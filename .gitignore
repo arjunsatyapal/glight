@@ -8,6 +8,7 @@ classes/
 *.swp
 gwt-unitCache/
 *.cache.*
+*.nocache.js
 .gwt/
 *.gwt.rpc
 appengine-generated/
