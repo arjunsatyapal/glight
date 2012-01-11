@@ -330,7 +330,7 @@
       SDK version pointed to by ${gae.home} property (Typically, one used by your
       Eclipse plug-in).
     -->
-    <gae.home>/Users/arjuns/appengine-java-sdk-1.6.1</gae.home>
+    <gae.home>${basedir}/../../third_party/appengine/appengine-java-sdk-1.6.1</gae.home>
     <gaepluginversion>0.9.2</gaepluginversion>
     <gae.version>1.6.1</gae.version>
     <gaeApplicationName>Light</gaeApplicationName>
@@ -344,10 +344,10 @@
     <!--
       Path to closurebuilder.py
     -->
-    <closure.builder.dir>/Users/arjuns/google-closure/closure-library/closure-library-20111110-r1376</closure.builder.dir>
-    <closure.compiler.dir>/Users/arjuns/google-closure/closure-compiler/r1592/compiler-20111114</closure.compiler.dir>
-    <closure.templates.lib.dir>/Users/arjuns/google-closure/closure-templates/closure-templates-for-javascript-2011-22-12</closure.templates.lib.dir>
-    <closure.lib.dir>/Users/arjuns/google-closure/closure-library/closure-library-20111110-r1376</closure.lib.dir>
+    <closure.builder.dir>${basedir}/../../third_party/google-closure/closure-library/closure-library-20111110-r1376</closure.builder.dir>
+    <closure.compiler.dir>${basedir}/../../third_party/google-closure/closure-compiler/r1592/compiler-20111114</closure.compiler.dir>
+    <closure.templates.lib.dir>${basedir}/../../third_party/google-closure/closure-templates/closure-templates-for-javascript-2011-22-12</closure.templates.lib.dir>
+    <closure.lib.dir>${basedir}/../../third_party/google-closure/closure-library/closure-library-20111110-r1376</closure.lib.dir>
     <js.dir>${basedir}/src/main/webapp/learnclosure/</js.dir>
     <generated.js.dir>${basedir}/target/generated</generated.js.dir>
   </properties>

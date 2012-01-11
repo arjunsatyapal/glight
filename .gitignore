@@ -6,3 +6,5 @@ target/
 gwt-unitCache/
 war/
 credentials/
+.settings/
+appengine-generated/
