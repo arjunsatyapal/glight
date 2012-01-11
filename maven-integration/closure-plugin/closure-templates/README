@@ -1,0 +1,5 @@
+You need to install before you can execute.
+
+Sample Command :
+mvn install com.google:closure.templates.unofficial.plugin:1.0-SNAPSHOT:closure-templates
+
