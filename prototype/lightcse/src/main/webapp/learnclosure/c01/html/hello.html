@@ -1,0 +1,24 @@
+<html>
+<head>
+<title>Example: Hello World</title>
+</head>
+<body>
+	<div id="hello"></div>
+	<script src="../../../closure/goog/base.js"></script>
+	<script>
+        goog.require('goog.string.StringBuffer');
+    </script>
+
+	<script>
+        goog.require('goog.soy');
+    </script>
+	<script src="/soyutils_usegoog.js"></script>
+
+	<script src="../soy/hello.soy.js"></script>
+	<script src="../js/hello.js"></script>
+	<script>
+        goog.light.sayHello('Hello World!');
+    </script>
+</body>
+</html>
+
