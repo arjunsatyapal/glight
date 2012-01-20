@@ -70,11 +70,11 @@ public class ClosureCompiler {
 
     private void saveObfuscatedCodeToFile(String outputdirectory,
             String javascriptCode) throws Exception {
-        FileWriter fstream = new FileWriter(outputdirectory);
+        /*FileWriter fstream = new FileWriter(outputdirectory);
         BufferedWriter out = new BufferedWriter(fstream);
         out.write(javascriptCode);
         // Close the output stream
-        out.close();
+        out.close();*/
     }
 
 }

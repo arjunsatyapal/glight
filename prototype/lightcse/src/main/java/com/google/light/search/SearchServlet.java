@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,15 +26,43 @@ public class SearchServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		
-		String query = request.getParameter("q");
-		List<SearchResult> searchResults;
-		if(query != null && !"".equals(query)) {
-			searchResults = new CSESearchProvider().search(query);
-		} else {
-			searchResults = new ArrayList<SearchResult>();
+		int page = 1;
+		try {
+			page = Integer.parseInt(request.getParameter("page"));
+		} catch (Exception e) {
+			
 		}
+		
+		String query = request.getParameter("q");
+		if(query == null)
+			query = "";
+		boolean hasNextPage = false;
+		List<SearchResultItem> searchResults = new ArrayList<SearchResultItem>();
+		
+		if(!"".equals(query)) {
+			SearchResult searchResult = new CSESearchProvider().search(query, page);
+			hasNextPage = searchResult.hasNextPage();
+			for(SearchResultItem result : searchResult.getItems()) {
+				result.setLink(
+						StringEscapeUtils.escapeHtml(ServletUtils.createUrl("/review","q",query,"link",result.getLink()))
+						);
+				searchResults.add(result);
+			}
+		}
+		
+		request.setAttribute("query", StringEscapeUtils.escapeHtml(query));
 		request.setAttribute("searchResults", searchResults);
 		request.setAttribute("searchResultsCount", searchResults.size());
+		request.setAttribute("hasNextPage", hasNextPage);
+		if(hasNextPage)
+			request.setAttribute("nextPageLink", StringEscapeUtils.escapeHtml(ServletUtils.createUrl("/search","q",query,"page",""+(page+1))));
+
+		request.setAttribute("hasPrevPage", page>1);
+		if(page>1) {
+			request.setAttribute("prevPageLink", StringEscapeUtils.escapeHtml(ServletUtils.createUrl("/search","q",query,"page",""+(page-1))));
+		}
+		
+		request.setAttribute("page", page);
 		
 		ServletUtils.forward(request, response, "search.jsp", log);
 	}

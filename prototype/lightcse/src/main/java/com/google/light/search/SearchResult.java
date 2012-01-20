@@ -1,25 +1,21 @@
 package com.google.light.search;
 
+import java.util.List;
+
 public class SearchResult {
-	String title;
-	String description;
-	String link;
-	public String getTitle() {
-		return title;
+	private List<SearchResultItem> items;
+
+	public List<SearchResultItem> getItems() {
+		return items;
 	}
-	public void setTitle(String title) {
-		this.title = title;
+
+	public void setItems(List<SearchResultItem> items) {
+		this.items = items;
 	}
-	public String getDescription() {
-		return description;
+	
+	// FIXME, just heuristics ...
+	public boolean hasNextPage() {
+		return items.size() == SearchProvider.RESULTS_PER_PAGE;
 	}
-	public void setDescription(String description) {
-		this.description = description;
-	}
-	public String getLink() {
-		return link;
-	}
-	public void setLink(String link) {
-		this.link = link;
-	}
+
 }

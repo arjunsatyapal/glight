@@ -22,6 +22,21 @@
         <servlet-name>SearchServlet</servlet-name>
         <servlet-class>com.google.light.search.SearchServlet</servlet-class>
     </servlet>
+    
+    <servlet>
+        <servlet-name>ReviewResourceServlet</servlet-name>
+        <servlet-class>com.google.light.search.ReviewResourceServlet</servlet-class>
+    </servlet>
+    
+    <servlet>
+        <servlet-name>ViewLessonServlet</servlet-name>
+        <servlet-class>com.google.light.lessons.ViewLessonServlet</servlet-class>
+    </servlet>
+    
+    <servlet>
+        <servlet-name>AjaxServiceServlet</servlet-name>
+        <servlet-class>com.google.light.util.AjaxServiceServlet</servlet-class>
+    </servlet>
 
     <servlet-mapping>
         <servlet-name>IndexServlet</servlet-name>
@@ -31,6 +46,22 @@
     <servlet-mapping>
         <servlet-name>SearchServlet</servlet-name>
         <url-pattern>/search</url-pattern>
+    </servlet-mapping>
+    
+    
+    <servlet-mapping>
+        <servlet-name>AjaxServiceServlet</servlet-name>
+        <url-pattern>/ajax/*</url-pattern>
+    </servlet-mapping>
+    
+    <servlet-mapping>
+        <servlet-name>ReviewResourceServlet</servlet-name>
+        <url-pattern>/review</url-pattern>
+    </servlet-mapping>
+    
+    <servlet-mapping>
+        <servlet-name>ViewLessonServlet</servlet-name>
+        <url-pattern>/lesson</url-pattern>
     </servlet-mapping>
     
     <servlet-mapping>

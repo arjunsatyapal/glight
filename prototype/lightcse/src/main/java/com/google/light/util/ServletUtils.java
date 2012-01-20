@@ -1,9 +1,15 @@
 package com.google.light.util;
 
+import java.util.List;
+
 import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.httpclient.HttpMethod;
+import org.apache.commons.httpclient.NameValuePair;
+import org.apache.commons.httpclient.URIException;
+import org.apache.commons.httpclient.methods.GetMethod;
 import org.slf4j.Logger;
 
 public class ServletUtils {
@@ -33,5 +39,24 @@ public class ServletUtils {
             final HttpServletResponse response, final String path) {
     	forward(request, response, path, null);
     }
+    
+    
+	public static String createUrl(String base, String... queryKeysAndValues)
+			throws URIException {
+		String lastKey = null;
+		NameValuePair[] pairs = new NameValuePair[queryKeysAndValues.length/2];
+		for(int i=0;i<queryKeysAndValues.length;i++) {
+			if(i%2==0)
+				lastKey = queryKeysAndValues[i];
+			else
+				pairs[i/2] = new NameValuePair(lastKey, queryKeysAndValues[i]);
+				
+		}
+		HttpMethod method = new GetMethod(base);
+		method.setQueryString(pairs);
+
+		return method.getURI().getEscapedURI();
+
+	}
 
 }

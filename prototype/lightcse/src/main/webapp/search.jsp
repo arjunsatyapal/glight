@@ -3,7 +3,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>CSE Test</title>
+<title>Light</title>
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
 <style>
 html,body {
@@ -82,6 +82,12 @@ html,body {
 	font-size: 18px;
 }
 
+.pageInfo {
+	font-size: 18px;
+	text-align: center;
+	padding: 5px;
+}
+
 </style>
 </head>
 <body>
@@ -108,12 +114,18 @@ html,body {
 });*/
 </script>
 
-<div id="header"><form method="GET" action="/search">Look for materials <input type="text" id="search_query" name="q" /> <input type="submit" class="search_button" value="Search" /></form></div>
+<div id="header"><form method="GET" action="/search">Look for materials <input type="text" value="${query}" id="search_query" name="q" /> <input type="submit" class="search_button" value="Search" /></form></div>
 <div id="content" <c:if test="${searchResultsCount > 0 }"> class="show_results">
 <div id="search_results">
 <c:forEach var="searchResult" items="${searchResults}">
 <div><a href="${searchResult.link}">${searchResult.title}</a><br/>${searchResult.description}</div>
 </c:forEach>
+
+<div class="pageInfo">
+<c:if test="${hasPrevPage}"><a href="${prevPageLink}">Prev</a> | </c:if>
+Page ${page}
+<c:if test="${hasNextPage}"> | <a href="${nextPageLink}">Next</a></c:if>
+</div>
 </div</c:if>>
 </div>
 
