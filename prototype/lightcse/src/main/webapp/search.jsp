@@ -70,11 +70,11 @@ html,body {
 	padding: 5px;
 }
 
-#search_results > div:hover {
+.search_result:hover {
 	background-color: #F1F1F1;
 }
 
-#search_results > div {
+.search_result {
 	margin: 2px;
 	padding: 8px;
 	border-bottom: 2px solid #F1F1F1;
@@ -91,6 +91,29 @@ html,body {
 #other {
 	float:right;
 	padding-right: 10px;
+}
+
+.add {
+	float: right;
+}
+.dropdown {
+	position: absolute;
+	border: 1px solid black;
+	width: 150px;
+	background-color: white;
+	z-index:10;
+	display: none;
+}
+
+.dropdownItem {
+	color: black;
+	text-align: left;
+	padding: 3px;
+	font-weight: normal;
+}
+
+.dropdownItem:hover {
+	background-color: #F1F1F1;
 }
 
 </style>
@@ -117,6 +140,117 @@ $(document).ready(function() {
 			window.location.href="/mylessons";
 		})
 	);
+	
+	var currentLink;
+	function createCheckBoxCallback(lesson) {
+		return function() {
+			var target;
+			if($(this).is(":checked")) {
+				target = "/ajax/addLinkToLesson";
+				lesson.links[currentLink] = true;
+			} else {
+				target = "/ajax/removeLinkFromLesson";
+				delete lesson.links[currentLink];
+			}
+			$.get(target,{
+				lesson: lesson.id,
+				link: currentLink 
+			},function(data) {
+				console.log("Done",target,data);
+			});
+		}
+	}
+	// Set here is just a object that maps to true
+	function convertArrayToSet(array) {
+		var obj = {};
+		for(var i=array.length-1;i>=0;i--) {
+			obj[array[i]] = true;
+		}
+		return obj;
+	}
+	function addLessonToDropdown(lesson) {
+		var item = $("<div/>").addClass("dropdownItem").appendTo(dropdown);
+		item.append(lesson.checkbox = $("<input type=\"checkbox\" />").change(createCheckBoxCallback(lesson)));
+		item.append($("<span/>").text(lesson.name));
+	}
+
+	var lessons = ${lessons};
+	var dropdown = $("<div />").addClass("dropdown");
+	for(var i=0;i<lessons.length;i++) {
+		lessons[i].links = convertArrayToSet(lessons[i].links);
+		addLessonToDropdown(lessons[i]);
+	}
+	
+	
+	$("#backToSearch").click(function() {
+		window.location.href = "${backToSearchUrl}";
+	});
+	var timeout = null;
+	
+	function startHideProcess(interval) {
+		if(timeout === null) {
+			timeout = setTimeout(function() {
+				dropdown.hide();
+				timeout = null;
+			}, interval);
+		}
+	}
+	function positionRelativeTo(relative) {
+		relative = $(relative);
+		var offset = relative.offset();
+		
+		dropdown.css("top", offset.top);
+		dropdown.css("left", offset.left-dropdown.outerWidth()-3);
+		
+		dropdown.appendTo(relative.parent());
+	}
+	function setupDropdown(relative) {
+		currentLink = $(relative).parents(".search_result").children("a").attr("href");
+		for(var i=0;i<lessons.length;i++) {
+			var lesson = lessons[i];
+			lesson.checkbox.attr('checked', Boolean(lesson.links[currentLink]));
+		}
+	}
+	
+	dropdown.mouseenter(function() {
+		if(timeout !== null) {
+			clearTimeout(timeout);
+			timeout=null;
+		}
+	}).mouseleave(function() {
+		startHideProcess(500);
+	})
+	$(".add")
+		.mouseenter(function(e) {
+			positionRelativeTo(e.target);
+			setupDropdown(e.target);
+			dropdown.show();
+			if(timeout !== null) {
+				clearTimeout(timeout);
+				timeout=null;
+			}
+		})
+		.mouseleave(function() {
+			startHideProcess(500);
+		})
+	
+	var createNewLessonItem = $("<div/>").appendTo(dropdown).addClass("dropdownItem").text("Create New Lesson")
+		.click(function() {
+			var name = prompt("Enter the Lesson Name");
+			if(name) {
+				$.get("/ajax/createLesson",{
+					name: name
+				},function(lesson) {
+					console.log("Done",lesson);
+					addLessonToDropdown(lesson);
+					createNewLessonItem.detach().appendTo(dropdown);
+				});
+			}
+			
+			startHideProcess(3000);
+		});
+	
+	dropdown.appendTo(document.body).hide();
 });
 
 </script>
@@ -131,7 +265,7 @@ $(document).ready(function() {
 	<c:if test="${searchResultsCount > 0 }">
 	<div id="search_results">
 	<c:forEach var="searchResult" items="${searchResults}">
-	<div><a href="${searchResult.link}">${searchResult.title}</a><br/>${searchResult.description}</div>
+	<div class="search_result"><div class="add button">Add</div><a href="${searchResult.link}" target="_blank">${searchResult.title}</a><br/>${searchResult.description}</div>
 	</c:forEach>
 	
 	<div class="pageInfo">
