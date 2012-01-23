@@ -25,7 +25,7 @@ public class CSESearchProvider implements SearchProvider {
 		//Instantiate a Customsearch object with a transport mechanism and json parser    
 		Customsearch customsearch = new Customsearch(new NetHttpTransport(), new JacksonFactory());
 		//using deprecated setKey method on customsearch to set your API Key
-		customsearch.setKey("AIzaSyCrgEkpgUDlBgrBr9YtKLn8RZ6vSU5k8Nw");
+		//customsearch.setKey("AIzaSyCrgEkpgUDlBgrBr9YtKLn8RZ6vSU5k8Nw");
 		//instantiate a Customsearch.Cse.List object with your search string
 		List<Result> cseItems;
 		try {
@@ -55,6 +55,9 @@ public class CSESearchProvider implements SearchProvider {
 			item.setLink(cseItem.getLink());
 			items.add(item);
 		}
+		
+		// Heuristics ...
+		result.setHasNextPage(items.size() == SearchProvider.RESULTS_PER_PAGE);
 		
 		return result;
 	}

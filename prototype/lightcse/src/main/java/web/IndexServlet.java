@@ -37,8 +37,6 @@ public class IndexServlet extends HttpServlet {
             final HttpServletResponse response) throws ServletException,
             IOException {
 
-    	new CSESearchProvider().search("whatever");
-    	
         if (log.isDebugEnabled()) {
             log.debug("doGet");
         }

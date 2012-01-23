@@ -19,7 +19,7 @@ import com.google.light.util.ServletUtils;
 
 public class ViewLessonServlet extends HttpServlet {
 	private static final Logger log = LoggerFactory
-		    .getLogger(ReviewResourceServlet.class);
+		    .getLogger(ViewLessonServlet.class);
 	
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)

@@ -41,15 +41,15 @@ public class ServletUtils {
     }
     
     
-	public static String createUrl(String base, String... queryKeysAndValues)
+	public static String createUrl(String base, Object... queryKeysAndValues)
 			throws URIException {
-		String lastKey = null;
+		Object lastKey = null;
 		NameValuePair[] pairs = new NameValuePair[queryKeysAndValues.length/2];
 		for(int i=0;i<queryKeysAndValues.length;i++) {
 			if(i%2==0)
 				lastKey = queryKeysAndValues[i];
 			else
-				pairs[i/2] = new NameValuePair(lastKey, queryKeysAndValues[i]);
+				pairs[i/2] = new NameValuePair(lastKey.toString(), queryKeysAndValues[i].toString());
 				
 		}
 		HttpMethod method = new GetMethod(base);
@@ -57,6 +57,15 @@ public class ServletUtils {
 
 		return method.getURI().getEscapedURI();
 
+	}
+	
+	public static String getBaseUrl(HttpServletRequest req) {
+	    String scheme = req.getScheme();             // http
+	    String serverName = req.getServerName();     // hostname.com
+	    int serverPort = req.getServerPort();        // 80
+	    String contextPath = req.getContextPath();   // /mywebapp
+
+	    return scheme+"://"+serverName+":"+serverPort+contextPath;
 	}
 
 }

@@ -37,11 +37,15 @@ public class SearchServlet extends HttpServlet {
 		if(query == null)
 			query = "";
 		boolean hasNextPage = false;
+		String suggestion = null;
+		String suggestionQuery = null;
 		List<SearchResultItem> searchResults = new ArrayList<SearchResultItem>();
 		
 		if(!"".equals(query)) {
-			SearchResult searchResult = new CSESearchProvider().search(query, page);
+			SearchResult searchResult = new GSSSearchProvider().search(query, page);
 			hasNextPage = searchResult.hasNextPage();
+			suggestion = searchResult.getSuggestion();
+			suggestionQuery = searchResult.getSuggestionQuery();
 			for(SearchResultItem result : searchResult.getItems()) {
 				result.setLink(
 						StringEscapeUtils.escapeHtml(ServletUtils.createUrl("/review","q",query,"link",result.getLink()))
@@ -63,6 +67,14 @@ public class SearchServlet extends HttpServlet {
 		}
 		
 		request.setAttribute("page", page);
+		
+		request.setAttribute("showSuggestion", suggestion != null);
+		if(suggestion != null) {
+			request.setAttribute("suggestion", suggestion);
+			request.setAttribute("suggestionUrl", StringEscapeUtils.escapeHtml(ServletUtils.createUrl("/search","q",suggestionQuery)));
+		}
+		
+		request.setAttribute("showNoResultsMessage", page==1 && searchResults.size() == 0 && !"".equals(query));
 		
 		ServletUtils.forward(request, response, "search.jsp", log);
 	}

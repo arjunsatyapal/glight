@@ -29,7 +29,7 @@ html,body {
 	text-align: center;
 }
 
-.search_button {
+.button {
 	background-color: #4D90FE;
 	background-image: -webkit-gradient(linear,left top,left bottom,from(#4d90fe),to(#4787ed));
 	background-image: -webkit-linear-gradient(top,#4d90fe,#4787ed);
@@ -88,6 +88,11 @@ html,body {
 	padding: 5px;
 }
 
+#other {
+	float:right;
+	padding-right: 10px;
+}
+
 </style>
 </head>
 <body>
@@ -106,27 +111,49 @@ html,body {
 <link rel="stylesheet" href="http://www.google.com/cse/style/look/default.css" type="text/css" />-->
 
 <script>
-/*$(document).ready(function() {
+$(document).ready(function() {
 	$("search_button").click(
-		$("content").removeClass("show_results");
-		$("content").empty();
+		$("#mylessonsbutton").click(function() {
+			window.location.href="/mylessons";
+		})
 	);
-});*/
+});
+
 </script>
 
-<div id="header"><form method="GET" action="/search">Look for materials <input type="text" value="${query}" id="search_query" name="q" /> <input type="submit" class="search_button" value="Search" /></form></div>
-<div id="content" <c:if test="${searchResultsCount > 0 }"> class="show_results">
-<div id="search_results">
-<c:forEach var="searchResult" items="${searchResults}">
-<div><a href="${searchResult.link}">${searchResult.title}</a><br/>${searchResult.description}</div>
-</c:forEach>
-
-<div class="pageInfo">
-<c:if test="${hasPrevPage}"><a href="${prevPageLink}">Prev</a> | </c:if>
-Page ${page}
-<c:if test="${hasNextPage}"> | <a href="${nextPageLink}">Next</a></c:if>
+<div id="header">
+	<div id="other"><div id="mylessonsbutton" class="button">My Lessons</div></div>
+	<form method="GET" action="/search">Look for materials <input type="text" value="${query}" id="search_query" name="q" /> <input type="submit" class="button" value="Search" /></form>
+	
 </div>
-</div</c:if>>
+<div id="content">
+
+	<c:if test="${searchResultsCount > 0 }">
+	<div id="search_results">
+	<c:forEach var="searchResult" items="${searchResults}">
+	<div><a href="${searchResult.link}">${searchResult.title}</a><br/>${searchResult.description}</div>
+	</c:forEach>
+	
+	<div class="pageInfo">
+	<c:if test="${hasPrevPage}"><a href="${prevPageLink}">Prev</a> | </c:if>
+	Page ${page}
+	<c:if test="${hasNextPage}"> | <a href="${nextPageLink}">Next</a></c:if>
+	</div>
+	
+	</div></c:if>
+	
+	<c:if test="${showSuggestion}">
+	<div class="pageInfo">
+	Suggestion: <a href="${suggestionUrl}">${suggestion}</a>
+	</div>
+	</c:if>
+	
+	<c:if test="${showNoResultsMessage}">
+	<div class="pageInfo">
+	No results for this search
+	</div>
+	</c:if>
+
 </div>
 
 </body>

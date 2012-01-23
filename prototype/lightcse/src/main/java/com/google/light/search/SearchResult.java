@@ -4,6 +4,11 @@ import java.util.List;
 
 public class SearchResult {
 	private List<SearchResultItem> items;
+	
+	private boolean hasNextPage;
+	
+	private String suggestion;
+	private String suggestionQuery;
 
 	public List<SearchResultItem> getItems() {
 		return items;
@@ -13,9 +18,29 @@ public class SearchResult {
 		this.items = items;
 	}
 	
-	// FIXME, just heuristics ...
 	public boolean hasNextPage() {
-		return items.size() == SearchProvider.RESULTS_PER_PAGE;
+		return hasNextPage;
 	}
 
+	public void setHasNextPage(boolean hasNextPage) {
+		this.hasNextPage = hasNextPage;
+	}
+
+	public String getSuggestion() {
+		return suggestion;
+	}
+
+	public void setSuggestion(String suggestion) {
+		this.suggestion = suggestion;
+	}
+
+	public String getSuggestionQuery() {
+		return suggestionQuery;
+	}
+
+	public void setSuggestionQuery(String suggestionQuery) {
+		this.suggestionQuery = suggestionQuery;
+	}
+
+	
 }

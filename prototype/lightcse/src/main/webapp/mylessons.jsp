@@ -3,7 +3,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Review</title>
+<title>Light</title>
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
 <style>
 html,body {
@@ -12,6 +12,9 @@ html,body {
 	font-size: small;
 	font-family: arial,sans-serif;
 	color: black;
+	height: 100%;
+}
+#content, #search_results {
 	height: 100%;
 }
 #header {
@@ -24,7 +27,6 @@ html,body {
 	padding-top: 10px;
 	padding-bottom: 10px;
 	text-align: center;
-	height: 30px;
 }
 
 .button {
@@ -54,79 +56,34 @@ html,body {
 	display: inline-block;
 }
 
-
-html {
-	overflow-y: hidden;
-}
-#header, #content, iframe {
-	position: absolute;
-	width: 100%;
-	left: 0;
-}
-#header {
-	top: 0;
-}
-#content {
-	top: 50px;
-	bottom: 0px;
-}
-iframe {
-	border: 0 none;
-	height: 100%;
+#lessons {
+	padding: 5px;
 }
 
-.button.disabled {
-	opacity: 0.5;
+#lessons > div:hover {
+	background-color: #F1F1F1;
 }
-#title {
+
+#lessons > div {
+	margin: 2px;
+	padding: 8px;
+	border-bottom: 2px solid #F1F1F1;
+	border-right: 2px solid #F1F1F1;
 	font-size: 18px;
 }
 
 </style>
-
-<script>
-$(document).ready(function(){
-	var lesson = ${lesson};
-	
-	if(lesson.links.length == 0) {
-		$("#title").text(lesson.name+" (Empty)");
-		$("#prev, #next").addClass("disabled");
-		return;
-	}
-	
-	var pos = 0;
-	var next = $("#next");
-	var prev = $("#prev");
-	var frame = $("#frame");
-	
-	function adjustUI() {
-		prev.toggleClass("disabled", pos==0);
-		next.toggleClass("disabled", pos==lesson.links.length-1);
-		frame.attr("src",lesson.links[pos]);
-		$("#title").text(lesson.name+" ("+(pos+1)+"/"+lesson.links.length+")");
-	}
-	adjustUI();
-	
-	$("#next").click(function() {
-		if($(this).hasClass("disabled")) return;
-		pos++;
-		adjustUI();
-	})
-	$("#prev").click(function() {
-		if($(this).hasClass("disabled")) return;
-		pos--;
-		adjustUI();
-	})
-	
-});
-</script>
-
 </head>
 <body>
+<div id="header"><form method="GET" action="/search">Look for materials <input type="text" value="${query}" id="search_query" name="q" /> <input type="submit" class="search_button" value="Search" /></form></div>
+<div id="content"><c:if test="${lessonsCount > 0 }">
+<div id="lessons">
+<c:forEach var="lesson" items="${lessons}">
+<div><a href="/lesson?id=${lesson.id}">${lesson.name}</a><br/>Link for students: ${baseUrl}/lesson?id=${lesson.id}</div>
+</c:forEach>
 
-<div id="header"><div id="prev" class="button">Previous</div> <span id="title"></span> <div id="next" class="button">Next</div></div>
-<div id="content">
-<iframe id="frame" frameborder="0"></iframe>
+</div></c:if>
+<c:if test="${lessonsCount == 0 }">No Lessons</c:if>
 </div>
 
 </body>
