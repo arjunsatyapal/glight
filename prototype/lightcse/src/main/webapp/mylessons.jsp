@@ -14,9 +14,6 @@ html,body {
 	color: black;
 	height: 100%;
 }
-#content, #search_results {
-	height: 100%;
-}
 #header {
 	background: #F1F1F1;
 	background: -webkit-gradient(radial,100 36,0,100 -40,120,from(#FAFAFA),to(#F1F1F1)),#F1F1F1
@@ -56,6 +53,17 @@ html,body {
 	display: inline-block;
 }
 
+#search_query {
+	display: inline-block;
+	height: 27px;
+	
+	width: 250px;
+	font-size: 16px;
+	border: solid 1px gray;
+	background-color: white;
+	margin: 1px;
+}
+
 #lessons {
 	padding: 5px;
 }
@@ -64,7 +72,7 @@ html,body {
 	background-color: #F1F1F1;
 }
 
-#lessons > div {
+#lessons > div, #nolessons {
 	margin: 2px;
 	padding: 8px;
 	border-bottom: 2px solid #F1F1F1;
@@ -75,7 +83,7 @@ html,body {
 </style>
 </head>
 <body>
-<div id="header"><form method="GET" action="/search">Look for materials <input type="text" value="${query}" id="search_query" name="q" /> <input type="submit" class="search_button" value="Search" /></form></div>
+<div id="header"><form method="GET" action="/search">Look for materials <input type="text" value="${query}" id="search_query" name="q" /> <input type="submit" class="button" value="Search" /></form></div>
 <div id="content"><c:if test="${lessonsCount > 0 }">
 <div id="lessons">
 <c:forEach var="lesson" items="${lessons}">
@@ -83,7 +91,7 @@ html,body {
 </c:forEach>
 
 </div></c:if>
-<c:if test="${lessonsCount == 0 }">No Lessons</c:if>
+<c:if test="${lessonsCount == 0 }"><div id="nolessons">No Lessons. To create one, find a material to start the lesson with and then click the Add button.</div></c:if>
 </div>
 
 </body>

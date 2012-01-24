@@ -14,9 +14,6 @@ html,body {
 	color: black;
 	height: 100%;
 }
-#content, #search_results {
-	height: 100%;
-}
 #header {
 	background: #F1F1F1;
 	background: -webkit-gradient(radial,100 36,0,100 -40,120,from(#FAFAFA),to(#F1F1F1)),#F1F1F1
@@ -241,7 +238,9 @@ $(document).ready(function() {
 				$.get("/ajax/createLesson",{
 					name: name
 				},function(lesson) {
+					lesson.links = [];
 					console.log("Done",lesson);
+					lessons.push(lesson);
 					addLessonToDropdown(lesson);
 					createNewLessonItem.detach().appendTo(dropdown);
 				});
