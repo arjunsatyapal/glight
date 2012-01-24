@@ -79,6 +79,11 @@ html,body {
 	font-size: 18px;
 }
 
+.search_result_link {
+	color: gray;
+	font-size: 14px;
+}
+
 .pageInfo {
 	font-size: 18px;
 	text-align: center;
@@ -264,7 +269,7 @@ $(document).ready(function() {
 	<c:if test="${searchResultsCount > 0 }">
 	<div id="search_results">
 	<c:forEach var="searchResult" items="${searchResults}">
-	<div class="search_result"><div class="add button">Add</div><a href="${searchResult.link}" target="_blank">${searchResult.title}</a><br/>${searchResult.description}</div>
+	<div class="search_result"><div class="add button">Add</div><a href="${searchResult.link}" target="_blank">${searchResult.title}</a><br/>${searchResult.description}<div class="search_result_link">${searchResult.link}</div></div>
 	</c:forEach>
 	
 	<div class="pageInfo">
