@@ -3,6 +3,7 @@ package com.google.light.search;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.xml.stream.XMLOutputFactory;
 
@@ -12,11 +13,11 @@ import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
 import org.jdom.output.XMLOutputter;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import web.IndexServlet;
 
+import com.google.common.base.Throwables;
 import com.google.light.util.ServletUtils;
 
 public class GSSSearchProvider implements SearchProvider {
@@ -27,8 +28,7 @@ public class GSSSearchProvider implements SearchProvider {
 	private static final String RESULT_TAG = "R";
 	private static final String RESULTS_COUNT_TAG = "M";
 	private static final String RESULTS_TAG = "RES";
-	private static final Logger log = LoggerFactory
-		    .getLogger(GSSSearchProvider.class);
+	private static final Logger log = Logger.getLogger(GSSSearchProvider.class.getName()); 
 	
 	@Override
 	public SearchResult search(String query, int page) {
@@ -39,18 +39,18 @@ public class GSSSearchProvider implements SearchProvider {
 		result.setHasNextPage(false);
 		
 		//http://www.google.com/cse?cx=001369170667164983739:xqelsiji0y8&start=10&num=10&output=xml&q=addition
-		
+		log.info("Searching for "+query);
 		String url;
 		int start = (page-1)*RESULTS_PER_PAGE;
 		try {
 			url = ServletUtils.createUrl("http://www.google.com/cse",
 					"cx", "006574055569862991143:tcyk48xpqx8",
-					"output", "xml",
+					"output", "xml_no_dtd",
 					"num", RESULTS_PER_PAGE,
 					"start", start,
 					"q", escapeQuery(query));
 		} catch (URIException e) {
-			e.printStackTrace();
+			log.severe(Throwables.getStackTraceAsString(e));
 			return result;
 		}
 		
@@ -61,11 +61,11 @@ public class GSSSearchProvider implements SearchProvider {
 			doc = builder.build(new URL(url).openStream());
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.severe(Throwables.getStackTraceAsString(e));
 			return result;
 		}
 		
-		log.debug(new XMLOutputter().outputString(doc));
+		log.info(new XMLOutputter().outputString(doc));
 
 		return buildResultListFromDOM(doc, start);
 	}
