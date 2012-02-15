@@ -1,0 +1,31 @@
+#!/bin/sh
+# To make things simpler, this batch file should automate the process.
+# It's also well commented so you can troubleshoot it.
+
+# You will need: hg (Mercurial), $APPENGINE_PYTHON_SDK/appcfg.py (appengine python sdk), patch
+
+# You will need to specify the path for appengine python sdk
+# export APPENGINE_PYTHON_SDK=/some/path/appengine # put your appengine path here
+
+# Discovering the base dir of this script
+BASEDIR=$(dirname $(pwd)/$0)
+
+# Create a place to store the stuff
+mkdir /tmp/light-review
+cd /tmp/light-review
+
+# Download the rietvelt code
+hg clone https://code.google.com/p/rietveld/
+
+# Entering in the rietvelt code
+cd rietveld
+
+# Go to the revision for which the patch was made
+# you can try to use it agaist the newest revision and skip this command
+hg update e03ee9780a60ef1289ae4129a6ae9a9659ce7475
+
+# Patching
+patch < $BASEDIR/rietvelt.patch
+
+# Deploying
+python $APPENGINE_PYTHON_SDK/appcfg.py update .
