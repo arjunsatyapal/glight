@@ -8,11 +8,6 @@ import com.google.api.client.json.jackson.JacksonFactory;
 import com.google.api.services.customsearch.Customsearch;
 import com.google.api.services.customsearch.model.Result;
 import com.google.api.services.customsearch.model.Search;
-import com.google.appengine.api.search.Consistency;
-import com.google.appengine.api.search.Index;
-import com.google.appengine.api.search.IndexManager;
-import com.google.appengine.api.search.IndexManagerFactory;
-import com.google.appengine.api.search.IndexSpec;
 
 public class CSESearchProvider implements SearchProvider {
 

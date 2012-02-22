@@ -1,7 +1,5 @@
 package com.google.light.util;
 
-import java.util.List;
-
 import com.google.light.lessons.LessonEntity;
 import com.googlecode.objectify.ObjectifyService;
 import com.googlecode.objectify.helper.DAOBase;

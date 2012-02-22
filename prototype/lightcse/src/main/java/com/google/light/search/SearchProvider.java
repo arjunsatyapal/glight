@@ -1,7 +1,5 @@
 package com.google.light.search;
 
-import java.util.ArrayList;
-import java.util.List;
 
 public interface SearchProvider {
 	static final int RESULTS_PER_PAGE = 10;

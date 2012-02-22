@@ -1,7 +1,5 @@
 package com.google.light.util;
 
-import java.util.List;
-
 import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
