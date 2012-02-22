@@ -8,15 +8,6 @@
         http://java.sun.com/xml/ns/javaee
         http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
     version="2.5">
-
-    <listener>
-        <listener-class>web.ContextInitializer</listener-class>
-    </listener>
-
-    <servlet>
-        <servlet-name>IndexServlet</servlet-name>
-        <servlet-class>web.IndexServlet</servlet-class>
-    </servlet>
     
     <servlet>
         <servlet-name>SearchServlet</servlet-name>
@@ -42,11 +33,6 @@
         <servlet-name>AjaxServiceServlet</servlet-name>
         <servlet-class>com.google.light.util.AjaxServiceServlet</servlet-class>
     </servlet>
-
-    <servlet-mapping>
-        <servlet-name>IndexServlet</servlet-name>
-        <url-pattern>/index</url-pattern>
-    </servlet-mapping>
     
     <servlet-mapping>
         <servlet-name>SearchServlet</servlet-name>
