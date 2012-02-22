@@ -249,8 +249,8 @@
       Specify AppEngine version for your project. It should match
       SDK version pointed to by ${gae.home} property (Typically, one used by your
       Eclipse plug-in).
-    -->
-    <gae.home>${basedir}/../../third_party/appengine/appengine-java-sdk-1.6.1</gae.home>
+    
+    <gae.home>${basedir}/../../third_party/appengine/appengine-java-sdk-1.6.1</gae.home>-->
     <gaepluginversion>0.9.2</gaepluginversion>
     <gae.version>1.6.1</gae.version>
     <gaeApplicationName>Light</gaeApplicationName>
