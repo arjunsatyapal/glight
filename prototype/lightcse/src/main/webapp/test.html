@@ -1,0 +1,57 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv='Content-Type' content='Type=text/html; charset=utf-8'>
+<title>Editor First Tests</title>
+<script src="js/external/require.js"></script>
+<script src="js/config.js"></script>
+<link rel="stylesheet" type="text/css" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/base/jquery-ui.css" />
+<script>
+require(["jquery","light.learningpath.editwidget"], function($, editwidget) {
+  $(document).ready(function() {
+    var view = new editwidget.View();
+    view.decorate($("#sortable").get(0));
+  });
+});
+</script>
+<style>
+#sortable { list-style-type: none; margin: 0; padding: 0; width: 60%; }
+#sortable li { margin: 0 3px 3px 3px; padding: 0.4em; padding-left: 1.5em; font-size: 1.4em; height: 18px; }
+#sortable li span { position: absolute; margin-left: -1.3em; }
+</style>
+<!-- <script>
+require.load = function() {
+  throw new Error("Not allowed to load new stuff!");
+};
+//require.pause();
+define("a",function(require) {
+  var b = require('b');
+  console.log(b);
+  return {a:b};
+});
+define("b",function() {
+  return "asd";
+});
+
+
+
+//require.resume();
+var q = require("a");
+require(["a"],function() { console.log("Here I am");});
+console.log(queue);
+console.log("bla");
+</script> -->
+</head>
+
+<body>
+
+<div id="sortable">
+	<div>Item 1</div>
+	<div>Item 2</div>
+	<div>Item 3</div>
+	<div>Item 4</div>
+</div>
+
+</body>
+
+</html>
