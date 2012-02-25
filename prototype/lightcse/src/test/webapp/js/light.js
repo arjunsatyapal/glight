@@ -17,9 +17,6 @@ define(function(require) {
   
         expect(binded()).toEqual("bar");
       });
-      it("bla", function() {
-        expect(true).toBeTruthy();
-      });
     });
     describe("when provieded a related function(method) and object(instance)", function() {
       it("should return a function that has that object as context", function() {

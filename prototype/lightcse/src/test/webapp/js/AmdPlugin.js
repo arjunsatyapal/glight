@@ -22,9 +22,9 @@ jstestdriver.AmdPlugin = (function() {
    * Utility function for logging in the browser
    */
   amdPlugin.log = function() {
-    /*if (window['console']) {
+    if (window['console']) {
       window.console.log.apply(window.console, arguments);
-    }*/
+    }
     jstestdriver.console.log.apply(jstestdriver.console, arguments);
   }
   

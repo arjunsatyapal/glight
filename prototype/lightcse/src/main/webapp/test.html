@@ -7,10 +7,16 @@
 <script src="js/config.js"></script>
 <link rel="stylesheet" type="text/css" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/base/jquery-ui.css" />
 <script>
+var view, col;
 require(["jquery","light.learningpath.editwidget"], function($, editwidget) {
   $(document).ready(function() {
-    var view = new editwidget.View();
-    view.decorate($("#sortable").get(0));
+    col = new editwidget.ModuleCollection([
+      {title: "Google", url: "http://www.google.com"},
+      {title: "Yahoo", url: "http://www.yahoo.com"}
+	]);
+    view = new editwidget.View({ el: $("#sortable"), collection: col });
+    
+    view.render();
   });
 });
 </script>
