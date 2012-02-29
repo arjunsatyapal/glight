@@ -1,5 +1,7 @@
 #Usee full directory paths compared to directory names.
 # Auto generated folders for Apps
+.classpath
+.project
 target/
 *.swp
 .gwt/
