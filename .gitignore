@@ -10,3 +10,4 @@ war/
 credentials/
 .settings/
 appengine-generated/
+.externalToolBuilders/

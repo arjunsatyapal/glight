@@ -23,6 +23,7 @@
 
   <dependencies>
     <!--
+      AppEngine Dependency :
       jars from GAE's "lib/user" must be added as compile-time dependencies,
       as described here in "Copying JARs" section:
       http://code.google.com/appengine/docs/java/tools/ant.html
@@ -41,6 +42,7 @@
     </dependency>
 
     <!--
+      Appengine Dependency :
       J2EE Servlet API. We need it to compile IndexServlet class.
       You can probably remove it, if you don't explicitly use Servlets.
     -->
@@ -51,47 +53,9 @@
       <scope>provided</scope>
     </dependency>
 
-    <dependency>
-      <groupId>com.googlecode.objectify</groupId>
-      <artifactId>objectify</artifactId>
-      <version>2.2.2</version>
-    </dependency>
-
     <!--
-      Make use of JSP tags. Remove, if you don't use JSPs.
-    -->
-    <dependency>
-      <artifactId>standard</artifactId>
-      <groupId>taglibs</groupId>
-      <version>1.1.2</version>
-      <type>jar</type>
-      <scope>runtime</scope>
-    </dependency>
-
-    <!--
-      These dependencies are here just for enabling logging.
-    -->
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-      <version>1.6.0</version>
-    </dependency>
-
-    <dependency>
-      <groupId>ch.qos.logback</groupId>
-      <artifactId>logback-classic</artifactId>
-      <version>0.9.22</version>
-    </dependency>
-
-    <!-- Test scope -->
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.5</version>
-      <scope>test</scope>
-    </dependency>
-
-    <!--
+      AppEngine Dependency :
+      Scope = Test.
       GAE libraries for local testing as described here:
       http://code.google.com/appengine/docs/java/howto/unittesting.html
     -->
@@ -114,6 +78,88 @@
       <artifactId>appengine-testing</artifactId>
       <version>${gae.version}</version>
       <scope>test</scope>
+    </dependency>
+
+    <!--
+      Guava Dependency :
+      TODO(arjuns) : Some of the library depend on r09. So not using r11. Update this with that culprit.
+    -->
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>11.0.2</version>
+    </dependency>
+
+    <!--
+      Guice Dependency : Guice + Guice Servlet Extension.
+    -->
+    <dependency>
+      <groupId>com.google.inject</groupId>
+      <artifactId>guice</artifactId>
+      <version>3.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.inject.extensions</groupId>
+      <artifactId>guice-servlet</artifactId>
+      <version>3.0</version>
+    </dependency>
+
+    <!--
+      Joda Time Dependency :
+    -->
+    <dependency>
+      <groupId>joda-time</groupId>
+      <artifactId>joda-time</artifactId>
+      <version>2.0</version>
+    </dependency>
+
+    <!--
+      JSP Dependency :
+      Make use of JSP tags. Remove, if you don't use JSPs.
+    -->
+    <dependency>
+      <artifactId>standard</artifactId>
+      <groupId>taglibs</groupId>
+      <version>1.1.2</version>
+      <type>jar</type>
+      <scope>runtime</scope>
+    </dependency>
+
+    <!--
+      Junit Dependency :
+      Scope = Test Only.
+    -->
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.5</version>
+      <scope>test</scope>
+    </dependency>
+    <!--
+      Logging Dependency : These dependencies are here just for enabling logging.
+      TODO(arjuns): may be good for use to wrap all different logging frameworks.
+    -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>1.6.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <version>0.9.22</version>
+    </dependency>
+
+    <!--
+      Objectify Dependency :
+      Scope : Production.
+    -->
+    <dependency>
+      <groupId>com.googlecode.objectify</groupId>
+      <artifactId>objectify</artifactId>
+      <version>3.1</version>
     </dependency>
   </dependencies>
 
@@ -172,7 +218,7 @@
         </dependencies>
         <executions>
           <execution>
-            <id/>
+            <id />
             <phase>validate</phase>
             <goals>
               <goal>unpack</goal>
@@ -205,6 +251,37 @@
         </configuration>
       </plugin>
     </plugins>
+
+    <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence
+      on the Maven build itself. -->
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.eclipse.m2e</groupId>
+          <artifactId>lifecycle-mapping</artifactId>
+          <version>1.0.0</version>
+          <configuration>
+            <lifecycleMappingMetadata>
+              <pluginExecutions>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>net.kindleit</groupId>
+                    <artifactId>maven-gae-plugin</artifactId>
+                    <versionRange>[0.1,)</versionRange>
+                    <goals>
+                      <goal>unpack</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <execute />
+                  </action>
+                </pluginExecution>
+              </pluginExecutions>
+            </lifecycleMappingMetadata>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
   </build>
 
   <!--
@@ -224,16 +301,15 @@
 
     <!--
       Specify AppEngine version for your project. It should match
-      SDK version pointed to by ${gae.home} property (Typically, one used 
-      by your
-      Eclipse plug-in).
+      SDK version pointed to by ${gae.home} property (Typically, one used
+      by your Eclipse plug-in).
     -->
-    <gae.version>1.6.2.1</gae.version>
-    
-    <!-- 
+    <gae.version>1.6.3</gae.version>
+
+    <!--
       GAE Application Name.
-     -->
-     <gaeApplicationName>light</gaeApplicationName>
+    -->
+    <gaeApplicationName>light</gaeApplicationName>
 
     <!--
       Upload to http://test.latest.<applicationName>.appspot.com by
@@ -257,11 +333,10 @@
 
     <!--
       This profile will activate automatically during release and
-      upload application to the http://2.latest.<applicationName>.appspot.com 
-      (We
-      might want to set the 2nd version as our applications Default version 
-      to
+      upload application to the http://2.latest.<applicationName>.appspot.com
+      (We might want to set the 2nd version as our applications Default version to
       be accessible at http://<applicationName>.appspot.com).
+      TODO(arjuns) : See if this can be used.
     -->
     <profile>
       <id>release-build</id>
