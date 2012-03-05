@@ -183,7 +183,7 @@ public class PersonManagerImplTest extends AbstractLightServerTest {
   }
 
   /**
-   * Test for {@link PersonManager}
+   * Test for {@link PersonManager#getPersonByEmail(String)}
    */
   @Test
   public void test_getPersonByEmail() throws Exception {
@@ -232,7 +232,7 @@ public class PersonManagerImplTest extends AbstractLightServerTest {
     assertNotNull(actualPerson1);
     assertTrue(!actualPerson1.equals(actualPerson2));
 
-    // Negative Testing 1 : Check for non-existing email.
+    // Negative Testing : Check for non-existing email.
     assertNull(personManager.getPersonByEmail(getRandomEmail()));
   }
 }

@@ -13,31 +13,33 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.server.persistence;
+package com.google.light.server.dto;
 
-import java.io.Serializable;
+import com.google.light.server.dto.person.DtoToPersistenceInterface;
+import org.junit.Test;
 
 /**
- * Light POJO which needs to be converted to and from DTO needs to implement this Interface. D : DTO
- * : Data Transfer Object which will be converted to JSON/XML depending on API. P : Persistence
- * Entity.
+ * Test for Entities of type {@link DtoToPersistenceInterface}.
  * 
  * @author Arjun Satyapal
  */
-public interface PersistenceToDtoInterface<P, D> extends Serializable {
+public abstract class AbstractDtoToPersistenceTest {
   /**
-   * Convert Persistence entity to corresponding DTO.
-   * 
-   * @return
+   * Test for constructor for each entity.
    */
-  public D toDto();
+  @Test
+  public abstract void test_constructor();
+  
+  /**
+   * Test for {@link DtoToPersistenceInterface#validate()}.
+   */
+  @Test
+  public abstract void test_validate();
 
-  @Override
-  public boolean equals(Object obj);
-
-  @Override
-  public int hashCode();
-
-  @Override
-  public String toString();
+  /**
+   * Test for {@link DtoToPersistenceInterface#toPersistenceEntity()}
+   */
+  @Test
+  public abstract void test_toPersistenceEntity();
+  
 }

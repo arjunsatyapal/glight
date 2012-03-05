@@ -101,7 +101,6 @@ public class PersonManagerImpl implements PersonManager {
    */
   @Override
   public PersonEntity getPersonByEmail(String email) {
-    // TODO(arjuns) : Add test for this.
     return personDao.getByEmail(email);
   }
 

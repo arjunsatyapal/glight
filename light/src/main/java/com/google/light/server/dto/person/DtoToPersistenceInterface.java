@@ -25,10 +25,19 @@ import java.io.Serializable;
  * @author Arjun Satyapal
  */
 public interface DtoToPersistenceInterface<D, P> extends Serializable {
+  @Override
+  public boolean equals(Object obj);
+  
+  @Override
+  public int hashCode();
+  
+  @Override
+  public String toString();
+  
   /**
    * Ensure that DTO is valid.
    * TODO(arjuns): Throw a checked exception.
-   * TODO(arjuns) : Sync with Walter on refactorin. Issue : 2003.
+   * TODO(arjuns) : Sync with Walter on refactoring. Issue : 2003.
    * @return
    */
   public D validate();

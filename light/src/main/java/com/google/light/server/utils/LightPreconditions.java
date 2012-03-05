@@ -19,18 +19,20 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Preconditions;
-
-import com.google.light.server.exception.unchecked.PersonLoginRequiredException;
-
 import com.google.common.base.Strings;
+import com.google.light.server.exception.unchecked.PersonLoginRequiredException;
 import java.util.List;
+import org.apache.commons.validator.routines.EmailValidator;
 
 /**
- * Some Additional Preconditions which are not available with Guava Library.
+ * Some Additional Preconditions which are not available with Guava Library's
+ * {@link Preconditions}.
  * 
  * @author Arjun Satyapal
  */
 public class LightPreconditions {
+  private static EmailValidator emailValidator = EmailValidator.getInstance();
+  
   public static String checkNotEmptyString(String reference) {
     return checkNotEmptyString(reference, "");
   }
@@ -40,9 +42,9 @@ public class LightPreconditions {
     return reference;
   }
 
-  // TODO(arjuns) : Fix this validation eventually.
   public static String checkEmail(String email) {
-    return checkNotEmptyString(email);
+    checkArgument(emailValidator.isValid(email), "email:" + email);
+    return email;
   }
 
   // TODO(arjuns) : Fix this validation eventually.
@@ -60,30 +62,6 @@ public class LightPreconditions {
     checkNotNull(list);
     checkArgument(list.size() > 0);
     return list;
-  }
-
-  public static <T> boolean isListEmpty(List<T> list) {
-    if (list == null || list.size() == 0) {
-      return true;
-    }
-
-    return false;
-  }
-
-  public static Long checkPositiveLong(Long number) {
-    checkNotNull(number);
-    checkArgument(number > 0);
-    return number;
-  }
-
-  public static boolean isEqual(Object expected, Object actual) {
-    if (expected == actual) {
-      return true;
-    } else if ((expected == null && actual != null) || (expected != null && actual == null)) {
-      return false;
-    }
-
-    return expected.equals(actual);
   }
 
   // Utility class.

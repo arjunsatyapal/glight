@@ -13,30 +13,29 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.server.guice.providers;
+package com.google.light.server.guice;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-import com.google.light.server.manager.interfaces.PersonManager;
+import com.google.light.server.guice.providers.InstanceProvider;
+import com.google.light.server.persistence.dao.PersonDao;
 
 /**
- * Service Provider for various Guice Injected Classes.
- * 
- * NOTE : DAOs should be injected directly in the relevant managers.
+ * Classes which are not added to {@link InstanceProvider} can be added here for test.
  * 
  * @author Arjun Satyapal
  */
-public class InstanceProvider {
+public class TestInstanceProvider {
   private Injector injector;
-
-  @Inject
-  private InstanceProvider(Injector injector) {
+  
+  @Inject 
+  public TestInstanceProvider(Injector injector) {
     this.injector = checkNotNull(injector);
   }
-
-  public PersonManager getPersonManager() {
-    return checkNotNull(injector.getInstance(PersonManager.class));
+  
+  public PersonDao getPersonDao() {
+    return checkNotNull(injector.getInstance(PersonDao.class));
   }
 }

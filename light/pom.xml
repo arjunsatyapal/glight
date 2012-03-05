@@ -80,6 +80,19 @@
       <scope>test</scope>
     </dependency>
 
+    <!-- Apache Commons Dependencies : -->
+    <dependency>
+      <groupId>org.apache.directory.studio</groupId>
+      <artifactId>org.apache.commons.lang</artifactId>
+      <version>2.6</version>
+    </dependency>
+
+    <dependency>
+      <groupId>commons-validator</groupId>
+      <artifactId>commons-validator</artifactId>
+      <version>1.4.0</version>
+    </dependency>
+
     <!--
       Guava Dependency :
       TODO(arjuns) : Some of the library depend on r09. So not using r11. Update this with that culprit.

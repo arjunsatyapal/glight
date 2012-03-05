@@ -16,9 +16,18 @@
 package com.google.light.server.persistence.entity.person;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.light.server.utils.LightPreconditions.checkEmail;
 import static com.google.light.server.utils.LightPreconditions.checkNotEmptyString;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
+
+import org.apache.commons.lang.builder.HashCodeBuilder;
+
+import org.apache.commons.lang.builder.ToStringBuilder;
+
 import com.google.light.server.constants.OpenIdAuthDomain;
+import com.google.light.server.dto.person.PersonDto;
+import com.google.light.server.persistence.PersistenceToDtoInterface;
 
 /**
  *  We are storing these so that in future if we need to add support more Federated Providers
@@ -26,55 +35,30 @@ import com.google.light.server.constants.OpenIdAuthDomain;
  *  
  * @author Arjun Satyapal
  */
-public class IdProviderDetail {
+@SuppressWarnings("serial")
+public class IdProviderDetail implements PersistenceToDtoInterface<PersonEntity, PersonDto> {
   private OpenIdAuthDomain authDomain;
   private String email;
   private String federatedIdentity;
 
   @Override
   public String toString() {
-    return "IdentityProviderDetail [authDomain=" + authDomain + ", email=" + email
-        + ", federatedIdentity=" + federatedIdentity + "]";
+    return ToStringBuilder.reflectionToString(this);
   }
 
   @Override
   public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + ((authDomain == null) ? 0 : authDomain.hashCode());
-    result = prime * result + ((email == null) ? 0 : email.hashCode());
-    result = prime * result + ((federatedIdentity == null) ? 0 : federatedIdentity.hashCode());
-    return result;
+    return HashCodeBuilder.reflectionHashCode(this);
   }
 
   @Override
   public boolean equals(Object obj) {
-    if (this == obj)
-      return true;
-    if (obj == null)
-      return false;
-    if (getClass() != obj.getClass())
-      return false;
-    IdProviderDetail other = (IdProviderDetail) obj;
-    if (authDomain != other.authDomain)
-      return false;
-    if (email == null) {
-      if (other.email != null)
-        return false;
-    } else if (!email.equals(other.email))
-      return false;
-    if (federatedIdentity == null) {
-      if (other.federatedIdentity != null)
-        return false;
-    } else if (!federatedIdentity.equals(other.federatedIdentity))
-      return false;
-    return true;
+    return EqualsBuilder.reflectionEquals(this, obj);
   }
 
   public IdProviderDetail(OpenIdAuthDomain authDomain, String email, String federatedIdentity) {
     this.authDomain = checkNotNull(authDomain);
-    this.email = checkNotEmptyString(email);
-    this.federatedIdentity = checkNotEmptyString(federatedIdentity);
+    this.email = checkEmail(email);
     this.federatedIdentity = checkNotEmptyString(federatedIdentity);
   }
 
@@ -90,8 +74,17 @@ public class IdProviderDetail {
     return federatedIdentity;
   }
 
-  // For Objecfity.
+  // For Objectify.
   @SuppressWarnings("unused")
   private IdProviderDetail() {
+  }
+
+  /** 
+   * {@inheritDoc}
+   */
+  @Override
+  public PersonDto toDto() {
+    // TODO(arjuns): Auto-generated method stub
+    throw new UnsupportedOperationException();
   }
 }
