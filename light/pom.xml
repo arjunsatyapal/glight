@@ -19,9 +19,35 @@
       <name>Objectify Maven Repository</name>
       <url>http://objectify-appengine.googlecode.com/svn/maven</url>
     </repository>
+	<repository>
+		<id>jstd-maven-plugin google code repo</id>
+		<url>http://jstd-maven-plugin.googlecode.com/svn/maven2</url>
+	</repository>
   </repositories>
+  <pluginRepositories>
+        <pluginRepository>
+            <id>jstd-maven-plugin google code repo</id>
+            <url>http://jstd-maven-plugin.googlecode.com/svn/maven2</url>
+        </pluginRepository>
+  </pluginRepositories>
 
   <dependencies>
+  
+	<!-- JSTestDriver -->
+	<dependency>
+		<groupId>com.googlecode.jstd-maven-plugin</groupId>
+		<artifactId>jstd-maven-plugin</artifactId>
+		<version>1.3.2.5</version>
+		<scope>test</scope>
+	</dependency>
+
+	<dependency>
+		<groupId>com.googlecode.jstd-maven-plugin</groupId>
+		<artifactId>jstestdriver-jar</artifactId>
+		<version>1.3.4-a</version>
+		<scope>test</scope>
+	</dependency>
+  
     <!--
       AppEngine Dependency :
       jars from GAE's "lib/user" must be added as compile-time dependencies,
@@ -173,6 +199,69 @@
     </extensions>
 
     <plugins>
+
+
+	<!-- JSTestDriver -->
+	<plugin>
+		<groupId>com.googlecode.jstd-maven-plugin</groupId>
+		<artifactId>jstd-maven-plugin</artifactId>
+		<version>1.3.2.5</version>
+		<configuration>
+			<config>jsTestDriver.conf</config>
+			<groupId>com.googlecode.jstd-maven-plugin</groupId>
+			<artifactId>jstestdriver-jar</artifactId>
+			<reset>true</reset>
+		</configuration>
+		<executions>
+			<execution>
+				<id>run-tests</id>
+				<goals>
+					<goal>test</goal>
+				</goals>
+			</execution>
+		</executions>
+	</plugin>
+	
+	<!-- Jetty to serve stuff to JSTestDriver (needs to go after JSTestDriver 
+		so the server will be stopped at the right moment) -->
+	<plugin>
+		<groupId>org.mortbay.jetty</groupId>
+		<artifactId>maven-jetty-plugin</artifactId>
+		<configuration>
+			<scanIntervalSeconds>5</scanIntervalSeconds>
+			<stopPort>9966</stopPort>
+			<stopKey>foo</stopKey>
+			<webXml>dummyWeb.xml</webXml>
+			<contextPath>/</contextPath>
+			<webAppSourceDirectory>.</webAppSourceDirectory>
+			<connectors>
+				<connector implementation="org.mortbay.jetty.nio.SelectChannelConnector">
+					<port>9980</port>
+					<maxIdleTime>60000</maxIdleTime>
+				</connector>
+			</connectors>
+		</configuration>
+		<executions>
+			<execution>
+				<id>start-jetty</id>
+				<phase>test-compile</phase>
+				<goals>
+					<goal>run</goal>
+				</goals>
+				<configuration>
+					<daemon>true</daemon>
+				</configuration>
+			</execution>
+			<execution>
+				<id>stop-jetty</id>
+				<phase>test</phase>
+				<goals>
+					<goal>stop</goal>
+				</goals>
+			</execution>
+		</executions>
+	</plugin>
+    
       <plugin>
         <artifactId>maven-archetype-plugin</artifactId>
         <version>2.0-alpha-4</version>
@@ -275,6 +364,19 @@
                   <action>
                     <execute />
                   </action>
+                </pluginExecution>
+                <pluginExecution>
+                	<pluginExecutionFilter>
+                		<groupId>org.mortbay.jetty</groupId>
+                		<artifactId>maven-jetty-plugin</artifactId>
+                		<versionRange>[6.1.26,)</versionRange>
+                		<goals>
+                			<goal>run</goal>
+                		</goals>
+                	</pluginExecutionFilter>
+                	<action>
+                		<ignore></ignore>
+                	</action>
                 </pluginExecution>
               </pluginExecutions>
             </lifecycleMappingMetadata>
