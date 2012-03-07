@@ -14,21 +14,17 @@ define(['dojo/_base/connect', 'dojo/_base/declare', 'light/URLHashUtil',
 
     describe('watch', function() {
       describe('when called', function() {
-        var subscribeStub, _onHashChangeStub, hashUtilGet;
-        beforeEach(function() {
-          subscribeStub = this.stub(connect, 'subscribe');
-          _onHashChangeStub = this.stub(router, '_onHashChange');
-          hashUtilGet = this.stub(hashUtil, 'get');
-        });
         it('should subscribe to hashchange event\'s, setup the lastQuery' +
            ' to the default one and do the first sync', function() {
+          var subscribeStub = this.stub(connect, 'subscribe');
+          var _onHashChangeStub = this.stub(router, '_onHashChange');
+          var hashUtilGet = this.stub(hashUtil, 'get');
+
           hashUtilGet.withArgs().returns('SOMEHASH');
 
           router.watch();
 
           var v = expect(subscribeStub);
-          /*for(q in v)
-            console.log(q,v[q]);*/
           expect(subscribeStub).toHaveBeenCalledWith(
             '/dojo/hashchange', router, router._onHashChange
           );

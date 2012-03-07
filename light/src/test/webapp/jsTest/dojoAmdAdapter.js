@@ -126,7 +126,8 @@ jstestdriver.dojoAmdAdapter = (function() {
   function fail() {
     if (lastFile != null) {
       lastCallback(new jstestdriver.FileResult(lastFile, false,
-              'Error loading resource: ' + prettyPrintJSON(arguments)));
+              'Error loading resource: ' +
+              prettyPrintJSON(Array.prototype.slice.call(arguments, 0))));
       lastFile = null;
     }
   }

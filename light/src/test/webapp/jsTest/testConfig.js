@@ -14,6 +14,7 @@
 var dojoConfig = {
   //'dojo-undef-api': true, 'dojo-publish-privates': true, 
   has: {'config-dojo-loader-catches': true},
+  cacheBust:new Date(), // Needed to avoid some browsers from caching the code
   isDebug: true,
   deferredOnError: function(e) { console.log(e.message, e.stack) },
       packages: [ {
