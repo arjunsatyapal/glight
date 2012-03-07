@@ -115,7 +115,6 @@ jstestdriver.JasmineAdapter = (function() {
               frames.push(line.replace(/https?:\/\/\w+(:\d+)?\/test\//,
                       '').replace(/^\s*/, '     '));
             }
-            console.log(stack, frames);
             return frames.join('\n');
           };
 

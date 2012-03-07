@@ -109,26 +109,68 @@ jstestdriver.dojoAmdAdapter = (function() {
    */
   var DUMMY_TEST_FILE = '/dojoAmdAdapterWait.js';
 
+
+  /**
+   * Loading timeout in milliseconds
+   *
+   * Theoretically dojo has a builtin system for that,
+   * but some kind of syntax errors in a module will not fire the
+   * timeout in IE with Dojo 1.7.2 loader and the JSTestDriver just
+   * hangs.
+   *
+   * @const
+   */
+  var LOAD_TIMEOUT = 5000;
+
+  /**
+   * Boolean for tracking if the last loading attempt failed
+   */
+  var failed = false;
+
+  /**
+   * A test case to make JSTestDriver fail in case a loading error
+   * occurs.
+   *
+   * For some reason, just telling JSTestDriver that the dummy
+   * resource failed to load does not make it globally fail. That means,
+   * for example, if there is a loading error (path problem, syntax
+   * error on a file, etc) it would be possible that the maven build
+   * will not fail. This is why these fake testcase exists.
+   */
+  var reporterTestCase = TestCase('LoadTest');
+  reporterTestCase.prototype.testLoadingSucceeded = function() {
+    if (failed) {
+      failed = false;
+      throw new Error('Loading errors happened!');
+    }
+  }
+
   var dojoAmdAdapter = {};
 
   dojoAmdAdapter.log = function() {
-    /*var console = jstestdriver.console;
-    console.log.apply(console, arguments);*/
+    var console = jstestdriver.console;
+    console.log.apply(console, arguments);
   }
 
   // Variables to store data from the last loading of DUMMY_TEST_FILE
   var lastCallback = null;
   var lastFile = null;
+  var lastTimer = 0;
+  var lastAction = null;
 
   /**
    * Error callback
    */
   function fail() {
     if (lastFile != null) {
+      failed = true;
       lastCallback(new jstestdriver.FileResult(lastFile, false,
               'Error loading resource: ' +
-              prettyPrintJSON(Array.prototype.slice.call(arguments, 0))));
+              prettyPrintJSON(Array.prototype.slice.call(arguments, 0)) +
+              '\n  Last action was: ' + lastAction));
       lastFile = null;
+      lastAction = null;
+      clearTimeout(lastTimer);
     }
   }
 
@@ -139,6 +181,8 @@ jstestdriver.dojoAmdAdapter = (function() {
     if (lastFile != null) {
       lastCallback(new jstestdriver.FileResult(lastFile, true, '', 0));
       lastFile = null;
+      lastAction = null;
+      clearTimeout(lastTimer);
     }
   }
 
@@ -150,12 +194,29 @@ jstestdriver.dojoAmdAdapter = (function() {
   jstestdriver.pluginRegistrar.register({
     name: 'waitForDojoAndTestsToBeReady',
     loadSource: function(fileObj, callback) {
+
+      // If this is the dummy resource
       if (fileObj.fileSrc.substr(fileObj.fileSrc.length -
               DUMMY_TEST_FILE.length) === DUMMY_TEST_FILE) {
+
+        // Data about the dummy resource that we will need
         lastCallback = callback;
         lastFile = fileObj;
+
+        // Starting timer for failing if we timeout
+        lastTimer = setTimeout(function() {
+          fail('Loading timeout (dojoAmdAdapter). ' +
+               'Please, check if your file path\'s are ok and ' +
+               'if there are no syntax errors in your files.');
+        }, LOAD_TIMEOUT);
+
+        // Loading the list
+        lastAction = 'Loading test list: ' + dojoAmdAdapterConfig.testListFile;
         require(['dojo/text!' + dojoAmdAdapterConfig.testListFile],
                 function(fileData) {
+
+          // Parsing the list
+          lastAction = 'Parsing JSON data from ' + dojoAmdAdapterConfig.testListFile;
           var data;
           try {
             data = jstestdriver.JSON.parse(fileData);
@@ -167,16 +228,24 @@ jstestdriver.dojoAmdAdapter = (function() {
             });
             return;
           }
+
+          // Reformatting files to proper module ids
+          lastAction = 'Iterating over JSON data from ' + dojoAmdAdapterConfig.testListFile;
           var mids = [];
           for (var i = 0, len = data.length; i < len; i++) {
             var mid = dojoAmdAdapterConfig.testMidFormatter(data[i]);
             if (mid)
               mids.push(mid);
           }
+
+          // Finally loading them
+          lastAction = 'Loading: ' + mids;
           require(mids, success);
+
         });
         return true;
       }
+
       return false;
     }
   });

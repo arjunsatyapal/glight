@@ -495,7 +495,7 @@
 								<includes>
 									<include>**/*Test.js</include>
 								</includes>
-								<outputFile>${project.basedir}/src/test/webapp/jsTest/testList.js</outputFile>
+								<outputFile>${project.basedir}/target/testList.js</outputFile>
 							</configuration>
 						</execution>
 					</executions>
