@@ -1,0 +1,3 @@
+[
+  "lightTest/SearchRouterTest.js"
+]

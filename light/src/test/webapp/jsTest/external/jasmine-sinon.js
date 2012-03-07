@@ -28,14 +28,17 @@
     spyMatcherHash[unusualMatchers[j]] = getMatcherFunction(j);
   }
 
-  global.sinonJasmine = {
-    getMatchers: function() {
-      return spyMatcherHash;
-    }
-  };
+  // LightMod: Making sinon clean up after himself
+  beforeEach(function() {
+    this.addMatchers(spyMatcherHash);
+    this.sinonSandbox = global.sinon.sandbox.create(
+      global.sinon.getConfig({injectInto: this, useFakeServer: false})
+    );
+  });
+
+  afterEach(function() {
+    this.sinonSandbox.restore();
+  });
 
 })(window);
 
-beforeEach(function() {
-  this.addMatchers(sinonJasmine.getMatchers());
-});
