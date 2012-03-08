@@ -48,7 +48,7 @@ define(['dojo/_base/connect', 'dojo/_base/declare', 'light/URLHashUtil',
      * @private
      */
     _onHashChange: function(hash) {
-      var query;
+      var query = null;
       try {
         query = this._hashToQuery(hash);
       } catch (e) {

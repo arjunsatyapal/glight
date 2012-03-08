@@ -19,35 +19,35 @@
       <name>Objectify Maven Repository</name>
       <url>http://objectify-appengine.googlecode.com/svn/maven</url>
     </repository>
-	<repository>
-		<id>jstd-maven-plugin google code repo</id>
-		<url>http://jstd-maven-plugin.googlecode.com/svn/maven2</url>
-	</repository>
+    <repository>
+      <id>jstd-maven-plugin google code repo</id>
+      <url>http://jstd-maven-plugin.googlecode.com/svn/maven2</url>
+    </repository>
   </repositories>
   <pluginRepositories>
-        <pluginRepository>
-            <id>jstd-maven-plugin google code repo</id>
-            <url>http://jstd-maven-plugin.googlecode.com/svn/maven2</url>
-        </pluginRepository>
+    <pluginRepository>
+      <id>jstd-maven-plugin google code repo</id>
+      <url>http://jstd-maven-plugin.googlecode.com/svn/maven2</url>
+    </pluginRepository>
   </pluginRepositories>
 
   <dependencies>
-  
-	<!-- JSTestDriver -->
-	<dependency>
-		<groupId>com.googlecode.jstd-maven-plugin</groupId>
-		<artifactId>jstd-maven-plugin</artifactId>
-		<version>1.3.2.5</version>
-		<scope>test</scope>
-	</dependency>
 
-	<dependency>
-		<groupId>com.googlecode.jstd-maven-plugin</groupId>
-		<artifactId>jstestdriver-jar</artifactId>
-		<version>1.3.4-a</version>
-		<scope>test</scope>
-	</dependency>
-  
+    <!-- JSTestDriver -->
+    <dependency>
+      <groupId>com.googlecode.jstd-maven-plugin</groupId>
+      <artifactId>jstd-maven-plugin</artifactId>
+      <version>1.3.2.5</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.googlecode.jstd-maven-plugin</groupId>
+      <artifactId>jstestdriver-jar</artifactId>
+      <version>1.3.4-a</version>
+      <scope>test</scope>
+    </dependency>
+
     <!--
       AppEngine Dependency :
       jars from GAE's "lib/user" must be added as compile-time dependencies,
@@ -199,27 +199,7 @@
     </extensions>
 
     <plugins>
-	<!-- Jasmine Runner -->
-	<plugin>
-		<groupId>com.github.searls</groupId>
-		<artifactId>jasmine-maven-plugin</artifactId>
-		<version>1.1.0</version>
-		<!-- <executions></executions> -->
-		<configuration>
-			<debug>true</debug>
-			<specRunnerTemplate>REQUIRE_JS</specRunnerTemplate>
-			<scriptLoaderPath>../../../../../src/test/webapp/jsTest/loaderForJasmineMaven.js</scriptLoaderPath>
-			<jsSrcDir>${project.basedir}/src/main/webapp/js/light</jsSrcDir>
-			<jsTestSrcDir>${project.basedir}/src/test/webapp/jsTest/lightTest</jsTestSrcDir>
-			<sourceExcludes>
-			    <exclude>**</exclude>
-			</sourceExcludes>
-			<specIncludes>
-			    <include>**/*Test.js</include>
-			</specIncludes>
-		</configuration>
-	</plugin>
-    
+
       <plugin>
         <artifactId>maven-archetype-plugin</artifactId>
         <version>2.0-alpha-4</version>
@@ -324,30 +304,30 @@
                   </action>
                 </pluginExecution>
                 <pluginExecution>
-                	<pluginExecutionFilter>
-                		<groupId>org.mortbay.jetty</groupId>
-                		<artifactId>maven-jetty-plugin</artifactId>
-                		<versionRange>[6.1.26,)</versionRange>
-                		<goals>
-                			<goal>run</goal>
-                		</goals>
-                	</pluginExecutionFilter>
-                	<action>
-                		<ignore></ignore>
-                	</action>
+                  <pluginExecutionFilter>
+                    <groupId>org.mortbay.jetty</groupId>
+                    <artifactId>maven-jetty-plugin</artifactId>
+                    <versionRange>[6.1.26,)</versionRange>
+                    <goals>
+                      <goal>run</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore></ignore>
+                  </action>
                 </pluginExecution>
                 <pluginExecution>
-                	<pluginExecutionFilter>
-                		<groupId>eu.numberfour.maven.plugins</groupId>
-                		<artifactId>file-list-maven-plugin</artifactId>
-                		<versionRange>[1.0.0,)</versionRange>
-                		<goals>
-                			<goal>list</goal>
-                		</goals>
-                	</pluginExecutionFilter>
-                	<action>
-                		<ignore></ignore>
-                	</action>
+                  <pluginExecutionFilter>
+                    <groupId>eu.numberfour.maven.plugins</groupId>
+                    <artifactId>file-list-maven-plugin</artifactId>
+                    <versionRange>[1.0.0,)</versionRange>
+                    <goals>
+                      <goal>list</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore></ignore>
+                  </action>
                 </pluginExecution>
               </pluginExecutions>
             </lifecycleMappingMetadata>
@@ -389,161 +369,189 @@
       default.
     -->
     <gae.application.version>test</gae.application.version>
-        
-	<!-- JSTestDriver properties -->
-	<jstest.plugin.version>1.3.2.5</jstest.plugin.version>
-	<jstest.port>42442</jstest.port>
-	<jstest.browser>google-chrome</jstest.browser>
+
+    <!-- JSTestDriver properties -->
+    <jstd.plugin.version>1.3.2.5</jstd.plugin.version>
   </properties>
 
   <profiles>
-  	
-  	<!-- Profiles for running JSTests -->
-  	<profile>
-  		<id>jstest-autocapture</id>
-  		<activation>
-	      <property>
-	        <name>!jstest.server</name>
-	      </property>
-	    </activation>
-  		<build>
-  			<plugins>
-				<plugin>
-					<groupId>com.googlecode.jstd-maven-plugin</groupId>
-					<artifactId>jstd-maven-plugin</artifactId>
-					<version>${jstest.plugin.version}</version>
-					<configuration>
-				  		<browser>${jstest.browser}</browser>
-						<port>${jstest.port}</port>
-					</configuration>
-				</plugin>
-  			</plugins>
-  		</build>
-  	</profile>
-  	
-  	<profile>
-  		<id>jstest-external</id>
-  		<activation>
-	      <property>
-	        <name>jstest.server</name>
-	      </property>
-	    </activation>
-  		<build>
-  			<plugins>
-				<plugin>
-					<groupId>com.googlecode.jstd-maven-plugin</groupId>
-					<artifactId>jstd-maven-plugin</artifactId>
-					<version>${jstest.plugin.version}</version>
-					<configuration>
-				  		<server>${jstest.server}</server>
-					</configuration>
-				</plugin>
-  			</plugins>
-  		</build>
-  	</profile>
-  	
-  	
-  	<profile>
-  		<id>jstest</id>
-  		<activation>
-	      <!-- 
-		      This is a little trick to make this profile execute every time unless you
-		      explicitly deactivate it.
-	      -->
-	      <property>
-	        <name>!jstest.DONOTDEFINEME</name>
-	      </property>
-	    </activation>
-  		<build>
-  			<plugins>
-				<!-- JSTestDriver -->
-				<plugin>
-					<groupId>com.googlecode.jstd-maven-plugin</groupId>
-					<artifactId>jstd-maven-plugin</artifactId>
-					<version>${jstest.plugin.version}</version>
-					<configuration>
-						<config>src/test/webapp/jsTest/jsTestDriver.conf</config>
-						<groupId>com.googlecode.jstd-maven-plugin</groupId>
-						<artifactId>jstestdriver-jar</artifactId>
-						<reset>true</reset>
-					</configuration>
-					<executions>
-						<execution>
-							<id>run-tests</id>
-							<phase>test</phase>
-							<goals>
-								<goal>test</goal>
-							</goals>
-						</execution>
-					</executions>
-				</plugin>
-				
-				<!-- Listing test files to be loaded by JSTestDriver -->
-				<plugin>
-					<groupId>eu.numberfour.maven.plugins</groupId>
-					<artifactId>file-list-maven-plugin</artifactId>
-					<version>1.0.0</version>
-					<executions>
-						<execution>
-							<id>list-js-test-files</id>
-							<phase>test-compile</phase>
-							<goals>
-								<goal>list</goal>
-							</goals>
-							<configuration>
-								<baseDir>${project.basedir}/src/test/webapp/jsTest</baseDir>
-								<includes>
-									<include>**/*Test.js</include>
-								</includes>
-								<outputFile>${project.basedir}/target/testList.js</outputFile>
-							</configuration>
-						</execution>
-					</executions>
-				</plugin>
-				
-				<!-- Jetty to serve stuff to JSTestDriver (needs to go after JSTestDriver 
-					so the server will be stopped at the right moment) -->
-				<plugin>
-					<groupId>org.mortbay.jetty</groupId>
-					<artifactId>maven-jetty-plugin</artifactId>
-					<version>6.1.26</version>
-					<configuration>
-						<scanIntervalSeconds>5</scanIntervalSeconds>
-						<stopPort>9966</stopPort>
-						<stopKey>foo</stopKey>
-						<webXml>src/test/webapp/jsTest/dummyWeb.xml</webXml>
-						<contextPath>/</contextPath>
-						<webAppSourceDirectory>.</webAppSourceDirectory>
-						<connectors>
-							<connector implementation="org.mortbay.jetty.nio.SelectChannelConnector">
-								<port>9980</port>
-								<maxIdleTime>60000</maxIdleTime>
-							</connector>
-						</connectors>
-					</configuration>
-					<executions>
-						<execution>
-							<id>start-jetty</id>
-							<phase>test-compile</phase>
-							<goals>
-								<goal>run</goal>
-							</goals>
-							<configuration>
-								<daemon>true</daemon>
-							</configuration>
-						</execution>
-						<execution>
-							<id>test</id>
-							<phase>test</phase>
-							<goals>
-								<goal>stop</goal>
-							</goals>
-						</execution>
-					</executions>
-				</plugin>
-  			</plugins>
-  		</build>
-  	</profile>
+
+    <!-- Jasmine profile (use it when not running JSTestDriver) -->
+    <profile>
+      <id>jasmine</id>
+      <activation>
+        <property>
+          <name>!jstd.server</name>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <!-- Jasmine Runner -->
+          <plugin>
+            <groupId>com.github.searls</groupId>
+            <artifactId>jasmine-maven-plugin</artifactId>
+            <version>1.1.0</version>
+            <executions>
+              <execution>
+                <phase>test</phase>
+                <goals>
+                  <goal>test</goal>
+                </goals>
+              </execution>
+            </executions>
+            <configuration>
+              <debug>true</debug>
+              <!--
+                Currently Jasmine only supports RequireJS AMD loader, but we are using the dojo one.
+                So, we made an little adapter that can be found at src/test/webapp/jsTest/loaderForJasmineMaven.js
+              -->
+              <specRunnerTemplate>REQUIRE_JS</specRunnerTemplate>
+              <!--
+                Plugin Bug warning!
+
+                Jasmine plugin assumes that the script loader path is relative to jsSrcDir, but
+                we are storing our fake loader at src/test/webapp/jsTest/loaderForJasmineMaven.js.
+                That's why we need all the "../". But, if you notice it has more "../" then necessary.
+                That's because of a plugin bug.
+              -->
+              <scriptLoaderPath>../../../../../src/test/webapp/jsTest/loaderForJasmineMaven.js</scriptLoaderPath>
+              <!--
+                Uncomment that to use Firefox instead of HTMLUnit
+                <webDriverClassName>org.openqa.selenium.firefox.FirefoxDriver</webDriverClassName>
+              -->
+              <jsSrcDir>${project.basedir}/src/main/webapp/js</jsSrcDir>
+              <jsTestSrcDir>${project.basedir}/src/test/webapp/jsTest</jsTestSrcDir>
+
+              <!--
+                This next two specs are used to determine the name of the directories inside
+                target/jasmine where the source and the tests will be stored.
+
+                We try to mimic the same structure of the project baseDir, so our
+                configurations for the dojoLoader can be the same regardless of which tool
+                we are using (jasmine:bdd, jasmine:test or JSTestDriver).
+              -->
+              <srcDirectoryName>src/main/webapp/js</srcDirectoryName>
+              <specDirectoryName>src/test/webapp/jsTest</specDirectoryName>
+
+              <!-- Don't include any file by default, let Dojo Loader load them when needed -->
+              <sourceExcludes>
+                <exclude>**</exclude>
+              </sourceExcludes>
+
+              <!-- Auto load all of our tests -->
+              <specIncludes>
+                <include>lightTest/**/*Test.js</include>
+              </specIncludes>
+
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <!--
+      Profile for running JSTestsDriver with an server with captured browsers.
+      Note: it needs to be http://localhost:PORT for now. It does not work with
+      remote servers.
+    -->
+    <profile>
+      <id>jstestdriver</id>
+      <activation>
+        <property>
+          <name>jstd.server</name>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <!-- JSTestDriver -->
+          <plugin>
+            <groupId>com.googlecode.jstd-maven-plugin</groupId>
+            <artifactId>jstd-maven-plugin</artifactId>
+            <version>${jstd.plugin.version}</version>
+            <configuration>
+              <config>src/test/webapp/jsTest/jsTestDriver.conf</config>
+              <groupId>com.googlecode.jstd-maven-plugin</groupId>
+              <artifactId>jstestdriver-jar</artifactId>
+              <reset>true</reset>
+              <server>${jstd.server}</server>
+            </configuration>
+            <executions>
+              <execution>
+                <id>run-tests</id>
+                <phase>test</phase>
+                <goals>
+                  <goal>test</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+
+          <!-- Listing test files to be loaded by JSTestDriver -->
+          <plugin>
+            <groupId>eu.numberfour.maven.plugins</groupId>
+            <artifactId>file-list-maven-plugin</artifactId>
+            <version>1.0.0</version>
+            <executions>
+              <execution>
+                <id>list-js-test-files</id>
+                <phase>test-compile</phase>
+                <goals>
+                  <goal>list</goal>
+                </goals>
+                <configuration>
+                  <baseDir>${project.basedir}/src/test/webapp/jsTest</baseDir>
+                  <includes>
+                    <include>**/*Test.js</include>
+                  </includes>
+                  <outputFile>${project.basedir}/target/testList.js</outputFile>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+
+          <!-- Jetty to serve stuff to JSTestDriver (needs to go after JSTestDriver
+            so the server will be stopped at the right moment) -->
+          <plugin>
+            <groupId>org.mortbay.jetty</groupId>
+            <artifactId>maven-jetty-plugin</artifactId>
+            <version>6.1.26</version>
+            <configuration>
+              <scanIntervalSeconds>5</scanIntervalSeconds>
+              <stopPort>9966</stopPort>
+              <stopKey>foo</stopKey>
+              <webXml>src/test/webapp/jsTest/dummyWeb.xml</webXml>
+              <contextPath>/</contextPath>
+              <webAppSourceDirectory>.</webAppSourceDirectory>
+              <connectors>
+                <connector implementation="org.mortbay.jetty.nio.SelectChannelConnector">
+                  <port>9980</port>
+                  <maxIdleTime>60000</maxIdleTime>
+                </connector>
+              </connectors>
+            </configuration>
+            <executions>
+              <execution>
+                <id>start-jetty</id>
+                <phase>test-compile</phase>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+                <configuration>
+                  <daemon>true</daemon>
+                </configuration>
+              </execution>
+              <execution>
+                <id>test</id>
+                <phase>test</phase>
+                <goals>
+                  <goal>stop</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
     <!--
       We can configure our integration server to activate this profile
       and perform gae:deploy, thus uploading latest snapshot to the
@@ -578,7 +586,7 @@
           to 2.
         -->
         <gae.application.version>release</gae.application.version>
-        
+
       </properties>
     </profile>
   </profiles>
