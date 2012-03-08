@@ -1,8 +1,24 @@
+/*
+ * Copyright (C) Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+"use strict";
 /** @exports dojoAmdAdapter as jstestdriver.dojoAmdAdapter */
 /**
  * <p>Dojo Asynchronous Module Definition Adapter for JsTestDriver
  *
- * <p>It aims to allow loading tests and modules to test using the
+ * <p>It aims to allow loading tests and code modules to test using the
  * dojo AMD loader. Currently it is not pretty general and it was specially
  * tweaked to the needs of Light.
  *
@@ -15,15 +31,18 @@
  *      loading this plugin.
  * <pre>
  *  var dojoAmdAdapterConfig = {
+ *
  *      // JSON File with the tests to be loaded using the Dojo Loader
  *      testListFile: "JSTestDriver/Path/For/A/JSON/File/Listing/Test/Files",
+ *
  *      // Function to customize the module id's found in the testListFile
  *      // If it returns false we will ignore the given module
  *      testMidFormatter: function(mid) { return mid; }
+ *
  *  };
  * </pre></li>
  * <li> You add the dojo/dojo.js to be loaded with your JsTestDriver</li>
- * <li> You add this file (dojoAmdAdapter.js) to be loaded after dojo with your
+ * <li> You add this file (dojoAmdAdapter.js) to be loaded after dojo.js in your
  *      JsTestDriver.conf</li>
  * <li> You create a empty file called "dojoAmdAdapterWait.js" and make it be
  *      loaded by JSTestDriver after this file (dojoAmdAdapter.js).</li>
@@ -41,10 +60,10 @@
  */
 jstestdriver.dojoAmdAdapter = (function() {
 
-  // Checking some probably mistakes of new users of this plugin
+  // Checking some probable mistakes done by new users of this plugin
   if (jstestdriver.dojoAmdAdapter)
     throw new Error('dojoAmdAdapter was already defined. AMD Modules ' +
-            "aren't currently reloaded, so you need to use --reset.");
+            'aren\'t currently reloaded, so you need to use --reset.');
   if (!window.dojoAmdAdapterConfig)
     throw new Error('dojoAmdAdapterConfig not defined!');
   if (!(dojoAmdAdapterConfig.testMidFormatter instanceof Function))
@@ -53,6 +72,7 @@ jstestdriver.dojoAmdAdapter = (function() {
 
   /**
    * Convert's a Javascript object Friendly JSON representation.
+   *
    * @return {String} Friendly JSON representation.
    */
   var prettyPrintJSON = function(obj, indent) {
@@ -105,6 +125,7 @@ jstestdriver.dojoAmdAdapter = (function() {
 
   /**
    * Dummy test file used to make JSTestDriver wait for Dojo to load files.
+   *
    * @const
    */
   var DUMMY_TEST_FILE = '/dojoAmdAdapterWait.js';
@@ -120,12 +141,12 @@ jstestdriver.dojoAmdAdapter = (function() {
    *
    * @const
    */
-  var LOAD_TIMEOUT = 5000;
+  var LOAD_TIMEOUT_IN_MILLIS = 5000;
 
   /**
    * Boolean for tracking if the last loading attempt failed
    */
-  var failed = false;
+  var previous_load_failed = false;
 
   /**
    * A test case to make JSTestDriver fail in case a loading error
@@ -135,12 +156,12 @@ jstestdriver.dojoAmdAdapter = (function() {
    * resource failed to load does not make it globally fail. That means,
    * for example, if there is a loading error (path problem, syntax
    * error on a file, etc) it would be possible that the maven build
-   * will not fail. This is why these fake testcase exists.
+   * will not fail. This is why this fake testcase exists.
    */
   var reporterTestCase = TestCase('LoadTest');
   reporterTestCase.prototype.testLoadingSucceeded = function() {
-    if (failed) {
-      failed = false;
+    if (previous_load_failed) {
+      previous_load_failed = false;
       throw new Error('Loading errors happened!');
     }
   }
@@ -163,7 +184,7 @@ jstestdriver.dojoAmdAdapter = (function() {
    */
   function fail() {
     if (lastFile != null) {
-      failed = true;
+      previous_load_failed = true;
       lastCallback(new jstestdriver.FileResult(lastFile, false,
               'Error loading resource: ' +
               prettyPrintJSON(Array.prototype.slice.call(arguments, 0)) +
@@ -189,8 +210,10 @@ jstestdriver.dojoAmdAdapter = (function() {
   // Wiring an error callback for loading problems
   require.on('error', fail);
 
-  // JSTestDriverPlugin that knows how to load the "dummy" resource,
-  // so we can pause the execution until everything is loaded.
+  /*
+     JSTestDriverPlugin that knows how to load the "dummy" resource,
+     so we can pause the execution until everything is loaded.
+  */
   jstestdriver.pluginRegistrar.register({
     name: 'waitForDojoAndTestsToBeReady',
     loadSource: function(fileObj, callback) {
@@ -208,10 +231,11 @@ jstestdriver.dojoAmdAdapter = (function() {
           fail('Loading timeout (dojoAmdAdapter). ' +
                'Please, check if your file path\'s are ok and ' +
                'if there are no syntax errors in your files.');
-        }, LOAD_TIMEOUT);
+        }, LOAD_TIMEOUT_IN_MILLIS);
 
         // Loading the list
         lastAction = 'Loading test list: ' + dojoAmdAdapterConfig.testListFile;
+
         require(['dojo/text!' + dojoAmdAdapterConfig.testListFile],
                 function(fileData) {
 

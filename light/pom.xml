@@ -33,21 +33,6 @@
 
   <dependencies>
 
-    <!-- JSTestDriver -->
-    <dependency>
-      <groupId>com.googlecode.jstd-maven-plugin</groupId>
-      <artifactId>jstd-maven-plugin</artifactId>
-      <version>1.3.2.5</version>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>com.googlecode.jstd-maven-plugin</groupId>
-      <artifactId>jstestdriver-jar</artifactId>
-      <version>1.3.4-a</version>
-      <scope>test</scope>
-    </dependency>
-
     <!--
       AppEngine Dependency :
       jars from GAE's "lib/user" must be added as compile-time dependencies,
@@ -150,6 +135,21 @@
       <version>1.1.2</version>
       <type>jar</type>
       <scope>runtime</scope>
+    </dependency>
+
+    <!-- JSTestDriver -->
+    <dependency>
+      <groupId>com.googlecode.jstd-maven-plugin</groupId>
+      <artifactId>jstd-maven-plugin</artifactId>
+      <version>${jstd.plugin.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.googlecode.jstd-maven-plugin</groupId>
+      <artifactId>jstestdriver-jar</artifactId>
+      <version>${jstd.version}</version>
+      <scope>test</scope>
     </dependency>
 
     <!--
@@ -372,6 +372,7 @@
 
     <!-- JSTestDriver properties -->
     <jstd.plugin.version>1.3.2.5</jstd.plugin.version>
+    <jstd.version>1.3.4-a</jstd.version>
   </properties>
 
   <profiles>

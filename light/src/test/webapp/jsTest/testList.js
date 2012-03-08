@@ -1,3 +1,0 @@
-[
-  "lightTest/SearchRouterTest.js"
-]
