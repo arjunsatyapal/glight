@@ -26,8 +26,8 @@
  *
  * <p>Current assumptions for this plugin to work:
  * <ul>
- * <li> You create a file containing a variable dojoAmdAdapterConfig with the
- *      options shown bellow and configure JsTestDriver to load it before
+ * <li> You created a file containing a variable dojoAmdAdapterConfig with the
+ *      options shown bellow and configured JsTestDriver to load it before
  *      loading this plugin.
  * <pre>
  *  var dojoAmdAdapterConfig = {
@@ -41,18 +41,18 @@
  *
  *  };
  * </pre></li>
- * <li> You add the dojo/dojo.js to be loaded with your JsTestDriver</li>
- * <li> You add this file (dojoAmdAdapter.js) to be loaded after dojo.js in your
+ * <li> You added the dojo/dojo.js to be loaded with your JsTestDriver</li>
+ * <li> You added this file (dojoAmdAdapter.js) to be loaded after dojo.js in your
  *      JsTestDriver.conf</li>
- * <li> You create a empty file called "dojoAmdAdapterWait.js" and make it be
+ * <li> You created a empty file called "dojoAmdAdapterWait.js" and made it be
  *      loaded by JSTestDriver after this file (dojoAmdAdapter.js).</li>
  * <li> Your test files and their dependencies are not on load section! Use
  *      serve or proxy (recommended) to make them available to the dojo loader
  *      when running jstestdriver. Even dojo files besides dojo.js should not
  *      be on the load section. </li>
- * <li> You have fresh browsers between runs (use the --reset flag when running
- *      JSTestDriver).</li>
- * <li> You add to dojoConfig the option
+ * <li> You only use fresh browsers between runs (use the --reset flag when
+ *      running JSTestDriver).</li>
+ * <li> You added to dojoConfig the option
  *      <code>has: {'config-dojo-loader-catches': true}</code></li>
  * </ul>
  *
