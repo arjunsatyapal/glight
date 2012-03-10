@@ -17,7 +17,7 @@ package com.google.light.server.persistence.entity.person;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkEmail;
-import static com.google.light.server.utils.LightPreconditions.checkNotEmptyString;
+import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 
@@ -59,7 +59,7 @@ public class IdProviderDetail implements PersistenceToDtoInterface<PersonEntity,
   public IdProviderDetail(OpenIdAuthDomain authDomain, String email, String federatedIdentity) {
     this.authDomain = checkNotNull(authDomain);
     this.email = checkEmail(email);
-    this.federatedIdentity = checkNotEmptyString(federatedIdentity);
+    this.federatedIdentity = checkNotBlank(federatedIdentity);
   }
 
   public OpenIdAuthDomain getAuthDomain() {

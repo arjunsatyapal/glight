@@ -15,9 +15,12 @@
  */
 package com.google.light.server.dto.person;
 
+import static com.google.light.testingutils.TestingUtils.getRandomLongNumber;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
+
+import com.google.light.testingutils.TestingUtils;
 
 import com.google.light.server.dto.AbstractDtoToPersistenceTest;
 import com.google.light.server.persistence.entity.person.PersonEntity;
@@ -29,14 +32,12 @@ import org.junit.Test;
  * @author Arjun Satyapal
  */
 public class PersonDtoTest extends AbstractDtoToPersistenceTest {
-  private final String userId = "userId:1111";
   private final String firstName = "first Name";
   private final String lastName = "last name";
   private final String email = "email@gmail.com";
 
   private PersonDto.Builder getPersonDtoBuilder() {
     return new PersonDto.Builder()
-        .id(userId)
         .firstName(firstName)
         .lastName(lastName)
         .email(email);
@@ -94,7 +95,7 @@ public class PersonDtoTest extends AbstractDtoToPersistenceTest {
       // expected.
     }
 
-    // Negative tests for Emails are done with LightPreconditions.
+    // Negative tests for Email are done with LightPreconditions.
   }
 
   /**
@@ -108,10 +109,10 @@ public class PersonDtoTest extends AbstractDtoToPersistenceTest {
         .lastName(lastName)
         .email(email);
 
-    PersonDto dtoWithoutId = new PersonDto(null, firstName, lastName, email);
-    assertEquals(personBuilder.build(), dtoWithoutId.toPersistenceEntity());
-
-    PersonDto dtoWithId = new PersonDto(userId, firstName, lastName, email);
-    assertEquals(personBuilder.id(userId).build(), dtoWithId.toPersistenceEntity());
+    PersonDto personDto = new PersonDto(firstName, lastName, email);
+    assertEquals(personBuilder.build(), personDto.toPersistenceEntity(null));
+    
+    Long value = getRandomLongNumber();
+    assertEquals(personBuilder.id(value).build(), personDto.toPersistenceEntity(value));
   }
 }

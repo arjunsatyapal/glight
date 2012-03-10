@@ -18,7 +18,8 @@ package com.google.light.server.constants;
 import org.junit.Test;
 
 /**
- *
+ * All tests for Enum classes should extend this.
+ * 
  * @author Arjun Satyapal
  */
 public interface EnumTestInterface {

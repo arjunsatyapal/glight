@@ -16,7 +16,8 @@
 package com.google.light.server.persistence.entity.person;
 
 import static com.google.light.server.utils.LightPreconditions.checkEmail;
-import static com.google.light.server.utils.LightPreconditions.checkNotEmptyString;
+import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
+import static com.google.light.server.utils.LightPreconditions.checkPersonId;
 
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
@@ -40,7 +41,7 @@ import javax.persistence.Id;
 @SuppressWarnings("serial")
 public class PersonEntity implements PersistenceToDtoInterface<PersonEntity, PersonDto> {
   @Id
-  String id;
+  Long id;
   String firstName;
   String lastName;
 
@@ -67,18 +68,18 @@ public class PersonEntity implements PersistenceToDtoInterface<PersonEntity, Per
   }
 
   // TODO(arjuns) : Add test for constructor.
-  public PersonEntity(@Nullable String id, String firstName, String lastName, 
+  public PersonEntity(@Nullable Long id, String firstName, String lastName, 
       @Nullable String email, @Nullable List<IdProviderDetail> idProviderDetails) {
     this.id = id;
-    this.firstName = checkNotEmptyString(firstName);
-    this.lastName = checkNotEmptyString(lastName);
+    this.firstName = checkNotBlank(firstName);
+    this.lastName = checkNotBlank(lastName);
     this.email = email == null ? null : checkEmail(email);
     this.idProviderDetails = idProviderDetails;
   }
 
   @Override
   public PersonDto toDto() {
-    PersonDto dto = new PersonDto(id, firstName, lastName, email);
+    PersonDto dto = new PersonDto(firstName, lastName, email);
     return dto.validate();
   }
 
@@ -88,7 +89,7 @@ public class PersonEntity implements PersistenceToDtoInterface<PersonEntity, Per
   }
 
   // Getters and setters.
-  public String getId() {
+  public Long getId() {
     return id;
   }
 
@@ -96,12 +97,12 @@ public class PersonEntity implements PersistenceToDtoInterface<PersonEntity, Per
   /**
    * Id can be set only when a User is Logged In.
    */
-  public void setId(String id) {
+  public void setId(Long id) {
     if (this.id != null) {
       throw new UnsupportedOperationException("Id cannot be changed once it is set.");
     } 
     
-    this.id = checkNotEmptyString(id);
+    this.id = checkPersonId(id);
   }
 
   public List<IdProviderDetail> getIdProviderDetails() {
@@ -135,12 +136,12 @@ public class PersonEntity implements PersistenceToDtoInterface<PersonEntity, Per
   }
 
   public static class Builder {
-    private String id;
+    private Long id;
     private String firstName;
     private String lastName;
     private String email;
     private List<IdProviderDetail> idProviderDetails;
-    public Builder id(String id) {
+    public Builder id(Long id) {
       this.id = id;
       return this;
     }

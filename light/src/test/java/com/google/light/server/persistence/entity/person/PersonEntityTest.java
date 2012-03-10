@@ -16,9 +16,11 @@
 package com.google.light.server.persistence.entity.person;
 
 import static com.google.light.testingutils.TestingUtils.getRandomEmail;
-import static com.google.light.testingutils.TestingUtils.getRandomUserId;
+import static com.google.light.testingutils.TestingUtils.getRandomPersonId;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+
+import com.google.light.server.exception.unchecked.InvalidPersonIdException;
 
 import com.google.common.collect.ImmutableList;
 import com.google.light.server.constants.OpenIdAuthDomain;
@@ -31,7 +33,7 @@ import org.junit.Test;
  * @author Arjun Satyapal
  */
 public class PersonEntityTest extends AbstractPersistenceEntityTest {
-  private final String userId = "Id:1111";
+  private final Long userId = 1234L;
   private final String email = "email@gmail.com";
   private final String firstName = "first name";
   private final String lastName = "last name";
@@ -116,11 +118,9 @@ public class PersonEntityTest extends AbstractPersistenceEntityTest {
   @Test
   @Override
   public void test_toDto() {
-    PersonDto expectedDtoWithoutId = new PersonDto(null, firstName, lastName, email);
-    assertEquals(expectedDtoWithoutId, personWithoutId.toDto());
-
-    PersonDto expectedDtoWithId = new PersonDto(userId, firstName, lastName, email);
-    assertEquals(expectedDtoWithId, personWithId.toDto());
+    PersonDto expectedPersonDto = new PersonDto(firstName, lastName, email);
+    assertEquals(expectedPersonDto, personWithoutId.toDto());
+    assertEquals(expectedPersonDto, personWithId.toDto());
   }
 
   /**
@@ -200,7 +200,7 @@ public class PersonEntityTest extends AbstractPersistenceEntityTest {
 
     // Negative Test : trying changing value.
     try {
-      testPerson.setId(getRandomUserId());
+      testPerson.setId(getRandomPersonId());
       fail("should have failed");
     } catch (UnsupportedOperationException e) {
       // expected.
@@ -210,14 +210,15 @@ public class PersonEntityTest extends AbstractPersistenceEntityTest {
     try {
       getPersonBuilderWithoutId().build().setId(null);
       fail("should have failed");
-    } catch (IllegalArgumentException e) {
+    } catch (InvalidPersonIdException e) {
       // expected.
     }
 
+    // Negative test : id = a negative value.
     try {
-      getPersonBuilderWithoutId().build().setId("");
+      getPersonBuilderWithoutId().build().setId(-1L);
       fail("should have failed");
-    } catch (IllegalArgumentException e) {
+    } catch (InvalidPersonIdException e) {
       // expected.
     }
   }

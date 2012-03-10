@@ -16,12 +16,33 @@
 package com.google.light.server.dto.person;
 
 import static com.google.light.server.utils.LightPreconditions.checkEmail;
-import static com.google.light.server.utils.LightPreconditions.checkNotEmptyString;
+import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
+import com.google.light.server.dto.DtoToPersistenceInterface;
 import com.google.light.server.persistence.entity.person.PersonEntity;
+import java.io.StringReader;
+import java.io.StringWriter;
+import javax.xml.XMLConstants;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.util.JAXBSource;
+import javax.xml.transform.Source;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
+import javax.xml.validation.Validator;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
+import org.codehaus.jackson.map.AnnotationIntrospector;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.ObjectWriter;
+import org.codehaus.jackson.xc.JaxbAnnotationIntrospector;
 
 /**
  * DTO for {@link PersonEntity}.
@@ -29,10 +50,18 @@ import org.apache.commons.lang.builder.ToStringBuilder;
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
+@XmlRootElement(name = "person")
+@XmlType(name = "personType", propOrder = {"firstName", "lastName", "email" })
+@XmlAccessorType(XmlAccessType.FIELD)
+//@JsonSerialize(include = Inclusion.NON_NULL)
 public class PersonDto implements DtoToPersistenceInterface<PersonDto, PersonEntity> {
-  private String id;
+  @XmlElement
   private String firstName;
+
+  @XmlElement
   private String lastName;
+
+  @XmlElement
   private String email;
 
   @Override
@@ -42,9 +71,11 @@ public class PersonDto implements DtoToPersistenceInterface<PersonDto, PersonEnt
 
   @Override
   public PersonDto validate() {
-    checkNotEmptyString(firstName);
-    checkNotEmptyString(lastName);
-    checkEmail(email);
+    checkNotBlank(firstName);
+    checkNotBlank(lastName);
+    if (email != null) {
+      checkEmail(email);
+    }
     return this;
   }
 
@@ -59,39 +90,104 @@ public class PersonDto implements DtoToPersistenceInterface<PersonDto, PersonEnt
   }
 
   @Override
-  public PersonEntity toPersistenceEntity() {
+  public String toJson() {
+    ObjectMapper mapper = new ObjectMapper();
+    AnnotationIntrospector introspector = new JaxbAnnotationIntrospector();
+    // make deserializer use JAXB annotations (only)
+    mapper.getDeserializationConfig().withAnnotationIntrospector(introspector);
+    // make serializer use JAXB annotations (only)
+    mapper.getSerializationConfig().withAnnotationIntrospector(introspector);
+
+    ObjectWriter writer = mapper.writer();
+    //
+    // writerWithDefaultPrettyPrinter();
+    try {
+      return writer.writeValueAsString(this);
+    } catch (Exception e) {
+      // TODO(arjuns): Auto-generated catch block
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public PersonEntity toPersistenceEntity(Long id) {
     return new PersonEntity(id, firstName, lastName, email, null);
+  }
+
+  @Override
+  public String toXml() {
+    try {
+      StringWriter sw = new StringWriter();
+      JAXBContext jaxbContext = JAXBContext.newInstance(PersonDto.class);
+      JAXBSource jaxbSource = new JAXBSource(jaxbContext, this);
+      Marshaller marshaller = jaxbContext.createMarshaller();
+      marshaller.marshal(this, sw);
+      String personXml = sw.toString();
+      System.out.println(personXml);
+
+      SchemaFactory sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+      Schema schema = sf.newSchema(getClass().getResource("/xsd/person.xsd"));
+
+      Validator validator = schema.newValidator();
+      validator.validate(jaxbSource);
+
+      // Now validate Generated XML to be double Sure.
+      Source xmlStringSource = new StreamSource(new StringReader(personXml));
+      validator.validate(xmlStringSource);
+      return personXml;
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  // For JAXB.
+  @SuppressWarnings("unused")
+  private PersonDto() {
   }
 
   /**
    * Constructor for PersonDto.
-   * @param id 
-   * @param firstName 
+   * 
+   * @param id
+   * @param firstName
    * @param lastName
    * @param email
    */
-  public PersonDto(String id, String firstName, String lastName, String email) {
-    this.id = id;
+  public PersonDto(String firstName, String lastName, String email) {
     this.firstName = firstName;
     this.lastName = lastName;
     this.email = email;
   }
 
   // Getters and setters.
-  public String getId() {
-    return id;
+  public String getFirstName() {
+    return firstName;
+  }
+
+  public void setFirstName(String firstName) {
+    this.firstName = firstName;
+  }
+
+  public String getLastName() {
+    return lastName;
+  }
+
+  public void setLastName(String lastName) {
+    this.lastName = lastName;
+  }
+
+  public String getEmail() {
+    return email;
+  }
+
+  public void setEmail(String email) {
+    this.email = email;
   }
 
   public static class Builder {
-    private String id;
     private String firstName;
     private String lastName;
     private String email;
-
-    public Builder id(String id) {
-      this.id = id;
-      return this;
-    }
 
     public Builder firstName(String firstName) {
       this.firstName = firstName;
@@ -107,9 +203,9 @@ public class PersonDto implements DtoToPersistenceInterface<PersonDto, PersonEnt
       this.email = email;
       return this;
     }
-    
+
     public PersonDto build() {
-      PersonDto dto = new PersonDto(id, firstName, lastName, email);
+      PersonDto dto = new PersonDto(firstName, lastName, email);
       return dto.validate();
     }
   }
