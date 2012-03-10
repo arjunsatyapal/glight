@@ -76,7 +76,11 @@ public class TestingUtils {
   }
   
   public static String getRandomUserId() {
-    return "userId:" + getRandomLongNumberString();
+    return getRandomString();
+  }
+  
+  public static Long getRandomPersonId() {
+    return getRandomLongNumber();
   }
   
   public static String getRandomFederatedId() {

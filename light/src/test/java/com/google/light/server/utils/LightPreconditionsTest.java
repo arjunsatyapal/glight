@@ -17,15 +17,19 @@ package com.google.light.server.utils;
 
 import static com.google.light.server.utils.LightPreconditions.checkEmail;
 import static com.google.light.server.utils.LightPreconditions.checkNonEmptyList;
-import static com.google.light.server.utils.LightPreconditions.checkNotEmptyString;
+import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
+import static com.google.light.server.utils.LightPreconditions.checkNull;
 import static com.google.light.server.utils.LightPreconditions.checkPersonId;
 import static com.google.light.server.utils.LightPreconditions.checkPersonIsLoggedIn;
+import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
 import static com.google.light.testingutils.TestingUtils.getRandomEmail;
 import static com.google.light.testingutils.TestingUtils.getRandomFederatedId;
 import static com.google.light.testingutils.TestingUtils.getRandomUserId;
 import static com.google.light.testingutils.TestingUtils.getUUIDString;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
+import com.google.light.server.exception.unchecked.InvalidPersonIdException;
 
 import com.google.common.collect.Lists;
 import com.google.light.server.constants.OpenIdAuthDomain;
@@ -120,11 +124,11 @@ public class LightPreconditionsTest {
    */
   @Test
   public void test_checkNotEmptyString() {
-    checkNotEmptyString("hello");
+    checkNotBlank("hello");
 
     // Negative : string=null
     try {
-      checkNotEmptyString(null);
+      checkNotBlank(null);
       fail("should have failed.");
     } catch (IllegalArgumentException e) {
       // expected.
@@ -132,7 +136,15 @@ public class LightPreconditionsTest {
 
     // Negative : string=""
     try {
-      checkNotEmptyString("");
+      checkNotBlank("");
+      fail("should have failed.");
+    } catch (IllegalArgumentException e) {
+      // expected.
+    }
+
+    // Negative : string=""
+    try {
+      checkNotBlank("    ");
       fail("should have failed.");
     } catch (IllegalArgumentException e) {
       // expected.
@@ -147,7 +159,7 @@ public class LightPreconditionsTest {
     String uuid = getUUIDString();
     // Negative : string=null
     try {
-      checkNotEmptyString(null, uuid);
+      checkNotBlank(null, uuid);
       fail("should have failed.");
     } catch (IllegalArgumentException e) {
       // expected.
@@ -157,7 +169,7 @@ public class LightPreconditionsTest {
 
     // Negative : string=""
     try {
-      checkNotEmptyString("", uuid);
+      checkNotBlank("", uuid);
       fail("should have failed.");
     } catch (IllegalArgumentException e) {
       // expected.
@@ -170,24 +182,25 @@ public class LightPreconditionsTest {
    */
   @Test
   public void test_checkPersonId() {
-    checkPersonId("1234");
-    checkPersonId("  1   ");
-    checkPersonId("1");
-    checkPersonId(Long.toString(Long.MAX_VALUE));
-    
+    checkPersonId(1234L);
+    checkPersonId(1L);
+    checkPersonId(Long.MAX_VALUE);
+
     try {
       checkPersonId(null);
       fail("should have failed.");
-    } catch (IllegalArgumentException e) {
+    } catch (InvalidPersonIdException e) {
       // Expected
     }
 
     try {
-      checkPersonId("");
+      checkPersonId(0L);
       fail("should have failed.");
-    } catch (IllegalArgumentException e) {
+    } catch (InvalidPersonIdException e) {
       // Expected
     }
+
+    // Rest negative tests are tested as part of LightPreconditions#checkPositiveLong
   }
 
   /**
@@ -195,15 +208,17 @@ public class LightPreconditionsTest {
    */
   @Test
   public void test_checkPersonIsLoggedIn() {
-    GaeTestingUtils gae = new GaeTestingUtils(OpenIdAuthDomain.GOOGLE.get(),
-        getRandomEmail(), getRandomFederatedId(), true/*isFederated*/, getRandomUserId()/*userId*/, 
-        true/*loggedIn*/, false/*isAdmin*/);
-    
+    GaeTestingUtils gae =
+        new GaeTestingUtils(OpenIdAuthDomain.GOOGLE.get(),
+            getRandomEmail(), getRandomFederatedId(), true/* isFederated */,
+            getRandomUserId()/* userId */,
+            true/* loggedIn */, false/* isAdmin */);
+
     try {
       gae.setUp();
       checkPersonIsLoggedIn();
       gae.setLoggedIn(false);
-      
+
       try {
         checkPersonIsLoggedIn();
         fail("should have failed.");
@@ -212,6 +227,63 @@ public class LightPreconditionsTest {
       }
     } finally {
       gae.tearDown();
+    }
+  }
+
+  /**
+   * Test for {@link LightPreconditions#checkPositiveLong(Long)}
+   */
+  @Test
+  public void test_checkPositiveLong() {
+    // Positive Tests.
+    checkPositiveLong(1L);
+    checkPositiveLong(Long.MAX_VALUE);
+
+    // Negative Test : Null value.
+    try {
+      checkPositiveLong(null);
+      fail("should have failed.");
+    } catch (NullPointerException e) {
+      // Expected
+    }
+
+    // Negative Test : 0L
+    try {
+      checkPositiveLong(0L);
+      fail("should have failed.");
+    } catch (IllegalArgumentException e) {
+      // Expected
+    }
+
+    // Negative Test : -1L
+    try {
+      checkPositiveLong(-1L);
+      fail("should have failed.");
+    } catch (IllegalArgumentException e) {
+      // Expected
+    }
+
+    // Negative Test : Long.MIN_VALUE
+    try {
+      checkPositiveLong(Long.MIN_VALUE);
+      fail("should have failed.");
+    } catch (IllegalArgumentException e) {
+      // Expected
+    }
+  }
+
+  /**
+   * Test for {@link LightPreconditions#checkNull(Object)}.
+   */
+  @Test
+  public void test_checkNull() {
+    checkNull(null);
+
+    try {
+      checkNull("");
+      fail("should have failed.");
+    } catch (IllegalArgumentException e) {
+      // Expected
     }
   }
 }
