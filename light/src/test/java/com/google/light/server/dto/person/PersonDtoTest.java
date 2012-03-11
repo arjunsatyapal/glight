@@ -15,15 +15,17 @@
  */
 package com.google.light.server.dto.person;
 
+import static com.google.light.server.constants.TestResourceMappings.CREATE_PERSON;
 import static com.google.light.testingutils.TestingUtils.getRandomLongNumber;
+import static com.google.light.testingutils.TestingUtils.getResourceAsString;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
-import com.google.light.testingutils.TestingUtils;
+import com.google.light.server.utils.JsonUtils;
 
 import com.google.light.server.dto.AbstractDtoToPersistenceTest;
 import com.google.light.server.persistence.entity.person.PersonEntity;
+import com.google.light.server.utils.XmlUtils;
 import org.junit.Test;
 
 /**
@@ -49,8 +51,41 @@ public class PersonDtoTest extends AbstractDtoToPersistenceTest {
   @Test
   @Override
   public void test_constructor() {
-    // Constructor doesn't do any validation. So following should pass.
-    assertNotNull(getPersonDtoBuilder().build());
+    // No validation logic in constructor. So nothing to test here.
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  @Test
+  public void test_toJson() throws Exception {
+    String xmlString = getResourceAsString(CREATE_PERSON.getXmlResPath());
+    PersonDto createPersonDto = XmlUtils.getDto(xmlString);
+    createPersonDto.validate();
+    
+    String jsonString = createPersonDto.toJson();
+    String expectedJsonString = getResourceAsString(CREATE_PERSON.getJsonResPath());
+    
+    assertEquals(expectedJsonString, jsonString);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Test
+  @Override
+  public void test_toPersistenceEntity() {
+    PersonEntity.Builder personBuilder = new PersonEntity.Builder()
+        .firstName(firstName)
+        .lastName(lastName)
+        .email(email);
+
+    PersonDto personDto = new PersonDto(firstName, lastName, email);
+    assertEquals(personBuilder.build(), personDto.toPersistenceEntity(null));
+
+    Long value = getRandomLongNumber();
+    assertEquals(personBuilder.id(value).build(), personDto.toPersistenceEntity(value));
   }
 
   /**
@@ -101,18 +136,16 @@ public class PersonDtoTest extends AbstractDtoToPersistenceTest {
   /**
    * {@inheritDoc}
    */
-  @Test
   @Override
-  public void test_toPersistenceEntity() {
-    PersonEntity.Builder personBuilder = new PersonEntity.Builder()
-        .firstName(firstName)
-        .lastName(lastName)
-        .email(email);
-
-    PersonDto personDto = new PersonDto(firstName, lastName, email);
-    assertEquals(personBuilder.build(), personDto.toPersistenceEntity(null));
+  @Test
+  public void test_toXml() throws Exception {
+    String jsonString = getResourceAsString(CREATE_PERSON.getJsonResPath());
+    PersonDto createPersonDto = JsonUtils.getDto(jsonString, PersonDto.class);
+    createPersonDto.validate();
     
-    Long value = getRandomLongNumber();
-    assertEquals(personBuilder.id(value).build(), personDto.toPersistenceEntity(value));
+    String xmlString = createPersonDto.toXml();
+    String expectedXmlString = getResourceAsString(CREATE_PERSON.getXmlResPath());
+    
+    assertEquals(expectedXmlString, xmlString);
   }
 }

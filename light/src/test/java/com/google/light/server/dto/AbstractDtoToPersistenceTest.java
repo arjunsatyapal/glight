@@ -15,7 +15,6 @@
  */
 package com.google.light.server.dto;
 
-import com.google.light.server.dto.person.DtoToPersistenceInterface;
 import org.junit.Test;
 
 /**
@@ -28,18 +27,34 @@ public abstract class AbstractDtoToPersistenceTest {
    * Test for constructor for each entity.
    */
   @Test
-  public abstract void test_constructor();
-  
+  public abstract void test_constructor() throws Exception;
+
   /**
-   * Test for {@link DtoToPersistenceInterface#validate()}.
+   * Test for {@link DtoToPersistenceInterface#toJson()}. For testing, we will read XML from file,
+   * convert it to DTO, then convert it to JSON and then compare with a JSON stored in file.
+   * 
+   * @throws Exception
    */
   @Test
-  public abstract void test_validate();
+  public abstract void test_toJson() throws Exception;
 
   /**
    * Test for {@link DtoToPersistenceInterface#toPersistenceEntity()}
    */
   @Test
-  public abstract void test_toPersistenceEntity();
-  
+  public abstract void test_toPersistenceEntity() throws Exception;
+
+  /**
+   * Test for {@link DtoToPersistenceInterface#validate()}.
+   */
+  @Test
+  public abstract void test_validate() throws Exception;
+
+  /**
+   * Test for {@link DtoToPersistenceInterface#toXml()}. For testing, we will read JSON from file,
+   * convert it to DTO, then convert it to XML and then compare with a XML stored in file.
+   */
+  @Test
+  public abstract void test_toXml() throws Exception;
+
 }

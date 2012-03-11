@@ -18,31 +18,23 @@ package com.google.light.server.dto.person;
 import static com.google.light.server.utils.LightPreconditions.checkEmail;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
+import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
+
+import org.codehaus.jackson.map.annotate.JsonSerialize;
+
+import com.google.light.server.constants.XsdPath;
 import com.google.light.server.dto.DtoToPersistenceInterface;
 import com.google.light.server.persistence.entity.person.PersonEntity;
-import java.io.StringReader;
-import java.io.StringWriter;
-import javax.xml.XMLConstants;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Marshaller;
+import com.google.light.server.utils.JsonUtils;
+import com.google.light.server.utils.XmlUtils;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.util.JAXBSource;
-import javax.xml.transform.Source;
-import javax.xml.transform.stream.StreamSource;
-import javax.xml.validation.Schema;
-import javax.xml.validation.SchemaFactory;
-import javax.xml.validation.Validator;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
-import org.codehaus.jackson.map.AnnotationIntrospector;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.ObjectWriter;
-import org.codehaus.jackson.xc.JaxbAnnotationIntrospector;
 
 /**
  * DTO for {@link PersonEntity}.
@@ -53,7 +45,7 @@ import org.codehaus.jackson.xc.JaxbAnnotationIntrospector;
 @XmlRootElement(name = "person")
 @XmlType(name = "personType", propOrder = {"firstName", "lastName", "email" })
 @XmlAccessorType(XmlAccessType.FIELD)
-//@JsonSerialize(include = Inclusion.NON_NULL)
+@JsonSerialize(include = Inclusion.NON_NULL)
 public class PersonDto implements DtoToPersistenceInterface<PersonDto, PersonEntity> {
   @XmlElement
   private String firstName;
@@ -91,20 +83,11 @@ public class PersonDto implements DtoToPersistenceInterface<PersonDto, PersonEnt
 
   @Override
   public String toJson() {
-    ObjectMapper mapper = new ObjectMapper();
-    AnnotationIntrospector introspector = new JaxbAnnotationIntrospector();
-    // make deserializer use JAXB annotations (only)
-    mapper.getDeserializationConfig().withAnnotationIntrospector(introspector);
-    // make serializer use JAXB annotations (only)
-    mapper.getSerializationConfig().withAnnotationIntrospector(introspector);
-
-    ObjectWriter writer = mapper.writer();
-    //
-    // writerWithDefaultPrettyPrinter();
     try {
-      return writer.writeValueAsString(this);
+      
+        return JsonUtils.toJson(this);
     } catch (Exception e) {
-      // TODO(arjuns): Auto-generated catch block
+      // TODO(arjuns) : Add exception handling later.
       throw new RuntimeException(e);
     }
   }
@@ -117,25 +100,9 @@ public class PersonDto implements DtoToPersistenceInterface<PersonDto, PersonEnt
   @Override
   public String toXml() {
     try {
-      StringWriter sw = new StringWriter();
-      JAXBContext jaxbContext = JAXBContext.newInstance(PersonDto.class);
-      JAXBSource jaxbSource = new JAXBSource(jaxbContext, this);
-      Marshaller marshaller = jaxbContext.createMarshaller();
-      marshaller.marshal(this, sw);
-      String personXml = sw.toString();
-      System.out.println(personXml);
-
-      SchemaFactory sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-      Schema schema = sf.newSchema(getClass().getResource("/xsd/person.xsd"));
-
-      Validator validator = schema.newValidator();
-      validator.validate(jaxbSource);
-
-      // Now validate Generated XML to be double Sure.
-      Source xmlStringSource = new StreamSource(new StringReader(personXml));
-      validator.validate(xmlStringSource);
-      return personXml;
+      return XmlUtils.toValidXml(this, this.getClass().getResource(XsdPath.PERSON.get()));
     } catch (Exception e) {
+      // TODO(arjuns) : Add exception handling later.
       throw new RuntimeException(e);
     }
   }

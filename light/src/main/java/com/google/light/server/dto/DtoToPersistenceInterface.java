@@ -43,17 +43,17 @@ public interface DtoToPersistenceInterface<D, P> extends Serializable {
   public P toPersistenceEntity(Long id);
   
   /**
-   * Convert DTO to XML.
-   */
-  public String toXml();
-
-  /**
    * Ensure that DTO is valid. TODO(arjuns): Throw a checked exception. TODO(arjuns) : Sync with
    * Walter on refactoring. Issue : 2003.
    * 
    * @return
    */
   public D validate();
+  
+  /**
+   * Convert DTO to XML.
+   */
+  public String toXml();
 
   /**
    * {@inheritDoc}
