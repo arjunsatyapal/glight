@@ -13,9 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.server.constants;
-
-import com.google.light.server.servlets.filters.ServletFilterJson;
+package com.google.light.server.servlets.filters;
 
 import javax.servlet.Filter;
 
@@ -25,7 +23,8 @@ import javax.servlet.Filter;
  * @author Arjun Satyapal
  */
 public enum FilterPathEnum {
-  JSON(ServletFilterJson.class, "/json/*");
+  API(ServletFilter.class, "/api/*"),
+  TEST(ServletFilter.class, "/test/*");
   
   private Class<? extends Filter> clazz;
   private String urlPattern;

@@ -13,11 +13,15 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.server.constants;
+package com.google.light.server.servlets.path;
 
+import com.google.light.server.servlets.test.TestLogin;
+
+import com.google.light.server.servlets.test.TestHeaders;
+
+import com.google.light.server.exception.unchecked.httpexception.NotFoundException;
 import com.google.light.server.servlets.AbstractLightServlet;
-
-import com.google.light.server.servlets.person.PersonJsonServlet;
+import com.google.light.server.servlets.person.PersonServlet;
 
 /**
  * Enum to Map Servlets with their Paths and URL Patterns.
@@ -26,7 +30,10 @@ import com.google.light.server.servlets.person.PersonJsonServlet;
  */
 public enum ServletPathEnum {
   // TODO(arjuns): Add regex checks here.
-  PERSON(PersonJsonServlet.class, "/json/person");
+  
+  PERSON(PersonServlet.class, "/api/person"),
+  TEST_HEADER(TestHeaders.class, "/test/testheader"),
+  TEST_LOGIN(TestLogin.class, "/test/testlogin");
 
   private Class<? extends AbstractLightServlet> clazz;
   private String servletPath;
@@ -51,7 +58,7 @@ public enum ServletPathEnum {
       }
     }
 
-    throw new IllegalArgumentException("ServletPath not found for servletPath[" + servletPath
+    throw new NotFoundException("ServletPath not found for servletPath[" + servletPath
         + "].");
   }
 }

@@ -13,38 +13,50 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.server.servlets.person;
+package com.google.light.server.servlets.test;
 
-import com.google.light.server.manager.interfaces.PersonManager;
-
+import com.google.appengine.api.users.User;
+import com.google.appengine.api.users.UserService;
+import com.google.appengine.api.users.UserServiceFactory;
+import com.google.light.server.servlets.AbstractLightServlet;
+import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-
-import com.google.light.server.servlets.AbstractLightServlet;
-
 /**
- * JSON Interface for {@link PersonManager}.
+ * A simple class to help testing for Login.
+ * 
+ * TODO(arjuns) : Remove this once integration tests are stable.
  * 
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
-public class PersonJsonServlet extends AbstractLightServlet {
-
-  /** 
-   * {@inheritDoc}
-   */
+public class TestLogin extends AbstractLightServlet {
   @Override
-  protected void doDelete(HttpServletRequest request, HttpServletResponse response) {
-    // TODO(arjuns): Auto-generated method stub
-    throw new UnsupportedOperationException();
+  public void doGet(HttpServletRequest request, HttpServletResponse response) {
+    try {
+      StringBuilder builder = new StringBuilder("Hello ");
+
+      UserService userService = UserServiceFactory.getUserService();
+      User user = userService.getCurrentUser();
+      System.out.println("Logged in : " + userService.isUserLoggedIn());
+      if (user == null) {
+        builder.append("<anonymous>");
+      } else {
+        builder.append(user.getEmail());
+      }
+
+      response.getWriter().println(builder.toString());
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   /** 
    * {@inheritDoc}
    */
   @Override
-  protected void doGet(HttpServletRequest request, HttpServletResponse response) {
+  protected void doDelete(HttpServletRequest request, HttpServletResponse response) {
     // TODO(arjuns): Auto-generated method stub
     throw new UnsupportedOperationException();
   }
