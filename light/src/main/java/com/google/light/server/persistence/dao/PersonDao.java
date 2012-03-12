@@ -15,12 +15,15 @@
  */
 package com.google.light.server.persistence.dao;
 
+import java.util.logging.Logger;
+
+import com.google.light.server.dto.person.PersonDto;
+
 import com.google.common.collect.Lists;
-import com.google.light.server.exception.unchecked.IllegalKeyTypeException;
-import com.google.light.server.persistence.AbstractBasicDao;
+import com.google.inject.Inject;
+import com.google.light.server.exception.unchecked.EmailInUseException;
 import com.google.light.server.persistence.entity.person.PersonEntity;
 import com.google.light.server.utils.ObjectifyUtils;
-import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Objectify;
 import com.googlecode.objectify.ObjectifyService;
 import com.googlecode.objectify.Query;
@@ -30,24 +33,21 @@ import java.util.List;
  * 
  * @author Arjun Satyapal
  */
-public class PersonDao extends AbstractBasicDao<PersonEntity> {
+public class PersonDao extends AbstractBasicDao<PersonDto, PersonEntity, Long> {
+  private static final Logger logger = Logger.getLogger(PersonDao.class.getName());
+
+  @Inject
+  public PersonDao() {
+    super(PersonEntity.class, Long.class);
+  }
+
   static {
     ObjectifyService.register(PersonEntity.class);
   }
 
-  @Override
-  public Key<PersonEntity> getKey(String id) {
-    return new Key<PersonEntity>(PersonEntity.class, id);
-  }
-  
-  @Override
-  public Key<PersonEntity> getKey(Long id) throws IllegalKeyTypeException {
-    throw new IllegalKeyTypeException();
-  }
-
   public PersonEntity getByEmail(String email) {
     Objectify ofy = ObjectifyUtils.nonTransaction();
-    
+
     Query<PersonEntity> filter =
         ofy.query(PersonEntity.class).filter(PersonEntity.OFY_EMAIL_QUERY_STRING, email);
 
@@ -55,8 +55,41 @@ public class PersonDao extends AbstractBasicDao<PersonEntity> {
   }
 
   /**
-   * Asserts that records returned by this is <= 1.
-   * If it is < 1, then returns null.
+   * For PersonEntity, DataStore does not generate Ids. Instead UserIds returned by AppEngine are
+   * treated as Ids.
+   * 
+   * {@inheritDoc}
+   */
+  @Override
+  public PersonEntity put(Objectify txn, PersonEntity entity) {
+    PersonEntity existingEntity = this.getByEmail(entity.getEmail());
+    if (existingEntity != null) {
+      /*
+       * There is already an entity with given email, and a new entity is attempted to be persisted
+       * with same emailId.
+       */
+      if (!existingEntity.getId().equals(entity.getId()))
+        throw new EmailInUseException();
+    }
+    boolean isCreate = false;
+    if (entity.getId() == null) {
+      isCreate = false;
+    }
+      
+    PersonEntity returnEntity = super.put(txn, entity);
+    String returnMsg = "";
+    
+    if (isCreate) {
+      returnMsg = "Created PersonEntity[" + returnEntity.getId() + "].";
+    } else {
+      returnMsg = "Updated PersonEntity[" + returnEntity.getId() + "].";
+    }
+    
+    return logAndReturn(logger, returnEntity, returnMsg);
+  }
+
+  /**
+   * Asserts that records returned by this is <= 1. If it is < 1, then returns null.
    */
   private PersonEntity assertAndReturnUniqueUserEntity(String email, Query<PersonEntity> filter) {
     List<PersonEntity> tempList = Lists.newArrayList(filter.iterator());
@@ -65,11 +98,11 @@ public class PersonDao extends AbstractBasicDao<PersonEntity> {
       throw new IllegalStateException("For email=[" + email + "], found [" + tempList.size()
           + "] records.");
     }
-    
+
     if (tempList.size() == 0) {
       return null;
     }
-    
+
     return tempList.get(0);
   }
 }

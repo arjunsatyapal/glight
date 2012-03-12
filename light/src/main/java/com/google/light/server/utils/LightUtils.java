@@ -13,33 +13,31 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.server.constants;
+package com.google.light.server.utils;
 
-import com.google.light.server.servlets.filters.ServletFilterJson;
+import static com.google.common.base.Preconditions.checkNotNull;
+import java.io.IOException;
 
-import javax.servlet.Filter;
+import java.io.InputStream;
+
+import com.google.common.base.Charsets;
+
+import java.io.InputStreamReader;
+
+import com.google.common.io.CharStreams;
 
 /**
- * Enum to Map Filter Implementations with URL Patterns.
+ * General Utility methods for Light.
  * 
  * @author Arjun Satyapal
  */
-public enum FilterPathEnum {
-  JSON(ServletFilterJson.class, "/json/*");
-  
-  private Class<? extends Filter> clazz;
-  private String urlPattern;
-  
-  private FilterPathEnum(Class<? extends Filter> clazz, String urlPattern) {
-    this.clazz = clazz;
-    this.urlPattern = urlPattern;
+public class LightUtils {
+  public static String getInputStreamAsString(InputStream is) throws IOException {
+    checkNotNull(is);
+    return CharStreams.toString(new InputStreamReader(is, Charsets.UTF_8));
   }
   
-  public Class<? extends Filter> getClazz() {
-    return clazz;
-  }
-  
-  public String getUrlPattern() {
-    return urlPattern;
+  // Utility class.
+  private LightUtils() {
   }
 }

@@ -15,7 +15,7 @@
  */
 package com.google.light.server.constants;
 
-import static com.google.light.server.utils.LightPreconditions.checkNotEmptyString;
+import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
 /**
  * This enum is a wrapper for AuthDomains for Different OpenId Providers.
@@ -28,7 +28,7 @@ public enum OpenIdAuthDomain {
   private String domain;
   
   private OpenIdAuthDomain(String domain) {
-    this.domain = checkNotEmptyString(domain);
+    this.domain = checkNotBlank(domain);
   }
   
   public String get() {

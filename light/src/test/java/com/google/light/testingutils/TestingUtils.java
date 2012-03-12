@@ -58,7 +58,7 @@ public class TestingUtils {
    * @return
    */
   public static String getRandomEmail() {
-    return "email." + getRandomString() + "@" + getRandomString();
+    return "email." + getRandomLongNumberString() + "@" + getRandomLongNumberString() + ".com";
   }
 
   /**
@@ -76,7 +76,11 @@ public class TestingUtils {
   }
   
   public static String getRandomUserId() {
-    return "userId:" + getRandomLongNumberString();
+    return getRandomString();
+  }
+  
+  public static Long getRandomPersonId() {
+    return getRandomLongNumber();
   }
   
   public static String getRandomFederatedId() {

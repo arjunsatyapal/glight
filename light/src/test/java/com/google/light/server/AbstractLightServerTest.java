@@ -17,6 +17,8 @@ import static com.google.light.testingutils.TestingUtils.getRandomFederatedId;
 import static com.google.light.testingutils.TestingUtils.getRandomString;
 import static com.google.light.testingutils.TestingUtils.getRandomUserId;
 
+import com.google.light.server.guice.TestInstanceProvider;
+
 import com.google.inject.Injector;
 import com.google.light.server.constants.OpenIdAuthDomain;
 import com.google.light.server.guice.TestLightModule;
@@ -44,6 +46,7 @@ public class AbstractLightServerTest {
 
   protected Injector injector;
   protected InstanceProvider instanceProvider;
+  protected TestInstanceProvider testInstanceProvider;
   protected static GaeTestingUtils gaeTestingUtils = null;
 
   @BeforeClass
@@ -103,6 +106,8 @@ public class AbstractLightServerTest {
     }
     injector = TestLightModule.getTestInjector();
     instanceProvider = injector.getInstance(InstanceProvider.class);
+    testInstanceProvider = injector.getInstance(TestInstanceProvider.class);
+    
   }
 
   @After

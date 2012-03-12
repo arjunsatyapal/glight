@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="person" type="personType" />
+
+  <xs:complexType name="personType">
+    <xs:sequence>
+      <xs:element name="id" type="xs:long" minOccurs="0" maxOccurs="1" />
+      <xs:element name="firstName" type="xs:string" minOccurs="1" maxOccurs="1" />
+      <xs:element name="lastName" type="xs:string" minOccurs="1" maxOccurs="1" />
+      <xs:element name="email" type="xs:string" minOccurs="0" maxOccurs="1" />
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>

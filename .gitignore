@@ -1,13 +1,25 @@
 #Usee full directory paths compared to directory names.
-# Auto generated folders for Apps
-.classpath
-.project
+
+# Compilation target for MVN.
 target/
+
+# Temporary files created by VI.
 *.swp
+
+# Folders created by GWT Compiler.
 .gwt/
 gwt-unitCache/
-war/
 credentials/
 .settings/
+
+# Folder created by AppEngien Dev Server.
 appengine-generated/
+
+# Folder created during AppEngine compilation.
+war/
+
+# folder created by Eclipse.
+.project
+.classpath
 .externalToolBuilders/
+

@@ -55,13 +55,31 @@ public class ObjectifyUtils {
   }
 
   /**
+   * Rollback an Objectify transaction which is in progress.
+   */
+  public static void rollbackTransaction(Objectify txn) {
+    // If its a non-transaction, then txn.getTxn will return null.
+    if (txn.getTxn() != null) {
+      if (txn.getTxn().isActive()) {
+        // TODO(arjuns): Add requestId once available.
+        logger.info("Rolling back transaction.");
+        txn.getTxn().rollback();
+      }
+    }
+  }
+
+  /**
    * Commit an Objectify transaction which is in progress.
    */
   public static void commitTransaction(Objectify txn) {
     try {
-      txn.getTxn().commit();
+      // If its a non-transaction, then txn.getTxn will return null.
+      if (txn.getTxn() != null) {
+        txn.getTxn().commit();
+      }
     } finally {
-      if (txn.getTxn().isActive()) {
+      if (txn.getTxn() != null && txn.getTxn().isActive()) {
+        // TODO(arjuns): Add requestId once available.
         logger.severe("Rolling back.");
         txn.getTxn().rollback();
       }
@@ -86,19 +104,32 @@ public class ObjectifyUtils {
    */
   public static Objectify nonTransaction() {
     ObjectifyOpts opts =
-        getObjectifyOptions(false/* global-cache */, false/* session-cache */, 
+        getObjectifyOptions(false/* global-cache */, false/* session-cache */,
             false/* transaction */);
     return ObjectifyService.begin(opts);
   }
 
   /**
-   * Utility method to return a Objectify key.
+   * Utility method to return a Objectify key for Id of type <Long>.
    * 
    * @param clazz Entity Class.
    * @param id Id of object.
    * @return
    */
   public static <T> Key<T> getKey(Class<T> clazz, Long id) {
+    checkNotNull(id);
+
+    return new Key<T>(clazz, id);
+  }
+
+  /**
+   * Utility method to return a Objectify key for Id of type <String>.
+   * 
+   * @param clazz Entity Class.
+   * @param id Id of object.
+   * @return
+   */
+  public static <T> Key<T> getKey(Class<T> clazz, String id) {
     checkNotNull(id);
 
     return new Key<T>(clazz, id);

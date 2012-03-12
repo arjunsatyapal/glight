@@ -17,7 +17,7 @@ package com.google.light.server.utils;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.constants.OpenIdAuthDomain.getAuthDomainByValue;
-import static com.google.light.server.utils.LightPreconditions.checkNotEmptyString;
+import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
 import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
@@ -37,7 +37,7 @@ public class GaeUtils {
    * @return
    */
   public static OpenIdAuthDomain getGaeAuthDomain() {
-    return getAuthDomainByValue(checkNotEmptyString(getUser().getAuthDomain()));
+    return getAuthDomainByValue(checkNotBlank(getUser().getAuthDomain()));
   }
 
   /**
@@ -47,7 +47,7 @@ public class GaeUtils {
    * @return
    */
   public static String getGaeUserEmail() {
-    return checkNotEmptyString(getUser().getEmail());
+    return checkNotBlank(getUser().getEmail());
   }
   
   /**
@@ -57,7 +57,7 @@ public class GaeUtils {
    * @return
    */
   public static String getFederatedIdentity() {
-    return checkNotEmptyString(getUser().getFederatedIdentity());
+    return checkNotBlank(getUser().getFederatedIdentity());
   }
   
   
@@ -86,7 +86,7 @@ public class GaeUtils {
    * @return
    */
   public static String getGaeUserId() {
-    return checkNotEmptyString(getUser().getUserId());
+    return checkNotBlank(getUser().getUserId());
   }
 
   /**
