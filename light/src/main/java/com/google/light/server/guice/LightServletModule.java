@@ -16,10 +16,9 @@
 package com.google.light.server.guice;
 
 
-import com.google.light.server.servlets.filters.FilterPathEnum;
-
 import com.google.inject.Scopes;
 import com.google.inject.servlet.ServletModule;
+import com.google.light.server.servlets.filters.FilterPathEnum;
 import com.google.light.server.servlets.path.ServletPathEnum;
 
 /**
@@ -56,5 +55,6 @@ class LightServletModule extends ServletModule {
   private void initServlet(ServletPathEnum servletPath) {
     bind(servletPath.getClazz()).in(Scopes.SINGLETON);
     serve(servletPath.get()).with(servletPath.getClazz());
+    serve(servletPath.getRoot()).with(servletPath.getClazz());
   }
 }

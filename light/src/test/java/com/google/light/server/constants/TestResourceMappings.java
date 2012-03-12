@@ -23,18 +23,35 @@ import com.google.light.server.utils.LightPreconditions;
  * @author Arjun Satyapal
  */
 public enum TestResourceMappings {
-  CREATE_PERSON("/person/json/create_person.json", "/person/xml/create_person.xml");
-  
+  CREATE_PERSON("/person/json/create_person_request.json",
+                "/person/json/create_person_response.json",
+                "/person/xml/create_person_request.xml",
+                "/person/xml/create_person_response.xml");
+
+  private String jsonReqPath;
   private String jsonResPath;
+
+  private String xmlReqPath;
   private String xmlResPath;
-  
-  private TestResourceMappings(String jsonResPath, String xmlResPath) {
+
+  private TestResourceMappings(String jsonReqPath, String jsonResPath,
+      String xmlReqPath, String xmlResPath) {
+    this.jsonReqPath = LightPreconditions.checkNotBlank(jsonReqPath);
     this.jsonResPath = LightPreconditions.checkNotBlank(jsonResPath);
+    this.xmlReqPath = LightPreconditions.checkNotBlank(xmlReqPath);
     this.xmlResPath = LightPreconditions.checkNotBlank(xmlResPath);
+  }
+
+  public String getJsonReqPath() {
+    return jsonReqPath;
   }
 
   public String getJsonResPath() {
     return jsonResPath;
+  }
+
+  public String getXmlReqPath() {
+    return xmlReqPath;
   }
 
   public String getXmlResPath() {

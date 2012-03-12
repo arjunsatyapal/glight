@@ -15,11 +15,14 @@
  */
 package com.google.light.server.servlets.test;
 
+import static com.google.light.server.utils.LightPreconditions.checkEmail;
+
 import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.light.server.servlets.AbstractLightServlet;
 import java.io.IOException;
+import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -32,6 +35,8 @@ import javax.servlet.http.HttpServletResponse;
  */
 @SuppressWarnings("serial")
 public class TestLogin extends AbstractLightServlet {
+  private static final Logger logger = Logger.getLogger(TestLogin.class.getName());
+  
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) {
     try {
@@ -39,10 +44,13 @@ public class TestLogin extends AbstractLightServlet {
 
       UserService userService = UserServiceFactory.getUserService();
       User user = userService.getCurrentUser();
-      System.out.println("Logged in : " + userService.isUserLoggedIn());
+      logger.info("Logged in : " + userService.isUserLoggedIn());
       if (user == null) {
+        logger.info("user == null.");
         builder.append("<anonymous>");
       } else {
+        logger.info("Email = " + user.getEmail());
+        checkEmail(user.getEmail());
         builder.append(user.getEmail());
       }
 
@@ -57,8 +65,7 @@ public class TestLogin extends AbstractLightServlet {
    */
   @Override
   protected void doDelete(HttpServletRequest request, HttpServletResponse response) {
-    // TODO(arjuns): Auto-generated method stub
-    throw new UnsupportedOperationException();
+    doGet(request, response);
   }
 
   /** 
@@ -66,8 +73,7 @@ public class TestLogin extends AbstractLightServlet {
    */
   @Override
   protected long getLastModified(HttpServletRequest request) {
-    // TODO(arjuns): Auto-generated method stub
-    throw new UnsupportedOperationException();
+    return -1;
   }
 
   /** 
@@ -75,8 +81,7 @@ public class TestLogin extends AbstractLightServlet {
    */
   @Override
   protected void doHead(HttpServletRequest request, HttpServletResponse response) {
-    // TODO(arjuns): Auto-generated method stub
-    throw new UnsupportedOperationException();
+    doGet(request, response);
   }
 
   /** 
@@ -84,8 +89,7 @@ public class TestLogin extends AbstractLightServlet {
    */
   @Override
   protected void doOptions(HttpServletRequest request, HttpServletResponse response) {
-    // TODO(arjuns): Auto-generated method stub
-    throw new UnsupportedOperationException();
+    doGet(request, response);
   }
 
   /** 
@@ -93,8 +97,7 @@ public class TestLogin extends AbstractLightServlet {
    */
   @Override
   protected void doPost(HttpServletRequest request, HttpServletResponse response) {
-    // TODO(arjuns): Auto-generated method stub
-    throw new UnsupportedOperationException();
+    doGet(request, response);
   }
 
   /** 
@@ -102,7 +105,6 @@ public class TestLogin extends AbstractLightServlet {
    */
   @Override
   protected void doPut(HttpServletRequest request, HttpServletResponse response) {
-    // TODO(arjuns): Auto-generated method stub
-    throw new UnsupportedOperationException();
+    doGet(request, response);
   }
 }

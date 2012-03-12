@@ -17,10 +17,9 @@ import static com.google.light.testingutils.TestingUtils.getRandomFederatedId;
 import static com.google.light.testingutils.TestingUtils.getRandomString;
 import static com.google.light.testingutils.TestingUtils.getRandomUserId;
 
-import com.google.light.server.guice.TestInstanceProvider;
-
 import com.google.inject.Injector;
 import com.google.light.server.constants.OpenIdAuthDomain;
+import com.google.light.server.guice.TestInstanceProvider;
 import com.google.light.server.guice.TestLightModule;
 import com.google.light.server.guice.providers.InstanceProvider;
 import com.google.light.testingutils.GaeTestingUtils;

@@ -15,6 +15,12 @@
  */
 package com.google.light.testingutils;
 
+import java.io.IOException;
+
+import java.io.InputStream;
+
+import com.google.light.server.utils.LightUtils;
+
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -74,20 +80,26 @@ public class TestingUtils {
     String returnString = Long.toString(getRandomLongNumber());
     return returnString;
   }
-  
+
   public static String getRandomUserId() {
     return getRandomString();
   }
-  
+
   public static Long getRandomPersonId() {
     return getRandomLongNumber();
   }
-  
+
   public static String getRandomFederatedId() {
     return "federatedId:" + getRandomString();
   }
-  
+
   public static String getRandomFederatedAuthority() {
     return "federatedAuthority:" + getRandomString();
+  }
+
+  public static String getResourceAsString(String resourcePath)
+      throws IOException {
+    InputStream is = System.class.getResourceAsStream(resourcePath);
+    return LightUtils.getInputStreamAsString(is);
   }
 }

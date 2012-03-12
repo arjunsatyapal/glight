@@ -23,7 +23,6 @@ import com.google.inject.Inject;
 import com.google.light.server.exception.unchecked.IdShouldNotBeSet;
 import com.google.light.server.manager.interfaces.PersonManager;
 import com.google.light.server.persistence.dao.PersonDao;
-import com.google.light.server.persistence.entity.person.IdProviderDetail;
 import com.google.light.server.persistence.entity.person.PersonEntity;
 import com.google.light.server.utils.GaeUtils;
 import com.google.light.server.utils.LightPreconditions;
@@ -56,11 +55,12 @@ public class PersonManagerImpl implements PersonManager {
     // TODO(arjuns) : Add test for this.
     checkArgument(entity.getIdProviderDetails() == null);
 
-    IdProviderDetail currIdProviderDetail = new IdProviderDetail(
-        GaeUtils.getGaeAuthDomain(),
-        GaeUtils.getGaeUserEmail(),
-        GaeUtils.getFederatedIdentity());
-    entity.addIdProviderDetail(currIdProviderDetail);
+    // TODO(arjuns) : Fix this with Federated Login.
+//    IdProviderDetail currIdProviderDetail = new IdProviderDetail(
+//        GaeUtils.getGaeAuthDomain(),
+//        GaeUtils.getGaeUserEmail(),
+//        GaeUtils.getFederatedIdentity());
+//    entity.addIdProviderDetail(currIdProviderDetail);
 
     checkArgument(entity.getEmail() == null);
     entity.setEmail(GaeUtils.getGaeUserEmail());

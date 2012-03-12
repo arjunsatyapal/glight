@@ -17,13 +17,13 @@ package com.google.light.server.servlets;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import javax.servlet.http.HttpServletResponse;
-
-import javax.servlet.http.HttpServletRequest;
-
 import com.google.inject.Inject;
+
 import com.google.inject.Injector;
+import com.google.light.server.guice.providers.InstanceProvider;
 import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Base servlets for all Light Servlets. Essentially it forces all the derived servlets
@@ -37,8 +37,15 @@ public abstract class AbstractLightServlet extends HttpServlet {
   @Inject
   private Injector injector;
   
+  @Inject
+  private InstanceProvider instanceProvider;
+
   protected Injector getInjector() {
     return checkNotNull(injector);
+  }
+  
+  protected InstanceProvider getInstanceProvider() {
+    return instanceProvider;
   }
 
   /**

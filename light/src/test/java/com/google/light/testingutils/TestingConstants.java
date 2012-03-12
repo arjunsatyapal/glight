@@ -13,28 +13,15 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.server.utils;
+package com.google.light.testingutils;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.base.Charsets;
-import com.google.common.io.CharStreams;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import com.google.api.client.http.GenericUrl;
 
 /**
- * General Utility methods for Light.
+ * Some constants for Testing Purposes.
  * 
  * @author Arjun Satyapal
  */
-public class LightUtils {
-  public static String getInputStreamAsString(InputStream is) throws IOException {
-    checkNotNull(is);
-    return CharStreams.toString(new InputStreamReader(is, Charsets.UTF_8));
-  }
-  
-  // Utility class.
-  private LightUtils() {
-  }
+public class TestingConstants {
+  public static final GenericUrl devServerUrl =  new GenericUrl("http://localhost:8080/_ah/login");
 }

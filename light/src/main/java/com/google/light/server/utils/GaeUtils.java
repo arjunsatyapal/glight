@@ -37,7 +37,7 @@ public class GaeUtils {
    * @return
    */
   public static OpenIdAuthDomain getGaeAuthDomain() {
-    return getAuthDomainByValue(checkNotBlank(getUser().getAuthDomain()));
+    return getAuthDomainByValue(checkNotBlank(getUser().getAuthDomain(), "authDomain is blank."));
   }
 
   /**
@@ -47,7 +47,7 @@ public class GaeUtils {
    * @return
    */
   public static String getGaeUserEmail() {
-    return checkNotBlank(getUser().getEmail());
+    return checkNotBlank(getUser().getEmail(), "userEmail is blank.");
   }
   
   /**
@@ -57,7 +57,9 @@ public class GaeUtils {
    * @return
    */
   public static String getFederatedIdentity() {
-    return checkNotBlank(getUser().getFederatedIdentity());
+    // TODO(arjuns) : Fix this with Federated Login.
+    return null;
+//    return checkNotBlank(getUser().getFederatedIdentity(), "federatedIdentity is blank.");
   }
   
   
@@ -67,7 +69,7 @@ public class GaeUtils {
    * @return
    */
   public static UserService getUserService() {
-    return checkNotNull(UserServiceFactory.getUserService());
+    return checkNotNull(UserServiceFactory.getUserService(), "userService is null.");
   }
 
   /**
@@ -86,7 +88,7 @@ public class GaeUtils {
    * @return
    */
   public static String getGaeUserId() {
-    return checkNotBlank(getUser().getUserId());
+    return checkNotBlank(getUser().getUserId(), "userId is blank.");
   }
 
   /**

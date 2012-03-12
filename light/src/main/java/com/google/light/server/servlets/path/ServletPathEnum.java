@@ -15,40 +15,52 @@
  */
 package com.google.light.server.servlets.path;
 
-import com.google.light.server.servlets.test.TestLogin;
-
-import com.google.light.server.servlets.test.TestHeaders;
+import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
 import com.google.light.server.exception.unchecked.httpexception.NotFoundException;
-import com.google.light.server.servlets.AbstractLightServlet;
 import com.google.light.server.servlets.person.PersonServlet;
+import com.google.light.server.servlets.test.TestHeaders;
+import com.google.light.server.servlets.test.TestLogin;
+import javax.servlet.http.HttpServlet;
 
 /**
  * Enum to Map Servlets with their Paths and URL Patterns.
+ * 
+ *TODO(arjuns) : Add tests for this.
  * 
  * @author Arjun Satyapal
  */
 public enum ServletPathEnum {
   // TODO(arjuns): Add regex checks here.
-  
-  PERSON(PersonServlet.class, "/api/person"),
-  TEST_HEADER(TestHeaders.class, "/test/testheader"),
-  TEST_LOGIN(TestLogin.class, "/test/testlogin");
+  // TODO(arjuns) : Find a way to end URLs without /.
+  PERSON(PersonServlet.class, "/api/person", "/api/person/"),
 
-  private Class<? extends AbstractLightServlet> clazz;
+  // Some test servlets.
+  TEST_HEADER(TestHeaders.class, "/test/testheader", "/test/testheader/"),
+  TEST_LOGIN(TestLogin.class, "/test/testlogin", "/test/testlogin/");
+
+  private Class<? extends HttpServlet> clazz;
   private String servletPath;
+  // Path when this servlet acts as root for others.
+  private String servletRoot;
 
-  private ServletPathEnum(Class<? extends AbstractLightServlet> clazz, String servletPath) {
+  private ServletPathEnum(Class<? extends HttpServlet> clazz, String servletPath,
+      String servletRoot) {
     this.clazz = clazz;
-    this.servletPath = servletPath;
+    this.servletPath = checkNotBlank(servletPath);
+    this.servletRoot = checkNotBlank(servletRoot);
   }
 
-  public Class<? extends AbstractLightServlet> getClazz() {
+  public Class<? extends HttpServlet> getClazz() {
     return clazz;
   }
 
   public String get() {
     return servletPath;
+  }
+  
+  public String getRoot() {
+    return servletRoot;
   }
 
   public static ServletPathEnum getServletPathEnum(String servletPath) {

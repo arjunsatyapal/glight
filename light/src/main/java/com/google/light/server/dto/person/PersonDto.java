@@ -18,6 +18,8 @@ package com.google.light.server.dto.person;
 import static com.google.light.server.utils.LightPreconditions.checkEmail;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
+import org.codehaus.jackson.annotate.JsonCreator;
+
 import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
 
 import org.codehaus.jackson.map.annotate.JsonSerialize;
@@ -108,6 +110,7 @@ public class PersonDto implements DtoToPersistenceInterface<PersonDto, PersonEnt
   }
 
   // For JAXB.
+  @JsonCreator
   @SuppressWarnings("unused")
   private PersonDto() {
   }

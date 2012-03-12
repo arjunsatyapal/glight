@@ -48,7 +48,9 @@ public class OpenIdAuthDomainTest implements EnumTestInterface {
   @Test
   public void test_getAuthDomainByValue() {
     Map<String, OpenIdAuthDomain> map = ImmutableMap.<String, OpenIdAuthDomain> builder()
-        .put("https://www.google.com/accounts/o8/ud", OpenIdAuthDomain.GOOGLE)
+        // TODO(arjuns) : Fix this with OAuth login.
+//        .put("https://www.google.com/accounts/o8/ud", OpenIdAuthDomain.GOOGLE)
+        .put("gmail.com", OpenIdAuthDomain.GOOGLE)
         .build();
 
     for (String curr : map.keySet()) {

@@ -24,6 +24,8 @@ import javax.servlet.Filter;
  */
 public enum FilterPathEnum {
   API(ServletFilter.class, "/api/*"),
+  
+  // TODO(arjuns) : Add a separate filter for test.
   TEST(ServletFilter.class, "/test/*");
   
   private Class<? extends Filter> clazz;

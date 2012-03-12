@@ -20,10 +20,13 @@ import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 /**
  * This enum is a wrapper for AuthDomains for Different OpenId Providers.
  * 
+ * TODO(arjuns) : Try with some other things. Eventually this class may have to go
+ * if it keeps on varying for multiple things.
+ * 
  * @author Arjun Satyapal
  */
 public enum OpenIdAuthDomain {
-  GOOGLE("https://www.google.com/accounts/o8/ud");
+  GOOGLE("gmail.com");
   
   private String domain;
   

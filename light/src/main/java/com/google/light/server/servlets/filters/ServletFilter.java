@@ -15,7 +15,6 @@
  */
 package com.google.light.server.servlets.filters;
 
-
 import javax.servlet.http.HttpServletResponse;
 
 import javax.servlet.http.HttpServletRequest;
@@ -31,8 +30,8 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
 /**
- * Servlet Filter for All Light Requests.
- * See {@link FilterPathEnum} to see what all URLs are covered by this Filter.
+ * Servlet Filter for All Light Requests. See {@link FilterPathEnum} to see what all URLs are
+ * covered by this Filter.
  * 
  * @author Arjun Satyapal
  */
