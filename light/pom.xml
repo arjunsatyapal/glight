@@ -38,7 +38,15 @@
       <id>codehaus-snapshots</id>
       <url>http://snapshots.repository.codehaus.org</url>
     </repository>
+
+    <!-- For non-mavenized jars and plugins -->
+    <repository>
+      <id>non-mavenized-jars</id>
+      <name>Arjun Maven Repository</name>
+      <url>http://arjunsatyapal-maven.googlecode.com/svn/trunk/repository</url>
+    </repository>
   </repositories>
+  
   <pluginRepositories>
     <pluginRepository>
       <id>jstd-maven-plugin google code repo</id>
