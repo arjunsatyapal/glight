@@ -29,6 +29,10 @@
       <id>jstd-maven-plugin google code repo</id>
       <url>http://jstd-maven-plugin.googlecode.com/svn/maven2</url>
     </pluginRepository>
+    <pluginRepository>
+      <id>maven-copy-plugin repository</id>
+      <url>http://evgeny-goldin.org/artifactory/repo</url>
+    </pluginRepository>
   </pluginRepositories>
 
   <dependencies>
@@ -376,6 +380,49 @@
   </properties>
 
   <profiles>
+
+    <!-- Download Dojo Toolkit and unpack it -->
+    <profile>
+      <id>dojo-download</id>
+      <activation>
+        <file>
+          <missing>src/main/webapp/js/external/djk</missing>
+        </file>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>com.goldin.plugins</groupId>
+            <artifactId>maven-copy-plugin</artifactId>
+            <version>0.2.3.8-beta-5</version>
+            <executions>
+              <execution>
+                <id>dojo-unpack</id>
+                <phase>process-resources</phase>
+                <goals>
+                  <goal>copy</goal>
+                </goals>
+                <configuration>
+                  <resources>
+                    <resource>
+                      <targetPath>target/tmp-djk</targetPath>
+                      <file>http://download.dojotoolkit.org/release-1.7.2/dojo-release-1.7.2-src.zip</file>
+                      <unpack>true</unpack>
+                    </resource>
+                    <resource>
+                      <targetPath>src/main/webapp/js/external/djk</targetPath>
+                      <directory>target/tmp-djk/dojo-release-1.7.2-src</directory>
+                      <move>true</move>
+                      <preservePath>true</preservePath>
+                    </resource>
+                  </resources>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
 
     <!-- Jasmine profile (use it when not running JSTestDriver) -->
     <profile>
