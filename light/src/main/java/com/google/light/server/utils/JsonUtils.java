@@ -30,12 +30,14 @@ import org.codehaus.jackson.xc.JaxbAnnotationIntrospector;
 /**
  * Utility class for Json.
  * 
+ * D : DTO for this Json.
+ * 
  * TODO(arjuns) : Add test for this.
  * 
  * @author Arjun Satyapal
  */
 public class JsonUtils {
-  public static <T> T getDto(String jsonString, Class<T> dtoClass) throws JsonParseException,
+  public static <D> D getDto(String jsonString, Class<D> dtoClass) throws JsonParseException,
       JsonMappingException, IOException {
     ObjectMapper mapper = new ObjectMapper();
     AnnotationIntrospector introspector = new JaxbAnnotationIntrospector();

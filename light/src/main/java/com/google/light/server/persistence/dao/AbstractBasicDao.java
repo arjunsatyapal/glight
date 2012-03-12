@@ -24,7 +24,7 @@ import com.google.light.server.persistence.PersistenceToDtoInterface;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.light.server.exception.unchecked.IllegalKeyTypeException;
-import com.google.light.server.exception.unchecked.ObjectifyTransactionShouldBeRunning;
+import com.google.light.server.exception.unchecked.ObjectifyTxnShouldBeRunningException;
 import com.google.light.server.utils.ObjectifyUtils;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Objectify;
@@ -156,14 +156,14 @@ public abstract class AbstractBasicDao<D, P extends PersistenceToDtoInterface<P,
    * @param ofy
    * @param key
    * @return
-   * @throws ObjectifyTransactionShouldBeRunning 
+   * @throws ObjectifyTxnShouldBeRunningException 
    */
   public P get(Objectify ofy, Key<P> key) {
     if (ofy == null) {
       ofy = ObjectifyUtils.nonTransaction();
     } else {
       if (!ofy.getTxn().isActive()) {
-        throw new ObjectifyTransactionShouldBeRunning();
+        throw new ObjectifyTxnShouldBeRunningException();
       }
     }
 

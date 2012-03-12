@@ -22,7 +22,8 @@ import java.io.Serializable;
  * DTO : Data Transfer Object which will be converted to JSON/XML depending on API. P : Persistence
  * Entity.
  * 
- * D : DTO P : Persistence Entity.
+ * D : DTO.<br>
+ * P : Persistence Entity.
  * 
  * TODO(arjuns): Refactor this into DtoInterface, and DtoToPersistence interface.
  * 
@@ -41,7 +42,7 @@ public interface DtoToPersistenceInterface<D, P> extends Serializable {
    * @return
    */
   public P toPersistenceEntity(Long id);
-  
+
   /**
    * Ensure that DTO is valid. TODO(arjuns): Throw a checked exception. TODO(arjuns) : Sync with
    * Walter on refactoring. Issue : 2003.
@@ -49,7 +50,7 @@ public interface DtoToPersistenceInterface<D, P> extends Serializable {
    * @return
    */
   public D validate();
-  
+
   /**
    * Convert DTO to XML.
    */

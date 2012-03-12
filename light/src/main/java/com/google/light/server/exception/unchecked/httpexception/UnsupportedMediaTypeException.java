@@ -18,7 +18,8 @@ package com.google.light.server.exception.unchecked.httpexception;
 import com.google.light.server.constants.HttpStatusCodesEnum;
 
 /**
- * Exceptions for covering HTTP Codes.
+ * Exceptions thrown if Server receives a request with Content-Type set to a value which is
+ * not unsupported.
  * 
  * @author Arjun Satyapal
  */

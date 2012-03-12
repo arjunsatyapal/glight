@@ -80,7 +80,6 @@ public enum HttpStatusCodesEnum {
   private HttpStatusCategoryEnum category;
   
   private HttpStatusCodesEnum(int code, HttpStatusCategoryEnum category) {
-    checkArgument(code > 0 && code < 1000);
     this.statusCode = code;
     this.category = checkNotNull(category);
   }

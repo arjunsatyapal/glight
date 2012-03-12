@@ -21,11 +21,11 @@ package com.google.light.server.exception.unchecked;
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
-public class ObjectifyTransactionShouldBeRunning extends LightRuntimeException {
+public class ObjectifyTxnShouldBeRunningException extends LightRuntimeException {
   /**
    * {@inheritDoc}
    */
-  public ObjectifyTransactionShouldBeRunning() {
+  public ObjectifyTxnShouldBeRunningException() {
       super();
   }
 
@@ -33,21 +33,21 @@ public class ObjectifyTransactionShouldBeRunning extends LightRuntimeException {
    * {@inheritDoc}
    * @param message
    */
-  public ObjectifyTransactionShouldBeRunning(String message) {
+  public ObjectifyTxnShouldBeRunningException(String message) {
       super(message);
   }
 
   /**
    * {@inheritDoc}
    */
-  public ObjectifyTransactionShouldBeRunning(String message, Throwable cause) {
+  public ObjectifyTxnShouldBeRunningException(String message, Throwable cause) {
       super(message, cause);
   }
 
   /**
    * {@inheritDoc}
    */
-  public ObjectifyTransactionShouldBeRunning(Throwable cause) {
+  public ObjectifyTxnShouldBeRunningException(Throwable cause) {
       super(cause);
   }
 }

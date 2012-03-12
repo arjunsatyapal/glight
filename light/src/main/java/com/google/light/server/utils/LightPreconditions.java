@@ -124,14 +124,6 @@ public class LightPreconditions {
     }
   }
 
-  /**
-   * Ensures that the User is logged in.
-   */
-  public static void checkPersonLoggedIn() {
-    
-  }
-  
-  
   // Utility class.
   private LightPreconditions() {
   }
