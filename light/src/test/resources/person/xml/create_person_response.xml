@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<person>
+    <firstName>first name</firstName>
+    <lastName>last name</lastName>
+    <email>unit-test@myopenedu.com</email>
+</person>

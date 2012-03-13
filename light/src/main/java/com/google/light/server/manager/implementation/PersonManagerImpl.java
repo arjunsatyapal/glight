@@ -16,19 +16,16 @@
 package com.google.light.server.manager.implementation;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.light.server.utils.GaeUtils.getGaeUserId;
 import static com.google.light.server.utils.LightPreconditions.checkPersonId;
 
 import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.light.server.exception.unchecked.IdShouldNotBeSet;
-import com.google.light.server.exception.unchecked.PersonLoginRequiredException;
 import com.google.light.server.manager.interfaces.PersonManager;
 import com.google.light.server.persistence.dao.PersonDao;
-import com.google.light.server.persistence.entity.person.IdProviderDetail;
 import com.google.light.server.persistence.entity.person.PersonEntity;
 import com.google.light.server.utils.GaeUtils;
+import com.google.light.server.utils.LightPreconditions;
 
 /**
  * Implementation class for {@link PersonManager}
@@ -40,9 +37,7 @@ public class PersonManagerImpl implements PersonManager {
 
   @Inject
   public PersonManagerImpl(PersonDao personDao) {
-    if (!GaeUtils.isUserLoggedIn()) {
-      throw new PersonLoginRequiredException();
-    }
+    LightPreconditions.checkPersonIsLoggedIn();
     this.personDao = Preconditions.checkNotNull(personDao);
   }
 
@@ -53,27 +48,28 @@ public class PersonManagerImpl implements PersonManager {
   public PersonEntity createPerson(PersonEntity entity) {
     // We don't trust client to provide PersonId at time of Creation. So it has to be set
     // on the server side.
-    if (!Strings.isNullOrEmpty(entity.getId())) {
+    if (entity.getId() != null) {
       throw new IdShouldNotBeSet();
-    } else {
-      entity.setId(getGaeUserId());
     }
 
     // TODO(arjuns) : Add test for this.
     checkArgument(entity.getIdProviderDetails() == null);
 
-    IdProviderDetail currIdProviderDetail = new IdProviderDetail(
-        GaeUtils.getGaeAuthDomain(),
-        GaeUtils.getGaeUserEmail(),
-        GaeUtils.getFederatedIdentity());
-    entity.addIdProviderDetail(currIdProviderDetail);
+    // TODO(arjuns) : Fix this with Federated Login.
+//    IdProviderDetail currIdProviderDetail = new IdProviderDetail(
+//        GaeUtils.getGaeAuthDomain(),
+//        GaeUtils.getGaeUserEmail(),
+//        GaeUtils.getFederatedIdentity());
+//    entity.addIdProviderDetail(currIdProviderDetail);
 
     checkArgument(entity.getEmail() == null);
     entity.setEmail(GaeUtils.getGaeUserEmail());
     
     // This is a heavy operation, so perform this validation just before persisting.
-    if (getPersonByEmail(entity.getEmail()) != null) {
-      return getPerson(GaeUtils.getGaeUserId());
+    PersonEntity personByEmail = getPersonByEmail(entity.getEmail());
+    
+    if (personByEmail != null) {
+      return personByEmail;
     }
 
     return personDao.put(entity);
@@ -92,7 +88,7 @@ public class PersonManagerImpl implements PersonManager {
    * {@inheritDoc}
    */
   @Override
-  public PersonEntity getPerson(String id) {
+  public PersonEntity getPerson(Long id) {
     return personDao.get(checkPersonId(id));
   }
 
@@ -101,7 +97,6 @@ public class PersonManagerImpl implements PersonManager {
    */
   @Override
   public PersonEntity getPersonByEmail(String email) {
-    // TODO(arjuns) : Add test for this.
     return personDao.getByEmail(email);
   }
 

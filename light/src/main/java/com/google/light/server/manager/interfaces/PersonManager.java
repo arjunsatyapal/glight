@@ -34,7 +34,7 @@ public interface PersonManager {
    * @return
    * @throws IllegalKeyTypeException
    */
-  public PersonEntity getPerson(String id);
+  public PersonEntity getPerson(Long id);
 
   /**
    * Get details of an existing Person by Email.

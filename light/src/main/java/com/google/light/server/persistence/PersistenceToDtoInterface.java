@@ -18,11 +18,26 @@ package com.google.light.server.persistence;
 import java.io.Serializable;
 
 /**
- * Light POJO which needs to be converted to and from DTO needs to implement this Interface.
- * D : DTO : Data Transfer Object which will be converted to JSON/XML depending on API.
- * P : Persistence Entity.
+ * Light POJO which needs to be converted to and from DTO needs to implement this Interface. D : DTO
+ * : Data Transfer Object which will be converted to JSON/XML depending on API. P : Persistence
+ * Entity.
+ * 
  * @author Arjun Satyapal
  */
 public interface PersistenceToDtoInterface<P, D> extends Serializable {
+  /**
+   * Convert Persistence entity to corresponding DTO.
+   * 
+   * @return
+   */
   public D toDto();
+
+  @Override
+  public boolean equals(Object obj);
+
+  @Override
+  public int hashCode();
+
+  @Override
+  public String toString();
 }

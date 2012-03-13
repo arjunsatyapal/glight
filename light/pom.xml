@@ -14,16 +14,39 @@
   <name>${gaeApplicationName}</name>
 
   <repositories>
+    <!--
+      Objectify Repository.
+    -->
     <repository>
       <id>objectify-appengine</id>
       <name>Objectify Maven Repository</name>
       <url>http://objectify-appengine.googlecode.com/svn/maven</url>
     </repository>
+
+    <!--
+      JSTestDriver Repository.
+    -->
     <repository>
       <id>jstd-maven-plugin google code repo</id>
       <url>http://jstd-maven-plugin.googlecode.com/svn/maven2</url>
     </repository>
+
+    <!--
+      Jackson Repository.
+    -->
+    <repository>
+      <id>codehaus-snapshots</id>
+      <url>http://snapshots.repository.codehaus.org</url>
+    </repository>
+
+    <!-- For non-mavenized jars and plugins -->
+    <repository>
+      <id>non-mavenized-jars</id>
+      <name>Arjun Maven Repository</name>
+      <url>http://arjunsatyapal-maven.googlecode.com/svn/trunk/repository</url>
+    </repository>
   </repositories>
+  
   <pluginRepositories>
     <pluginRepository>
       <id>jstd-maven-plugin google code repo</id>
@@ -95,6 +118,34 @@
       <scope>test</scope>
     </dependency>
 
+    <!-- Apache Commons Dependencies : -->
+    <dependency>
+      <groupId>org.apache.directory.studio</groupId>
+      <artifactId>org.apache.commons.lang</artifactId>
+      <version>2.6</version>
+    </dependency>
+
+    <dependency>
+      <groupId>commons-validator</groupId>
+      <artifactId>commons-validator</artifactId>
+      <version>1.4.0</version>
+    </dependency>
+
+    <!--
+      Google API Dependency :
+    -->
+    <dependency>
+      <groupId>com.google.http-client</groupId>
+      <artifactId>google-http-client</artifactId>
+      <version>1.6.0-beta</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.api-client</groupId>
+      <artifactId>google-api-client</artifactId>
+      <version>1.6.0-beta</version>
+    </dependency>
+
     <!--
       Guava Dependency :
       TODO(arjuns) : Some of the library depend on r09. So not using r11. Update this with that culprit.
@@ -121,12 +172,37 @@
     </dependency>
 
     <!--
+      JAXB Dependencies :
+      Used for converting DTO to Json and XML.
+    -->
+    <dependency>
+      <groupId>com.sun.xml.bind</groupId>
+      <artifactId>jaxb-impl</artifactId>
+      <version>2.2.5</version>
+    </dependency>
+
+    <!--
       Joda Time Dependency :
     -->
     <dependency>
       <groupId>joda-time</groupId>
       <artifactId>joda-time</artifactId>
       <version>2.0</version>
+    </dependency>
+
+    <!--
+      Json Dependency :
+    -->
+    <dependency>
+      <groupId>org.codehaus.jackson</groupId>
+      <artifactId>jackson-mapper-asl</artifactId>
+      <version>1.9.5</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.codehaus.jackson</groupId>
+      <artifactId>jackson-xc</artifactId>
+      <version>1.9.0</version>
     </dependency>
 
     <!--
@@ -163,7 +239,7 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.5</version>
+      <version>4.10</version>
       <scope>test</scope>
     </dependency>
     <!--
@@ -227,6 +303,47 @@
         </configuration>
       </plugin>
 
+      <!-- Maven : For running tests in parallel. -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.12</version>
+        <configuration>
+          <parallel>methods</parallel>
+          <threadCount>10</threadCount>
+        </configuration>
+        <dependencies>
+          <dependency>
+            <groupId>org.apache.maven.surefire</groupId>
+            <artifactId>surefire-junit47</artifactId>
+            <version>2.12</version>
+          </dependency>
+        </dependencies>
+      </plugin>
+
+      <!-- Maven : For running integration tests. -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <version>2.12</version>
+        <configuration>
+        </configuration>
+        <executions>
+          <execution>
+            <id>integration-test</id>
+            <goals>
+              <goal>integration-test</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>verify</id>
+            <goals>
+              <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
       <!--
         The actual maven-gae-plugin. Type "mvn gae:run" to run project,
         "mvn gae:deploy" to upload to GAE.
@@ -255,6 +372,23 @@
               <goal>unpack</goal>
             </goals>
           </execution>
+
+          <execution>
+            <id>gae:start</id>
+            <phase>pre-integration-test</phase>
+            <goals>
+              <goal>stop</goal>
+              <goal>start</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>gae:stop</id>
+            <phase>post-integration-test</phase>
+            <goals>
+              <goal>stop</goal>
+            </goals>
+          </execution>
+
         </executions>
       </plugin>
 
@@ -269,6 +403,28 @@
         </configuration>
       </plugin>
 
+      <!--
+        Code Coverage Plugin : For code coverage.
+      -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>cobertura-maven-plugin</artifactId>
+        <version>2.5.1</version>
+        <configuration>
+          <formats>
+            <format>xml</format>
+            <format>html</format>
+          </formats>
+        </configuration>
+        <executions>
+          <execution>
+            <phase>verify</phase>
+            <goals>
+              <goal>cobertura</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
       <!--
         Java compiler version
       -->
@@ -341,6 +497,91 @@
     </pluginManagement>
   </build>
 
+  <reporting>
+    <plugins>
+      <!--
+        Project Info Plugin : For generating Project Site.
+      -->
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-project-info-reports-plugin</artifactId>
+        <version>2.4</version>
+        <!-- <configuration>
+          <dependencyLocationsEnabled>false</dependencyLocationsEnabled>
+          <dependencyDetailsEnabled>false</dependencyDetailsEnabled>
+          </configuration>
+        -->
+      </plugin>
+
+      <!--
+        Cobertura Plugin : For Code Coverage.
+      -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>cobertura-maven-plugin</artifactId>
+        <version>2.5.1</version>
+        <configuration>
+          <formats>
+            <format>xml</format>
+            <format>html</format>
+          </formats>
+        </configuration>
+      </plugin>
+
+      <!--
+        Surefire Plugin : Include Unit-Tests in reports.
+      -->
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-report-plugin</artifactId>
+        <version>2.12</version>
+        <configuration>
+          <alwaysGenerateSurefireReport>true</alwaysGenerateSurefireReport>
+          <reportsDirectories>
+            <reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>
+          </reportsDirectories>
+        </configuration>
+        <reportSets>
+          <reportSet>
+            <reports>
+              <!--
+                Surefire plugin has a bug which runs test even for report-only. So depending
+                on failsafe-report-only where tests are not run.
+              -->
+              <report>failsafe-report-only</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
+
+      <!--
+        Surefire Plugin : Include Integration tests report. Failsafe Plugin inherits
+        from Surefire plugin but does not hcange the output file name. So we are
+        specifically putting configuration for both : Surefire and Failsafe.
+      -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-report-plugin</artifactId>
+        <version>2.12</version>
+        <configuration>
+          <alwaysGenerateFailsafeReport>true</alwaysGenerateFailsafeReport>
+          <reportsDirectories>
+            <reportsDirectory>${project.build.directory}/failsafe-reports</reportsDirectory>
+          </reportsDirectories>
+        </configuration>
+        <reportSets>
+          <reportSet>
+            <reports>
+              <report>failsafe-report-only</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
+    </plugins>
+  </reporting>
+
   <!--
     Specify hard-coded project properties here.
   -->
@@ -362,6 +603,7 @@
       by your Eclipse plug-in).
     -->
     <gae.version>1.6.3</gae.version>
+    <gae.wait>false</gae.wait>
 
     <!--
       GAE Application Name.

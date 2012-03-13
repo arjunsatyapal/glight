@@ -17,6 +17,7 @@ package com.google.light.server.manager.implementation;
 
 import static com.google.light.testingutils.TestingUtils.getRandomEmail;
 import static com.google.light.testingutils.TestingUtils.getRandomFederatedId;
+import static com.google.light.testingutils.TestingUtils.getRandomPersonId;
 import static com.google.light.testingutils.TestingUtils.getRandomString;
 import static com.google.light.testingutils.TestingUtils.getRandomUserId;
 import static org.junit.Assert.assertEquals;
@@ -25,7 +26,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import com.google.light.testingutils.TestingUtils;
+import com.google.light.server.exception.unchecked.InvalidPersonIdException;
 
 import com.google.inject.ProvisionException;
 import com.google.light.server.AbstractLightServerTest;
@@ -110,7 +111,7 @@ public class PersonManagerImplTest extends AbstractLightServerTest {
       PersonEntity dummy = new PersonEntity.Builder()
           .firstName(testFirstName)
           .lastName(testLastName)
-          .id(testUserId) // This should trigger negative scenario.
+          .id(getRandomPersonId()) // This should trigger negative scenario.
           .build();
 
       personManager.createPerson(dummy);
@@ -163,27 +164,27 @@ public class PersonManagerImplTest extends AbstractLightServerTest {
     try {
       personManager.getPerson(null);
       fail("should have failed");
-    } catch (IllegalArgumentException e) {
+    } catch (InvalidPersonIdException e) {
       // expected.
     }
 
-    // Negative Testing : Try to search with empty String.
+    // Negative Testing : Try to search with Invalid PersonId.
     try {
-      personManager.getPerson("");
+      personManager.getPerson(0L);
       fail("should have failed");
-    } catch (IllegalArgumentException e) {
+    } catch (InvalidPersonIdException e) {
       // expected.
     }
 
     /*
      * Negative Testing : Reset env to some other email, so that GAE returns different UserId.
      */
-    assertNull(personManager.getPerson(TestingUtils.getRandomUserId()));
+    assertNull(personManager.getPerson(getRandomPersonId()));
 
   }
 
   /**
-   * Test for {@link PersonManager}
+   * Test for {@link PersonManager#getPersonByEmail(String)}
    */
   @Test
   public void test_getPersonByEmail() throws Exception {
@@ -232,7 +233,7 @@ public class PersonManagerImplTest extends AbstractLightServerTest {
     assertNotNull(actualPerson1);
     assertTrue(!actualPerson1.equals(actualPerson2));
 
-    // Negative Testing 1 : Check for non-existing email.
+    // Negative Testing : Check for non-existing email.
     assertNull(personManager.getPersonByEmail(getRandomEmail()));
   }
 }

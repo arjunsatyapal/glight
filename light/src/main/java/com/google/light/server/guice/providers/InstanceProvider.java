@@ -24,6 +24,8 @@ import com.google.light.server.manager.interfaces.PersonManager;
 /**
  * Service Provider for various Guice Injected Classes.
  * 
+ * NOTE : DAOs should be injected directly in the relevant managers.
+ * 
  * @author Arjun Satyapal
  */
 public class InstanceProvider {

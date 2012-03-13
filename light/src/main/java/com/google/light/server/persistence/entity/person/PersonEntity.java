@@ -16,10 +16,15 @@
 package com.google.light.server.persistence.entity.person;
 
 import static com.google.light.server.utils.LightPreconditions.checkEmail;
-import static com.google.light.server.utils.LightPreconditions.checkNotEmptyString;
-import static com.google.light.server.utils.LightPreconditions.checkPersonIsLoggedIn;
+import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
+import static com.google.light.server.utils.LightPreconditions.checkPersonId;
 
-import com.google.common.base.Strings;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+
+import org.apache.commons.lang.builder.EqualsBuilder;
+
+import org.apache.commons.lang.builder.ToStringBuilder;
+
 import com.google.common.collect.Lists;
 import com.google.light.server.dto.person.PersonDto;
 import com.google.light.server.persistence.PersistenceToDtoInterface;
@@ -36,7 +41,7 @@ import javax.persistence.Id;
 @SuppressWarnings("serial")
 public class PersonEntity implements PersistenceToDtoInterface<PersonEntity, PersonDto> {
   @Id
-  String id;
+  Long id;
   String firstName;
   String lastName;
 
@@ -49,74 +54,32 @@ public class PersonEntity implements PersistenceToDtoInterface<PersonEntity, Per
 
   @Override
   public String toString() {
-    return "PersonEntity [id=" + id + ", firstName=" + firstName + ", lastName=" + lastName
-        + ", email=" + email + ", idProviderDetails=" + idProviderDetails + "]";
+    return ToStringBuilder.reflectionToString(this);
   }
 
   @Override
   public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + ((email == null) ? 0 : email.hashCode());
-    result = prime * result + ((firstName == null) ? 0 : firstName.hashCode());
-    result = prime * result + ((id == null) ? 0 : id.hashCode());
-    result =
-        prime * result
-            + ((idProviderDetails == null) ? 0 : idProviderDetails.hashCode());
-    result = prime * result + ((lastName == null) ? 0 : lastName.hashCode());
-    return result;
+    return HashCodeBuilder.reflectionHashCode(this);
   }
 
   @Override
   public boolean equals(Object obj) {
-    if (this == obj)
-      return true;
-    if (obj == null)
-      return false;
-    if (getClass() != obj.getClass())
-      return false;
-    PersonEntity other = (PersonEntity) obj;
-    if (email == null) {
-      if (other.email != null)
-        return false;
-    } else if (!email.equals(other.email))
-      return false;
-    if (firstName == null) {
-      if (other.firstName != null)
-        return false;
-    } else if (!firstName.equals(other.firstName))
-      return false;
-    if (id == null) {
-      if (other.id != null)
-        return false;
-    } else if (!id.equals(other.id))
-      return false;
-    if (idProviderDetails == null) {
-      if (other.idProviderDetails != null)
-        return false;
-    } else if (!idProviderDetails.equals(other.idProviderDetails))
-      return false;
-    if (lastName == null) {
-      if (other.lastName != null)
-        return false;
-    } else if (!lastName.equals(other.lastName))
-      return false;
-    return true;
+    return EqualsBuilder.reflectionEquals(this, obj);
   }
 
   // TODO(arjuns) : Add test for constructor.
-  public PersonEntity(@Nullable String id, String firstName, String lastName, 
+  public PersonEntity(@Nullable Long id, String firstName, String lastName, 
       @Nullable String email, @Nullable List<IdProviderDetail> idProviderDetails) {
     this.id = id;
-    this.firstName = checkNotEmptyString(firstName);
-    this.lastName = checkNotEmptyString(lastName);
-    this.email = Strings.isNullOrEmpty(email) ? null : checkEmail(email);
+    this.firstName = checkNotBlank(firstName);
+    this.lastName = checkNotBlank(lastName);
+    this.email = email == null ? null : checkEmail(email);
     this.idProviderDetails = idProviderDetails;
   }
 
   @Override
   public PersonDto toDto() {
-    PersonDto dto = new PersonDto(id, firstName, lastName, email);
+    PersonDto dto = new PersonDto(firstName, lastName, email);
     return dto.validate();
   }
 
@@ -126,7 +89,7 @@ public class PersonEntity implements PersistenceToDtoInterface<PersonEntity, Per
   }
 
   // Getters and setters.
-  public String getId() {
+  public Long getId() {
     return id;
   }
 
@@ -134,11 +97,12 @@ public class PersonEntity implements PersistenceToDtoInterface<PersonEntity, Per
   /**
    * Id can be set only when a User is Logged In.
    */
-  public void setId(String id) {
-    // On PersonEntity id can be set only if a user is logged in.
-    // Or it will be read from Persistence, and will be pre-set.
-    checkPersonIsLoggedIn();
-    this.id = checkNotEmptyString(id);
+  public void setId(Long id) {
+    if (this.id != null) {
+      throw new UnsupportedOperationException("Id cannot be changed once it is set.");
+    } 
+    
+    this.id = checkPersonId(id);
   }
 
   public List<IdProviderDetail> getIdProviderDetails() {
@@ -168,19 +132,16 @@ public class PersonEntity implements PersistenceToDtoInterface<PersonEntity, Per
   }
 
   public void setEmail(String email) {
-    // On PersonEntity email can be set only if a user is logged in.
-    // Or it will be read from Persistence, and will be pre-set.
-    checkPersonIsLoggedIn();
     this.email = checkEmail(email);
   }
 
   public static class Builder {
-    private String id;
+    private Long id;
     private String firstName;
     private String lastName;
     private String email;
     private List<IdProviderDetail> idProviderDetails;
-    public Builder id(String id) {
+    public Builder id(Long id) {
       this.id = id;
       return this;
     }

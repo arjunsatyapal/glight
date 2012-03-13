@@ -15,6 +15,10 @@
  */
 package com.google.light.server.servlets.filters;
 
+import javax.servlet.http.HttpServletResponse;
+
+import javax.servlet.http.HttpServletRequest;
+
 import com.google.common.base.Throwables;
 import java.io.IOException;
 import java.util.logging.Logger;
@@ -26,23 +30,28 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
 /**
- * Servlet Filter for Json Requests.
+ * Servlet Filter for All Light Requests. See {@link FilterPathEnum} to see what all URLs are
+ * covered by this Filter.
  * 
  * @author Arjun Satyapal
  */
 
-public class ServletFilterJson implements Filter {
-  private static final Logger logger = Logger.getLogger(ServletFilterJson.class.getName());
+public class ServletFilter implements Filter {
+  private static final Logger logger = Logger.getLogger(Filter.class.getName());
   private FilterConfig filterConfig;
 
   @Override
   public void doFilter(ServletRequest req, ServletResponse res, FilterChain filterChain)
       throws IOException, ServletException {
     try {
-      filterChain.doFilter(req, res);
+      HttpServletRequest request = (HttpServletRequest) req;
+      HttpServletResponse response = (HttpServletResponse) res;
+      
+      // TODO(arjuns) : Add changeLog.
+      filterChain.doFilter(request, response);
     } catch (Exception e) {
       // TODO(arjuns) : check log(level, message, throwable) logs whole stack.
-      logger.info("Failed due to : " + Throwables.getStackTraceAsString(e));
+      logger.severe("Failed due to : " + Throwables.getStackTraceAsString(e));
     } finally {
     }
   }
