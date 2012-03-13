@@ -1,5 +1,7 @@
 /**
  * Source: https://github.com/jupiterjs/syn/blob/7af0f4e981ab7f83a18d8f29d5c3bfb4227d56d2/dist/syn.js
+ * This file was modified by changing setTimeout function to jasmine.setTimeout, because
+ * jasmine mocks setTimeout during tests.
  */
 (function(){
 	var extend = function( d, s ) {
@@ -689,7 +691,7 @@
 			timeout = timeout || 600;
 			var self = this;
 			this.queue.unshift(function() {
-				setTimeout(function() {
+				jasmine.setTimeout(function() {
 					callback && callback.apply(self, [])
 					self.done.apply(self, arguments);
 				}, timeout);
@@ -735,7 +737,7 @@
 			Syn.trigger("mousedown", options, element);
 
 			//timeout is b/c IE is stupid and won't call focus handlers
-			setTimeout(function() {
+			jasmine.setTimeout(function() {
 				Syn.trigger("mouseup", options, element);
 				if (!Syn.support.mouseDownUpClicks || force ) {
 					Syn.trigger("click", options, element);
@@ -745,7 +747,7 @@
 					Syn.create.click.setup('click', options, element);
 					Syn.defaults.click.call(element);
 					//must give time for callback
-					setTimeout(function() {
+					jasmine.setTimeout(function() {
 						callback(true);
 					}, 1);
 				}
@@ -765,7 +767,7 @@
 			Syn.trigger("mousedown", mouseopts, element);
 
 			//timeout is b/c IE is stupid and won't call focus handlers
-			setTimeout(function() {
+			jasmine.setTimeout(function() {
 				Syn.trigger("mouseup", mouseopts, element);
 				if ( Syn.mouse.browser.right.contextmenu ) {
 					Syn.trigger("contextmenu", extend(extend({}, Syn.mouse.browser.right.contextmenu), options), element);
@@ -789,7 +791,7 @@
 			Syn.helpers.addOffset(options, element);
 			var self = this;
 			this._click(options, element, function() {
-				setTimeout(function() {
+				jasmine.setTimeout(function() {
 					self._click(options, element, function() {
 						Syn.trigger("dblclick", options, element);
 						callback(true);
@@ -1037,7 +1039,7 @@
 	//do support code
 	(function() {
 		if (!document.body ) {
-			setTimeout(arguments.callee, 1)
+			jasmine.setTimeout(arguments.callee, 1)
 			return;
 		}
 		var oldSynth = window.__synthTest;
@@ -1103,7 +1105,7 @@
 		Syn.trigger("mousedown", {}, div)
 		Syn.trigger("mouseup", {}, div)
 
-		//setTimeout(function(){
+		//jasmine.setTimeout(function(){
 		//	Syn.trigger("mousedown",{},div)
 		//	Syn.trigger("mouseup",{},div)
 		//},1)
@@ -2035,7 +2037,7 @@
 				}
 
 				if ( defaultResult !== null ) {
-					setTimeout(function() {
+					jasmine.setTimeout(function() {
 						Syn.trigger('keyup', Syn.key.options(key, 'keyup'), element)
 						callback(runDefaults, element)
 					}, 1)
@@ -2098,7 +2100,7 @@
 	//do support code
 	(function() {
 		if (!document.body ) {
-			setTimeout(arguments.callee, 1)
+			jasmine.setTimeout(arguments.callee, 1)
 			return;
 		}
 
@@ -2177,7 +2179,7 @@
 
 		// document body has to exists for this test
 		if (!document.body ) {
-			setTimeout(arguments.callee, 1)
+			jasmine.setTimeout(arguments.callee, 1)
 			return;
 		}
 		var div = document.createElement('div')
@@ -2273,7 +2275,7 @@
 						top: (options.clientY + scrollOffset.top + 2) + "px"
 					})
 					current = mouseMove(options, element, current)
-					setTimeout(arguments.callee, 15)
+					jasmine.setTimeout(arguments.callee, 15)
 				}
 				else {
 					current = mouseMove(end, element, current);
