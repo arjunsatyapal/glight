@@ -37,9 +37,11 @@ define(['dojo/_base/declare', 'light/AbstractLightController'],
       var self = this;
       this._personStore.save({
         onComplete: function() {
+          // TODO(waltercacau): Add a redirect to the home or another specified page.
           alert("Ok");
         },
         onError: function() {
+          // TODO(waltercacau): Show friendly error.
           alert("Not ok");
           console.log('Error:',arguments);
           self._view.enable();
