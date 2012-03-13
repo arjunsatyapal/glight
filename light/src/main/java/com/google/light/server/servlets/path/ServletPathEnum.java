@@ -17,6 +17,8 @@ package com.google.light.server.servlets.path;
 
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
+import com.google.light.server.servlets.admin.ConfigServlet;
+
 import com.google.light.server.exception.unchecked.httpexception.NotFoundException;
 import com.google.light.server.servlets.person.PersonServlet;
 import com.google.light.server.servlets.test.TestHeaders;
@@ -35,6 +37,8 @@ public enum ServletPathEnum {
   // TODO(arjuns) : Find a way to end URLs without /.
   PERSON(PersonServlet.class, "/api/person", "/api/person/"),
 
+  CONFIG(ConfigServlet.class, "/admin/config", "/admin/config/"),
+  
   // Some test servlets.
   TEST_HEADER(TestHeaders.class, "/test/testheader", "/test/testheader/"),
   TEST_LOGIN(TestLogin.class, "/test/testlogin", "/test/testlogin/");

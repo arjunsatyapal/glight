@@ -120,10 +120,10 @@ public class LightPreconditionsTest {
   }
 
   /**
-   * Test for {@link LightPreconditions#checkNotEmptyString(String)}
+   * Test for {@link LightPreconditions#checkNotBlank(String)}
    */
   @Test
-  public void test_checkNotEmptyString() {
+  public void test_checkNotBlank() {
     checkNotBlank("hello");
 
     // Negative : string=null
@@ -152,10 +152,10 @@ public class LightPreconditionsTest {
   }
 
   /**
-   * Test for {@link LightPreconditions#checkNotEmptyString(String, String)}
+   * Test for {@link LightPreconditions#checkNotBlank(String, String)}
    */
   @Test
-  public void test_checkNotEmptyString_msg() {
+  public void test_checkNotBlank_msg() {
     String uuid = getUUIDString();
     // Negative : string=null
     try {

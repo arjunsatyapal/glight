@@ -15,6 +15,9 @@
  */
 package com.google.light.server.constants;
 
+import static com.google.light.server.constants.ContentTypeEnum.APPLICATION_JSON;
+import static com.google.light.server.constants.ContentTypeEnum.APPLICATION_XML;
+import static com.google.light.server.constants.ContentTypeEnum.TEXT_HTML;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
@@ -37,7 +40,7 @@ public class ContentTypeEnumTest implements EnumTestInterface {
   @Test
   @Override
   public void test_count() {
-    assertEquals("Update test_getContentTypeByString as required.", 2,
+    assertEquals("Update test_getContentTypeByString as required.", 3,
         ContentTypeEnum.values().length);
   }
 
@@ -47,8 +50,9 @@ public class ContentTypeEnumTest implements EnumTestInterface {
   @Test
   public void test_getContentTypeByString() {
     Map<String, ContentTypeEnum> map = ImmutableMap.<String, ContentTypeEnum> builder()
-        .put("application/json", ContentTypeEnum.APPLICATION_JSON)
-        .put("application/xml", ContentTypeEnum.APPLICATION_XML)
+        .put("application/json", APPLICATION_JSON)
+        .put("application/xml", APPLICATION_XML)
+        .put("text/html", TEXT_HTML)
         .build();
 
     for (String curr : map.keySet()) {

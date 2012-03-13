@@ -23,10 +23,9 @@ import javax.servlet.Filter;
  * @author Arjun Satyapal
  */
 public enum FilterPathEnum {
+  ADMIN(ServletFilter.class, "/admin/*"),
   API(ServletFilter.class, "/api/*"),
-  
-  // TODO(arjuns) : Add a separate filter for test.
-  TEST(ServletFilter.class, "/test/*");
+  TEST(TestServletFilter.class, "/test/*");
   
   private Class<? extends Filter> clazz;
   private String urlPattern;

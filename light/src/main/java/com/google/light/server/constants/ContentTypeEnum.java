@@ -27,7 +27,8 @@ import com.google.light.server.exception.unchecked.httpexception.UnsupportedMedi
  */
 public enum ContentTypeEnum {
   APPLICATION_JSON("application/json"),
-  APPLICATION_XML("application/xml");
+  APPLICATION_XML("application/xml"),
+  TEXT_HTML("text/html");
   
   private String type;
   

@@ -30,15 +30,19 @@ import com.google.light.server.servlets.path.ServletPathEnum;
 class LightServletModule extends ServletModule {
   @Override
   protected void configureServlets() {
+    
+    
     // First registering the Filters.
-    initFilters(FilterPathEnum.API);
-    initFilters(FilterPathEnum.TEST);
+    // TODO(arjuns): Do special handling for TestFilter.
+    for (FilterPathEnum currFilter : FilterPathEnum.values()) {
+      initFilters(currFilter);
+    }
 
     // Now registering the Servlets.
-    initServlet(ServletPathEnum.PERSON);
-    initServlet(ServletPathEnum.TEST_HEADER);
-    initServlet(ServletPathEnum.TEST_LOGIN);
-    
+    // TODO(arjuns) : Do special handling for TestServlet.
+    for (ServletPathEnum currServlet : ServletPathEnum.values()) {
+      initServlet(currServlet);
+    }
   }
 
   /**
