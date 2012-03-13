@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-"use strict";
+'use strict';
 define(['dojo/_base/connect', 'dojo/_base/declare', 'light/URLHashUtil',
         'dojo'], function(connect, declare, hashUtil, dojo) {
 
@@ -70,10 +70,10 @@ define(['dojo/_base/connect', 'dojo/_base/declare', 'light/URLHashUtil',
       try {
         query = this._hashToQuery(hash);
       } catch (e) {
-        console.log('WARN USER!', e);
+        // TODO(waltercacau): Warn the user that his query was wrong
       }
       if (query) {
-        console.log('Query changed', query);
+        // TODO(waltercacau): Publish an event saying that the query has changed
         this.lastQuery = query;
       } else {
         hashUtil.set(this._queryToHash(this._lastQuery));

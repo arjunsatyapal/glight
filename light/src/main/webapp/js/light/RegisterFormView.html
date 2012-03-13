@@ -1,0 +1,25 @@
+<div width="100%" style="padding: 20px; text-align: center">
+	Before continuing you need to fill this small registration form and accept our Terms of Service. <br /><br />
+	<div data-dojo-type="dijit.form.Form" data-dojo-attach-point="_form" style="display: inline-block">
+	<table style="width: 500px;">
+		<tr>
+			<td>First Name:</td>
+			<td><input required="true" data-dojo-type="dijit.form.ValidationTextBox" style="width: 300px" data-dojo-attach-point="_firstNameTextBox"/></td>
+		</tr>
+		<tr>
+			<td>Last Name:</td>
+			<td><input required="true" data-dojo-type="dijit.form.ValidationTextBox" style="width: 300px" data-dojo-attach-point="_lastNameTextBox"/></td>
+		</tr>
+		<tr>
+			<td>Terms of Service</td>
+			<td>
+				<p><textarea data-dojo-type="dijit.form.Textarea" style="width: 300px" data-dojo-attach-point="_tosTextarea" readonly="readonly">Legal things and stuff :D</textarea></p>
+				<p><input data-dojo-type="dijit.form.CheckBox" data-dojo-attach-point="_tosCheckbox"> I agree</p>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2"><button data-dojo-type="dijit.form.Button" data-dojo-attach-point="_button" data-dojo-attach-event="onClick:_onSubmit">Register</button></td>
+		</tr>
+	</table>
+	</div>
+</div>

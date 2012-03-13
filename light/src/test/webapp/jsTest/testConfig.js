@@ -34,7 +34,9 @@
 	// jasmine:test goal don't start a web server. They are just run
 	// on the filesystem. So we can't rely on the serving structure and we need to discover
 	// our current location.
-	var base = (window.jstestdriver ? '' : location.pathname.replace(/\/[^/]+$/, '')) + '/';
+	var base = (window.jstestdriver ? '' : location.pathname.replace(/\/[^/]+$/, ''));
+	if(base.substr(base.length-1) != '/')
+	  base += '/';
 
 	dojoConfig = {
 	  //'dojo-undef-api': true, 'dojo-publish-privates': true,
@@ -66,7 +68,7 @@
 		*/
 		testListFile: '/target/testList.js',
 		testMidFormatter: function(mid) {
-		  if (mid.substr(mid.length - 3) == '.js') {
+		  if (mid.substr(mid.length - 7) == 'Test.js') {
 		    return mid.substr(0, mid.length - 3);
 		  }
 		}
