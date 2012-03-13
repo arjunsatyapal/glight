@@ -17,45 +17,78 @@
 define(['dojo/_base/declare', 'dijit/_Widget', 'dijit/_TemplatedMixin',
         'dijit/_WidgetsInTemplateMixin', 'dojo/text!./RegisterFormView.html',
         'dijit/Tooltip', 'light/AbstractLightView', 'dojo/query',
-        'dijit/form/ValidationTextBox', 'dijit/form/Textarea', 'dijit/form/Button',
-        'dijit/form/CheckBox', 'dijit/Dialog', 'dijit/form/Form'],
+        'dijit/form/ValidationTextBox', 'dijit/form/Textarea',
+        'dijit/form/Button', 'dijit/form/CheckBox', 'dijit/Dialog',
+        'dijit/form/Form'],
         function(declare, _Widget, _TemplatedMixin,
                 _WidgetsInTemplateMixin, template, Tooltip,
                 AbstractLightView, query) {
-    return declare('light.RegisterFormView',
-            [AbstractLightView, _Widget, _TemplatedMixin, _WidgetsInTemplateMixin], {
+  /**
+   * @class
+   * @name light.RegisterFormView
+   */
+  return declare('light.RegisterFormView',
+          [AbstractLightView, _Widget,
+           _TemplatedMixin, _WidgetsInTemplateMixin], {
 
-        /** @lends light.RegisterFormView# */
+      /** @lends light.RegisterFormView# */
 
-        templateString: template,
-        getData: function() {
-          return {
-            firstName: this._firstNameTextBox.get('value'),
-            lastName: this._lastNameTextBox.get('value')
-          };
-        },
-        disable: function() {
-          // TODO(waltercacau): Make widgets gray out.
-          query('input', this.domNode).attr('disabled', 'disabled');
-        },
-        enable: function() {
-          query('input', this.domNode).removeAttr('disabled');
-        },
-        validate: function() {
-          return this._form.validate() && this._tosValidation();
-        },
-        _tosValidation: function() {
-          var ret = this._tosCheckbox.get('checked');
-          console.log('asd');
-          if (!ret) {
-            Tooltip.show('You should agree to the Terms of Service',
-                    this._tosCheckbox.domNode.parentNode,
-                    [], !this.isLeftToRight());
-          }
-          return ret;
-        },
-        _onSubmit: function() {
-          this._controller.onSubmit();
+      templateString: template,
+
+      /**
+       * Return's the current data in the form.
+       * @return {Object} Current data.
+       */
+      getData: function() {
+        return {
+          firstName: this._firstNameTextBox.get('value'),
+          lastName: this._lastNameTextBox.get('value')
+        };
+      },
+
+      /**
+       * Disables all the form's inputs
+       */
+      disable: function() {
+        // TODO(waltercacau): Make widgets gray out.
+        query('input', this.domNode).attr('disabled', 'disabled');
+      },
+
+      /**
+       * Enables all the form's inputs
+       */
+      enable: function() {
+        query('input', this.domNode).removeAttr('disabled');
+      },
+
+      /**
+       * Validates the form and visually gives feedback
+       * to the user if some validation has failed.
+       * @return {boolean} True if there are not validation errors.
+       */
+      validate: function() {
+        return this._form.validate() && this._tosValidation();
+      },
+
+      /**
+       * Validates that the user has agreed to the Terms of Service.
+       * @return {boolean} True if the user has agreed.
+       */
+      _tosValidation: function() {
+        var ret = this._tosCheckbox.get('checked');
+        if (!ret) {
+          Tooltip.show('You should agree to the Terms of Service',
+                  this._tosCheckbox.domNode.parentNode,
+                  [], !this.isLeftToRight());
         }
-    });
+        return ret;
+      },
+
+      /**
+       * Callback to be called when the submit button is pressed.
+       */
+      _onSubmit: function() {
+        this._controller.onSubmit();
+      }
+  });
 });

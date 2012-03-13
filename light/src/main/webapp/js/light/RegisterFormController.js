@@ -20,6 +20,9 @@ define(['dojo/_base/declare', 'light/AbstractLightController'],
     
     /** @lends light.RegisterFormController# */
     
+    /**
+     * @constructs
+     */
     constructor: function(personStore) {
       this._personStore = personStore;
     },

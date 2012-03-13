@@ -15,9 +15,8 @@
  */
 define(['dojo/_base/declare', 'light/AbstractLightStore'],
         function(declare, AbstractLightStore) {
-  describe('light.AbstractLightStore subclass', function() {
-    
-    describe('without a target and being instantiated', function() {
+  describe('light.AbstractLightStore subclass constructor', function() {
+    describe('without a target', function() {
       it('should throw', function() {
         var ResourceStore = declare(AbstractLightStore, {
           constructor: function() {
@@ -25,12 +24,12 @@ define(['dojo/_base/declare', 'light/AbstractLightStore'],
           }
         });
         expect(function() {
-          new ResourceStore()
+          new ResourceStore();
         }).toThrow(new Error('You should specify a target!'));
       });
     });
-    
-    describe('with a target and being instantiated', function() {
+
+    describe('with a target', function() {
       it('should not throw', function() {
         var ResourceStore = declare(AbstractLightStore, {
           lightTarget: '/api/resource',
@@ -41,10 +40,10 @@ define(['dojo/_base/declare', 'light/AbstractLightStore'],
           }
         });
         expect(function() {
-          new ResourceStore()
+          new ResourceStore();
         }).not.toThrow();
       });
     });
-    
+
   });
 });
