@@ -13,7 +13,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-'use strict';
 define(['dojo/_base/connect', 'dojo/_base/declare', 'light/URLHashUtil',
         'dojo'], function(connect, declare, hashUtil, dojo) {
 

@@ -13,7 +13,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-'use strict';
 define(['dojo/_base/declare', 'dijit/_Widget', 'dijit/_TemplatedMixin',
         'dijit/_WidgetsInTemplateMixin', 'dojo/text!./SearchBarView.html',
         'dijit/form/TextBox', 'dijit/form/Button'],

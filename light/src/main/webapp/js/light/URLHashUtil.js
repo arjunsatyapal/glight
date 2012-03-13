@@ -13,7 +13,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-"use strict";
 define(['dojo/_base/declare', 'dojo/hash'], function(declare, dojoHash) {
   /**
    * Small wrapper around dojo's hash functionality to enable better testing

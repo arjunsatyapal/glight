@@ -13,23 +13,27 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-"use strict";
 /**
- * This file should expose an AMD Loader that has a require.config function like RequireJS 1.0.7
- * 
- * For simplicity, we configured Jasmine Maven Plugin to think it is working with requireJS,
- * because by the time this file was created (2012-03-07) there is no support for other AMD loaders in
- * such plugin.
- * 
- * We also use this file to load other test framework dependencies (eg. sinon.JS).
+ * This file should expose an AMD Loader that has a require.config function
+ * like RequireJS 1.0.7
+ *
+ * For simplicity, we configured Jasmine Maven Plugin to think it is working
+ * with requireJS, because by the time this file was created (2012-03-07) there
+ * is no support for other AMD loaders in such plugin.
+ *
+ * We also use this file to load other test framework dependencies
+ * (eg. sinon.JS).
+ *
  * Ideally this file should be analogous to jsTestDriver.conf
  */
 
 var setupDojoLoaderForJasmine = function() {
-	
+
   /**
    * Convert's a Javascript object Friendly JSON representation.
-   * 
+   *
+   * @param {*} obj Data to be transformed into JSON.
+   * @param {String=} indent Indentation level.
    * @return {String} Friendly JSON representation.
    */
   var prettyPrintJSON = function(obj, indent) {
@@ -79,24 +83,27 @@ var setupDojoLoaderForJasmine = function() {
       return JSON.stringify(obj);
     }
   }
-	
-	var failed = false;
-	var debug = [];
-	describe("loader", function() {
-		it("should succeed", function() {
-			if(failed)
-				throw new Error("Error loading resource: " + prettyPrintJSON(debug));
-		});
-	});
-	require.config = function() {};
-	require.on("error", function() {
-		failed = true;
-		debug = Array.prototype.slice.call(arguments, 0);
-	});
-}
 
-document.write('<script src="src/test/webapp/jsTest/external/sinon-1.3.1.js"></script>');
-document.write('<script src="src/test/webapp/jsTest/external/jasmine-sinon.js"></script>');
+  var failed = false;
+  var debug = [];
+  describe('loader', function() {
+    it('should succeed', function() {
+      if (failed)
+        throw new Error('Error loading resource: ' + prettyPrintJSON(debug));
+    });
+  });
+  require.config = function() {};
+  require.on('error', function() {
+    failed = true;
+    debug = Array.prototype.slice.call(arguments, 0);
+  });
+};
+
+document.write(
+    '<script src="src/test/webapp/jsTest/external/sinon-1.3.1.js"></script>');
+document.write(
+    '<script src="src/test/webapp/jsTest/external/jasmine-sinon.js"></script>');
 document.write('<script src="src/test/webapp/jsTest/testConfig.js"></script>');
-document.write('<script src="src/main/webapp/js/external/djk/dojo/dojo.js"></script>');
+document.write(
+    '<script src="src/main/webapp/js/external/djk/dojo/dojo.js"></script>');
 document.write('<script>setupDojoLoaderForJasmine()</script>');

@@ -13,7 +13,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-'use strict';
 define(['dojo/_base/declare', 'light/AbstractLightController'],
         function(declare, AbstractLightController) {
   return declare('light.RegisterFormController', AbstractLightController, {
