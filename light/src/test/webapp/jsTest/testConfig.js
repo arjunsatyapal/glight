@@ -68,6 +68,7 @@
 
   /**
    * Configuration for the dojoAmdAdapter
+   * @see jstestdriver.dojoAmdAdapter
    */
   dojoAmdAdapterConfig = {
     /*
@@ -77,7 +78,11 @@
     */
     testListFile: '/target/testList.js',
     testMidFormatter: function(mid) {
-      if (mid.substr(mid.length - 7) == 'Test.js') {
+      /*
+        Maven produces a list of filenames, but dojo.require expect a list
+        of module ids (eg. lightTest/SomeTest.js -> lightTest/SomeTest)
+       */
+      if (mid.substr(mid.length - 3) == '.js') {
         return mid.substr(0, mid.length - 3);
       }
     }

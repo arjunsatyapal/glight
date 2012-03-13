@@ -17,6 +17,7 @@ define(['dojo/_base/declare'],
         function(declare) {
   /**
    * Base abstract class for all light controllers.
+   * 
    * @class
    * @name light.AbstractLightController
    */

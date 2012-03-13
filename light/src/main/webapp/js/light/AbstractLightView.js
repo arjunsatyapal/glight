@@ -13,10 +13,10 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-define(['dojo/_base/declare'],
-        function(declare) {
+define(['dojo/_base/declare'], function(declare) {
   /**
    * Base abstract class for all light views.
+   * 
    * @class
    * @name light.AbstractLightView
    */
@@ -25,8 +25,9 @@ define(['dojo/_base/declare'],
 
     /**
      * Defines the controller for this view.
-     *
-     * @param {light.AbstractLightController} controller Controller.
+     * 
+     * @param {light.AbstractLightController}
+     *          controller Controller.
      */
     setController: function(controller) {
       this._controller = controller;

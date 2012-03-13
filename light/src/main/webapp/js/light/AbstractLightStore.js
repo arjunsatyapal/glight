@@ -16,14 +16,15 @@
 define(['dojo/_base/declare', 'dojo', 'dojox', 'dojox/data/JsonRestStore'],
         function(declare, dojo, dojox, JsonRestStore) {
   /**
-   * Creates custom getRequest that accepts/add custom headers
+   * Creates custom getRequest that accepts/adds custom headers
    *
-   * This part is basically a copy of dojox.rpc.Rest from Dojo 1.7.2 inner
+   * <p>This part is basically a copy of dojox.rpc.Rest from Dojo 1.7.2 inner
    * function getRequest slightly modified.
+   * {@link http://svn.dojotoolkit.org/src/tags/release-1.7.2/dojox/rpc/Rest.js}
    *
-   * Ideally, we shouldn't do it, but Dojo does not have custom headers
-   * implemented on its Rest implementation and gives us no access to extend
-   * this inner getRequest function, only completely replace it.
+   * <p>Since Dojo does not have custom headers
+   * implemented on its Rest and gives us no access to extend
+   * this inner getRequest function, we have to completely replace it.
    *
    * @param {string} path Resource path (eg. /api/person).
    * @param {string} lightAPIVersion API version to communicate with our
@@ -54,6 +55,7 @@ define(['dojo/_base/declare', 'dojo', 'dojox', 'dojox/data/JsonRestStore'],
         headers: {
           Accept: isJson ? 'application/json,application/javascript' : '*/*',
 
+          // LightMod: The next header was not set in the original version.
           // Light API Version
           'X-Light-API-Version': lightAPIVersion
 
