@@ -97,12 +97,22 @@ var setupDojoLoaderForJasmine = function() {
     failed = true;
     debug = Array.prototype.slice.call(arguments, 0);
   });
+  /*require(['dojo/domReady!'], function() {
+    document.body.setAttribute('class', 'claro');
+  })*/
 };
 
+/*document.write(
+    '<link rel="stylesheet" type="text/css" '+
+    'href="src/main/webapp/js/external/djk/dijit/themes/claro/claro.css">');*/
+document.write(
+    '<script src="src/test/webapp/jsTest/external/syn.js"></script>');
 document.write(
     '<script src="src/test/webapp/jsTest/external/sinon-1.3.1.js"></script>');
 document.write(
     '<script src="src/test/webapp/jsTest/external/jasmine-sinon.js"></script>');
+document.write(
+    '<script src="src/test/webapp/jsTest/lightTestExtensions.js"></script>');
 document.write('<script src="src/test/webapp/jsTest/testConfig.js"></script>');
 document.write(
     '<script src="src/main/webapp/js/external/djk/dojo/dojo.js"></script>');
