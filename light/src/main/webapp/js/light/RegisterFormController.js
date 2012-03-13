@@ -16,34 +16,38 @@
 define(['dojo/_base/declare', 'light/AbstractLightController'],
         function(declare, AbstractLightController) {
   return declare('light.RegisterFormController', AbstractLightController, {
-    
+
     /** @lends light.RegisterFormController# */
-    
+
     /**
+     * @extends light.AbstractLightController
      * @constructs
      */
     constructor: function(personStore) {
       this._personStore = personStore;
     },
-    
+
     /**
      * Callback for when the form is submitted.
      */
     onSubmit: function() {
-      if(!this._view.validate())
+      if (!this._view.validate())
         return;
       this._view.disable();
       this._personStore.newItem(this._view.getData());
       var self = this;
       this._personStore.save({
         onComplete: function() {
-          // TODO(waltercacau): Add a redirect to the home or another specified page.
-          alert("Ok");
+          /*
+           * TODO(waltercacau): Add a redirect to the home
+           * or another specified page.
+           */
+          alert('Ok');
         },
         onError: function() {
           // TODO(waltercacau): Show friendly error.
-          alert("Not ok");
-          console.log('Error:',arguments);
+          alert('Not ok');
+          console.log('Error:', arguments);
           self._view.enable();
         }
       });

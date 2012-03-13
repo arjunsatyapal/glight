@@ -13,7 +13,8 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-define(['dojo/_base/declare', 'dojo', 'dojox', 'dojox/data/JsonRestStore'], function(declare, dojo, dojox, JsonRestStore) {
+define(['dojo/_base/declare', 'dojo', 'dojox', 'dojox/data/JsonRestStore'],
+        function(declare, dojo, dojox, JsonRestStore) {
   /**
    * Creates custom getRequest that accepts/add custom headers
    *
@@ -72,23 +73,19 @@ define(['dojo/_base/declare', 'dojo', 'dojox', 'dojox/data/JsonRestStore'], func
   return declare('light.AbstractLightStore', JsonRestStore, {
     /** @lends light.AbstractLightStore# */
 
-    '-chains-': {
-      constructor: 'manual'
-    },
-    lightAPIVersion: '1.0',
-
     /**
      * This is the base abstract class for all Light stores.
      *
-     * It takes care of setting the right headers for communicating
+     * <p>It takes care of setting the right headers for communicating
      * with the Light backend.
      *
-     * Make sure when you subclass this class that you call
+     * <p>Make sure when you subclass this class that you call
      * the parent constructor using this.inherited(arguments),
      * otherwise the store will not be properly setup. We are
      * using manual chaining for the constructors, so the
      * superclass constructor is not called automatically.
      *
+     * @extends dojox.data.JsonRestStore
      * @constructs
      */
     constructor: function(options) {
@@ -107,6 +104,14 @@ define(['dojo/_base/declare', 'dojo', 'dojox', 'dojox/data/JsonRestStore'], func
                           true, this.lightAPIVersion));
 
       this.inherited(arguments, [options]);
+    },
+
+    lightAPIVersion: '1.0',
+
+    // Chain configuration should be at the end for JSDoc to work.
+    '-chains-': {
+      constructor: 'manual'
     }
+
   });
 });

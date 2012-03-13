@@ -15,24 +15,22 @@
  */
 define(['dojo/_base/declare'],
         function(declare) {
+  /**
+   * Base abstract class for all light views.
+   * @class
+   * @name light.AbstractLightView
+   */
   return declare('light.AbstractLightController', null, {
-    /** @lends light.AbstractLightController# */
-    
-    /**
-     * Base abstract class for all light views.
-     * 
-     * @constructs
-     */
-    constructor: function() {},
-    
+    /** @lends light.AbstractLightView# */
+
     /**
      * Defines the controller for this view.
-     * 
+     *
      * @param {light.AbstractLightController} controller Controller.
      */
     setController: function(controller) {
       this._controller = controller;
     }
-    
+
   });
 });
