@@ -40,7 +40,7 @@ public class TestHeaders extends AbstractLightServlet {
    * {@inheritDoc}
    */
   @Override
-  protected void doDelete(HttpServletRequest request, HttpServletResponse response) {
+  public void doDelete(HttpServletRequest request, HttpServletResponse response) {
     doGet(request, response);
   }
 
@@ -145,7 +145,7 @@ public class TestHeaders extends AbstractLightServlet {
    * {@inheritDoc}
    */
   @Override
-  protected long getLastModified(HttpServletRequest request) {
+  public long getLastModified(HttpServletRequest request) {
     // TODO(arjuns): Auto-generated method stub
     // throw new UnsupportedOperationException();
     return -1L;
@@ -155,7 +155,7 @@ public class TestHeaders extends AbstractLightServlet {
    * {@inheritDoc}
    */
   @Override
-  protected void doHead(HttpServletRequest request, HttpServletResponse response) {
+  public void doHead(HttpServletRequest request, HttpServletResponse response) {
     doGet(request, response);
   }
 
@@ -163,7 +163,7 @@ public class TestHeaders extends AbstractLightServlet {
    * {@inheritDoc}
    */
   @Override
-  protected void doOptions(HttpServletRequest request, HttpServletResponse response) {
+  public void doOptions(HttpServletRequest request, HttpServletResponse response) {
     doGet(request, response);
   }
 
@@ -180,7 +180,7 @@ public class TestHeaders extends AbstractLightServlet {
    * {@inheritDoc}
    */
   @Override
-  protected void doPut(HttpServletRequest request, HttpServletResponse response) {
+  public void doPut(HttpServletRequest request, HttpServletResponse response) {
     doGet(request, response);
   }
 }

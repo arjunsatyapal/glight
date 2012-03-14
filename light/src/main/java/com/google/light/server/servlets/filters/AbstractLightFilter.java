@@ -15,10 +15,6 @@
  */
 package com.google.light.server.servlets.filters;
 
-import javax.servlet.http.HttpServletResponse;
-
-import javax.servlet.http.HttpServletRequest;
-
 import com.google.common.base.Throwables;
 import java.io.IOException;
 import java.util.logging.Logger;
@@ -28,6 +24,8 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Servlet Filter for All Light Requests. See {@link FilterPathEnum} to see what all URLs are
@@ -36,7 +34,7 @@ import javax.servlet.ServletResponse;
  * @author Arjun Satyapal
  */
 
-public class ServletFilter implements Filter {
+public abstract class AbstractLightFilter implements Filter {
   private static final Logger logger = Logger.getLogger(Filter.class.getName());
   private FilterConfig filterConfig;
 

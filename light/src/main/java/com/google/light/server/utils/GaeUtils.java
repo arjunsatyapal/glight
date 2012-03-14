@@ -19,8 +19,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.constants.OpenIdAuthDomain.getAuthDomainByValue;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
-import com.google.appengine.api.utils.SystemProperty;
-
 import com.google.apphosting.api.ApiProxy.Environment;
 
 import com.google.apphosting.api.ApiProxy;
@@ -118,6 +116,16 @@ public class GaeUtils {
   // Utility Class.
   private GaeUtils() {
   }
+  
+  /**
+   * Returns Appengine AppId for the current environment.
+   * 
+   * @return
+   */
+  public static String getAppId() {
+    Environment env = ApiProxy.getCurrentEnvironment();
+    return checkNotBlank(env.getAppId());
+  }
 
   /**
    * Returns true if AppEngine is production instance for Light. This method depends on 
@@ -127,8 +135,7 @@ public class GaeUtils {
    * @return
    */
   public static boolean isProductionServer() {
-    Environment env = ApiProxy.getCurrentEnvironment();
-    if (env.getAppId().equals("light-prod")) {
+    if (getAppId().equals("light-prod")) {
       return true;
     } else {
       return false;
@@ -142,10 +149,7 @@ public class GaeUtils {
    * @return
    */
   public static boolean isDevServer() {
-    if (SystemProperty.environment.value() == SystemProperty.Environment.Value.Development) {
-      return true;
-    }
-    return false;
+    return !isProductionServer() && getAppId().equals("test");
   }
   
   /**
@@ -156,8 +160,7 @@ public class GaeUtils {
    * @return True when its neither ProductionServer nor DevServer.
    */
   public static boolean isQaServer() {
-    Environment env = ApiProxy.getCurrentEnvironment();
-    return !isProductionServer() && env.getAppId().equals("light-qa");
+    return !isProductionServer() && getAppId().equals("light-qa");
   }
   
 }

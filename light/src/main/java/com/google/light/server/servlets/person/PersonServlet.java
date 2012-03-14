@@ -49,7 +49,7 @@ public class PersonServlet extends AbstractLightServlet {
    * {@inheritDoc}
    */
   @Override
-  protected void doDelete(HttpServletRequest request, HttpServletResponse response) {
+  public void doDelete(HttpServletRequest request, HttpServletResponse response) {
     throw new MethodNotAllowedException("For Person, delete is not allowed.");
   }
 
@@ -57,7 +57,7 @@ public class PersonServlet extends AbstractLightServlet {
    * {@inheritDoc}
    */
   @Override
-  protected void doGet(HttpServletRequest request, HttpServletResponse response) {
+  public void doGet(HttpServletRequest request, HttpServletResponse response) {
     // TODO(arjuns): Auto-generated method stub
     try {
       response.getWriter().println("hello : " + GaeUtils.getGaeUserEmail());
@@ -71,7 +71,7 @@ public class PersonServlet extends AbstractLightServlet {
    * {@inheritDoc}
    */
   @Override
-  protected long getLastModified(HttpServletRequest request) {
+  public long getLastModified(HttpServletRequest request) {
     /*
      * TODO(arjuns): Fix this by replacing from MemCache. At present defaulting to -1 so that
      * request can be executed.
@@ -83,7 +83,7 @@ public class PersonServlet extends AbstractLightServlet {
    * {@inheritDoc}
    */
   @Override
-  protected void doHead(HttpServletRequest request, HttpServletResponse response) {
+  public void doHead(HttpServletRequest request, HttpServletResponse response) {
     // TODO(arjuns): Auto-generated method stub
     throw new UnsupportedOperationException();
   }
@@ -92,7 +92,7 @@ public class PersonServlet extends AbstractLightServlet {
    * {@inheritDoc}
    */
   @Override
-  protected void doOptions(HttpServletRequest request, HttpServletResponse response) {
+  public void doOptions(HttpServletRequest request, HttpServletResponse response) {
     // TODO(arjuns): Auto-generated method stub
     throw new UnsupportedOperationException();
   }
@@ -164,7 +164,7 @@ public class PersonServlet extends AbstractLightServlet {
    * {@inheritDoc}
    */
   @Override
-  protected void doPut(HttpServletRequest request, HttpServletResponse response) {
+  public void doPut(HttpServletRequest request, HttpServletResponse response) {
     // TODO(arjuns): Auto-generated method stub
     throw new UnsupportedOperationException();
   }

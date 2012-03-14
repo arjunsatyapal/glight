@@ -28,27 +28,29 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
 /**
- * Servlet Filter for QA and Test environment.
+ * Servlet Filter for All Light Requests. See {@link FilterPathEnum} to see what all URLs are
+ * covered by this Filter.
  * 
  * @author Arjun Satyapal
  */
 
-public class TestServletFilter extends AbstractLightFilter {
+public class ProdServletFilter extends AbstractLightFilter {
   private static final Logger logger = Logger.getLogger(Filter.class.getName());
+
   @Inject
-  private TestServletFilter() {
-    if (GaeUtils.isProductionServer()) {
-      String msg = "TestServletFilter should be injected for Test&QA environment only.";
+  private ProdServletFilter() {
+    if (!GaeUtils.isProductionServer()) {
+      String msg = "ProdServletFilter should not be injected for non-production environments.";
       logger.severe(msg);
       throw new FilterInstanceBindingException(msg);
     }
 
-    NamespaceManager.set("test");
+    NamespaceManager.set("");
   }
 
   @Override
   public void doFilter(ServletRequest req, ServletResponse res, FilterChain filterChain)
       throws IOException, ServletException {
-   super.doFilter(req, res, filterChain);
+    super.doFilter(req, res, filterChain);
   }
 }
