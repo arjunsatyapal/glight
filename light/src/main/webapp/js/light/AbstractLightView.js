@@ -20,13 +20,13 @@ define(['dojo/_base/declare'], function(declare) {
    * @class
    * @name light.AbstractLightView
    */
-  return declare('light.AbstractLightController', null, {
+  return declare('light.controllers.AbstractLightController', null, {
     /** @lends light.AbstractLightView# */
 
     /**
      * Defines the controller for this view.
      * 
-     * @param {light.AbstractLightController}
+     * @param {light.controllers.AbstractLightController}
      *          controller Controller.
      */
     setController: function(controller) {
