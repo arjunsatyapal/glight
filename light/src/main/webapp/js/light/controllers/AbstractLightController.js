@@ -19,10 +19,10 @@ define(['dojo/_base/declare'],
    * Base abstract class for all light controllers.
    * 
    * @class
-   * @name light.AbstractLightController
+   * @name light.controllers.AbstractLightController
    */
-  return declare('light.AbstractLightController', null, {
-    /** @lends light.AbstractLightController# */
+  return declare('light.controllers.AbstractLightController', null, {
+    /** @lends light.controllers.AbstractLightController# */
 
     /**
      * Defines the view for this controller.
