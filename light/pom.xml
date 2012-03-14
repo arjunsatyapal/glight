@@ -706,9 +706,12 @@
               -->
               <scriptLoaderPath>../../../../../src/test/webapp/jsTest/loaderForJasmineMaven.js</scriptLoaderPath>
               <!--
-                Uncomment that to use Firefox instead of HTMLUnit
-                <webDriverClassName>org.openqa.selenium.firefox.FirefoxDriver</webDriverClassName>
+                We need to use Firefox instead of HTMLUnit for now because in the current HTMLUnit
+                there is no implementation of getBoundingClientRect, which is used by dojo during
+                the testing of Light's Views.
               -->
+              <webDriverClassName>org.openqa.selenium.firefox.FirefoxDriver</webDriverClassName>
+              
               <jsSrcDir>${project.basedir}/src/main/webapp/js</jsSrcDir>
               <jsTestSrcDir>${project.basedir}/src/test/webapp/jsTest</jsTestSrcDir>
 
