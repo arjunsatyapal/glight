@@ -13,10 +13,10 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-define(['light/RegisterFormView', 'light/controllers/RegisterFormController',
+define(['light/views/RegisterFormView', 'light/controllers/RegisterFormController',
         'dojo/query', 'lightTest/robot'],
         function(RegisterFormView, RegisterFormController, query, robot) {
-  describe('light.RegisterFormView', function() {
+  describe('light.views.RegisterFormView', function() {
     var controller, view;
     
     beforeEach(function() {
