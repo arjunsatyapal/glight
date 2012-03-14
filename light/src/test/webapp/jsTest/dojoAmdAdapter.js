@@ -13,7 +13,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-"use strict";
 /** @exports dojoAmdAdapter as jstestdriver.dojoAmdAdapter */
 /**
  * <p>Dojo Asynchronous Module Definition Adapter for JsTestDriver
@@ -42,8 +41,8 @@
  *  };
  * </pre></li>
  * <li> You added the dojo/dojo.js to be loaded with your JsTestDriver</li>
- * <li> You added this file (dojoAmdAdapter.js) to be loaded after dojo.js in your
- *      JsTestDriver.conf</li>
+ * <li> You added this file (dojoAmdAdapter.js) to be loaded after dojo.js
+ *      in your JsTestDriver.conf</li>
  * <li> You created a empty file called "dojoAmdAdapterWait.js" and made it be
  *      loaded by JSTestDriver after this file (dojoAmdAdapter.js).</li>
  * <li> Your test files and their dependencies are not on load section! Use
@@ -240,7 +239,8 @@ jstestdriver.dojoAmdAdapter = (function() {
                 function(fileData) {
 
           // Parsing the list
-          lastAction = 'Parsing JSON data from ' + dojoAmdAdapterConfig.testListFile;
+          lastAction = 'Parsing JSON data from ' +
+              dojoAmdAdapterConfig.testListFile;
           var data;
           try {
             data = jstestdriver.JSON.parse(fileData);
@@ -254,7 +254,8 @@ jstestdriver.dojoAmdAdapter = (function() {
           }
 
           // Reformatting files to proper module ids
-          lastAction = 'Iterating over JSON data from ' + dojoAmdAdapterConfig.testListFile;
+          lastAction = 'Iterating over JSON data from ' +
+              dojoAmdAdapterConfig.testListFile;
           var mids = [];
           for (var i = 0, len = data.length; i < len; i++) {
             var mid = dojoAmdAdapterConfig.testMidFormatter(data[i]);
