@@ -72,8 +72,8 @@ define(['dojo/_base/declare', 'dojo', 'dojox', 'dojox/data/JsonRestStore'],
     };
   }
 
-  return declare('light.AbstractLightStore', JsonRestStore, {
-    /** @lends light.AbstractLightStore# */
+  return declare('light.stores.AbstractLightStore', JsonRestStore, {
+    /** @lends light.stores.AbstractLightStore# */
 
     /**
      * This is the base abstract class for all Light stores.

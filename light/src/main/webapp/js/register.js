@@ -35,7 +35,7 @@ function setupLightPage() {
     }
   });*/
   
-  require(['dojo/query', 'light/RegisterFormView', 'light/RegisterFormController', 'light/PersonStore'],
+  require(['dojo/query', 'light/RegisterFormView', 'light/RegisterFormController', 'light/stores/PersonStore'],
           function($, RegisterFormView, RegisterFormController, PersonStore) {
     $('body')[0].setAttribute('class', 'claro');
 

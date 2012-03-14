@@ -13,17 +13,17 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-define(['dojo/_base/declare', 'light/AbstractLightStore'],
+define(['dojo/_base/declare', 'light/stores/AbstractLightStore'],
         function(declare, AbstractLightStore) {
 
-  return declare('light.PersonStore', AbstractLightStore, {
-    /** @lends light.PersonStore# */
+  return declare('light.stores.PersonStore', AbstractLightStore, {
+    /** @lends light.stores.PersonStore# */
 
     lightTarget: '/api/person',
 
     /**
      * Store object for Person resource.
-     * @extends light.AbstractLightStore
+     * @extends light.stores.AbstractLightStore
      * @constructs
      */
     constructor: function(options) {
