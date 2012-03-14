@@ -15,6 +15,8 @@
  */
 package com.google.light.server.guice;
 
+import com.google.common.base.Preconditions;
+
 import com.google.inject.Scopes;
 import com.google.inject.servlet.ServletModule;
 import com.google.light.server.servlets.filters.FilterPathEnum;
@@ -33,7 +35,11 @@ class LightServletModule extends ServletModule {
 
   @Override
   protected void configureServlets() {
-
+    // One of the dev/qa/prod should be true.
+    Preconditions.checkArgument(GaeUtils.isDevServer()
+        || GaeUtils.isQaServer()
+        || GaeUtils.isProductionServer(), "Unknown AppId : " + GaeUtils.getAppId());
+    
     // First registering the Filters.
     if (GaeUtils.isProductionServer()) {
       initFilters(FilterPathEnum.API);

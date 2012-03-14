@@ -19,6 +19,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.constants.OpenIdAuthDomain.getAuthDomainByValue;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
+import com.google.light.server.constants.LightAppIdEnum;
+
 import com.google.apphosting.api.ApiProxy.Environment;
 
 import com.google.apphosting.api.ApiProxy;
@@ -116,7 +118,7 @@ public class GaeUtils {
   // Utility Class.
   private GaeUtils() {
   }
-  
+
   /**
    * Returns Appengine AppId for the current environment.
    * 
@@ -128,39 +130,39 @@ public class GaeUtils {
   }
 
   /**
-   * Returns true if AppEngine is production instance for Light. This method depends on 
+   * Returns true if AppEngine is production instance for Light. This method depends on
    * ApplicationId for Application.
    * 
    * TODO(arjuns): add test for this.
+   * 
    * @return
    */
   public static boolean isProductionServer() {
-    if (getAppId().equals("light-prod")) {
-      return true;
-    } else {
-      return false;
-    }
+    return LightAppIdEnum.PROD == LightAppIdEnum.getLightAppIdEnum();
   }
 
   /**
-   * Returns true if AppEngine is running on Devserver.
-   * 
-   * // TODO(arjuns): Add test for this.
-   * @return
-   */
-  public static boolean isDevServer() {
-    return !isProductionServer() && getAppId().equals("test");
-  }
-  
-  /**
-   * Returns true for an Application which is running on AppEngine production environment,
-   * but is not a Production Application. 
+   * Returns true for an Application which is running on AppEngine production environment, but is
+   * not a Production Application.
    * 
    * TODO(arjuns): Add test for this.
+   * 
    * @return True when its neither ProductionServer nor DevServer.
    */
   public static boolean isQaServer() {
-    return !isProductionServer() && getAppId().equals("light-qa");
+    return !isProductionServer()
+        && LightAppIdEnum.QA == LightAppIdEnum.getLightAppIdEnum();
   }
-  
+
+  /**
+   * Returns true if AppEngine is running on Devserver / Unittest.
+   * 
+   * TODO(arjuns): Add test for this.
+   * 
+   * @return
+   */
+  public static boolean isDevServer() {
+    return !isProductionServer()
+        && LightAppIdEnum.TEST == LightAppIdEnum.getLightAppIdEnum();
+  }
 }

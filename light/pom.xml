@@ -261,6 +261,7 @@
 
     <!--
       Mockito Dependency :
+      Scope = test
     -->
     <dependency>
       <groupId>org.mockito</groupId>

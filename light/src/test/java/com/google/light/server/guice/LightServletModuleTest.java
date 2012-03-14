@@ -24,12 +24,13 @@ import static com.google.light.testingutils.TestingUtils.getRandomUserId;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
+
+import com.google.light.server.constants.LightAppIdEnum;
 
 import com.google.light.server.servlets.filters.ProdServletFilter;
 
@@ -94,7 +95,7 @@ public class LightServletModuleTest {
     ServletContext context = mock(ServletContext.class);
     when(filterConfig.getServletContext()).thenReturn(context);
     filter.init(filterConfig);
-    System.out.println(GaeUtils.getAppId());
+    filter.destroy();
   }
 
   /**
@@ -102,29 +103,37 @@ public class LightServletModuleTest {
    */
   @Test
   public void test_validateTestFilterBinding() {
-    System.out.println(NamespaceManager.get());
     // Default env = test.
+    gaeTestingUtils.tearDown();
+    gaeTestingUtils.setAppId("test");
+    gaeTestingUtils.setUp();
+    
     Injector testInjector = Guice.createInjector(new LightServletModule());
     assertTrue(isDevServer());
     assertFalse(isQaServer());
     assertFalse(isProductionServer());
+    assertEquals(LightAppIdEnum.TEST, LightAppIdEnum.getLightAppIdEnum());
     assertNotNull(testInjector.getInstance(TestServletFilter.class));
     assertEquals("test", NamespaceManager.get());
+    
     
     try {
       testInjector.getInstance(ProdServletFilter.class);
       fail("should have failed.");
     } catch (ProvisionException e) {
       assertTrue(e.getCause() instanceof FilterInstanceBindingException);
-    } 
+    } finally {
+      testInjector.getInstance(GuiceFilter.class).destroy();
+    }
     
     // Now simulating : qa.
     gaeTestingUtils.tearDown();
-    gaeTestingUtils.setAppId("light-qa");
+    gaeTestingUtils.setAppId("s~light-qa");
     gaeTestingUtils.setUp();
     assertFalse(isDevServer());
     assertTrue(isQaServer());
     assertFalse(isProductionServer());
+    assertEquals(LightAppIdEnum.QA, LightAppIdEnum.getLightAppIdEnum());
     
     Injector qaInjector = Guice.createInjector(new LightServletModule());
     assertNotNull(qaInjector.getInstance(TestServletFilter.class));
@@ -140,19 +149,21 @@ public class LightServletModuleTest {
       gaeTestingUtils.setAppId("test");
       gaeTestingUtils.setUp();
       assertTrue(GaeUtils.isDevServer());
+      qaInjector.getInstance(GuiceFilter.class).destroy();
     }
     
     // Now simulating Prod.
     gaeTestingUtils.tearDown();
-    gaeTestingUtils.setAppId("light-prod");
+    gaeTestingUtils.setAppId("s~light-prod");
     gaeTestingUtils.setUp();
     Injector prodInjector = Guice.createInjector(new LightServletModule());
     assertFalse(isDevServer());
     assertFalse(isQaServer());
     assertTrue(isProductionServer());
+    assertEquals(LightAppIdEnum.PROD, LightAppIdEnum.getLightAppIdEnum());
     assertNotNull(prodInjector.getInstance(ProdServletFilter.class));
     assertEquals("", NamespaceManager.get());
-
+    
     try {
       prodInjector.getInstance(TestServletFilter.class);
       fail("should have failed.");
@@ -165,6 +176,7 @@ public class LightServletModuleTest {
       gaeTestingUtils.setAppId("test");
       gaeTestingUtils.setUp();
       assertTrue(GaeUtils.isDevServer());
+      prodInjector.getInstance(GuiceFilter.class).destroy();
     }
   }
 }
