@@ -13,8 +13,8 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-define(['light/PersonStore'], function(PersonStore) {
-  describe('light.PersonStore constructor', function() {
+define(['light/stores/PersonStore'], function(PersonStore) {
+  describe('light.stores.PersonStore constructor', function() {
     it('should not throw', function() {
       expect(function() {
         new PersonStore();

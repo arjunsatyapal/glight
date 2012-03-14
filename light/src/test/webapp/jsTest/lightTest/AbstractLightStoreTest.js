@@ -13,9 +13,9 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-define(['dojo/_base/declare', 'light/AbstractLightStore'],
+define(['dojo/_base/declare', 'light/stores/AbstractLightStore'],
         function(declare, AbstractLightStore) {
-  describe('light.AbstractLightStore subclass constructor', function() {
+  describe('light.stores.AbstractLightStore subclass constructor', function() {
     describe('without a target', function() {
       it('should throw', function() {
         var ResourceStore = declare(AbstractLightStore, {
