@@ -14,7 +14,7 @@
  * the License.
  */
 define(['light/controllers/RegisterFormController', 'light/stores/PersonStore',
-        'light/RegisterFormView'],
+        'light/views/RegisterFormView'],
         function(RegisterFormController, PersonStore, RegisterFormView) {
   describe('light.controllers.RegisterFormController', function() {
     var controller, personStore, view;

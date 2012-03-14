@@ -15,7 +15,7 @@
  */
 define(['dojo/_base/declare', 'dijit/_Widget', 'dijit/_TemplatedMixin',
         'dijit/_WidgetsInTemplateMixin', 'dojo/text!./RegisterFormView.html',
-        'dijit/Tooltip', 'light/AbstractLightView', 'dojo/query',
+        'dijit/Tooltip', 'light/views/AbstractLightView', 'dojo/query',
         'dijit/form/ValidationTextBox', 'dijit/form/Textarea',
         'dijit/form/Button', 'dijit/form/CheckBox', 'dijit/Dialog',
         'dijit/form/Form'],
@@ -24,13 +24,13 @@ define(['dojo/_base/declare', 'dijit/_Widget', 'dijit/_TemplatedMixin',
                 AbstractLightView, query) {
   /**
    * @class
-   * @name light.RegisterFormView
+   * @name light.views.RegisterFormView
    */
-  return declare('light.RegisterFormView',
+  return declare('light.views.RegisterFormView',
           [AbstractLightView, _Widget,
            _TemplatedMixin, _WidgetsInTemplateMixin], {
 
-      /** @lends light.RegisterFormView# */
+      /** @lends light.views.RegisterFormView# */
 
       templateString: template,
 

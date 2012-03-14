@@ -1,4 +1,4 @@
-define(['dojo/query', 'light/AbstractLightView'], 
+define(['dojo/query', 'light/views/AbstractLightView'], 
         function($, AbstractLightView) {
   /**
    * Utility Methods for testing UI.

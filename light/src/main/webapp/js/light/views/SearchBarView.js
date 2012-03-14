@@ -18,7 +18,7 @@ define(['dojo/_base/declare', 'dijit/_Widget', 'dijit/_TemplatedMixin',
         'dijit/form/TextBox', 'dijit/form/Button'],
         function(declare, _Widget, _TemplatedMixin,
                 _WidgetsInTemplateMixin, template) {
-    return declare('light.SearchBarView',
+    return declare('light.views.SearchBarView',
             [_Widget, _TemplatedMixin, _WidgetsInTemplateMixin], {
         templateString: template,
         constructor: function() {
