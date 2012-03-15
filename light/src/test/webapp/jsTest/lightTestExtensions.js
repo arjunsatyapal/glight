@@ -18,6 +18,40 @@
  * to make Light tests easier.
  */
 (function() {
+  /*
+   * Overriding jasmine dummy specFilter so we can run only
+   * a subset of the tests using the queryString ?spec=.
+   * This method was actually borrowed from the following file:
+   * https://github.com/searls/jasmine-maven-plugin/blob/cdd2091be640f323a2f7e56c932a1e07de9d8830/src/main/resources/vendor/js/jasmine-html.js
+   *
+   * <p>This implementation for a specFilter is actually used by the
+   * jasmine-maven-plugin, but for some reason it is limited to filter
+   * only the Jasmine Reporter (viewing of results), not the actual
+   * execution of tests.
+   * 
+   * <p>Example of use: If you spec fullname is ABC and you put a querystring
+   * ?spec=A, your spec will be executed. Same happens if you use ?spec=AB.
+   * But if you use ?spec=X or ?spec=AX the ABC spec will not be executed.
+   */
+  jasmine.getEnv().specFilter = function(spec) {
+    var paramMap = {};
+    var params = window.location.search.substring(1).split('&');
+    for (var i = 0; i < params.length; i++) {
+      var p = params[i].split('=');
+      paramMap[decodeURIComponent(p[0])] = decodeURIComponent(p[1]);
+    }
+
+    if (!paramMap.spec) {
+      return true;
+    }
+    return spec.getFullName().indexOf(paramMap.spec) === 0;
+  }
+
+  /*
+   * Patching the methods jasmine.Spec.prototype.waitsFor
+   * and jasmine.WaitsForBlock.prototype.execute
+   * to accept javascript promises.
+   */
   jasmine.Spec.prototype.waitsFor = function(latchFunction, optional_timeoutMessage, optional_timeout) {
     var latchFunction_ = null;
     var optional_timeoutMessage_ = null;
@@ -28,7 +62,7 @@
       switch (typeof arg) {
         // LightMod: Adding support for promises
         case 'object':
-          if(typeof arg.then != 'function')
+          if (typeof arg.then != 'function')
             throw new Error('Object to wait for is not a promise!');
           latchFunction_ = arg;
           break;
@@ -48,15 +82,15 @@
     this.addToQueue(waitsForFunc);
     return this;
   };
-  
+
   jasmine.WaitsForBlock.prototype.execute = function(onComplete) {
     if (jasmine.VERBOSE) {
       this.env.reporter.log('>> Jasmine waiting for ' + (this.message || 'something to happen'));
     }
-    
+
     // LightMod: Adding support for promises
-    if(typeof this.latchFunction == 'object') {
-      var failFunc = function(){
+    if (typeof this.latchFunction == 'object') {
+      var failFunc = function() {
         this.spec.fail(new Error('Promise failed'));
         onComplete();
       }
@@ -68,7 +102,7 @@
       }
       return;
     }
-    
+
     var latchFunctionResult;
     try {
       latchFunctionResult = this.latchFunction.apply(this.spec);
@@ -97,5 +131,5 @@
       }, jasmine.WaitsForBlock.TIMEOUT_INCREMENT);
     }
   };
-  
+
 })();

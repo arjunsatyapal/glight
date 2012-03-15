@@ -17,6 +17,8 @@ dojoConfig = {
   async: true,
   isDebug: true,
   waitSeconds: 2,
+  // Commented part used for testing i18n
+  // locale: 'pt-br',
   deferredOnError: function(e) { console.log(e.message, e.stack); },
     packages: [{
         name: 'light',

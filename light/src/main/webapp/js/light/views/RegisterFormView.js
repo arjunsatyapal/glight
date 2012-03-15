@@ -13,26 +13,36 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-define(['dojo/_base/declare', 'dijit/_Widget', 'dijit/_TemplatedMixin',
+define(['dojo/_base/declare', 'dijit/focus',
         'dijit/_WidgetsInTemplateMixin', 'dojo/text!./RegisterFormView.html',
-        'dijit/Tooltip', 'light/views/AbstractLightView', 'dojo/query',
+        'dojo/i18n!light/nls/RegisterFormMessages',
+        'dijit/Tooltip', 'light/views/TemplatedLightView', 'dojo/query',
         'dijit/form/ValidationTextBox', 'dijit/form/Textarea',
         'dijit/form/Button', 'dijit/form/CheckBox', 'dijit/Dialog',
         'dijit/form/Form'],
-        function(declare, _Widget, _TemplatedMixin,
-                _WidgetsInTemplateMixin, template, Tooltip,
-                AbstractLightView, query) {
+        function(declare, focusUtil, _WidgetsInTemplateMixin, template,
+                messages, Tooltip, TemplatedLightView, query) {
   /**
    * @class
    * @name light.views.RegisterFormView
    */
   return declare('light.views.RegisterFormView',
-          [AbstractLightView, _Widget,
-           _TemplatedMixin, _WidgetsInTemplateMixin], {
+          [TemplatedLightView, _WidgetsInTemplateMixin], {
 
       /** @lends light.views.RegisterFormView# */
 
       templateString: template,
+
+      messages: messages,
+      
+      postCreate: function() {
+        // TODO(waltercacau): Test this when we discover what is more accessible.
+        // Making tooltip autohide
+        var self = this;
+        this._tosCheckbox.on('blur', function() {
+          Tooltip.hide(this.domNode.parentNode);
+        });
+      },
 
       /**
        * Return's the current data in the form.
@@ -76,9 +86,11 @@ define(['dojo/_base/declare', 'dijit/_Widget', 'dijit/_TemplatedMixin',
       _tosValidation: function() {
         var ret = this._tosCheckbox.get('checked');
         if (!ret) {
-          Tooltip.show('You should agree to the Terms of Service',
+          // TODO(waltercacau): Discover how to make the tooltip readable for a screenreader.
+          Tooltip.show(this.messages.tosTooltipError,
                   this._tosCheckbox.domNode.parentNode,
                   [], !this.isLeftToRight());
+          //focusUtil.focus(this._tosCheckbox);
         }
         return ret;
       },
