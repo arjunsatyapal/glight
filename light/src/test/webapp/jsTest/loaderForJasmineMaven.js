@@ -97,14 +97,8 @@ var setupDojoLoaderForJasmine = function() {
     failed = true;
     debug = Array.prototype.slice.call(arguments, 0);
   });
-  /*require(['dojo/domReady!'], function() {
-    document.body.setAttribute('class', 'claro');
-  })*/
 };
 
-/*document.write(
-    '<link rel="stylesheet" type="text/css" '+
-    'href="src/main/webapp/js/external/djk/dijit/themes/claro/claro.css">');*/
 document.write(
     '<script src="src/test/webapp/jsTest/external/syn.js"></script>');
 document.write(
