@@ -13,21 +13,12 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-define(['dojo/_base/declare', 'dojo/hash'], function(declare, dojoHash) {
-  /**
-   * Small wrapper around dojo's hash functionality to enable better testing
-   * @class
-   * @name light.URLHashUtil
-   */
-  return {
-    /** @lends light.URLHashUtil */
-
-    get: function() {
-      return dojoHash();
-    },
-
-    set: function(hash) {
-      return dojoHash(hash);
-    }
-  };
+define(['light/PersonStore'], function(PersonStore) {
+  describe('light.PersonStore constructor', function() {
+    it('should not throw', function() {
+      expect(function() {
+        new PersonStore();
+      }).not.toThrow();
+    });
+  });
 });

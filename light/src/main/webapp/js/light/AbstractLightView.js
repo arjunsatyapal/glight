@@ -13,21 +13,25 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-define(['dojo/_base/declare', 'dojo/hash'], function(declare, dojoHash) {
+define(['dojo/_base/declare'], function(declare) {
   /**
-   * Small wrapper around dojo's hash functionality to enable better testing
+   * Base abstract class for all light views.
+   * 
    * @class
-   * @name light.URLHashUtil
+   * @name light.AbstractLightView
    */
-  return {
-    /** @lends light.URLHashUtil */
+  return declare('light.AbstractLightController', null, {
+    /** @lends light.AbstractLightView# */
 
-    get: function() {
-      return dojoHash();
-    },
-
-    set: function(hash) {
-      return dojoHash(hash);
+    /**
+     * Defines the controller for this view.
+     * 
+     * @param {light.AbstractLightController}
+     *          controller Controller.
+     */
+    setController: function(controller) {
+      this._controller = controller;
     }
-  };
+
+  });
 });
