@@ -13,11 +13,18 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-"use strict";
-define(["dojo/_base/declare", "dijit/_Widget", "dijit/_TemplatedMixin", "dijit/_WidgetsInTemplateMixin", "dojo/text!./SearchBarView.html", "dijit/form/TextBox", "dijit/form/Button"], 
-        function(declare, _Widget, _TemplatedMixin, _WidgetsInTemplateMixin, template) {
-    return declare("light.SearchBarView", [_Widget, _TemplatedMixin, _WidgetsInTemplateMixin], {
-        templateString: template
+define(['dojo/_base/declare', 'dijit/_Widget', 'dijit/_TemplatedMixin',
+        'dijit/_WidgetsInTemplateMixin', 'dojo/text!./SearchBarView.html',
+        'dijit/form/TextBox', 'dijit/form/Button'],
+        function(declare, _Widget, _TemplatedMixin,
+                _WidgetsInTemplateMixin, template) {
+    return declare('light.SearchBarView',
+            [_Widget, _TemplatedMixin, _WidgetsInTemplateMixin], {
+        templateString: template,
+        constructor: function() {
+          this.domNode.style.width = '100%';
+          this.domNode.style.height = '100%';
+        }
     });
-     
+
 });
