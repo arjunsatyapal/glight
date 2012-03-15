@@ -16,16 +16,15 @@
 package com.google.light.server.manager.implementation;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkPersonId;
 
-import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.light.server.exception.unchecked.IdShouldNotBeSet;
 import com.google.light.server.manager.interfaces.PersonManager;
 import com.google.light.server.persistence.dao.PersonDao;
 import com.google.light.server.persistence.entity.person.PersonEntity;
-import com.google.light.server.utils.GaeUtils;
-import com.google.light.server.utils.LightPreconditions;
+import com.google.light.server.servlets.SessionManager;
 
 /**
  * Implementation class for {@link PersonManager}
@@ -33,12 +32,15 @@ import com.google.light.server.utils.LightPreconditions;
  * @author Arjun Satyapal
  */
 public class PersonManagerImpl implements PersonManager {
+  private SessionManager sessionManager;
   private PersonDao personDao;
 
   @Inject
-  public PersonManagerImpl(PersonDao personDao) {
-    LightPreconditions.checkPersonIsLoggedIn();
-    this.personDao = Preconditions.checkNotNull(personDao);
+  public PersonManagerImpl(SessionManager sessionManager, PersonDao personDao) {
+    this.sessionManager = checkNotNull(sessionManager);
+    this.personDao = checkNotNull(personDao);
+    
+    checkArgument(sessionManager.isUserLoggedIn());
   }
 
   /**
@@ -63,7 +65,7 @@ public class PersonManagerImpl implements PersonManager {
 //    entity.addIdProviderDetail(currIdProviderDetail);
 
     checkArgument(entity.getEmail() == null);
-    entity.setEmail(GaeUtils.getGaeUserEmail());
+    entity.setEmail(sessionManager.getEmail());
     
     // This is a heavy operation, so perform this validation just before persisting.
     PersonEntity personByEmail = getPersonByEmail(entity.getEmail());

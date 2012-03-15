@@ -17,24 +17,18 @@ package com.google.light.server.servlets.person;
 
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
-import java.io.IOException;
-import org.junit.BeforeClass;
-
 import com.google.api.client.http.HttpRequestFactory;
-
-import com.google.api.client.http.javanet.NetHttpTransport;
-
-import com.google.api.client.json.jackson.JacksonFactory;
-
-import com.google.api.client.json.JsonFactory;
-
 import com.google.api.client.http.HttpTransport;
-
-import com.google.light.testingutils.OpenIdCookieProvider;
-
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.jackson.JacksonFactory;
 import com.google.light.server.servlets.AbstractLightServlet;
+import com.google.light.testingutils.FakeLoginHelper;
+import com.google.light.testingutils.TestingUtils;
+import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -43,7 +37,8 @@ import org.junit.Test;
  * @author Arjun Satyapal
  */
 public abstract class AbstractLightIntegrationTest {
-  protected static OpenIdCookieProvider cookieProvider;
+  protected static FakeLoginHelper loginProvider;
+  protected static String userId;
   protected static String email;
 
   protected static HttpTransport HTTP_TRANSPORT = new NetHttpTransport();
@@ -63,18 +58,19 @@ public abstract class AbstractLightIntegrationTest {
     } else {
       serverUrl = "http://localhost:8080";
     }
-    // serverUrl = "http://light-qa.appspot.com";
+     serverUrl = "http://light-qa.appspot.com";
 
     if (serverUrl.startsWith("http://localhost")) {
       isLocalHost = true;
     } else {
       isLocalHost = false;
     }
-
+    
+    userId = TestingUtils.getRandomUserId();
     email = "unit-test@myopenedu.com";
 
     try {
-      cookieProvider = new OpenIdCookieProvider(isLocalHost, email, serverUrl);
+      loginProvider = new FakeLoginHelper(serverUrl,  userId, email, false);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

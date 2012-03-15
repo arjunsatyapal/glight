@@ -13,21 +13,27 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.server.constants;
+package com.google.light.server.annotations;
 
-import org.junit.Test;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.TYPE;
+
+import com.google.light.server.guice.scope.LightScope;
+
+import com.google.inject.ScopeAnnotation;
+
+import java.lang.annotation.Retention;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import java.lang.annotation.Target;
 
 /**
- * All tests for Enum classes should extend this.
- * 
- * TODO(arjuns) : Add test for uniqueness.
+ * {@link ScopeAnnotation} for {@link LightScope}.
  * 
  * @author Arjun Satyapal
  */
-public interface EnumTestInterface {
-  /**
-   * Test count in order to catch accidental deletions.
-   */
-  @Test
-  public void test_count();
+
+@Target({ TYPE, METHOD })
+@Retention(RUNTIME)
+@ScopeAnnotation
+public @interface AnotLightScope {
 }

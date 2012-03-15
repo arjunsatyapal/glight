@@ -13,7 +13,9 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.server.exception.unchecked;
+package com.google.light.server.exception.unchecked.httpexception;
+
+import com.google.light.server.constants.HttpStatusCodesEnum;
 
 /**
  * This indicates that in order to perform the requested task, user has to login.
@@ -21,33 +23,12 @@ package com.google.light.server.exception.unchecked;
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
-public class PersonLoginRequiredException extends LightRuntimeException {
-  /**
-   * {@inheritDoc}
-   */
-  public PersonLoginRequiredException() {
-      super();
-  }
-
+public class PersonLoginRequiredException extends LightHttpException {
   /**
    * {@inheritDoc}
    * @param message
    */
   public PersonLoginRequiredException(String message) {
-      super(message);
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  public PersonLoginRequiredException(String message, Throwable cause) {
-      super(message, cause);
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  public PersonLoginRequiredException(Throwable cause) {
-      super(cause);
+      super(HttpStatusCodesEnum.UNAUTHORIZED, message);
   }
 }

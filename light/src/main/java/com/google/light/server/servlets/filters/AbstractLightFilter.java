@@ -15,17 +15,21 @@
  */
 package com.google.light.server.servlets.filters;
 
+import static com.google.light.server.utils.GuiceUtils.getKeyForScopeSeed;
+import com.google.light.server.annotations.AnotSession;
+
 import com.google.common.base.Throwables;
-import java.io.IOException;
+import com.google.inject.Inject;
+import com.google.light.server.guice.scope.LightScope;
 import java.util.logging.Logger;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 /**
  * Servlet Filter for All Light Requests. See {@link FilterPathEnum} to see what all URLs are
@@ -38,19 +42,33 @@ public abstract class AbstractLightFilter implements Filter {
   private static final Logger logger = Logger.getLogger(Filter.class.getName());
   private FilterConfig filterConfig;
 
+  @Inject
+  protected LightScope lightScope;
+
   @Override
-  public void doFilter(ServletRequest req, ServletResponse res, FilterChain filterChain)
-      throws IOException, ServletException {
+  public void doFilter(ServletRequest req, ServletResponse res,
+      FilterChain filterChain) {
     try {
       HttpServletRequest request = (HttpServletRequest) req;
       HttpServletResponse response = (HttpServletResponse) res;
+
+      HttpSession session = request.getSession();
       
       // TODO(arjuns) : Add changeLog.
+      lightScope.enter();
+      
+      if (session.isNew()) {
+        session.invalidate();
+      } else {
+        lightScope.seed(getKeyForScopeSeed(HttpSession.class, AnotSession.class), session);
+            
+      }
       filterChain.doFilter(request, response);
     } catch (Exception e) {
       // TODO(arjuns) : check log(level, message, throwable) logs whole stack.
       logger.severe("Failed due to : " + Throwables.getStackTraceAsString(e));
     } finally {
+      lightScope.exit();
     }
   }
 

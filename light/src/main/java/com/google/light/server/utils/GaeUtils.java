@@ -19,15 +19,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.constants.OpenIdAuthDomain.getAuthDomainByValue;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
-import com.google.light.server.constants.LightAppIdEnum;
-
-import com.google.apphosting.api.ApiProxy.Environment;
-
-import com.google.apphosting.api.ApiProxy;
-
 import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
+import com.google.apphosting.api.ApiProxy;
+import com.google.apphosting.api.ApiProxy.Environment;
+import com.google.light.server.constants.LightAppIdEnum;
 import com.google.light.server.constants.OpenIdAuthDomain;
 
 /**
@@ -42,7 +39,7 @@ public class GaeUtils {
    * 
    * @return
    */
-  public static OpenIdAuthDomain getGaeAuthDomain() {
+  public static OpenIdAuthDomain getAuthDomain() {
     return getAuthDomainByValue(checkNotBlank(getUser().getAuthDomain(), "authDomain is blank."));
   }
 
@@ -60,6 +57,7 @@ public class GaeUtils {
    * Get Federated Identity of the Logged in user. This should be called only when user is logged
    * in.
    * 
+   * @deprecated
    * @return
    */
   public static String getFederatedIdentity() {

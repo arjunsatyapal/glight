@@ -17,8 +17,6 @@ package com.google.light.server.servlets.person;
 
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
-import com.google.light.server.utils.GaeUtils;
-
 import com.google.common.base.Charsets;
 import com.google.common.base.Throwables;
 import com.google.common.io.CharStreams;
@@ -28,6 +26,7 @@ import com.google.light.server.exception.unchecked.httpexception.MethodNotAllowe
 import com.google.light.server.exception.unchecked.httpexception.UnsupportedMediaTypeException;
 import com.google.light.server.persistence.entity.person.PersonEntity;
 import com.google.light.server.servlets.AbstractLightServlet;
+import com.google.light.server.utils.GaeUtils;
 import com.google.light.server.utils.JsonUtils;
 import com.google.light.server.utils.XmlUtils;
 import java.io.IOException;
