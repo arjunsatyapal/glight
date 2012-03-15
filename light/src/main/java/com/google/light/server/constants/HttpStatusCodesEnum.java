@@ -15,7 +15,6 @@
  */
 package com.google.light.server.constants;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.constants.HttpStatusCategoryEnum.CLIENT_ERROR;
 import static com.google.light.server.constants.HttpStatusCategoryEnum.INFORMATIONAL;

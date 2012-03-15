@@ -46,7 +46,7 @@
       <url>http://arjunsatyapal-maven.googlecode.com/svn/trunk/repository</url>
     </repository>
   </repositories>
-  
+
   <pluginRepositories>
     <pluginRepository>
       <id>jstd-maven-plugin google code repo</id>
@@ -242,6 +242,7 @@
       <version>4.10</version>
       <scope>test</scope>
     </dependency>
+
     <!--
       Logging Dependency : These dependencies are here just for enabling logging.
       TODO(arjuns): may be good for use to wrap all different logging frameworks.
@@ -258,6 +259,17 @@
       <version>0.9.22</version>
     </dependency>
 
+    <!--
+      Mockito Dependency :
+      Scope = test
+    -->
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <version>1.9.0</version>
+      <scope>test</scope>
+    </dependency>
+    
     <!--
       Objectify Dependency :
       Scope : Production.
@@ -483,6 +495,19 @@
                     <versionRange>[1.0.0,)</versionRange>
                     <goals>
                       <goal>list</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore></ignore>
+                  </action>
+                </pluginExecution>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>com.goldin.plugins</groupId>
+                    <artifactId>maven-copy-plugin</artifactId>
+                    <versionRange>[0.2.3.8-beta-5,)</versionRange>
+                    <goals>
+                      <goal>copy</goal>
                     </goals>
                   </pluginExecutionFilter>
                   <action>

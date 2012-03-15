@@ -15,11 +15,14 @@
  */
 package com.google.light.server.guice;
 
+import com.google.common.base.Preconditions;
 
 import com.google.inject.Scopes;
 import com.google.inject.servlet.ServletModule;
 import com.google.light.server.servlets.filters.FilterPathEnum;
 import com.google.light.server.servlets.path.ServletPathEnum;
+import com.google.light.server.utils.GaeUtils;
+import java.util.logging.Logger;
 
 /**
  * Guice Servlet Module to bind Servlets & Filters to corresponding URL Patterns.
@@ -28,17 +31,27 @@ import com.google.light.server.servlets.path.ServletPathEnum;
  */
 
 class LightServletModule extends ServletModule {
+  private static final Logger logger = Logger.getLogger(LightServletModule.class.getName());
+
   @Override
   protected void configureServlets() {
+    // One of the dev/qa/prod should be true.
+    Preconditions.checkArgument(GaeUtils.isDevServer()
+        || GaeUtils.isQaServer()
+        || GaeUtils.isProductionServer(), "Unknown AppId : " + GaeUtils.getAppId());
+    
     // First registering the Filters.
-    initFilters(FilterPathEnum.API);
-    initFilters(FilterPathEnum.TEST);
+    if (GaeUtils.isProductionServer()) {
+      initFilters(FilterPathEnum.API);
+    } else {
+      initFilters(FilterPathEnum.TEST);
+    }
 
     // Now registering the Servlets.
-    initServlet(ServletPathEnum.PERSON);
-    initServlet(ServletPathEnum.TEST_HEADER);
-    initServlet(ServletPathEnum.TEST_LOGIN);
-    
+    // TODO(arjuns) : Do special handling for TestServlet.
+    for (ServletPathEnum currServlet : ServletPathEnum.values()) {
+      initServlet(currServlet);
+    }
   }
 
   /**
@@ -46,7 +59,10 @@ class LightServletModule extends ServletModule {
    */
   private void initFilters(FilterPathEnum filter) {
     bind(filter.getClazz()).in(Scopes.SINGLETON);
-    filter(filter.getUrlPattern()).through(filter.getClazz());
+    for (String currPattern : filter.getUrlPatterns()) {
+      logger.info("Binding [" + currPattern + "] to filter [" + filter.getClazz() + "].");
+      filter(currPattern).through(filter.getClazz());
+    }
   }
 
   /**
@@ -54,7 +70,10 @@ class LightServletModule extends ServletModule {
    */
   private void initServlet(ServletPathEnum servletPath) {
     bind(servletPath.getClazz()).in(Scopes.SINGLETON);
+    logger.info("Binding [" + servletPath.get() + "] to Servlet [" + servletPath.getClazz() + "].");
     serve(servletPath.get()).with(servletPath.getClazz());
+    logger.info("Binding [" + servletPath.getRoot() + "] to Servlet [" + servletPath.getClazz()
+        + "].");
     serve(servletPath.getRoot()).with(servletPath.getClazz());
   }
 }

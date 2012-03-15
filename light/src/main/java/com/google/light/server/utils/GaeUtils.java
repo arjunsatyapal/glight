@@ -19,6 +19,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.constants.OpenIdAuthDomain.getAuthDomainByValue;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
+import com.google.light.server.constants.LightAppIdEnum;
+
+import com.google.apphosting.api.ApiProxy.Environment;
+
+import com.google.apphosting.api.ApiProxy;
+
 import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
@@ -31,7 +37,7 @@ import com.google.light.server.constants.OpenIdAuthDomain;
  */
 public class GaeUtils {
   /**
-   * Get FederatedAuthDomain for Current Logged in user. This should be called only when user is 
+   * Get FederatedAuthDomain for Current Logged in user. This should be called only when user is
    * Logged in.
    * 
    * @return
@@ -49,7 +55,7 @@ public class GaeUtils {
   public static String getGaeUserEmail() {
     return checkNotBlank(getUser().getEmail(), "userEmail is blank.");
   }
-  
+
   /**
    * Get Federated Identity of the Logged in user. This should be called only when user is logged
    * in.
@@ -59,10 +65,9 @@ public class GaeUtils {
   public static String getFederatedIdentity() {
     // TODO(arjuns) : Fix this with Federated Login.
     return null;
-//    return checkNotBlank(getUser().getFederatedIdentity(), "federatedIdentity is blank.");
+    // return checkNotBlank(getUser().getFederatedIdentity(), "federatedIdentity is blank.");
   }
-  
-  
+
   /**
    * Get GAE User Service.
    * 
@@ -100,10 +105,9 @@ public class GaeUtils {
     return getUserService().isUserLoggedIn();
   }
 
-
   /**
-   * Returns true if current user is Admin.
-   * Returns false if user is not admin / user is not logged in.
+   * Returns true if current user is Admin. Returns false if user is not admin / user is not logged
+   * in.
    * 
    * @return
    */
@@ -113,5 +117,52 @@ public class GaeUtils {
 
   // Utility Class.
   private GaeUtils() {
+  }
+
+  /**
+   * Returns Appengine AppId for the current environment.
+   * 
+   * @return
+   */
+  public static String getAppId() {
+    Environment env = ApiProxy.getCurrentEnvironment();
+    return checkNotBlank(env.getAppId());
+  }
+
+  /**
+   * Returns true if AppEngine is production instance for Light. This method depends on
+   * ApplicationId for Application.
+   * 
+   * TODO(arjuns): add test for this.
+   * 
+   * @return
+   */
+  public static boolean isProductionServer() {
+    return LightAppIdEnum.PROD == LightAppIdEnum.getLightAppIdEnum();
+  }
+
+  /**
+   * Returns true for an Application which is running on AppEngine production environment, but is
+   * not a Production Application.
+   * 
+   * TODO(arjuns): Add test for this.
+   * 
+   * @return True when its neither ProductionServer nor DevServer.
+   */
+  public static boolean isQaServer() {
+    return !isProductionServer()
+        && LightAppIdEnum.QA == LightAppIdEnum.getLightAppIdEnum();
+  }
+
+  /**
+   * Returns true if AppEngine is running on Devserver / Unittest.
+   * 
+   * TODO(arjuns): Add test for this.
+   * 
+   * @return
+   */
+  public static boolean isDevServer() {
+    return !isProductionServer()
+        && LightAppIdEnum.TEST == LightAppIdEnum.getLightAppIdEnum();
   }
 }

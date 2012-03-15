@@ -52,42 +52,42 @@ public abstract class AbstractLightServlet extends HttpServlet {
    * {@inheritDoc}
    */
   @Override
-  protected abstract void doDelete(HttpServletRequest request, HttpServletResponse response);
+  public abstract void doDelete(HttpServletRequest request, HttpServletResponse response);
 
   /**
    * {@inheritDoc}
    */
   @Override
-  protected abstract void doGet(HttpServletRequest request, HttpServletResponse response);
+  public abstract void doGet(HttpServletRequest request, HttpServletResponse response);
 
   /**
    * {@inheritDoc}
    * @return 
    */
   @Override
-  protected abstract long getLastModified(HttpServletRequest request);
+  public abstract long getLastModified(HttpServletRequest request);
 
   /**
    * {@inheritDoc}
    */
   @Override
-  protected abstract void doHead(HttpServletRequest request, HttpServletResponse response);
+  public abstract void doHead(HttpServletRequest request, HttpServletResponse response);
 
   /**
    * {@inheritDoc}
    */
   @Override
-  protected abstract void doOptions(HttpServletRequest request, HttpServletResponse response);
+  public abstract void doOptions(HttpServletRequest request, HttpServletResponse response);
 
   /**
    * {@inheritDoc}
    */
   @Override
-  protected abstract void doPost(HttpServletRequest request, HttpServletResponse response);
+  public abstract void doPost(HttpServletRequest request, HttpServletResponse response);
 
   /**
    * {@inheritDoc}
    */
   @Override
-  protected abstract void doPut(HttpServletRequest request, HttpServletResponse response);
+  public abstract void doPut(HttpServletRequest request, HttpServletResponse response);
 }

@@ -15,6 +15,10 @@
  */
 package com.google.light.server.servlets.filters;
 
+import static com.google.light.server.utils.LightPreconditions.checkNonEmptyList;
+
+import com.google.common.collect.Lists;
+import java.util.List;
 import javax.servlet.Filter;
 
 /**
@@ -23,24 +27,23 @@ import javax.servlet.Filter;
  * @author Arjun Satyapal
  */
 public enum FilterPathEnum {
-  API(ServletFilter.class, "/api/*"),
-  
-  // TODO(arjuns) : Add a separate filter for test.
-  TEST(ServletFilter.class, "/test/*");
+  API(ProdServletFilter.class, Lists.newArrayList("/api/*", "/admin/*")),
+  TEST(TestServletFilter.class, Lists.newArrayList("/*"));
   
   private Class<? extends Filter> clazz;
-  private String urlPattern;
+  private List<String> urlPatterns;
   
-  private FilterPathEnum(Class<? extends Filter> clazz, String urlPattern) {
+  private FilterPathEnum(Class<? extends Filter> clazz, 
+      List<String> urlPatterns) {
     this.clazz = clazz;
-    this.urlPattern = urlPattern;
+    this.urlPatterns = checkNonEmptyList(urlPatterns);
   }
   
   public Class<? extends Filter> getClazz() {
     return clazz;
   }
   
-  public String getUrlPattern() {
-    return urlPattern;
+  public List<String> getUrlPatterns() {
+    return urlPatterns;
   }
 }

@@ -55,7 +55,7 @@ public class GaeTestingUtils {
     //TODO(arjuns) : Figure out what is the difference between federatedAuthority and authDomain.
     // For the time being treating as same.
     initFederatedUser(userId, federatedId, federatedAuthority, isFederated);
-
+    
     gaeTestHelper = new LocalServiceTestHelper(
         new LocalDatastoreServiceTestConfig(),
         new LocalTaskQueueTestConfig(),
@@ -108,6 +108,10 @@ public class GaeTestingUtils {
    */
   public void setEmail(String envEmail) {
     gaeTestHelper.setEnvEmail(envEmail);
+  }
+  
+  public void setAppId(String appId) {
+    gaeTestHelper.setEnvAppId(appId);
   }
 
   /**
