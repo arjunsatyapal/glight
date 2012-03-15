@@ -17,6 +17,11 @@ package com.google.light.server.servlets.path;
 
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
+import com.google.light.server.servlets.test.FakeSessionServlet;
+
+import com.google.light.server.servlets.test.FakeLoginServlet;
+
+
 import com.google.light.server.servlets.admin.ConfigServlet;
 
 import com.google.light.server.exception.unchecked.httpexception.NotFoundException;
@@ -35,30 +40,40 @@ import javax.servlet.http.HttpServlet;
 public enum ServletPathEnum {
   // TODO(arjuns): Add regex checks here.
   // TODO(arjuns) : Find a way to end URLs without /.
-  PERSON(PersonServlet.class, "/api/person", "/api/person/"),
-
-  CONFIG(ConfigServlet.class, "/admin/config", "/admin/config/"),
+  PERSON(PersonServlet.class, false, "/api/person", "/api/person/"),
+  CONFIG(ConfigServlet.class, false, "/admin/config", "/admin/config/"),
   
   // Some test servlets.
-  TEST_HEADER(TestHeaders.class, "/test/testheader", "/test/testheader/"),
-  TEST_LOGIN(TestLogin.class, "/test/testlogin", "/test/testlogin/");
+  FAKE_LOGIN(FakeLoginServlet.class, true, "/test/fakelogin", "/test/fakelogin/"),
+  FAKE_SESSION(FakeSessionServlet.class, true, "/test/fakesession", "/test/fakesession/"),
+  TEST_HEADER(TestHeaders.class, true, "/test/testheader", "/test/testheader/"),
+  TEST_LOGIN(TestLogin.class, true, "/test/testlogin", "/test/testlogin/");
+  
 
   private Class<? extends HttpServlet> clazz;
+  private boolean onlyForTest;
+  
   private String servletPath;
   // Path when this servlet acts as root for others.
   private String servletRoot;
+  
 
-  private ServletPathEnum(Class<? extends HttpServlet> clazz, String servletPath,
-      String servletRoot) {
+  private ServletPathEnum(Class<? extends HttpServlet> clazz, boolean onlyForTest,
+      String servletPath, String servletRoot) {
     this.clazz = clazz;
     this.servletPath = checkNotBlank(servletPath);
     this.servletRoot = checkNotBlank(servletRoot);
+    this.onlyForTest = onlyForTest;
   }
 
   public Class<? extends HttpServlet> getClazz() {
     return clazz;
   }
 
+  public boolean isOnlyForTest() {
+    return onlyForTest;
+  }
+  
   public String get() {
     return servletPath;
   }

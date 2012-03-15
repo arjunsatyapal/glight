@@ -15,17 +15,11 @@
  */
 package com.google.light.server.servlets.filters;
 
-import com.google.appengine.api.NamespaceManager;
 import com.google.inject.Inject;
 import com.google.light.server.exception.unchecked.FilterInstanceBindingException;
 import com.google.light.server.utils.GaeUtils;
-import java.io.IOException;
 import java.util.logging.Logger;
 import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
 
 /**
  * Servlet Filter for All Light Requests. See {@link FilterPathEnum} to see what all URLs are
@@ -44,13 +38,5 @@ public class ProdServletFilter extends AbstractLightFilter {
       logger.severe(msg);
       throw new FilterInstanceBindingException(msg);
     }
-
-    NamespaceManager.set("");
-  }
-
-  @Override
-  public void doFilter(ServletRequest req, ServletResponse res, FilterChain filterChain)
-      throws IOException, ServletException {
-    super.doFilter(req, res, filterChain);
   }
 }

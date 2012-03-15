@@ -20,21 +20,13 @@ import static com.google.light.server.utils.LightPreconditions.checkNonEmptyList
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkNull;
 import static com.google.light.server.utils.LightPreconditions.checkPersonId;
-import static com.google.light.server.utils.LightPreconditions.checkPersonIsLoggedIn;
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
-import static com.google.light.testingutils.TestingUtils.getRandomEmail;
-import static com.google.light.testingutils.TestingUtils.getRandomFederatedId;
-import static com.google.light.testingutils.TestingUtils.getRandomUserId;
 import static com.google.light.testingutils.TestingUtils.getUUIDString;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import com.google.light.server.exception.unchecked.InvalidPersonIdException;
-
 import com.google.common.collect.Lists;
-import com.google.light.server.constants.OpenIdAuthDomain;
-import com.google.light.server.exception.unchecked.PersonLoginRequiredException;
-import com.google.light.testingutils.GaeTestingUtils;
+import com.google.light.server.exception.unchecked.InvalidPersonIdException;
 import java.util.List;
 import org.junit.Test;
 
@@ -201,33 +193,6 @@ public class LightPreconditionsTest {
     }
 
     // Rest negative tests are tested as part of LightPreconditions#checkPositiveLong
-  }
-
-  /**
-   * Test for {@link LightPreconditions#checkPersonIsLoggedIn()}
-   */
-  @Test
-  public void test_checkPersonIsLoggedIn() {
-    GaeTestingUtils gae =
-        new GaeTestingUtils(OpenIdAuthDomain.GOOGLE.get(),
-            getRandomEmail(), getRandomFederatedId(), true/* isFederated */,
-            getRandomUserId()/* userId */,
-            true/* loggedIn */, false/* isAdmin */);
-
-    try {
-      gae.setUp();
-      checkPersonIsLoggedIn();
-      gae.setLoggedIn(false);
-
-      try {
-        checkPersonIsLoggedIn();
-        fail("should have failed.");
-      } catch (PersonLoginRequiredException e) {
-        // Expected
-      }
-    } finally {
-      gae.tearDown();
-    }
   }
 
   /**

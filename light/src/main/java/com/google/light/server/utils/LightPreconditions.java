@@ -20,7 +20,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Preconditions;
 import com.google.light.server.exception.unchecked.InvalidPersonIdException;
-import com.google.light.server.exception.unchecked.PersonLoginRequiredException;
 import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.validator.routines.EmailValidator;
@@ -72,20 +71,11 @@ public class LightPreconditions {
   }
 
   // TODO(arjuns) : Fix this validation eventually.
-  public static Long checkPersonId(Long id) {
+  public static Long checkPersonId(Long personId) {
     try {
-      return checkPositiveLong(id);
+      return checkPositiveLong(personId);
     } catch (Exception e) {
       throw new InvalidPersonIdException(e);
-    }
-  }
-
-  /**
-   * Ensures that the person is logged in.
-   */
-  public static void checkPersonIsLoggedIn() {
-    if (!GaeUtils.isUserLoggedIn()) {
-      throw new PersonLoginRequiredException();
     }
   }
 

@@ -18,4 +18,8 @@
     </system-properties>
 
     <sessions-enabled>true</sessions-enabled>
+    
+    <admin-console>
+      <page name="Configuration" url="/admin/config" />
+    </admin-console>
 </appengine-web-app>

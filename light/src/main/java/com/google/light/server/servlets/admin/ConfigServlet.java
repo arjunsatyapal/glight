@@ -15,19 +15,18 @@
  */
 package com.google.light.server.servlets.admin;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.light.server.utils.LightUtils.getPST8PDTime;
 
 import com.google.appengine.api.utils.SystemProperty;
 import com.google.apphosting.api.ApiProxy;
 import com.google.apphosting.api.ApiProxy.Environment;
 import com.google.light.server.constants.ContentTypeEnum;
 import com.google.light.server.utils.GaeUtils;
+import com.google.light.server.utils.LightUtils;
 import java.util.Map;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 
 /**
  * Servlet to handle configuration for Light.
@@ -60,8 +59,7 @@ public class ConfigServlet extends HttpServlet {
        * stackoverflow.com/questions/3948861/appengine-get-current-serving-application-version
        */
       Long timeStamp = (long) (Long.parseLong(splits[1]) / (long) Math.pow(2, 28));
-      appendKeyValue("possible deployTime (PST8PDT)",
-          new DateTime(timeStamp * 1000, DateTimeZone.forID("PST8PDT")));
+      appendKeyValue("possible deployTime (PST8PDT)", getPST8PDTime(timeStamp * 1000));
 
       // appendKeyValue("version", applicationVersion.split(".")[0]);
       /*
@@ -95,11 +93,10 @@ public class ConfigServlet extends HttpServlet {
   }
 
   private void appendSectionHeader(String sectionHeader) {
-    builder.append("<br><br><b>").append(sectionHeader).append(": </b>");
+    LightUtils.appendSectionHeader(builder, sectionHeader);
   }
 
   private void appendKeyValue(String key, Object value) {
-    checkNotNull(builder);
-    builder.append("<br>").append(key).append(" = ").append(value);
+    LightUtils.appendKeyValue(builder, key, value);
   }
 }

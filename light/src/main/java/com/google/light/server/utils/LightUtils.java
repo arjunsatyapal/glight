@@ -22,6 +22,8 @@ import com.google.common.io.CharStreams;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 
 /**
  * General Utility methods for Light.
@@ -32,6 +34,19 @@ public class LightUtils {
   public static String getInputStreamAsString(InputStream is) throws IOException {
     checkNotNull(is);
     return CharStreams.toString(new InputStreamReader(is, Charsets.UTF_8));
+  }
+  
+  public static void appendSectionHeader(StringBuilder builder, String sectionHeader) {
+    builder.append("<br><br><b>").append(sectionHeader).append(": </b>");
+  }
+
+  public static void appendKeyValue(StringBuilder builder, String key, Object value) {
+    checkNotNull(builder);
+    builder.append("<br>").append(key).append(" = ").append(value);
+  }
+  
+  public static DateTime getPST8PDTime(long instantInMillis) {
+    return new DateTime(instantInMillis, DateTimeZone.forID("PST8PDT"));
   }
   
   // Utility class.

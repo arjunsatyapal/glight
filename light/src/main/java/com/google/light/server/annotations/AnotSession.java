@@ -13,21 +13,20 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.server.constants;
+package com.google.light.server.annotations;
 
-import org.junit.Test;
+import com.google.inject.BindingAnnotation;
+
+import java.lang.annotation.RetentionPolicy;
+
+import java.lang.annotation.Retention;
 
 /**
- * All tests for Enum classes should extend this.
- * 
- * TODO(arjuns) : Add test for uniqueness.
+ * {@link BindingAnnotation} for {@link HttpSession}.
  * 
  * @author Arjun Satyapal
  */
-public interface EnumTestInterface {
-  /**
-   * Test count in order to catch accidental deletions.
-   */
-  @Test
-  public void test_count();
+@BindingAnnotation
+@Retention(RetentionPolicy.RUNTIME)
+public @interface AnotSession {
 }

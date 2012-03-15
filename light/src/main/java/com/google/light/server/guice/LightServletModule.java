@@ -41,7 +41,8 @@ class LightServletModule extends ServletModule {
         || GaeUtils.isProductionServer(), "Unknown AppId : " + GaeUtils.getAppId());
     
     // First registering the Filters.
-    if (GaeUtils.isProductionServer()) {
+    boolean isProduction = GaeUtils.isProductionServer(); 
+    if (isProduction) {
       initFilters(FilterPathEnum.API);
     } else {
       initFilters(FilterPathEnum.TEST);
@@ -50,6 +51,10 @@ class LightServletModule extends ServletModule {
     // Now registering the Servlets.
     // TODO(arjuns) : Do special handling for TestServlet.
     for (ServletPathEnum currServlet : ServletPathEnum.values()) {
+      // Will skip Servlets which are only for test.
+      if (isProduction && currServlet.isOnlyForTest()) {
+        continue;
+      }
       initServlet(currServlet);
     }
   }

@@ -15,6 +15,9 @@
  */
 package com.google.light.server.utils;
 
+import com.google.inject.Key;
+import java.lang.annotation.Annotation;
+
 import com.google.inject.ProvisionException;
 
 /**
@@ -23,6 +26,12 @@ import com.google.inject.ProvisionException;
  * @author Arjun Satyapal
  */
 public class GuiceUtils {
+  
+  public static <P, Q extends Annotation> Key<P> getKeyForScopeSeed(Class<P> clazz,
+      Class<Q> annotationClazz) {
+    return Key.get(clazz, annotationClazz);
+  }
+  
   /**
    * Use this method for checking if the cause for Guice Provision Exception is of expected type.
    * 
