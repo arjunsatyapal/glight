@@ -72,9 +72,10 @@ public class ConfigServlet extends HttpServlet {
       appendSectionHeader("Appengine Environment");
       appendKeyValue("applicationEnvironment", SystemProperty.environment.get());
 
-      appendKeyValue("isProduction", GaeUtils.isProductionServer());
       appendKeyValue("isDevServer", GaeUtils.isDevServer());
+      appendKeyValue("isProduction", GaeUtils.isProductionServer());
       appendKeyValue("isQaServer", GaeUtils.isQaServer());
+      appendKeyValue("isUnitTestServer", GaeUtils.isUnitTestServer());
       appendKeyValue("authDomain", env.getAuthDomain());
       appendKeyValue("env.applicationId", env.getAppId());
       appendKeyValue("email", env.getEmail());

@@ -37,8 +37,9 @@ class LightServletModule extends ServletModule {
   protected void configureServlets() {
     // One of the dev/qa/prod should be true.
     Preconditions.checkArgument(GaeUtils.isDevServer()
+        || GaeUtils.isProductionServer()
         || GaeUtils.isQaServer()
-        || GaeUtils.isProductionServer(), "Unknown AppId : " + GaeUtils.getAppId());
+        || GaeUtils.isUnitTestServer(), "Unknown AppId : " + GaeUtils.getAppId());
     
     // First registering the Filters.
     boolean isProduction = GaeUtils.isProductionServer(); 

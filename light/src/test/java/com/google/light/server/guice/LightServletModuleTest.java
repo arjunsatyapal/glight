@@ -18,6 +18,7 @@ package com.google.light.server.guice;
 import static com.google.light.server.utils.GaeUtils.isDevServer;
 import static com.google.light.server.utils.GaeUtils.isProductionServer;
 import static com.google.light.server.utils.GaeUtils.isQaServer;
+import static com.google.light.server.utils.GaeUtils.isUnitTestServer;
 import static com.google.light.testingutils.TestingUtils.getRandomEmail;
 import static com.google.light.testingutils.TestingUtils.getRandomFederatedId;
 import static com.google.light.testingutils.TestingUtils.getRandomUserId;
@@ -30,22 +31,16 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-import com.google.light.server.constants.LightAppIdEnum;
-
-import com.google.light.server.servlets.filters.ProdServletFilter;
-
-import com.google.inject.ProvisionException;
-
-import com.google.light.server.exception.unchecked.FilterInstanceBindingException;
-
-import com.google.light.server.utils.GaeUtils;
-
-import com.google.light.server.servlets.filters.TestServletFilter;
-
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.ProvisionException;
 import com.google.inject.servlet.GuiceFilter;
+import com.google.light.server.constants.LightAppIdEnum;
 import com.google.light.server.constants.OpenIdAuthDomain;
+import com.google.light.server.exception.unchecked.FilterInstanceBindingException;
+import com.google.light.server.servlets.filters.ProdServletFilter;
+import com.google.light.server.servlets.filters.TestServletFilter;
+import com.google.light.server.utils.GaeUtils;
 import com.google.light.testingutils.GaeTestingUtils;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletContext;
@@ -107,9 +102,11 @@ public class LightServletModuleTest {
     gaeTestingUtils.setUp();
     
     Injector testInjector = Guice.createInjector(new LightServletModule());
-    assertTrue(isDevServer());
-    assertFalse(isQaServer());
+    assertTrue(isUnitTestServer());
     assertFalse(isProductionServer());
+    assertFalse(isDevServer());
+    assertFalse(isQaServer());
+    
     assertEquals(LightAppIdEnum.TEST, LightAppIdEnum.getLightAppIdEnum());
     assertNotNull(testInjector.getInstance(TestServletFilter.class));
     // TODO(arjuns): fix this.
@@ -129,9 +126,12 @@ public class LightServletModuleTest {
     gaeTestingUtils.tearDown();
     gaeTestingUtils.setAppId("s~light-qa");
     gaeTestingUtils.setUp();
+    
+    assertFalse(isUnitTestServer());
+    assertFalse(isProductionServer());
     assertFalse(isDevServer());
     assertTrue(isQaServer());
-    assertFalse(isProductionServer());
+
     assertEquals(LightAppIdEnum.QA, LightAppIdEnum.getLightAppIdEnum());
     
     Injector qaInjector = Guice.createInjector(new LightServletModule());
@@ -145,10 +145,6 @@ public class LightServletModuleTest {
     } catch (ProvisionException e) {
       assertTrue(e.getCause() instanceof FilterInstanceBindingException);
     } finally {
-      gaeTestingUtils.tearDown();
-      gaeTestingUtils.setAppId("test");
-      gaeTestingUtils.setUp();
-      assertTrue(GaeUtils.isDevServer());
       qaInjector.getInstance(GuiceFilter.class).destroy();
     }
     
@@ -157,14 +153,17 @@ public class LightServletModuleTest {
     gaeTestingUtils.setAppId("s~light-prod");
     gaeTestingUtils.setUp();
     Injector prodInjector = Guice.createInjector(new LightServletModule());
+
+    assertFalse(isUnitTestServer());
+    assertTrue(isProductionServer());
     assertFalse(isDevServer());
     assertFalse(isQaServer());
-    assertTrue(isProductionServer());
+    
     assertEquals(LightAppIdEnum.PROD, LightAppIdEnum.getLightAppIdEnum());
     assertNotNull(prodInjector.getInstance(ProdServletFilter.class));
     // TODO(arjuns): fix this.
 //    assertEquals("", NamespaceManager.get());
-    
+
     try {
       prodInjector.getInstance(TestServletFilter.class);
       fail("should have failed.");
@@ -176,7 +175,7 @@ public class LightServletModuleTest {
       gaeTestingUtils.tearDown();
       gaeTestingUtils.setAppId("test");
       gaeTestingUtils.setUp();
-      assertTrue(GaeUtils.isDevServer());
+      assertTrue(GaeUtils.isUnitTestServer());
       prodInjector.getInstance(GuiceFilter.class).destroy();
     }
   }
