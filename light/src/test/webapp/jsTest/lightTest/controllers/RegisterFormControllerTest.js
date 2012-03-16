@@ -14,14 +14,15 @@
  * the License.
  */
 define(['light/controllers/RegisterFormController', 'light/stores/PersonStore',
-        'light/views/RegisterFormView'],
-        function(RegisterFormController, PersonStore, RegisterFormView) {
+        'light/views/RegisterFormView', 'lightTest/TestUtils'],
+        function(RegisterFormController, PersonStore, RegisterFormView,
+                 TestUtils) {
   describe('light.controllers.RegisterFormController', function() {
     var controller, personStore, view;
 
     beforeEach(function() {
       this.stub(personStore = new PersonStore());
-      this.stub(view = new RegisterFormView());
+      view = TestUtils.stubView(RegisterFormView);
       controller = new RegisterFormController(personStore);
       controller.setView(view);
     });

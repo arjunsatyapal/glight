@@ -13,25 +13,14 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-define(['dojo/_base/declare', 'dijit/_Widget'], function(declare, _Widget) {
-  /**
-   * Base abstract class for all light views.
-   * 
-   * @class
-   * @name light.views.AbstractLightView
-   */
-  return declare('light.controllers.AbstractLightView', _Widget, {
-    /** @lends light.views.AbstractLightView# */
-
-    /**
-     * Defines the controller for this view.
-     * 
-     * @param {light.controllers.AbstractLightController}
-     *          controller Controller.
-     */
-    setController: function(controller) {
-      this._controller = controller;
-    }
-
-  });
+define({
+  instructions: 'Antes de continuar, você deve preencher este pequeno' +
+  ' formulário e aceitar os Termos de Serviço.',
+  firstNameTextBoxLabel: 'Primeiro Nome:',
+  lastNameTextBoxLabel: 'Último Nome:',
+  tosTextareaLabel: 'Termos de Serviço',
+  tosTextareaContent: 'Coisas legais',
+  tosCheckboxLabel: 'Eu aceito os Termos de Serviço',
+  submitButton: 'Registrar',
+  tosTooltipError: 'Você deve aceitar os Termos de Serviço para prosseguir.'
 });
