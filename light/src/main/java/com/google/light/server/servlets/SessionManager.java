@@ -25,8 +25,6 @@ import static com.google.light.server.utils.LightPreconditions.checkEmail;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPersonId;
 
-import com.google.light.server.exception.unchecked.httpexception.UnauthorizedException;
-
 import com.google.light.server.exception.unchecked.httpexception.PersonLoginRequiredException;
 
 import com.google.appengine.api.users.UserServiceFactory;
@@ -153,17 +151,5 @@ public class SessionManager {
     if (!isPersonLoggedIn()) {
       throw new PersonLoginRequiredException("");
     }
-  }
-
-  /**
-   * Returns true if current user is GAE Admin. Returns false if user is not admin / user is not
-   * logged in.
-   * 
-   * For GAE Admin, we always trust on AppEngine Environment.
-   * 
-   * @return
-   */
-  public static boolean isGaeAdmin() {
-    return UserServiceFactory.getUserService().isUserAdmin();
   }
 }

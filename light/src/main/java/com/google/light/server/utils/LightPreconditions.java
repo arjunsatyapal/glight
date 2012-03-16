@@ -18,6 +18,8 @@ package com.google.light.server.utils;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.appengine.api.users.UserServiceFactory;
+
 import com.google.light.server.exception.unchecked.httpexception.UnauthorizedException;
 
 import com.google.common.base.Preconditions;
@@ -113,6 +115,18 @@ public class LightPreconditions {
     if (object != null) {
       throw new IllegalArgumentException("Expected null.");
     }
+  }
+  
+  /**
+   * Returns true if current user is GAE Admin. Returns false if user is not admin / user is not
+   * logged in.
+   * 
+   * For GAE Admin, we always trust on AppEngine Environment.
+   * 
+   * @return
+   */
+  public static boolean isGaeAdmin() {
+    return UserServiceFactory.getUserService().isUserAdmin();
   }
   
   /**
