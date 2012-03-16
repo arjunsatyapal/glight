@@ -17,6 +17,8 @@ package com.google.light.server.guice.providers;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.light.server.servlets.SessionManager;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.light.server.manager.interfaces.PersonManager;
@@ -38,5 +40,9 @@ public class InstanceProvider {
 
   public PersonManager getPersonManager() {
     return checkNotNull(injector.getInstance(PersonManager.class));
+  }
+  
+  public SessionManager getSessionManager() {
+    return checkNotNull(injector.getInstance(SessionManager.class));
   }
 }

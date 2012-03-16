@@ -18,6 +18,8 @@ package com.google.light.server.utils;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.light.server.exception.unchecked.httpexception.UnauthorizedException;
+
 import com.google.common.base.Preconditions;
 import com.google.light.server.exception.unchecked.InvalidPersonIdException;
 import java.util.List;
@@ -110,6 +112,17 @@ public class LightPreconditions {
   public static void checkNull(Object object) {
     if (object != null) {
       throw new IllegalArgumentException("Expected null.");
+    }
+  }
+  
+  /**
+   * Ensures that Person is Admin.
+   * 
+   * TODO(arjuns) : Add test for this.
+   */
+  public static void checkPersonIsGaeAdmin() {
+    if (!isGaeAdmin()) {
+      throw new UnauthorizedException("Admin priviliges required.");
     }
   }
 

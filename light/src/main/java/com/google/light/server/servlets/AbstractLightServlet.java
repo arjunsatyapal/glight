@@ -17,8 +17,6 @@ package com.google.light.server.servlets;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Preconditions;
-
 import com.google.inject.Inject;
 
 import com.google.inject.Injector;
@@ -38,9 +36,7 @@ import javax.servlet.http.HttpServletResponse;
 public abstract class AbstractLightServlet extends HttpServlet {
   @Inject
   private Injector injector;
-
   private InstanceProvider instanceProvider;
-
   
   protected Injector getInjector() {
     return checkNotNull(injector);

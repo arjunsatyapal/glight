@@ -28,8 +28,7 @@ public enum RequestParmKeyEnum {
   AUTH_DOMAIN("auth_domain", false),
   GAE_USER_EMAIL("gae_user_email", false),
   GAE_USER_ID("gae_user_id", false),
-  PERSON_ID("person_id", false),
-  USER_ADMIN("user_admin", false);
+  PERSON_ID("person_id", false);
   
   private String key;
   private boolean allowedInProd;

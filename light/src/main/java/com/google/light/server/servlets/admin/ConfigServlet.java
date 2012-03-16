@@ -15,18 +15,22 @@
  */
 package com.google.light.server.servlets.admin;
 
+import static com.google.light.server.servlets.SessionManager.checkPersonIsGaeAdmin;
+import static com.google.light.server.utils.LightUtils.appendKeyValue;
+import static com.google.light.server.utils.LightUtils.appendSectionHeader;
+import static com.google.light.server.utils.LightUtils.appendSessionData;
 import static com.google.light.server.utils.LightUtils.getPST8PDTime;
 
 import com.google.appengine.api.utils.SystemProperty;
 import com.google.apphosting.api.ApiProxy;
 import com.google.apphosting.api.ApiProxy.Environment;
 import com.google.light.server.constants.ContentTypeEnum;
+import com.google.light.server.servlets.AbstractLightServlet;
 import com.google.light.server.utils.GaeUtils;
-import com.google.light.server.utils.LightUtils;
 import java.util.Map;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 /**
  * Servlet to handle configuration for Light.
@@ -36,68 +40,121 @@ import javax.servlet.http.HttpServletResponse;
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
-public class ConfigServlet extends HttpServlet {
+public class ConfigServlet extends AbstractLightServlet {
   private StringBuilder builder = null;
 
   @SuppressWarnings("deprecation")
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) {
     try {
+      checkPersonIsGaeAdmin();
+
       builder = new StringBuilder();
       Environment env = ApiProxy.getCurrentEnvironment();
-      appendSectionHeader("Appengine SystemProperty");
-      appendKeyValue("applicationid", SystemProperty.applicationId.get());
+      appendSectionHeader(builder, "Appengine SystemProperty");
+      appendKeyValue(builder, "applicationid", SystemProperty.applicationId.get());
 
       String applicationVersion = SystemProperty.applicationVersion.get();
-      appendKeyValue("applicationVersion", applicationVersion);
+      appendKeyValue(builder, "applicationVersion", applicationVersion);
 
       String[] splits = applicationVersion.split("\\.");
-      appendKeyValue("version", splits[0]);
+      appendKeyValue(builder, "version", splits[0]);
 
       /*
-       * Source :  
+       * Source :
        * stackoverflow.com/questions/3948861/appengine-get-current-serving-application-version
        */
       Long timeStamp = (long) (Long.parseLong(splits[1]) / (long) Math.pow(2, 28));
-      appendKeyValue("possible deployTime (PST8PDT)", getPST8PDTime(timeStamp * 1000));
+      appendKeyValue(builder, "possible deployTime (PST8PDT)", getPST8PDTime(timeStamp * 1000));
 
       // appendKeyValue("version", applicationVersion.split(".")[0]);
       /*
        * TODO(arjuns): Replace with ServerService when Available. For now suppressing deprecated
        * warning.
        */
-      appendKeyValue("instanceReplicaId", SystemProperty.instanceReplicaId.get());
-      appendKeyValue("JavaSdkVersion", SystemProperty.version.get());
+      appendKeyValue(builder, "instanceReplicaId", SystemProperty.instanceReplicaId.get());
+      appendKeyValue(builder, "JavaSdkVersion", SystemProperty.version.get());
 
-      appendSectionHeader("Appengine Environment");
-      appendKeyValue("applicationEnvironment", SystemProperty.environment.get());
+      appendSectionHeader(builder, "Appengine Environment");
+      appendKeyValue(builder, "applicationEnvironment", SystemProperty.environment.get());
 
-      appendKeyValue("isDevServer", GaeUtils.isDevServer());
-      appendKeyValue("isProduction", GaeUtils.isProductionServer());
-      appendKeyValue("isQaServer", GaeUtils.isQaServer());
-      appendKeyValue("isUnitTestServer", GaeUtils.isUnitTestServer());
-      appendKeyValue("authDomain", env.getAuthDomain());
-      appendKeyValue("env.applicationId", env.getAppId());
-      appendKeyValue("email", env.getEmail());
+      appendKeyValue(builder, "isDevServer", GaeUtils.isDevServer());
+      appendKeyValue(builder, "isProduction", GaeUtils.isProductionServer());
+      appendKeyValue(builder, "isQaServer", GaeUtils.isQaServer());
+      appendKeyValue(builder, "isUnitTestServer", GaeUtils.isUnitTestServer());
+      appendKeyValue(builder, "authDomain", env.getAuthDomain());
+      appendKeyValue(builder, "env.applicationId", env.getAppId());
+      appendKeyValue(builder, "email", env.getEmail());
 
       Map<String, Object> map = env.getAttributes();
       for (String currKey : map.keySet()) {
-        appendKeyValue(currKey, map.get(currKey));
+        appendKeyValue(builder, currKey, map.get(currKey));
       }
+
+      // Populating Session Data.
+      HttpSession session = request.getSession();
+      appendSectionHeader(builder, "Session Details = " + false);
+      appendSessionData(builder, session);
 
       response.setContentType(ContentTypeEnum.TEXT_HTML.get());
       response.getWriter().println(builder.toString());
+
     } catch (Exception e) {
       // TODO(arjuns): Add exception handling.
       throw new RuntimeException(e);
     }
   }
 
-  private void appendSectionHeader(String sectionHeader) {
-    LightUtils.appendSectionHeader(builder, sectionHeader);
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void doDelete(HttpServletRequest request, HttpServletResponse response) {
+    // TODO(arjuns): Auto-generated method stub
+    throw new UnsupportedOperationException();
   }
 
-  private void appendKeyValue(String key, Object value) {
-    LightUtils.appendKeyValue(builder, key, value);
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public long getLastModified(HttpServletRequest request) {
+    return -1;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void doHead(HttpServletRequest request, HttpServletResponse response) {
+    // TODO(arjuns): Auto-generated method stub
+    throw new UnsupportedOperationException();
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void doOptions(HttpServletRequest request, HttpServletResponse response) {
+    // TODO(arjuns): Auto-generated method stub
+    throw new UnsupportedOperationException();
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void doPost(HttpServletRequest request, HttpServletResponse response) {
+    // TODO(arjuns): Auto-generated method stub
+    throw new UnsupportedOperationException();
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void doPut(HttpServletRequest request, HttpServletResponse response) {
+    // TODO(arjuns): Auto-generated method stub
+    throw new UnsupportedOperationException();
   }
 }

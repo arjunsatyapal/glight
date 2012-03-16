@@ -40,7 +40,7 @@ public class PersonManagerImpl implements PersonManager {
     this.sessionManager = checkNotNull(sessionManager);
     this.personDao = checkNotNull(personDao);
     
-    checkArgument(sessionManager.isUserLoggedIn());
+    checkArgument(sessionManager.isPersonLoggedIn());
   }
 
   /**
@@ -65,7 +65,7 @@ public class PersonManagerImpl implements PersonManager {
 //    entity.addIdProviderDetail(currIdProviderDetail);
 
     checkArgument(entity.getEmail() == null);
-    entity.setEmail(sessionManager.getEmail());
+    entity.setEmail(sessionManager.getGaeEmail());
     
     // This is a heavy operation, so perform this validation just before persisting.
     PersonEntity personByEmail = getPersonByEmail(entity.getEmail());

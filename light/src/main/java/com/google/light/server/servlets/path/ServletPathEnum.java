@@ -17,7 +17,8 @@ package com.google.light.server.servlets.path;
 
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
-import com.google.light.server.servlets.test.FakeSessionServlet;
+import com.google.light.server.servlets.misc.SessionServlet;
+
 
 import com.google.light.server.servlets.test.FakeLoginServlet;
 
@@ -42,10 +43,12 @@ public enum ServletPathEnum {
   // TODO(arjuns) : Find a way to end URLs without /.
   PERSON(PersonServlet.class, false, "/api/person", "/api/person/"),
   CONFIG(ConfigServlet.class, false, "/admin/config", "/admin/config/"),
+  // TODO(arjuns) : Get a better path.
+  
   
   // Some test servlets.
   FAKE_LOGIN(FakeLoginServlet.class, true, "/test/fakelogin", "/test/fakelogin/"),
-  FAKE_SESSION(FakeSessionServlet.class, true, "/test/fakesession", "/test/fakesession/"),
+  SESSION(SessionServlet.class, true, "/test/session", "/test/session/"),
   TEST_HEADER(TestHeaders.class, true, "/test/testheader", "/test/testheader/"),
   TEST_LOGIN(TestLogin.class, true, "/test/testlogin", "/test/testlogin/");
   

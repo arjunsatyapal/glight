@@ -25,6 +25,10 @@ import static com.google.light.server.utils.LightPreconditions.checkEmail;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPersonId;
 
+import com.google.light.server.exception.unchecked.httpexception.UnauthorizedException;
+
+import com.google.light.server.exception.unchecked.httpexception.PersonLoginRequiredException;
+
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.inject.Inject;
 import com.google.light.server.annotations.AnotSession;
@@ -47,8 +51,9 @@ public class SessionManager {
   }
 
   /**
-   * Get AuthDomain for user from Session.
-   * TODO(arjuns): Figure out what needs to be set for Prod/test.
+   * Get AuthDomain for user from Session. TODO(arjuns): Figure out what needs to be set for
+   * Prod/test.
+   * 
    * @return
    */
   public OpenIdAuthDomain getAuthDomain() {
@@ -73,7 +78,7 @@ public class SessionManager {
    * 
    * @return
    */
-  public String getEmail() {
+  public String getGaeEmail() {
     String email = (String) session.getAttribute(RequestParmKeyEnum.GAE_USER_EMAIL.get());
     return checkEmail(email);
   }
@@ -126,32 +131,39 @@ public class SessionManager {
   }
 
   /**
-   * Returns true if user is logged in.
+   * Returns true if Person is logged in.
    * 
    * @return
    */
-  public boolean isUserLoggedIn() {
+  public boolean isPersonLoggedIn() {
     if (LightAppIdEnum.PROD == LightAppIdEnum.getLightAppIdEnum()) {
       return UserServiceFactory.getUserService().isUserLoggedIn();
     }
-    
-    // For test/qa rely on session.
-    return session.getAttribute(RequestParmKeyEnum.GAE_USER_ID.get()) != null;
+
+    // For test/qa rely on session. If session is present, user is logged in.
+    return session != null;
   }
 
   /**
-   * Returns true if current user is Admin. Returns false if user is not admin / user is not logged
-   * in.
+   * Ensures that Person is Logged In.
+   * 
+   * TODO(arjuns): Add test for this.
+   */
+  public void checkPersonLoggedIn() {
+    if (!isPersonLoggedIn()) {
+      throw new PersonLoginRequiredException("");
+    }
+  }
+
+  /**
+   * Returns true if current user is GAE Admin. Returns false if user is not admin / user is not
+   * logged in.
+   * 
+   * For GAE Admin, we always trust on AppEngine Environment.
    * 
    * @return
    */
-  public boolean isUserAdmin() {
-    if (LightAppIdEnum.PROD == LightAppIdEnum.getLightAppIdEnum()) {
-      return UserServiceFactory.getUserService().isUserAdmin();
-    }
-    
-    // For test/qa rely on session.
-    Boolean userAdmin = (Boolean) session.getAttribute(RequestParmKeyEnum.USER_ADMIN.get());
-    return userAdmin;
+  public static boolean isGaeAdmin() {
+    return UserServiceFactory.getUserService().isUserAdmin();
   }
 }

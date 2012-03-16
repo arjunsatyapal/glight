@@ -16,11 +16,9 @@
 package com.google.light.server.servlets.person;
 
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
-import static com.google.light.testingutils.FakeLoginHelper.getCookieFromResponse;
 import static org.junit.Assert.assertTrue;
 
 import com.google.api.client.http.GenericUrl;
-import com.google.api.client.http.HttpHeaders;
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.HttpResponse;
@@ -29,8 +27,9 @@ import com.google.api.client.http.UrlEncodedContent;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.common.collect.ImmutableMap;
 import com.google.light.server.constants.RequestParmKeyEnum;
+import com.google.light.server.servlets.misc.SessionServlet;
 import com.google.light.server.servlets.path.ServletPathEnum;
-import com.google.light.server.servlets.test.FakeSessionServlet;
+import com.google.light.testingutils.FakeLoginHelper;
 import com.google.light.testingutils.TestingUtils;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
@@ -39,9 +38,9 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
- * Test for {@link FakeSessionServlet}.
+ * Test for {@link SessionServlet}.
  * 
- * TODO(arjuns): Convert this test from Integration test to unittest.
+ * TODO(arjuns): Convert this test from Integration test to unit-test.
  * 
  * @author Arjun Satyapal
  */
@@ -72,36 +71,27 @@ public class FakeSessionServletITCase {
   }
 
   /**
-   * Test for {@link FakeSessionServlet#doPost(HttpServletRequest, HttpServletResponse)}.
+   * Test for {@link SessionServlet#doPost(HttpServletRequest, HttpServletResponse)}.
    * 
    * Test for creating a session.
    */
   @Test
   public void test_doPost() throws Exception {
     HttpRequestFactory requestFactory = HTTP_TRANSPORT.createRequestFactory();
-    GenericUrl fakeSessionServletUrl =
-        new GenericUrl(serverUrl + ServletPathEnum.FAKE_SESSION.get());
-    HttpRequest request =
-        requestFactory.buildPostRequest(fakeSessionServletUrl, new UrlEncodedContent(null));
-    HttpResponse response = request.execute();
-    assertTrue(response.isSuccessStatusCode());
 
-    String cookie = getCookieFromResponse(response);
-    checkNotBlank(cookie);
 
     GenericUrl fakeLoginServletUrl = new GenericUrl(serverUrl + ServletPathEnum.FAKE_LOGIN.get());
     Map<String, String> map = new ImmutableMap.Builder<String, String>()
         .put(RequestParmKeyEnum.GAE_USER_EMAIL.get(), email)
         .put(RequestParmKeyEnum.GAE_USER_ID.get(), gaeUserId)
-        .put(RequestParmKeyEnum.USER_ADMIN.get(), "false")
         .build();
 
-    request = requestFactory.buildPostRequest(fakeLoginServletUrl, new UrlEncodedContent(map));
+    HttpRequest request = requestFactory.buildPostRequest(fakeLoginServletUrl, new UrlEncodedContent(map));
+    HttpResponse response = request.execute();
+    
+    String cookie = FakeLoginHelper.getCookieFromResponse(response);
+    checkNotBlank(cookie);
 
-    HttpHeaders headers = new HttpHeaders();
-    headers.set("Cookie", cookie);
-    request.setHeaders(headers);
-    response = request.execute();
     assertTrue(response.isSuccessStatusCode());
   }
 }

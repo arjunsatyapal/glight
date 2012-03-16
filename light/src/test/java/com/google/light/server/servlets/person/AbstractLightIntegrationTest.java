@@ -51,14 +51,13 @@ public abstract class AbstractLightIntegrationTest {
 
   @BeforeClass
   public static void cookieSetup() {
-    String testServerUrl = System.getProperty("test.server_url");
+    String testServerUrl = System.getProperty("test.server.url");
 
     if (testServerUrl != null) {
-      serverUrl = checkNotBlank(testServerUrl, "test.server_url should not be empty.");
+      serverUrl = checkNotBlank(testServerUrl, "test.server.url should not be empty.");
     } else {
       serverUrl = "http://localhost:8080";
     }
-     serverUrl = "http://light-qa.appspot.com";
 
     if (serverUrl.startsWith("http://localhost")) {
       isLocalHost = true;

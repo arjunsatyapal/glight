@@ -18,17 +18,17 @@ package com.google.light.server.exception.unchecked.httpexception;
 import com.google.light.server.constants.HttpStatusCodesEnum;
 
 /**
- * This indicates that in order to perform the requested task, user has to login.
+ * This indicates that User is not authorized to perform the requested operation.
  * 
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
-public class PersonLoginRequiredException extends LightHttpException {
+public class UnauthorizedException extends LightHttpException {
   /**
    * {@inheritDoc}
    * @param message
    */
-  public PersonLoginRequiredException(String message) {
-      super(HttpStatusCodesEnum.FORBIDDEN, message);
+  public UnauthorizedException(String message) {
+      super(HttpStatusCodesEnum.UNAUTHORIZED, message);
   }
 }

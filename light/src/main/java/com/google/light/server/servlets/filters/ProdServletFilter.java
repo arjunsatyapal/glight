@@ -18,8 +18,16 @@ package com.google.light.server.servlets.filters;
 import com.google.inject.Inject;
 import com.google.light.server.exception.unchecked.FilterInstanceBindingException;
 import com.google.light.server.utils.GaeUtils;
+import com.google.light.server.utils.LightUtils;
+import java.io.IOException;
 import java.util.logging.Logger;
 import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 /**
  * Servlet Filter for All Light Requests. See {@link FilterPathEnum} to see what all URLs are
@@ -37,6 +45,19 @@ public class ProdServletFilter extends AbstractLightFilter {
       String msg = "ProdServletFilter should not be injected for non-production environments.";
       logger.severe(msg);
       throw new FilterInstanceBindingException(msg);
+    }
+  }
+
+  @Override
+  public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+      throws IOException, ServletException {
+    HttpServletRequest req = (HttpServletRequest) request;
+    
+    HttpSession session = req.getSession();
+    
+    if (session.isNew()) {
+      LightUtils.prepareSession(session, GaeUtils.getGaeUserId(), GaeUtils.getGaeUserEmail());
+      session.setMaxInactiveInterval(3600 /*sec*/);
     }
   }
 }

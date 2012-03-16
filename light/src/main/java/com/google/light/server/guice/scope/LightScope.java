@@ -64,7 +64,7 @@ import java.util.logging.Logger;
  * @author Fedor Karpelevitch
  */
 public class LightScope implements Scope {
-  Logger logger = Logger.getLogger(LightScope.class.getName());
+  private static final Logger logger = Logger.getLogger(LightScope.class.getName());
 
   private static final Provider<Object> SEEDED_KEY_PROVIDER =
       new Provider<Object>() {
@@ -83,7 +83,7 @@ public class LightScope implements Scope {
     values.set(Maps.<Key<?>, Object> newHashMap());
   }
 
-  public boolean isRunning() {
+  public boolean isEnabled() {
     return values.get() != null;
   }
 

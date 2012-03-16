@@ -16,6 +16,9 @@
 package com.google.light.server.servlets.filters;
 
 import static com.google.light.server.utils.GuiceUtils.getKeyForScopeSeed;
+
+import com.google.light.server.exception.unchecked.httpexception.PersonLoginRequiredException;
+
 import com.google.light.server.annotations.AnotSession;
 
 import com.google.common.base.Throwables;
@@ -45,14 +48,16 @@ public abstract class AbstractLightFilter implements Filter {
   @Inject
   protected LightScope lightScope;
 
-  @Override
-  public void doFilter(ServletRequest req, ServletResponse res,
+  public void doFilter(HttpSession session, ServletRequest req, ServletResponse res,
       FilterChain filterChain) {
     try {
       HttpServletRequest request = (HttpServletRequest) req;
       HttpServletResponse response = (HttpServletResponse) res;
 
-      HttpSession session = request.getSession();
+      
+      if (session == null) {
+          throw new PersonLoginRequiredException("");
+      }
       
       // TODO(arjuns) : Add changeLog.
       lightScope.enter();
@@ -61,14 +66,15 @@ public abstract class AbstractLightFilter implements Filter {
         session.invalidate();
       } else {
         lightScope.seed(getKeyForScopeSeed(HttpSession.class, AnotSession.class), session);
-            
       }
       filterChain.doFilter(request, response);
     } catch (Exception e) {
       // TODO(arjuns) : check log(level, message, throwable) logs whole stack.
       logger.severe("Failed due to : " + Throwables.getStackTraceAsString(e));
     } finally {
-      lightScope.exit();
+      if (lightScope.isEnabled()) {
+        lightScope.exit();
+      }
     }
   }
 

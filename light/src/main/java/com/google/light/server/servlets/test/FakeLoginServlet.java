@@ -17,13 +17,14 @@ package com.google.light.server.servlets.test;
 
 import static com.google.light.server.constants.RequestParmKeyEnum.GAE_USER_EMAIL;
 import static com.google.light.server.constants.RequestParmKeyEnum.GAE_USER_ID;
-import static com.google.light.server.constants.RequestParmKeyEnum.USER_ADMIN;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
+
+import javax.servlet.ServletException;
 
 import com.google.inject.Inject;
 import com.google.light.server.constants.LightAppIdEnum;
 import com.google.light.server.exception.unchecked.FilterInstanceBindingException;
-import com.google.light.server.exception.unchecked.httpexception.PersonLoginRequiredException;
+import com.google.light.server.utils.LightUtils;
 import java.io.IOException;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServlet;
@@ -52,26 +53,26 @@ public class FakeLoginServlet extends HttpServlet {
   }
 
   @Override
-  public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+  public void doPost(HttpServletRequest request, HttpServletResponse response)
+      throws ServletException, IOException {
+    doGet(request, response);
+  }
+  
+  @Override
+  public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     HttpSession session = request.getSession();
 
     String testGaeUserId = null;
     String testGaeUserEmail = null;
-    boolean testUserAdmin = false;
-    if (session.isNew()) {
-      session.invalidate();
-      throw new PersonLoginRequiredException("First create session.");
-    } else {
-      testGaeUserId = checkNotBlank(request.getParameter(GAE_USER_ID.get()));
-      testGaeUserEmail = checkNotBlank(request.getParameter(GAE_USER_EMAIL.get()));
-      testUserAdmin = Boolean.parseBoolean(checkNotBlank(request.getParameter(USER_ADMIN.get())));
+    testGaeUserId = checkNotBlank(request.getParameter(GAE_USER_ID.get()));
+    testGaeUserEmail = checkNotBlank(request.getParameter(GAE_USER_EMAIL.get()));
+    session.setMaxInactiveInterval(120 /*seconds*/);
 
-      session.setAttribute(GAE_USER_ID.get(), testGaeUserId);
-      session.setAttribute(GAE_USER_EMAIL.get(), testGaeUserEmail);
-      session.setAttribute(USER_ADMIN.get(), testUserAdmin);
+    LightUtils.prepareSession(session, testGaeUserId, testGaeUserEmail);
 
-      logger.info("Setting gaeUserId[" + testGaeUserId + "], gaeUserEmail[" + testGaeUserEmail
-          + "], userAdmin[" + testUserAdmin + "].");
-    }
+    String msg = "Setting gaeUserId[" + testGaeUserId + "], gaeUserEmail[" + testGaeUserEmail
+        + "]"; 
+    logger.info(msg);
+    response.getWriter().println(msg);
   }
 }

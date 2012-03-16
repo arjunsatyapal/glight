@@ -17,9 +17,6 @@ package com.google.light.testingutils;
 
 import static com.google.light.server.utils.LightPreconditions.checkEmail;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
-import static org.junit.Assert.assertTrue;
-
-import com.google.light.server.servlets.test.FakeLoginServlet;
 
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpHeaders;
@@ -33,6 +30,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.light.server.constants.RequestParmKeyEnum;
 import com.google.light.server.servlets.path.ServletPathEnum;
+import com.google.light.server.servlets.test.FakeLoginServlet;
 import com.google.light.server.utils.LightPreconditions;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -48,8 +46,6 @@ public class FakeLoginHelper {
   private String serverUrl;
   private String gaeUserId;
   private String gaeUserEmail;
-  private boolean isUserAdmin;
-
   private String cookie;
 
   public FakeLoginHelper(String serverUrl, String gaeUserId, String gaeUserEmail,
@@ -57,8 +53,6 @@ public class FakeLoginHelper {
     this.serverUrl = checkNotBlank(serverUrl);
     this.gaeUserId = checkNotBlank(gaeUserId);
     this.gaeUserEmail = checkEmail(gaeUserEmail);
-    this.isUserAdmin = isUserAdmin;
-
     init();
   }
 
@@ -69,25 +63,16 @@ public class FakeLoginHelper {
 
     HttpTransport HTTP_TRANSPORT = new NetHttpTransport();
     HttpRequestFactory requestFactory = HTTP_TRANSPORT.createRequestFactory();
-    GenericUrl url = new GenericUrl(serverUrl + ServletPathEnum.FAKE_SESSION.get());
-    HttpRequest request = requestFactory.buildPostRequest(url, new UrlEncodedContent(null));
-    HttpResponse response = request.execute();
-    assertTrue(response.isSuccessStatusCode());
-
-    cookie = getCookieFromResponse(response);
-    url = new GenericUrl(serverUrl + ServletPathEnum.FAKE_LOGIN.get());
+    GenericUrl url = new GenericUrl(serverUrl + ServletPathEnum.FAKE_LOGIN.get());
 
     Map<String, String> map = new ImmutableMap.Builder<String, String>()
         .put(RequestParmKeyEnum.GAE_USER_EMAIL.get(), gaeUserEmail)
         .put(RequestParmKeyEnum.GAE_USER_ID.get(), gaeUserId)
-        .put(RequestParmKeyEnum.USER_ADMIN.get(), Boolean.toString(isUserAdmin))
         .build();
-    request = requestFactory.buildPostRequest(url, new UrlEncodedContent(map));
-
-    HttpHeaders headers = new HttpHeaders();
-    headers.set("Cookie", cookie);
-    request.setHeaders(headers);
-    response = request.execute();
+    
+    HttpRequest request = requestFactory.buildPostRequest(url, new UrlEncodedContent(map));
+    HttpResponse response = request.execute();
+    cookie = getCookieFromResponse(response);
   }
 
   public static String getCookieFromResponse(HttpResponse response) {
