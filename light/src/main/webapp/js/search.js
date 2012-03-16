@@ -13,5 +13,5 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+var lightMain = 'light/main/SearchMain';
 document.write('<script src="/js/genericLoader.js"></script>');
-document.write('<script defer="defer">require([\'light/main/RegisterMain\']);</script>');

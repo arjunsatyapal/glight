@@ -14,7 +14,8 @@
  * the License.
  */
 define(['dojo/_base/connect', 'dojo/_base/declare', 'light/URLHashUtil',
-        'dojo'], function(connect, declare, hashUtil, dojo) {
+        'dojo', 'light/enums/SearchEventsEnum'],
+        function(connect, declare, hashUtil, dojo, SearchEventsEnum) {
 
   return declare('light.SearchRouter', null, {
     /** @lends light.SearchRouter# */
@@ -31,8 +32,13 @@ define(['dojo/_base/connect', 'dojo/_base/declare', 'light/URLHashUtil',
        *
        * It is initialized with the default "empty" one
        */
-      this._lastQuery = this.defaultQuery;
-
+      this._lastSearchState = this.DEFAULT_SEARCH_STATE;
+      
+      /**
+       * Auxiliary variable to help skip handling hash
+       * changes caused by this router.
+       */
+      this._skipHash = null;
     },
 
     /**
@@ -40,19 +46,53 @@ define(['dojo/_base/connect', 'dojo/_base/declare', 'light/URLHashUtil',
      *
      * @const
      */
-    defaultQuery: {
+    DEFAULT_SEARCH_STATE: {
       page: 1,
       query: ''
     },
 
     /**
-     * Wire's this object to the page so it can watch for
-     * changes in the hash (http://www.../somepage#SOMEHASH) and
+     * Wire's this object to the dojo event system so it can
+     * watch for search state changes and or changes in
+     * the hash (http://www.../somepage#SOMEHASH) to
      * change the search state based on it.
      */
     watch: function() {
       connect.subscribe('/dojo/hashchange', this, this._onHashChange);
+      connect.subscribe(SearchEventsEnum.SEARCH_STATE_CHANGED, this,
+              this._onSearchStateChange);
       this._onHashChange(hashUtil.get());
+    },
+    
+    /**
+     * Set's the hash taking care of avoiding this router
+     * to handle this hashChange.
+     */
+    _setHash: function(hash) {
+      this._skipHash = hash;
+      hashUtil.set(hash);
+    },
+    
+    /**
+     * Checks if we should skip handling this hash change.
+     * 
+     * <p>This is particularly useful to avoid this router
+     * to handle hashChanges caused by itself.
+     */
+    _shouldSkipThisHashChange: function(hash) {
+      var result = this._skipHash == hash; 
+      this._skipHash = null;
+      return result;
+    },
+    
+    /**
+     * Handles searchStateChange events.
+     */
+    _onSearchStateChange: function(searchState, source) {
+      if(source != this) {
+        this._lastSearchState = searchState;
+        this._setHash(this._searchStateToHash(searchState));
+      }
     },
 
     /**
@@ -65,27 +105,29 @@ define(['dojo/_base/connect', 'dojo/_base/declare', 'light/URLHashUtil',
      * @private
      */
     _onHashChange: function(hash) {
-      var query = null;
+      if(this._shouldSkipThisHashChange(hash))
+        return;
+      var searchState = null;
       try {
-        query = this._hashToQuery(hash);
+        searchState = this._hashToSearchState(hash);
       } catch (e) {
         // TODO(waltercacau): Warn the user that his query was wrong
       }
-      if (query) {
-        // TODO(waltercacau): Publish an event saying that the query has changed
-        this.lastQuery = query;
+      if (searchState) {
+        this._lastSearchState = searchState;
+        connect.publish(SearchEventsEnum.SEARCH_STATE_CHANGED, [searchState, this]);
       } else {
-        hashUtil.set(this._queryToHash(this._lastQuery));
+        this._setHash(this._searchStateToHash(this._lastSearchState));
       }
     },
 
-    _queryToHash: function(data) {
+    _searchStateToHash: function(data) {
       return dojo.objectToQuery(data);
     },
 
-    _hashToQuery: function(hash) {
+    _hashToSearchState: function(hash) {
       if (hash == '')
-        return this.defaultQuery;
+        return this.defaultSearchState;
       var data = dojo.queryToObject(hash);
       if (typeof data.page != 'string' || !data.page.match(/[0-9]+/)) {
         throw new Error('Page is not a number');

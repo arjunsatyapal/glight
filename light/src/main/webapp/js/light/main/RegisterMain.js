@@ -13,5 +13,12 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-document.write('<script src="/js/genericLoader.js"></script>');
-document.write('<script defer="defer">require([\'light/main/RegisterMain\']);</script>');
+define(['light/views/RegisterFormView',
+        'light/controllers/RegisterFormController',
+        'light/stores/PersonStore', 'dojo/domReady!'],
+        function(RegisterFormView, RegisterFormController, PersonStore) {
+  var registerFormView = new RegisterFormView({}, 'registerForm');
+  var registerFormController = new RegisterFormController(new PersonStore());
+  registerFormController.setView(registerFormView);
+  registerFormView.setController(registerFormController);
+});

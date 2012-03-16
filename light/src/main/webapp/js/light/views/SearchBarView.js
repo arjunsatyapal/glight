@@ -21,9 +21,15 @@ define(['dojo/_base/declare', 'light/views/TemplatedLightView',
     return declare('light.views.SearchBarView',
             [TemplatedLightView, _WidgetsInTemplateMixin], {
         templateString: template,
-        constructor: function() {
-          this.domNode.style.width = '100%';
-          this.domNode.style.height = '100%';
+        
+        _onSubmit: function() {
+          this._controller.onSubmit();
+        },
+        getQuery: function() {
+          return this._textBox.get('value');
+        },
+        setQuery: function(value) {
+          return this._textBox.set('value', value);
         }
     });
 

@@ -13,5 +13,13 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-document.write('<script src="/js/genericLoader.js"></script>');
-document.write('<script defer="defer">require([\'light/main/RegisterMain\']);</script>');
+define({
+  type:"object",
+  properties:{
+    query: {type:"string"},
+    page: {
+      type:"number",
+      minimum: 1
+    }
+  }
+});

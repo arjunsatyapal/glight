@@ -13,8 +13,8 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-define(['light/views/AbstractLightView'],
-        function(AbstractLightView) {
+define(['light/views/AbstractLightView', 'dojox/json/schema', 'dojo'],
+        function(AbstractLightView, jsonSchema, dojo) {
   /**
    * Utility Methods for testing.
    * @class
@@ -44,7 +44,12 @@ define(['light/views/AbstractLightView'],
       return stubbed;
     },
 
-    _currentSpec: null
+    _currentSpec: null,
+    
+    validateSchema: function(obj, schema) {
+      if(!jsonSchema.validate(obj, schema).valid)
+        throw new Error('Given object does not conform to schema: '+dojo.toJson(obj));
+    }
 
   };
 
