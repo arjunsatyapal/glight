@@ -13,14 +13,14 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-define(['dojo/_base/declare', 'light/AbstractLightController'],
+define(['dojo/_base/declare', 'light/controllers/AbstractLightController'],
         function(declare, AbstractLightController) {
-  return declare('light.RegisterFormController', AbstractLightController, {
+  return declare('light.controllers.RegisterFormController', AbstractLightController, {
 
-    /** @lends light.RegisterFormController# */
+    /** @lends light.controllers.RegisterFormController# */
 
     /**
-     * @extends light.AbstractLightController
+     * @extends light.controllers.AbstractLightController
      * @constructs
      */
     constructor: function(personStore) {

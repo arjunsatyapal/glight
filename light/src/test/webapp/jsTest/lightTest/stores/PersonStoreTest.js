@@ -13,23 +13,12 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-define(['dojo/_base/declare'],
-        function(declare) {
-  /**
-   * Base abstract class for all light controllers.
-   * 
-   * @class
-   * @name light.AbstractLightController
-   */
-  return declare('light.AbstractLightController', null, {
-    /** @lends light.AbstractLightController# */
-
-    /**
-     * Defines the view for this controller.
-     */
-    setView: function(view) {
-      this._view = view;
-    }
-
+define(['light/stores/PersonStore'], function(PersonStore) {
+  describe('light.stores.PersonStore constructor', function() {
+    it('should not throw', function() {
+      expect(function() {
+        new PersonStore();
+      }).not.toThrow();
+    });
   });
 });

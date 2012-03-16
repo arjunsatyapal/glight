@@ -13,18 +13,22 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-define(['dojo/_base/declare', 'dijit/_Widget', 'dijit/_TemplatedMixin',
-        'dijit/_WidgetsInTemplateMixin', 'dojo/text!./SearchBarView.html',
-        'dijit/form/TextBox', 'dijit/form/Button'],
-        function(declare, _Widget, _TemplatedMixin,
-                _WidgetsInTemplateMixin, template) {
-    return declare('light.SearchBarView',
-            [_Widget, _TemplatedMixin, _WidgetsInTemplateMixin], {
-        templateString: template,
-        constructor: function() {
-          this.domNode.style.width = '100%';
-          this.domNode.style.height = '100%';
-        }
-    });
+define(['dojo/_base/declare', 'light/stores/AbstractLightStore'],
+        function(declare, AbstractLightStore) {
 
+  return declare('light.stores.PersonStore', AbstractLightStore, {
+    /** @lends light.stores.PersonStore# */
+
+    lightTarget: '/api/person',
+
+    /**
+     * Store object for Person resource.
+     * @extends light.stores.AbstractLightStore
+     * @constructs
+     */
+    constructor: function(options) {
+      this.inherited(arguments);
+    }
+
+  });
 });

@@ -13,10 +13,10 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-define(['light/RegisterFormController', 'light/PersonStore',
-        'light/RegisterFormView'],
+define(['light/controllers/RegisterFormController', 'light/stores/PersonStore',
+        'light/views/RegisterFormView'],
         function(RegisterFormController, PersonStore, RegisterFormView) {
-  describe('light.RegisterFormController', function() {
+  describe('light.controllers.RegisterFormController', function() {
     var controller, personStore, view;
 
     beforeEach(function() {

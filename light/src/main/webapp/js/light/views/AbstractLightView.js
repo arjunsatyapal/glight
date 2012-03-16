@@ -18,15 +18,15 @@ define(['dojo/_base/declare'], function(declare) {
    * Base abstract class for all light views.
    * 
    * @class
-   * @name light.AbstractLightView
+   * @name light.views.AbstractLightView
    */
-  return declare('light.AbstractLightController', null, {
-    /** @lends light.AbstractLightView# */
+  return declare('light.controllers.AbstractLightController', null, {
+    /** @lends light.views.AbstractLightView# */
 
     /**
      * Defines the controller for this view.
      * 
-     * @param {light.AbstractLightController}
+     * @param {light.controllers.AbstractLightController}
      *          controller Controller.
      */
     setController: function(controller) {
