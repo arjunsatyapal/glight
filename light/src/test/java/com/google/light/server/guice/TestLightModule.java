@@ -15,10 +15,14 @@
  */
 package com.google.light.server.guice;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.util.Modules;
+import com.google.light.server.annotations.AnotHttpSession;
+import javax.servlet.http.HttpSession;
 
 /**
  * Guice Module for UnitTests for Light.
@@ -26,14 +30,22 @@ import com.google.inject.util.Modules;
  * @author Arjun Satyapal
  */
 public class TestLightModule extends AbstractModule {
-
-  @Override
-  protected void configure() {
-    // PlaceHolder for Test Overrides.
+  private HttpSession httpSession;
+  
+  public TestLightModule(HttpSession httpSession) {
+    this.httpSession = checkNotNull(httpSession);
   }
   
-  public static Injector getTestInjector() {
+  @Override
+  protected void configure() {
+    bind(HttpSession.class)
+        .annotatedWith(AnotHttpSession.class)
+        .toInstance(httpSession);
+
+  }
+
+  public static Injector getTestInjector(HttpSession httpSession) {
     return Guice.createInjector(Modules.override(
-        new LightModule()).with(new TestLightModule()));
+        new LightModule()).with(new TestLightModule(httpSession)));
   }
 }

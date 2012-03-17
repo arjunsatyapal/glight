@@ -29,7 +29,7 @@ import com.google.light.server.exception.unchecked.httpexception.PersonLoginRequ
 
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.inject.Inject;
-import com.google.light.server.annotations.AnotSession;
+import com.google.light.server.annotations.AnotHttpSession;
 import com.google.light.server.constants.LightAppIdEnum;
 import com.google.light.server.constants.OpenIdAuthDomain;
 import com.google.light.server.constants.RequestParmKeyEnum;
@@ -44,7 +44,7 @@ public class SessionManager {
   private HttpSession session;
 
   @Inject
-  public SessionManager(@AnotSession HttpSession session) {
+  public SessionManager(@AnotHttpSession HttpSession session) {
     this.session = checkNotNull(session);
   }
 

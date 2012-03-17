@@ -17,6 +17,12 @@ package com.google.light.server.guice.providers;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.light.server.manager.implementation.PersonManagerImpl;
+
+import com.google.inject.Provider;
+
+import com.google.inject.util.Providers;
+
 import com.google.light.server.servlets.SessionManager;
 
 import com.google.inject.Inject;
@@ -32,14 +38,16 @@ import com.google.light.server.manager.interfaces.PersonManager;
  */
 public class InstanceProvider {
   private Injector injector;
+  private Provider<PersonManagerImpl> personManagerProvider;
 
   @Inject
-  private InstanceProvider(Injector injector) {
+  private InstanceProvider(Injector injector, Provider<PersonManagerImpl> personManagerProvider) {
     this.injector = checkNotNull(injector);
+    this.personManagerProvider = checkNotNull(personManagerProvider);
   }
 
   public PersonManager getPersonManager() {
-    return checkNotNull(injector.getInstance(PersonManager.class));
+    return checkNotNull(personManagerProvider.get());
   }
   
   public SessionManager getSessionManager() {

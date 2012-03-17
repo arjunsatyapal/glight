@@ -233,17 +233,6 @@
     </dependency>
 
     <!--
-      Junit Dependency :
-      Scope = Test Only.
-    -->
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.10</version>
-      <scope>test</scope>
-    </dependency>
-
-    <!--
       Logging Dependency : These dependencies are here just for enabling logging.
       TODO(arjuns): may be good for use to wrap all different logging frameworks.
     -->
@@ -260,16 +249,22 @@
     </dependency>
 
     <!--
-      Mockito Dependency :
-      Scope = test
+      Test Dependency :
+      Scope = Test Only.
     -->
     <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.10</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
       <groupId>org.mockito</groupId>
-      <artifactId>mockito-core</artifactId>
+      <artifactId>mockito-all</artifactId>
       <version>1.9.0</version>
       <scope>test</scope>
     </dependency>
-    
     <!--
       Objectify Dependency :
       Scope : Production.
@@ -736,7 +731,7 @@
                 the testing of Light's Views.
               -->
               <webDriverClassName>org.openqa.selenium.firefox.FirefoxDriver</webDriverClassName>
-              
+
               <jsSrcDir>${project.basedir}/src/main/webapp/js</jsSrcDir>
               <jsTestSrcDir>${project.basedir}/src/test/webapp/jsTest</jsTestSrcDir>
 

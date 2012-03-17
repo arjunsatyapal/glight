@@ -15,20 +15,11 @@ package com.google.light.server;
 import static com.google.light.server.constants.RequestParmKeyEnum.AUTH_DOMAIN;
 import static com.google.light.server.constants.RequestParmKeyEnum.GAE_USER_EMAIL;
 import static com.google.light.server.constants.RequestParmKeyEnum.GAE_USER_ID;
-import static com.google.light.server.utils.GuiceUtils.getKeyForScopeSeed;
 import static com.google.light.testingutils.TestingUtils.getRandomEmail;
 import static com.google.light.testingutils.TestingUtils.getRandomFederatedId;
 import static com.google.light.testingutils.TestingUtils.getRandomString;
 import static com.google.light.testingutils.TestingUtils.getRandomUserId;
 import static org.mockito.Mockito.when;
-
-import com.google.light.server.annotations.AnotSession;
-
-import org.mockito.Mockito;
-
-import javax.servlet.http.HttpSession;
-
-import com.google.light.server.guice.scope.LightScope;
 
 import com.google.inject.Injector;
 import com.google.light.server.constants.OpenIdAuthDomain;
@@ -36,17 +27,19 @@ import com.google.light.server.guice.TestInstanceProvider;
 import com.google.light.server.guice.TestLightModule;
 import com.google.light.server.guice.providers.InstanceProvider;
 import com.google.light.testingutils.GaeTestingUtils;
+import javax.servlet.http.HttpSession;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.mockito.Mockito;
 
 /**
  * Base class for all the Light Server Tests.
  * 
  * @author Arjun Satyapal
  */
-public class AbstractLightServerTest {
+public abstract class AbstractLightServerTest {
   private static boolean gaeSetupDone = false;
 
   protected static OpenIdAuthDomain defaultAuthDomain = OpenIdAuthDomain.GOOGLE;
@@ -57,7 +50,6 @@ public class AbstractLightServerTest {
   protected String testLastName;
 
   protected Injector injector;
-  protected LightScope lightScope;
   protected InstanceProvider instanceProvider;
   protected TestInstanceProvider testInstanceProvider;
   protected static GaeTestingUtils gaeTestingUtils = null;
@@ -117,17 +109,16 @@ public class AbstractLightServerTest {
       gaeEnvReset(defaultAuthDomain.get(), testEmail, testFederatedId, testUserId,
           true /* loggedIn */, false /* isAdmin */);
     }
-    injector = TestLightModule.getTestInjector();
-    lightScope = injector.getInstance(LightScope.class);
-    lightScope.enter();
+    HttpSession mockSession = Mockito.mock(HttpSession.class);
+    when(mockSession.getAttribute(AUTH_DOMAIN.get())).thenReturn(defaultAuthDomain);
+    when(mockSession.getAttribute(GAE_USER_EMAIL.get())).thenReturn(testEmail);
+    when(mockSession.getAttribute(GAE_USER_ID.get())).thenReturn(testUserId);
+    
+    injector = TestLightModule.getTestInjector(mockSession);
     instanceProvider = injector.getInstance(InstanceProvider.class);
     testInstanceProvider = injector.getInstance(TestInstanceProvider.class);
     
-    HttpSession session = Mockito.mock(HttpSession.class);
-    when(session.getAttribute(AUTH_DOMAIN.get())).thenReturn(defaultAuthDomain);
-    when(session.getAttribute(GAE_USER_EMAIL.get())).thenReturn(testEmail);
-    when(session.getAttribute(GAE_USER_ID.get())).thenReturn(testUserId);
-    lightScope.seed(getKeyForScopeSeed(HttpSession.class, AnotSession.class), session);
+    
   }
 
   @After
@@ -137,6 +128,5 @@ public class AbstractLightServerTest {
     testUserId = null;
     testEmail = null;
     gaeSetupDone = false;
-    lightScope.exit();
   }
 }
