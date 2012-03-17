@@ -135,6 +135,9 @@ public class GaeUtils {
    * 
    * There is no good easy way to test this. So trusting on AppEngine that it will return the 
    * correct value.
+   * 
+   * TODO(arjuns): May be as part of the integration test, using configServlet, this can be tested.
+   * Add test for that.
    */
   public static boolean isDevServer() {
     return SystemProperty.Environment.Value.Development == SystemProperty.environment.value();

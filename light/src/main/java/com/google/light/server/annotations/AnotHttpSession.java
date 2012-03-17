@@ -28,5 +28,5 @@ import java.lang.annotation.Retention;
  */
 @BindingAnnotation
 @Retention(RetentionPolicy.RUNTIME)
-public @interface AnotSession {
+public @interface AnotHttpSession {
 }

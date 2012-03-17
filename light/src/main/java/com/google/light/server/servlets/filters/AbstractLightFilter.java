@@ -15,15 +15,11 @@
  */
 package com.google.light.server.servlets.filters;
 
-import static com.google.light.server.utils.GuiceUtils.getKeyForScopeSeed;
-
-import com.google.light.server.exception.unchecked.httpexception.PersonLoginRequiredException;
-
-import com.google.light.server.annotations.AnotSession;
+import static com.google.light.server.utils.GuiceUtils.seedEntityInRequestScope;
 
 import com.google.common.base.Throwables;
-import com.google.inject.Inject;
-import com.google.light.server.guice.scope.LightScope;
+import com.google.light.server.annotations.AnotHttpSession;
+import com.google.light.server.exception.unchecked.httpexception.PersonLoginRequiredException;
 import java.util.logging.Logger;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -45,9 +41,6 @@ public abstract class AbstractLightFilter implements Filter {
   private static final Logger logger = Logger.getLogger(Filter.class.getName());
   private FilterConfig filterConfig;
 
-  @Inject
-  protected LightScope lightScope;
-
   public void doFilter(HttpSession session, ServletRequest req, ServletResponse res,
       FilterChain filterChain) {
     try {
@@ -60,21 +53,16 @@ public abstract class AbstractLightFilter implements Filter {
       }
       
       // TODO(arjuns) : Add changeLog.
-      lightScope.enter();
       
       if (session.isNew()) {
         session.invalidate();
       } else {
-        lightScope.seed(getKeyForScopeSeed(HttpSession.class, AnotSession.class), session);
+        seedEntityInRequestScope(request, HttpSession.class, AnotHttpSession.class, session);
       }
       filterChain.doFilter(request, response);
     } catch (Exception e) {
       // TODO(arjuns) : check log(level, message, throwable) logs whole stack.
       logger.severe("Failed due to : " + Throwables.getStackTraceAsString(e));
-    } finally {
-      if (lightScope.isEnabled()) {
-        lightScope.exit();
-      }
     }
   }
 

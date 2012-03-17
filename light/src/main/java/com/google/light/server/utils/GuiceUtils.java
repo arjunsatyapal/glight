@@ -15,6 +15,8 @@
  */
 package com.google.light.server.utils;
 
+import javax.servlet.http.HttpServletRequest;
+
 import com.google.inject.Key;
 import java.lang.annotation.Annotation;
 
@@ -26,12 +28,24 @@ import com.google.inject.ProvisionException;
  * @author Arjun Satyapal
  */
 public class GuiceUtils {
-  
-  public static <P, Q extends Annotation> Key<P> getKeyForScopeSeed(Class<P> clazz,
-      Class<Q> annotationClazz) {
-    return Key.get(clazz, annotationClazz);
+
+  /**
+   * Utility method to return {@link Key} which uses {@link Key#get(Class, Annotation)}.
+   * 
+   * E : Entity Class.
+   * A : Binding Annotation class.
+   * 
+   * TODO(arjuns): Add test.
+   * 
+   * @param entityClass
+   * @param anotClazz
+   * @return
+   */
+  public static <E, A extends Annotation> Key<E> getKeyForScopeSeed(Class<E> entityClass,
+      Class<A> anotClazz) {
+    return Key.get(entityClass, anotClazz);
   }
-  
+
   /**
    * Use this method for checking if the cause for Guice Provision Exception is of expected type.
    * 
@@ -46,6 +60,25 @@ public class GuiceUtils {
       return true;
     }
     return false;
+  }
+
+  /**
+   * Utility method to enqueue an entity under a RequestScope.
+   * 
+   * E : Entity to be put under RequestScope.
+   * A : Binding annotation.
+   * 
+   * TODO(arjuns): Add test for this.
+   * 
+   * @param request
+   * @param entityClass
+   * @param anotClass
+   * @param object
+   */
+  public static <E, A extends Annotation> void seedEntityInRequestScope(
+      HttpServletRequest request, Class<E> entityClass, Class<A> anotClass, E object) {
+    Key<E> key = getKeyForScopeSeed(entityClass, anotClass); 
+    request.setAttribute(key.toString(), object);
   }
 
   // Utility class.

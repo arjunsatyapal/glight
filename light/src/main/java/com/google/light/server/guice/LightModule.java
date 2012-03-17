@@ -16,17 +16,15 @@
 package com.google.light.server.guice;
 
 import com.google.inject.AbstractModule;
-import com.google.light.server.annotations.AnotLightScope;
-import com.google.light.server.annotations.AnotSession;
-import com.google.light.server.guice.providers.InstanceProvider;
-import com.google.light.server.guice.scope.LightScope;
-import com.google.light.server.manager.implementation.PersonManagerImpl;
-import com.google.light.server.manager.interfaces.PersonManager;
-import com.google.light.server.servlets.SessionManager;
+import com.google.light.server.annotations.AnotHttpSession;
 import javax.servlet.http.HttpSession;
 
 /**
  * Guice Production Module for Light.
+ * 
+ * Note : All bindings should be in request scoped.
+ * 
+ * TODO(arjuns): Add test for this.
  * 
  * @author Arjun Satyapal
  */
@@ -34,17 +32,8 @@ public class LightModule extends AbstractModule {
 
   @Override
   protected void configure() {
-    // tell Guice about the scope
-    LightScope lightScope = new LightScope();
-    bindScope(AnotLightScope.class, lightScope);
-    bind(LightScope.class).toInstance(lightScope);
-
-    // Binding lightScope variables.
-    bind(HttpSession.class).annotatedWith(AnotSession.class)
-        .toProvider(LightScope.<HttpSession> seededKeyProvider()).in(lightScope);
-    
-    bind(InstanceProvider.class).in(lightScope);
-    bind(SessionManager.class).in(lightScope);
-    bind(PersonManager.class).to(PersonManagerImpl.class).in(lightScope);
+    bind(HttpSession.class)
+      .annotatedWith(AnotHttpSession.class)
+      .to(HttpSession.class);
   }
 }
