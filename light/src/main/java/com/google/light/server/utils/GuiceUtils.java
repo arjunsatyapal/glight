@@ -36,6 +36,7 @@ public class GuiceUtils {
    * A : Binding Annotation class.
    * 
    * TODO(arjuns): Add test.
+   * TODO(arjuns) : Rename this method to getAnnotationBindingKey.
    * 
    * @param entityClass
    * @param anotClazz

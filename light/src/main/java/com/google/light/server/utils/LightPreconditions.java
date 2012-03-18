@@ -18,6 +18,10 @@ package com.google.light.server.utils;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.net.URISyntaxException;
+
+import java.net.URI;
+
 import com.google.appengine.api.users.UserServiceFactory;
 
 import com.google.light.server.exception.unchecked.httpexception.UnauthorizedException;
@@ -140,6 +144,18 @@ public class LightPreconditions {
     }
   }
 
+  /**
+   * Ensures that the the given String is a valid URI.
+   * 
+   * TODO(arjuns): Add test for this.
+   * @throws URISyntaxException 
+   */
+  public static String checkValidUri(String uri) throws URISyntaxException {
+    new URI(uri);
+    return uri;
+  }
+  
+  
   // Utility class.
   private LightPreconditions() {
   }

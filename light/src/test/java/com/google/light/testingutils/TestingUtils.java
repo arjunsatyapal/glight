@@ -15,12 +15,9 @@
  */
 package com.google.light.testingutils;
 
-import java.io.IOException;
-
-import java.io.InputStream;
-
 import com.google.light.server.utils.LightUtils;
-
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 

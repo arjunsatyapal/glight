@@ -21,10 +21,13 @@ import static com.google.light.testingutils.TestingUtils.getRandomString;
 import static com.google.light.testingutils.TestingUtils.getRandomUserId;
 import static org.mockito.Mockito.when;
 
+import com.google.light.server.constants.LightAppIdEnum;
+
+import com.google.light.server.guice.module.UnitTestModule;
+
 import com.google.inject.Injector;
 import com.google.light.server.constants.OpenIdAuthDomain;
 import com.google.light.server.guice.TestInstanceProvider;
-import com.google.light.server.guice.TestLightModule;
 import com.google.light.server.guice.providers.InstanceProvider;
 import com.google.light.testingutils.GaeTestingUtils;
 import javax.servlet.http.HttpSession;
@@ -42,6 +45,7 @@ import org.mockito.Mockito;
 public abstract class AbstractLightServerTest {
   private static boolean gaeSetupDone = false;
 
+  protected static LightAppIdEnum defaultEnv = LightAppIdEnum.TEST;
   protected static OpenIdAuthDomain defaultAuthDomain = OpenIdAuthDomain.GOOGLE;
   protected String testUserId;
   protected String testEmail;
@@ -58,16 +62,16 @@ public abstract class AbstractLightServerTest {
   public static void gaeSetup() {
     // This causes GAE Test Setup once.
     gaeTestingUtils =
-        new GaeTestingUtils(defaultAuthDomain.get(), getRandomEmail(), getRandomFederatedId(), 
-            true /*isFederatedUser*/, getRandomUserId(), true /* isUserLoggedIn */, 
-            false /* isGaeAdmin */);
+        new GaeTestingUtils(defaultEnv, defaultAuthDomain.get(), getRandomEmail(),
+            getRandomFederatedId(), true /* isFederatedUser */, getRandomUserId(),
+            true /* isUserLoggedIn */, false /* isGaeAdmin */);
     gaeTestingUtils.setUp();
-    
+
     /*
-     * Deliberately keeping this false so that each test is forced to initiate with its own Env
-     * with each setup.
+     * Deliberately keeping this false so that each test is forced to initiate with its own Env with
+     * each setup.
      */
-    
+
     gaeSetupDone = false;
   }
 
@@ -113,12 +117,11 @@ public abstract class AbstractLightServerTest {
     when(mockSession.getAttribute(AUTH_DOMAIN.get())).thenReturn(defaultAuthDomain);
     when(mockSession.getAttribute(GAE_USER_EMAIL.get())).thenReturn(testEmail);
     when(mockSession.getAttribute(GAE_USER_ID.get())).thenReturn(testUserId);
-    
-    injector = TestLightModule.getTestInjector(mockSession);
+
+    injector = UnitTestModule.getTestInjector(mockSession);
     instanceProvider = injector.getInstance(InstanceProvider.class);
     testInstanceProvider = injector.getInstance(TestInstanceProvider.class);
-    
-    
+
   }
 
   @After

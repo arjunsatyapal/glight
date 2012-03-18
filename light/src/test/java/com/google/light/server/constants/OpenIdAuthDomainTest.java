@@ -26,7 +26,7 @@ import org.junit.Test;
 
 /**
  * Test for {@link OpenIdAuthDomain}.
- * 
+ * @deprecated
  * @author Arjun Satyapal
  */
 public class OpenIdAuthDomainTest implements EnumTestInterface {

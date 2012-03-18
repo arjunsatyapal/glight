@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.server.guice;
+package com.google.light.server.guice.module;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -22,17 +22,25 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.util.Modules;
 import com.google.light.server.annotations.AnotHttpSession;
+import com.google.light.server.exception.unchecked.ServerConfigurationException;
+import com.google.light.server.guice.modules.DevServerModule;
+import com.google.light.server.utils.GaeUtils;
 import javax.servlet.http.HttpSession;
 
 /**
- * Guice Module for UnitTests for Light.
+ * UnitTest Guice Module for UnitTests Environment.
  * 
  * @author Arjun Satyapal
  */
-public class TestLightModule extends AbstractModule {
+public class UnitTestModule extends AbstractModule {
   private HttpSession httpSession;
   
-  public TestLightModule(HttpSession httpSession) {
+  public UnitTestModule(HttpSession httpSession) {
+    if (!GaeUtils.isUnitTestServer()) {
+      throw new ServerConfigurationException(
+          "UnitTestModule should be instantiated only for UnitTest Env.");
+    }
+    
     this.httpSession = checkNotNull(httpSession);
   }
   
@@ -41,11 +49,10 @@ public class TestLightModule extends AbstractModule {
     bind(HttpSession.class)
         .annotatedWith(AnotHttpSession.class)
         .toInstance(httpSession);
-
   }
 
   public static Injector getTestInjector(HttpSession httpSession) {
-    return Guice.createInjector(Modules.override(
-        new LightModule()).with(new TestLightModule(httpSession)));
+    return Guice.createInjector(Modules.override(new DevServerModule())
+        .with(new UnitTestModule(httpSession)));
   }
 }

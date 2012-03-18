@@ -13,24 +13,31 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.server.guice;
+package com.google.light.server.guice.modules;
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.servlet.GuiceServletContextListener;
+import com.google.light.server.exception.unchecked.ServerConfigurationException;
+import com.google.light.server.utils.GaeUtils;
 
 /**
- * A ServletContext Listener to initialize Guice.
- * More : http://code.google.com/p/google-guice/wiki/ServletModule
+ * QA Guice Module for QA Environment.
+ * 
+ * Note : All bindings should be in request scoped.
+ * 
+ * TODO(arjuns): Add test for this.
  * 
  * @author Arjun Satyapal
  */
-public class LightGuiceServletContextListener extends GuiceServletContextListener {
+public class QaModule extends BaseGuiceModule {
+  public QaModule() {
+    if (!GaeUtils.isQaServer()) {
+      throw new ServerConfigurationException(
+          "QaModule should be instantiated only for QA Env.");
+    }
+  }
+
   @Override
-  protected Injector getInjector() {
-    return Guice.createInjector(
-        new LightModule(),
-        new LightServletModule()
-        );
+  protected void configure() {
+    super.configure();
+    // Add QA Environment specific bindings here.
   }
 }

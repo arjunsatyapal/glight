@@ -31,7 +31,7 @@ import java.util.logging.Logger;
  */
 
 class LightServletModule extends ServletModule {
-  private static final Logger logger = Logger.getLogger(LightServletModule.class.getName());
+  private static final Logger logger = Logger.getLogger(ServletModule.class.getName());
 
   @Override
   protected void configureServlets() {

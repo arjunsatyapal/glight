@@ -13,27 +13,34 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.server.guice;
+package com.google.light.server.guice.modules;
 
 import com.google.inject.AbstractModule;
 import com.google.light.server.annotations.AnotHttpSession;
 import javax.servlet.http.HttpSession;
 
 /**
- * Guice Production Module for Light.
- * 
- * Note : All bindings should be in request scoped.
+ * {@link BaseGuiceModule} will do two things :
+ * <br> 1. Do mandatory bindings which are common across all environments.
+ * <br> 2. Define bindings that are required, but varies in different environments.
+ * <p>
+ * NOTE : Even if any one of environment(Product, QA, or DevServer) varies in type of binding, that
+ * will cause to define the binding for all the environments in the corresponding Environment
+ * Module. * This approach keeps Module bindings simple and easy to maintain.
+ * <p>
+ * {@link com.google.light.server.guice.module.UnitTestModule} is exception to this rule. 
+ * UnitTestModule will Override the {@link DevServerModule} as they are almost always similar.
  * 
  * TODO(arjuns): Add test for this.
  * 
  * @author Arjun Satyapal
  */
-public class LightModule extends AbstractModule {
+public abstract class BaseGuiceModule extends AbstractModule {
 
   @Override
   protected void configure() {
     bind(HttpSession.class)
-      .annotatedWith(AnotHttpSession.class)
-      .to(HttpSession.class);
+        .annotatedWith(AnotHttpSession.class)
+        .to(HttpSession.class);
   }
 }

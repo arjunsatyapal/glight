@@ -19,6 +19,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.constants.OpenIdAuthDomain.getAuthDomainByValue;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
+import com.google.light.server.servlets.SessionManager;
+
 import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
@@ -38,6 +40,8 @@ public class GaeUtils {
    * Get FederatedAuthDomain for Current Logged in user. This should be called only when user is
    * Logged in.
    * 
+   * TODO(arjuns) : Remove this method or add test for it.
+   * @deprecated
    * @return
    */
   public static OpenIdAuthDomain getAuthDomain() {
@@ -47,7 +51,8 @@ public class GaeUtils {
   /**
    * Get Email provided by the Federated Identity Provider. This should be called only when user is
    * logged in.
-   * 
+   * TODO(arjuns) : Remove this method or add test for it.
+   * @deprecated Going forward, {@link SessionManager#getGaeEmail()} should be used.
    * @return
    */
   public static String getGaeUserEmail() {
@@ -57,7 +62,7 @@ public class GaeUtils {
   /**
    * Get Federated Identity of the Logged in user. This should be called only when user is logged
    * in.
-   * 
+   * TODO(arjuns) : Remove this method or add test for it.
    * @deprecated
    * @return
    */
@@ -69,7 +74,7 @@ public class GaeUtils {
 
   /**
    * Get GAE User Service.
-   * 
+   * TODO(arjuns) : add test for it.
    * @return
    */
   public static UserService getUserService() {
@@ -78,7 +83,7 @@ public class GaeUtils {
 
   /**
    * Get current logged in GAE User.
-   * 
+   * TODO(arjuns) : add test for this.
    * @return Return current Logged In user. Null if user is not logged in.
    */
   public static User getUser() {
@@ -88,7 +93,8 @@ public class GaeUtils {
   /**
    * Get current logged in GAE User's id. This should be called when you are sure that user is
    * logged in.
-   * 
+   * TODO(arjuns) : Remove this method or add test for it.
+   * @deprecated Going forward {@link SessionManager#getPersonId()} should be used. 
    * @return
    */
   public static String getGaeUserId() {
@@ -128,16 +134,18 @@ public class GaeUtils {
     return checkNotBlank(env.getAppId());
   }
 
-  
+  /**
+   * Ensures that Application is running on AppEngine.
+   * 
+   * TODO(arjuns): Add test for this.
+   * @return
+   */
+  public static boolean isRunningOnGAE() {
+    return SystemProperty.Environment.Value.Production == SystemProperty.environment.value();
+  }
   /**
    * Returns true if Application is running on local DevelopmentServer.
    * This depends on the {@link SystemProperty#environment}.
-   * 
-   * There is no good easy way to test this. So trusting on AppEngine that it will return the 
-   * correct value.
-   * 
-   * TODO(arjuns): May be as part of the integration test, using configServlet, this can be tested.
-   * Add test for that.
    */
   public static boolean isDevServer() {
     return SystemProperty.Environment.Value.Development == SystemProperty.environment.value();
@@ -148,7 +156,7 @@ public class GaeUtils {
    * This depends on AppId.
    */
   public static boolean isProductionServer() {
-    return !isDevServer() && LightAppIdEnum.PROD == LightAppIdEnum.getLightAppIdEnum();
+    return isRunningOnGAE() && LightAppIdEnum.PROD == LightAppIdEnum.getLightAppIdEnum();
   }
 
   /**
@@ -156,7 +164,7 @@ public class GaeUtils {
    * This depends on AppId.
    */
   public static boolean isQaServer() {
-    return !isDevServer()
+    return isRunningOnGAE()
         && LightAppIdEnum.QA == LightAppIdEnum.getLightAppIdEnum();
   }
 
@@ -165,8 +173,7 @@ public class GaeUtils {
    * This depends on AppId.
    */
   public static boolean isUnitTestServer() {
-    return !isProductionServer()
+    return SystemProperty.environment.value() == null
         && LightAppIdEnum.TEST == LightAppIdEnum.getLightAppIdEnum();
   }
-
 }

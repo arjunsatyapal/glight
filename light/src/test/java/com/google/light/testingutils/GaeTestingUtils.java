@@ -15,6 +15,10 @@
  */
 package com.google.light.testingutils;
 
+import com.google.appengine.api.utils.SystemProperty;
+
+import com.google.light.server.constants.LightAppIdEnum;
+
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.appengine.tools.development.testing.LocalTaskQueueTestConfig;
@@ -49,13 +53,28 @@ public class GaeTestingUtils {
 
   private LocalServiceTestHelper gaeTestHelper;
 
-  public GaeTestingUtils(String federatedAuthority, String email, String federatedId,
-      Boolean isFederated, String userId, boolean loggedIn,
+  public GaeTestingUtils(LightAppIdEnum env, String federatedAuthority, String email,
+      String federatedId, Boolean isFederated, String userId, boolean loggedIn,
       boolean isAdmin) {
-    //TODO(arjuns) : Figure out what is the difference between federatedAuthority and authDomain.
+    // TODO(arjuns) : Figure out what is the difference between federatedAuthority and authDomain.
     // For the time being treating as same.
     initFederatedUser(userId, federatedId, federatedAuthority, isFederated);
-    
+
+    switch (env) {
+      case DEV_SERVER:
+        SystemProperty.environment.set(SystemProperty.Environment.Value.Development);
+        break;
+      case PROD:
+        
+      case QA:
+        SystemProperty.environment.set(SystemProperty.Environment.Value.Production);
+        break;
+
+      case TEST:
+      default:
+        SystemProperty.environment.set("");
+    }
+
     gaeTestHelper = new LocalServiceTestHelper(
         new LocalDatastoreServiceTestConfig(),
         new LocalTaskQueueTestConfig(),
@@ -64,7 +83,9 @@ public class GaeTestingUtils {
         .setEnvIsLoggedIn(loggedIn)
         .setEnvAttributes(gaeEnvAttr)
         .setEnvEmail(email)
-        .setEnvIsAdmin(isAdmin);
+        .setEnvIsAdmin(isAdmin)
+        .setEnvAppId(env.getAppIds().get(0));
+
   }
 
   /**
@@ -109,7 +130,7 @@ public class GaeTestingUtils {
   public void setEmail(String envEmail) {
     gaeTestHelper.setEnvEmail(envEmail);
   }
-  
+
   public void setAppId(String appId) {
     gaeTestHelper.setEnvAppId(appId);
   }

@@ -22,7 +22,7 @@ import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
  * 
  * TODO(arjuns) : Try with some other things. Eventually this class may have to go
  * if it keeps on varying for multiple things.
- * 
+ * @deprecated
  * @author Arjun Satyapal
  */
 public enum OpenIdAuthDomain {

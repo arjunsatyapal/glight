@@ -15,8 +15,10 @@
  */
 package com.google.light.server.constants;
 
+import static com.google.light.server.constants.LightAppIdEnum.getLightAppIdEnumById;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import com.google.light.server.guice.LightServletModuleTest;
 
@@ -35,24 +37,20 @@ public class LightAppIdEnumTest implements EnumTestInterface {
   @Test
   @Override
   public void test_count() {
-    assertEquals(3, LightAppIdEnum.values().length);
+    assertEquals(4, LightAppIdEnum.values().length);
   }
 
   /**
-   * Ensure that Ids mentioned inside {@link LightAppIdEnum} are only under one enum.
+   * Ensure that Ids mentioned inside {@link LightAppIdEnum#PROD} and {@link LightAppIdEnum#QA} are
+   * Mutually Exclusive.
+   * 
+   * For {@link LightAppIdEnum#DEV_SERVER} and {@link LightAppIdEnum#TEST}, we dont care as they are
+   * for testing purpose only.
    */
   @Test
   public void test_mutualExclusiveCategory() {
-    for (LightAppIdEnum srcEnum : LightAppIdEnum.values()) {
-      for (LightAppIdEnum destEnum : LightAppIdEnum.values()) {
-        if (srcEnum == destEnum) {
-          continue;
-        }
-
-        for (String currId : srcEnum.getAppIds()) {
-          assertFalse(destEnum.getAppIds().contains(currId));
-        }
-      }
+    for (String currId : LightAppIdEnum.PROD.getAppIds()) {
+      assertFalse(LightAppIdEnum.QA.getAppIds().contains(currId));
     }
   }
 
@@ -71,5 +69,21 @@ public class LightAppIdEnumTest implements EnumTestInterface {
     assertEquals(LightAppIdEnum.PROD, LightAppIdEnum.getLightAppIdEnumById("s~light-prod"));
     assertEquals(LightAppIdEnum.QA, LightAppIdEnum.getLightAppIdEnumById("s~light-qa"));
     assertEquals(LightAppIdEnum.TEST, LightAppIdEnum.getLightAppIdEnumById("test"));
+
+    // Ensure that for none of the mentioend AppIds, Dev Server is returned.
+    for (LightAppIdEnum currEnum : LightAppIdEnum.values()) {
+      for (String currAppId : currEnum.getAppIds()) {
+        LightAppIdEnum expectedEnum = currEnum;
+        
+        // Since DEV_SERVER inherits AppId from QA, so getValue by AppId should return QA.
+        if (expectedEnum == LightAppIdEnum.DEV_SERVER) {
+          expectedEnum = LightAppIdEnum.QA;
+        }
+        
+        assertEquals(expectedEnum, getLightAppIdEnumById(currAppId));
+        // DEV_SERVER is never returned.
+        assertTrue(LightAppIdEnum.DEV_SERVER != getLightAppIdEnumById(currAppId));
+      }
+    }
   }
 }

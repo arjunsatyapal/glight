@@ -21,8 +21,6 @@ import com.google.light.server.manager.implementation.PersonManagerImpl;
 
 import com.google.inject.Provider;
 
-import com.google.inject.util.Providers;
-
 import com.google.light.server.servlets.SessionManager;
 
 import com.google.inject.Inject;

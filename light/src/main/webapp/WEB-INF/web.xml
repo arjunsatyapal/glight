@@ -14,7 +14,7 @@
   </filter-mapping>
 
   <listener>
-    <listener-class>com.google.light.server.guice.LightGuiceServletContextListener</listener-class>
+    <listener-class>com.google.light.server.guice.ServletContextListener</listener-class>
   </listener>
 
   <security-constraint>
