@@ -54,6 +54,9 @@ public class ServletUtilsTest {
         .append(codeKeyValue);
     when(request1.getRequestURL()).thenReturn(googLoginCbReqUrlBuffer);
     assertEquals(googLoginCbReqUrlBuffer.toString(), getRequestUriWithQueryParams(request1));
+    
+    // TODO(arjuns) : Add a test when query params are null.
+    // TODO(arjuns): Fix this test as mentioned in issue 25001.
   }
   
   /**

@@ -55,10 +55,10 @@ public class PersonDao extends AbstractBasicDao<PersonDto, PersonEntity, Long> {
   public PersonEntity getByEmail(String email) {
     Objectify ofy = ObjectifyUtils.nonTransaction();
 
-    Query<PersonEntity> filter =
+    Query<PersonEntity> query =
         ofy.query(PersonEntity.class).filter(PersonEntity.OFY_EMAIL_QUERY_STRING, email);
 
-    return assertAndReturnUniqueUserEntity(email, filter);
+    return assertAndReturnUniqueUserEntity(email, query);
   }
 
   /**

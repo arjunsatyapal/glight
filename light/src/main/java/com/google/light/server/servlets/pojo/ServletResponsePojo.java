@@ -82,6 +82,13 @@ public class ServletResponsePojo<D extends DtoInterface<D>> {
     return dto;
   }
   
+  /**
+   * Log the response string, prepare the response object, and then return.
+   * 
+   * Usually this should be the last statement inside a servlet method.
+   * 
+   * @throws IOException
+   */
   public void logAndReturn() throws IOException {
     logger.info(responseString);
     response.setContentType(contentType.get());
