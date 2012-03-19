@@ -40,14 +40,6 @@ public class TestHeaders extends AbstractLightServlet {
    * {@inheritDoc}
    */
   @Override
-  public void service(HttpServletRequest request, HttpServletResponse response) {
-    super.service(request, response);
-  }
-  
-  /**
-   * {@inheritDoc}
-   */
-  @Override
   public void doDelete(HttpServletRequest request, HttpServletResponse response) {
     doGet(request, response);
   }
