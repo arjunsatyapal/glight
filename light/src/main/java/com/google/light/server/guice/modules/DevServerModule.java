@@ -15,6 +15,14 @@
  */
 package com.google.light.server.guice.modules;
 
+import com.google.light.server.constants.OAuth2Provider;
+
+import com.google.light.server.servlets.test.TestOAuth2ConsumerImpl;
+
+import com.google.light.server.annotations.AnotOAuth2ConsumerGoogleLogin;
+
+import com.google.light.server.manager.interfaces.OAuth2Consumer;
+
 import com.google.light.server.exception.unchecked.ServerConfigurationException;
 import com.google.light.server.utils.GaeUtils;
 
@@ -42,9 +50,8 @@ public class DevServerModule extends BaseGuiceModule {
     
     // Add QA Environment specific bindings here.
     // TODO(arjuns): Add requireBinding in BaseGuiceModule.
-    // TODO(arjuns): Uncomment in next cl.
-//    bind(OAuth2Consumer.class)
-//        .annotatedWith(AnotOAuth2ConsumerGoogleLogin.class)
-//        .toInstance(new TestOAuth2ConsumerImpl(OAuth2Provider.GOOGLE_LOGIN));
+    bind(OAuth2Consumer.class)
+        .annotatedWith(AnotOAuth2ConsumerGoogleLogin.class)
+        .toInstance(new TestOAuth2ConsumerImpl(OAuth2Provider.GOOGLE_LOGIN));
   }
 }

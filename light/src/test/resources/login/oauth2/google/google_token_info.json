@@ -1,0 +1,10 @@
+{
+ "issued_to": "1234.apps.googleusercontent.com",
+ "audience": "1234.apps.googleusercontent.com",
+ "user_id": "123456789",
+ "scope": "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email",
+ "expires_in": 3600,
+ "email": "unit-test1@myopenedu.com",
+ "verified_email": true,
+ "access_type": "online"
+}
