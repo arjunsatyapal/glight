@@ -15,6 +15,7 @@
  */
 package com.google.light.server.guice.modules;
 
+import static com.google.light.server.utils.GuiceUtils.getKeyForScopeSeed;
 
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
@@ -23,21 +24,24 @@ import com.google.api.client.json.jackson.JacksonFactory;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.light.server.annotations.AnotHttpSession;
+import com.google.light.server.annotations.AnotOAuth2ConsumerGoogleLogin;
 import com.google.light.server.manager.implementation.AdminOperationManagerImpl;
 import com.google.light.server.manager.interfaces.AdminOperationManager;
+import com.google.light.server.manager.interfaces.OAuth2ConsumerManager;
+import com.google.light.server.persistence.dao.OAuth2ConsumerCredentialDao;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpSession;
 
 /**
- * {@link BaseGuiceModule} will do two things :
- * <br> 1. Do mandatory bindings which are common across all environments.
- * <br> 2. Define bindings that are required, but varies in different environments.
+ * {@link BaseGuiceModule} will do two things : <br>
+ * 1. Do mandatory bindings which are common across all environments. <br>
+ * 2. Define bindings that are required, but varies in different environments.
  * <p>
  * NOTE : Even if any one of environment(Product, QA, or DevServer) varies in type of binding, that
  * will cause to define the binding for all the environments in the corresponding Environment
  * Module. * This approach keeps Module bindings simple and easy to maintain.
  * <p>
- * {@link com.google.light.server.guice.module.UnitTestModule} is exception to this rule. 
+ * {@link com.google.light.server.guice.module.UnitTestModule} is exception to this rule.
  * UnitTestModule will Override the {@link DevServerModule} as they are almost always similar.
  * 
  * TODO(arjuns): Add test for this.
@@ -50,23 +54,25 @@ public abstract class BaseGuiceModule extends AbstractModule {
   @Override
   protected void configure() {
     requireBinding(HttpTransport.class);
-      
+    requireBinding(getKeyForScopeSeed(OAuth2ConsumerManager.class, AnotOAuth2ConsumerGoogleLogin.class));
     
+    bind(OAuth2ConsumerCredentialDao.class);
+    
+    bind(AdminOperationManager.class)
+        .to(AdminOperationManagerImpl.class);
+
     bind(HttpSession.class)
         .annotatedWith(AnotHttpSession.class)
         .to(HttpSession.class);
-    
-    bind(AdminOperationManager.class)
-      .to(AdminOperationManagerImpl.class);
   }
-  
+
   // TODO(arjuns): Following bindings are global bindings. Need to be fixed.
   @Provides
   public HttpTransport provideHttpTransport() {
     logger.info("Creating new HttpTransport");
     return new NetHttpTransport();
   }
-  
+
   @Provides
   public JsonFactory provideJsonFactory() {
     logger.info("Creating new JsonFactory");

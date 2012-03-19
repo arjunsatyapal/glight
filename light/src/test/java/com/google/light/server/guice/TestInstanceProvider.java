@@ -22,7 +22,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.light.server.annotations.AnotOAuth2ConsumerGoogleLogin;
 import com.google.light.server.guice.providers.InstanceProvider;
-import com.google.light.server.manager.interfaces.OAuth2Consumer;
+import com.google.light.server.manager.interfaces.OAuth2ConsumerManager;
 import com.google.light.server.persistence.dao.PersonDao;
 
 /**
@@ -42,8 +42,8 @@ public class TestInstanceProvider {
     return checkNotNull(injector.getInstance(PersonDao.class));
   }
   
-  public OAuth2Consumer oauth2ConsumerGoogleLogin() {
+  public OAuth2ConsumerManager oauth2ConsumerGoogleLogin() {
     return checkNotNull(injector.getInstance(
-        getKeyForScopeSeed(OAuth2Consumer.class, AnotOAuth2ConsumerGoogleLogin.class)));
+        getKeyForScopeSeed(OAuth2ConsumerManager.class, AnotOAuth2ConsumerGoogleLogin.class)));
   }
 }
