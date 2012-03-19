@@ -24,8 +24,8 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import com.google.appengine.api.utils.SystemProperty;
-
 import com.google.light.server.constants.LightAppIdEnum;
+import com.google.light.server.constants.OAuth2Provider;
 import com.google.light.testingutils.GaeTestingUtils;
 import com.google.light.testingutils.TestingUtils;
 import org.junit.Before;
@@ -154,7 +154,7 @@ public class GaeUtilsTest {
   }
 
   private GaeTestingUtils getGaeTestingUtils(LightAppIdEnum env) {
-    return new GaeTestingUtils(env, "federatedAuthority", gaeUserEmail, getRandomFederatedId(),
+    return new GaeTestingUtils(env, OAuth2Provider.GOOGLE_LOGIN, gaeUserEmail, getRandomFederatedId(),
         false /* isFederated */, TestingUtils.getRandomUserId()/* userId */, true/* loggedIn */,
         false/* isAdmin */);
   }

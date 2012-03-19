@@ -12,22 +12,20 @@
  */
 package com.google.light.server;
 
-import static com.google.light.server.constants.RequestParmKeyEnum.AUTH_DOMAIN;
-import static com.google.light.server.constants.RequestParmKeyEnum.GAE_USER_EMAIL;
-import static com.google.light.server.constants.RequestParmKeyEnum.GAE_USER_ID;
+import static com.google.light.server.constants.RequestParmKeyEnum.LOGIN_PROVIDER_ID;
+import static com.google.light.server.constants.RequestParmKeyEnum.LOGIN_PROVIDER_USER_EMAIL;
+import static com.google.light.server.constants.RequestParmKeyEnum.LOGIN_PROVIDER_USER_ID;
 import static com.google.light.testingutils.TestingUtils.getRandomEmail;
 import static com.google.light.testingutils.TestingUtils.getRandomFederatedId;
 import static com.google.light.testingutils.TestingUtils.getRandomString;
 import static com.google.light.testingutils.TestingUtils.getRandomUserId;
 import static org.mockito.Mockito.when;
 
-import com.google.light.server.constants.LightAppIdEnum;
-
-import com.google.light.server.guice.module.UnitTestModule;
-
 import com.google.inject.Injector;
-import com.google.light.server.constants.OpenIdAuthDomain;
+import com.google.light.server.constants.LightAppIdEnum;
+import com.google.light.server.constants.OAuth2Provider;
 import com.google.light.server.guice.TestInstanceProvider;
+import com.google.light.server.guice.module.UnitTestModule;
 import com.google.light.server.guice.providers.InstanceProvider;
 import com.google.light.testingutils.GaeTestingUtils;
 import javax.servlet.http.HttpSession;
@@ -42,13 +40,12 @@ import org.mockito.Mockito;
  * 
  * @author Arjun Satyapal
  */
-@SuppressWarnings("deprecation")
 public abstract class AbstractLightServerTest {
   private static boolean gaeSetupDone = false;
 
   protected static LightAppIdEnum defaultEnv = LightAppIdEnum.TEST;
   
-  protected static OpenIdAuthDomain defaultAuthDomain = OpenIdAuthDomain.GOOGLE;
+  protected static OAuth2Provider defaultLoginProvider = OAuth2Provider.GOOGLE_LOGIN;
   protected String testUserId;
   protected String testEmail;
   protected String testFederatedId;
@@ -64,7 +61,7 @@ public abstract class AbstractLightServerTest {
   public static void gaeSetup() {
     // This causes GAE Test Setup once.
     gaeTestingUtils =
-        new GaeTestingUtils(defaultEnv, defaultAuthDomain.get(), getRandomEmail(),
+        new GaeTestingUtils(defaultEnv, defaultLoginProvider, getRandomEmail(),
             getRandomFederatedId(), true /* isFederatedUser */, getRandomUserId(),
             true /* isUserLoggedIn */, false /* isGaeAdmin */);
     gaeTestingUtils.setUp();
@@ -90,9 +87,10 @@ public abstract class AbstractLightServerTest {
    * @param isLoggedIn
    * @param isAdmin
    */
-  protected void gaeEnvReset(String authDomain, String email, String federatedId, String userId,
+  protected void gaeEnvReset(OAuth2Provider provider, String email, String federatedId, String userId,
       boolean isLoggedIn, boolean isAdmin) {
-    gaeTestingUtils.setAuthDomain(authDomain);
+    // TODO(arjuns): Fix this.
+//    gaeTestingUtils.setAuthDomain(authDomain);
     gaeTestingUtils.setEmail(email);
     gaeTestingUtils.setFederatedIdentity(federatedId);
     gaeTestingUtils.setUserId(userId);
@@ -112,18 +110,17 @@ public abstract class AbstractLightServerTest {
     testLastName = getRandomString();
 
     if (!gaeSetupDone) {
-      gaeEnvReset(defaultAuthDomain.get(), testEmail, testFederatedId, testUserId,
+      gaeEnvReset(defaultLoginProvider, testEmail, testFederatedId, testUserId,
           true /* loggedIn */, false /* isAdmin */);
     }
     HttpSession mockSession = Mockito.mock(HttpSession.class);
-    when(mockSession.getAttribute(AUTH_DOMAIN.get())).thenReturn(defaultAuthDomain);
-    when(mockSession.getAttribute(GAE_USER_EMAIL.get())).thenReturn(testEmail);
-    when(mockSession.getAttribute(GAE_USER_ID.get())).thenReturn(testUserId);
+    when(mockSession.getAttribute(LOGIN_PROVIDER_ID.get())).thenReturn(defaultLoginProvider.name());
+    when(mockSession.getAttribute(LOGIN_PROVIDER_USER_ID.get())).thenReturn(testUserId);
+    when(mockSession.getAttribute(LOGIN_PROVIDER_USER_EMAIL.get())).thenReturn(testEmail);
 
     injector = UnitTestModule.getTestInjector(mockSession);
     instanceProvider = injector.getInstance(InstanceProvider.class);
     testInstanceProvider = injector.getInstance(TestInstanceProvider.class);
-
   }
 
   @After

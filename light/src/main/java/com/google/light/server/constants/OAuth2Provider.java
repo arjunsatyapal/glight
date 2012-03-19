@@ -27,7 +27,8 @@ import java.util.ArrayList;
  * Enum to encapsulate details for different OAuth2 providers.
  * 
  * TODO(arjuns): Add test for this class.
- * 
+ * TODO(arjuns): See how credentials can be best managed with multiple types for same provider.
+ * e.g. for Google Docs etc.
  * @author Arjun Satyapal
  */
 public enum OAuth2Provider {

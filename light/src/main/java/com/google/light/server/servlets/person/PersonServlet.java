@@ -23,9 +23,9 @@ import com.google.light.server.dto.person.PersonDto;
 import com.google.light.server.exception.unchecked.httpexception.MethodNotAllowedException;
 import com.google.light.server.persistence.entity.person.PersonEntity;
 import com.google.light.server.servlets.AbstractLightServlet;
+import com.google.light.server.servlets.SessionManager;
 import com.google.light.server.servlets.pojo.ServletRequestPojo;
 import com.google.light.server.servlets.pojo.ServletResponsePojo;
-import com.google.light.server.utils.GaeUtils;
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -35,9 +35,8 @@ import javax.servlet.http.HttpServletResponse;
  * 
  * @author Arjun Satyapal
  */
-@SuppressWarnings({ "deprecation", "serial" })
+@SuppressWarnings("serial")
 public class PersonServlet extends AbstractLightServlet {
-
   /**
    * {@inheritDoc}
    */
@@ -60,9 +59,11 @@ public class PersonServlet extends AbstractLightServlet {
    */
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) {
-    // TODO(arjuns): Auto-generated method stub
+    // TODO(arjuns): Move sessionManager to Constructor.
+    SessionManager sessionManager = getInstanceProvider().getSessionManager();
+    
     try {
-      response.getWriter().println("hello : " + GaeUtils.getGaeUserEmail());
+      response.getWriter().println("hello : " + sessionManager.getLoginProviderUserEmail());
     } catch (IOException e) {
       // TODO(arjuns): Auto-generated catch block
       throw new RuntimeException(e);

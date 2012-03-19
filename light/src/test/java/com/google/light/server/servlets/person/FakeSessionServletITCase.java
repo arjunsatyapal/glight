@@ -26,6 +26,7 @@ import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.UrlEncodedContent;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.common.collect.ImmutableMap;
+import com.google.light.server.constants.OAuth2Provider;
 import com.google.light.server.constants.RequestParmKeyEnum;
 import com.google.light.server.servlets.misc.SessionServlet;
 import com.google.light.server.servlets.path.ServletPathEnum;
@@ -44,11 +45,10 @@ import org.junit.Test;
  * 
  * @author Arjun Satyapal
  */
-@SuppressWarnings("deprecation")
 public class FakeSessionServletITCase {
   private static String serverUrl;
   private static String email;
-  private static String gaeUserId;
+  private static String userId;
   private static final HttpTransport HTTP_TRANSPORT = new NetHttpTransport();
 
   @BeforeClass
@@ -68,28 +68,31 @@ public class FakeSessionServletITCase {
 
     // email = "unit-test@myopenedu.com";
     email = TestingUtils.getRandomEmail();
-    gaeUserId = TestingUtils.getRandomUserId();
+    userId = TestingUtils.getRandomUserId();
   }
 
   /**
    * Test for {@link SessionServlet#doPost(HttpServletRequest, HttpServletResponse)}.
    * 
    * Test for creating a session.
+   * TODO(arjuns): Fix this test and merge with {@link FakeLoginHelper}.
    */
   @Test
   public void test_doPost() throws Exception {
     HttpRequestFactory requestFactory = HTTP_TRANSPORT.createRequestFactory();
 
-
     GenericUrl fakeLoginServletUrl = new GenericUrl(serverUrl + ServletPathEnum.FAKE_LOGIN.get());
+    
     Map<String, String> map = new ImmutableMap.Builder<String, String>()
-        .put(RequestParmKeyEnum.GAE_USER_EMAIL.get(), email)
-        .put(RequestParmKeyEnum.GAE_USER_ID.get(), gaeUserId)
+        .put(RequestParmKeyEnum.LOGIN_PROVIDER_ID.get(), OAuth2Provider.GOOGLE_LOGIN.name())
+        .put(RequestParmKeyEnum.LOGIN_PROVIDER_USER_EMAIL.get(), email)
+        .put(RequestParmKeyEnum.LOGIN_PROVIDER_USER_ID.get(), userId)
         .build();
 
-    HttpRequest request = requestFactory.buildPostRequest(fakeLoginServletUrl, new UrlEncodedContent(map));
+    HttpRequest request = requestFactory.buildPostRequest(
+        fakeLoginServletUrl, new UrlEncodedContent(map));
     HttpResponse response = request.execute();
-    
+
     String cookie = FakeLoginHelper.getCookieFromResponse(response);
     checkNotBlank(cookie);
 

@@ -65,7 +65,7 @@ public class PersonManagerImpl implements PersonManager {
 //    entity.addIdProviderDetail(currIdProviderDetail);
 
     checkArgument(entity.getEmail() == null);
-    entity.setEmail(sessionManager.getGaeEmail());
+    entity.setEmail(sessionManager.getLoginProviderUserEmail());
     
     // This is a heavy operation, so perform this validation just before persisting.
     PersonEntity personByEmail = getPersonByEmail(entity.getEmail());

@@ -43,8 +43,6 @@ import javax.servlet.http.HttpSession;
  */
 @SuppressWarnings("serial")
 public class ConfigServlet extends AbstractLightServlet {
-  
-
   @Inject
   public ConfigServlet() {
   }

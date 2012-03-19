@@ -45,7 +45,6 @@ import org.junit.Test;
  * 
  * @author Arjun Satyapal
  */
-@SuppressWarnings("deprecation")
 public class PersonManagerImplTest extends AbstractLightServerTest {
 
   private PersonManager personManager;
@@ -76,7 +75,7 @@ public class PersonManagerImplTest extends AbstractLightServerTest {
       tearDown();
       // If user is not Logged In, then essentially any of the PersonManager methods cannot
       // be called. Here we have to override default setup values.
-      gaeEnvReset(defaultAuthDomain.get()/* authDomain */, getRandomEmail(),
+      gaeEnvReset(defaultLoginProvider/* authDomain */, getRandomEmail(),
           getRandomString() /* federatedId */,
           getRandomUserId(), false /* isUserLoggedIn */,
           false /* isGaeAdmin */);
@@ -139,7 +138,7 @@ public class PersonManagerImplTest extends AbstractLightServerTest {
           .build();
 
       // ensuring that test is init with a different email.
-      gaeEnvReset(defaultAuthDomain.get(), getRandomEmail(),
+      gaeEnvReset(defaultLoginProvider, getRandomEmail(),
           getRandomFederatedId(), dummyUserId, true /* isUserLoggedIn */,
           false /* isGaeAdmin */);
       personManager.createPerson(dummy);
@@ -196,7 +195,7 @@ public class PersonManagerImplTest extends AbstractLightServerTest {
   public void test_getPersonByEmail() throws Exception {
     String userId1 = getRandomUserId();
     String email1 = getRandomEmail();
-    gaeEnvReset(defaultAuthDomain.get(), email1, getRandomFederatedId(), userId1,
+    gaeEnvReset(defaultLoginProvider, email1, getRandomFederatedId(), userId1,
         true /* isUserLoggedIn */, false /* isGaeAdmin */);
 
     PersonEntity person = new PersonEntity.Builder()
@@ -217,7 +216,7 @@ public class PersonManagerImplTest extends AbstractLightServerTest {
     String email2 = getRandomEmail();
     assertTrue(!email1.equals(email2));
 
-    gaeEnvReset(defaultAuthDomain.get(), email2, getRandomFederatedId(), userId2,
+    gaeEnvReset(defaultLoginProvider, email2, getRandomFederatedId(), userId2,
         true /* isUserLoggedIn */, false /* isGaeAdmin */);
 
     PersonEntity newPerson = new PersonEntity.Builder()

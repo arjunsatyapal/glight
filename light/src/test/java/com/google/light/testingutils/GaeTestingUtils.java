@@ -16,17 +16,15 @@
 package com.google.light.testingutils;
 
 import com.google.appengine.api.utils.SystemProperty;
-
-import com.google.light.server.constants.LightAppIdEnum;
-
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.appengine.tools.development.testing.LocalTaskQueueTestConfig;
 import com.google.appengine.tools.development.testing.LocalUserServiceTestConfig;
 import com.google.apphosting.api.ApiProxy;
 import com.google.apphosting.api.ApiProxy.Environment;
+import com.google.light.server.constants.LightAppIdEnum;
+import com.google.light.server.constants.OAuth2Provider;
 import com.google.light.server.utils.GaeUtils;
-import java.util.HashMap;
 
 /**
  * Helper class for tweaking GAE Environment Parameters. Some getters are similar to
@@ -49,23 +47,17 @@ public class GaeTestingUtils {
   static final String IS_FEDERATED_USER_KEY =
       "com.google.appengine.api.users.UserService.is_federated_user";
 
-  private HashMap<String, Object> gaeEnvAttr;
-
   private LocalServiceTestHelper gaeTestHelper;
 
-  public GaeTestingUtils(LightAppIdEnum env, String federatedAuthority, String email,
+  public GaeTestingUtils(LightAppIdEnum env, OAuth2Provider provider, String email,
       String federatedId, Boolean isFederated, String userId, boolean loggedIn,
       boolean isAdmin) {
-    // TODO(arjuns) : Figure out what is the difference between federatedAuthority and authDomain.
-    // For the time being treating as same.
-    initFederatedUser(userId, federatedId, federatedAuthority, isFederated);
-
     switch (env) {
       case DEV_SERVER:
         SystemProperty.environment.set(SystemProperty.Environment.Value.Development);
         break;
       case PROD:
-        
+
       case QA:
         SystemProperty.environment.set(SystemProperty.Environment.Value.Production);
         break;
@@ -76,12 +68,13 @@ public class GaeTestingUtils {
     }
 
     gaeTestHelper = new LocalServiceTestHelper(
-        new LocalDatastoreServiceTestConfig(),
-        new LocalTaskQueueTestConfig(),
-        new LocalUserServiceTestConfig())
-        .setEnvAuthDomain(federatedAuthority)
+            new LocalDatastoreServiceTestConfig(),
+            new LocalTaskQueueTestConfig(),
+            new LocalUserServiceTestConfig())
+        
+    // TODO(arjuns): Fix this.
+        .setEnvAuthDomain("google")
         .setEnvIsLoggedIn(loggedIn)
-        .setEnvAttributes(gaeEnvAttr)
         .setEnvEmail(email)
         .setEnvIsAdmin(isAdmin)
         .setEnvAppId(env.getAppIds().get(0));
@@ -115,7 +108,7 @@ public class GaeTestingUtils {
   /**
    * Set GAE UserId.
    * 
-   * @param userId
+   * @param providerUserId
    */
   public void setFederatedIdentity(String federatedId) {
     Environment env = ApiProxy.getCurrentEnvironment();
@@ -160,14 +153,5 @@ public class GaeTestingUtils {
    */
   public void setLoggedIn(boolean loggedIn) {
     gaeTestHelper.setEnvIsLoggedIn(loggedIn);
-  }
-
-  private void initFederatedUser(String userId, String federatedId, String federatedAuthority,
-      Boolean isFederated) {
-    gaeEnvAttr = new HashMap<String, Object>();
-    gaeEnvAttr.put(USER_ID_KEY, userId);
-    gaeEnvAttr.put(FEDERATED_IDENTITY_KEY, federatedId);
-    gaeEnvAttr.put(FEDERATED_AUTHORITY_KEY, federatedAuthority);
-    gaeEnvAttr.put(IS_FEDERATED_USER_KEY, isFederated);
   }
 }

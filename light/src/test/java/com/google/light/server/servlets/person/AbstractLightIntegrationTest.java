@@ -15,20 +15,23 @@
  */
 package com.google.light.server.servlets.person;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
+
+import org.junit.Before;
 
 import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson.JacksonFactory;
+import com.google.light.server.constants.OAuth2Provider;
 import com.google.light.server.servlets.AbstractLightServlet;
 import com.google.light.testingutils.FakeLoginHelper;
 import com.google.light.testingutils.TestingUtils;
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -37,20 +40,27 @@ import org.junit.Test;
  * @author Arjun Satyapal
  */
 public abstract class AbstractLightIntegrationTest {
-  protected static FakeLoginHelper loginProvider;
-  protected static String userId;
-  protected static String email;
+  protected FakeLoginHelper loginProvider;
+  protected OAuth2Provider provider;
+  protected String providerUserId;
+  protected String providerEmail;
+  protected HttpTransport HTTP_TRANSPORT = new NetHttpTransport();
+  protected final JsonFactory JSON_FACTORY = new JacksonFactory();
 
-  protected static HttpTransport HTTP_TRANSPORT = new NetHttpTransport();
-  protected static final JsonFactory JSON_FACTORY = new JacksonFactory();
+  protected HttpRequestFactory requestFactory = HTTP_TRANSPORT.createRequestFactory();
+  protected String serverUrl = null;
 
-  protected static HttpRequestFactory requestFactory = HTTP_TRANSPORT.createRequestFactory();
-  protected static String serverUrl = null;
+  protected boolean isLocalHost = false;
 
-  protected static boolean isLocalHost = false;
+  protected AbstractLightIntegrationTest(OAuth2Provider provider, String providerUserId,
+      String providerEmail) {
+    this.provider = checkNotNull(provider);
+    this.providerUserId = checkNotBlank(providerUserId);
+    this.providerEmail = checkNotBlank(providerEmail);
+  }
 
-  @BeforeClass
-  public static void cookieSetup() {
+  @Before
+  public void setUp() {
     String testServerUrl = System.getProperty("test.server.url");
 
     if (testServerUrl != null) {
@@ -64,12 +74,13 @@ public abstract class AbstractLightIntegrationTest {
     } else {
       isLocalHost = false;
     }
-    
-    userId = TestingUtils.getRandomUserId();
-    email = "unit-test@myopenedu.com";
+
+    providerUserId = TestingUtils.getRandomUserId();
+    providerEmail = "unit-test@myopenedu.com";
 
     try {
-      loginProvider = new FakeLoginHelper(serverUrl,  userId, email, false);
+      loginProvider =
+          new FakeLoginHelper(serverUrl, provider, providerUserId, providerEmail, false);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

@@ -20,7 +20,7 @@ import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
 import com.google.light.server.exception.unchecked.httpexception.NotFoundException;
 import com.google.light.server.servlets.admin.ConfigServlet;
-import com.google.light.server.servlets.admin.OAuth2CredentialServlet;
+import com.google.light.server.servlets.admin.OAuth2ConsumerCredentialServlet;
 import com.google.light.server.servlets.login.LoginServlet;
 import com.google.light.server.servlets.misc.SessionServlet;
 import com.google.light.server.servlets.oauth2.google.login.GoogleLoginCallbackServlet;
@@ -43,35 +43,34 @@ public enum ServletPathEnum {
   // TODO(arjuns) : Find a way to end URLs without /.
   PERSON(PersonServlet.class, "/api/person",
          true, false, false),
-/*TODO(arjuns): Uncooment in next cl.
   LOGIN(LoginServlet.class, "/login",
-      false, false, false),
-      
+        false, false, false),
+
   LOGIN_GOOGLE(GoogleLoginServlet.class, "/login/google",
-      false, false, false),
-      
+               false, false, false),
+
   LOGIN_GOOGLE_CB(GoogleLoginCallbackServlet.class, "/login/google_login_callback",
-      false, false, false),*/
+                  false, false, false),
 
   // Admin Servlets
   CONFIG(ConfigServlet.class, "/admin/config",
-      true, true, false),
-      
-  OAUTH2_CONSUMER_CRENDENTIAL(OAuth2CredentialServlet.class, "/admin/oauth2_consumer_cred",
-      true, true, false),
+         true, true, false),
+
+  OAUTH2_CONSUMER_CRENDENTIAL(OAuth2ConsumerCredentialServlet.class,
+                              "/admin/oauth2_consumer_credential",
+                              true, true, false),
 
   // Some test servlets.
   FAKE_LOGIN(FakeLoginServlet.class, "/test/fakelogin",
-      false, false, true),
-      
-  SESSION(SessionServlet.class, "/test/session",
-      true, false, true),
-  TEST_HEADER(TestHeaders.class, "/test/testheader",
-      false, false, true),
-  TEST_LOGIN(TestLogin.class, "/test/testlogin",
-      true, false, true);
+             false, false, true),
 
-  
+  SESSION(SessionServlet.class, "/test/session",
+          true, false, true),
+  TEST_HEADER(TestHeaders.class, "/test/testheader",
+              false, false, true),
+  TEST_LOGIN(TestLogin.class, "/test/testlogin",
+             true, false, true);
+
   private Class<? extends HttpServlet> clazz;
   private String servletPath;
   // Path when this servlet acts as root for others.
@@ -81,21 +80,19 @@ public enum ServletPathEnum {
   private boolean requiresAdminPrivilege;
   private boolean onlyForTest;
 
-  
-
-  private ServletPathEnum(Class<? extends HttpServlet> clazz, String servletPath, 
+  private ServletPathEnum(Class<? extends HttpServlet> clazz, String servletPath,
       boolean requireLogin, boolean requireAdminPrivilege, boolean onlyForTest) {
     this.clazz = clazz;
     this.servletPath = checkNotBlank(servletPath);
     checkArgument(!servletPath.endsWith("/"));
     this.servletRoot = checkNotBlank(servletPath + "/");
     this.requiresLogin = requireLogin;
-    
+
     if (!requireLogin && requireAdminPrivilege) {
       throw new IllegalStateException("For AdminPrivileges, Login is mandatory.");
     }
     this.requiresAdminPrivilege = requireAdminPrivilege;
-    
+
     this.onlyForTest = onlyForTest;
   }
 
@@ -106,11 +103,11 @@ public enum ServletPathEnum {
   public boolean isRequiredLogin() {
     return requiresLogin;
   }
-  
+
   public boolean isRequiredAdminPrivilege() {
     return requiresAdminPrivilege;
   }
-  
+
   public boolean isOnlyForTest() {
     return onlyForTest;
   }
@@ -122,14 +119,12 @@ public enum ServletPathEnum {
   public String getRoot() {
     return servletRoot;
   }
-  
-
 
   // TODO(arjuns): Add test for this.
   public static ServletPathEnum getServletPathEnum(String requestUri) {
     String uri = requestUri.endsWith("/") ? requestUri.substring(0, requestUri.length() - 1)
-                  : requestUri;
-    
+        : requestUri;
+
     for (ServletPathEnum currServletPath : ServletPathEnum.values()) {
       if (currServletPath.get().equals(uri)) {
         return currServletPath;

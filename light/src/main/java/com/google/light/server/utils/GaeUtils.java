@@ -16,10 +16,7 @@
 package com.google.light.server.utils;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.light.server.constants.OpenIdAuthDomain.getAuthDomainByValue;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
-
-import com.google.light.server.servlets.SessionManager;
 
 import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
@@ -28,53 +25,14 @@ import com.google.appengine.api.utils.SystemProperty;
 import com.google.apphosting.api.ApiProxy;
 import com.google.apphosting.api.ApiProxy.Environment;
 import com.google.light.server.constants.LightAppIdEnum;
-import com.google.light.server.constants.OpenIdAuthDomain;
+import com.google.light.server.servlets.SessionManager;
 
 /**
  * Utility class to wrap different GAE specific functions.
  * 
  * @author Arjun Satyapal
  */
-@SuppressWarnings("deprecation")
 public class GaeUtils {
-  /**
-   * Get FederatedAuthDomain for Current Logged in user. This should be called only when user is
-   * Logged in.
-   * 
-   * TODO(arjuns) : Remove this method or add test for it.
-   * @deprecated
-   * @return
-   */
-  @Deprecated
-  public static OpenIdAuthDomain getAuthDomain() {
-    return getAuthDomainByValue(checkNotBlank(getUser().getAuthDomain(), "authDomain is blank."));
-  }
-
-  /**
-   * Get Email provided by the Federated Identity Provider. This should be called only when user is
-   * logged in.
-   * TODO(arjuns) : Remove this method or add test for it.
-   * @deprecated Going forward, {@link SessionManager#getGaeEmail()} should be used.
-   * @return
-   */
-  @Deprecated
-  public static String getGaeUserEmail() {
-    return checkNotBlank(getUser().getEmail(), "userEmail is blank.");
-  }
-
-  /**
-   * Get Federated Identity of the Logged in user. This should be called only when user is logged
-   * in.
-   * TODO(arjuns) : Remove this method or add test for it.
-   * @deprecated
-   * @return
-   */
-  @Deprecated
-  public static String getFederatedIdentity() {
-    // TODO(arjuns) : Fix this with Federated Login.
-    return null;
-    // return checkNotBlank(getUser().getFederatedIdentity(), "federatedIdentity is blank.");
-  }
 
   /**
    * Get GAE User Service.
