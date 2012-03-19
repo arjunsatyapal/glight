@@ -15,13 +15,10 @@
  */
 package com.google.light.server.servlets.filters;
 
-import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.light.server.exception.unchecked.FilterInstanceBindingException;
-import com.google.light.server.servlets.path.ServletPathEnum;
 import com.google.light.server.utils.GaeUtils;
 import java.io.IOException;
-import java.util.Set;
 import java.util.logging.Logger;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -52,19 +49,5 @@ public class TestServletFilter extends AbstractLightFilter {
   public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain)
       throws IOException, ServletException {
     handleFilterChain(request, response, filterChain);
-  }
-  
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  Set<ServletPathEnum> getSkipServletSet() {
-    Set<ServletPathEnum> set = Sets.newHashSet(
-        ServletPathEnum.CONFIG, // Admin servlets rely on Gae Environment. So are ignored.
-        ServletPathEnum.LOGIN, // Creates session. So have to be ignored.
-        ServletPathEnum.FAKE_LOGIN // Creates session. So have to be ignored.
-        );
-    
-    return set;
   }
 }

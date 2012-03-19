@@ -15,7 +15,6 @@
  */
 package com.google.light.server.servlets.misc;
 
-import static com.google.light.server.utils.LightUtils.appendSectionHeader;
 import static com.google.light.server.utils.LightUtils.appendSessionData;
 
 import com.google.light.server.constants.ContentTypeEnum;
@@ -52,7 +51,6 @@ public class SessionServlet extends HttpServlet {
     HttpSession session = request.getSession();
     
     StringBuilder builder = new StringBuilder();
-    appendSectionHeader(builder, "Session Details = " + false);
     appendSessionData(builder, session);
 
     response.setContentType(ContentTypeEnum.TEXT_HTML.get());

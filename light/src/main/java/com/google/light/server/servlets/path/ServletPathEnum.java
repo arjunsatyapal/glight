@@ -15,57 +15,87 @@
  */
 package com.google.light.server.servlets.path;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
-import com.google.light.server.servlets.misc.SessionServlet;
-
-
-import com.google.light.server.servlets.test.FakeLoginServlet;
-
-
-import com.google.light.server.servlets.admin.ConfigServlet;
-
 import com.google.light.server.exception.unchecked.httpexception.NotFoundException;
+import com.google.light.server.servlets.admin.ConfigServlet;
+import com.google.light.server.servlets.admin.OAuth2CredentialServlet;
+import com.google.light.server.servlets.login.LoginServlet;
+import com.google.light.server.servlets.misc.SessionServlet;
+import com.google.light.server.servlets.oauth2.google.login.GoogleLoginCallbackServlet;
+import com.google.light.server.servlets.oauth2.google.login.GoogleLoginServlet;
 import com.google.light.server.servlets.person.PersonServlet;
 import com.google.light.server.servlets.test.TestHeaders;
 import com.google.light.server.servlets.test.TestLogin;
+import com.google.light.server.servlets.test.oauth2.google.login.FakeLoginServlet;
 import javax.servlet.http.HttpServlet;
 
 /**
  * Enum to Map Servlets with their Paths and URL Patterns.
  * 
- *TODO(arjuns) : Add tests for this.
+ * TODO(arjuns) : Add tests for this.
  * 
  * @author Arjun Satyapal
  */
 public enum ServletPathEnum {
   // TODO(arjuns): Add regex checks here.
   // TODO(arjuns) : Find a way to end URLs without /.
-  PERSON(PersonServlet.class, false, "/api/person", "/api/person/"),
-  CONFIG(ConfigServlet.class, false, "/admin/config", "/admin/config/"),
-  // TODO(arjuns) : Get a better path.
-  
-  
-  // Some test servlets.
-  FAKE_LOGIN(FakeLoginServlet.class, true, "/test/fakelogin", "/test/fakelogin/"),
-  SESSION(SessionServlet.class, true, "/test/session", "/test/session/"),
-  TEST_HEADER(TestHeaders.class, true, "/test/testheader", "/test/testheader/"),
-  TEST_LOGIN(TestLogin.class, true, "/test/testlogin", "/test/testlogin/");
-  
+  PERSON(PersonServlet.class, "/api/person",
+         true, false, false),
+/*TODO(arjuns): Uncooment in next cl.
+  LOGIN(LoginServlet.class, "/login",
+      false, false, false),
+      
+  LOGIN_GOOGLE(GoogleLoginServlet.class, "/login/google",
+      false, false, false),
+      
+  LOGIN_GOOGLE_CB(GoogleLoginCallbackServlet.class, "/login/google_login_callback",
+      false, false, false),*/
 
-  private Class<? extends HttpServlet> clazz;
-  private boolean onlyForTest;
+  // Admin Servlets
+  CONFIG(ConfigServlet.class, "/admin/config",
+      true, true, false),
+      
+  OAUTH2_CONSUMER_CRENDENTIAL(OAuth2CredentialServlet.class, "/admin/oauth2_consumer_cred",
+      true, true, false),
+
+  // Some test servlets.
+  FAKE_LOGIN(FakeLoginServlet.class, "/test/fakelogin",
+      false, false, true),
+      
+  SESSION(SessionServlet.class, "/test/session",
+      true, false, true),
+  TEST_HEADER(TestHeaders.class, "/test/testheader",
+      false, false, true),
+  TEST_LOGIN(TestLogin.class, "/test/testlogin",
+      true, false, true);
+
   
+  private Class<? extends HttpServlet> clazz;
   private String servletPath;
   // Path when this servlet acts as root for others.
   private String servletRoot;
+
+  private boolean requiresLogin;
+  private boolean requiresAdminPrivilege;
+  private boolean onlyForTest;
+
   
 
-  private ServletPathEnum(Class<? extends HttpServlet> clazz, boolean onlyForTest,
-      String servletPath, String servletRoot) {
+  private ServletPathEnum(Class<? extends HttpServlet> clazz, String servletPath, 
+      boolean requireLogin, boolean requireAdminPrivilege, boolean onlyForTest) {
     this.clazz = clazz;
     this.servletPath = checkNotBlank(servletPath);
-    this.servletRoot = checkNotBlank(servletRoot);
+    checkArgument(!servletPath.endsWith("/"));
+    this.servletRoot = checkNotBlank(servletPath + "/");
+    this.requiresLogin = requireLogin;
+    
+    if (!requireLogin && requireAdminPrivilege) {
+      throw new IllegalStateException("For AdminPrivileges, Login is mandatory.");
+    }
+    this.requiresAdminPrivilege = requireAdminPrivilege;
+    
     this.onlyForTest = onlyForTest;
   }
 
@@ -73,26 +103,40 @@ public enum ServletPathEnum {
     return clazz;
   }
 
+  public boolean isRequiredLogin() {
+    return requiresLogin;
+  }
+  
+  public boolean isRequiredAdminPrivilege() {
+    return requiresAdminPrivilege;
+  }
+  
   public boolean isOnlyForTest() {
     return onlyForTest;
   }
-  
+
   public String get() {
     return servletPath;
   }
-  
+
   public String getRoot() {
     return servletRoot;
   }
+  
 
-  public static ServletPathEnum getServletPathEnum(String servletPath) {
+
+  // TODO(arjuns): Add test for this.
+  public static ServletPathEnum getServletPathEnum(String requestUri) {
+    String uri = requestUri.endsWith("/") ? requestUri.substring(0, requestUri.length() - 1)
+                  : requestUri;
+    
     for (ServletPathEnum currServletPath : ServletPathEnum.values()) {
-      if (currServletPath.get().equals(servletPath)) {
+      if (currServletPath.get().equals(uri)) {
         return currServletPath;
       }
     }
 
-    throw new NotFoundException("ServletPath not found for servletPath[" + servletPath
+    throw new NotFoundException("ServletPath not found for servletPath[" + requestUri
         + "].");
   }
 }

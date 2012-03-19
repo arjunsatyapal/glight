@@ -101,7 +101,6 @@ public class ConfigServlet extends AbstractLightServlet {
 
       // Populating Session Data.
       HttpSession session = request.getSession();
-      appendSectionHeader(builder, "Session Details = " + false);
       appendSessionData(builder, session);
 
       response.setContentType(ContentTypeEnum.TEXT_HTML.get());
