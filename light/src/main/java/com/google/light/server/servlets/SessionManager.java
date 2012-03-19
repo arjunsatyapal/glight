@@ -25,18 +25,20 @@ import static com.google.light.server.utils.LightPreconditions.checkEmail;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPersonId;
 
-import com.google.light.server.exception.unchecked.httpexception.PersonLoginRequiredException;
-
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.inject.Inject;
+import com.google.inject.servlet.RequestScoped;
+import com.google.inject.servlet.ServletScopes;
 import com.google.light.server.annotations.AnotHttpSession;
 import com.google.light.server.constants.LightAppIdEnum;
 import com.google.light.server.constants.OpenIdAuthDomain;
 import com.google.light.server.constants.RequestParmKeyEnum;
+import com.google.light.server.exception.unchecked.httpexception.PersonLoginRequiredException;
 import javax.servlet.http.HttpSession;
 
 /**
- * Class to wrap functions around sessions. This class should be injected in LightScope.
+ * Class to wrap functions around sessions. This class should be injected in {@link RequestScoped}.
+ * {@link ServletScopes#REQUEST}.
  * 
  * @author Arjun Satyapal
  */

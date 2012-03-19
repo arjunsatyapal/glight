@@ -64,6 +64,8 @@ public class GuiceUtils {
 
   /**
    * Utility method to enqueue an entity under a RequestScope.
+   * See {@link http://code.google.com/p/google-guice/wiki/ServletModule#Using_RequestScope}
+   * for more details.
    * 
    * E : Entity to be put under RequestScope.
    * A : Binding annotation.
