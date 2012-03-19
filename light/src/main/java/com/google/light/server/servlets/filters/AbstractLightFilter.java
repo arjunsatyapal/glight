@@ -57,7 +57,7 @@ public abstract class AbstractLightFilter implements Filter {
        * requireAdminPrivilege, requireLogin should be true (as that is conceptually) correct. And
        * infact will work fine on real AppEngine. But in testing world, we are using FakeLogins. So
        * essentially at the time of login, session is established, which will be used for detecting
-       * login. But for detecting whether user is Admin, we depend on AppEngine. In order to make
+       * login. But for detecting whether User is Admin, we depend on AppEngine. In order to make
        * testing easier, we first check if Admin Privileges is required. If that is true, then we
        * ask GAE if user is logged in. And if UserIs logged in, then without checking the session,
        * we allow the user to visit those URLs. This makes testing easier, as it reduces one
@@ -102,7 +102,7 @@ public abstract class AbstractLightFilter implements Filter {
   }
 
   /**
-   * This method checks if LoginIs required or not. If login is required, then request is forwarded
+   * This method checks if Login is required or not. If login is required, then request is forwarded
    * to {@link #validateAndDoFilter(ServletRequest, ServletResponse, FilterChain)} else it will be
    * handed over to {@link super#doFilter(ServletRequest, ServletResponse, FilterChain)}.
    * 
