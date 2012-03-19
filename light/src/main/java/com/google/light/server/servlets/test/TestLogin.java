@@ -37,6 +37,14 @@ import javax.servlet.http.HttpServletResponse;
 public class TestLogin extends AbstractLightServlet {
   private static final Logger logger = Logger.getLogger(TestLogin.class.getName());
   
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void service(HttpServletRequest request, HttpServletResponse response) {
+    super.service(request, response);
+  }
+  
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) {
     try {

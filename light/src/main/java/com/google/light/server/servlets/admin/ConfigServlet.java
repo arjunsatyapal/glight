@@ -15,6 +15,7 @@
  */
 package com.google.light.server.servlets.admin;
 
+import static com.google.light.server.utils.LightPreconditions.checkPersonIsGaeAdmin;
 import static com.google.light.server.utils.LightUtils.appendKeyValue;
 import static com.google.light.server.utils.LightUtils.appendSectionHeader;
 import static com.google.light.server.utils.LightUtils.appendSessionData;
@@ -46,6 +47,15 @@ public class ConfigServlet extends AbstractLightServlet {
 
   @Inject
   public ConfigServlet() {
+  }
+  
+  /** 
+   * {@inheritDoc}
+   */
+  @Override
+  public void service(HttpServletRequest request, HttpServletResponse response) {
+   checkPersonIsGaeAdmin();
+   super.service(request, response);
   }
   
   @SuppressWarnings("deprecation")
