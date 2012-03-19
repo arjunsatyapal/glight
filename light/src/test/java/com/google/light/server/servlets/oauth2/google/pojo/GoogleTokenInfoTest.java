@@ -38,7 +38,7 @@ public class GoogleTokenInfoTest {
    * Test to validate JSON Parsing for {@link GoogleTokenInfo}.
    */
   @Test
-  public void test_something() throws Exception {
+  public void test_jsonToGoogleTokenInfo_Parsing() throws Exception {
     String jsonString = getResourceAsString(GOOGLE_TOKEN_INFO_JSON_FILE_PATH);
     GoogleTokenInfo tokenInfo = JsonUtils.getDto(jsonString, GoogleTokenInfo.class);
     

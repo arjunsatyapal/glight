@@ -26,7 +26,7 @@ import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
 
 /**
  * Java representation for the JSON object returned by Google as a response to
- * {@link GoogleOAuth2Helper#getTokenInfo(String)}
+ * {@link GoogleOAuth2Helper#getUserInfo(String)}
  * 
  * @author Arjun Satyapal
  */

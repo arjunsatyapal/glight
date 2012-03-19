@@ -16,7 +16,7 @@
 package com.google.light.server.exception.unchecked;
 
 /**
- * Indicates that there is some Server Configuration Exception.
+ * Indicates that some exception occured during Google Login Flow.
  * 
  * @author Arjun Satyapal
  */

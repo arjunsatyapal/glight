@@ -18,6 +18,8 @@ package com.google.light.server.constants;
 /**
  * Few String constants.
  * 
+ * TODO(arjuns): See if this is needed later.
+ * 
  * @author Arjun Satyapal
  */
 public class StringConstants {
