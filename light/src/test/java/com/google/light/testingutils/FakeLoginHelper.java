@@ -18,6 +18,9 @@ package com.google.light.testingutils;
 import static com.google.light.server.utils.LightPreconditions.checkEmail;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
+import com.google.light.server.servlets.test.oauth2.google.login.FakeLoginServlet;
+
+
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpHeaders;
 import com.google.api.client.http.HttpRequest;
@@ -30,7 +33,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.light.server.constants.RequestParmKeyEnum;
 import com.google.light.server.servlets.path.ServletPathEnum;
-import com.google.light.server.servlets.test.FakeLoginServlet;
 import com.google.light.server.utils.LightPreconditions;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -41,6 +43,7 @@ import java.util.Map;
  * 
  * @author Arjun Satyapal
  */
+@SuppressWarnings("deprecation")
 public class FakeLoginHelper {
 
   private String serverUrl;

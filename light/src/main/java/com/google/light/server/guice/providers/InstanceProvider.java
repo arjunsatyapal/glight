@@ -17,15 +17,14 @@ package com.google.light.server.guice.providers;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.light.server.manager.implementation.PersonManagerImpl;
-
-import com.google.inject.Provider;
-
-import com.google.light.server.servlets.SessionManager;
-
+import com.google.api.client.http.HttpTransport;
+import com.google.api.client.json.JsonFactory;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import com.google.inject.Provider;
+import com.google.light.server.manager.implementation.PersonManagerImpl;
 import com.google.light.server.manager.interfaces.PersonManager;
+import com.google.light.server.servlets.SessionManager;
 
 /**
  * Service Provider for various Guice Injected Classes.
@@ -36,12 +35,20 @@ import com.google.light.server.manager.interfaces.PersonManager;
  */
 public class InstanceProvider {
   private Injector injector;
+  // TODO(arjuns): Change this to real instance.
   private Provider<PersonManagerImpl> personManagerProvider;
+  
+  private HttpTransport httpTransport;
+  private JsonFactory jsonFactory;
 
   @Inject
-  private InstanceProvider(Injector injector, Provider<PersonManagerImpl> personManagerProvider) {
+  private InstanceProvider(Injector injector, Provider<PersonManagerImpl> personManagerProvider,
+      Provider<HttpTransport> httpTransportProvider,
+      Provider<JsonFactory> jsonFactoryProvider) {
     this.injector = checkNotNull(injector);
     this.personManagerProvider = checkNotNull(personManagerProvider);
+    this.httpTransport = checkNotNull(httpTransportProvider.get());
+    this.jsonFactory = checkNotNull(jsonFactoryProvider.get());
   }
 
   public PersonManager getPersonManager() {
@@ -50,5 +57,13 @@ public class InstanceProvider {
   
   public SessionManager getSessionManager() {
     return checkNotNull(injector.getInstance(SessionManager.class));
+  }
+  
+  public HttpTransport getHttpTransport() {
+    return checkNotNull(httpTransport);
+  }
+  
+  public JsonFactory getJsonFactory() {
+    return checkNotNull(jsonFactory);
   }
 }

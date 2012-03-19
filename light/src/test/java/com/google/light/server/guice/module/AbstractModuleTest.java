@@ -29,6 +29,7 @@ import org.junit.Test;
  * 
  * @author Arjun Satyapal
  */
+@SuppressWarnings("deprecation")
 public abstract class AbstractModuleTest {
   protected GaeTestingUtils gaeTestingUtils = null;
 

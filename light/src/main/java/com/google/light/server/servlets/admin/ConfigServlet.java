@@ -15,7 +15,6 @@
  */
 package com.google.light.server.servlets.admin;
 
-import static com.google.light.server.utils.LightPreconditions.checkPersonIsGaeAdmin;
 import static com.google.light.server.utils.LightUtils.appendKeyValue;
 import static com.google.light.server.utils.LightUtils.appendSectionHeader;
 import static com.google.light.server.utils.LightUtils.appendSessionData;
@@ -24,9 +23,11 @@ import static com.google.light.server.utils.LightUtils.getPST8PDTime;
 import com.google.appengine.api.utils.SystemProperty;
 import com.google.apphosting.api.ApiProxy;
 import com.google.apphosting.api.ApiProxy.Environment;
+import com.google.inject.Inject;
 import com.google.light.server.constants.ContentTypeEnum;
 import com.google.light.server.servlets.AbstractLightServlet;
 import com.google.light.server.utils.GaeUtils;
+import com.google.light.server.utils.LightPreconditions;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -41,15 +42,22 @@ import javax.servlet.http.HttpSession;
  */
 @SuppressWarnings("serial")
 public class ConfigServlet extends AbstractLightServlet {
-  private StringBuilder builder = null;
+  
 
+  @Inject
+  public ConfigServlet() {
+  }
+  
   @SuppressWarnings("deprecation")
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) {
+    // TODO(arjuns) : Move this check to filter or some where else as this causes Guice Injection
+    // failures if put if put in constructor. Probably can be moved to filter.
+    
+    LightPreconditions.checkPersonIsGaeAdmin();
+    
     try {
-      checkPersonIsGaeAdmin();
-
-      builder = new StringBuilder();
+      StringBuilder builder = new StringBuilder();
       Environment env = ApiProxy.getCurrentEnvironment();
       appendSectionHeader(builder, "Appengine SystemProperty");
       appendKeyValue(builder, "applicationid", SystemProperty.applicationId.get());

@@ -26,6 +26,7 @@ import org.junit.Test;
  * 
  * @author Arjun Satyapal
  */
+@SuppressWarnings("deprecation")
 public class IdProviderDetailTest extends AbstractPersistenceEntityTest {
   private final OpenIdAuthDomain authDomain = OpenIdAuthDomain.GOOGLE;
   private final String email = "gmail@email.com";

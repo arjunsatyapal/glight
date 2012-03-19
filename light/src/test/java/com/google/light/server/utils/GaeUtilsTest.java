@@ -15,10 +15,6 @@
  */
 package com.google.light.server.utils;
 
-import static com.google.light.server.utils.GaeUtils.isDevServer;
-import static com.google.light.server.utils.GaeUtils.isProductionServer;
-import static com.google.light.server.utils.GaeUtils.isQaServer;
-import static com.google.light.server.utils.GaeUtils.isUnitTestServer;
 import static com.google.light.testingutils.TestingUtils.getRandomEmail;
 import static com.google.light.testingutils.TestingUtils.getRandomFederatedId;
 import static org.junit.Assert.assertEquals;

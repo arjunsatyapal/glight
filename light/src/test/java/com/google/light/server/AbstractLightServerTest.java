@@ -42,10 +42,12 @@ import org.mockito.Mockito;
  * 
  * @author Arjun Satyapal
  */
+@SuppressWarnings("deprecation")
 public abstract class AbstractLightServerTest {
   private static boolean gaeSetupDone = false;
 
   protected static LightAppIdEnum defaultEnv = LightAppIdEnum.TEST;
+  
   protected static OpenIdAuthDomain defaultAuthDomain = OpenIdAuthDomain.GOOGLE;
   protected String testUserId;
   protected String testEmail;

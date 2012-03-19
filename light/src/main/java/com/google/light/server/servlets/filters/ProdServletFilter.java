@@ -15,19 +15,19 @@
  */
 package com.google.light.server.servlets.filters;
 
+import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.light.server.exception.unchecked.FilterInstanceBindingException;
+import com.google.light.server.servlets.path.ServletPathEnum;
 import com.google.light.server.utils.GaeUtils;
-import com.google.light.server.utils.LightUtils;
 import java.io.IOException;
+import java.util.Set;
 import java.util.logging.Logger;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 
 /**
  * Servlet Filter for All Light Requests. See {@link FilterPathEnum} to see what all URLs are
@@ -35,7 +35,6 @@ import javax.servlet.http.HttpSession;
  * 
  * @author Arjun Satyapal
  */
-
 public class ProdServletFilter extends AbstractLightFilter {
   private static final Logger logger = Logger.getLogger(Filter.class.getName());
 
@@ -49,15 +48,23 @@ public class ProdServletFilter extends AbstractLightFilter {
   }
 
   @Override
-  public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+  public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain)
       throws IOException, ServletException {
-    HttpServletRequest req = (HttpServletRequest) request;
+    // TODO(arjuns): If user is logged in and tries to visit a cached URL without going through
+    // login flow, it may be an issue. Will fix that once we have some more infrastructure around
+    // login.
+    handleFilterChain(request, response, filterChain);
+  }
+  
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  Set<ServletPathEnum> getSkipServletSet() {
+    Set<ServletPathEnum> set = Sets.newHashSet(
+        ServletPathEnum.LOGIN // Login Servlet should 
+        );
     
-    HttpSession session = req.getSession();
-    
-    if (session.isNew()) {
-      LightUtils.prepareSession(session, GaeUtils.getGaeUserId(), GaeUtils.getGaeUserEmail());
-      session.setMaxInactiveInterval(3600 /*sec*/);
-    }
+    return set;
   }
 }

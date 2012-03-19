@@ -32,6 +32,7 @@ import org.junit.Test;
  * 
  * @author Arjun Satyapal
  */
+@SuppressWarnings("deprecation")
 public class PersonEntityTest extends AbstractPersistenceEntityTest {
   private final Long userId = 1234L;
   private final String email = "email@gmail.com";

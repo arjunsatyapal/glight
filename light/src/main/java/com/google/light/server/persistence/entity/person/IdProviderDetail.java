@@ -35,7 +35,7 @@ import com.google.light.server.persistence.PersistenceToDtoInterface;
  *  
  * @author Arjun Satyapal
  */
-@SuppressWarnings("serial")
+@SuppressWarnings({ "deprecation", "serial" })
 public class IdProviderDetail implements PersistenceToDtoInterface<PersonEntity, PersonDto> {
   private OpenIdAuthDomain authDomain;
   private String email;

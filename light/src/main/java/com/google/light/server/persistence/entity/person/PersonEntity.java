@@ -68,6 +68,7 @@ public class PersonEntity implements PersistenceToDtoInterface<PersonEntity, Per
   }
 
   // TODO(arjuns) : Add test for constructor.
+  // TODO(arjuns): Make constructor private to promote builder.
   public PersonEntity(@Nullable Long id, String firstName, String lastName, 
       @Nullable String email, @Nullable List<IdProviderDetail> idProviderDetails) {
     this.id = id;

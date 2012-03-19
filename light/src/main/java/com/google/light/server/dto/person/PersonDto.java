@@ -48,7 +48,7 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 @XmlType(name = "personType", propOrder = {"firstName", "lastName", "email" })
 @XmlAccessorType(XmlAccessType.FIELD)
 @JsonSerialize(include = Inclusion.NON_NULL)
-public class PersonDto implements DtoToPersistenceInterface<PersonDto, PersonEntity> {
+public class PersonDto implements DtoToPersistenceInterface<PersonDto, PersonEntity, Long> {
   @XmlElement
   private String firstName;
 
@@ -118,6 +118,7 @@ public class PersonDto implements DtoToPersistenceInterface<PersonDto, PersonEnt
   /**
    * Constructor for PersonDto.
    * 
+   * TODO(arjuns): Make constructor private to promote Builder.
    * @param id
    * @param firstName
    * @param lastName

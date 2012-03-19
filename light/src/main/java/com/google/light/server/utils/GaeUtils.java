@@ -35,6 +35,7 @@ import com.google.light.server.constants.OpenIdAuthDomain;
  * 
  * @author Arjun Satyapal
  */
+@SuppressWarnings("deprecation")
 public class GaeUtils {
   /**
    * Get FederatedAuthDomain for Current Logged in user. This should be called only when user is
@@ -44,6 +45,7 @@ public class GaeUtils {
    * @deprecated
    * @return
    */
+  @Deprecated
   public static OpenIdAuthDomain getAuthDomain() {
     return getAuthDomainByValue(checkNotBlank(getUser().getAuthDomain(), "authDomain is blank."));
   }
@@ -55,6 +57,7 @@ public class GaeUtils {
    * @deprecated Going forward, {@link SessionManager#getGaeEmail()} should be used.
    * @return
    */
+  @Deprecated
   public static String getGaeUserEmail() {
     return checkNotBlank(getUser().getEmail(), "userEmail is blank.");
   }
@@ -66,6 +69,7 @@ public class GaeUtils {
    * @deprecated
    * @return
    */
+  @Deprecated
   public static String getFederatedIdentity() {
     // TODO(arjuns) : Fix this with Federated Login.
     return null;
@@ -97,6 +101,7 @@ public class GaeUtils {
    * @deprecated Going forward {@link SessionManager#getPersonId()} should be used. 
    * @return
    */
+  @Deprecated
   public static String getGaeUserId() {
     return checkNotBlank(getUser().getUserId(), "userId is blank.");
   }

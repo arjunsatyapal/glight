@@ -44,6 +44,7 @@ import org.junit.Test;
  * 
  * @author Arjun Satyapal
  */
+@SuppressWarnings("deprecation")
 public class FakeSessionServletITCase {
   private static String serverUrl;
   private static String email;

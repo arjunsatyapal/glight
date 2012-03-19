@@ -28,6 +28,7 @@ import com.google.inject.servlet.GuiceFilter;
 import com.google.inject.servlet.ServletModule;
 import com.google.light.server.constants.LightAppIdEnum;
 import com.google.light.server.constants.OpenIdAuthDomain;
+import com.google.light.server.guice.modules.BaseGuiceModule;
 import com.google.light.testingutils.GaeTestingUtils;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletContext;
@@ -41,6 +42,7 @@ import org.junit.Test;
  * 
  * @author Arjun Satyapal
  */
+@SuppressWarnings("deprecation")
 public class LightServletModuleTest {
   protected static GaeTestingUtils gaeTestingUtils = null;
 
@@ -68,7 +70,9 @@ public class LightServletModuleTest {
    */
   @Test
   public void test_ensureBindingPossible() throws Exception {
-    Injector injector = Guice.createInjector(new LightServletModule());
+    Injector injector = Guice.createInjector(
+        new BaseGuiceModule(){} /*for bindings on which servlets are dependent*/, 
+        new LightServletModule());
     GuiceFilter filter = injector.getInstance(GuiceFilter.class);
     FilterConfig filterConfig = mock(FilterConfig.class);
     ServletContext context = mock(ServletContext.class);

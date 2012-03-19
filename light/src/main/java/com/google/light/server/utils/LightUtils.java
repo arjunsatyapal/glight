@@ -37,6 +37,7 @@ import org.joda.time.DateTimeZone;
  * 
  * @author Arjun Satyapal
  */
+@SuppressWarnings("deprecation")
 public class LightUtils {
   private static final Logger logger = Logger.getLogger(LightUtils.class.getName());
 
@@ -65,7 +66,6 @@ public class LightUtils {
     session.setAttribute(GAE_USER_EMAIL.get(), gaeUserEmail);
   }
   
-  @SuppressWarnings("deprecation")
   public static void appendSessionData(StringBuilder builder, HttpSession session) {
     String testGaeUserId = null;
     String testGaeUserEmail = null;

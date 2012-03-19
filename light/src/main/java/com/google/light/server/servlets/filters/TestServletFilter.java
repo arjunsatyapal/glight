@@ -15,23 +15,19 @@
  */
 package com.google.light.server.servlets.filters;
 
-import java.util.Set;
-
 import com.google.common.collect.Sets;
-
-import com.google.light.server.servlets.path.ServletPathEnum;
-
 import com.google.inject.Inject;
 import com.google.light.server.exception.unchecked.FilterInstanceBindingException;
+import com.google.light.server.servlets.path.ServletPathEnum;
 import com.google.light.server.utils.GaeUtils;
 import java.io.IOException;
+import java.util.Set;
 import java.util.logging.Logger;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
 
 /**
  * Servlet Filter for QA and Test environment.
@@ -55,34 +51,20 @@ public class TestServletFilter extends AbstractLightFilter {
   @Override
   public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain)
       throws IOException, ServletException {
-    HttpServletRequest req = (HttpServletRequest) request;
-
-    if (skipSessionRequirements(req.getRequestURI())) {
-      filterChain.doFilter(request, response);
-    } else {
-      // Skip the AbstractLightFilter.
-      super.doFilter(req.getSession(false), req, response, filterChain);
-    }
+    handleFilterChain(request, response, filterChain);
   }
   
   /**
-   * Tells whether parent filter should be ignored and instead directly go to the filter
-   * chain. Since TestFilter covers all the URLs, this method will be used to exclude few
-   * Servlets from TestServletFilter.
+   * {@inheritDoc}
    */
-  boolean skipSessionRequirements(String requestUri) {
+  @Override
+  Set<ServletPathEnum> getSkipServletSet() {
     Set<ServletPathEnum> set = Sets.newHashSet(
         ServletPathEnum.CONFIG, // Admin servlets rely on Gae Environment. So are ignored.
+        ServletPathEnum.LOGIN, // Creates session. So have to be ignored.
         ServletPathEnum.FAKE_LOGIN // Creates session. So have to be ignored.
-        
         );
     
-    for (ServletPathEnum currEnum  : set) {
-      if (requestUri.startsWith(currEnum.get())) {
-        return true;
-      }
-    }
-    
-    return false;
+    return set;
   }
 }
