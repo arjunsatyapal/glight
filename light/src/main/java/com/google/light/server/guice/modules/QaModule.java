@@ -15,15 +15,16 @@
  */
 package com.google.light.server.guice.modules;
 
+import com.google.light.server.annotations.AnotOAuth2ConsumerGoogleLogin;
 import com.google.light.server.exception.unchecked.ServerConfigurationException;
+import com.google.light.server.manager.implementation.oauth2.consumer.GoogleOAuth2ConsumerManagerImpl;
+import com.google.light.server.manager.interfaces.OAuth2ConsumerManager;
 import com.google.light.server.utils.GaeUtils;
 
 /**
  * QA Guice Module for QA Environment.
  * 
  * Note : All bindings should be in request scoped.
- * 
- * TODO(arjuns): Add test for this.
  * 
  * @author Arjun Satyapal
  */
@@ -39,5 +40,10 @@ public class QaModule extends BaseGuiceModule {
   protected void configure() {
     super.configure();
     // Add QA Environment specific bindings here.
+    // Add Production Environment specific bindings here.
+    bind(OAuth2ConsumerManager.class)
+      .annotatedWith(AnotOAuth2ConsumerGoogleLogin.class)
+      .to(GoogleOAuth2ConsumerManagerImpl.class);
+    
   }
 }
