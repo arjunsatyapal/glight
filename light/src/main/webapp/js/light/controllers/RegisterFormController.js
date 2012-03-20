@@ -15,7 +15,8 @@
  */
 define(['dojo/_base/declare', 'light/controllers/AbstractLightController'],
         function(declare, AbstractLightController) {
-  return declare('light.controllers.RegisterFormController', AbstractLightController, {
+  return declare('light.controllers.RegisterFormController',
+          AbstractLightController, {
 
     /** @lends light.controllers.RegisterFormController# */
 
