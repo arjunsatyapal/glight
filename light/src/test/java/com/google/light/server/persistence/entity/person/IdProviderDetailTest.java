@@ -18,12 +18,14 @@ package com.google.light.server.persistence.entity.person;
 import static org.junit.Assert.fail;
 
 import com.google.light.server.constants.OpenIdAuthDomain;
+import com.google.light.server.exception.unchecked.BlankStringException;
 import com.google.light.server.persistence.entity.AbstractPersistenceEntityTest;
 import org.junit.Test;
 
 /**
  * Test for {@link IdProviderDetail}
- * 
+ * TODO(arjuns): Update in context of OAuth2Provider.
+ * TODO(arjuns): Add builder to make test more easier to read.
  * @author Arjun Satyapal
  */
 @SuppressWarnings("deprecation")
@@ -40,7 +42,7 @@ public class IdProviderDetailTest extends AbstractPersistenceEntityTest {
    */
   @Test
   @Override
-  public void test_constructor() {
+  public void test_builder() {
     // Positive part is already tested. Lets test for negative things.
 
     // Negative Test : Test with authDomain = null.
@@ -73,15 +75,15 @@ public class IdProviderDetailTest extends AbstractPersistenceEntityTest {
     try {
       new IdProviderDetail(authDomain, email, null);
       fail("should have failed.");
-    } catch (IllegalArgumentException e) {
+    } catch (BlankStringException e) {
       // expected.
     }
 
-    // Negative Test : Test with federatedIdentity="".
+    // Negative Test : Test with federatedIdentity=" ".
     try {
-      new IdProviderDetail(authDomain, email, "");
+      new IdProviderDetail(authDomain, email, " ");
       fail("should have failed.");
-    } catch (IllegalArgumentException e) {
+    } catch (BlankStringException e) {
       // expected.
     }
   }
@@ -96,7 +98,7 @@ public class IdProviderDetailTest extends AbstractPersistenceEntityTest {
       detail1.toDto();
       fail("should have failed.");
     } catch (UnsupportedOperationException e) {
-      // expected.
+      // If you implement it, then fix this test.
     }
   }
 }

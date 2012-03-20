@@ -96,7 +96,13 @@ public class PersonDto implements DtoToPersistenceInterface<PersonDto, PersonEnt
 
   @Override
   public PersonEntity toPersistenceEntity(Long id) {
-    return new PersonEntity(id, firstName, lastName, email, null);
+    return new PersonEntity.Builder()
+      .id(id)
+      .firstName(firstName)
+      .lastName(lastName)
+      .email(email)
+      .idProviderDetails(null)
+      .build();
   }
 
   @Override
@@ -110,24 +116,24 @@ public class PersonDto implements DtoToPersistenceInterface<PersonDto, PersonEnt
   }
 
   // For JAXB.
-  @JsonCreator
   @SuppressWarnings("unused")
+  @JsonCreator
   private PersonDto() {
   }
 
   /**
    * Constructor for PersonDto.
    * 
-   * TODO(arjuns): Make constructor private to promote Builder.
    * @param id
    * @param firstName
    * @param lastName
    * @param email
    */
-  public PersonDto(String firstName, String lastName, String email) {
+  protected PersonDto(String firstName, String lastName, String email) {
     this.firstName = firstName;
     this.lastName = lastName;
     this.email = email;
+    validate();
   }
 
   // Getters and setters.

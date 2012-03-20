@@ -32,6 +32,7 @@ import java.util.ArrayList;
  * @author Arjun Satyapal
  */
 public enum OAuth2Provider {
+  // TODO(arjuns) : Once we have more values here, then update tests to get a random value from this.
   GOOGLE_LOGIN("google",
                "https://accounts.google.com/o/oauth2/auth",
                "https://accounts.google.com/o/oauth2/token",

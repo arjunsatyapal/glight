@@ -68,8 +68,7 @@ public class PersonEntity implements PersistenceToDtoInterface<PersonEntity, Per
   }
 
   // TODO(arjuns) : Add test for constructor.
-  // TODO(arjuns): Make constructor private to promote builder.
-  public PersonEntity(@Nullable Long id, String firstName, String lastName, 
+  protected PersonEntity(@Nullable Long id, String firstName, String lastName, 
       @Nullable String email, @Nullable List<IdProviderDetail> idProviderDetails) {
     this.id = id;
     this.firstName = checkNotBlank(firstName);
@@ -80,7 +79,11 @@ public class PersonEntity implements PersistenceToDtoInterface<PersonEntity, Per
 
   @Override
   public PersonDto toDto() {
-    PersonDto dto = new PersonDto(firstName, lastName, email);
+    PersonDto dto = new PersonDto.Builder()
+      .firstName(firstName)
+      .lastName(lastName)
+      .email(email)
+      .build();
     return dto.validate();
   }
 

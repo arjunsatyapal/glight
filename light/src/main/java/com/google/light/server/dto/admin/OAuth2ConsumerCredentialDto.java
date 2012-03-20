@@ -31,8 +31,6 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 /**
  * DTO for OAuth2Consumer Credentials.
  * 
- * TODO(arjuns): Add test for this class.
- * 
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
@@ -63,7 +61,6 @@ public class OAuth2ConsumerCredentialDto implements
    */
   @Override
   public String toJson() {
-    // TODO(arjuns): Auto-generated method stub
     throw new UnsupportedOperationException();
   }
 
@@ -100,7 +97,6 @@ public class OAuth2ConsumerCredentialDto implements
    */
   @Override
   public String toXml() {
-    // TODO(arjuns): Auto-generated method stub
     throw new UnsupportedOperationException();
   }
 

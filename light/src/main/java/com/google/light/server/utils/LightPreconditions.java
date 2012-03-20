@@ -18,6 +18,8 @@ package com.google.light.server.utils;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.light.server.exception.unchecked.BlankStringException;
+
 import java.net.URISyntaxException;
 
 import java.net.URI;
@@ -63,7 +65,10 @@ public class LightPreconditions {
    * @return
    */
   public static String checkNotBlank(String reference, String errorString) {
-    Preconditions.checkArgument(!StringUtils.isBlank(reference), errorString);
+    if (StringUtils.isBlank(reference)) {
+      throw new BlankStringException(errorString);
+    }
+    
     return reference;
   }
 

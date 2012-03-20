@@ -27,7 +27,7 @@ public abstract class AbstractDtoToPersistenceTest {
    * Test for constructor for each entity.
    */
   @Test
-  public abstract void test_constructor() throws Exception;
+  public abstract void test_builder() throws Exception;
 
   /**
    * Test for {@link DtoToPersistenceInterface#toJson()}. For testing, we will read XML from file,

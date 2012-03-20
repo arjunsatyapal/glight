@@ -24,7 +24,6 @@ import com.google.light.server.utils.GaeUtils;
 
 import com.google.inject.Inject;
 import com.google.light.server.constants.ContentTypeEnum;
-import com.google.light.server.constants.LightEnvEnum;
 import com.google.light.server.constants.OAuth2Provider;
 import com.google.light.server.exception.unchecked.FilterInstanceBindingException;
 import com.google.light.server.utils.LightUtils;

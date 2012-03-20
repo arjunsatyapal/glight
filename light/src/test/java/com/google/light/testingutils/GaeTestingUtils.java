@@ -56,8 +56,9 @@ public class GaeTestingUtils {
       case DEV_SERVER:
         SystemProperty.environment.set(SystemProperty.Environment.Value.Development);
         break;
+        
       case PROD:
-
+        //$FALL-THROUGH$
       case QA:
         SystemProperty.environment.set(SystemProperty.Environment.Value.Production);
         break;

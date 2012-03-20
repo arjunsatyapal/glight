@@ -18,19 +18,16 @@ package com.google.light.server.persistence.entity.admin;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
-import javax.persistence.Id;
-
 import com.google.light.server.constants.OAuth2Provider;
 import com.google.light.server.dto.admin.OAuth2ConsumerCredentialDto;
 import com.google.light.server.persistence.PersistenceToDtoInterface;
+import javax.persistence.Id;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
 /**
  * PersistenceEntity for OAuth2Consumer Credentials.
- * 
- * TODO(arjuns): Add test for this class.
  * 
  * @author Arjun Satyapal
  */
@@ -42,13 +39,17 @@ public class OAuth2ConsumerCredentialEntity implements
   private String clientId;
   private String clientSecret;
 
-  protected OAuth2ConsumerCredentialEntity(String oAuth2ProviderKey, String clientId, 
+  protected OAuth2ConsumerCredentialEntity(String oAuth2ProviderKey, String clientId,
       String clientSecret) {
-    this.oAuth2ProviderKey = checkNotNull(oAuth2ProviderKey);
-    this.clientId = checkNotBlank(clientId);
-    this.clientSecret = checkNotBlank(clientSecret);
+    // Ensure that oAuth2ProviderKey is valid.
+    this.oAuth2ProviderKey = checkNotBlank(oAuth2ProviderKey);
+    checkNotNull(OAuth2Provider.valueOf(oAuth2ProviderKey), "invalid ProviderKey["
+        + oAuth2ProviderKey + "].");
+    
+    this.clientId = checkNotBlank(clientId, "clientId is blank");
+    this.clientSecret = checkNotBlank(clientSecret, "clientSecret is blank");
   }
-  
+
   /**
    * {@inheritDoc}
    */
@@ -75,7 +76,7 @@ public class OAuth2ConsumerCredentialEntity implements
   public boolean equals(Object obj) {
     return EqualsBuilder.reflectionEquals(this, obj);
   }
-  
+
   public String getOAuth2ProviderKey() {
     return oAuth2ProviderKey;
   }
@@ -92,7 +93,7 @@ public class OAuth2ConsumerCredentialEntity implements
   @SuppressWarnings("unused")
   private OAuth2ConsumerCredentialEntity() {
   }
-  
+
   public static class Builder {
     private String oAuth2ProviderKey;
     private String clientId;

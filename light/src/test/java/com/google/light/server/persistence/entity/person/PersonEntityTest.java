@@ -20,6 +20,8 @@ import static com.google.light.testingutils.TestingUtils.getRandomPersonId;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import com.google.light.server.exception.unchecked.BlankStringException;
+
 import com.google.light.server.exception.unchecked.InvalidPersonIdException;
 
 import com.google.common.collect.ImmutableList;
@@ -29,6 +31,7 @@ import com.google.light.server.persistence.entity.AbstractPersistenceEntityTest;
 import org.junit.Test;
 
 /**
+ * Test for {@link PersonEntity}.
  * 
  * @author Arjun Satyapal
  */
@@ -45,13 +48,13 @@ public class PersonEntityTest extends AbstractPersistenceEntityTest {
   private final IdProviderDetail idProviderDetail = new IdProviderDetail(authDomain, email,
       testFederatedId);
 
-  private final PersonEntity personWithoutId = getPersonBuilderWithoutId().build();
+  private final PersonEntity personWithoutId = getEntityBuilderWithoutId().build();
 
-  private final PersonEntity personWithId = getPersonBuilderWithoutId()
+  private final PersonEntity personWithId = getEntityBuilderWithoutId()
       .id(userId)
       .build();
 
-  private PersonEntity.Builder getPersonBuilderWithoutId() {
+  private PersonEntity.Builder getEntityBuilderWithoutId() {
     return new PersonEntity.Builder()
         .email(email)
         .firstName(firstName)
@@ -64,38 +67,38 @@ public class PersonEntityTest extends AbstractPersistenceEntityTest {
    */
   @Test
   @Override
-  public void test_constructor() {
+  public void test_builder() {
     // Valid case is already tested.
 
     // Negative test : First Name=null
     try {
-      getPersonBuilderWithoutId().firstName(null).build();
+      getEntityBuilderWithoutId().firstName(null).build();
       fail("Should have failed.");
-    } catch (IllegalArgumentException e) {
+    } catch (BlankStringException e) {
       // Expected.
     }
 
-    // Negative test : First Name=""
+    // Negative test : First Name=" "
     try {
-      getPersonBuilderWithoutId().firstName(null).build();
+      getEntityBuilderWithoutId().firstName(" ").build();
       fail("Should have failed.");
-    } catch (IllegalArgumentException e) {
+    } catch (BlankStringException e) {
       // Expected.
     }
 
     // Negative test : Last Name=null
     try {
-      getPersonBuilderWithoutId().lastName(null).build();
+      getEntityBuilderWithoutId().lastName(null).build();
       fail("Should have failed.");
-    } catch (IllegalArgumentException e) {
+    } catch (BlankStringException e) {
       // Expected.
     }
 
-    // Negative test : Last Name=""
+    // Negative test : Last Name=" "
     try {
-      getPersonBuilderWithoutId().lastName("").build();
+      getEntityBuilderWithoutId().lastName(" ").build();
       fail("Should have failed.");
-    } catch (IllegalArgumentException e) {
+    } catch (BlankStringException  e) {
       // Expected.
     }
 
@@ -104,9 +107,11 @@ public class PersonEntityTest extends AbstractPersistenceEntityTest {
      * testing only the constructor part.
      */
 
+    // Email == null is allowed. so no negative test for that.
+    
     // Negative test : email=""
     try {
-      getPersonBuilderWithoutId().email("").build();
+      getEntityBuilderWithoutId().email(" ").build();
       fail("Should have failed.");
     } catch (IllegalArgumentException e) {
       // Expected.
@@ -119,9 +124,13 @@ public class PersonEntityTest extends AbstractPersistenceEntityTest {
   @Test
   @Override
   public void test_toDto() {
-    PersonDto expectedPersonDto = new PersonDto(firstName, lastName, email);
-    assertEquals(expectedPersonDto, personWithoutId.toDto());
-    assertEquals(expectedPersonDto, personWithId.toDto());
+    PersonDto expectedDto = new PersonDto.Builder()
+      .firstName(firstName)
+      .lastName(lastName)
+      .email(email)
+      .build();
+    assertEquals(expectedDto, personWithoutId.toDto());
+    assertEquals(expectedDto, personWithId.toDto());
   }
 
   /**
@@ -131,7 +140,7 @@ public class PersonEntityTest extends AbstractPersistenceEntityTest {
   public void test_setEmail() {
     // Negative test : Email = null
     try {
-      getPersonBuilderWithoutId().build().setEmail(null);
+      getEntityBuilderWithoutId().build().setEmail(null);
       fail("Should have failed.");
     } catch (IllegalArgumentException e) {
       // Expected.
@@ -139,7 +148,7 @@ public class PersonEntityTest extends AbstractPersistenceEntityTest {
 
     // Negative test : Email = ""
     try {
-      getPersonBuilderWithoutId().email("").build();
+      getEntityBuilderWithoutId().email("").build();
       fail("Should have failed.");
     } catch (IllegalArgumentException e) {
       // Expected.
@@ -147,7 +156,7 @@ public class PersonEntityTest extends AbstractPersistenceEntityTest {
 
     // Negative test : Email = xyz
     try {
-      getPersonBuilderWithoutId().email("xyz").build();
+      getEntityBuilderWithoutId().email("xyz").build();
       fail("Should have failed.");
     } catch (IllegalArgumentException e) {
       // Expected.
@@ -155,7 +164,7 @@ public class PersonEntityTest extends AbstractPersistenceEntityTest {
 
     // Negative test : Email = xyz@
     try {
-      getPersonBuilderWithoutId().email("xyz@").build();
+      getEntityBuilderWithoutId().email("xyz@").build();
       fail("Should have failed.");
     } catch (IllegalArgumentException e) {
       // Expected.
@@ -163,7 +172,7 @@ public class PersonEntityTest extends AbstractPersistenceEntityTest {
 
     // Negative test : Email = xyz@
     try {
-      getPersonBuilderWithoutId().email("xyz@@").build();
+      getEntityBuilderWithoutId().email("xyz@@").build();
 
       fail("Should have failed.");
     } catch (IllegalArgumentException e) {
@@ -172,7 +181,7 @@ public class PersonEntityTest extends AbstractPersistenceEntityTest {
 
     // Negative test : Email = xyz@abc
     try {
-      getPersonBuilderWithoutId().email("xyz@abc").build();
+      getEntityBuilderWithoutId().email("xyz@abc").build();
       fail("Should have failed.");
     } catch (IllegalArgumentException e) {
       // Expected.
@@ -180,14 +189,14 @@ public class PersonEntityTest extends AbstractPersistenceEntityTest {
 
     // Negative test : Email = xyz@abc@
     try {
-      getPersonBuilderWithoutId().email("xyz@abc@").build();
+      getEntityBuilderWithoutId().email("xyz@abc@").build();
       fail("Should have failed.");
     } catch (IllegalArgumentException e) {
       // Expected.
     }
 
     // Ensuring that TestingUtils is generating right emails :)
-    getPersonBuilderWithoutId().email(getRandomEmail()).build();
+    getEntityBuilderWithoutId().email(getRandomEmail()).build();
   }
 
   /**
@@ -196,7 +205,7 @@ public class PersonEntityTest extends AbstractPersistenceEntityTest {
   @Test
   public void test_setId() {
     // Positive Test
-    PersonEntity testPerson = getPersonBuilderWithoutId().build();
+    PersonEntity testPerson = getEntityBuilderWithoutId().build();
     testPerson.setId(userId);
 
     // Negative Test : trying changing value.
@@ -209,7 +218,7 @@ public class PersonEntityTest extends AbstractPersistenceEntityTest {
 
     // Negative test : id=null
     try {
-      getPersonBuilderWithoutId().build().setId(null);
+      getEntityBuilderWithoutId().build().setId(null);
       fail("should have failed");
     } catch (InvalidPersonIdException e) {
       // expected.
@@ -217,7 +226,7 @@ public class PersonEntityTest extends AbstractPersistenceEntityTest {
 
     // Negative test : id = a negative value.
     try {
-      getPersonBuilderWithoutId().build().setId(-1L);
+      getEntityBuilderWithoutId().build().setId(-1L);
       fail("should have failed");
     } catch (InvalidPersonIdException e) {
       // expected.

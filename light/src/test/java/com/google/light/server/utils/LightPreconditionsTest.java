@@ -25,6 +25,8 @@ import static com.google.light.testingutils.TestingUtils.getUUIDString;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import com.google.light.server.exception.unchecked.BlankStringException;
+
 import com.google.common.collect.Lists;
 import com.google.light.server.exception.unchecked.InvalidPersonIdException;
 import java.util.List;
@@ -122,7 +124,7 @@ public class LightPreconditionsTest {
     try {
       checkNotBlank(null);
       fail("should have failed.");
-    } catch (IllegalArgumentException e) {
+    } catch (BlankStringException e) {
       // expected.
     }
 
@@ -130,15 +132,15 @@ public class LightPreconditionsTest {
     try {
       checkNotBlank("");
       fail("should have failed.");
-    } catch (IllegalArgumentException e) {
+    } catch (BlankStringException e) {
       // expected.
     }
 
-    // Negative : string=""
+    // Negative : string="    "
     try {
       checkNotBlank("    ");
       fail("should have failed.");
-    } catch (IllegalArgumentException e) {
+    } catch (BlankStringException e) {
       // expected.
     }
   }
@@ -153,7 +155,7 @@ public class LightPreconditionsTest {
     try {
       checkNotBlank(null, uuid);
       fail("should have failed.");
-    } catch (IllegalArgumentException e) {
+    } catch (BlankStringException e) {
       // expected.
       assertTrue(e.getMessage().contains(uuid));
 
@@ -163,7 +165,7 @@ public class LightPreconditionsTest {
     try {
       checkNotBlank("", uuid);
       fail("should have failed.");
-    } catch (IllegalArgumentException e) {
+    } catch (BlankStringException e) {
       // expected.
       assertTrue(e.getMessage().contains(uuid));
     }

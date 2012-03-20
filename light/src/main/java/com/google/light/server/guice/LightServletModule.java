@@ -15,7 +15,7 @@
  */
 package com.google.light.server.guice;
 
-import com.google.common.base.Preconditions;
+import com.google.light.server.exception.unchecked.ServerConfigurationException;
 
 import com.google.inject.Scopes;
 import com.google.inject.servlet.ServletModule;
@@ -35,11 +35,15 @@ class LightServletModule extends ServletModule {
 
   @Override
   protected void configureServlets() {
-    // One of the dev/qa/prod should be true.
-    Preconditions.checkArgument(GaeUtils.isDevServer()
+    // One of the env should be true.
+    boolean knownEnv = GaeUtils.isDevServer()
         || GaeUtils.isProductionServer()
         || GaeUtils.isQaServer()
-        || GaeUtils.isUnitTestServer(), "Unknown AppId : " + GaeUtils.getAppId());
+        || GaeUtils.isUnitTestServer();
+    
+    if (!knownEnv) {
+      throw new ServerConfigurationException("Unknown AppId : " + GaeUtils.getAppId());
+    }
     
     // First registering the Filters.
     boolean isProduction = GaeUtils.isProductionServer(); 

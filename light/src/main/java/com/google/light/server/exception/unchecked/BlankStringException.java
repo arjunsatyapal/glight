@@ -13,54 +13,46 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.server.dto;
+package com.google.light.server.exception.unchecked;
 
-import java.io.Serializable;
+import com.google.light.server.utils.LightPreconditions;
 
 /**
- * Interface to encapsulate methods related to DTO.
+ * Exception thrown by {@link LightPreconditions#checkNotBlank(String)} when 
+ * <br> String is null.
+ * <br> String is empty
+ * <br> String consists only of whitespaces.
  * 
- * TODO(arjuns): Add test for this class.
- *
  * @author Arjun Satyapal
  */
-public interface DtoInterface<D> extends Serializable {
+@SuppressWarnings("serial")
+public class BlankStringException extends RuntimeException {
   /**
-   * Convert DTO to JSON String.
+   * {@inheritDoc}
    */
-  public String toJson();
-  
+  public BlankStringException() {
+      super();
+  }
+
   /**
-   * Convert DTO to XML.
+   * {@inheritDoc}
+   * @param message
    */
-  public String toXml();
-  
-  /**
-   * Ensure that DTO is valid. <br>
-   * TODO(arjuns): Throw a checked exception. <br>
-   * TODO(arjuns) : Sync with Walter on refactoring. Issue : 2003.
-   * 
-   * @return
-   */
-  public D validate();
+  public BlankStringException(String message) {
+      super(message);
+  }
 
   /**
    * {@inheritDoc}
    */
-  @Override
-  public boolean equals(Object obj);
+  public BlankStringException(String message, Throwable cause) {
+      super(message, cause);
+  }
 
   /**
    * {@inheritDoc}
    */
-  @Override
-  public int hashCode();
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @return
-   */
-  @Override
-  public String toString();
+  public BlankStringException(Throwable cause) {
+      super(cause);
+  }
 }

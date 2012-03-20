@@ -32,7 +32,7 @@ import com.google.light.server.persistence.PersistenceToDtoInterface;
 /**
  *  We are storing these so that in future if we need to add support more Federated Providers
  *  then we can add it.
- *  
+ *  TODO(arjuns): Update in context of OAuth2Provider.
  * @author Arjun Satyapal
  */
 @SuppressWarnings({ "deprecation", "serial" })
@@ -56,6 +56,7 @@ public class IdProviderDetail implements PersistenceToDtoInterface<PersonEntity,
     return EqualsBuilder.reflectionEquals(this, obj);
   }
 
+  // TODO(arjuns): Add a builder and make constructor private.
   public IdProviderDetail(OpenIdAuthDomain authDomain, String email, String federatedIdentity) {
     this.authDomain = checkNotNull(authDomain);
     this.email = checkEmail(email);

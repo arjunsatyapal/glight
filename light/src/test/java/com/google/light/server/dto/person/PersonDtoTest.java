@@ -21,10 +21,10 @@ import static com.google.light.testingutils.TestingUtils.getResourceAsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-import com.google.light.server.utils.JsonUtils;
-
 import com.google.light.server.dto.AbstractDtoToPersistenceTest;
+import com.google.light.server.exception.unchecked.BlankStringException;
 import com.google.light.server.persistence.entity.person.PersonEntity;
+import com.google.light.server.utils.JsonUtils;
 import com.google.light.server.utils.XmlUtils;
 import org.junit.Test;
 
@@ -38,7 +38,7 @@ public class PersonDtoTest extends AbstractDtoToPersistenceTest {
   private final String lastName = "last name";
   private final String email = "email@gmail.com";
 
-  private PersonDto.Builder getPersonDtoBuilder() {
+  private PersonDto.Builder getDtoBuilder() {
     return new PersonDto.Builder()
         .firstName(firstName)
         .lastName(lastName)
@@ -50,7 +50,7 @@ public class PersonDtoTest extends AbstractDtoToPersistenceTest {
    */
   @Test
   @Override
-  public void test_constructor() {
+  public void test_builder() {
     // No validation logic in constructor. So nothing to test here.
   }
 
@@ -76,16 +76,16 @@ public class PersonDtoTest extends AbstractDtoToPersistenceTest {
   @Test
   @Override
   public void test_toPersistenceEntity() {
-    PersonEntity.Builder personBuilder = new PersonEntity.Builder()
+    PersonEntity.Builder entityBuilder = new PersonEntity.Builder()
         .firstName(firstName)
         .lastName(lastName)
         .email(email);
 
-    PersonDto personDto = new PersonDto(firstName, lastName, email);
-    assertEquals(personBuilder.build(), personDto.toPersistenceEntity(null));
+    PersonDto personDto = getDtoBuilder().build();
+    assertEquals(entityBuilder.build(), personDto.toPersistenceEntity(null));
 
     Long value = getRandomLongNumber();
-    assertEquals(personBuilder.id(value).build(), personDto.toPersistenceEntity(value));
+    assertEquals(entityBuilder.id(value).build(), personDto.toPersistenceEntity(value));
   }
 
   /**
@@ -95,38 +95,38 @@ public class PersonDtoTest extends AbstractDtoToPersistenceTest {
   @Override
   public void test_validate() {
     // Positive Test
-    PersonDto person1 = getPersonDtoBuilder().build();
+    PersonDto person1 = getDtoBuilder().build();
     person1.validate();
 
     // Negative Test : firstName=null
     try {
-      getPersonDtoBuilder().firstName(null).build();
+      getDtoBuilder().firstName(null).build();
       fail("should have failed.");
-    } catch (IllegalArgumentException e) {
+    } catch (BlankStringException e) {
       // expected.
     }
 
-    // Negative Test : firstName=""
+    // Negative Test : firstName=" "
     try {
-      getPersonDtoBuilder().firstName("").build();
+      getDtoBuilder().firstName(" ").build();
       fail("should have failed.");
-    } catch (IllegalArgumentException e) {
+    } catch (BlankStringException e) {
       // expected.
     }
 
     // Negative Test : lastName=null
     try {
-      getPersonDtoBuilder().lastName(null).build();
+      getDtoBuilder().lastName(null).build();
       fail("should have failed.");
-    } catch (IllegalArgumentException e) {
+    } catch (BlankStringException e) {
       // expected.
     }
 
-    // Negative Test : lastName=""
+    // Negative Test : lastName=" "
     try {
-      getPersonDtoBuilder().lastName("").build();
+      getDtoBuilder().lastName(" ").build();
       fail("should have failed.");
-    } catch (IllegalArgumentException e) {
+    } catch (BlankStringException e) {
       // expected.
     }
 
