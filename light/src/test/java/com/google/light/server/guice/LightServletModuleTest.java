@@ -20,22 +20,21 @@ import static com.google.light.testingutils.TestingUtils.getRandomFederatedId;
 import static com.google.light.testingutils.TestingUtils.getRandomUserId;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
-
-import com.google.light.server.constants.OAuth2Provider;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.servlet.GuiceFilter;
 import com.google.inject.servlet.ServletModule;
-import com.google.light.server.constants.LightAppIdEnum;
+import com.google.light.server.constants.LightEnvEnum;
+import com.google.light.server.constants.OAuth2Provider;
+import com.google.light.server.guice.module.UnitTestModule;
+import com.google.light.server.guice.modules.DevServerModule;
 import com.google.light.server.guice.modules.ProdModule;
+import com.google.light.server.guice.modules.QaModule;
 import com.google.light.testingutils.GaeTestingUtils;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletContext;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
+import javax.servlet.http.HttpSession;
 import org.junit.Test;
 
 /**
@@ -46,24 +45,17 @@ import org.junit.Test;
 public class LightServletModuleTest {
   protected static GaeTestingUtils gaeTestingUtils = null;
 
-  @BeforeClass
-  public static void gaeSetUp() {
-    // Deliberately creating PROD Env.
+  public void gaeSetUp(LightEnvEnum env) {
     gaeTestingUtils =
-        new GaeTestingUtils(LightAppIdEnum.PROD, OAuth2Provider.GOOGLE_LOGIN, getRandomEmail(),
+        new GaeTestingUtils(env, OAuth2Provider.GOOGLE_LOGIN, getRandomEmail(),
             getRandomFederatedId(), true /* isFederatedUser */, getRandomUserId(),
             true /* isUserLoggedIn */, false /* isGaeAdmin */);
     gaeTestingUtils.setUp();
   }
 
-  @Before
-  public void setUp() {
-    initMocks(this);
-  }
-
-  @AfterClass
   public static void gaeTearDown() {
     gaeTestingUtils.tearDown();
+    gaeTestingUtils = null;
   }
 
   /**
@@ -71,16 +63,43 @@ public class LightServletModuleTest {
    */
   @Test
   public void test_ensureBindingPossible() throws Exception {
-    Injector injector = Guice.createInjector(
-        new ProdModule() /*for bindings on which servlets are dependent*/, 
-        new LightServletModule());
-    GuiceFilter filter = injector.getInstance(GuiceFilter.class);
-    FilterConfig filterConfig = mock(FilterConfig.class);
-    ServletContext context = mock(ServletContext.class);
-    when(filterConfig.getServletContext()).thenReturn(context);
-    filter.init(filterConfig);
-    filter.destroy();
+    for (LightEnvEnum currEnv : LightEnvEnum.values()) {
+      try {
+        gaeSetUp(currEnv);
+        Injector injector = getInjector(currEnv);
+        
+        GuiceFilter filter = injector.getInstance(GuiceFilter.class);
+        
+        FilterConfig filterConfig = mock(FilterConfig.class);
+        ServletContext context = mock(ServletContext.class);
+        
+        when(filterConfig.getServletContext()).thenReturn(context);
+        filter.init(filterConfig);
+        filter.destroy();
+      } finally {
+        gaeTearDown();
+      }
+    }
   }
-  
+
+  private Injector getInjector(LightEnvEnum env) {
+    ServletModule servletModule = new LightServletModule();
+    switch (env) {
+      case DEV_SERVER:
+        return Guice.createInjector(new DevServerModule(), servletModule);
+
+      case PROD:
+        return Guice.createInjector(new ProdModule(), servletModule);
+
+      case QA:
+        return Guice.createInjector(new QaModule(), servletModule);
+
+      case UNIT_TEST:
+        return UnitTestModule.getTestInjector(mock(HttpSession.class));
+
+      default:
+        throw new IllegalArgumentException("Unknown env : " + env);
+    }
+  }
   // TODO(arjuns): Add tests for ServletBindings.
 }

@@ -20,7 +20,7 @@ import static org.junit.Assert.assertTrue;
 
 import com.google.light.server.utils.GaeUtils;
 
-import com.google.light.server.constants.LightAppIdEnum;
+import com.google.light.server.constants.LightEnvEnum;
 import com.google.light.server.guice.modules.ProdModule;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,7 +37,7 @@ public class ProdModuleTest extends AbstractModuleTest {
   @Before
   @Override
   public void setUp() {
-    super.gaeSetUp(LightAppIdEnum.PROD);
+    super.gaeSetUp(LightEnvEnum.PROD);
   }
   
   /**

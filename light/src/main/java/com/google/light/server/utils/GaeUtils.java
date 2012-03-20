@@ -24,7 +24,7 @@ import com.google.appengine.api.users.UserServiceFactory;
 import com.google.appengine.api.utils.SystemProperty;
 import com.google.apphosting.api.ApiProxy;
 import com.google.apphosting.api.ApiProxy.Environment;
-import com.google.light.server.constants.LightAppIdEnum;
+import com.google.light.server.constants.LightEnvEnum;
 import com.google.light.server.servlets.SessionManager;
 
 /**
@@ -119,7 +119,7 @@ public class GaeUtils {
    * This depends on AppId.
    */
   public static boolean isProductionServer() {
-    return isRunningOnGAE() && LightAppIdEnum.PROD == LightAppIdEnum.getLightAppIdEnum();
+    return isRunningOnGAE() && LightEnvEnum.PROD == LightEnvEnum.getLightEnvByAppId();
   }
 
   /**
@@ -128,7 +128,7 @@ public class GaeUtils {
    */
   public static boolean isQaServer() {
     return isRunningOnGAE()
-        && LightAppIdEnum.QA == LightAppIdEnum.getLightAppIdEnum();
+        && LightEnvEnum.QA == LightEnvEnum.getLightEnvByAppId();
   }
 
   /**
@@ -137,6 +137,6 @@ public class GaeUtils {
    */
   public static boolean isUnitTestServer() {
     return SystemProperty.environment.value() == null
-        && LightAppIdEnum.TEST == LightAppIdEnum.getLightAppIdEnum();
+        && LightEnvEnum.UNIT_TEST == LightEnvEnum.getLightEnvByAppId();
   }
 }

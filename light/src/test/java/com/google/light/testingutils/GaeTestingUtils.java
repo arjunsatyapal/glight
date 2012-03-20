@@ -22,7 +22,7 @@ import com.google.appengine.tools.development.testing.LocalTaskQueueTestConfig;
 import com.google.appengine.tools.development.testing.LocalUserServiceTestConfig;
 import com.google.apphosting.api.ApiProxy;
 import com.google.apphosting.api.ApiProxy.Environment;
-import com.google.light.server.constants.LightAppIdEnum;
+import com.google.light.server.constants.LightEnvEnum;
 import com.google.light.server.constants.OAuth2Provider;
 import com.google.light.server.utils.GaeUtils;
 
@@ -49,7 +49,7 @@ public class GaeTestingUtils {
 
   private LocalServiceTestHelper gaeTestHelper;
 
-  public GaeTestingUtils(LightAppIdEnum env, OAuth2Provider provider, String email,
+  public GaeTestingUtils(LightEnvEnum env, OAuth2Provider provider, String email,
       String federatedId, Boolean isFederated, String userId, boolean loggedIn,
       boolean isAdmin) {
     switch (env) {
@@ -62,7 +62,7 @@ public class GaeTestingUtils {
         SystemProperty.environment.set(SystemProperty.Environment.Value.Production);
         break;
 
-      case TEST:
+      case UNIT_TEST:
       default:
         SystemProperty.environment.set("");
     }

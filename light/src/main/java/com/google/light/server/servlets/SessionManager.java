@@ -23,10 +23,8 @@ import static com.google.light.server.utils.LightPreconditions.checkEmail;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPersonId;
 
-import com.google.appengine.api.users.UserServiceFactory;
 import com.google.inject.Inject;
 import com.google.light.server.annotations.AnotHttpSession;
-import com.google.light.server.constants.LightAppIdEnum;
 import com.google.light.server.constants.OAuth2Provider;
 import com.google.light.server.constants.RequestParmKeyEnum;
 import com.google.light.server.exception.unchecked.httpexception.PersonLoginRequiredException;
@@ -123,16 +121,12 @@ public class SessionManager {
   }
 
   /**
-   * Returns true if Person is logged in.
+   * Returns true if Person is logged in. In order to determine if User is logged in or not, 
+   * we depend on whether Session is null or not.
    * 
    * @return
    */
   public boolean isPersonLoggedIn() {
-    if (LightAppIdEnum.PROD == LightAppIdEnum.getLightAppIdEnum()) {
-      return UserServiceFactory.getUserService().isUserLoggedIn();
-    }
-
-    // For test/qa rely on session. If session is present, user is logged in.
     return session != null;
   }
 

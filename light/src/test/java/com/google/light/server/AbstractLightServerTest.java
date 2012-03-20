@@ -22,7 +22,7 @@ import static com.google.light.testingutils.TestingUtils.getRandomUserId;
 import static org.mockito.Mockito.when;
 
 import com.google.inject.Injector;
-import com.google.light.server.constants.LightAppIdEnum;
+import com.google.light.server.constants.LightEnvEnum;
 import com.google.light.server.constants.OAuth2Provider;
 import com.google.light.server.guice.TestInstanceProvider;
 import com.google.light.server.guice.module.UnitTestModule;
@@ -43,7 +43,7 @@ import org.mockito.Mockito;
 public abstract class AbstractLightServerTest {
   private static boolean gaeSetupDone = false;
 
-  protected static LightAppIdEnum defaultEnv = LightAppIdEnum.TEST;
+  protected static LightEnvEnum defaultEnv = LightEnvEnum.UNIT_TEST;
   
   protected static OAuth2Provider defaultLoginProvider = OAuth2Provider.GOOGLE_LOGIN;
   protected String testUserId;

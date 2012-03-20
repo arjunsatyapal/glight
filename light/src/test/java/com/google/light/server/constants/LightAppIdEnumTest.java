@@ -15,17 +15,16 @@
  */
 package com.google.light.server.constants;
 
-import static com.google.light.server.constants.LightAppIdEnum.getLightAppIdEnumById;
+import static com.google.light.server.constants.LightEnvEnum.getLightEnvByAppId;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import com.google.light.server.guice.LightServletModuleTest;
-
 import org.junit.Test;
 
 /**
- * Test for {@link LightAppIdEnum}.
+ * Test for {@link LightEnvEnum}.
  * 
  * @author Arjun Satyapal
  */
@@ -37,52 +36,52 @@ public class LightAppIdEnumTest implements EnumTestInterface {
   @Test
   @Override
   public void test_count() {
-    assertEquals(4, LightAppIdEnum.values().length);
+    assertEquals(4, LightEnvEnum.values().length);
   }
 
   /**
-   * Ensure that Ids mentioned inside {@link LightAppIdEnum#PROD} and {@link LightAppIdEnum#QA} are
+   * Ensure that Ids mentioned inside {@link LightEnvEnum#PROD} and {@link LightEnvEnum#QA} are
    * Mutually Exclusive.
    * 
-   * For {@link LightAppIdEnum#DEV_SERVER} and {@link LightAppIdEnum#TEST}, we dont care as they are
+   * For {@link LightEnvEnum#DEV_SERVER} and {@link LightEnvEnum#UNIT_TEST}, we dont care as they are
    * for testing purpose only.
    */
   @Test
   public void test_mutualExclusiveCategory() {
-    for (String currId : LightAppIdEnum.PROD.getAppIds()) {
-      assertFalse(LightAppIdEnum.QA.getAppIds().contains(currId));
+    for (String currId : LightEnvEnum.PROD.getAppIds()) {
+      assertFalse(LightEnvEnum.QA.getAppIds().contains(currId));
     }
   }
 
   /**
-   * Test for {@link LightAppIdEnum#getLightAppIdEnumById(String)}.
+   * Test for {@link LightEnvEnum#getLightEnvByAppId(String)}.
    * 
-   * We are not testing {@link LightAppIdEnum#getLightAppIdEnum()} directly as it involves lot of
+   * We are not testing {@link LightEnvEnum#getLightEnvByAppId()} directly as it involves lot of
    * setup and teardown. In addition it depends on
-   * {@link LightAppIdEnum#getLightAppIdEnumById(String)}. So no point in extra testing.
+   * {@link LightEnvEnum#getLightAppIdEnumById(String)}. So no point in extra testing.
    * 
    * In order to be safe, its tested as part of
    * {@link LightServletModuleTest#test_validateTestFilterBinding()}.
    */
   @Test
-  public void test_getLightAppIdEnum() {
-    assertEquals(LightAppIdEnum.PROD, LightAppIdEnum.getLightAppIdEnumById("s~light-prod"));
-    assertEquals(LightAppIdEnum.QA, LightAppIdEnum.getLightAppIdEnumById("s~light-qa"));
-    assertEquals(LightAppIdEnum.TEST, LightAppIdEnum.getLightAppIdEnumById("test"));
+  public void test_getLightEnvEnumByAppId() {
+    assertEquals(LightEnvEnum.PROD, getLightEnvByAppId("s~light-prod"));
+    assertEquals(LightEnvEnum.QA, getLightEnvByAppId("s~light-qa"));
+    assertEquals(LightEnvEnum.UNIT_TEST, getLightEnvByAppId("test"));
 
-    // Ensure that for none of the mentioend AppIds, Dev Server is returned.
-    for (LightAppIdEnum currEnum : LightAppIdEnum.values()) {
+    // Ensure that for none of the mentioned AppIds, DEV_SERVER is returned.
+    for (LightEnvEnum currEnum : LightEnvEnum.values()) {
       for (String currAppId : currEnum.getAppIds()) {
-        LightAppIdEnum expectedEnum = currEnum;
+        LightEnvEnum expectedEnum = currEnum;
         
         // Since DEV_SERVER inherits AppId from QA, so getValue by AppId should return QA.
-        if (expectedEnum == LightAppIdEnum.DEV_SERVER) {
-          expectedEnum = LightAppIdEnum.QA;
+        if (expectedEnum == LightEnvEnum.DEV_SERVER) {
+          expectedEnum = LightEnvEnum.QA;
         }
         
-        assertEquals(expectedEnum, getLightAppIdEnumById(currAppId));
+        assertEquals(expectedEnum, getLightEnvByAppId(currAppId));
         // DEV_SERVER is never returned.
-        assertTrue(LightAppIdEnum.DEV_SERVER != getLightAppIdEnumById(currAppId));
+        assertTrue(LightEnvEnum.DEV_SERVER != getLightEnvByAppId(currAppId));
       }
     }
   }

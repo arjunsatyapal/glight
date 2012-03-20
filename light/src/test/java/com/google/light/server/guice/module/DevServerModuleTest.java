@@ -18,7 +18,7 @@ package com.google.light.server.guice.module;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import com.google.light.server.constants.LightAppIdEnum;
+import com.google.light.server.constants.LightEnvEnum;
 import com.google.light.server.guice.modules.DevServerModule;
 import com.google.light.server.utils.GaeUtils;
 import org.junit.Before;
@@ -36,7 +36,7 @@ public class DevServerModuleTest extends AbstractModuleTest {
   @Before
   @Override
   public void setUp() {
-    super.gaeSetUp(LightAppIdEnum.DEV_SERVER);
+    super.gaeSetUp(LightEnvEnum.DEV_SERVER);
   }
   
   /**

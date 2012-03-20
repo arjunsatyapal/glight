@@ -20,9 +20,11 @@ import static com.google.light.server.constants.RequestParmKeyEnum.LOGIN_PROVIDE
 import static com.google.light.server.constants.RequestParmKeyEnum.LOGIN_PROVIDER_USER_ID;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
+import com.google.light.server.utils.GaeUtils;
+
 import com.google.inject.Inject;
 import com.google.light.server.constants.ContentTypeEnum;
-import com.google.light.server.constants.LightAppIdEnum;
+import com.google.light.server.constants.LightEnvEnum;
 import com.google.light.server.constants.OAuth2Provider;
 import com.google.light.server.exception.unchecked.FilterInstanceBindingException;
 import com.google.light.server.utils.LightUtils;
@@ -47,8 +49,8 @@ public class FakeLoginServlet extends HttpServlet {
 
   @Inject
   private FakeLoginServlet() {
-    if (LightAppIdEnum.PROD == LightAppIdEnum.getLightAppIdEnum()) {
-      String msg = "TestServletFilter should be injected for Test&QA environment only.";
+    if (GaeUtils.isProductionServer()) {
+      String msg = "TestServletFilter should not be injected for Production Env.";
       logger.severe(msg);
       throw new FilterInstanceBindingException(msg);
     }

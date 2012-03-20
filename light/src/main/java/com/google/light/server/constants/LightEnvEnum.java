@@ -26,11 +26,9 @@ import java.util.List;
 /**
  * Enum to identify the Environment.
  * 
- * TODO(arjuns): Rename this class to LightEnvironmentEnum.
- * 
  * @author Arjun Satyapal
  */
-public enum LightAppIdEnum {
+public enum LightEnvEnum {
   PROD(newArrayList("s~light-prod")),
   QA(newArrayList("s~light-qa")),
  
@@ -38,12 +36,11 @@ public enum LightAppIdEnum {
   // DevServer picks the value from appengine-web.xml. So it will be always same as QA. But
   // the difference is that SystemProperty.environment.value() differs for QA and DEV_SERVER.
   DEV_SERVER(newArrayList("s~light-qa")),
-  // TODO(arjuns): Rename this to UnitTest.
-  TEST(newArrayList("test"));
+  UNIT_TEST(newArrayList("test"));
   
   private List<String> appIds;
   
-  private LightAppIdEnum(List<String> appIds) {
+  private LightEnvEnum(List<String> appIds) {
     this.appIds = LightPreconditions.checkNonEmptyList(appIds);
   }
   
@@ -60,17 +57,17 @@ public enum LightAppIdEnum {
    * 
    * @return
    */
-  public static LightAppIdEnum getLightAppIdEnum() {
+  public static LightEnvEnum getLightEnvByAppId() {
     Environment env = ApiProxy.getCurrentEnvironment();
     
-    return getLightAppIdEnumById(env.getAppId());
+    return getLightEnvByAppId(env.getAppId());
   }
   
   @VisibleForTesting
-  static LightAppIdEnum getLightAppIdEnumById(String envId) {
-    for (LightAppIdEnum currEnum : LightAppIdEnum.values()) {
+  static LightEnvEnum getLightEnvByAppId(String envId) {
+    for (LightEnvEnum currEnum : LightEnvEnum.values()) {
       // DevServer is not calculated on the basis of envId. So it should never be returned.
-      if (currEnum == LightAppIdEnum.DEV_SERVER) {
+      if (currEnum == LightEnvEnum.DEV_SERVER) {
         continue;
       }
       
@@ -81,7 +78,6 @@ public enum LightAppIdEnum {
       }
     }
     
-    return TEST;
+    return UNIT_TEST;
   }
-
 }

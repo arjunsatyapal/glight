@@ -22,7 +22,7 @@ import com.google.light.server.utils.GaeUtils;
 
 import com.google.light.server.guice.modules.QaModule;
 
-import com.google.light.server.constants.LightAppIdEnum;
+import com.google.light.server.constants.LightEnvEnum;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -38,7 +38,7 @@ public class QaModuleTest extends AbstractModuleTest {
   @Before
   @Override
   public void setUp() {
-    super.gaeSetUp(LightAppIdEnum.QA);
+    super.gaeSetUp(LightEnvEnum.QA);
   }
   
   /**

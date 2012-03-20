@@ -24,7 +24,7 @@ import javax.servlet.http.HttpSession;
 
 import org.mockito.Mockito;
 
-import com.google.light.server.constants.LightAppIdEnum;
+import com.google.light.server.constants.LightEnvEnum;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -40,7 +40,7 @@ public class UnitTestModuleTest extends AbstractModuleTest {
   @Before
   @Override
   public void setUp() {
-    super.gaeSetUp(LightAppIdEnum.TEST);
+    super.gaeSetUp(LightEnvEnum.UNIT_TEST);
   }
   
   /**
