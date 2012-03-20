@@ -16,6 +16,9 @@
 package com.google.light.server.utils;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.light.server.constants.RequestParmKeyEnum.LOGIN_PROVIDER_ID;
+import static com.google.light.server.constants.RequestParmKeyEnum.LOGIN_PROVIDER_USER_EMAIL;
+import static com.google.light.server.constants.RequestParmKeyEnum.LOGIN_PROVIDER_USER_ID;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;
@@ -65,9 +68,9 @@ public class LightUtils {
     logger.info("Prepairing session with provider[" + loginProvider 
         + ", providerUserId[" + providerUserId
         + "], providerUserEmail[" + providerUserEmail + "].");
-    session.setAttribute(RequestParmKeyEnum.LOGIN_PROVIDER_ID.get(), loginProvider.name());
-    session.setAttribute(RequestParmKeyEnum.LOGIN_PROVIDER_USER_ID.get(), providerUserId);
-    session.setAttribute(RequestParmKeyEnum.LOGIN_PROVIDER_USER_EMAIL.get(), providerUserEmail);
+    session.setAttribute(LOGIN_PROVIDER_ID.get(), loginProvider.name());
+    session.setAttribute(LOGIN_PROVIDER_USER_ID.get(), providerUserId);
+    session.setAttribute(LOGIN_PROVIDER_USER_EMAIL.get(), providerUserEmail);
   }
 
   public static void appendSessionData(StringBuilder builder, HttpSession session) {
@@ -97,13 +100,6 @@ public class LightUtils {
     appendKeyValue(builder, "maxInactiveIntervalInSec", session.getMaxInactiveInterval());
     appendKeyValue(builder, "servletContext", session.getServletContext());
     appendKeyValue(builder, "sessionContext", session.getSessionContext());
-
-    @SuppressWarnings("rawtypes")
-    Enumeration names = session.getAttributeNames();
-    builder.append("<br>names = ");
-    while (names.hasMoreElements()) {
-      builder.append(" ").append(names.nextElement());
-    }
   }
 
   // Utility class.
