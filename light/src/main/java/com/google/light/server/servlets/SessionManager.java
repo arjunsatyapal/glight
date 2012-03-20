@@ -15,32 +15,30 @@
  */
 package com.google.light.server.servlets;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.light.server.constants.OpenIdAuthDomain.getAuthDomainByValue;
-import static com.google.light.server.constants.RequestParmKeyEnum.AUTH_DOMAIN;
-import static com.google.light.server.constants.RequestParmKeyEnum.GAE_USER_EMAIL;
-import static com.google.light.server.constants.RequestParmKeyEnum.GAE_USER_ID;
+import static com.google.light.server.constants.RequestParmKeyEnum.LOGIN_PROVIDER_ID;
+import static com.google.light.server.constants.RequestParmKeyEnum.LOGIN_PROVIDER_USER_EMAIL;
+import static com.google.light.server.constants.RequestParmKeyEnum.LOGIN_PROVIDER_USER_ID;
 import static com.google.light.server.constants.RequestParmKeyEnum.PERSON_ID;
 import static com.google.light.server.utils.LightPreconditions.checkEmail;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPersonId;
 
-import com.google.light.server.exception.unchecked.httpexception.PersonLoginRequiredException;
-
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.inject.Inject;
 import com.google.light.server.annotations.AnotHttpSession;
 import com.google.light.server.constants.LightAppIdEnum;
-import com.google.light.server.constants.OpenIdAuthDomain;
+import com.google.light.server.constants.OAuth2Provider;
 import com.google.light.server.constants.RequestParmKeyEnum;
+import com.google.light.server.exception.unchecked.httpexception.PersonLoginRequiredException;
 import javax.servlet.http.HttpSession;
 
 /**
  * Class to wrap functions around sessions. This class should be injected in LightScope.
+ * 
  * TODO(arjuns): Update tests.
+ * 
  * @author Arjun Satyapal
  */
-@SuppressWarnings("deprecation")
 public class SessionManager {
   private HttpSession session;
 
@@ -50,73 +48,58 @@ public class SessionManager {
   }
 
   /**
-   * Get AuthDomain for user from Session. TODO(arjuns): Figure out what needs to be set for
-   * Prod/test.
-   * 
-   * TODO(arjuns): Find alternative for AuthDomain.
+   * Get Person's Login Provider from Session.
    * 
    * @return
    */
-  public OpenIdAuthDomain getAuthDomain() {
-    String authDomain = checkNotBlank((String) session.getAttribute(AUTH_DOMAIN.get()),
-        "authDomain is blank.");
-    return getAuthDomainByValue(authDomain);
+  public OAuth2Provider getLoginProvider() {
+    String loginProviderStr = (String) session.getAttribute(LOGIN_PROVIDER_ID.get());
+    return OAuth2Provider.valueOf(loginProviderStr);
+  }
+  
+  /**
+   * Store Person's Login Provider in session.
+   */
+  public void setLoginProvider(OAuth2Provider provider) {
+    session.setAttribute(LOGIN_PROVIDER_ID.get(), provider.name());
   }
 
   /**
-   * Get AuthDomain for Current Logged in user from Session.This should be called only when user is
-   * Logged in.
-   * 
-   * TODO(arjuns) : Find alternatvie for AuthDomain.
+   * Get Person's email provided by LoginProvider from Session.
    * 
    * @return
    */
-  public void setAuthDomain(OpenIdAuthDomain domain) {
-    checkNotNull(domain);
-    session.setAttribute(AUTH_DOMAIN.get(), domain.get());
-  }
-
-  /**
-   * Get User Email from Session.
-   * 
-   * TODO(arjuns): Rename this method to getEmail.
-   * 
-   * @return
-   */
-  public String getGaeEmail() {
-    String email = (String) session.getAttribute(RequestParmKeyEnum.GAE_USER_EMAIL.get());
+  public String getLoginProviderUserEmail() {
+    String email = (String) session.getAttribute(RequestParmKeyEnum.LOGIN_PROVIDER_USER_EMAIL.get());
     return checkEmail(email);
   }
 
   /**
-   * Set User Email from Session.
-   * TODO(arjuns): Rename this method to setEmail.
+   * Store Person's email in sessin.
+   * 
    * @return
    */
-  public void setUserEmail(String email) {
-    session.setAttribute(GAE_USER_EMAIL.get(), checkEmail(email));
+  public void setProviderUserEmail(String email) {
+    session.setAttribute(LOGIN_PROVIDER_USER_EMAIL.get(), checkEmail(email));
   }
 
   /**
-   * Get GaeUserId from Session.
+   * Get Person's UserId provided by LoginProvider from Session.
    * 
-   * @deprecated GaesUserId should not be used any more. Instead use {@link #getPersonId()}
    * @return
    */
-  @Deprecated
-  public String getGaeUserId() {
-    String userId = (String) session.getAttribute(GAE_USER_ID.get());
+  public String getLoginProviderUserId() {
+    String userId = (String) session.getAttribute(LOGIN_PROVIDER_USER_ID.get());
     return checkNotBlank(userId);
   }
 
   /**
-   * Set GaeUserId from Session.
-   * @deprecated UserId should not be used any more. Instead use {@link #setPersonId(Long)}
+   * Store Person's UserId provided by LoginProvider in session.
+   * 
    * @return
    */
-  @Deprecated
-  public void setGaeUserId(String id) {
-    session.setAttribute(GAE_USER_ID.get(), checkNotBlank(id));
+  public void setLoginProviderUserId(String id) {
+    session.setAttribute(LOGIN_PROVIDER_USER_ID.get(), checkNotBlank(id));
   }
 
   /**
@@ -131,7 +114,7 @@ public class SessionManager {
   }
 
   /**
-   * Set PersonId to Session.
+   * Store PersonId in Session.
    * 
    * @return
    */

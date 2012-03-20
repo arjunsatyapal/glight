@@ -16,12 +16,11 @@
 package com.google.light.server.utils;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.light.server.constants.RequestParmKeyEnum.GAE_USER_EMAIL;
-import static com.google.light.server.constants.RequestParmKeyEnum.GAE_USER_ID;
-import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;
+import com.google.light.server.constants.OAuth2Provider;
+import com.google.light.server.constants.RequestParmKeyEnum;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -58,30 +57,36 @@ public class LightUtils {
     return new DateTime(instantInMillis, DateTimeZone.forID("PST8PDT"));
   }
 
-  public static void prepareSession(HttpSession session, String gaeUserId, String gaeUserEmail) {
-    logger.info("Prepairing session with gaseUserId[" + gaeUserId + "], gaseUserEmail["
-        + gaeUserEmail + "].");
-    session.setAttribute(GAE_USER_ID.get(), gaeUserId);
-    session.setAttribute(GAE_USER_EMAIL.get(), gaeUserEmail);
+  // TODO(arjuns): Update test.
+  // TODO(arjuns): Abstract out common userInfo.
+  // TODO(arjuns): Add token expiry time here.
+  public static void prepareSession(HttpSession session, OAuth2Provider loginProvider,
+      String providerUserId, String providerUserEmail) {
+    logger.info("Prepairing session with provider[" + loginProvider 
+        + ", providerUserId[" + providerUserId
+        + "], providerUserEmail[" + providerUserEmail + "].");
+    session.setAttribute(RequestParmKeyEnum.LOGIN_PROVIDER_ID.get(), loginProvider.name());
+    session.setAttribute(RequestParmKeyEnum.LOGIN_PROVIDER_USER_ID.get(), providerUserId);
+    session.setAttribute(RequestParmKeyEnum.LOGIN_PROVIDER_USER_EMAIL.get(), providerUserEmail);
   }
-  
+
   public static void appendSessionData(StringBuilder builder, HttpSession session) {
-    String testGaeUserId = null;
-    String testGaeUserEmail = null;
-    appendSectionHeader(builder, "Session Details = " + false);
-    if (session.isNew()) {
-      session.invalidate();
+    appendSectionHeader(builder, "Session Details : ");
+    if (session == null) {
       appendKeyValue(builder, "status", "no session found.");
       return;
     } else {
       appendKeyValue(builder, "status", "session found.");
     }
 
-    testGaeUserId = checkNotBlank((String) session.getAttribute(GAE_USER_ID.get()));
-    testGaeUserEmail = checkNotBlank((String) session.getAttribute(GAE_USER_EMAIL.get()));
+    @SuppressWarnings("rawtypes")
+    Enumeration attrNames = session.getAttributeNames();
 
-    appendKeyValue(builder, "testGaeUserId", testGaeUserId);
-    appendKeyValue(builder, "testGaeUserEmail", testGaeUserEmail);
+    while (attrNames.hasMoreElements()) {
+      Object currAttrName = attrNames.nextElement();
+      appendKeyValue(builder, currAttrName.toString(),
+          session.getAttribute(currAttrName.toString()));
+    }
 
     appendKeyValue(builder, "creationTimeInMillis", session.getCreationTime());
     appendKeyValue(builder, "creationTime", getPST8PDTime(session.getCreationTime()));

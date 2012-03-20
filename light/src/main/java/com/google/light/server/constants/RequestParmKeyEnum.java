@@ -25,13 +25,16 @@ import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
  * @author Arjun Satyapal
  */
 public enum RequestParmKeyEnum {
-  AUTH_DOMAIN("auth_domain", false),
+  // TODO(arjuns): Add cateogry to differentiate on what goes in Sessino and what comes in URL.
+  LOGIN_PROVIDER_ID("login_provider_id", true),
+  LOGIN_PROVIDER_USER_ID("login_provider_user_id", true),
+  LOGIN_PROVIDER_USER_EMAIL("login_provider_user_email", true),
   
-  // TODO(arjuns) : Rename this to Email.
-  GAE_USER_EMAIL("gae_user_email", false),
-  @Deprecated /*gae_user_id should not be used any more.*/
-  GAE_USER_ID("gae_user_id", false),
-  PERSON_ID("person_id", false);
+  PERSON_ID("person_id", true),
+  
+  OAUTH2_PROVIDER_NAME("oauth2_provider_name", true),
+  CLIENT_ID("client_id", true),
+  CLIENT_SECRET("client_secret", true);
   
   private String key;
   private boolean allowedInProd;

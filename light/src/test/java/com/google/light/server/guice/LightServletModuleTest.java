@@ -22,13 +22,14 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
+import com.google.light.server.constants.OAuth2Provider;
+
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.servlet.GuiceFilter;
 import com.google.inject.servlet.ServletModule;
 import com.google.light.server.constants.LightAppIdEnum;
-import com.google.light.server.constants.OpenIdAuthDomain;
-import com.google.light.server.guice.modules.BaseGuiceModule;
+import com.google.light.server.guice.modules.ProdModule;
 import com.google.light.testingutils.GaeTestingUtils;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletContext;
@@ -42,14 +43,14 @@ import org.junit.Test;
  * 
  * @author Arjun Satyapal
  */
-@SuppressWarnings("deprecation")
 public class LightServletModuleTest {
   protected static GaeTestingUtils gaeTestingUtils = null;
 
   @BeforeClass
   public static void gaeSetUp() {
+    // Deliberately creating PROD Env.
     gaeTestingUtils =
-        new GaeTestingUtils(LightAppIdEnum.TEST, OpenIdAuthDomain.GOOGLE.get(), getRandomEmail(),
+        new GaeTestingUtils(LightAppIdEnum.PROD, OAuth2Provider.GOOGLE_LOGIN, getRandomEmail(),
             getRandomFederatedId(), true /* isFederatedUser */, getRandomUserId(),
             true /* isUserLoggedIn */, false /* isGaeAdmin */);
     gaeTestingUtils.setUp();
@@ -71,7 +72,7 @@ public class LightServletModuleTest {
   @Test
   public void test_ensureBindingPossible() throws Exception {
     Injector injector = Guice.createInjector(
-        new BaseGuiceModule(){} /*for bindings on which servlets are dependent*/, 
+        new ProdModule() /*for bindings on which servlets are dependent*/, 
         new LightServletModule());
     GuiceFilter filter = injector.getInstance(GuiceFilter.class);
     FilterConfig filterConfig = mock(FilterConfig.class);

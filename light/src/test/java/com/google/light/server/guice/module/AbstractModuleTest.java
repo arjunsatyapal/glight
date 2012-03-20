@@ -20,7 +20,7 @@ import static com.google.light.testingutils.TestingUtils.getRandomFederatedId;
 import static com.google.light.testingutils.TestingUtils.getRandomUserId;
 
 import com.google.light.server.constants.LightAppIdEnum;
-import com.google.light.server.constants.OpenIdAuthDomain;
+import com.google.light.server.constants.OAuth2Provider;
 import com.google.light.testingutils.GaeTestingUtils;
 import org.junit.Test;
 
@@ -29,13 +29,12 @@ import org.junit.Test;
  * 
  * @author Arjun Satyapal
  */
-@SuppressWarnings("deprecation")
 public abstract class AbstractModuleTest {
   protected GaeTestingUtils gaeTestingUtils = null;
 
   public void gaeSetUp(LightAppIdEnum env) {
     gaeTestingUtils =
-        new GaeTestingUtils(env, OpenIdAuthDomain.GOOGLE.get(), getRandomEmail(),
+        new GaeTestingUtils(env, OAuth2Provider.GOOGLE_LOGIN, getRandomEmail(),
             getRandomFederatedId(), true /* isFederatedUser */, getRandomUserId(), 
             true /* isUserLoggedIn */, false /* isGaeAdmin */);
     gaeTestingUtils.setUp();
