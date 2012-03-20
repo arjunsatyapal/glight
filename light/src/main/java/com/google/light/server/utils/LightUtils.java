@@ -19,14 +19,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.constants.RequestParmKeyEnum.GAE_USER_EMAIL;
 import static com.google.light.server.constants.RequestParmKeyEnum.GAE_USER_ID;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
-import com.google.light.server.exception.unchecked.httpexception.PersonLoginRequiredException;
-import java.util.Enumeration;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Enumeration;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpSession;
 import org.joda.time.DateTime;
@@ -69,10 +68,13 @@ public class LightUtils {
   public static void appendSessionData(StringBuilder builder, HttpSession session) {
     String testGaeUserId = null;
     String testGaeUserEmail = null;
-
+    appendSectionHeader(builder, "Session Details = " + false);
     if (session.isNew()) {
       session.invalidate();
-      throw new PersonLoginRequiredException("First create a session.");
+      appendKeyValue(builder, "status", "no session found.");
+      return;
+    } else {
+      appendKeyValue(builder, "status", "session found.");
     }
 
     testGaeUserId = checkNotBlank((String) session.getAttribute(GAE_USER_ID.get()));

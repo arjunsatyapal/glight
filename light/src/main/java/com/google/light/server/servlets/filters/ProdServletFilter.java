@@ -15,13 +15,10 @@
  */
 package com.google.light.server.servlets.filters;
 
-import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.light.server.exception.unchecked.FilterInstanceBindingException;
-import com.google.light.server.servlets.path.ServletPathEnum;
 import com.google.light.server.utils.GaeUtils;
 import java.io.IOException;
-import java.util.Set;
 import java.util.logging.Logger;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -54,17 +51,5 @@ public class ProdServletFilter extends AbstractLightFilter {
     // login flow, it may be an issue. Will fix that once we have some more infrastructure around
     // login.
     handleFilterChain(request, response, filterChain);
-  }
-  
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  Set<ServletPathEnum> getSkipServletSet() {
-    Set<ServletPathEnum> set = Sets.newHashSet(
-        ServletPathEnum.LOGIN // Login Servlet should 
-        );
-    
-    return set;
   }
 }
