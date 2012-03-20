@@ -21,7 +21,7 @@ import com.google.light.server.constants.OAuth2Provider;
 import com.google.light.server.persistence.entity.admin.OAuth2ConsumerCredentialEntity;
 
 /**
- * 
+ * Manager class for managing Admin Operations.
  * 
  * TODO(arjuns): Add test for this class.
  * 
