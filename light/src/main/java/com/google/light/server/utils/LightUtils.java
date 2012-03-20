@@ -16,6 +16,7 @@
 package com.google.light.server.utils;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.light.server.constants.LightConstants.SESSION_MAX_INACTIVITY_PERIOD;
 import static com.google.light.server.constants.RequestParmKeyEnum.LOGIN_PROVIDER_ID;
 import static com.google.light.server.constants.RequestParmKeyEnum.LOGIN_PROVIDER_USER_EMAIL;
 import static com.google.light.server.constants.RequestParmKeyEnum.LOGIN_PROVIDER_USER_ID;
@@ -23,7 +24,6 @@ import static com.google.light.server.constants.RequestParmKeyEnum.LOGIN_PROVIDE
 import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;
 import com.google.light.server.constants.OAuth2Provider;
-import com.google.light.server.constants.RequestParmKeyEnum;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -38,7 +38,6 @@ import org.joda.time.DateTimeZone;
  * 
  * @author Arjun Satyapal
  */
-@SuppressWarnings("deprecation")
 public class LightUtils {
   private static final Logger logger = Logger.getLogger(LightUtils.class.getName());
 
@@ -60,17 +59,19 @@ public class LightUtils {
     return new DateTime(instantInMillis, DateTimeZone.forID("PST8PDT"));
   }
 
-  // TODO(arjuns): Update test.
   // TODO(arjuns): Abstract out common userInfo.
   // TODO(arjuns): Add token expiry time here.
   public static void prepareSession(HttpSession session, OAuth2Provider loginProvider,
       String providerUserId, String providerUserEmail) {
-    logger.info("Prepairing session with provider[" + loginProvider 
-        + ", providerUserId[" + providerUserId
-        + "], providerUserEmail[" + providerUserEmail + "].");
-    session.setAttribute(LOGIN_PROVIDER_ID.get(), loginProvider.name());
-    session.setAttribute(LOGIN_PROVIDER_USER_ID.get(), providerUserId);
-    session.setAttribute(LOGIN_PROVIDER_USER_EMAIL.get(), providerUserEmail);
+    synchronized (session) {
+      logger.info("Prepairing session with provider[" + loginProvider 
+          + ", providerUserId[" + providerUserId
+          + "], providerUserEmail[" + providerUserEmail + "].");
+      session.setAttribute(LOGIN_PROVIDER_ID.get(), loginProvider.name());
+      session.setAttribute(LOGIN_PROVIDER_USER_ID.get(), providerUserId);
+      session.setAttribute(LOGIN_PROVIDER_USER_EMAIL.get(), providerUserEmail);
+      session.setMaxInactiveInterval(SESSION_MAX_INACTIVITY_PERIOD);
+    }
   }
 
   public static void appendSessionData(StringBuilder builder, HttpSession session) {
@@ -99,7 +100,6 @@ public class LightUtils {
         getPST8PDTime(session.getLastAccessedTime()));
     appendKeyValue(builder, "maxInactiveIntervalInSec", session.getMaxInactiveInterval());
     appendKeyValue(builder, "servletContext", session.getServletContext());
-    appendKeyValue(builder, "sessionContext", session.getSessionContext());
   }
 
   // Utility class.

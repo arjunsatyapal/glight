@@ -17,15 +17,14 @@ package com.google.light.server.servlets.test;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.light.server.constants.StringConstants.CLIENT_ID;
-import static com.google.light.server.constants.StringConstants.CLIENT_SECRET;
+import static com.google.light.server.constants.RequestParmKeyEnum.CLIENT_ID;
+import static com.google.light.server.constants.RequestParmKeyEnum.CLIENT_SECRET;
 import static com.google.light.server.utils.GaeUtils.getAppId;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
 import com.google.common.io.Files;
 import com.google.inject.Inject;
 import com.google.light.server.constants.OAuth2Provider;
-import com.google.light.server.constants.StringConstants;
 import com.google.light.server.manager.interfaces.OAuth2ConsumerManager;
 import com.google.light.server.utils.GaeUtils;
 import java.io.BufferedReader;
@@ -116,13 +115,13 @@ public class TestOAuth2ConsumerManagerImpl implements OAuth2ConsumerManager {
       throws IOException {
     logger.info("Creating credential file for : " + oauth2Provider2.getProviderName());
     this.clientId =
-        readLineFromConsole("Enter " + CLIENT_ID + " for " + getAppId() + " : ");
+        readLineFromConsole("Enter " + CLIENT_ID.get()+ " for " + getAppId() + " : ");
     this.clientSecret =
-        readLineFromConsole("Enter " + CLIENT_SECRET + " for " + getAppId() + " : ");
+        readLineFromConsole("Enter " + CLIENT_SECRET.get() + " for " + getAppId() + " : ");
 
     Properties properties = new Properties();
-    properties.setProperty(CLIENT_ID, clientId);
-    properties.setProperty(CLIENT_SECRET, clientSecret);
+    properties.setProperty(CLIENT_ID.get(), clientId);
+    properties.setProperty(CLIENT_SECRET.get(), clientSecret);
     StringBuilder builder =
         new StringBuilder("Appengine does not allow creating of files even on devserver. " +
             "So Create File[" + consumerCredentialPath
@@ -152,8 +151,8 @@ public class TestOAuth2ConsumerManagerImpl implements OAuth2ConsumerManager {
     Properties properties = new Properties();
     properties.load(new FileInputStream(consumerCredentialPath));
 
-    this.clientId = checkNotBlank(properties.getProperty(StringConstants.CLIENT_ID));
-    this.clientSecret = checkNotBlank(properties.getProperty(StringConstants.CLIENT_SECRET));
+    this.clientId = checkNotBlank(properties.getProperty(CLIENT_ID.get()));
+    this.clientSecret = checkNotBlank(properties.getProperty(CLIENT_SECRET.get()));
     return true;
   }
 

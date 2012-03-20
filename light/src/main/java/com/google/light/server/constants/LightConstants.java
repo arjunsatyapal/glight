@@ -16,17 +16,10 @@
 package com.google.light.server.constants;
 
 /**
- * Few String constants.
- * 
- * TODO(arjuns): See if this is needed later.
+ * Miscellaneous constants for Light.
  * 
  * @author Arjun Satyapal
  */
-public class StringConstants {
-  // Denotes key for OAuth2 Consumer ClientId.
-  public static String CLIENT_ID = "client_id";
-
-  // Denotes key for OAuth2 Consumer ClientSecret..
-  public static String CLIENT_SECRET = "client_secret";
-  
+public class LightConstants {
+  public static int SESSION_MAX_INACTIVITY_PERIOD = 3600;
 }
