@@ -20,6 +20,8 @@ import static com.google.light.testingutils.TestingUtils.getResourceAsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import org.apache.commons.codec.binary.StringUtils;
+
 import org.junit.Ignore;
 
 import com.google.api.client.http.GenericUrl;
@@ -27,7 +29,6 @@ import com.google.api.client.http.HttpHeaders;
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.InputStreamContent;
-import com.google.api.client.util.Strings;
 import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;
 import com.google.light.server.constants.ContentTypeEnum;
@@ -144,7 +145,7 @@ public class PersonServletITCase extends AbstractLightIntegrationTest {
     String jsonReqString = getResourceAsString(CREATE_PERSON.getJsonReqPath());
     GenericUrl requestUrl = new GenericUrl(serverUrl + ServletPathEnum.PERSON.get());
 
-    InputStream is = new ByteArrayInputStream(Strings.toBytesUtf8(jsonReqString));
+    InputStream is = new ByteArrayInputStream(StringUtils.getBytesUtf8(jsonReqString));
     InputStreamContent isContent =
         new InputStreamContent(ContentTypeEnum.APPLICATION_JSON.get(), is);
     isContent.setLength(jsonReqString.length());
@@ -169,7 +170,7 @@ public class PersonServletITCase extends AbstractLightIntegrationTest {
     String xmlReqString = getResourceAsString(CREATE_PERSON.getXmlReqPath());
     GenericUrl requestUrl = new GenericUrl(serverUrl + ServletPathEnum.PERSON.get());
 
-    InputStream is = new ByteArrayInputStream(Strings.toBytesUtf8(xmlReqString));
+    InputStream is = new ByteArrayInputStream(StringUtils.getBytesUtf8(xmlReqString));
     InputStreamContent isContent =
         new InputStreamContent(ContentTypeEnum.APPLICATION_XML.get(), is);
     isContent.setLength(xmlReqString.length());

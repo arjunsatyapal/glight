@@ -25,6 +25,7 @@ import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
  * @deprecated
  * @author Arjun Satyapal
  */
+@SuppressWarnings("dep-ann")
 public enum OpenIdAuthDomain {
   GOOGLE("gmail.com");
   

@@ -35,7 +35,7 @@ import com.googlecode.objectify.Objectify;
  * 
  * D : DTO for P.
  * P : PersistenceEntity Type.
- * I : Type of Id used by T.
+ * I : Type of Id used by P.
  * 
  * @author Arjun Satyapal
  */

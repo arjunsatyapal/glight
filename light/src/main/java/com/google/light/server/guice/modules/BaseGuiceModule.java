@@ -15,8 +15,17 @@
  */
 package com.google.light.server.guice.modules;
 
+
+import com.google.api.client.http.HttpTransport;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.jackson.JacksonFactory;
 import com.google.inject.AbstractModule;
+import com.google.inject.Provides;
 import com.google.light.server.annotations.AnotHttpSession;
+import com.google.light.server.manager.implementation.AdminOperationManagerImpl;
+import com.google.light.server.manager.interfaces.AdminOperationManager;
+import java.util.logging.Logger;
 import javax.servlet.http.HttpSession;
 
 /**
@@ -36,11 +45,31 @@ import javax.servlet.http.HttpSession;
  * @author Arjun Satyapal
  */
 public abstract class BaseGuiceModule extends AbstractModule {
+  private static final Logger logger = Logger.getLogger(BaseGuiceModule.class.getName());
 
   @Override
   protected void configure() {
+    requireBinding(HttpTransport.class);
+      
+    
     bind(HttpSession.class)
         .annotatedWith(AnotHttpSession.class)
         .to(HttpSession.class);
+    
+    bind(AdminOperationManager.class)
+      .to(AdminOperationManagerImpl.class);
+  }
+  
+  // TODO(arjuns): Following bindings are global bindings. Need to be fixed.
+  @Provides
+  public HttpTransport provideHttpTransport() {
+    logger.info("Creating new HttpTransport");
+    return new NetHttpTransport();
+  }
+  
+  @Provides
+  public JsonFactory provideJsonFactory() {
+    logger.info("Creating new JsonFactory");
+    return new JacksonFactory();
   }
 }

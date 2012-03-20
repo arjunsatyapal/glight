@@ -15,7 +15,7 @@
  */
 package com.google.light.server.constants;
 
-import com.google.light.server.utils.LightPreconditions;
+import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
 /**
  * Enum to contain mapping between json resources and corresponding xml resources.
@@ -36,10 +36,10 @@ public enum TestResourceMappings {
 
   private TestResourceMappings(String jsonReqPath, String jsonResPath,
       String xmlReqPath, String xmlResPath) {
-    this.jsonReqPath = LightPreconditions.checkNotBlank(jsonReqPath);
-    this.jsonResPath = LightPreconditions.checkNotBlank(jsonResPath);
-    this.xmlReqPath = LightPreconditions.checkNotBlank(xmlReqPath);
-    this.xmlResPath = LightPreconditions.checkNotBlank(xmlResPath);
+    this.jsonReqPath = checkNotBlank(jsonReqPath);
+    this.jsonResPath = checkNotBlank(jsonResPath);
+    this.xmlReqPath = checkNotBlank(xmlReqPath);
+    this.xmlResPath = checkNotBlank(xmlResPath);
   }
 
   public String getJsonReqPath() {

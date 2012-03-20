@@ -26,7 +26,10 @@ import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
  */
 public enum RequestParmKeyEnum {
   AUTH_DOMAIN("auth_domain", false),
+  
+  // TODO(arjuns) : Rename this to Email.
   GAE_USER_EMAIL("gae_user_email", false),
+  @Deprecated /*gae_user_id should not be used any more.*/
   GAE_USER_ID("gae_user_id", false),
   PERSON_ID("person_id", false);
   

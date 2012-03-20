@@ -36,22 +36,29 @@ import java.util.List;
 public class PersonDao extends AbstractBasicDao<PersonDto, PersonEntity, Long> {
   private static final Logger logger = Logger.getLogger(PersonDao.class.getName());
 
+  static {
+    ObjectifyService.register(PersonEntity.class);
+  }
+
   @Inject
   public PersonDao() {
     super(PersonEntity.class, Long.class);
   }
 
-  static {
-    ObjectifyService.register(PersonEntity.class);
-  }
-
+  /**
+   * Fetch PersonEntity by Email. The underlying assumption is that only one Person Exists with an
+   * email.
+   * 
+   * @param email
+   * @return
+   */
   public PersonEntity getByEmail(String email) {
     Objectify ofy = ObjectifyUtils.nonTransaction();
 
-    Query<PersonEntity> filter =
+    Query<PersonEntity> query =
         ofy.query(PersonEntity.class).filter(PersonEntity.OFY_EMAIL_QUERY_STRING, email);
 
-    return assertAndReturnUniqueUserEntity(email, filter);
+    return assertAndReturnUniqueUserEntity(email, query);
   }
 
   /**
@@ -74,16 +81,16 @@ public class PersonDao extends AbstractBasicDao<PersonDto, PersonEntity, Long> {
     if (entity.getId() == null) {
       isCreate = false;
     }
-      
+
     PersonEntity returnEntity = super.put(txn, entity);
     String returnMsg = "";
-    
+
     if (isCreate) {
       returnMsg = "Created PersonEntity[" + returnEntity.getId() + "].";
     } else {
       returnMsg = "Updated PersonEntity[" + returnEntity.getId() + "].";
     }
-    
+
     return logAndReturn(logger, returnEntity, returnMsg);
   }
 

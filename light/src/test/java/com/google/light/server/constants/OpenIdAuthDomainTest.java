@@ -29,6 +29,7 @@ import org.junit.Test;
  * @deprecated
  * @author Arjun Satyapal
  */
+@Deprecated
 public class OpenIdAuthDomainTest implements EnumTestInterface {
 
   /**

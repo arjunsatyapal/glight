@@ -27,7 +27,7 @@ import javax.servlet.Filter;
  * @author Arjun Satyapal
  */
 public enum FilterPathEnum {
-  API(ProdServletFilter.class, Lists.newArrayList("/api/*", "/admin/*")),
+  API(ProdServletFilter.class, Lists.newArrayList("/api/*", "/admin/*", "/login/*")),
   TEST(TestServletFilter.class, Lists.newArrayList("/*"));
   
   private Class<? extends Filter> clazz;

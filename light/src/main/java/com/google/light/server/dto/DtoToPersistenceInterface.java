@@ -15,64 +15,24 @@
  */
 package com.google.light.server.dto;
 
-import java.io.Serializable;
 
 /**
- * Light POJO which needs to be converted to and from JSON needs to implement this Interface. D :
- * DTO : Data Transfer Object which will be converted to JSON/XML depending on API. P : Persistence
- * Entity.
- * 
- * D : DTO.<br>
+ * Light POJO which needs to be converted to and from JSON needs to implement this Interface. <br>
+ * D : DTO : Data Transfer Object which will be converted to JSON/XML depending on API.<br>
  * P : Persistence Entity.
- * 
- * TODO(arjuns): Refactor this into DtoInterface, and DtoToPersistence interface.
+ * I : Type of Id used by P (Persistence Entity).
  * 
  * @author Arjun Satyapal
  */
-public interface DtoToPersistenceInterface<D, P> extends Serializable {
-
-  /**
-   * Convert DTO to JSON String.
-   */
-  public String toJson();
+public interface DtoToPersistenceInterface<D, P, I> extends DtoInterface<D> {
 
   /**
    * Convert DTO to Persistence Entity.
    * 
-   * @return
-   */
-  public P toPersistenceEntity(Long id);
-
-  /**
-   * Ensure that DTO is valid. TODO(arjuns): Throw a checked exception. TODO(arjuns) : Sync with
-   * Walter on refactoring. Issue : 2003.
+   * T : Type of Id. This should be either Long or String as Objectify supports
+   * only those type of Ids.
    * 
    * @return
    */
-  public D validate();
-
-  /**
-   * Convert DTO to XML.
-   */
-  public String toXml();
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public boolean equals(Object obj);
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public int hashCode();
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @return
-   */
-  @Override
-  public String toString();
+  public P toPersistenceEntity(I id);
 }

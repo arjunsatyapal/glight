@@ -17,6 +17,12 @@ package com.google.light.server.servlets.filters;
 
 import static com.google.light.server.utils.GuiceUtils.seedEntityInRequestScope;
 
+import java.io.IOException;
+import javax.servlet.ServletException;
+
+import com.google.light.server.servlets.path.ServletPathEnum;
+import java.util.Set;
+
 import com.google.common.base.Throwables;
 import com.google.light.server.annotations.AnotHttpSession;
 import com.google.light.server.exception.unchecked.httpexception.PersonLoginRequiredException;
@@ -66,6 +72,34 @@ public abstract class AbstractLightFilter implements Filter {
     }
   }
 
+  abstract Set<ServletPathEnum> getSkipServletSet();
+  
+  /**
+   * Tells whether parent filter should be ignored and instead directly go to the filter
+   * chain. Since TestFilter covers all the URLs, this method will be used to exclude few
+   * Servlets from TestServletFilter.
+   */
+  boolean skipSessionRequirements(Set<ServletPathEnum> ignoreSet, String requestUri) {
+    for (ServletPathEnum currEnum  : ignoreSet) {
+      if (requestUri.startsWith(currEnum.get())) {
+        return true;
+      }
+    }
+    
+    return false;
+  }
+  
+  void handleFilterChain(ServletRequest request, ServletResponse response, FilterChain filterChain)
+      throws IOException, ServletException {
+    HttpServletRequest req = (HttpServletRequest) request;
+    
+    if (skipSessionRequirements(getSkipServletSet(), req.getRequestURI())) {
+      filterChain.doFilter(request, response);
+    } else {
+      doFilter(req.getSession(false), req, response, filterChain);
+    }
+  }
+  
   public FilterConfig getFilterConfig() {
     return filterConfig;
   }

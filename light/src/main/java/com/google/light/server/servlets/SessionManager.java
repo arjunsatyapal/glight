@@ -37,20 +37,23 @@ import javax.servlet.http.HttpSession;
 
 /**
  * Class to wrap functions around sessions. This class should be injected in LightScope.
- * 
+ * TODO(arjuns): Update tests.
  * @author Arjun Satyapal
  */
+@SuppressWarnings("deprecation")
 public class SessionManager {
   private HttpSession session;
 
   @Inject
   public SessionManager(@AnotHttpSession HttpSession session) {
-    this.session = checkNotNull(session);
+    this.session = session;
   }
 
   /**
    * Get AuthDomain for user from Session. TODO(arjuns): Figure out what needs to be set for
    * Prod/test.
+   * 
+   * TODO(arjuns): Find alternative for AuthDomain.
    * 
    * @return
    */
@@ -64,6 +67,8 @@ public class SessionManager {
    * Get AuthDomain for Current Logged in user from Session.This should be called only when user is
    * Logged in.
    * 
+   * TODO(arjuns) : Find alternatvie for AuthDomain.
+   * 
    * @return
    */
   public void setAuthDomain(OpenIdAuthDomain domain) {
@@ -74,6 +79,8 @@ public class SessionManager {
   /**
    * Get User Email from Session.
    * 
+   * TODO(arjuns): Rename this method to getEmail.
+   * 
    * @return
    */
   public String getGaeEmail() {
@@ -83,7 +90,7 @@ public class SessionManager {
 
   /**
    * Set User Email from Session.
-   * 
+   * TODO(arjuns): Rename this method to setEmail.
    * @return
    */
   public void setUserEmail(String email) {
@@ -93,8 +100,10 @@ public class SessionManager {
   /**
    * Get GaeUserId from Session.
    * 
+   * @deprecated GaesUserId should not be used any more. Instead use {@link #getPersonId()}
    * @return
    */
+  @Deprecated
   public String getGaeUserId() {
     String userId = (String) session.getAttribute(GAE_USER_ID.get());
     return checkNotBlank(userId);
@@ -102,9 +111,10 @@ public class SessionManager {
 
   /**
    * Set GaeUserId from Session.
-   * 
+   * @deprecated UserId should not be used any more. Instead use {@link #setPersonId(Long)}
    * @return
    */
+  @Deprecated
   public void setGaeUserId(String id) {
     session.setAttribute(GAE_USER_ID.get(), checkNotBlank(id));
   }
@@ -115,6 +125,7 @@ public class SessionManager {
    * @return
    */
   public Long getPersonId() {
+    checkPersonLoggedIn();
     Long personId = (Long) session.getAttribute(PERSON_ID.get());
     return checkPersonId(personId);
   }

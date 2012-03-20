@@ -45,6 +45,7 @@ import org.junit.Test;
  * 
  * @author Arjun Satyapal
  */
+@SuppressWarnings("deprecation")
 public class PersonManagerImplTest extends AbstractLightServerTest {
 
   private PersonManager personManager;
