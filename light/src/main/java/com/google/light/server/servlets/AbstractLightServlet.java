@@ -18,7 +18,6 @@ package com.google.light.server.servlets;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.inject.Inject;
-
 import com.google.inject.Injector;
 import com.google.light.server.guice.providers.InstanceProvider;
 import javax.servlet.http.HttpServlet;
@@ -26,9 +25,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * Base servlets for all Light Servlets. Essentially it forces all the derived servlets
- * to implement this methods. This ensures that any of the deriving classes dont miss any of these
- * REST methods.
+ * Base servlets for all Light Servlets. Essentially it forces all the derived servlets to implement
+ * this methods. This ensures that any of the deriving classes does not miss any of these REST 
+ * methods. NOTE :<br>
+ * * If Child class does not support a method, it should throw 
+ * {@link UnsupportedOperationException}.
  * 
  * @author Arjun Satyapal
  */
@@ -37,16 +38,29 @@ public abstract class AbstractLightServlet extends HttpServlet {
   @Inject
   private Injector injector;
   private InstanceProvider instanceProvider;
-  
+
   protected Injector getInjector() {
     return checkNotNull(injector);
   }
-  
+
   protected InstanceProvider getInstanceProvider() {
     if (instanceProvider == null) {
       this.instanceProvider = checkNotNull(injector.getInstance(InstanceProvider.class));
     }
     return instanceProvider;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void service(HttpServletRequest request, HttpServletResponse response) {
+    try {
+      super.service(request, response);
+    } catch (Exception e) {
+      // TODO(arjuns): Auto-generated catch block
+      throw new RuntimeException(e);
+    }
   }
 
   /**
@@ -63,7 +77,8 @@ public abstract class AbstractLightServlet extends HttpServlet {
 
   /**
    * {@inheritDoc}
-   * @return 
+   * 
+   * @return
    */
   @Override
   public abstract long getLastModified(HttpServletRequest request);

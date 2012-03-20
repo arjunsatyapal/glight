@@ -37,6 +37,16 @@ import javax.servlet.http.HttpServletResponse;
  */
 @SuppressWarnings({ "deprecation", "serial" })
 public class PersonServlet extends AbstractLightServlet {
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void service(HttpServletRequest request, HttpServletResponse response) {
+    getInstanceProvider().getSessionManager().checkPersonLoggedIn();
+    super.service(request, response);
+  }
+
   /**
    * {@inheritDoc}
    */

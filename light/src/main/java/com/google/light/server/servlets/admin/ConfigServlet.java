@@ -15,6 +15,7 @@
  */
 package com.google.light.server.servlets.admin;
 
+import static com.google.light.server.utils.LightPreconditions.checkPersonIsGaeAdmin;
 import static com.google.light.server.utils.LightUtils.appendKeyValue;
 import static com.google.light.server.utils.LightUtils.appendSectionHeader;
 import static com.google.light.server.utils.LightUtils.appendSessionData;
@@ -23,7 +24,6 @@ import static com.google.light.server.utils.LightUtils.getPST8PDTime;
 import com.google.appengine.api.utils.SystemProperty;
 import com.google.apphosting.api.ApiProxy;
 import com.google.apphosting.api.ApiProxy.Environment;
-import com.google.inject.Inject;
 import com.google.light.server.constants.ContentTypeEnum;
 import com.google.light.server.servlets.AbstractLightServlet;
 import com.google.light.server.utils.GaeUtils;
@@ -43,9 +43,13 @@ import javax.servlet.http.HttpSession;
 @SuppressWarnings("serial")
 public class ConfigServlet extends AbstractLightServlet {
   
-
-  @Inject
-  public ConfigServlet() {
+  /** 
+   * {@inheritDoc}
+   */
+  @Override
+  public void service(HttpServletRequest request, HttpServletResponse response) {
+   checkPersonIsGaeAdmin();
+   super.service(request, response);
   }
   
   @SuppressWarnings("deprecation")
