@@ -56,6 +56,7 @@ public abstract class BaseGuiceModule extends AbstractModule {
     requireBinding(HttpTransport.class);
     requireBinding(getKeyForScopeSeed(OAuth2ConsumerManager.class, AnotOAuth2ConsumerGoogleLogin.class));
     
+    // TODO(arjuns): Can this be removed.
     bind(OAuth2ConsumerCredentialDao.class);
     
     bind(AdminOperationManager.class)

@@ -15,15 +15,16 @@
  */
 package com.google.light.server.guice.modules;
 
+import com.google.light.server.annotations.AnotOAuth2ConsumerGoogleLogin;
 import com.google.light.server.exception.unchecked.ServerConfigurationException;
+import com.google.light.server.manager.implementation.oauth2.consumer.GoogleOAuth2ConsumerManagerImpl;
+import com.google.light.server.manager.interfaces.OAuth2ConsumerManager;
 import com.google.light.server.utils.GaeUtils;
 
 /**
  * Production Guice module for Production Environment.
  * 
  * Note : All bindings should be in request scoped.
- * 
- * TODO(arjuns): Add test for this.
  * 
  * @author Arjun Satyapal
  */
@@ -40,5 +41,8 @@ public class ProdModule extends BaseGuiceModule {
     super.configure();
     
     // Add Production Environment specific bindings here.
+    bind(OAuth2ConsumerManager.class)
+      .annotatedWith(AnotOAuth2ConsumerGoogleLogin.class)
+      .to(GoogleOAuth2ConsumerManagerImpl.class);
   }
 }
