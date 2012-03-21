@@ -28,7 +28,7 @@ define({
    * </pre>
    * <p>We specify the source because some of the sources are also
    * subscribed for the same event and embedding the source in the callback
-   * arguments allows such sources to ignore their published events. 
+   * arguments allows such sources to ignore their own published events. 
    * 
    * @const
    */

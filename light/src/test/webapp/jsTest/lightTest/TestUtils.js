@@ -47,8 +47,11 @@ define(['light/views/AbstractLightView', 'dojox/json/schema', 'dojo'],
     _currentSpec: null,
     
     validateSchema: function(obj, schema) {
-      if(!jsonSchema.validate(obj, schema).valid)
-        throw new Error('Given object does not conform to schema: '+dojo.toJson(obj));
+      if(!jsonSchema.validate(obj, schema).valid) {
+        throw new Error('Given object does not conform to schema' + 
+            (schema.description ? ' ' + schema.description : '') +
+            ': '+dojo.toJson(obj));
+      }
     }
 
   };
