@@ -13,15 +13,14 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.server.servlets.misc;
+package com.google.light.server.servlets.test;
 
+import static com.google.light.server.utils.LightPreconditions.checkIsNotEnv;
 import static com.google.light.server.utils.LightUtils.appendSessionData;
 
 import com.google.light.server.constants.ContentTypeEnum;
-import com.google.light.server.exception.unchecked.FilterInstanceBindingException;
-import com.google.light.server.utils.GaeUtils;
+import com.google.light.server.constants.LightEnvEnum;
 import java.io.IOException;
-import java.util.logging.Logger;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -35,15 +34,9 @@ import javax.servlet.http.HttpSession;
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
-public class SessionServlet extends HttpServlet {
-  private static final Logger logger = Logger.getLogger(SessionServlet.class.getName());
-  
-  public SessionServlet() {
-    if (GaeUtils.isProductionServer()) {
-      String msg = "SessionServlet should not be injected for non-production environments.";
-      logger.severe(msg);
-      throw new FilterInstanceBindingException(msg);
-    }
+public class SessionInfoServlet extends HttpServlet {
+  public SessionInfoServlet() {
+    checkIsNotEnv(this, LightEnvEnum.PROD);
   }
   
   @Override

@@ -16,10 +16,13 @@
 package com.google.light.server.servlets.test;
 
 import static com.google.light.server.utils.LightPreconditions.checkEmail;
+import static com.google.light.server.utils.LightPreconditions.checkIsNotEnv;
 
 import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
+import com.google.inject.Inject;
+import com.google.light.server.constants.LightEnvEnum;
 import com.google.light.server.servlets.AbstractLightServlet;
 import java.io.IOException;
 import java.util.logging.Logger;
@@ -36,6 +39,11 @@ import javax.servlet.http.HttpServletResponse;
 @SuppressWarnings("serial")
 public class TestLogin extends AbstractLightServlet {
   private static final Logger logger = Logger.getLogger(TestLogin.class.getName());
+  
+  @Inject
+  public TestLogin() {
+    checkIsNotEnv(this, LightEnvEnum.PROD);
+  }
   
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) {

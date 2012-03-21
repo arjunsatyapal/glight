@@ -15,11 +15,12 @@
  */
 package com.google.light.server.guice.modules;
 
+import static com.google.light.server.utils.LightPreconditions.checkIsEnv;
+
 import com.google.light.server.annotations.AnotOAuth2ConsumerGoogleLogin;
-import com.google.light.server.exception.unchecked.ServerConfigurationException;
+import com.google.light.server.constants.LightEnvEnum;
 import com.google.light.server.manager.implementation.oauth2.consumer.GoogleOAuth2ConsumerManagerImpl;
 import com.google.light.server.manager.interfaces.OAuth2ConsumerManager;
-import com.google.light.server.utils.GaeUtils;
 
 /**
  * QA Guice Module for QA Environment.
@@ -30,10 +31,8 @@ import com.google.light.server.utils.GaeUtils;
  */
 public class QaModule extends BaseGuiceModule {
   public QaModule() {
-    if (!GaeUtils.isQaServer()) {
-      throw new ServerConfigurationException(
-          "QaModule should be instantiated only for QA Env.");
-    }
+    checkIsEnv(this, LightEnvEnum.QA);
+
   }
 
   @Override

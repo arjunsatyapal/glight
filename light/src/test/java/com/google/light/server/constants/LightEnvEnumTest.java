@@ -20,7 +20,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import com.google.light.server.guice.LightServletModuleTest;
+import com.google.light.testingutils.GaeTestingUtils;
+import com.google.light.testingutils.TestingUtils;
 import org.junit.Test;
 
 /**
@@ -28,8 +29,7 @@ import org.junit.Test;
  * 
  * @author Arjun Satyapal
  */
-public class LightAppIdEnumTest implements EnumTestInterface {
-
+public class LightEnvEnumTest implements EnumTestInterface {
   /**
    * {@inheritDoc}
    */
@@ -54,14 +54,18 @@ public class LightAppIdEnumTest implements EnumTestInterface {
   }
 
   /**
+   * Test for {@link LightEnvEnum#getLightEnv()}.
+   */
+  public void test_getLightEnv() {
+    for (LightEnvEnum currEnv : LightEnvEnum.values()) {
+      GaeTestingUtils gaeTestingUtils = TestingUtils.gaeSetup(currEnv);
+      assertEquals(currEnv, LightEnvEnum.getLightEnv());
+      gaeTestingUtils.tearDown();
+    }
+  }
+  
+  /**
    * Test for {@link LightEnvEnum#getLightEnvByAppId(String)}.
-   * 
-   * We are not testing {@link LightEnvEnum#getLightEnvByAppId()} directly as it involves lot of
-   * setup and teardown. In addition it depends on
-   * {@link LightEnvEnum#getLightAppIdEnumById(String)}. So no point in extra testing.
-   * 
-   * In order to be safe, its tested as part of
-   * {@link LightServletModuleTest#test_validateTestFilterBinding()}.
    */
   @Test
   public void test_getLightEnvEnumByAppId() {

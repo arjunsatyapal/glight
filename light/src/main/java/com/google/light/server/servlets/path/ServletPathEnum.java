@@ -18,11 +18,12 @@ package com.google.light.server.servlets.path;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
+import com.google.light.server.servlets.test.SessionInfoServlet;
+
 import com.google.light.server.exception.unchecked.httpexception.NotFoundException;
 import com.google.light.server.servlets.admin.ConfigServlet;
 import com.google.light.server.servlets.admin.OAuth2ConsumerCredentialServlet;
 import com.google.light.server.servlets.login.LoginServlet;
-import com.google.light.server.servlets.misc.SessionServlet;
 import com.google.light.server.servlets.oauth2.google.login.GoogleLoginCallbackServlet;
 import com.google.light.server.servlets.oauth2.google.login.GoogleLoginServlet;
 import com.google.light.server.servlets.person.PersonServlet;
@@ -64,7 +65,7 @@ public enum ServletPathEnum {
   FAKE_LOGIN(FakeLoginServlet.class, "/test/fakelogin",
              false, false, true),
 
-  SESSION(SessionServlet.class, "/test/session",
+  SESSION(SessionInfoServlet.class, "/test/session",
           true, false, true),
   TEST_HEADER(TestHeaders.class, "/test/testheader",
               false, false, true),

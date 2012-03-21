@@ -15,11 +15,12 @@
  */
 package com.google.light.server.guice.modules;
 
+import static com.google.light.server.utils.LightPreconditions.checkIsEnv;
+
 import com.google.light.server.annotations.AnotOAuth2ConsumerGoogleLogin;
-import com.google.light.server.exception.unchecked.ServerConfigurationException;
+import com.google.light.server.constants.LightEnvEnum;
 import com.google.light.server.manager.implementation.oauth2.consumer.GoogleOAuth2ConsumerManagerImpl;
 import com.google.light.server.manager.interfaces.OAuth2ConsumerManager;
-import com.google.light.server.utils.GaeUtils;
 
 /**
  * Production Guice module for Production Environment.
@@ -30,10 +31,7 @@ import com.google.light.server.utils.GaeUtils;
  */
 public class ProdModule extends BaseGuiceModule {
   public ProdModule() {
-    if (!GaeUtils.isProductionServer()) {
-      throw new ServerConfigurationException(
-          "ProdModule should be instantiated only for production Env.");
-    }
+    checkIsEnv(this, LightEnvEnum.PROD);
   }
 
   @Override

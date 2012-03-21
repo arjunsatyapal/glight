@@ -16,6 +16,7 @@
 package com.google.light.server.utils;
 
 import static com.google.light.server.utils.LightPreconditions.checkEmail;
+import static com.google.light.server.utils.LightPreconditions.checkIsEnv;
 import static com.google.light.server.utils.LightPreconditions.checkNonEmptyList;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkNull;
@@ -25,10 +26,14 @@ import static com.google.light.testingutils.TestingUtils.getUUIDString;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import com.google.light.server.exception.unchecked.BlankStringException;
-
 import com.google.common.collect.Lists;
+import com.google.light.server.constants.LightEnvEnum;
+import com.google.light.server.exception.unchecked.BlankStringException;
 import com.google.light.server.exception.unchecked.InvalidPersonIdException;
+import com.google.light.server.exception.unchecked.ServerConfigurationException;
+import com.google.light.testingutils.GaeTestingUtils;
+import com.google.light.testingutils.TestingUtils;
+import java.security.SecureRandom;
 import java.util.List;
 import org.junit.Test;
 
@@ -38,7 +43,6 @@ import org.junit.Test;
  * @author Arjun Satyapal
  */
 public class LightPreconditionsTest {
-
   /**
    * Test for {@link LightPreconditions#checkEmail(String)} Some quick tests. Though not required as
    * we are using Apache Commons Library to validate emails.
@@ -87,6 +91,45 @@ public class LightPreconditionsTest {
       fail("should have failed.");
     } catch (IllegalArgumentException e) {
       // expected.
+    }
+  }
+
+  /**
+   * Test for {@link LightPreconditions#checkIsEnv(Object, LightEnvEnum...)}
+   */
+  @Test
+  public void test_checkIsEnv() {
+    SecureRandom random = new SecureRandom();
+    for (LightEnvEnum currEnv : LightEnvEnum.values()) {
+      if (currEnv == LightEnvEnum.DEV_SERVER) {
+        // Since DEV_SERVER is never returned as one of the env, so this test doesnt work well.
+        continue;
+      }
+
+      List<LightEnvEnum> remainingEnvList = Lists.newArrayList(LightEnvEnum.values());
+      remainingEnvList.remove(currEnv);
+
+      int randomExtraEnvIndex = Math.abs(random.nextInt()) % remainingEnvList.size();
+      LightEnvEnum extraEnv = remainingEnvList.get(randomExtraEnvIndex);
+      assertTrue(currEnv != extraEnv);
+
+      GaeTestingUtils gaeTestingUtils = TestingUtils.gaeSetup(currEnv);
+      
+      // Positive Test : Send currEnv and extraEnv
+      checkIsEnv(this, currEnv, extraEnv);
+
+      /*
+       * Negative Test : As extraEnv is different from currEnv, so if we limit checkIsEnv only to
+       * that, then this test should fail.
+       */
+      try {
+        checkIsEnv(this, extraEnv);
+        fail("should have failed when currEnv=" + currEnv + " and extraEnv=" + extraEnv + ".");
+      } catch (ServerConfigurationException e) {
+        // Expected
+      }
+      
+      gaeTestingUtils.tearDown();
     }
   }
 

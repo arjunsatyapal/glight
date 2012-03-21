@@ -15,21 +15,16 @@
  */
 package com.google.light.server.guice;
 
-import com.google.light.server.exception.unchecked.ServerConfigurationException;
-
-import com.google.light.server.guice.modules.QaModule;
-
-import com.google.light.server.guice.modules.BaseGuiceModule;
-
-import com.google.light.server.guice.modules.DevServerModule;
-
-import com.google.light.server.guice.modules.ProdModule;
-
-import com.google.light.server.utils.GaeUtils;
-
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.servlet.GuiceServletContextListener;
+import com.google.light.server.constants.LightEnvEnum;
+import com.google.light.server.exception.unchecked.ServerConfigurationException;
+import com.google.light.server.guice.modules.BaseGuiceModule;
+import com.google.light.server.guice.modules.DevServerModule;
+import com.google.light.server.guice.modules.ProdModule;
+import com.google.light.server.guice.modules.QaModule;
+import com.google.light.server.utils.GaeUtils;
 
 /**
  * A ServletContext Listener to initialize Guice. More :
@@ -44,15 +39,24 @@ public class ServletContextListener extends GuiceServletContextListener {
 
     BaseGuiceModule guiceModule = null;
 
-    if (GaeUtils.isDevServer()) {
-      guiceModule = new DevServerModule();
-    } else if (GaeUtils.isProductionServer()) {
-      guiceModule = new ProdModule();
-    } else if (GaeUtils.isQaServer()) {
-      guiceModule = new QaModule();
-    } else {
-      throw new ServerConfigurationException("Unknown Environemnt with AppId = "
-          + GaeUtils.getAppId());
+    switch (LightEnvEnum.getLightEnv()) {
+      case PROD:
+        guiceModule = new ProdModule();
+        break;
+        
+      case QA:
+        guiceModule = new QaModule();
+        break;
+        
+      case DEV_SERVER:
+        //$FALL-THROUGH$
+      case UNIT_TEST:
+        guiceModule = new DevServerModule();
+        break;
+        
+      default:
+        throw new ServerConfigurationException("Unknown Environemnt with AppId = "
+            + GaeUtils.getAppId());
     }
 
     return Guice.createInjector(guiceModule, guiceServletModule);

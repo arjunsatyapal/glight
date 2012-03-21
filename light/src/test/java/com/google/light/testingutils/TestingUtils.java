@@ -15,11 +15,25 @@
  */
 package com.google.light.testingutils;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static org.mockito.Mockito.mock;
+
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.servlet.ServletModule;
+import com.google.light.server.constants.LightEnvEnum;
+import com.google.light.server.constants.OAuth2Provider;
+import com.google.light.server.guice.LightServletModule;
+import com.google.light.server.guice.module.UnitTestModule;
+import com.google.light.server.guice.modules.DevServerModule;
+import com.google.light.server.guice.modules.ProdModule;
+import com.google.light.server.guice.modules.QaModule;
 import com.google.light.server.utils.LightUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
+import javax.servlet.http.HttpSession;
 
 /**
  * 
@@ -98,5 +112,51 @@ public class TestingUtils {
       throws IOException {
     InputStream is = System.class.getResourceAsStream(resourcePath);
     return LightUtils.getInputStreamAsString(is);
+  }
+
+  /**
+   * Get Injector on the basis of the Environment.
+   * TODO(arjuns): Move other injector creations to use this.
+   * @param env
+   * @return
+   */
+  public static Injector getInjectorByEnv(LightEnvEnum env) {
+    ServletModule servletModule = new LightServletModule();
+    switch (env) {
+      case DEV_SERVER:
+        return Guice.createInjector(new DevServerModule(), servletModule);
+
+      case PROD:
+        return Guice.createInjector(new ProdModule(), servletModule);
+
+      case QA:
+        return Guice.createInjector(new QaModule(), servletModule);
+
+      case UNIT_TEST:
+        return UnitTestModule.getTestInjector(mock(HttpSession.class));
+
+      default:
+        throw new IllegalArgumentException("Unknown env : " + env);
+    }
+  }
+
+  /**
+   * Utility method so that a test which needs to have GAE env setup
+   * but does not care about basic things, then can use this method.
+   * TODO(arjuns): Move all the GAE setups to use this eventually.
+   */
+  public static GaeTestingUtils gaeSetup(LightEnvEnum env) {
+    GaeTestingUtils gaeTestingUtils =
+        new GaeTestingUtils(env,
+            OAuth2Provider.GOOGLE_LOGIN,
+            getRandomEmail(),
+            getRandomFederatedId(),
+            true /* isFederatedUser */,
+            getRandomUserId(),
+            true /* isUserLoggedIn */,
+            false /* isGaeAdmin */);
+    gaeTestingUtils.setUp();
+
+    return gaeTestingUtils;
   }
 }

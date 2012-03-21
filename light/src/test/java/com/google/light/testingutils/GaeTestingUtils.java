@@ -15,6 +15,11 @@
  */
 package com.google.light.testingutils;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import com.google.inject.Injector;
+import com.google.inject.servlet.GuiceFilter;
+
 import com.google.appengine.api.utils.SystemProperty;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
@@ -34,6 +39,8 @@ import com.google.light.server.utils.GaeUtils;
  * @author Arjun Satyapal
  */
 public class GaeTestingUtils {
+  private LightEnvEnum env;
+  
   /** See similar variables in {@link com.google.appengine.api.users.UserServiceImpl} */
   static final String USER_ID_KEY =
       "com.google.appengine.api.users.UserService.user_id_key";
@@ -52,6 +59,7 @@ public class GaeTestingUtils {
   public GaeTestingUtils(LightEnvEnum env, OAuth2Provider provider, String email,
       String federatedId, Boolean isFederated, String userId, boolean loggedIn,
       boolean isAdmin) {
+    this.env = checkNotNull(env);
     switch (env) {
       case DEV_SERVER:
         SystemProperty.environment.set(SystemProperty.Environment.Value.Development);
@@ -93,6 +101,8 @@ public class GaeTestingUtils {
    * Teardown GAE testing environment.
    */
   public void tearDown() {
+    Injector injector = TestingUtils.getInjectorByEnv(env);
+    injector.getInstance(GuiceFilter.class).destroy();
     gaeTestHelper.tearDown();
   }
 
@@ -154,5 +164,14 @@ public class GaeTestingUtils {
    */
   public void setLoggedIn(boolean loggedIn) {
     gaeTestHelper.setEnvIsLoggedIn(loggedIn);
+  }
+  
+  /**
+   * Return Env with which setup was done.
+   * 
+   * @return
+   */
+  public LightEnvEnum getEnv() {
+    return env;
   }
 }

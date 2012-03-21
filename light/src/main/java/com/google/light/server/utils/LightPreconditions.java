@@ -17,19 +17,19 @@ package com.google.light.server.utils;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.light.server.exception.unchecked.BlankStringException;
-
-import java.net.URISyntaxException;
-
-import java.net.URI;
+import static com.google.common.collect.Lists.newArrayList;
 
 import com.google.appengine.api.users.UserServiceFactory;
-
-import com.google.light.server.exception.unchecked.httpexception.UnauthorizedException;
-
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import com.google.light.server.constants.LightEnvEnum;
+import com.google.light.server.exception.unchecked.BlankStringException;
 import com.google.light.server.exception.unchecked.InvalidPersonIdException;
+import com.google.light.server.exception.unchecked.ServerConfigurationException;
+import com.google.light.server.exception.unchecked.httpexception.UnauthorizedException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.validator.routines.EmailValidator;
@@ -57,8 +57,8 @@ public class LightPreconditions {
   }
 
   /**
-   * Javadoc is same as for {{@link #checkNotBlank(String)}. This throws an exception with
-   * cause as errorString.
+   * Javadoc is same as for {{@link #checkNotBlank(String)}. This throws an exception with cause as
+   * errorString.
    * 
    * @param reference
    * @param errorString
@@ -68,7 +68,7 @@ public class LightPreconditions {
     if (StringUtils.isBlank(reference)) {
       throw new BlankStringException(errorString);
     }
-    
+
     return reference;
   }
 
@@ -125,7 +125,7 @@ public class LightPreconditions {
       throw new IllegalArgumentException("Expected null.");
     }
   }
-  
+
   /**
    * Returns true if current user is GAE Admin. Returns false if user is not admin / user is not
    * logged in.
@@ -137,7 +137,7 @@ public class LightPreconditions {
   public static boolean isGaeAdmin() {
     return UserServiceFactory.getUserService().isUserAdmin();
   }
-  
+
   /**
    * Ensures that Person is Admin.
    * 
@@ -153,14 +153,64 @@ public class LightPreconditions {
    * Ensures that the the given String is a valid URI.
    * 
    * TODO(arjuns): Add test for this.
-   * @throws URISyntaxException 
+   * 
+   * @throws URISyntaxException
    */
   public static String checkValidUri(String uri) throws URISyntaxException {
     new URI(uri);
     return uri;
   }
+
+  /**
+   * Ensures that given object was instantiated in one of the allowedEnvs.
+   * 
+   * TODO(arjuns) : Add test for this.
+   * 
+   * @param allowedEnvs
+   * @param object
+   */
+  public static void checkIsEnv(Object object, LightEnvEnum...allowedEnvs) {
+    if (containsCurrEnvInVarArgs(allowedEnvs)) {
+      return;
+    }
+
+    
+    throw new ServerConfigurationException(object.getClass().getName()
+        + " should not have been instantiated in " + LightEnvEnum.getLightEnv()
+        + " because it is allowed to be instantiated only in " 
+        + Iterables.toString(newArrayList(allowedEnvs)));
+  }
   
+  /**
+   * Ensures that given object was not instantiated in notAllowedEnvs.
+   * 
+   * TODO(arjuns) : Add test for this.
+   * 
+   * @param allowedEnvs
+   * @param object
+   */
+  public static void checkIsNotEnv(Object object, LightEnvEnum...notAllowedEnvs) {
+    if (!containsCurrEnvInVarArgs(notAllowedEnvs)) {
+      return;
+    }
+
+    throw new ServerConfigurationException(object.getClass().getName()
+        + " should not have been instantiated in " + LightEnvEnum.getLightEnv()
+        + " because it is not allowed to be instantiated in "
+        + Iterables.toString(Lists.newArrayList(notAllowedEnvs)));
+  }
   
+  private static boolean containsCurrEnvInVarArgs(LightEnvEnum...varargs) {
+    LightEnvEnum currEnv = LightEnvEnum.getLightEnv();
+    
+    for (LightEnvEnum currVarArg : varargs) {
+      if (currVarArg == currEnv) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   // Utility class.
   private LightPreconditions() {
   }

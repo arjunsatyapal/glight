@@ -21,24 +21,18 @@ import static com.google.light.testingutils.TestingUtils.getRandomUserId;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.servlet.GuiceFilter;
-import com.google.inject.servlet.ServletModule;
 import com.google.light.server.constants.LightEnvEnum;
 import com.google.light.server.constants.OAuth2Provider;
-import com.google.light.server.guice.module.UnitTestModule;
-import com.google.light.server.guice.modules.DevServerModule;
-import com.google.light.server.guice.modules.ProdModule;
-import com.google.light.server.guice.modules.QaModule;
 import com.google.light.testingutils.GaeTestingUtils;
+import com.google.light.testingutils.TestingUtils;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletContext;
-import javax.servlet.http.HttpSession;
 import org.junit.Test;
 
 /**
- * Test for {@link ServletModule}.
+ * Test for {@link LightServletModule}.
  * 
  * @author Arjun Satyapal
  */
@@ -66,10 +60,9 @@ public class LightServletModuleTest {
     for (LightEnvEnum currEnv : LightEnvEnum.values()) {
       try {
         gaeSetUp(currEnv);
-        Injector injector = getInjector(currEnv);
+        Injector injector = TestingUtils.getInjectorByEnv(currEnv);
         
         GuiceFilter filter = injector.getInstance(GuiceFilter.class);
-        
         FilterConfig filterConfig = mock(FilterConfig.class);
         ServletContext context = mock(ServletContext.class);
         
@@ -79,26 +72,6 @@ public class LightServletModuleTest {
       } finally {
         gaeTearDown();
       }
-    }
-  }
-
-  private Injector getInjector(LightEnvEnum env) {
-    ServletModule servletModule = new LightServletModule();
-    switch (env) {
-      case DEV_SERVER:
-        return Guice.createInjector(new DevServerModule(), servletModule);
-
-      case PROD:
-        return Guice.createInjector(new ProdModule(), servletModule);
-
-      case QA:
-        return Guice.createInjector(new QaModule(), servletModule);
-
-      case UNIT_TEST:
-        return UnitTestModule.getTestInjector(mock(HttpSession.class));
-
-      default:
-        throw new IllegalArgumentException("Unknown env : " + env);
     }
   }
   // TODO(arjuns): Add tests for ServletBindings.

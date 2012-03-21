@@ -119,7 +119,7 @@ public class GaeUtils {
    * This depends on AppId.
    */
   public static boolean isProductionServer() {
-    return isRunningOnGAE() && LightEnvEnum.PROD == LightEnvEnum.getLightEnvByAppId();
+    return isRunningOnGAE() && LightEnvEnum.PROD == LightEnvEnum.getLightEnv();
   }
 
   /**
@@ -128,7 +128,7 @@ public class GaeUtils {
    */
   public static boolean isQaServer() {
     return isRunningOnGAE()
-        && LightEnvEnum.QA == LightEnvEnum.getLightEnvByAppId();
+        && LightEnvEnum.QA == LightEnvEnum.getLightEnv();
   }
 
   /**
@@ -137,6 +137,6 @@ public class GaeUtils {
    */
   public static boolean isUnitTestServer() {
     return SystemProperty.environment.value() == null
-        && LightEnvEnum.UNIT_TEST == LightEnvEnum.getLightEnvByAppId();
+        && LightEnvEnum.UNIT_TEST == LightEnvEnum.getLightEnv();
   }
 }

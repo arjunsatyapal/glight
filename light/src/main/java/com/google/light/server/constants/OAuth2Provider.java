@@ -46,7 +46,10 @@ public enum OAuth2Provider {
   private String tokenServerUrl;
   private ArrayList<String> scopes;
 
-  private OAuth2Provider(String providerName, String authServerUrl, String tokenServerUrl, 
+  private OAuth2Provider(
+      String providerName, 
+      String authServerUrl, 
+      String tokenServerUrl,
       ArrayList<String> scopes) {
     try {
       this.providerName = checkNotBlank(providerName);

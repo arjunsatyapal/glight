@@ -18,6 +18,8 @@ package com.google.light.server.servlets.person;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static org.junit.Assert.assertTrue;
 
+import com.google.light.server.servlets.test.SessionInfoServlet;
+
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpRequestFactory;
@@ -28,7 +30,6 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.common.collect.ImmutableMap;
 import com.google.light.server.constants.OAuth2Provider;
 import com.google.light.server.constants.RequestParmKeyEnum;
-import com.google.light.server.servlets.misc.SessionServlet;
 import com.google.light.server.servlets.path.ServletPathEnum;
 import com.google.light.testingutils.FakeLoginHelper;
 import com.google.light.testingutils.TestingUtils;
@@ -39,7 +40,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
- * Test for {@link SessionServlet}.
+ * Test for {@link SessionInfoServlet}.
  * 
  * TODO(arjuns): Convert this test from Integration test to unit-test.
  * 
@@ -72,7 +73,7 @@ public class FakeSessionServletITCase {
   }
 
   /**
-   * Test for {@link SessionServlet#doPost(HttpServletRequest, HttpServletResponse)}.
+   * Test for {@link SessionInfoServlet#doPost(HttpServletRequest, HttpServletResponse)}.
    * 
    * Test for creating a session.
    * TODO(arjuns): Fix this test and merge with {@link FakeLoginHelper}.

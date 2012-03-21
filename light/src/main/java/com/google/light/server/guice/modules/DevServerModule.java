@@ -15,16 +15,13 @@
  */
 package com.google.light.server.guice.modules;
 
-import com.google.light.server.constants.OAuth2Provider;
-
-import com.google.light.server.servlets.test.TestOAuth2ConsumerManagerImpl;
+import static com.google.light.server.utils.LightPreconditions.checkIsEnv;
 
 import com.google.light.server.annotations.AnotOAuth2ConsumerGoogleLogin;
-
+import com.google.light.server.constants.LightEnvEnum;
+import com.google.light.server.constants.OAuth2Provider;
 import com.google.light.server.manager.interfaces.OAuth2ConsumerManager;
-
-import com.google.light.server.exception.unchecked.ServerConfigurationException;
-import com.google.light.server.utils.GaeUtils;
+import com.google.light.server.servlets.test.TestOAuth2ConsumerManagerImpl;
 
 
 /**
@@ -36,10 +33,7 @@ import com.google.light.server.utils.GaeUtils;
  */
 public class DevServerModule extends BaseGuiceModule {
   public DevServerModule() {
-    if (!(GaeUtils.isDevServer() || GaeUtils.isUnitTestServer())) {
-      throw new ServerConfigurationException(
-          "DevServerModule should be instantiated only for DevServer/UnitTest Env.");
-    }
+    checkIsEnv(this, LightEnvEnum.DEV_SERVER, LightEnvEnum.UNIT_TEST);
   }
 
   @Override

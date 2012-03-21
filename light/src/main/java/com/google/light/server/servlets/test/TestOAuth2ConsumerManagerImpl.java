@@ -15,18 +15,18 @@
  */
 package com.google.light.server.servlets.test;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.constants.RequestParmKeyEnum.CLIENT_ID;
 import static com.google.light.server.constants.RequestParmKeyEnum.CLIENT_SECRET;
 import static com.google.light.server.utils.GaeUtils.getAppId;
+import static com.google.light.server.utils.LightPreconditions.checkIsEnv;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
 import com.google.common.io.Files;
 import com.google.inject.Inject;
+import com.google.light.server.constants.LightEnvEnum;
 import com.google.light.server.constants.OAuth2Provider;
 import com.google.light.server.manager.interfaces.OAuth2ConsumerManager;
-import com.google.light.server.utils.GaeUtils;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -54,8 +54,8 @@ public class TestOAuth2ConsumerManagerImpl implements OAuth2ConsumerManager {
 
   @Inject
   public TestOAuth2ConsumerManagerImpl(OAuth2Provider oauth2Provider) {
-    // Should be called only for DevServer or UnitTests.
-    checkArgument(GaeUtils.isDevServer() || GaeUtils.isUnitTestServer());
+    checkIsEnv(this, LightEnvEnum.DEV_SERVER, LightEnvEnum.UNIT_TEST);
+    
     this.oAuth2Provider = checkNotNull(oauth2Provider);
     validateOrCreateConsumerCredentials(oauth2Provider);
   }

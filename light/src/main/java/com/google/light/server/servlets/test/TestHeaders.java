@@ -15,8 +15,14 @@
  */
 package com.google.light.server.servlets.test;
 
+import static com.google.light.server.utils.LightPreconditions.checkIsNotEnv;
+
 import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.inject.Inject;
+import com.google.light.server.constants.LightEnvEnum;
 import com.google.light.server.servlets.AbstractLightServlet;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -36,6 +42,12 @@ import javax.servlet.http.HttpServletResponse;
  */
 @SuppressWarnings("serial")
 public class TestHeaders extends AbstractLightServlet {
+  
+  @Inject
+  public TestHeaders() {
+    checkIsNotEnv(this, LightEnvEnum.PROD);
+  }
+  
   /**
    * {@inheritDoc}
    */
@@ -72,7 +84,8 @@ public class TestHeaders extends AbstractLightServlet {
       builder.append("<br>cookies = ");
       if (cookies != null) {
         for (Cookie cookie : cookies) {
-          builder.append("<br>    " + cookie);
+          Gson gson = new GsonBuilder().setPrettyPrinting().create();
+          builder.append("<br>    <pre>" + gson.toJson(cookie) + "</pre>");
         }
       } else {
         builder.append("null");
@@ -130,9 +143,6 @@ public class TestHeaders extends AbstractLightServlet {
       ServletInputStream is = request.getInputStream();
       String isInUTF8 = CharStreams.toString(new InputStreamReader(is, Charsets.UTF_8));
       builder.append("<br> inputStreamInUTF8 = " + isInUTF8);
-
-      // BufferedReader buffReader = request.getReader();
-      // builder.append("bufferedReader = " + CharStreams.toString(buffReader));
 
       response.setContentType("text/html");
       response.getWriter().println(builder.toString());

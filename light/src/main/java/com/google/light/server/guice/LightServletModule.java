@@ -30,7 +30,7 @@ import java.util.logging.Logger;
  * @author Arjun Satyapal
  */
 
-class LightServletModule extends ServletModule {
+public class LightServletModule extends ServletModule {
   private static final Logger logger = Logger.getLogger(LightServletModule.class.getName());
 
   @Override

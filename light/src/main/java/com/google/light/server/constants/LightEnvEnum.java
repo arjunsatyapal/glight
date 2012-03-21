@@ -17,6 +17,7 @@ package com.google.light.server.constants;
 
 import static com.google.common.collect.Lists.newArrayList;
 
+import com.google.appengine.api.utils.SystemProperty;
 import com.google.apphosting.api.ApiProxy;
 import com.google.apphosting.api.ApiProxy.Environment;
 import com.google.common.annotations.VisibleForTesting;
@@ -32,7 +33,7 @@ public enum LightEnvEnum {
   PROD(newArrayList("s~light-prod")),
   QA(newArrayList("s~light-qa")),
  
-  // TODO(arjuns) : Create separate appengine-web.xml files for Prod and Qa.
+  // TODO(arjuns) : Create separate appengine-web.xml files for Prod, QA.
   // DevServer picks the value from appengine-web.xml. So it will be always same as QA. But
   // the difference is that SystemProperty.environment.value() differs for QA and DEV_SERVER.
   DEV_SERVER(newArrayList("s~light-qa")),
@@ -57,14 +58,32 @@ public enum LightEnvEnum {
    * 
    * @return
    */
-  public static LightEnvEnum getLightEnvByAppId() {
+  public static LightEnvEnum getLightEnv() {
     Environment env = ApiProxy.getCurrentEnvironment();
+    LightEnvEnum returnEnum = getLightEnvByAppId(env.getAppId());
     
-    return getLightEnvByAppId(env.getAppId());
+    if (returnEnum == QA) {
+      /*
+       * Since search by AppId always prioritizes QA over DEV_SERVEr, so this step of checking
+       * the environment value is here to correct that.
+       */
+      if (SystemProperty.environment.value() == null) {
+        return DEV_SERVER;
+      }
+    }
+    
+    return returnEnum;
   }
   
+  /**
+   * This method will search for {@link LightEnvEnum} by AppId. Since DEV_SERVER and QA share
+   * AppIds, so this method will always prioritize QA over DEV_SERVER.
+   * 
+   * @param envId
+   * @return
+   */
   @VisibleForTesting
-  static LightEnvEnum getLightEnvByAppId(String envId) {
+  protected static LightEnvEnum getLightEnvByAppId(String envId) {
     for (LightEnvEnum currEnum : LightEnvEnum.values()) {
       // DevServer is not calculated on the basis of envId. So it should never be returned.
       if (currEnum == LightEnvEnum.DEV_SERVER) {

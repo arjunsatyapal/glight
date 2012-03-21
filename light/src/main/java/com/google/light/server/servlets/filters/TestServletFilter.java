@@ -15,12 +15,11 @@
  */
 package com.google.light.server.servlets.filters;
 
+import static com.google.light.server.utils.LightPreconditions.checkIsNotEnv;
+
 import com.google.inject.Inject;
-import com.google.light.server.exception.unchecked.FilterInstanceBindingException;
-import com.google.light.server.utils.GaeUtils;
+import com.google.light.server.constants.LightEnvEnum;
 import java.io.IOException;
-import java.util.logging.Logger;
-import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -33,16 +32,12 @@ import javax.servlet.ServletResponse;
  */
 
 public class TestServletFilter extends AbstractLightFilter {
-  private static final Logger logger = Logger.getLogger(Filter.class.getName());
   @Inject
   private TestServletFilter() {
-    if (GaeUtils.isProductionServer()) {
-      String msg = "TestServletFilter should be injected for Test&QA environment only.";
-      logger.severe(msg);
-      throw new FilterInstanceBindingException(msg);
-    }
+    checkIsNotEnv(this, LightEnvEnum.PROD);
   }
-  /** 
+
+  /**
    * {@inheritDoc}
    */
   @Override
