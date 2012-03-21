@@ -27,8 +27,6 @@ import static com.google.light.testingutils.TestingUtils.getUUIDString;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.util.ArrayList;
-
 import com.google.common.collect.Lists;
 import com.google.light.server.constants.LightEnvEnum;
 import com.google.light.server.exception.unchecked.BlankStringException;

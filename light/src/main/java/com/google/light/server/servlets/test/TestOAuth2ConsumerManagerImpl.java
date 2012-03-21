@@ -18,7 +18,6 @@ package com.google.light.server.servlets.test;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.constants.RequestParmKeyEnum.CLIENT_ID;
 import static com.google.light.server.constants.RequestParmKeyEnum.CLIENT_SECRET;
-import static com.google.light.server.utils.GaeUtils.getAppId;
 import static com.google.light.server.utils.LightPreconditions.checkIsEnv;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
@@ -26,6 +25,7 @@ import com.google.common.io.Files;
 import com.google.inject.Inject;
 import com.google.light.server.constants.LightEnvEnum;
 import com.google.light.server.constants.OAuth2Provider;
+import com.google.light.server.exception.unchecked.ServerConfigurationException;
 import com.google.light.server.manager.interfaces.OAuth2ConsumerManager;
 import java.io.BufferedReader;
 import java.io.File;
@@ -114,23 +114,13 @@ public class TestOAuth2ConsumerManagerImpl implements OAuth2ConsumerManager {
   private void createFile(OAuth2Provider oauth2Provider2, String consumerCredentialPath)
       throws IOException {
     logger.info("Creating credential file for : " + oauth2Provider2.getProviderName());
-    this.clientId =
-        readLineFromConsole("Enter " + CLIENT_ID.get()+ " for " + getAppId() + " : ");
-    this.clientSecret =
-        readLineFromConsole("Enter " + CLIENT_SECRET.get() + " for " + getAppId() + " : ");
-
-    Properties properties = new Properties();
-    properties.setProperty(CLIENT_ID.get(), clientId);
-    properties.setProperty(CLIENT_SECRET.get(), clientSecret);
+    // TODO(arjuns): Fix this eventually to do validation.
     StringBuilder builder =
-        new StringBuilder("Appengine does not allow creating of files even on devserver. " +
-            "So Create File[" + consumerCredentialPath
-            + "] with following content, and then restart" +
-            " the server. : \n");
-    builder.append(CLIENT_ID).append("=").append(clientId).append("\n");
-    builder.append(CLIENT_SECRET).append("=").append(clientSecret);
-    System.out.println(builder.toString());
-    System.exit(-1);
+        new StringBuilder("Appengine does not allow creating of files. So create a file at \n"
+            + consumerCredentialPath + "\n and put following content into it : "
+            + "\n" + CLIENT_ID + "=<put your clientId here>"
+            + "\n" + CLIENT_SECRET + "=<put your clientSecret here.>");
+    throw new ServerConfigurationException(builder.toString());
   }
 
   /**

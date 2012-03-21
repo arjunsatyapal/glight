@@ -15,7 +15,6 @@
  */
 package com.google.light.testingutils;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static org.mockito.Mockito.mock;
 
 import com.google.inject.Guice;
