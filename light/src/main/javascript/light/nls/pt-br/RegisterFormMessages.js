@@ -13,7 +13,11 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-define({
+/**
+ * Calling window.define instead of define because of dojo build bug.
+ * @see http://bugs.dojotoolkit.org/ticket/15057
+ */
+window.define({
   instructions: 'Antes de continuar, você deve preencher este pequeno' +
   ' formulário e aceitar os Termos de Serviço.',
   firstNameTextBoxLabel: 'Primeiro Nome:',

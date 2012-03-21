@@ -38,7 +38,6 @@ define(['dojo/_base/declare', 'dijit/focus',
       postCreate: function() {
         // TODO(waltercacau): Test this when we discover what is more accessible.
         // Making tooltip autohide
-        var self = this;
         this._tosCheckbox.on('blur', function() {
           Tooltip.hide(this.domNode.parentNode);
         });
