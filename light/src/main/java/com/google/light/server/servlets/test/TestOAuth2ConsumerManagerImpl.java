@@ -19,15 +19,13 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.constants.StringConstants.CLIENT_ID;
 import static com.google.light.server.constants.StringConstants.CLIENT_SECRET;
-import static com.google.light.server.utils.GaeUtils.getAppId;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
-
-import com.google.light.server.exception.unchecked.ServerConfigurationException;
 
 import com.google.common.io.Files;
 import com.google.inject.Inject;
 import com.google.light.server.constants.OAuth2Provider;
 import com.google.light.server.constants.StringConstants;
+import com.google.light.server.exception.unchecked.ServerConfigurationException;
 import com.google.light.server.manager.interfaces.OAuth2ConsumerManager;
 import com.google.light.server.utils.GaeUtils;
 import java.io.BufferedReader;
@@ -117,15 +115,13 @@ public class TestOAuth2ConsumerManagerImpl implements OAuth2ConsumerManager {
   private void createFile(OAuth2Provider oauth2Provider2, String consumerCredentialPath)
       throws IOException {
     logger.info("Creating credential file for : " + oauth2Provider2.getProviderName());
-    Properties properties = new Properties();
     // TODO(arjuns): Fix this eventually to do validation.
-    properties.setProperty(CLIENT_ID, "<put your clientId here>");
-    properties.setProperty(CLIENT_SECRET, "<put your clientSecret here.>");
     StringBuilder builder =
-        new StringBuilder("Appengine does not allow creating of files. So a dummy file has been " +
-            "created for  you at : " + consumerCredentialPath + ". Go ahead and updated it.");
-    System.out.println(builder.toString());
-    throw new ServerConfigurationException("Consumer Credentials missing for test env.");
+        new StringBuilder("Appengine does not allow creating of files. So create a file at \n"
+            + consumerCredentialPath + "\n and put following content into it : "
+            + "\n" + CLIENT_ID + "=<put your clientId here>"
+            + "\n" + CLIENT_SECRET + "=<put your clientSecret here.>");
+    throw new ServerConfigurationException(builder.toString());
   }
 
   /**
