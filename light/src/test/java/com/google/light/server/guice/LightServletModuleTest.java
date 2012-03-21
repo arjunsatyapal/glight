@@ -15,16 +15,12 @@
  */
 package com.google.light.server.guice;
 
-import static com.google.light.testingutils.TestingUtils.getRandomEmail;
-import static com.google.light.testingutils.TestingUtils.getRandomFederatedId;
-import static com.google.light.testingutils.TestingUtils.getRandomUserId;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.google.inject.Injector;
 import com.google.inject.servlet.GuiceFilter;
 import com.google.light.server.constants.LightEnvEnum;
-import com.google.light.server.constants.OAuth2Provider;
 import com.google.light.testingutils.GaeTestingUtils;
 import com.google.light.testingutils.TestingUtils;
 import javax.servlet.FilterConfig;
@@ -37,29 +33,15 @@ import org.junit.Test;
  * @author Arjun Satyapal
  */
 public class LightServletModuleTest {
-  protected static GaeTestingUtils gaeTestingUtils = null;
-
-  public void gaeSetUp(LightEnvEnum env) {
-    gaeTestingUtils =
-        new GaeTestingUtils(env, OAuth2Provider.GOOGLE_LOGIN, getRandomEmail(),
-            getRandomFederatedId(), true /* isFederatedUser */, getRandomUserId(),
-            true /* isUserLoggedIn */, false /* isGaeAdmin */);
-    gaeTestingUtils.setUp();
-  }
-
-  public static void gaeTearDown() {
-    gaeTestingUtils.tearDown();
-    gaeTestingUtils = null;
-  }
-
   /**
    * Test to ensure that Guice can initialize servlets and filters.
    */
   @Test
   public void test_ensureBindingPossible() throws Exception {
     for (LightEnvEnum currEnv : LightEnvEnum.values()) {
+      GaeTestingUtils gaeTestingUtils = TestingUtils.gaeSetup(currEnv);
       try {
-        gaeSetUp(currEnv);
+
         Injector injector = TestingUtils.getInjectorByEnv(currEnv);
         
         GuiceFilter filter = injector.getInstance(GuiceFilter.class);
@@ -70,7 +52,7 @@ public class LightServletModuleTest {
         filter.init(filterConfig);
         filter.destroy();
       } finally {
-        gaeTearDown();
+        gaeTestingUtils.tearDown();
       }
     }
   }

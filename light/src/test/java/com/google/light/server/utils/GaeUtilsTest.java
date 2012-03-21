@@ -15,8 +15,7 @@
  */
 package com.google.light.server.utils;
 
-import static com.google.light.testingutils.TestingUtils.getRandomEmail;
-import static com.google.light.testingutils.TestingUtils.getRandomFederatedId;
+import static com.google.light.testingutils.TestingUtils.gaeSetup;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -25,10 +24,7 @@ import static org.junit.Assert.assertTrue;
 
 import com.google.appengine.api.utils.SystemProperty;
 import com.google.light.server.constants.LightEnvEnum;
-import com.google.light.server.constants.OAuth2Provider;
 import com.google.light.testingutils.GaeTestingUtils;
-import com.google.light.testingutils.TestingUtils;
-import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -37,12 +33,6 @@ import org.junit.Test;
  * @author Arjun Satyapal
  */
 public class GaeUtilsTest {
-  private String gaeUserEmail;
-  @Before
-  public void setUp() {
-    gaeUserEmail = getRandomEmail();
-  }
-
   /**
    * Test for {@link GaeUtils#getAppId()}.
    */
@@ -50,7 +40,7 @@ public class GaeUtilsTest {
   public void test_getAppId() {
     // First appId for QA env.
     String expectedAppId = "s~light-qa";
-    GaeTestingUtils gaeTestingUtils = getGaeTestingUtils(LightEnvEnum.QA);
+    GaeTestingUtils gaeTestingUtils = gaeSetup(LightEnvEnum.QA);
 
     try {
       gaeTestingUtils.setUp();
@@ -66,8 +56,7 @@ public class GaeUtilsTest {
   @Test
   public void test_isDevServer() {
     // First appId for QA env.
-    GaeTestingUtils gaeTestingUtils = getGaeTestingUtils(LightEnvEnum.DEV_SERVER);
-
+    GaeTestingUtils gaeTestingUtils = gaeSetup(LightEnvEnum.DEV_SERVER);
     try {
       gaeTestingUtils.setUp();
       assertTrue(GaeUtils.isDevServer());
@@ -87,7 +76,7 @@ public class GaeUtilsTest {
   @Test
   public void test_isProductionServer() {
     // First appId for QA env.
-    GaeTestingUtils gaeTestingUtils = getGaeTestingUtils(LightEnvEnum.PROD);
+    GaeTestingUtils gaeTestingUtils = gaeSetup(LightEnvEnum.PROD);
 
     try {
       gaeTestingUtils.setUp();
@@ -108,7 +97,7 @@ public class GaeUtilsTest {
   @Test
   public void test_isQaServer() {
     // First appId for QA env.
-    GaeTestingUtils gaeTestingUtils = getGaeTestingUtils(LightEnvEnum.QA);
+    GaeTestingUtils gaeTestingUtils = gaeSetup(LightEnvEnum.QA);
 
     try {
       gaeTestingUtils.setUp();
@@ -138,7 +127,7 @@ public class GaeUtilsTest {
   @Test
   public void test_isUnitTestServer() {
     // First appId for QA env.
-    GaeTestingUtils gaeTestingUtils = getGaeTestingUtils(LightEnvEnum.UNIT_TEST);
+    GaeTestingUtils gaeTestingUtils = gaeSetup(LightEnvEnum.UNIT_TEST);
 
     try {
       gaeTestingUtils.setUp();
@@ -151,11 +140,5 @@ public class GaeUtilsTest {
     } finally {
       gaeTestingUtils.tearDown();
     }
-  }
-
-  private GaeTestingUtils getGaeTestingUtils(LightEnvEnum env) {
-    return new GaeTestingUtils(env, OAuth2Provider.GOOGLE_LOGIN, gaeUserEmail, getRandomFederatedId(),
-        false /* isFederated */, TestingUtils.getRandomUserId()/* userId */, true/* loggedIn */,
-        false/* isAdmin */);
   }
 }

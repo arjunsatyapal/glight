@@ -17,10 +17,10 @@ package com.google.light.server.constants;
 
 import static com.google.common.collect.Lists.newArrayList;
 
-import com.google.appengine.api.utils.SystemProperty;
 import com.google.apphosting.api.ApiProxy;
 import com.google.apphosting.api.ApiProxy.Environment;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.light.server.utils.GaeUtils;
 import com.google.light.server.utils.LightPreconditions;
 import java.util.List;
 
@@ -67,7 +67,7 @@ public enum LightEnvEnum {
        * Since search by AppId always prioritizes QA over DEV_SERVEr, so this step of checking
        * the environment value is here to correct that.
        */
-      if (SystemProperty.environment.value() == null) {
+      if (GaeUtils.isDevServer()) {
         return DEV_SERVER;
       }
     }

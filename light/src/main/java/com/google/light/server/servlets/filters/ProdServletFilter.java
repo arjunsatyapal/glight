@@ -15,7 +15,7 @@
  */
 package com.google.light.server.servlets.filters;
 
-import static com.google.light.server.utils.LightPreconditions.checkIsNotEnv;
+import static com.google.light.server.utils.LightPreconditions.checkIsEnv;
 
 import com.google.inject.Inject;
 import com.google.light.server.constants.LightEnvEnum;
@@ -34,7 +34,7 @@ import javax.servlet.ServletResponse;
 public class ProdServletFilter extends AbstractLightFilter {
   @Inject
   private ProdServletFilter() {
-    checkIsNotEnv(this, LightEnvEnum.PROD);
+    checkIsEnv(this, LightEnvEnum.PROD);
   }
 
   @Override

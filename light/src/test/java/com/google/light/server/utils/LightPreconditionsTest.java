@@ -17,6 +17,7 @@ package com.google.light.server.utils;
 
 import static com.google.light.server.utils.LightPreconditions.checkEmail;
 import static com.google.light.server.utils.LightPreconditions.checkIsEnv;
+import static com.google.light.server.utils.LightPreconditions.checkIsNotEnv;
 import static com.google.light.server.utils.LightPreconditions.checkNonEmptyList;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkNull;
@@ -25,6 +26,8 @@ import static com.google.light.server.utils.LightPreconditions.checkPositiveLong
 import static com.google.light.testingutils.TestingUtils.getUUIDString;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
+import java.util.ArrayList;
 
 import com.google.common.collect.Lists;
 import com.google.light.server.constants.LightEnvEnum;
@@ -43,6 +46,8 @@ import org.junit.Test;
  * @author Arjun Satyapal
  */
 public class LightPreconditionsTest {
+  private static SecureRandom random = new SecureRandom();
+
   /**
    * Test for {@link LightPreconditions#checkEmail(String)} Some quick tests. Though not required as
    * we are using Apache Commons Library to validate emails.
@@ -99,22 +104,17 @@ public class LightPreconditionsTest {
    */
   @Test
   public void test_checkIsEnv() {
-    SecureRandom random = new SecureRandom();
     for (LightEnvEnum currEnv : LightEnvEnum.values()) {
       if (currEnv == LightEnvEnum.DEV_SERVER) {
         // Since DEV_SERVER is never returned as one of the env, so this test doesnt work well.
         continue;
       }
 
-      List<LightEnvEnum> remainingEnvList = Lists.newArrayList(LightEnvEnum.values());
-      remainingEnvList.remove(currEnv);
-
-      int randomExtraEnvIndex = Math.abs(random.nextInt()) % remainingEnvList.size();
-      LightEnvEnum extraEnv = remainingEnvList.get(randomExtraEnvIndex);
+      LightEnvEnum extraEnv = getRandomOtherEnvExcept(currEnv);
       assertTrue(currEnv != extraEnv);
 
       GaeTestingUtils gaeTestingUtils = TestingUtils.gaeSetup(currEnv);
-      
+
       // Positive Test : Send currEnv and extraEnv
       checkIsEnv(this, currEnv, extraEnv);
 
@@ -128,7 +128,54 @@ public class LightPreconditionsTest {
       } catch (ServerConfigurationException e) {
         // Expected
       }
+
+      gaeTestingUtils.tearDown();
+    }
+  }
+  
+  private LightEnvEnum getRandomOtherEnvExcept(LightEnvEnum...envs) {
+    List<LightEnvEnum> remainingEnvList = Lists.newArrayList(LightEnvEnum.values());
+    remainingEnvList.removeAll(Lists.newArrayList(envs));
+
+    int randomExtraEnvIndex = Math.abs(random.nextInt()) % remainingEnvList.size();
+    LightEnvEnum extraEnv = remainingEnvList.get(randomExtraEnvIndex);
+    return extraEnv;
+  }
+  
+  /**
+   * Test for {@link LightPreconditions#checkIsNotEnv(Object, LightEnvEnum...)}
+   */
+  @Test
+  public void test_checkIsNotEnv() {
+    for (LightEnvEnum currEnv : LightEnvEnum.values()) {
+      if (currEnv == LightEnvEnum.DEV_SERVER) {
+        // Since DEV_SERVER is never returned as one of the env, so this test doesnt work well.
+        continue;
+      }
+
+      LightEnvEnum otherEnv1 = getRandomOtherEnvExcept(currEnv);
+      LightEnvEnum otherEnv2 = getRandomOtherEnvExcept(currEnv, otherEnv1);
       
+      assertTrue(currEnv != otherEnv1);
+      assertTrue(currEnv != otherEnv2 && otherEnv1 != otherEnv2);
+      
+      GaeTestingUtils gaeTestingUtils = TestingUtils.gaeSetup(currEnv);
+
+      // Positive Test : Send currEnv and extraEnv
+        checkIsNotEnv(this, otherEnv1, otherEnv2);
+      
+
+      /*
+       * Negative Test : As extraEnv is different from currEnv, so if we limit checkIsEnv only to
+       * that, then this test should fail.
+       */
+      try {
+        checkIsNotEnv(this, currEnv);
+        fail("should have failed when currEnv=" + currEnv);
+      } catch (ServerConfigurationException e) {
+        // Expected
+      }
+
       gaeTestingUtils.tearDown();
     }
   }
