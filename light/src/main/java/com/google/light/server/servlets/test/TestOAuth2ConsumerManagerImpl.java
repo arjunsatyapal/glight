@@ -22,6 +22,8 @@ import static com.google.light.server.constants.StringConstants.CLIENT_SECRET;
 import static com.google.light.server.utils.GaeUtils.getAppId;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
+import com.google.light.server.exception.unchecked.ServerConfigurationException;
+
 import com.google.common.io.Files;
 import com.google.inject.Inject;
 import com.google.light.server.constants.OAuth2Provider;
@@ -115,23 +117,15 @@ public class TestOAuth2ConsumerManagerImpl implements OAuth2ConsumerManager {
   private void createFile(OAuth2Provider oauth2Provider2, String consumerCredentialPath)
       throws IOException {
     logger.info("Creating credential file for : " + oauth2Provider2.getProviderName());
-    this.clientId =
-        readLineFromConsole("Enter " + CLIENT_ID + " for " + getAppId() + " : ");
-    this.clientSecret =
-        readLineFromConsole("Enter " + CLIENT_SECRET + " for " + getAppId() + " : ");
-
     Properties properties = new Properties();
-    properties.setProperty(CLIENT_ID, clientId);
-    properties.setProperty(CLIENT_SECRET, clientSecret);
+    // TODO(arjuns): Fix this eventually to do validation.
+    properties.setProperty(CLIENT_ID, "<put your clientId here>");
+    properties.setProperty(CLIENT_SECRET, "<put your clientSecret here.>");
     StringBuilder builder =
-        new StringBuilder("Appengine does not allow creating of files even on devserver. " +
-            "So Create File[" + consumerCredentialPath
-            + "] with following content, and then restart" +
-            " the server. : \n");
-    builder.append(CLIENT_ID).append("=").append(clientId).append("\n");
-    builder.append(CLIENT_SECRET).append("=").append(clientSecret);
+        new StringBuilder("Appengine does not allow creating of files. So a dummy file has been " +
+            "created for  you at : " + consumerCredentialPath + ". Go ahead and updated it.");
     System.out.println(builder.toString());
-    System.exit(-1);
+    throw new ServerConfigurationException("Consumer Credentials missing for test env.");
   }
 
   /**
