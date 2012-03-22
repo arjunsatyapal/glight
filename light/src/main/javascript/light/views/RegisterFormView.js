@@ -13,15 +13,15 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-define(['dojo/_base/declare', 'dijit/focus',
+define(['dojo/_base/declare', 'dijit/focus', 'dojo/_base/event',
         'dijit/_WidgetsInTemplateMixin', 'dojo/text!./RegisterFormView.html',
         'dojo/i18n!light/nls/RegisterFormMessages',
         'dijit/Tooltip', 'light/views/TemplatedLightView', 'dojo/query',
         'dijit/form/ValidationTextBox', 'dijit/form/Textarea',
         'dijit/form/Button', 'dijit/form/CheckBox', 'dijit/Dialog',
         'dijit/form/Form'],
-        function(declare, focusUtil, _WidgetsInTemplateMixin, template,
-                messages, Tooltip, TemplatedLightView, query) {
+        function(declare, focusUtil, eventUtil, _WidgetsInTemplateMixin,
+                template, messages, Tooltip, TemplatedLightView, query) {
   /**
    * @class
    * @name light.views.RegisterFormView
@@ -97,8 +97,12 @@ define(['dojo/_base/declare', 'dijit/focus',
       /**
        * Callback to be called when the submit button is pressed.
        */
-      _onSubmit: function() {
+      _onSubmit: function(evt) {
         this._controller.onSubmit();
+        
+        // This avoids submitting the form
+        eventUtil.stop(evt);
+        return false;
       }
   });
 });

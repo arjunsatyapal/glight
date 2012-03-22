@@ -15,6 +15,14 @@
  */
 define(['dojo/query', 'light/views/AbstractLightView'],
         function($, AbstractLightView) {
+  /*
+   * TODO(waltercacau): Study the relevance of this class.
+   * It is not being used now because the only good functionality
+   * would be testing clicks on views, but it doesn't provide
+   * a way to avoid submitting form's when clicking. So, during
+   * such tests some form's might get submitted and the test page
+   * would exit.
+   */
   /**
    * Utility Methods for testing UI.
    * @class
@@ -176,6 +184,11 @@ define(['dojo/query', 'light/views/AbstractLightView'],
     }
 
   };
+  
+  // Avoiding form submissions when clicking
+  beforeEach(function() {
+    Syn.support.clickSubmits = false;
+  })
 
   // Registering with jasmine to cleanUp after each test.
   afterEach(function() {

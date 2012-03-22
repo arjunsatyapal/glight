@@ -13,10 +13,11 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-define(['light/views/RegisterFormView',
-        'light/controllers/RegisterFormController',
+define(['light/views/RegisterFormView', 
+        'light/controllers/RegisterFormController', 'dojo/_base/event',
         'dojo/query', 'lightTest/robot'],
-        function(RegisterFormView, RegisterFormController, query, robot) {
+        function(RegisterFormView, RegisterFormController,
+                 eventUtil, query, robot) {
   describe('light.views.RegisterFormView', function() {
     var controller, view;
 
@@ -26,13 +27,23 @@ define(['light/views/RegisterFormView',
       view.setController(controller);
       robot.attach(view);
     });
+    
+    describe('_onSubmit when called', function() {
+      it('should call controller.onSubmit' + 
+         'and stop event propagation', function() {
+        this.stub(eventUtil, 'stop');
+        var fakeEvent = {'fakeEvent': 'is fake!'};
+        view._onSubmit(fakeEvent);
+        expect(controller.onSubmit).toHaveBeenCalled();
+        expect(eventUtil.stop).toHaveBeenCalledWith(fakeEvent);
+      });
+    });
 
-    describe('_button when clicked', function() {
-      it('should call controller.onSubmit', function() {
-        waitsFor(robot.click(view._button));
-        runs(function() {
-          expect(controller.onSubmit).toHaveBeenCalled();
-        });
+    describe('_form when submitted', function() {
+      it('should call _onSubmit', function() {
+        this.stub(view, '_onSubmit');
+        view._form.onSubmit();
+        expect(view._onSubmit).toHaveBeenCalled();
       });
     });
 

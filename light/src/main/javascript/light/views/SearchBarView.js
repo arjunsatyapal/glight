@@ -13,18 +13,21 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-define(['dojo/_base/declare', 'light/views/TemplatedLightView',
+define(['dojo/_base/declare', 'light/views/TemplatedLightView', 
         'dijit/_WidgetsInTemplateMixin', 'dojo/text!./SearchBarView.html',
-        'dijit/form/TextBox', 'dijit/form/Button'],
+        'dojo/_base/event', 
+        'dijit/form/TextBox', 'dijit/form/Button', 'dijit/form/Form'],
         function(declare, TemplatedLightView,
-                _WidgetsInTemplateMixin, template) {
+                _WidgetsInTemplateMixin, template, eventUtil) {
     return declare('light.views.SearchBarView',
             [TemplatedLightView, _WidgetsInTemplateMixin], {
         templateString: template,
         
-        _onSubmit: function() {
+        _onSubmit: function(evt) {
           this._controller.onSubmit();
+          eventUtil.stop(evt);
         },
+        
         getQuery: function() {
           return this._textBox.get('value');
         },
