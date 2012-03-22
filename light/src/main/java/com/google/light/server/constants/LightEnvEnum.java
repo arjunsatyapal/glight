@@ -64,7 +64,7 @@ public enum LightEnvEnum {
     
     if (returnEnum == QA) {
       /*
-       * Since search by AppId always prioritizes QA over DEV_SERVEr, so this step of checking
+       * Since search by AppId always prioritizes QA over DEV_SERVER, so this step of checking
        * the environment value is here to correct that.
        */
       if (GaeUtils.isDevServer()) {
