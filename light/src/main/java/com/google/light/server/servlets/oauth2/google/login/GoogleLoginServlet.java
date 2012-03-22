@@ -5,16 +5,20 @@ import static com.google.light.server.utils.ServletUtils.getServerUrl;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-
-import com.google.api.client.auth.oauth2.AuthorizationCodeFlow;
 import com.google.light.server.servlets.oauth2.google.GoogleOAuth2Helper;
-import com.google.light.server.servlets.path.ServletPathEnum;
 import java.io.IOException;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+/**
+ * Servlet to handle Google Login.
+ * 
+ * TODO(arjuns): Add test for this.
+ *
+ * @author arjuns@google.com (Arjun Satyapal)
+ */
 @SuppressWarnings("serial")
 public class GoogleLoginServlet extends HttpServlet {
   private static final Logger logger = Logger.getLogger(GoogleLoginServlet.class.getName());
@@ -29,11 +33,7 @@ public class GoogleLoginServlet extends HttpServlet {
   @Override
   protected void doGet(HttpServletRequest request, HttpServletResponse response)
       throws IOException {
-    String redirectUri = getServerUrl(request) + ServletPathEnum.LOGIN_GOOGLE_CB.get();
-
-    AuthorizationCodeFlow flow = googleOAuth2Helper.getAuthorizationCodeFlow();
-    String actualRedirectUrl = flow.newAuthorizationUrl().setRedirectUri(redirectUri).build();
-
+    String actualRedirectUrl = googleOAuth2Helper.getGoogleLoginRedirectUri(getServerUrl(request));
     logger.info("Redirecting to : " + actualRedirectUrl);
     response.sendRedirect(actualRedirectUrl);
   }

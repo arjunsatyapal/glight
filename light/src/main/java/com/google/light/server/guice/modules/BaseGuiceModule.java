@@ -15,7 +15,7 @@
  */
 package com.google.light.server.guice.modules;
 
-import static com.google.light.server.utils.GuiceUtils.getKeyForScopeSeed;
+import com.google.light.server.manager.interfaces.OAuth2ConsumerCredentialManager;
 
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
@@ -23,12 +23,12 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson.JacksonFactory;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
+import com.google.light.server.annotations.AnotGoogleLoginCallbackUri;
 import com.google.light.server.annotations.AnotHttpSession;
-import com.google.light.server.annotations.AnotOAuth2ConsumerGoogleLogin;
 import com.google.light.server.manager.implementation.AdminOperationManagerImpl;
 import com.google.light.server.manager.interfaces.AdminOperationManager;
-import com.google.light.server.manager.interfaces.OAuth2ConsumerManager;
 import com.google.light.server.persistence.dao.OAuth2ConsumerCredentialDao;
+import com.google.light.server.servlets.path.ServletPathEnum;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpSession;
 
@@ -54,7 +54,12 @@ public abstract class BaseGuiceModule extends AbstractModule {
   @Override
   protected void configure() {
     requireBinding(HttpTransport.class);
-    requireBinding(getKeyForScopeSeed(OAuth2ConsumerManager.class, AnotOAuth2ConsumerGoogleLogin.class));
+    requireBinding(OAuth2ConsumerCredentialManager.class);
+
+    // Guice bindings for String.
+    bind(String.class)
+      .annotatedWith(AnotGoogleLoginCallbackUri.class)
+      .toInstance(ServletPathEnum.LOGIN_GOOGLE_CB.get());
     
     // TODO(arjuns): Can this be removed.
     bind(OAuth2ConsumerCredentialDao.class);

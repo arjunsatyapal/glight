@@ -15,13 +15,9 @@
  */
 package com.google.light.server.guice.module;
 
-import static com.google.light.testingutils.TestingUtils.getRandomEmail;
-import static com.google.light.testingutils.TestingUtils.getRandomFederatedId;
-import static com.google.light.testingutils.TestingUtils.getRandomUserId;
-
 import com.google.light.server.constants.LightEnvEnum;
-import com.google.light.server.constants.OAuth2Provider;
 import com.google.light.testingutils.GaeTestingUtils;
+import com.google.light.testingutils.TestingUtils;
 import org.junit.Test;
 
 /**
@@ -33,11 +29,7 @@ public abstract class AbstractModuleTest {
   protected GaeTestingUtils gaeTestingUtils = null;
 
   public void gaeSetUp(LightEnvEnum env) {
-    gaeTestingUtils =
-        new GaeTestingUtils(env, OAuth2Provider.GOOGLE_LOGIN, getRandomEmail(),
-            getRandomFederatedId(), true /* isFederatedUser */, getRandomUserId(), 
-            true /* isUserLoggedIn */, false /* isGaeAdmin */);
-    gaeTestingUtils.setUp();
+    gaeTestingUtils = TestingUtils.gaeSetup(env);
   }
 
   public void gaeTearDown() {

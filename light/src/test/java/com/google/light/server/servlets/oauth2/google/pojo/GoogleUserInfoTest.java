@@ -35,11 +35,11 @@ public class GoogleUserInfoTest {
    * Test to validate JSON Parsing for {@link GoogleUserInfo}.
    */
   @Test
-  public void test_something() throws Exception {
+  public void test_jsonParsing() throws Exception {
     String jsonString = getResourceAsString(GOOGLE_USER_INFO_JSON_FILE_PATH);
     GoogleUserInfo userTokenInfo = JsonUtils.getDto(jsonString, GoogleUserInfo.class);
     
-    assertEquals("123456789", userTokenInfo.getId());
+    assertEquals("115639870677665060321", userTokenInfo.getId());
     assertEquals("unit-test1@myopenedu.com", userTokenInfo.getEmail());
     assertTrue(userTokenInfo.getVerifiedEmail());
     assertEquals("Unit Test1", userTokenInfo.getName());

@@ -102,6 +102,12 @@ public class LightUtils {
     appendKeyValue(builder, "servletContext", session.getServletContext());
   }
 
+  // TODO(arjuns): Inject clock instead of using SystemTime so that we can simulate clock
+  // forwarding when required.
+  public static long getCurrentTimeInMillis() {
+    return System.currentTimeMillis();
+  }
+  
   // Utility class.
   private LightUtils() {
   }

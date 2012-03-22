@@ -13,21 +13,13 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.server.manager.interfaces;
+package com.google.light.server.servlets.test;
 
 /**
- * All OAuth Consumer Implementations should implement this.
+ * A Enum to wrap different Credential Standards.
  * 
- * TODO(arjuns): Add test for this class.
- *
  * @author Arjun Satyapal
  */
-public interface OAuth2ConsumerManager {
-  /**
-   * Return OAuth2 client_id 
-   * @return
-   */
-  public String getClientId();
-  
-  public String getClientSecret();
+public enum CredentialStandardEnum {
+  OAUTH2;
 }

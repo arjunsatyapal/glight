@@ -17,14 +17,18 @@ package com.google.light.server.guice.module;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.inject.servlet.ServletModule;
+
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.util.Modules;
+import com.google.light.server.annotations.AnotGoogleLoginCallbackUri;
 import com.google.light.server.annotations.AnotHttpSession;
 import com.google.light.server.exception.unchecked.ServerConfigurationException;
 import com.google.light.server.guice.modules.DevServerModule;
 import com.google.light.server.utils.GaeUtils;
+import com.google.light.testingutils.TestingConstants;
 import javax.servlet.http.HttpSession;
 
 /**
@@ -34,25 +38,30 @@ import javax.servlet.http.HttpSession;
  */
 public class UnitTestModule extends AbstractModule {
   private HttpSession httpSession;
-  
+
   public UnitTestModule(HttpSession httpSession) {
     if (!GaeUtils.isUnitTestServer()) {
       throw new ServerConfigurationException(
           "UnitTestModule should be instantiated only for UnitTest Env.");
     }
-    
+
     this.httpSession = checkNotNull(httpSession);
   }
-  
+
   @Override
   protected void configure() {
+    // Guice Bindings for Strings.
+    bind(String.class)
+        .annotatedWith(AnotGoogleLoginCallbackUri.class)
+        .toInstance(TestingConstants.GOOGLE_OAUTH_CB_CMD_LINE_URI);
+
     bind(HttpSession.class)
         .annotatedWith(AnotHttpSession.class)
         .toInstance(httpSession);
   }
 
-  public static Injector getTestInjector(HttpSession httpSession) {
-    return Guice.createInjector(Modules.override(new DevServerModule())
+  public static Injector getTestInjector(HttpSession httpSession, ServletModule servletModule) {
+    return Guice.createInjector(Modules.override(new DevServerModule(), servletModule)
         .with(new UnitTestModule(httpSession)));
   }
 }

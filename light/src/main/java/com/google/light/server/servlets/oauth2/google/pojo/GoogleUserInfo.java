@@ -15,6 +15,10 @@
  */
 package com.google.light.server.servlets.oauth2.google.pojo;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.commons.lang.builder.ToStringBuilder;
+
 import com.google.light.server.servlets.oauth2.google.GoogleOAuth2Helper;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -104,6 +108,21 @@ public class GoogleUserInfo {
     this.locale = accessType;
   }
 
+  @Override
+  public String toString() {
+    return ToStringBuilder.reflectionToString(this);
+  }
+
+  @Override
+  public int hashCode() {
+    return HashCodeBuilder.reflectionHashCode(this);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    return EqualsBuilder.reflectionEquals(this, obj);
+  }
+  
   // For JAXB.
   @JsonCreator
   public GoogleUserInfo() {

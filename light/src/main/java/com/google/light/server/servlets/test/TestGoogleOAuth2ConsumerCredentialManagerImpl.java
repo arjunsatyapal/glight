@@ -15,7 +15,6 @@
  */
 package com.google.light.server.servlets.test;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.constants.RequestParmKeyEnum.CLIENT_ID;
 import static com.google.light.server.constants.RequestParmKeyEnum.CLIENT_SECRET;
 import static com.google.light.server.utils.LightPreconditions.checkIsEnv;
@@ -26,53 +25,53 @@ import com.google.inject.Inject;
 import com.google.light.server.constants.LightEnvEnum;
 import com.google.light.server.constants.OAuth2Provider;
 import com.google.light.server.exception.unchecked.ServerConfigurationException;
-import com.google.light.server.manager.interfaces.OAuth2ConsumerManager;
-import java.io.BufferedReader;
+import com.google.light.server.manager.interfaces.OAuth2ConsumerCredentialManager;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.Properties;
 import java.util.logging.Logger;
 
 /**
- * Test implementation for {@link OAuth2ConsumerManager}.
+ * Test implementation for {@link OAuth2ConsumerCredentialManager}.
  * 
  * TODO(arjuns): Add test for this class.
  * 
  * @author Arjun Satyapal
  */
-public class TestOAuth2ConsumerManagerImpl implements OAuth2ConsumerManager {
-  private static final Logger logger = Logger.getLogger(TestOAuth2ConsumerManagerImpl.class
-      .getName());
+public class TestGoogleOAuth2ConsumerCredentialManagerImpl implements
+    OAuth2ConsumerCredentialManager {
+  private static final Logger logger = Logger.getLogger(
+      TestGoogleOAuth2ConsumerCredentialManagerImpl.class.getName());
 
-  @SuppressWarnings("unused")
-  private OAuth2Provider oAuth2Provider;
+  
+  // TODO(arjuns): See if this needs to be Guice Injected eventually.
+  private OAuth2Provider oAuth2Provider = OAuth2Provider.GOOGLE_LOGIN;
   private String clientId;
   private String clientSecret;
 
   @Inject
-  public TestOAuth2ConsumerManagerImpl(OAuth2Provider oauth2Provider) {
+  public TestGoogleOAuth2ConsumerCredentialManagerImpl() {
     checkIsEnv(this, LightEnvEnum.DEV_SERVER, LightEnvEnum.UNIT_TEST);
-    
-    this.oAuth2Provider = checkNotNull(oauth2Provider);
-    validateOrCreateConsumerCredentials(oauth2Provider);
+    validateOrCreateConsumerCredentials(oAuth2Provider);
   }
 
   /**
    * All resource consumer credentials should be stored at
-   * ~/credentials/oauth2/consumer/<provider-name>.
+   * {@link #CREDENTIALS_DIR}/oauth2/consumer/<provider-name>.
    * 
-   * e.g. For Google Provider, it will look like : ~/credentials/oauth2/consumer/google
+   * e.g. For Google Provider, it will look like : {@link #CREDENTIALS_DIR}/oauth2/consumer/google
    * 
    * @throws IOException
    */
-  private void validateOrCreateConsumerCredentials(OAuth2Provider oauth2Provider) {
+  protected void validateOrCreateConsumerCredentials(OAuth2Provider oauth2Provider) {
     try {
       // TODO(arjuns) : Refactor this part when more OAuthConsumer targets are added.
-      String consumerCredentialPath = getHomeDir() + "/credentials/oauth2/consumer/"
-          + oauth2Provider.getProviderName();
+      String consumerCredentialPath = CredentialUtils.getConsumerCredentialDir(
+          LightEnvEnum.getLightEnv(),
+          CredentialStandardEnum.OAUTH2,
+          OAuth2Provider.GOOGLE_LOGIN);
       File consumerCredentialFile = new File(consumerCredentialPath);
 
       boolean fileIsValid = false;
@@ -118,8 +117,8 @@ public class TestOAuth2ConsumerManagerImpl implements OAuth2ConsumerManager {
     StringBuilder builder =
         new StringBuilder("Appengine does not allow creating of files. So create a file at \n"
             + consumerCredentialPath + "\n and put following content into it : "
-            + "\n" + CLIENT_ID + "=<put your clientId here>"
-            + "\n" + CLIENT_SECRET + "=<put your clientSecret here.>");
+            + "\n" + CLIENT_ID.get() + "=<put your clientId here>"
+            + "\n" + CLIENT_SECRET.get() + "=<put your clientSecret here.>");
     throw new ServerConfigurationException(builder.toString());
   }
 
@@ -141,8 +140,12 @@ public class TestOAuth2ConsumerManagerImpl implements OAuth2ConsumerManager {
     Properties properties = new Properties();
     properties.load(new FileInputStream(consumerCredentialPath));
 
-    this.clientId = checkNotBlank(properties.getProperty(CLIENT_ID.get()));
-    this.clientSecret = checkNotBlank(properties.getProperty(CLIENT_SECRET.get()));
+    /*
+     * After fetching values from file, we are trimming it in order to ensure there were no extra 
+     * spaces introduced while creating the credential file.
+     */
+    this.clientId = checkNotBlank(properties.getProperty(CLIENT_ID.get())).trim();
+    this.clientSecret = checkNotBlank(properties.getProperty(CLIENT_SECRET.get())).trim();
     return true;
   }
 
@@ -160,17 +163,5 @@ public class TestOAuth2ConsumerManagerImpl implements OAuth2ConsumerManager {
   @Override
   public String getClientSecret() {
     return clientSecret;
-  }
-
-  public static String readLineFromConsole(String message) throws IOException {
-    System.out.println(message);
-    InputStreamReader converter = new InputStreamReader(System.in);
-    BufferedReader in = new BufferedReader(converter);
-
-    return checkNotBlank(in.readLine());
-  }
-
-  public static String getHomeDir() {
-    return System.getProperty("user.home");
   }
 }

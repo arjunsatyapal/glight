@@ -70,7 +70,7 @@ public class LightServletModule extends ServletModule {
   private void initFilters(FilterPathEnum filter) {
     bind(filter.getClazz()).in(Scopes.SINGLETON);
     for (String currPattern : filter.getUrlPatterns()) {
-      logger.info("Binding [" + currPattern + "] to filter [" + filter.getClazz() + "].");
+      logger.finest("Binding [" + currPattern + "] to filter [" + filter.getClazz() + "].");
       filter(currPattern).through(filter.getClazz());
     }
   }
@@ -80,9 +80,9 @@ public class LightServletModule extends ServletModule {
    */
   private void initServlet(ServletPathEnum servletPath) {
     bind(servletPath.getClazz()).in(Scopes.SINGLETON);
-    logger.info("Binding [" + servletPath.get() + "] to Servlet [" + servletPath.getClazz() + "].");
+    logger.finest("Binding [" + servletPath.get() + "] to Servlet [" + servletPath.getClazz() + "].");
     serve(servletPath.get()).with(servletPath.getClazz());
-    logger.info("Binding [" + servletPath.getRoot() + "] to Servlet [" + servletPath.getClazz()
+    logger.finest("Binding [" + servletPath.getRoot() + "] to Servlet [" + servletPath.getClazz()
         + "].");
     serve(servletPath.getRoot()).with(servletPath.getClazz());
   }

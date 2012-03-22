@@ -24,4 +24,8 @@ import com.google.api.client.http.GenericUrl;
  */
 public class TestingConstants {
   public static final GenericUrl devServerUrl =  new GenericUrl("http://localhost:8080/_ah/login");
+  
+  public static final String GOOGLE_OAUTH_CB_CMD_LINE_URI = "urn:ietf:wg:oauth:2.0:oob";
+  
+  public static final String RESOURCE_OWNER_EMAIL = "unit-test1@myopenedu.com";
 }

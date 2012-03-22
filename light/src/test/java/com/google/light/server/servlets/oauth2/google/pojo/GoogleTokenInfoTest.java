@@ -15,12 +15,14 @@
  */
 package com.google.light.server.servlets.oauth2.google.pojo;
 
+import static com.google.light.server.constants.OAuth2Provider.GOOGLE_LOGIN;
+import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
+import static com.google.light.testingutils.TestResourcePaths.GOOGLE_TOKEN_INFO_JSON;
 import static com.google.light.testingutils.TestingUtils.getResourceAsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import com.google.inject.internal.Sets;
-import com.google.light.server.servlets.oauth2.google.GoogleOAuth2Helper;
 import com.google.light.server.utils.JsonUtils;
 import java.util.Set;
 import org.junit.Test;
@@ -31,15 +33,12 @@ import org.junit.Test;
  * @author Arjun Satyapal
  */
 public class GoogleTokenInfoTest {
-  private static final String GOOGLE_TOKEN_INFO_JSON_FILE_PATH = 
-      "/login/oauth2/google/google_token_info.json";
-  
   /**
    * Test to validate JSON Parsing for {@link GoogleTokenInfo}.
    */
   @Test
   public void test_jsonToGoogleTokenInfo_Parsing() throws Exception {
-    String jsonString = getResourceAsString(GOOGLE_TOKEN_INFO_JSON_FILE_PATH);
+    String jsonString = getResourceAsString(GOOGLE_TOKEN_INFO_JSON.get());
     GoogleTokenInfo tokenInfo = JsonUtils.getDto(jsonString, GoogleTokenInfo.class);
     
     assertEquals("1234.apps.googleusercontent.com", tokenInfo.getIssuedTo());
@@ -47,7 +46,7 @@ public class GoogleTokenInfoTest {
     assertEquals("123456789", tokenInfo.getUserId());
     
     Set<String> expectedScope = Sets.newLinkedHashSet();
-    for (String currScope : GoogleOAuth2Helper.LOGIN_SCOPE) {
+    for (String currScope : GOOGLE_LOGIN.getScopes()) {
       expectedScope.add(currScope);
     }
     
@@ -58,7 +57,7 @@ public class GoogleTokenInfoTest {
     
     assertEquals(expectedScope, actualScope);
     
-    assertEquals(3600, tokenInfo.getExpiresInSeconds());
+    checkPositiveLong(tokenInfo.getExpiresInMillis());
     assertEquals("unit-test1@myopenedu.com", tokenInfo.getEmail());
     assertTrue(tokenInfo.getVerifiedEmail());
     assertEquals("online", tokenInfo.getAccessType());

@@ -13,13 +13,21 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.server.servlets.oauth2.google.pojo;
+package com.google.light.server.annotations;
+
+import com.google.inject.BindingAnnotation;
+
+import java.lang.annotation.RetentionPolicy;
+
+import java.lang.annotation.Retention;
 
 /**
- * Integration test for {@link GoogleOAuth2HelperITCase}.
- * TODO(arjuns): Add more tests here.
+ * {@link BindingAnnotation} for Google Login Callback URI. This annotation is required
+ * because it is different when you are in a browser vs command line.
+ * 
  * @author Arjun Satyapal
  */
-public class GoogleOAuth2HelperITCase {
-
+@BindingAnnotation
+@Retention(RetentionPolicy.RUNTIME)
+public @interface AnotGoogleLoginCallbackUri {
 }

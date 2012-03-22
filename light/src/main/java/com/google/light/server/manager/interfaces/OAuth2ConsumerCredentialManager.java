@@ -13,20 +13,21 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.server.annotations;
-
-import com.google.inject.BindingAnnotation;
-
-import java.lang.annotation.RetentionPolicy;
-
-import java.lang.annotation.Retention;
+package com.google.light.server.manager.interfaces;
 
 /**
- * {@link BindingAnnotation} for OAuth2 consumer for whom OAuth2 resource Provider is Google.
+ * All OAuth Consumer Implementations should implement this.
  * 
+ * TODO(arjuns): Add test for this class.
+ *
  * @author Arjun Satyapal
  */
-@BindingAnnotation
-@Retention(RetentionPolicy.RUNTIME)
-public @interface AnotOAuth2ConsumerGoogleLogin {
+public interface OAuth2ConsumerCredentialManager {
+  /**
+   * Return OAuth2 client_id 
+   * @return
+   */
+  public String getClientId();
+  
+  public String getClientSecret();
 }

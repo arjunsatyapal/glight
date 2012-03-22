@@ -15,11 +15,21 @@
  */
 package com.google.light.server.servlets.oauth2.google.pojo;
 
+import static com.google.light.server.utils.LightPreconditions.checkEmail;
+import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
+import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
+import static com.google.light.server.utils.LightUtils.getCurrentTimeInMillis;
+
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.commons.lang.builder.ToStringBuilder;
+
 import com.google.light.server.servlets.oauth2.google.GoogleOAuth2Helper;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 import org.codehaus.jackson.annotate.JsonCreator;
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
@@ -28,20 +38,29 @@ import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
  * Java representation for the JSON object returned by Google as a response to
  * {@link GoogleOAuth2Helper#getTokenInfo(String)}
  * 
+ * TODO(arjuns): Update tests.
+ * 
  * @author Arjun Satyapal
  */
 @XmlRootElement(name = "TokenInfo")
 @XmlAccessorType(XmlAccessType.PROPERTY)
 @JsonSerialize(include = Inclusion.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown=true)
 public class GoogleTokenInfo {
   private String issuedTo;
   private String audience;
   private String userId;
   private String scope;
-  private long expiresInSeconds;
+  private long expiresInMillis;
   private String email;
   private boolean verifiedEmail;
   private String accessType;
+  
+  // Following values are fetched from TokenResponse.
+  private String tokenType;
+  private String accessToken;
+  private String refreshToken;
+  
 
   @JsonProperty(value = "issued_to")
   public String getIssuedTo() {
@@ -79,13 +98,38 @@ public class GoogleTokenInfo {
   }
 
   @JsonProperty(value = "expires_in")
-  public long getExpiresInSeconds() {
-    return expiresInSeconds;
+  public long getExpiresInMillis() {
+    return expiresInMillis;
   }
 
+  /**
+   * From Google, we receive expiry in Seconds from time of Generation of AccessToken.
+   * We convert it to absolute expiry time in millis so that calculation of expiry
+   * time becomes easier as we dont have to store the token creationTime. In case its required
+   * then it can be reverse computed. 
+   * 
+   * In addition to that, we are deliberately shortening the life of AccessToken by 10 minutes.
+   * Reason for doing this is we have a TimeOut of 30seconds for FrontEnd and 10 minutes for 
+   * TaskQueues. And we don't want to get any access exception during those tasks. 
+   * In addition in future, once we start using FrontEnds, still we may not want to run any task 
+   * for more then 10 mins. If some task happens to run for more then 10minutes, then at that time
+   * that task should take care of this.
+   * 
+   * TODO(arjuns) : Add support for automatic refreshing when token expires.
+   * 
+   * @param expiresInSecFromNow
+   */
   @JsonProperty(value = "expires_in")
-  public void setExpiresInSeconds(long expiresInSeconds) {
-    this.expiresInSeconds = expiresInSeconds;
+  public void setExpiresInMillis(long expiresInSecFromNow) {
+    long nowInMillis = getCurrentTimeInMillis();
+    long modifiedExpiryInMillis = (expiresInSecFromNow - 10*60 /*10mins*/) * 1000;
+    if (modifiedExpiryInMillis < 0) {
+      modifiedExpiryInMillis = 0;
+    }
+    
+    long actualExpiryInMillis = nowInMillis + modifiedExpiryInMillis;
+    
+    this.expiresInMillis = actualExpiryInMillis;
   }
 
   public String getEmail() {
@@ -114,6 +158,84 @@ public class GoogleTokenInfo {
   @JsonProperty(value = "access_type")
   public void setAccessType(String accessType) {
     this.accessType = accessType;
+  }
+  
+  @JsonProperty(value = "token_type")
+  public String getTokenType() {
+    return tokenType;
+  }
+  // TODO(arjuns): At the time of persistence, ensure that this value is set, as 
+  // it does not come directly from the TokenInfo Url, but is present, when it was created.
+  @JsonProperty(value = "token_type")
+  public void setTokenType(String tokenType) {
+    this.tokenType = tokenType;
+  }
+  
+  @JsonProperty(value = "access_token")
+  public String getAccessToken() {
+    return accessToken;
+  }
+  
+  // TODO(arjuns): At the time of persistence, ensure that this value is set, as 
+  // it does not come directly from the TokenInfo Url, but is present, when it was created.
+  @JsonProperty(value = "access_token")
+  public void setAccessToken(String accessToken) {
+    this.accessToken = accessToken;
+  }
+  
+  @JsonProperty(value = "refresh_token")
+  public String getRefreshToken() {
+    return refreshToken;
+  }
+  // TODO(arjuns): At the time of persistence, ensure that this value is set, as 
+  // it does not come directly from the TokenInfo Url, but is present, when it was created.
+  @JsonProperty(value = "refresh_token")
+  public void setRefreshToken(String refreshToken) {
+    this.refreshToken = refreshToken;
+  }
+  
+  /**
+   * Ensures that all values are set. This does not check whether token is expired or not. 
+   */
+  public void validate() {
+    checkNotBlank(issuedTo, "issuedTo");
+    checkNotBlank(audience, "audience");
+    checkNotBlank(userId, "userId");
+    checkNotBlank(scope, "scope");
+    checkNotBlank(issuedTo, "issuedTo");
+    // TOOD(arjuns): Add some helper methods for expiry.
+    checkPositiveLong(expiresInMillis);
+    checkEmail(email);
+    checkNotBlank(issuedTo, "issuedTo");
+    checkNotBlank(accessType, "accessType");
+    
+    // Following values are fetched from TokenResponse.
+    checkNotBlank(tokenType, "tokenType");
+    checkNotBlank(accessToken, "accessToken");
+    checkNotBlank(refreshToken, "refreshToken");
+  }
+  
+  public boolean isAccessTokenExpired() {
+    if (getCurrentTimeInMillis() > expiresInMillis) {
+      return true;
+    }
+    
+    return false;
+  }
+  
+  @Override
+  public String toString() {
+    return ToStringBuilder.reflectionToString(this);
+  }
+
+  @Override
+  public int hashCode() {
+    return HashCodeBuilder.reflectionHashCode(this);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    return EqualsBuilder.reflectionEquals(this, obj);
   }
 
   // For JAXB.

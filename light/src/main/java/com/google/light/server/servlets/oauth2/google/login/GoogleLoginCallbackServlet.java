@@ -4,8 +4,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.constants.OAuth2Provider.GOOGLE_LOGIN;
 import static com.google.light.server.servlets.path.ServletPathEnum.SESSION;
 import static com.google.light.server.utils.ServletUtils.getRequestUriWithQueryParams;
-
-import com.google.light.server.utils.GaeUtils;
+import static com.google.light.server.utils.ServletUtils.getServerUrl;
 
 import com.google.api.client.auth.oauth2.AuthorizationCodeResponseUrl;
 import com.google.api.client.auth.oauth2.TokenResponse;
@@ -15,6 +14,7 @@ import com.google.light.server.exception.unchecked.GoogleLoginException;
 import com.google.light.server.servlets.oauth2.google.GoogleOAuth2Helper;
 import com.google.light.server.servlets.oauth2.google.pojo.GoogleTokenInfo;
 import com.google.light.server.servlets.oauth2.google.pojo.GoogleUserInfo;
+import com.google.light.server.utils.GaeUtils;
 import com.google.light.server.utils.LightUtils;
 import java.io.IOException;
 import java.util.logging.Logger;
@@ -22,6 +22,13 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+/**
+ * Servlet called by Google during Google Login flow.
+ * 
+ * TODO(arjuns): Add test for this.
+ *
+ * @author arjuns@google.com (Arjun Satyapal)
+ */
 @SuppressWarnings("serial")
 public class GoogleLoginCallbackServlet extends HttpServlet {
   private static final Logger logger = Logger.getLogger(GoogleLoginCallbackServlet.class.getName());
@@ -46,10 +53,10 @@ public class GoogleLoginCallbackServlet extends HttpServlet {
     } else if (authorizationCodeResponseUrl.getError() != null) {
       onError(request, response, authorizationCodeResponseUrl);
     } else {
-      TokenResponse tokenResponse = googleOAuth2Helper.getAccessToken(request, code);
+      TokenResponse tokenResponse = googleOAuth2Helper.getAccessToken(getServerUrl(request), code);
       logger.info("accessToken = " + tokenResponse.getAccessToken());
       GoogleTokenInfo tokenInfo = googleOAuth2Helper.getTokenInfo(tokenResponse.getAccessToken());
-      logger.info("tokenExpiry time = " + tokenInfo.getExpiresInSeconds());
+      logger.info("tokenExpiry time = " + tokenInfo.getExpiresInMillis());
       GoogleUserInfo userInfo = googleOAuth2Helper.getUserInfo(tokenResponse.getAccessToken());
 
       onSuccess(request, response, tokenInfo, userInfo);

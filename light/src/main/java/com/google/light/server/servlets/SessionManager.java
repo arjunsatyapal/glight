@@ -26,7 +26,6 @@ import static com.google.light.server.utils.LightPreconditions.checkPersonId;
 import com.google.inject.Inject;
 import com.google.light.server.annotations.AnotHttpSession;
 import com.google.light.server.constants.OAuth2Provider;
-import com.google.light.server.constants.RequestParmKeyEnum;
 import com.google.light.server.exception.unchecked.httpexception.PersonLoginRequiredException;
 import javax.servlet.http.HttpSession;
 
@@ -68,7 +67,7 @@ public class SessionManager {
    * @return
    */
   public String getLoginProviderUserEmail() {
-    String email = (String) session.getAttribute(RequestParmKeyEnum.LOGIN_PROVIDER_USER_EMAIL.get());
+    String email = (String) session.getAttribute(LOGIN_PROVIDER_USER_EMAIL.get());
     return checkEmail(email);
   }
 

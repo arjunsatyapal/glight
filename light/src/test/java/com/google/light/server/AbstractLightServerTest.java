@@ -12,28 +12,24 @@
  */
 package com.google.light.server;
 
-import static com.google.light.server.constants.RequestParmKeyEnum.LOGIN_PROVIDER_ID;
-import static com.google.light.server.constants.RequestParmKeyEnum.LOGIN_PROVIDER_USER_EMAIL;
-import static com.google.light.server.constants.RequestParmKeyEnum.LOGIN_PROVIDER_USER_ID;
+import static com.google.light.testingutils.TestingUtils.getMockSessionForTesting;
 import static com.google.light.testingutils.TestingUtils.getRandomEmail;
 import static com.google.light.testingutils.TestingUtils.getRandomFederatedId;
 import static com.google.light.testingutils.TestingUtils.getRandomString;
 import static com.google.light.testingutils.TestingUtils.getRandomUserId;
-import static org.mockito.Mockito.when;
 
 import com.google.inject.Injector;
 import com.google.light.server.constants.LightEnvEnum;
 import com.google.light.server.constants.OAuth2Provider;
 import com.google.light.server.guice.TestInstanceProvider;
-import com.google.light.server.guice.module.UnitTestModule;
 import com.google.light.server.guice.providers.InstanceProvider;
 import com.google.light.testingutils.GaeTestingUtils;
+import com.google.light.testingutils.TestingUtils;
 import javax.servlet.http.HttpSession;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.mockito.Mockito;
 
 /**
  * Base class for all the Light Server Tests.
@@ -57,21 +53,17 @@ public abstract class AbstractLightServerTest {
   protected TestInstanceProvider testInstanceProvider;
   protected static GaeTestingUtils gaeTestingUtils = null;
 
+  // TODO(arjuns): Fix this setup part so that we dont see exceptions in console.
   @BeforeClass
   public static void gaeSetup() {
     // This causes GAE Test Setup once.
-    gaeTestingUtils =
-        new GaeTestingUtils(defaultEnv, defaultLoginProvider, getRandomEmail(),
-            getRandomFederatedId(), true /* isFederatedUser */, getRandomUserId(),
-            true /* isUserLoggedIn */, false /* isGaeAdmin */);
-    gaeTestingUtils.setUp();
-
+    gaeTestingUtils = TestingUtils.gaeSetup(defaultEnv);
     /*
      * Deliberately keeping this false so that each test is forced to initiate with its own Env with
      * each setup.
      */
 
-    gaeSetupDone = false;
+    gaeSetupDone = true;
   }
 
   @AfterClass
@@ -113,12 +105,9 @@ public abstract class AbstractLightServerTest {
       gaeEnvReset(defaultLoginProvider, testEmail, testFederatedId, testUserId,
           true /* loggedIn */, false /* isAdmin */);
     }
-    HttpSession mockSession = Mockito.mock(HttpSession.class);
-    when(mockSession.getAttribute(LOGIN_PROVIDER_ID.get())).thenReturn(defaultLoginProvider.name());
-    when(mockSession.getAttribute(LOGIN_PROVIDER_USER_ID.get())).thenReturn(testUserId);
-    when(mockSession.getAttribute(LOGIN_PROVIDER_USER_EMAIL.get())).thenReturn(testEmail);
+    HttpSession mockSession = getMockSessionForTesting(defaultLoginProvider, testUserId, testEmail);
 
-    injector = UnitTestModule.getTestInjector(mockSession);
+    injector = TestingUtils.getInjectorByEnv(LightEnvEnum.UNIT_TEST, mockSession);
     instanceProvider = injector.getInstance(InstanceProvider.class);
     testInstanceProvider = injector.getInstance(TestInstanceProvider.class);
   }

@@ -22,6 +22,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import com.google.light.server.constants.LightEnvEnumTest;
+
 import com.google.appengine.api.utils.SystemProperty;
 import com.google.light.server.constants.LightEnvEnum;
 import com.google.light.testingutils.GaeTestingUtils;
@@ -33,17 +35,17 @@ import org.junit.Test;
  * @author Arjun Satyapal
  */
 public class GaeUtilsTest {
+  private GaeTestingUtils gaeTestingUtils = null;
   /**
    * Test for {@link GaeUtils#getAppId()}.
+   * This is just one test for QA Env. Others are done as part of the {@link LightEnvEnumTest}.
    */
   @Test
   public void test_getAppId() {
-    // First appId for QA env.
     String expectedAppId = "s~light-qa";
-    GaeTestingUtils gaeTestingUtils = gaeSetup(LightEnvEnum.QA);
 
     try {
-      gaeTestingUtils.setUp();
+      gaeTestingUtils = gaeSetup(LightEnvEnum.QA);
       assertEquals(expectedAppId, GaeUtils.getAppId());
     } finally {
       gaeTestingUtils.tearDown();
@@ -55,10 +57,8 @@ public class GaeUtilsTest {
    */
   @Test
   public void test_isDevServer() {
-    // First appId for QA env.
-    GaeTestingUtils gaeTestingUtils = gaeSetup(LightEnvEnum.DEV_SERVER);
     try {
-      gaeTestingUtils.setUp();
+      gaeTestingUtils = gaeSetup(LightEnvEnum.DEV_SERVER);
       assertTrue(GaeUtils.isDevServer());
       assertFalse(GaeUtils.isProductionServer());
       assertFalse(GaeUtils.isQaServer());
@@ -75,11 +75,8 @@ public class GaeUtilsTest {
    */
   @Test
   public void test_isProductionServer() {
-    // First appId for QA env.
-    GaeTestingUtils gaeTestingUtils = gaeSetup(LightEnvEnum.PROD);
-
     try {
-      gaeTestingUtils.setUp();
+      gaeTestingUtils = gaeSetup(LightEnvEnum.PROD);
       assertFalse(GaeUtils.isDevServer());
       assertTrue(GaeUtils.isProductionServer());
       assertFalse(GaeUtils.isQaServer());
@@ -96,11 +93,8 @@ public class GaeUtilsTest {
    */
   @Test
   public void test_isQaServer() {
-    // First appId for QA env.
-    GaeTestingUtils gaeTestingUtils = gaeSetup(LightEnvEnum.QA);
-
     try {
-      gaeTestingUtils.setUp();
+      gaeTestingUtils = gaeSetup(LightEnvEnum.QA);
       assertFalse(GaeUtils.isDevServer());
       assertFalse(GaeUtils.isProductionServer());
       assertTrue(GaeUtils.isQaServer());
@@ -118,19 +112,29 @@ public class GaeUtilsTest {
    */
   @Test
   public void test_isRunningOnGae() {
-    // nothing to test.
+    try {
+      gaeTestingUtils = gaeSetup(LightEnvEnum.QA);
+      assertTrue(GaeUtils.isRunningOnGAE());
+    } finally {
+      gaeTestingUtils.tearDown();
+    }
+    
+    try {
+      gaeTestingUtils = gaeSetup(LightEnvEnum.PROD);
+      assertTrue(GaeUtils.isRunningOnGAE());
+    } finally {
+      gaeTestingUtils.tearDown();
+    }
   }
+  
   
   /**
    * Test for {@link GaeUtils#isUnitTestServer()}
    */
   @Test
   public void test_isUnitTestServer() {
-    // First appId for QA env.
-    GaeTestingUtils gaeTestingUtils = gaeSetup(LightEnvEnum.UNIT_TEST);
-
     try {
-      gaeTestingUtils.setUp();
+      gaeTestingUtils = gaeSetup(LightEnvEnum.UNIT_TEST);
       assertFalse(GaeUtils.isDevServer());
       assertFalse(GaeUtils.isProductionServer());
       assertFalse(GaeUtils.isQaServer());

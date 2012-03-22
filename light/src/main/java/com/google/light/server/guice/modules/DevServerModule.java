@@ -17,11 +17,10 @@ package com.google.light.server.guice.modules;
 
 import static com.google.light.server.utils.LightPreconditions.checkIsEnv;
 
-import com.google.light.server.annotations.AnotOAuth2ConsumerGoogleLogin;
+import com.google.inject.Scopes;
 import com.google.light.server.constants.LightEnvEnum;
-import com.google.light.server.constants.OAuth2Provider;
-import com.google.light.server.manager.interfaces.OAuth2ConsumerManager;
-import com.google.light.server.servlets.test.TestOAuth2ConsumerManagerImpl;
+import com.google.light.server.manager.interfaces.OAuth2ConsumerCredentialManager;
+import com.google.light.server.servlets.test.TestGoogleOAuth2ConsumerCredentialManagerImpl;
 
 
 /**
@@ -41,8 +40,8 @@ public class DevServerModule extends BaseGuiceModule {
     super.configure();
     
     // Add QA Environment specific bindings here.
-    bind(OAuth2ConsumerManager.class)
-        .annotatedWith(AnotOAuth2ConsumerGoogleLogin.class)
-        .toInstance(new TestOAuth2ConsumerManagerImpl(OAuth2Provider.GOOGLE_LOGIN));
+    bind(OAuth2ConsumerCredentialManager.class)
+      .to(TestGoogleOAuth2ConsumerCredentialManagerImpl.class)
+      .in(Scopes.SINGLETON);
   }
 }

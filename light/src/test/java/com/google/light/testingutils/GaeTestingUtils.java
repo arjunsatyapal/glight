@@ -16,9 +16,8 @@
 package com.google.light.testingutils;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.inject.Injector;
-import com.google.inject.servlet.GuiceFilter;
+import static com.google.light.server.utils.LightPreconditions.checkEmail;
+import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
 import com.google.appengine.api.utils.SystemProperty;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
@@ -27,9 +26,12 @@ import com.google.appengine.tools.development.testing.LocalTaskQueueTestConfig;
 import com.google.appengine.tools.development.testing.LocalUserServiceTestConfig;
 import com.google.apphosting.api.ApiProxy;
 import com.google.apphosting.api.ApiProxy.Environment;
+import com.google.inject.Injector;
+import com.google.inject.servlet.GuiceFilter;
 import com.google.light.server.constants.LightEnvEnum;
 import com.google.light.server.constants.OAuth2Provider;
 import com.google.light.server.utils.GaeUtils;
+import javax.servlet.http.HttpSession;
 
 /**
  * Helper class for tweaking GAE Environment Parameters. Some getters are similar to
@@ -40,6 +42,13 @@ import com.google.light.server.utils.GaeUtils;
  */
 public class GaeTestingUtils {
   private LightEnvEnum env;
+  private OAuth2Provider provider;
+  private String email;
+  private String federatedId; 
+  private String isFederated;
+  private String userId;
+  private boolean loggedIn;
+  private boolean isAdmin;
   
   /** See similar variables in {@link com.google.appengine.api.users.UserServiceImpl} */
   static final String USER_ID_KEY =
@@ -59,6 +68,16 @@ public class GaeTestingUtils {
   public GaeTestingUtils(LightEnvEnum env, OAuth2Provider provider, String email,
       String federatedId, Boolean isFederated, String userId, boolean loggedIn,
       boolean isAdmin) {
+    this.env = checkNotNull(env);
+    this.provider = checkNotNull(provider);
+    this.email = checkEmail(email);
+    this.federatedId = checkNotBlank(federatedId);
+    this.isFederated = this.isFederated;
+    this.userId = checkNotBlank(userId);
+    this.loggedIn = loggedIn;
+    this.isAdmin = isAdmin;
+    
+    
     this.env = checkNotNull(env);
     switch (env) {
       case DEV_SERVER:
@@ -101,7 +120,8 @@ public class GaeTestingUtils {
    * Teardown GAE testing environment.
    */
   public void tearDown() {
-    Injector injector = TestingUtils.getInjectorByEnv(env);
+    HttpSession mockSession = TestingUtils.getMockSessionForTesting(provider, userId, email);
+    Injector injector = TestingUtils.getInjectorByEnv(env, mockSession);
     injector.getInstance(GuiceFilter.class).destroy();
     gaeTestHelper.tearDown();
   }

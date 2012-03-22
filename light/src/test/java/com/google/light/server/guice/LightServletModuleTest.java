@@ -15,16 +15,21 @@
  */
 package com.google.light.server.guice;
 
+import static com.google.light.testingutils.TestingUtils.getMockSessionForTesting;
+import static com.google.light.testingutils.TestingUtils.getRandomEmail;
+import static com.google.light.testingutils.TestingUtils.getRandomUserId;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.google.inject.Injector;
 import com.google.inject.servlet.GuiceFilter;
 import com.google.light.server.constants.LightEnvEnum;
+import com.google.light.server.constants.OAuth2Provider;
 import com.google.light.testingutils.GaeTestingUtils;
 import com.google.light.testingutils.TestingUtils;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpSession;
 import org.junit.Test;
 
 /**
@@ -39,18 +44,24 @@ public class LightServletModuleTest {
   @Test
   public void test_ensureBindingPossible() throws Exception {
     for (LightEnvEnum currEnv : LightEnvEnum.values()) {
+      HttpSession session = null;
+      if (currEnv == LightEnvEnum.UNIT_TEST) {
+        session = getMockSessionForTesting(OAuth2Provider.GOOGLE_LOGIN, getRandomUserId(),
+            getRandomEmail());
+      }
       GaeTestingUtils gaeTestingUtils = TestingUtils.gaeSetup(currEnv);
       try {
+        Injector injector = TestingUtils.getInjectorByEnv(currEnv, session);
 
-        Injector injector = TestingUtils.getInjectorByEnv(currEnv);
-        
         GuiceFilter filter = injector.getInstance(GuiceFilter.class);
         FilterConfig filterConfig = mock(FilterConfig.class);
         ServletContext context = mock(ServletContext.class);
-        
+
         when(filterConfig.getServletContext()).thenReturn(context);
         filter.init(filterConfig);
         filter.destroy();
+      } catch (Exception e) {
+        throw new Exception("Failed for : " + currEnv, e);
       } finally {
         gaeTestingUtils.tearDown();
       }

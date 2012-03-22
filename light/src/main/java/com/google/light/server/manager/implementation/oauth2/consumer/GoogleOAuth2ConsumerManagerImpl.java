@@ -17,11 +17,11 @@ package com.google.light.server.manager.implementation.oauth2.consumer;
 
 import com.google.inject.Inject;
 import com.google.light.server.constants.OAuth2Provider;
-import com.google.light.server.manager.interfaces.OAuth2ConsumerManager;
+import com.google.light.server.manager.interfaces.OAuth2ConsumerCredentialManager;
 import com.google.light.server.persistence.dao.OAuth2ConsumerCredentialDao;
 
 /**
- * Test implementation for {@link OAuth2ConsumerManager}.
+ * Test implementation for {@link OAuth2ConsumerCredentialManager}.
  * 
  * TODO(arjuns): Add test for this class.
  * 

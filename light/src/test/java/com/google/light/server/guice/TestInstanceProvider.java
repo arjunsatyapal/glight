@@ -16,13 +16,11 @@
 package com.google.light.server.guice;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.light.server.utils.GuiceUtils.getKeyForScopeSeed;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-import com.google.light.server.annotations.AnotOAuth2ConsumerGoogleLogin;
 import com.google.light.server.guice.providers.InstanceProvider;
-import com.google.light.server.manager.interfaces.OAuth2ConsumerManager;
+import com.google.light.server.manager.interfaces.OAuth2ConsumerCredentialManager;
 import com.google.light.server.persistence.dao.PersonDao;
 
 /**
@@ -42,8 +40,7 @@ public class TestInstanceProvider {
     return checkNotNull(injector.getInstance(PersonDao.class));
   }
   
-  public OAuth2ConsumerManager oauth2ConsumerGoogleLogin() {
-    return checkNotNull(injector.getInstance(
-        getKeyForScopeSeed(OAuth2ConsumerManager.class, AnotOAuth2ConsumerGoogleLogin.class)));
+  public OAuth2ConsumerCredentialManager oauth2ConsumerGoogleLogin() {
+    return checkNotNull(injector.getInstance(OAuth2ConsumerCredentialManager.class));
   }
 }

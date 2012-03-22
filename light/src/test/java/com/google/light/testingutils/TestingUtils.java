@@ -15,7 +15,12 @@
  */
 package com.google.light.testingutils;
 
-import static org.mockito.Mockito.mock;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.light.server.constants.RequestParmKeyEnum.LOGIN_PROVIDER_ID;
+import static com.google.light.server.constants.RequestParmKeyEnum.LOGIN_PROVIDER_USER_EMAIL;
+import static com.google.light.server.constants.RequestParmKeyEnum.LOGIN_PROVIDER_USER_ID;
+import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
+import static org.mockito.Mockito.when;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -28,11 +33,15 @@ import com.google.light.server.guice.modules.DevServerModule;
 import com.google.light.server.guice.modules.ProdModule;
 import com.google.light.server.guice.modules.QaModule;
 import com.google.light.server.utils.LightUtils;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
+import javax.annotation.Nullable;
 import javax.servlet.http.HttpSession;
+import org.mockito.Mockito;
 
 /**
  * 
@@ -114,12 +123,13 @@ public class TestingUtils {
   }
 
   /**
-   * Get Injector on the basis of the Environment.
-   * TODO(arjuns): Move other injector creations to use this.
+   * Get Injector on the basis of the Environment. TODO(arjuns): Move other injector creations to
+   * use this.
+   * 
    * @param env
    * @return
    */
-  public static Injector getInjectorByEnv(LightEnvEnum env) {
+  public static Injector getInjectorByEnv(LightEnvEnum env, @Nullable HttpSession session) {
     ServletModule servletModule = new LightServletModule();
     switch (env) {
       case DEV_SERVER:
@@ -132,7 +142,7 @@ public class TestingUtils {
         return Guice.createInjector(new QaModule(), servletModule);
 
       case UNIT_TEST:
-        return UnitTestModule.getTestInjector(mock(HttpSession.class));
+        return UnitTestModule.getTestInjector(checkNotNull(session), servletModule);
 
       default:
         throw new IllegalArgumentException("Unknown env : " + env);
@@ -140,9 +150,8 @@ public class TestingUtils {
   }
 
   /**
-   * Utility method so that a test which needs to have GAE env setup
-   * but does not care about basic things, then can use this method.
-   * TODO(arjuns): Move all the GAE setups to use this eventually.
+   * Utility method so that a test which needs to have GAE env setup but does not care about basic
+   * things, then can use this method. TODO(arjuns): Move all the GAE setups to use this eventually.
    */
   public static GaeTestingUtils gaeSetup(LightEnvEnum env) {
     GaeTestingUtils gaeTestingUtils =
@@ -157,5 +166,23 @@ public class TestingUtils {
     gaeTestingUtils.setUp();
 
     return gaeTestingUtils;
+  }
+
+  public static String readLineFromConsole(String message) throws IOException {
+    System.out.println(message);
+    InputStreamReader converter = new InputStreamReader(System.in);
+    BufferedReader in = new BufferedReader(converter);
+
+    return checkNotBlank(in.readLine());
+  }
+
+  public static HttpSession getMockSessionForTesting(OAuth2Provider provider, String userId,
+      String email) {
+    HttpSession mockSession = Mockito.mock(HttpSession.class);
+    when(mockSession.getAttribute(LOGIN_PROVIDER_ID.get())).thenReturn(provider.name());
+    when(mockSession.getAttribute(LOGIN_PROVIDER_USER_ID.get())).thenReturn(userId);
+    when(mockSession.getAttribute(LOGIN_PROVIDER_USER_EMAIL.get())).thenReturn(email);
+
+    return mockSession;
   }
 }

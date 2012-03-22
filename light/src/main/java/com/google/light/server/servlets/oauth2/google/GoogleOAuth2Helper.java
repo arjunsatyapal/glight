@@ -16,8 +16,10 @@
 package com.google.light.server.servlets.oauth2.google;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.light.server.servlets.path.ServletPathEnum.LOGIN_GOOGLE_CB;
-import static com.google.light.server.utils.ServletUtils.getServerUrl;
+import static com.google.light.server.constants.OAuth2Provider.GOOGLE_LOGIN;
+import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
+
+import com.google.common.annotations.VisibleForTesting;
 
 import com.google.api.client.auth.oauth2.AuthorizationCodeFlow;
 import com.google.api.client.auth.oauth2.BearerToken;
@@ -34,15 +36,16 @@ import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import com.google.light.server.annotations.AnotOAuth2ConsumerGoogleLogin;
+import com.google.light.server.annotations.AnotGoogleLoginCallbackUri;
+import com.google.light.server.constants.OAuth2Provider;
 import com.google.light.server.guice.providers.InstanceProvider;
-import com.google.light.server.manager.interfaces.OAuth2ConsumerManager;
+import com.google.light.server.manager.interfaces.OAuth2ConsumerCredentialManager;
 import com.google.light.server.servlets.oauth2.google.pojo.GoogleTokenInfo;
 import com.google.light.server.servlets.oauth2.google.pojo.GoogleUserInfo;
+import com.google.light.server.utils.GaeUtils;
 import com.google.light.server.utils.JsonUtils;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import javax.servlet.http.HttpServletRequest;
 
 /**
  * Helper class for Google OAuth.
@@ -52,54 +55,79 @@ import javax.servlet.http.HttpServletRequest;
  * @author Arjun Satyapal
  */
 public class GoogleOAuth2Helper {
-  /** OAuth 2 Login Scope. */
-  public static final String[] LOGIN_SCOPE = {
-    "https://www.googleapis.com/auth/userinfo.email",
-    "https://www.googleapis.com/auth/userinfo.profile",
-  };
-
   private InstanceProvider instanceProvider;
   private HttpTransport httpTransport;
   private JsonFactory jsonFactory;
-  private OAuth2ConsumerManager oauth2ConsumerManager;
+  private OAuth2ConsumerCredentialManager consumerCredentialManager;
+  private String googleLoginCbUri;
 
   private final HttpRequestFactory requestFactory;
   @Inject
   public GoogleOAuth2Helper(Provider<InstanceProvider> instanceProviderProvider,
-      @AnotOAuth2ConsumerGoogleLogin OAuth2ConsumerManager oauth2ConsumerManager) {
+      OAuth2ConsumerCredentialManager consumerCredentialManager,
+      @AnotGoogleLoginCallbackUri String googleLoginCbUri) {
     this.instanceProvider = instanceProviderProvider.get();
     this.httpTransport = instanceProvider.getHttpTransport();
     this.jsonFactory = instanceProvider.getJsonFactory();
     this.requestFactory = httpTransport.createRequestFactory();
-    this.oauth2ConsumerManager = checkNotNull(oauth2ConsumerManager);
+    this.consumerCredentialManager = checkNotNull(consumerCredentialManager);
+    this.googleLoginCbUri = checkNotBlank(googleLoginCbUri);
   }
 
-
-  public static final String TOKEN_SERVER_URL = "https://accounts.google.com/o/oauth2/token";
-  public static final String TOKEN_INFO_URL = "https://www.googleapis.com/oauth2/v1/tokeninfo";
-  public static final String AUTHORIZATION_SERVER_URL = "https://accounts.google.com/o/oauth2/auth";
-  public static final String USER_INFO_URL = "https://www.googleapis.com/oauth2/v1/userinfo";
+  /**
+   * URL from where Information about a Google Access Token can be fetched.
+   */
+  @VisibleForTesting
+  static final String TOKEN_INFO_URL = "https://www.googleapis.com/oauth2/v1/tokeninfo";
   
+  /**
+   * URL from where a Google Customer's Profile and Email can be fetched.
+   */
+  @VisibleForTesting
+  static final String USER_INFO_URL = "https://www.googleapis.com/oauth2/v1/userinfo";
+  
+  /**
+   * Method to get {@link AuthorizationCodeFlow} for {@link OAuth2Provider#GOOGLE_LOGIN}.
+   * 
+   * @return
+   */
   public AuthorizationCodeFlow getAuthorizationCodeFlow() {
     return new AuthorizationCodeFlow.Builder(
             BearerToken.authorizationHeaderAccessMethod(),
             httpTransport,
             jsonFactory, 
-            new GenericUrl(GoogleOAuth2Helper.TOKEN_SERVER_URL),
+            new GenericUrl(GOOGLE_LOGIN.getTokenServerUrl()),
             new ClientParametersAuthentication(
-                oauth2ConsumerManager.getClientId(), oauth2ConsumerManager.getClientSecret()),
-            oauth2ConsumerManager.getClientId(),
-            AUTHORIZATION_SERVER_URL)
-      .setScopes(LOGIN_SCOPE)
+                consumerCredentialManager.getClientId(), consumerCredentialManager.getClientSecret()),
+            consumerCredentialManager.getClientId(),
+            GOOGLE_LOGIN.getAuthServerUrl())
+      .setScopes(GOOGLE_LOGIN.getScopes())
       .build();
   }
   
-  public TokenResponse getAccessToken(HttpServletRequest request, String code) throws IOException {
+  /**
+   * Method to get AccessToken once a Person has given Authorization to Light for Accessing his/her
+   * Email and UserInfo from Google.
+   * 
+   * @param request
+   * @param code
+   * @return
+   * @throws IOException
+   */
+  public TokenResponse getAccessToken(String serverUrl, String code) throws IOException {
     AuthorizationCodeFlow flow = getAuthorizationCodeFlow();
-    String redirectUri = getServerUrl(request) + LOGIN_GOOGLE_CB.get();
+    String redirectUri = getLightUriForLoginCompletion(serverUrl);
+    
     return flow.newTokenRequest(code).setRedirectUri(redirectUri).execute();
   }
 
+  /**
+   * Method to get TokenInfo for a Google Access Token.
+   * 
+   * @param accessToken
+   * @return
+   * @throws IOException
+   */
   public GoogleTokenInfo getTokenInfo(String accessToken) throws IOException {
     GenericUrl tokenUrl = new GenericUrl(TOKEN_INFO_URL + "?access_token=" + accessToken); 
     
@@ -111,6 +139,13 @@ public class GoogleOAuth2Helper {
     return JsonUtils.getDto(tokenInfoStr, GoogleTokenInfo.class);
   }
   
+  /**
+   * Method to fetch information about the owner of the AccessToken.
+   * 
+   * @param accessToken
+   * @return
+   * @throws IOException
+   */
   public GoogleUserInfo getUserInfo(String accessToken) throws IOException {
     // TODO(arjuns): Find a better URL builder.
     GenericUrl userInfoUrl = new GenericUrl(USER_INFO_URL + "?access_token=" + accessToken);
@@ -123,5 +158,42 @@ public class GoogleOAuth2Helper {
     String userInfoString = CharStreams.toString(
         new InputStreamReader(userInfoResponse.getContent(), Charsets.UTF_8));
     return JsonUtils.getDto(userInfoString, GoogleUserInfo.class);
+  }
+  
+  /**
+   * Get a Light URI where Google will redirect the User's browser once Login flow is complete.
+   * 
+   * @param serverUrl
+   * @return
+   */
+  @VisibleForTesting
+  String getLightUriForLoginCompletion(String serverUrl) {
+    if (GaeUtils.isUnitTestServer()) {
+      return googleLoginCbUri;
+    } else {
+      return  serverUrl + googleLoginCbUri;
+    }
+  }
+  
+  /**
+   * Get a Google URI where Light should redirect User's browser to initiate the Login Procedure.
+   * 
+   * For more details, see {@link https://developers.google.com/accounts/docs/OAuth2Login}.
+   * For browser based Login Flow, a sample URL might look like :
+   *    https://accounts.google.com/o/oauth2/auth?
+   *    scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile&
+   *    state=%2Fprofile&
+   *    redirect_uri=https%3A%2F%2Foauth2-login-demo.appspot.com%2Foauthcallback&
+   *    response_type=token&
+   *    client_id=812741506391.apps.googleusercontent.com
+   * 
+   * @return
+   */
+  public String getGoogleLoginRedirectUri(String serverUrl) {
+    String lightUri = getLightUriForLoginCompletion(serverUrl);
+    
+    AuthorizationCodeFlow flow = getAuthorizationCodeFlow();
+    
+    return flow.newAuthorizationUrl().setRedirectUri(lightUri).build();
   }
 }

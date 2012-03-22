@@ -48,6 +48,7 @@ public class GaeUtils {
    * TODO(arjuns) : add test for this.
    * @return Return current Logged In user. Null if user is not logged in.
    */
+  @Deprecated
   public static User getUser() {
     return checkNotNull(getUserService().getCurrentUser(), "Seems user is not logged in.");
   }
@@ -67,6 +68,7 @@ public class GaeUtils {
   /**
    * Returns true if user is logged in.
    * 
+   * TODO(arjuns): Add test for this.
    * @return
    */
   public static boolean isUserLoggedIn() {
@@ -77,15 +79,13 @@ public class GaeUtils {
    * Returns true if current user is Admin. Returns false if user is not admin / user is not logged
    * in.
    * 
+   * TODO(arjuns): Add test for this.
    * @return
    */
   public static boolean isUserAdmin() {
     return isUserLoggedIn() && getUserService().isUserAdmin();
   }
 
-  // Utility Class.
-  private GaeUtils() {
-  }
 
   /**
    * Returns Appengine AppId for the current environment.
@@ -139,4 +139,9 @@ public class GaeUtils {
     return SystemProperty.environment.value() == null
         && LightEnvEnum.UNIT_TEST == LightEnvEnum.getLightEnv();
   }
+  
+  // Utility Class.
+  private GaeUtils() {
+  }
+
 }
