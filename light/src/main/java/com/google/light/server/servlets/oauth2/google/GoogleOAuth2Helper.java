@@ -17,13 +17,14 @@ package com.google.light.server.servlets.oauth2.google;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.constants.OAuth2Provider.GOOGLE_LOGIN;
-import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
-
-import com.google.common.annotations.VisibleForTesting;
+import static com.google.light.server.servlets.path.ServletPathEnum.LOGIN_GOOGLE_CB;
 
 import com.google.api.client.auth.oauth2.AuthorizationCodeFlow;
+import com.google.api.client.auth.oauth2.AuthorizationCodeRequestUrl;
+import com.google.api.client.auth.oauth2.AuthorizationCodeTokenRequest;
 import com.google.api.client.auth.oauth2.BearerToken;
 import com.google.api.client.auth.oauth2.ClientParametersAuthentication;
+import com.google.api.client.auth.oauth2.RefreshTokenRequest;
 import com.google.api.client.auth.oauth2.TokenResponse;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpHeaders;
@@ -32,17 +33,14 @@ import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;
 import com.google.inject.Inject;
-import com.google.inject.Provider;
-import com.google.light.server.annotations.AnotGoogleLoginCallbackUri;
 import com.google.light.server.constants.OAuth2Provider;
-import com.google.light.server.guice.providers.InstanceProvider;
 import com.google.light.server.manager.interfaces.OAuth2ConsumerCredentialManager;
 import com.google.light.server.servlets.oauth2.google.pojo.GoogleTokenInfo;
 import com.google.light.server.servlets.oauth2.google.pojo.GoogleUserInfo;
-import com.google.light.server.utils.GaeUtils;
 import com.google.light.server.utils.JsonUtils;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -51,27 +49,23 @@ import java.io.InputStreamReader;
  * Helper class for Google OAuth.
  * 
  * TODO(arjuns): Add test for this class.
- *
+ * 
  * @author Arjun Satyapal
  */
 public class GoogleOAuth2Helper {
-  private InstanceProvider instanceProvider;
   private HttpTransport httpTransport;
   private JsonFactory jsonFactory;
   private OAuth2ConsumerCredentialManager consumerCredentialManager;
-  private String googleLoginCbUri;
 
   private final HttpRequestFactory requestFactory;
+
   @Inject
-  public GoogleOAuth2Helper(Provider<InstanceProvider> instanceProviderProvider,
-      OAuth2ConsumerCredentialManager consumerCredentialManager,
-      @AnotGoogleLoginCallbackUri String googleLoginCbUri) {
-    this.instanceProvider = instanceProviderProvider.get();
-    this.httpTransport = instanceProvider.getHttpTransport();
-    this.jsonFactory = instanceProvider.getJsonFactory();
+  public GoogleOAuth2Helper(OAuth2ConsumerCredentialManager consumerCredentialManager,
+      HttpTransport httpTransport, JsonFactory jsonFactory) {
+    this.httpTransport = checkNotNull(httpTransport);
+    this.jsonFactory = checkNotNull(jsonFactory);
     this.requestFactory = httpTransport.createRequestFactory();
     this.consumerCredentialManager = checkNotNull(consumerCredentialManager);
-    this.googleLoginCbUri = checkNotBlank(googleLoginCbUri);
   }
 
   /**
@@ -79,13 +73,19 @@ public class GoogleOAuth2Helper {
    */
   @VisibleForTesting
   static final String TOKEN_INFO_URL = "https://www.googleapis.com/oauth2/v1/tokeninfo";
-  
+
   /**
    * URL from where a Google Customer's Profile and Email can be fetched.
    */
   @VisibleForTesting
   static final String USER_INFO_URL = "https://www.googleapis.com/oauth2/v1/userinfo";
-  
+
+  protected ClientParametersAuthentication getClientAuthentication() {
+    return new ClientParametersAuthentication(
+        consumerCredentialManager.getClientId(),
+        consumerCredentialManager.getClientSecret());
+  }
+
   /**
    * Method to get {@link AuthorizationCodeFlow} for {@link OAuth2Provider#GOOGLE_LOGIN}.
    * 
@@ -93,18 +93,17 @@ public class GoogleOAuth2Helper {
    */
   public AuthorizationCodeFlow getAuthorizationCodeFlow() {
     return new AuthorizationCodeFlow.Builder(
-            BearerToken.authorizationHeaderAccessMethod(),
-            httpTransport,
-            jsonFactory, 
-            new GenericUrl(GOOGLE_LOGIN.getTokenServerUrl()),
-            new ClientParametersAuthentication(
-                consumerCredentialManager.getClientId(), consumerCredentialManager.getClientSecret()),
-            consumerCredentialManager.getClientId(),
-            GOOGLE_LOGIN.getAuthServerUrl())
-      .setScopes(GOOGLE_LOGIN.getScopes())
-      .build();
+        BearerToken.authorizationHeaderAccessMethod(),
+        httpTransport,
+        jsonFactory,
+        new GenericUrl(GOOGLE_LOGIN.getTokenServerUrl()),
+        getClientAuthentication(),
+        consumerCredentialManager.getClientId(),
+        GOOGLE_LOGIN.getAuthServerUrl())
+        .setScopes(GOOGLE_LOGIN.getScopes())
+        .build();
   }
-  
+
   /**
    * Method to get AccessToken once a Person has given Authorization to Light for Accessing his/her
    * Email and UserInfo from Google.
@@ -115,10 +114,11 @@ public class GoogleOAuth2Helper {
    * @throws IOException
    */
   public TokenResponse getAccessToken(String serverUrl, String code) throws IOException {
-    AuthorizationCodeFlow flow = getAuthorizationCodeFlow();
     String redirectUri = getLightUriForLoginCompletion(serverUrl);
-    
-    return flow.newTokenRequest(code).setRedirectUri(redirectUri).execute();
+    AuthorizationCodeFlow flow = getAuthorizationCodeFlow();
+    AuthorizationCodeTokenRequest tokenRequest = flow.newTokenRequest(code);
+    tokenRequest.setRedirectUri(redirectUri);
+    return tokenRequest.execute();
   }
 
   /**
@@ -128,17 +128,25 @@ public class GoogleOAuth2Helper {
    * @return
    * @throws IOException
    */
-  public GoogleTokenInfo getTokenInfo(String accessToken) throws IOException {
-    GenericUrl tokenUrl = new GenericUrl(TOKEN_INFO_URL + "?access_token=" + accessToken); 
-    
+  public GoogleTokenInfo getTokenInfo(String tokenType, String accessToken, String refreshToken)
+      throws IOException {
+    GenericUrl tokenUrl = new GenericUrl(TOKEN_INFO_URL + "?access_token=" + accessToken);
+
     HttpRequest tokenInfoRequest = requestFactory.buildGetRequest(tokenUrl);
     HttpResponse tokenInfoResponse = tokenInfoRequest.execute();
 
     String tokenInfoStr = CharStreams.toString(new InputStreamReader(
         tokenInfoResponse.getContent(), Charsets.UTF_8));
-    return JsonUtils.getDto(tokenInfoStr, GoogleTokenInfo.class);
+    GoogleTokenInfo googTokenInfo = JsonUtils.getDto(tokenInfoStr, GoogleTokenInfo.class);
+    // Now setting values that are not returned as part of the info.
+    googTokenInfo.setTokenType(tokenType);
+    googTokenInfo.setAccessToken(accessToken);
+    googTokenInfo.setRefreshToken(refreshToken);
+
+    return googTokenInfo.validate();
+
   }
-  
+
   /**
    * Method to fetch information about the owner of the AccessToken.
    * 
@@ -159,7 +167,7 @@ public class GoogleOAuth2Helper {
         new InputStreamReader(userInfoResponse.getContent(), Charsets.UTF_8));
     return JsonUtils.getDto(userInfoString, GoogleUserInfo.class);
   }
-  
+
   /**
    * Get a Light URI where Google will redirect the User's browser once Login flow is complete.
    * 
@@ -168,32 +176,86 @@ public class GoogleOAuth2Helper {
    */
   @VisibleForTesting
   String getLightUriForLoginCompletion(String serverUrl) {
-    if (GaeUtils.isUnitTestServer()) {
-      return googleLoginCbUri;
-    } else {
-      return  serverUrl + googleLoginCbUri;
-    }
+    return serverUrl + LOGIN_GOOGLE_CB.get();
   }
-  
+
   /**
    * Get a Google URI where Light should redirect User's browser to initiate the Login Procedure.
    * 
-   * For more details, see {@link https://developers.google.com/accounts/docs/OAuth2Login}.
-   * For browser based Login Flow, a sample URL might look like :
-   *    https://accounts.google.com/o/oauth2/auth?
-   *    scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile&
-   *    state=%2Fprofile&
-   *    redirect_uri=https%3A%2F%2Foauth2-login-demo.appspot.com%2Foauthcallback&
-   *    response_type=token&
-   *    client_id=812741506391.apps.googleusercontent.com
+   * For more details, see {@link https://developers.google.com/accounts/docs/OAuth2Login}. For
+   * browser based Login Flow, a sample URL might look like :
+   * https://accounts.google.com/o/oauth2/auth?
+   * scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo
+   * .email+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile& state=%2Fprofile&
+   * redirect_uri=https%3A%2F%2Foauth2-login-demo.appspot.com%2Foauthcallback& response_type=token&
+   * client_id=812741506391.apps.googleusercontent.com
    * 
    * @return
    */
   public String getGoogleLoginRedirectUri(String serverUrl) {
     String lightUri = getLightUriForLoginCompletion(serverUrl);
-    
+
     AuthorizationCodeFlow flow = getAuthorizationCodeFlow();
-    
-    return flow.newAuthorizationUrl().setRedirectUri(lightUri).build();
+
+    AuthorizationCodeRequestUrl authorizationUrlBuilder = flow.newAuthorizationUrl();
+    authorizationUrlBuilder.setRedirectUri(lightUri);
+    /*
+     * access_type needs to be set to offline, as we want Google to return refreshToken. If this is
+     * not set, then Google will return only an accessToken with expiry period of 1 hour. And
+     * presence of user is required if another accessToken is required.
+     */
+    authorizationUrlBuilder.set("access_type", "offline");
+
+    /*
+     * approval_prompt is forced, so that refreshToken is returned every time. If this is not set,
+     * then refreshToken is returned only the first time, and then will never be returned. At
+     * present we are storing refreshToken so not required.
+     */
+    // authorizationUrlBuilder.set("approval_prompt", "force");
+
+    return authorizationUrlBuilder.build();
+  }
+
+  /**
+   * Method to refresh AccessToken.
+   * 
+   * @param refreshToken
+   * @return
+   * @throws IOException
+   */
+  public GoogleTokenInfo refreshToken(String refreshToken) throws IOException {
+    RefreshTokenRequest refreshRequest = new RefreshTokenRequest(
+        httpTransport,
+        jsonFactory,
+        new GenericUrl(GOOGLE_LOGIN.getTokenServerUrl()),
+        refreshToken)
+        .setClientAuthentication(getClientAuthentication());
+
+    TokenResponse tokenResponse = refreshRequest.execute();
+    // TODO(arjuns): See if refreshrequest returns a accessToken.
+    return getTokenInfo(tokenResponse.getTokenType(), tokenResponse.getAccessToken(), refreshToken);
+  }
+
+  /**
+   * Method to verify if the available accessToken is a valid AccessToken.
+   * It can become invalid in following scenarios  :
+   * 1. when Person revokes the access.
+   * 2. If an invalid token value is used.
+   * 3. TODO(arjuns): See what happens for expired token.
+   * TODO(arjuns): See what is the proper exception to catch for invalid Token.
+   * 
+   * This method depends on {{@link #getTokenInfo(String, String, String)}
+   * 
+   * @param tokenInfo
+   * @return
+   */
+  public boolean isValidAccessToken(GoogleTokenInfo tokenInfo) {
+    try {
+      getTokenInfo(tokenInfo.getTokenType(), tokenInfo.getAccessToken(),
+          tokenInfo.getRefreshToken());
+      return true;
+    } catch (Exception e) {
+      return false;
+    }
   }
 }

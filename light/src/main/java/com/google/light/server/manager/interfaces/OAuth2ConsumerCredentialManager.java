@@ -15,6 +15,7 @@
  */
 package com.google.light.server.manager.interfaces;
 
+
 /**
  * All OAuth Consumer Implementations should implement this.
  * 

@@ -45,6 +45,7 @@ import org.junit.Test;
  * 
  * @author Arjun Satyapal
  */
+@SuppressWarnings("deprecation")
 public class PersonManagerImplTest extends AbstractLightServerTest {
 
   private PersonManager personManager;
@@ -52,7 +53,7 @@ public class PersonManagerImplTest extends AbstractLightServerTest {
   @Override
   public void setUp() {
     super.setUp();
-    this.personManager = instanceProvider.getPersonManager();
+    this.personManager = injector.getInstance(PersonManager.class);
   }
 
   @Override

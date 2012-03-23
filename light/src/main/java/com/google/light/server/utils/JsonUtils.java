@@ -48,12 +48,24 @@ public class JsonUtils {
 
   public static <T> String toJson(T object) throws JsonGenerationException, JsonMappingException,
       IOException {
+    return toJson(object, true);
+  }
+
+  public static <T> String toJson(T object, boolean prettyPrint) throws JsonGenerationException,
+      JsonMappingException,
+      IOException {
     ObjectMapper mapper = new ObjectMapper();
     AnnotationIntrospector introspector = new JaxbAnnotationIntrospector();
     // make serializer use JAXB annotations (only)
     mapper.getSerializationConfig().withAnnotationIntrospector(introspector);
 
-    ObjectWriter writer = mapper.writerWithDefaultPrettyPrinter();
+    ObjectWriter writer = null;
+    
+    if (prettyPrint) {
+      writer = mapper.writerWithDefaultPrettyPrinter();
+    } else {
+      writer = mapper.writer();
+    }
     return writer.writeValueAsString(object);
   }
 

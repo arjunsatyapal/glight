@@ -50,7 +50,7 @@ public class CredentialUtils {
    * @return
    */
   public static String getCredentialDir() {
-    return getHomeDir() + "/credentials";
+    return getHomeDir() + "/light-credentials";
   }
 
   /**
@@ -84,6 +84,26 @@ public class CredentialUtils {
   public static String getOwnerCredentialDir(LightEnvEnum env, CredentialStandardEnum standard,
       String ownerEmail) {
     return getStdCredentialDir(env, standard) + "/" + "owner/" + ownerEmail;
+  }
+  
+  /**
+   * Returns path to the password file for Resource Owner.
+   * 
+   * @return
+   */
+  public static String getOwnerCredentialPasswdFilePath(LightEnvEnum env, CredentialStandardEnum standard,
+      String ownerEmail) {
+    return getOwnerCredentialDir(env, standard, ownerEmail) + "/passwd"; 
+  }
+  
+  /**
+   * Returns path to TokenInfo file for Resource Owner.
+   * 
+   * @return
+   */
+  public static String getOwnerTokenInfoFilePath(LightEnvEnum env, CredentialStandardEnum standard,
+      String ownerEmail) {
+    return getOwnerCredentialDir(env, standard, ownerEmail) + "/tokeninfo"; 
   }
 
   /**

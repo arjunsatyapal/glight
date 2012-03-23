@@ -34,6 +34,7 @@ public class GoogleLoginServlet extends HttpServlet {
   protected void doGet(HttpServletRequest request, HttpServletResponse response)
       throws IOException {
     String actualRedirectUrl = googleOAuth2Helper.getGoogleLoginRedirectUri(getServerUrl(request));
+    
     logger.info("Redirecting to : " + actualRedirectUrl);
     response.sendRedirect(actualRedirectUrl);
   }

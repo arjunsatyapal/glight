@@ -33,7 +33,7 @@ import javax.servlet.http.HttpServletResponse;
  * 
  * @author Arjun Satyapal
  */
-@SuppressWarnings("serial")
+@SuppressWarnings({ "deprecation", "serial" })
 public abstract class AbstractLightServlet extends HttpServlet {
   @Inject
   private Injector injector;

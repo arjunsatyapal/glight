@@ -22,7 +22,6 @@ import com.google.inject.Injector;
 import com.google.light.server.constants.LightEnvEnum;
 import com.google.light.server.constants.OAuth2Provider;
 import com.google.light.server.guice.TestInstanceProvider;
-import com.google.light.server.guice.providers.InstanceProvider;
 import com.google.light.testingutils.GaeTestingUtils;
 import com.google.light.testingutils.TestingUtils;
 import javax.servlet.http.HttpSession;
@@ -36,6 +35,7 @@ import org.junit.BeforeClass;
  * 
  * @author Arjun Satyapal
  */
+@SuppressWarnings("deprecation")
 public abstract class AbstractLightServerTest {
   private static boolean gaeSetupDone = false;
 
@@ -49,7 +49,6 @@ public abstract class AbstractLightServerTest {
   protected String testLastName;
 
   protected Injector injector;
-  protected InstanceProvider instanceProvider;
   protected TestInstanceProvider testInstanceProvider;
   protected static GaeTestingUtils gaeTestingUtils = null;
 
@@ -84,10 +83,6 @@ public abstract class AbstractLightServerTest {
     // TODO(arjuns): Fix this.
 //    gaeTestingUtils.setAuthDomain(authDomain);
     gaeTestingUtils.setEmail(email);
-    gaeTestingUtils.setFederatedIdentity(federatedId);
-    gaeTestingUtils.setUserId(userId);
-
-    gaeTestingUtils.setLoggedIn(isLoggedIn);
     gaeTestingUtils.setAdmin(isAdmin);
 
     gaeSetupDone = true;
@@ -108,7 +103,6 @@ public abstract class AbstractLightServerTest {
     HttpSession mockSession = getMockSessionForTesting(defaultLoginProvider, testUserId, testEmail);
 
     injector = TestingUtils.getInjectorByEnv(LightEnvEnum.UNIT_TEST, mockSession);
-    instanceProvider = injector.getInstance(InstanceProvider.class);
     testInstanceProvider = injector.getInstance(TestInstanceProvider.class);
   }
 

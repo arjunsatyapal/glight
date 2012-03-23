@@ -15,6 +15,9 @@
  */
 package com.google.light.server.guice;
 
+
+import static com.google.light.server.utils.LightPreconditions.checkIsEnv;
+
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.servlet.GuiceServletContextListener;
@@ -25,6 +28,7 @@ import com.google.light.server.guice.modules.DevServerModule;
 import com.google.light.server.guice.modules.ProdModule;
 import com.google.light.server.guice.modules.QaModule;
 import com.google.light.server.utils.GaeUtils;
+import java.util.logging.Logger;
 
 /**
  * A ServletContext Listener to initialize Guice. More :
@@ -33,27 +37,33 @@ import com.google.light.server.utils.GaeUtils;
  * @author Arjun Satyapal
  */
 public class ServletContextListener extends GuiceServletContextListener {
+  private static final Logger logger = Logger.getLogger(ServletContextListener.class.getName());
+  
   @Override
   protected Injector getInjector() {
     LightServletModule guiceServletModule = new LightServletModule();
+    logger.info("Initializaing : " + LightEnvEnum.getLightEnv());
 
     BaseGuiceModule guiceModule = null;
 
     switch (LightEnvEnum.getLightEnv()) {
       case PROD:
+        checkIsEnv(this, LightEnvEnum.PROD);
         guiceModule = new ProdModule();
         break;
         
       case QA:
+        checkIsEnv(this, LightEnvEnum.QA);
         guiceModule = new QaModule();
         break;
         
       case DEV_SERVER:
-        //$FALL-THROUGH$
-      case UNIT_TEST:
+        checkIsEnv(this, LightEnvEnum.DEV_SERVER);
         guiceModule = new DevServerModule();
         break;
-        
+      case UNIT_TEST:
+        // For UNIT_TEST environment, ServletContext should not be called.
+        //$FALL-THROUGH$
       default:
         throw new ServerConfigurationException("Unknown Environemnt with AppId = "
             + GaeUtils.getAppId());

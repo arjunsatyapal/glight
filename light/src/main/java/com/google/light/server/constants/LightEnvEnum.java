@@ -17,9 +17,9 @@ package com.google.light.server.constants;
 
 import static com.google.common.collect.Lists.newArrayList;
 
-import com.google.apphosting.api.ApiProxy;
-import com.google.apphosting.api.ApiProxy.Environment;
+import com.google.appengine.api.utils.SystemProperty;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.light.server.exception.unchecked.ServerConfigurationException;
 import com.google.light.server.utils.GaeUtils;
 import com.google.light.server.utils.LightPreconditions;
 import java.util.List;
@@ -30,13 +30,13 @@ import java.util.List;
  * @author Arjun Satyapal
  */
 public enum LightEnvEnum {
-  PROD(newArrayList("s~light-prod")),
-  QA(newArrayList("s~light-qa")),
+  PROD(newArrayList("light-prod")),
+  QA(newArrayList("light-qa")),
  
   // TODO(arjuns) : Create separate appengine-web.xml files for Prod, QA.
   // DevServer picks the value from appengine-web.xml. So it will be always same as QA. But
   // the difference is that SystemProperty.environment.value() differs for QA and DEV_SERVER.
-  DEV_SERVER(newArrayList("s~light-qa")),
+  DEV_SERVER(newArrayList("light-qa")),
   UNIT_TEST(newArrayList("test"));
   
   private List<String> appIds;
@@ -59,8 +59,8 @@ public enum LightEnvEnum {
    * @return
    */
   public static LightEnvEnum getLightEnv() {
-    Environment env = ApiProxy.getCurrentEnvironment();
-    LightEnvEnum returnEnum = getLightEnvByAppId(env.getAppId());
+    String appId = SystemProperty.applicationId.get();
+    LightEnvEnum returnEnum = getLightEnvByAppId(appId);
     
     if (returnEnum == QA) {
       /*
@@ -97,6 +97,6 @@ public enum LightEnvEnum {
       }
     }
     
-    return UNIT_TEST;
+    throw new ServerConfigurationException("Invalid EnvId : " + envId);
   }
 }

@@ -6,6 +6,8 @@ import static com.google.light.server.servlets.path.ServletPathEnum.SESSION;
 import static com.google.light.server.utils.ServletUtils.getRequestUriWithQueryParams;
 import static com.google.light.server.utils.ServletUtils.getServerUrl;
 
+import com.google.light.server.utils.JsonUtils;
+
 import com.google.api.client.auth.oauth2.AuthorizationCodeResponseUrl;
 import com.google.api.client.auth.oauth2.TokenResponse;
 import com.google.inject.Inject;
@@ -26,6 +28,7 @@ import javax.servlet.http.HttpServletResponse;
  * Servlet called by Google during Google Login flow.
  * 
  * TODO(arjuns): Add test for this.
+ * TODO(arjuns): Add code for revoke token.
  *
  * @author arjuns@google.com (Arjun Satyapal)
  */
@@ -55,9 +58,27 @@ public class GoogleLoginCallbackServlet extends HttpServlet {
     } else {
       TokenResponse tokenResponse = googleOAuth2Helper.getAccessToken(getServerUrl(request), code);
       logger.info("accessToken = " + tokenResponse.getAccessToken());
-      GoogleTokenInfo tokenInfo = googleOAuth2Helper.getTokenInfo(tokenResponse.getAccessToken());
-      logger.info("tokenExpiry time = " + tokenInfo.getExpiresInMillis());
+      logger.info("refreshToken = " + tokenResponse.getRefreshToken());
+      
+      /*
+       * Since tokenResponse is a final class, so in order to aid in testing, we are passing
+       * all required parameters to getTokenInfo method. 
+       */
+      GoogleTokenInfo tokenInfo = googleOAuth2Helper.getTokenInfo(tokenResponse.getTokenType(), 
+          tokenResponse.getAccessToken(), tokenResponse.getRefreshToken());
+      
+      // TODO(arjuns): Add support to show this on session.
+      // TODO(arjuns): Store TokenInfo.
+      logger.info("\nTokenInfo : " + JsonUtils.toJson(tokenInfo));
+      logger.info("\nTokenInfo\n : " + JsonUtils.toJson(tokenInfo, false));
+      
+      // TODO(arjuns): Store UserInfo.
       GoogleUserInfo userInfo = googleOAuth2Helper.getUserInfo(tokenResponse.getAccessToken());
+      logger.info("\nUserINfo : " + JsonUtils.toJson(userInfo));
+      
+      GoogleTokenInfo refreshTokenInfo = googleOAuth2Helper.refreshToken(tokenInfo.getRefreshToken());
+      logger.info("\nRefreshTokenInfo :\n " + JsonUtils.toJson(refreshTokenInfo));
+      logger.info("\nRefreshTokenInfo :\n " + JsonUtils.toJson(refreshTokenInfo, false));
 
       onSuccess(request, response, tokenInfo, userInfo);
     }

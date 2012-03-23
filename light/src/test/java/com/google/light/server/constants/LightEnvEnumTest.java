@@ -43,8 +43,8 @@ public class LightEnvEnumTest implements EnumTestInterface {
    * Ensure that Ids mentioned inside {@link LightEnvEnum#PROD} and {@link LightEnvEnum#QA} are
    * Mutually Exclusive.
    * 
-   * For {@link LightEnvEnum#DEV_SERVER} and {@link LightEnvEnum#UNIT_TEST}, we dont care as they are
-   * for testing purpose only.
+   * For {@link LightEnvEnum#DEV_SERVER} and {@link LightEnvEnum#UNIT_TEST}, we don't care as 
+   * they are for testing purposes only.
    */
   @Test
   public void test_mutualExclusiveCategory() {
@@ -69,8 +69,8 @@ public class LightEnvEnumTest implements EnumTestInterface {
    */
   @Test
   public void test_getLightEnvEnumByAppId() {
-    assertEquals(LightEnvEnum.PROD, getLightEnvByAppId("s~light-prod"));
-    assertEquals(LightEnvEnum.QA, getLightEnvByAppId("s~light-qa"));
+    assertEquals(LightEnvEnum.PROD, getLightEnvByAppId("light-prod"));
+    assertEquals(LightEnvEnum.QA, getLightEnvByAppId("light-qa"));
     assertEquals(LightEnvEnum.UNIT_TEST, getLightEnvByAppId("test"));
 
     // Ensure that for none of the mentioned AppIds, DEV_SERVER is returned.

@@ -15,35 +15,32 @@
  */
 package com.google.light.server.servlets.oauth2.google;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.light.server.constants.LightEnvEnum.DEV_SERVER;
-import static com.google.light.server.servlets.path.ServletPathEnum.LOGIN_GOOGLE_CB;
-import static com.google.light.server.servlets.test.CredentialStandardEnum.OAUTH2;
-import static com.google.light.server.servlets.test.CredentialUtils.getOwnerCredentialDir;
-import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
+import static com.google.light.server.constants.OAuth2Provider.GOOGLE_LOGIN;
 import static com.google.light.testingutils.TestResourcePaths.GOOGLE_USER_INFO_JSON;
-import static com.google.light.testingutils.TestingConstants.GOOGLE_OAUTH_CB_CMD_LINE_URI;
-import static com.google.light.testingutils.TestingConstants.RESOURCE_OWNER_EMAIL;
 import static com.google.light.testingutils.TestingUtils.getMockSessionForTesting;
 import static com.google.light.testingutils.TestingUtils.getResourceAsString;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
-import com.google.api.client.auth.oauth2.TokenResponse;
+import com.google.api.client.auth.oauth2.AuthorizationCodeFlow;
+import com.google.api.client.auth.oauth2.ClientParametersAuthentication;
 import com.google.api.client.http.HttpTransport;
-import com.google.common.base.Charsets;
-import com.google.common.io.Files;
 import com.google.inject.Injector;
 import com.google.light.server.constants.LightEnvEnum;
 import com.google.light.server.constants.OAuth2Provider;
 import com.google.light.server.manager.interfaces.OAuth2ConsumerCredentialManager;
 import com.google.light.server.servlets.oauth2.google.pojo.GoogleTokenInfo;
 import com.google.light.server.servlets.oauth2.google.pojo.GoogleUserInfo;
+import com.google.light.server.servlets.path.ServletPathEnum;
 import com.google.light.server.utils.JsonUtils;
 import com.google.light.testingutils.GaeTestingUtils;
-import com.google.light.testingutils.TestingConstants;
+import com.google.light.testingutils.TestResourcePaths;
 import com.google.light.testingutils.TestingUtils;
-import java.io.File;
+import com.google.light.testingutils.scripts.CreateCredentials;
 import java.io.IOException;
 import javax.servlet.http.HttpSession;
 import org.junit.After;
@@ -58,27 +55,53 @@ import org.junit.Test;
 public class GoogleOAuth2HelperITCase {
   private static final String SERVER_URL = "http://localhost:8080";
 
+  /*
+   * NOTE : If you set this value to any thing other then UNIT_TEST, then ensure that you have Light
+   * running on the address mentioned above.
+   */
+  private LightEnvEnum defaultEnv = LightEnvEnum.UNIT_TEST;
   private GaeTestingUtils gaeTestingUtils = null;
   private Injector injector;
   private GoogleOAuth2Helper helperInstance;
   private HttpTransport httpTransport;
   private OAuth2ConsumerCredentialManager consumerCredentialManager;
   private GoogleTokenInfo defaultGoogleTokenInfo;
+  private HttpSession mockTestSession;
 
   @Before
   public void setUp() throws IOException {
-    envSetup(LightEnvEnum.UNIT_TEST);
+    envSetup(defaultEnv);
   }
 
+  /**
+   * Assumption is that {@link CreateCredentials} was ran once, and
+   * {@link TestResourcePaths#UNIT_TEST_OAUTH_2_OWNER_TOKEN_INFO} exist.
+   */
   public void envSetup(LightEnvEnum env) throws IOException {
     gaeTestingUtils = TestingUtils.gaeSetup(env);
-    defaultGoogleTokenInfo = getTokenInfoFromFileSystem();
-    HttpSession mockSession =
-        getMockSessionForTesting(OAuth2Provider.GOOGLE_LOGIN, defaultGoogleTokenInfo.getUserId(),
-            defaultGoogleTokenInfo.getEmail());
 
-    injector = TestingUtils.getInjectorByEnv(env, mockSession);
+    defaultGoogleTokenInfo = TestingUtils.getGoogleTokenInfo(env);
+
+    mockTestSession = getMockSessionForTesting(OAuth2Provider.GOOGLE_LOGIN,
+        defaultGoogleTokenInfo.getUserId(), defaultGoogleTokenInfo.getEmail());
+
+    injector = TestingUtils.getInjectorByEnv(env, mockTestSession);
     helperInstance = checkNotNull(injector.getInstance(GoogleOAuth2Helper.class));
+
+    // TODO(arjuns): Check what happens after expiry.
+
+    // We validate only for UNIT_TEST and DEV_SERVER env.
+    checkArgument(helperInstance.isValidAccessToken(defaultGoogleTokenInfo),
+        "invalid tokenInfo. Recreate it by running : " + CreateCredentials.class.getSimpleName()
+            + ".");
+
+    if (defaultGoogleTokenInfo.hasAccessTokenExpired()) {
+      GoogleTokenInfo refreshedTokenInfo =
+          helperInstance.refreshToken(defaultGoogleTokenInfo.getRefreshToken());
+      TestingUtils.updateGoogleTokenInfo(refreshedTokenInfo);
+      defaultGoogleTokenInfo = refreshedTokenInfo;
+    }
+
     httpTransport = checkNotNull(injector.getInstance(HttpTransport.class));
     httpTransport.createRequestFactory();
 
@@ -100,24 +123,9 @@ public class GoogleOAuth2HelperITCase {
    */
   @Test
   public void test_getLightUriForLoginCompletion() throws Exception {
-    // First testing for Unit Test Env.
-    assertEquals(GOOGLE_OAUTH_CB_CMD_LINE_URI,
-        helperInstance.getLightUriForLoginCompletion(SERVER_URL));
-
-    // Now testing for other Envs.
-    String expectedUrl = SERVER_URL + LOGIN_GOOGLE_CB.get();
-
     for (LightEnvEnum currEnv : LightEnvEnum.values()) {
-
-      if (currEnv == LightEnvEnum.UNIT_TEST) {
-        // already tested.
-        continue;
-      }
-      envTearDown(); // Each env will be setup before it is used.
-      envSetup(currEnv);
-      injector = TestingUtils.getInjectorByEnv(currEnv, null);
-      GoogleOAuth2Helper helperInstance =
-          checkNotNull(injector.getInstance(GoogleOAuth2Helper.class));
+      GaeTestingUtils.cheapEnvSwitch(currEnv);
+      String expectedUrl = SERVER_URL + ServletPathEnum.LOGIN_GOOGLE_CB.get();
       assertEquals(expectedUrl, helperInstance.getLightUriForLoginCompletion(SERVER_URL));
     }
   }
@@ -133,14 +141,14 @@ public class GoogleOAuth2HelperITCase {
 
     // Now testing for DEV SERVER env.
     envTearDown();
-    envSetup(DEV_SERVER);
+    envSetup(LightEnvEnum.DEV_SERVER);
     helperInstance =
         checkNotNull(injector.getInstance(GoogleOAuth2Helper.class));
     expectedUrl = getExpectedUrl(helperInstance.getLightUriForLoginCompletion(SERVER_URL));
     assertEquals(expectedUrl, helperInstance.getGoogleLoginRedirectUri(SERVER_URL));
 
     // For QA and PROD env, we dont have enough parameters to generatete the URL. So we
-    // are assuming that those values are setup in PROD.
+    // are assuming that those values will be setup properly in PROD.
   }
 
   private String getExpectedUrl(String redirectUrl) {
@@ -153,7 +161,8 @@ public class GoogleOAuth2HelperITCase {
             + redirectUrl
             + "&"
             + "response_type=code&"
-            + "scope=https://www.googleapis.com/auth/userinfo.email%20https://www.googleapis.com/auth/userinfo.profile";
+            + "scope=https://www.googleapis.com/auth/userinfo.email%20https://www.googleapis.com/auth/userinfo.profile&"
+            + "access_type=offline";
 
     return expectedUrl;
   }
@@ -163,55 +172,36 @@ public class GoogleOAuth2HelperITCase {
    */
   @Test
   public void test_getAccessToken() throws Exception {
-    /*
-     * Unfortunately for AccessToken, user intervention is required, so cannot be tested during
-     * tests. So set boolean to ture if you want to run it.
-     */
-
-    boolean runTest = false;
-    if (!runTest) {
-      return;
-    }
-
-    /*
-     * Unfortunately OAuth2 client messes up when TestingConstants.GOOGLE_OAUTH_CB_CMD_LINE_URI is
-     * passed as redirectUri to Authorization Flow. So for our local testing we are relying that it
-     * will work in production. TODO(waltercacau) : This may be eventually covered using a Selenium
-     * Test. TODO(arjuns) : Create a Utility to initialize all the credentials.
-     */
-    String message = "Open a browser, redirect to following URL, and then enter the "
-        + "code returned by Google : \n"
-        + getExpectedUrl(TestingConstants.GOOGLE_OAUTH_CB_CMD_LINE_URI)
-        + "\n\nEnter the code returned by Google : ";
-    String code = TestingUtils.readLineFromConsole(message);
-
-    TokenResponse tokenResponse = helperInstance.getAccessToken(SERVER_URL, code);
-
-    checkNotBlank(tokenResponse.getAccessToken());
-    checkNotBlank(tokenResponse.getRefreshToken());
-    assertEquals(new Long(3600), tokenResponse.getExpiresInSeconds());
-    assertEquals("Bearer", tokenResponse.getTokenType());
-
-    GoogleTokenInfo tokenInfo = helperInstance.getTokenInfo(tokenResponse.getAccessToken());
-    tokenInfo.setTokenType(tokenResponse.getTokenType());
-
-    // All the values are validated above, so saving them directly.
-    tokenInfo.setTokenType(tokenResponse.getTokenType());
-    tokenInfo.setAccessToken(tokenResponse.getAccessToken());
-    tokenInfo.setRefreshToken(tokenResponse.getRefreshToken());
-    // Before persisting, ensure we are persiting write values.
-    tokenInfo.validate();
-
-    String ownerCredFilePath = getOwnerCredentialDir(DEV_SERVER, OAUTH2, RESOURCE_OWNER_EMAIL);
-    File ownerCredFile = new File(ownerCredFilePath);
-    Files.createParentDirs(ownerCredFile);
-    Files.write(JsonUtils.toJson(tokenInfo), ownerCredFile, Charsets.UTF_8);
-    System.out.println("For [" + RESOURCE_OWNER_EMAIL + "], file created at : \n"
-        + ownerCredFilePath);
-    test_getTokenInfo();
-    test_getUserInfo();
+    // Not much to test here as it needs a user intervention.
+    // TODO(waltercacau) : Add a selenium test for this
   }
 
+  /**
+   * Test for {@link GoogleOAuth2Helper#getAuthorizationCodeFlow()}.
+   */
+  @Test
+  public void test_getAuthorizationCodeFlow() {
+    AuthorizationCodeFlow flow = helperInstance.getAuthorizationCodeFlow();
+    assertEquals(GOOGLE_LOGIN.getAuthServerUrl(), flow.getAuthorizationServerEncodedUrl());
+    assertEquals(consumerCredentialManager.getClientId(), flow.getClientId());
+    assertTrue(flow.getClientAuthentication().getClass()
+        .isAssignableFrom(ClientParametersAuthentication.class));
+    assertNull(flow.getCredentialStore());
+    assertNotNull(flow.getJsonFactory());
+    assertNull(flow.getRequestInitializer());
+    assertTrue(TestingUtils.compareScopes(GOOGLE_LOGIN.getScopes(), flow.getScopes()));
+    assertEquals(GOOGLE_LOGIN.getTokenServerUrl(), flow.getTokenServerEncodedUrl());
+    assertNotNull(flow.getTransport());
+  }
+  
+  /**
+   * Test for {@link GoogleOAuth2Helper#getClientAuthentication()}.
+   */
+  @Test
+  public void test_getClientAuthentication() {
+    assertNotNull(helperInstance.getClientAuthentication());
+  }
+  
   /**
    * Test for {@link GoogleOAuth2Helper#getTokenInfo(String)}.
    * 
@@ -223,28 +213,20 @@ public class GoogleOAuth2HelperITCase {
    */
   @Test
   public void test_getTokenInfo() throws Exception {
-    String ownerCredFilePath = getOwnerCredentialDir(DEV_SERVER, OAUTH2, RESOURCE_OWNER_EMAIL);
-    String jsonString = Files.toString(new File(ownerCredFilePath), Charsets.UTF_8);
-    GoogleTokenInfo existingTokenInfo = JsonUtils.getDto(jsonString, GoogleTokenInfo.class);
-    existingTokenInfo.validate();
-    System.out.println(existingTokenInfo.isAccessTokenExpired());
+    GoogleTokenInfo freshTokenInfo = helperInstance.getTokenInfo(
+        defaultGoogleTokenInfo.getTokenType(),
+        defaultGoogleTokenInfo.getAccessToken(),
+        defaultGoogleTokenInfo.getRefreshToken());
 
-    // Now we have a valid tokenInfo file read from Command Line. Lets verify values by fetching
-    // from Gooogle.
-    String accessToken = existingTokenInfo.getAccessToken();
-    GoogleTokenInfo freshTokenInfo = helperInstance.getTokenInfo(accessToken);
-
-    // TokenInfo does not return AccessToken.
-    assertNull(freshTokenInfo.getAccessToken());
-    assertEquals(existingTokenInfo.getAccessType(), freshTokenInfo.getAccessType());
-    assertEquals(existingTokenInfo.getAudience(), freshTokenInfo.getAudience());
-    assertEquals(existingTokenInfo.getEmail(), freshTokenInfo.getEmail());
-    assertEquals(existingTokenInfo.getIssuedTo(), freshTokenInfo.getIssuedTo());
-    // TokenInfo does not return RefreshToken.
-    assertNull(freshTokenInfo.getRefreshToken());
-    assertEquals(existingTokenInfo.getScope(), freshTokenInfo.getScope());
-    assertEquals(existingTokenInfo.getUserId(), freshTokenInfo.getUserId());
-    assertEquals(existingTokenInfo.getVerifiedEmail(), freshTokenInfo.getVerifiedEmail());
+    assertEquals(defaultGoogleTokenInfo.getAccessToken(), freshTokenInfo.getAccessToken());
+    assertEquals(defaultGoogleTokenInfo.getAccessType(), freshTokenInfo.getAccessType());
+    assertEquals(defaultGoogleTokenInfo.getAudience(), freshTokenInfo.getAudience());
+    assertEquals(defaultGoogleTokenInfo.getEmail(), freshTokenInfo.getEmail());
+    assertEquals(defaultGoogleTokenInfo.getIssuedTo(), freshTokenInfo.getIssuedTo());
+    assertEquals(defaultGoogleTokenInfo.getRefreshToken(), freshTokenInfo.getRefreshToken());
+    assertEquals(defaultGoogleTokenInfo.getScope(), freshTokenInfo.getScope());
+    assertEquals(defaultGoogleTokenInfo.getUserId(), freshTokenInfo.getUserId());
+    assertEquals(defaultGoogleTokenInfo.getVerifiedEmail(), freshTokenInfo.getVerifiedEmail());
   }
 
   /**
@@ -254,17 +236,29 @@ public class GoogleOAuth2HelperITCase {
   public void test_getUserInfo() throws Exception {
     String jsonString = getResourceAsString(GOOGLE_USER_INFO_JSON.get());
     GoogleUserInfo existingUserInfo = JsonUtils.getDto(jsonString, GoogleUserInfo.class);
-    GoogleUserInfo recentUserInfo = helperInstance.getUserInfo(
-        getTokenInfoFromFileSystem().getAccessToken());
+    GoogleUserInfo recentUserInfo =
+        helperInstance.getUserInfo(defaultGoogleTokenInfo.getAccessToken());
 
     assertEquals(existingUserInfo, recentUserInfo);
   }
+  
+  /**
+   * Test for {@link GoogleOAuth2Helper#isValidAccessToken(GoogleTokenInfo)}.
+   */
+  public void test_isValidAccessToken() {
+    // This is already tested as part of the setup. So nothing to test here.
+  }
 
-  private GoogleTokenInfo getTokenInfoFromFileSystem() throws IOException {
-    String ownerCredFilePath = getOwnerCredentialDir(DEV_SERVER, OAUTH2, RESOURCE_OWNER_EMAIL);
-    String jsonString = Files.toString(new File(ownerCredFilePath), Charsets.UTF_8);
-    GoogleTokenInfo tokenInfoFromFile = JsonUtils.getDto(jsonString, GoogleTokenInfo.class);
-    tokenInfoFromFile.validate();
-    return tokenInfoFromFile;
+  /**
+   * Test for {@link GoogleOAuth2Helper#refreshToken(String)}.
+   */
+  @Test
+  public void test_refreshToken() throws Exception {
+    GoogleTokenInfo refreshedTokenInfo =
+        helperInstance.refreshToken(defaultGoogleTokenInfo.getRefreshToken());
+    // Re-running getTokenInfo and userInfo.
+    defaultGoogleTokenInfo = refreshedTokenInfo;
+    test_getTokenInfo();
+    test_getUserInfo();
   }
 }

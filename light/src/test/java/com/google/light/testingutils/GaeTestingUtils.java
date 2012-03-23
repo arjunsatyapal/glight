@@ -24,8 +24,6 @@ import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestC
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.appengine.tools.development.testing.LocalTaskQueueTestConfig;
 import com.google.appengine.tools.development.testing.LocalUserServiceTestConfig;
-import com.google.apphosting.api.ApiProxy;
-import com.google.apphosting.api.ApiProxy.Environment;
 import com.google.inject.Injector;
 import com.google.inject.servlet.GuiceFilter;
 import com.google.light.server.constants.LightEnvEnum;
@@ -44,11 +42,7 @@ public class GaeTestingUtils {
   private LightEnvEnum env;
   private OAuth2Provider provider;
   private String email;
-  private String federatedId; 
-  private String isFederated;
   private String userId;
-  private boolean loggedIn;
-  private boolean isAdmin;
   
   /** See similar variables in {@link com.google.appengine.api.users.UserServiceImpl} */
   static final String USER_ID_KEY =
@@ -66,19 +60,32 @@ public class GaeTestingUtils {
   private LocalServiceTestHelper gaeTestHelper;
 
   public GaeTestingUtils(LightEnvEnum env, OAuth2Provider provider, String email,
-      String federatedId, Boolean isFederated, String userId, boolean loggedIn,
-      boolean isAdmin) {
+      String userId, boolean isAdmin) {
     this.env = checkNotNull(env);
     this.provider = checkNotNull(provider);
     this.email = checkEmail(email);
-    this.federatedId = checkNotBlank(federatedId);
-    this.isFederated = this.isFederated;
     this.userId = checkNotBlank(userId);
-    this.loggedIn = loggedIn;
-    this.isAdmin = isAdmin;
-    
     
     this.env = checkNotNull(env);
+    basicSystemPropertySetup(env);
+    
+    gaeTestHelper = new LocalServiceTestHelper(
+            new LocalDatastoreServiceTestConfig(),
+            new LocalTaskQueueTestConfig(),
+            new LocalUserServiceTestConfig())
+        
+    // TODO(arjuns): Fix this.
+        .setEnvAuthDomain("google")
+        .setEnvEmail(email)
+        .setEnvIsAdmin(isAdmin)
+        .setEnvAppId(env.getAppIds().get(0));
+    
+  }
+
+  /**
+   * @param env
+   */
+  private static void basicSystemPropertySetup(LightEnvEnum env) {
     switch (env) {
       case DEV_SERVER:
         SystemProperty.environment.set(SystemProperty.Environment.Value.Development);
@@ -94,19 +101,7 @@ public class GaeTestingUtils {
       default:
         SystemProperty.environment.set("");
     }
-
-    gaeTestHelper = new LocalServiceTestHelper(
-            new LocalDatastoreServiceTestConfig(),
-            new LocalTaskQueueTestConfig(),
-            new LocalUserServiceTestConfig())
-        
-    // TODO(arjuns): Fix this.
-        .setEnvAuthDomain("google")
-        .setEnvIsLoggedIn(loggedIn)
-        .setEnvEmail(email)
-        .setEnvIsAdmin(isAdmin)
-        .setEnvAppId(env.getAppIds().get(0));
-
+    SystemProperty.applicationId.set(env.getAppIds().get(0));
   }
 
   /**
@@ -127,26 +122,6 @@ public class GaeTestingUtils {
   }
 
   /**
-   * Set GAE UserId.
-   * 
-   * @param userId
-   */
-  public void setUserId(String userId) {
-    Environment env = ApiProxy.getCurrentEnvironment();
-    env.getAttributes().put(USER_ID_KEY, userId);
-  }
-
-  /**
-   * Set GAE UserId.
-   * 
-   * @param providerUserId
-   */
-  public void setFederatedIdentity(String federatedId) {
-    Environment env = ApiProxy.getCurrentEnvironment();
-    env.getAttributes().put(FEDERATED_IDENTITY_KEY, federatedId);
-  }
-
-  /**
    * Set GAE UserEmail.
    * 
    * @param envEmail
@@ -160,17 +135,6 @@ public class GaeTestingUtils {
   }
 
   /**
-   * Set GAE AuthDomain.
-   * 
-   * @param authDomain
-   */
-  public void setAuthDomain(String authDomain) {
-    Environment env = ApiProxy.getCurrentEnvironment();
-    env.getAttributes().put(FEDERATED_AUTHORITY_KEY, authDomain);
-    gaeTestHelper.setEnvAuthDomain(authDomain);
-  }
-
-  /**
    * Set current GAE user as GAE Admin.
    * 
    * @param isAdmin
@@ -180,18 +144,18 @@ public class GaeTestingUtils {
   }
 
   /**
-   * Set LoggedIn mode for GAE User.
-   */
-  public void setLoggedIn(boolean loggedIn) {
-    gaeTestHelper.setEnvIsLoggedIn(loggedIn);
-  }
-  
-  /**
    * Return Env with which setup was done.
    * 
    * @return
    */
   public LightEnvEnum getEnv() {
     return env;
+  }
+  
+  /**
+   * Use at your own risk. If not cleaned up after this, then env can be in inconsistent state. 
+   */
+  public static void cheapEnvSwitch(LightEnvEnum env) {
+    basicSystemPropertySetup(env);
   }
 }

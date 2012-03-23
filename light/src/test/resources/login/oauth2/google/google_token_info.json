@@ -1,10 +1,14 @@
-{
- "issued_to": "1234.apps.googleusercontent.com",
- "audience": "1234.apps.googleusercontent.com",
- "user_id": "123456789",
- "scope": "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email",
- "expires_in": 3600,
- "email": "unit-test1@myopenedu.com",
- "verified_email": true,
- "access_type": "online"
+ {
+  "audience" : "160638920188.apps.googleusercontent.com",
+  "scope" : "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email",
+  "email" : "unit-test1@myopenedu.com",
+  "issued_to" : "160638920188.apps.googleusercontent.com",
+  "user_id" : "115639870677665060321",
+  "expires_in" : 3600,
+  "expires_in_millis" : 1332491059527,
+  "verified_email" : true,
+  "access_type" : "offline",
+  "token_type" : "Bearer",
+  "access_token" : "access_token",
+  "refresh_token" : "refresh_token"
 }

@@ -31,7 +31,6 @@ import com.google.light.server.manager.interfaces.OAuth2ConsumerCredentialManage
 public class QaModule extends BaseGuiceModule {
   public QaModule() {
     checkIsEnv(this, LightEnvEnum.QA);
-
   }
 
   @Override

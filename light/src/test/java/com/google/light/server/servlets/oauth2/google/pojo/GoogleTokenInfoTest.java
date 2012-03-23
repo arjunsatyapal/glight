@@ -18,13 +18,14 @@ package com.google.light.server.servlets.oauth2.google.pojo;
 import static com.google.light.server.constants.OAuth2Provider.GOOGLE_LOGIN;
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
 import static com.google.light.testingutils.TestResourcePaths.GOOGLE_TOKEN_INFO_JSON;
+import static com.google.light.testingutils.TestingUtils.compareScopes;
 import static com.google.light.testingutils.TestingUtils.getResourceAsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import com.google.inject.internal.Sets;
+import com.google.light.server.constants.LightEnvEnum;
 import com.google.light.server.utils.JsonUtils;
-import java.util.Set;
+import com.google.light.testingutils.GaeTestingUtils;
 import org.junit.Test;
 
 /**
@@ -38,28 +39,23 @@ public class GoogleTokenInfoTest {
    */
   @Test
   public void test_jsonToGoogleTokenInfo_Parsing() throws Exception {
+    GaeTestingUtils.cheapEnvSwitch(LightEnvEnum.UNIT_TEST);
     String jsonString = getResourceAsString(GOOGLE_TOKEN_INFO_JSON.get());
     GoogleTokenInfo tokenInfo = JsonUtils.getDto(jsonString, GoogleTokenInfo.class);
+    tokenInfo.validate();
     
-    assertEquals("1234.apps.googleusercontent.com", tokenInfo.getIssuedTo());
-    assertEquals("1234.apps.googleusercontent.com", tokenInfo.getAudience());
-    assertEquals("123456789", tokenInfo.getUserId());
-    
-    Set<String> expectedScope = Sets.newLinkedHashSet();
-    for (String currScope : GOOGLE_LOGIN.getScopes()) {
-      expectedScope.add(currScope);
-    }
-    
-    Set<String> actualScope = Sets.newLinkedHashSet();
-    for (String currScope : tokenInfo.getScope().split(" ")) {
-      actualScope.add(currScope);
-    }
-    
-    assertEquals(expectedScope, actualScope);
+    assertEquals("160638920188.apps.googleusercontent.com", tokenInfo.getIssuedTo());
+    assertEquals("160638920188.apps.googleusercontent.com", tokenInfo.getAudience());
+    assertEquals("115639870677665060321", tokenInfo.getUserId());
+    assertTrue(compareScopes(GOOGLE_LOGIN.getScopes(), tokenInfo.getScope()));
     
     checkPositiveLong(tokenInfo.getExpiresInMillis());
     assertEquals("unit-test1@myopenedu.com", tokenInfo.getEmail());
     assertTrue(tokenInfo.getVerifiedEmail());
-    assertEquals("online", tokenInfo.getAccessType());
+    assertEquals("offline", tokenInfo.getAccessType());
+    assertEquals("Bearer", tokenInfo.getTokenType());
+    assertEquals("access_token", tokenInfo.getAccessToken());
+    assertEquals("refresh_token", tokenInfo.getRefreshToken());
+    
   }
 }

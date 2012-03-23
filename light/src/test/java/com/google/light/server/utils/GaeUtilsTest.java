@@ -42,7 +42,7 @@ public class GaeUtilsTest {
    */
   @Test
   public void test_getAppId() {
-    String expectedAppId = "s~light-qa";
+    String expectedAppId = "light-qa";
 
     try {
       gaeTestingUtils = gaeSetup(LightEnvEnum.QA);
