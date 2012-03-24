@@ -49,7 +49,7 @@ public class GoogleTokenInfoTest {
     assertEquals("115639870677665060321", tokenInfo.getUserId());
     assertTrue(compareScopes(GOOGLE_LOGIN.getScopes(), tokenInfo.getScope()));
     
-    checkPositiveLong(tokenInfo.getExpiresInMillis());
+    checkPositiveLong(tokenInfo.getExpiresInMillis(), "expiresInMillis");
     assertEquals("unit-test1@myopenedu.com", tokenInfo.getEmail());
     assertTrue(tokenInfo.getVerifiedEmail());
     assertEquals("offline", tokenInfo.getAccessType());
