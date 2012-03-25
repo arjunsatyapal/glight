@@ -18,10 +18,6 @@ package com.google.light.server.persistence.entity.person;
 import static com.google.light.server.utils.LightPreconditions.checkEmail;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPersonId;
-import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
-
-import com.google.light.server.utils.LightPreconditions;
-
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import org.apache.commons.lang.builder.EqualsBuilder;

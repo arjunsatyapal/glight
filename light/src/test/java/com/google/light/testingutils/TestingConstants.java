@@ -15,6 +15,8 @@
  */
 package com.google.light.testingutils;
 
+import static com.google.light.testingutils.TestResourcePaths.GOOGLE_TOKEN_INFO_JSON;
+import static com.google.light.testingutils.TestingUtils.getResourceAsString;
 import com.google.api.client.http.GenericUrl;
 
 /**
@@ -39,4 +41,11 @@ public class TestingConstants {
   public static final long DEFAULT_TOKEN_EXPIRES_IN = 3600L;
   public static final long DEFAULT_TOKEN_EXPIRES_IN_MILLIS = 1332491059527L;
   public static final long DEFAULT_PERSON_ID = 1234L;
+  public static final String DEFAULT_TOKEN_INFO = getResourceAsString(GOOGLE_TOKEN_INFO_JSON.get());
+  
+  /**
+   * Following values are default values for Consumer Credentials.
+   */
+  public static final String DEFAULT_CLIENT_ID = "client_id";
+  public static final String DEFAULT_CLIENT_SECRET = "client_secret";
 }
