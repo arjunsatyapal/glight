@@ -1,0 +1,187 @@
+/*
+ * Copyright 2012 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+package com.google.light.server.persistence.dao;
+
+import static com.google.light.server.utils.GuiceUtils.getInstance;
+import static com.google.light.server.utils.ObjectifyUtils.commitTransaction;
+import static com.google.light.server.utils.ObjectifyUtils.getKey;
+import static com.google.light.server.utils.ObjectifyUtils.initiateTransaction;
+import static com.google.light.testingutils.TestingConstants.DEFAULT_ACCESS_TOKEN;
+import static com.google.light.testingutils.TestingConstants.DEFAULT_REFRESH_TOKEN;
+import static com.google.light.testingutils.TestingConstants.DEFAULT_TOKEN_EXPIRES_IN_MILLIS;
+import static com.google.light.testingutils.TestingConstants.DEFAULT_TOKEN_INFO;
+import static com.google.light.testingutils.TestingConstants.DEFAULT_TOKEN_TYPE;
+import static com.google.light.testingutils.TestingUtils.getRandomPersonId;
+import static com.google.light.testingutils.TestingUtils.getRandomString;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
+import com.google.light.server.dto.oauth2.owner.OAuth2OwnerTokenDto;
+import com.google.light.server.persistence.entity.oauth2.owner.OAuth2OwnerTokenEntity;
+import com.google.light.server.persistence.entity.oauth2.owner.OAuth2OwnerTokenEntity.Builder;
+import com.google.light.server.utils.ObjectifyUtils;
+import com.googlecode.objectify.Key;
+import com.googlecode.objectify.Objectify;
+import org.junit.Before;
+import org.junit.Test;
+
+/**
+ * Test for {@link OAuth2OwnerTokenDao}.
+ * 
+ * @author Arjun Satyapal
+ */
+public class OAuth2OwnerTokenDaoTest extends
+    AbstractBasicDaoTest<OAuth2OwnerTokenDto, OAuth2OwnerTokenEntity, String> {
+
+  public OAuth2OwnerTokenDaoTest() {
+    super(OAuth2OwnerTokenEntity.class, String.class);
+  }
+
+  private OAuth2OwnerTokenDao dao;
+  private Long personId;
+
+  @Override
+  @Before
+  public void setUp() {
+    super.setUp();
+    personId = getRandomPersonId();
+    dao = getInstance(injector, OAuth2OwnerTokenDao.class);
+  }
+
+  private Builder getDefaultEntityBuilder() {
+    return new OAuth2OwnerTokenEntity.Builder()
+        .personId(personId)
+        .provider(defaultLoginProvider)
+        .accessToken(DEFAULT_ACCESS_TOKEN)
+        .refreshToken(DEFAULT_REFRESH_TOKEN)
+        .expiresInMillis(DEFAULT_TOKEN_EXPIRES_IN_MILLIS)
+        .tokenType(DEFAULT_TOKEN_TYPE)
+        .tokenInfo(DEFAULT_TOKEN_INFO);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Test
+  @Override
+  public void test_get_ofyKey() {
+    OAuth2OwnerTokenEntity testEntity = getDefaultEntityBuilder().build();
+    OAuth2OwnerTokenEntity savedEntity = dao.put(testEntity);
+
+    Objectify ofy = ObjectifyUtils.initiateTransaction();
+    try {
+      Key<OAuth2OwnerTokenEntity> key = dao.getKey(savedEntity.getId());
+      OAuth2OwnerTokenEntity getEntiy = dao.get(ofy, key);
+      assertEquals(savedEntity, getEntiy);
+    } catch (Exception e) {
+      ObjectifyUtils.rollbackTransaction(ofy);
+    }
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Test
+  @Override
+  public void test_get_ofyId() {
+    OAuth2OwnerTokenEntity testEntity = getDefaultEntityBuilder().build();
+
+    OAuth2OwnerTokenEntity savedEntity = dao.put(testEntity);
+    OAuth2OwnerTokenEntity getEntity = dao.get(savedEntity.getId());
+    assertEquals(savedEntity, getEntity);
+
+    // Negative test : Try to fetch with randomId.
+    assertNull(dao.get(getRandomString()));
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Test
+  @Override
+  public void test_get_key() {
+    String id = getRandomString();
+    assertEquals(getKey(OAuth2OwnerTokenEntity.class, id), dao.getKey(id));
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Test
+  @Override
+  public void test_put_ofyEntity() {
+    OAuth2OwnerTokenEntity testEntity = getDefaultEntityBuilder().build();
+
+    // Positive Test :
+    Objectify txn = initiateTransaction();
+    assertTrue(txn.getTxn().isActive());
+
+    dao.put(txn, testEntity);
+    commitTransaction(txn);
+    OAuth2OwnerTokenEntity getEntity = dao.get(testEntity.getId());
+    assertEquals(testEntity, getEntity);
+
+    /*
+     * Negative : No negative test, as the key is based on PersonId + OAuth2Provider and therefore
+     * any attempt to put will create/update entry. And there is no-uniqueness constraint across two
+     * entities.
+     */
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Test
+  @Override
+  public void test_put() {
+
+    OAuth2OwnerTokenEntity testEntity = getDefaultEntityBuilder().build();
+    OAuth2OwnerTokenEntity savedEntity = dao.put(testEntity);
+
+    OAuth2OwnerTokenEntity getEntity = dao.get(testEntity.getId());
+    assertEquals(savedEntity, getEntity);
+
+    // Same entity can be persisted twice. Change accessToken & refreshToken.
+    String newAccessToken = getRandomString();
+    String newRefreshToken = getRandomString();
+
+    testEntity = getDefaultEntityBuilder()
+        .accessToken(newAccessToken)
+        .refreshToken(newRefreshToken)
+        .build();
+
+    OAuth2OwnerTokenEntity newSavedEntity = dao.put(testEntity);
+    assertEquals(newSavedEntity, dao.put(testEntity));
+    assertEquals(newSavedEntity, dao.put(testEntity));
+
+    // Ensures that savedEntity and newSavedEntity refer to same Entity.
+    assertEquals(savedEntity.getId(), newSavedEntity.getId());
+    // Ensures that savedEntity and newSavedEntity are not equal post modification.
+    assertTrue(!savedEntity.equals(newSavedEntity));
+
+    // Now original accessToken and refreshToken is set back.
+    testEntity = getDefaultEntityBuilder().build();
+    newSavedEntity = dao.put(testEntity);
+    assertEquals(savedEntity, newSavedEntity);
+
+    /*
+     * Negative : No negative test, as the key is based on PersonId + OAuth2Provider and therefore
+     * any attempt to put will create/update entry. And there is no-uniqueness constraint across two
+     * entities.
+     */
+  }
+}

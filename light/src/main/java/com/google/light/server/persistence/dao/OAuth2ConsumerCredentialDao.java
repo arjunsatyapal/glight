@@ -31,8 +31,6 @@ import com.googlecode.objectify.ObjectifyService;
 /**
  * DAO for {@link OAuth2ConsumerCredentialEntity}.
  * 
- * TODO(arjuns): Add test for this class.
- * 
  * @author Arjun Satyapal
  */
 public class OAuth2ConsumerCredentialDao extends

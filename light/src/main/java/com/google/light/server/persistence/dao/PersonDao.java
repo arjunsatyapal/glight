@@ -30,6 +30,7 @@ import com.googlecode.objectify.Query;
 import java.util.List;
 
 /**
+ * DAO for {@link PersonEntity}.
  * 
  * @author Arjun Satyapal
  */

@@ -176,4 +176,8 @@ public class OAuth2OwnerTokenEntity implements
     this.tokenType = checkNotBlank(builder.tokenType, "tokenType");
     this.tokenInfo = checkNotBlank(builder.tokenInfo, "tokenInfo");
   }
+
+  // For Objectify.
+  private OAuth2OwnerTokenEntity() {
+  }
 }
