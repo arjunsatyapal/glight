@@ -31,7 +31,6 @@ import com.google.light.server.persistence.dao.PersonDao;
  * @author Arjun Satyapal
  */
 @Deprecated
-@SuppressWarnings("deprecation")
 public class TestInstanceProvider {
   private Injector injector;
   
