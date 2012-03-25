@@ -28,7 +28,7 @@ public abstract class AbstractPersistenceEntityTest {
    * Test for constructor for each entity.
    */
   @Test
-  public abstract void test_builder();
+  public abstract void test_builder_with_constructor();
   
   /**
    * Test for {@link PersistenceToDtoInterface#toDto()}

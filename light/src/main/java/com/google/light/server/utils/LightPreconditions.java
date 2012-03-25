@@ -210,7 +210,7 @@ public class LightPreconditions {
     }
     return false;
   }
-
+  
   // Utility class.
   private LightPreconditions() {
   }

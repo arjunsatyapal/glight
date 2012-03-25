@@ -42,7 +42,7 @@ public class IdProviderDetailTest extends AbstractPersistenceEntityTest {
    */
   @Test
   @Override
-  public void test_builder() {
+  public void test_builder_with_constructor() {
     // Positive part is already tested. Lets test for negative things.
 
     // Negative Test : Test with authDomain = null.
