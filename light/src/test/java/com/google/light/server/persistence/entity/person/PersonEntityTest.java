@@ -17,17 +17,15 @@ package com.google.light.server.persistence.entity.person;
 
 import static com.google.light.testingutils.TestingUtils.getRandomEmail;
 import static com.google.light.testingutils.TestingUtils.getRandomPersonId;
+import static com.google.light.testingutils.TestingUtils.getRandomString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-import com.google.light.server.exception.unchecked.BlankStringException;
-
-import com.google.light.server.exception.unchecked.InvalidPersonIdException;
-
-import com.google.common.collect.ImmutableList;
-import com.google.light.server.constants.OpenIdAuthDomain;
 import com.google.light.server.dto.person.PersonDto;
+import com.google.light.server.exception.unchecked.BlankStringException;
+import com.google.light.server.exception.unchecked.InvalidPersonIdException;
 import com.google.light.server.persistence.entity.AbstractPersistenceEntityTest;
+import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -35,31 +33,25 @@ import org.junit.Test;
  * 
  * @author Arjun Satyapal
  */
-@SuppressWarnings("deprecation")
 public class PersonEntityTest extends AbstractPersistenceEntityTest {
-  private final Long userId = 1234L;
-  private final String email = "email@gmail.com";
-  private final String firstName = "first name";
-  private final String lastName = "last name";
+  private  Long personId;
+  private  String email;
+  private  String firstName;
+  private  String lastName;
 
-  private final OpenIdAuthDomain authDomain = OpenIdAuthDomain.GOOGLE;
-  private final String testFederatedId = "federatedId:2222";
-
-  private final IdProviderDetail idProviderDetail = new IdProviderDetail(authDomain, email,
-      testFederatedId);
-
-  private final PersonEntity personWithoutId = getEntityBuilderWithoutId().build();
-
-  private final PersonEntity personWithId = getEntityBuilderWithoutId()
-      .id(userId)
-      .build();
-
+  @Before
+  public void setUp() {
+    personId = getRandomPersonId();
+    email = getRandomEmail();
+    firstName = getRandomString();
+    lastName = getRandomString();
+  }
+  
   private PersonEntity.Builder getEntityBuilderWithoutId() {
     return new PersonEntity.Builder()
         .email(email)
         .firstName(firstName)
-        .lastName(lastName)
-        .idProviderDetails(ImmutableList.of(idProviderDetail));
+        .lastName(lastName);
   }
 
   /**
@@ -67,9 +59,29 @@ public class PersonEntityTest extends AbstractPersistenceEntityTest {
    */
   @Test
   @Override
-  public void test_builder() {
+  public void test_builder_with_constructor() {
     // Valid case is already tested.
 
+    // Positive test : null personId should pass.
+    getEntityBuilderWithoutId().id(null).build();
+
+    // Negative test : zero personId
+    try {
+      getEntityBuilderWithoutId().id(0L).build();
+      fail("Should have failed.");
+    } catch (InvalidPersonIdException e) {
+      // Expected.
+    }
+    
+    // Negative test : negative personId
+    try {
+      getEntityBuilderWithoutId().id(-3L).build();
+      fail("Should have failed.");
+    } catch (InvalidPersonIdException e) {
+      // Expected.
+    }
+
+    
     // Negative test : First Name=null
     try {
       getEntityBuilderWithoutId().firstName(null).build();
@@ -129,8 +141,8 @@ public class PersonEntityTest extends AbstractPersistenceEntityTest {
       .lastName(lastName)
       .email(email)
       .build();
-    assertEquals(expectedDto, personWithoutId.toDto());
-    assertEquals(expectedDto, personWithId.toDto());
+    assertEquals(expectedDto, getEntityBuilderWithoutId().build().toDto());
+    assertEquals(expectedDto, getEntityBuilderWithoutId().id(personId).build().toDto());
   }
 
   /**
@@ -206,7 +218,7 @@ public class PersonEntityTest extends AbstractPersistenceEntityTest {
   public void test_setId() {
     // Positive Test
     PersonEntity testPerson = getEntityBuilderWithoutId().build();
-    testPerson.setId(userId);
+    testPerson.setId(personId);
 
     // Negative Test : trying changing value.
     try {
