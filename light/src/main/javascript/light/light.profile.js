@@ -15,6 +15,9 @@
  */
 /**
  * This file is responsible for configuring the Dojo Build for production use.
+ * 
+ * <p> It was based on the app.profile.js file from the Dojo Boilerplate project.
+ * @see https://github.com/csnover/dojo-boilerplate
  */
 var profile = (function() {
   /**

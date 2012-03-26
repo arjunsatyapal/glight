@@ -11,7 +11,8 @@ to keep running your tests:
 	mvn jasmine:bdd
 
 It will start a server at http://localhost:8234/ and if you access it you
-can run/rerun your javascript tests.
+can run/rerun your javascript tests. You can change the 8234 port to whatever port
+you want by adding in the maven command line the argument "-Djasmine.serverPort=PORT".
 
 Also, by default the maven profile light-prod is active, so during maven build
 your javascript will be compiled and minimized. For development, that may not
@@ -29,7 +30,7 @@ and also it will allow you to configure eclipse to automatically output
 stuff from src/main/javascript/light into target/light-*/js/light, so you don't
 need to restart the webserver. 
 
-I simple and productive workflow would be:
+One simple and productive workflow would be:
 1) Build the project using the light-dev profile:
 	mvn clean package -Dlight-dev=true
 
