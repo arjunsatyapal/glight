@@ -16,6 +16,11 @@
 dojoConfig = {
   async: true,
   isDebug: true,
+  /*
+   * waitSeconds is the timeout for loading a certain resource. By default it is
+   * 15 seconds, but as this file is only for local testing, we can set
+   * a smaller value to get a faster feedback when loading errors occur.
+   */
   waitSeconds: 2,
   // Commented part used for testing i18n
   // locale: 'pt-br',
