@@ -50,19 +50,19 @@
     deferredOnError: function(e) { console.log(e.message, e.stack) },
       packages: [{
           name: 'light',
-          location: base + 'src/main/webapp/js/light'
+          location: base + 'src/main/javascript/light'
       }, {
           name: 'lightTest',
-          location: base + 'src/test/webapp/jsTest/lightTest'
+          location: base + 'src/test/javascript/lightTest'
       }, {
         name: 'dojo',
-        location: base + 'src/main/webapp/js/external/djk/dojo'
+        location: base + 'src/main/javascript/external/djk/dojo'
       }, {
         name: 'dijit',
-        location: base + 'src/main/webapp/js/external/djk/dijit'
+        location: base + 'src/main/javascript/external/djk/dijit'
       }, {
         name: 'dojox',
-        location: base + 'src/main/webapp/js/external/djk/dojox'
+        location: base + 'src/main/javascript/external/djk/dojox'
       }]
   };
 

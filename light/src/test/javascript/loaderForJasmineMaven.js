@@ -100,14 +100,14 @@ var setupDojoLoaderForJasmine = function() {
 };
 
 document.write(
-    '<script src="src/test/webapp/jsTest/external/syn.js"></script>');
+    '<script src="src/test/javascript/external/syn.js"></script>');
 document.write(
-    '<script src="src/test/webapp/jsTest/external/sinon-1.3.1.js"></script>');
+    '<script src="src/test/javascript/external/sinon-1.3.1.js"></script>');
 document.write(
-    '<script src="src/test/webapp/jsTest/external/jasmine-sinon.js"></script>');
+    '<script src="src/test/javascript/external/jasmine-sinon.js"></script>');
 document.write(
-    '<script src="src/test/webapp/jsTest/lightTestExtensions.js"></script>');
-document.write('<script src="src/test/webapp/jsTest/testConfig.js"></script>');
+    '<script src="src/test/javascript/lightTestExtensions.js"></script>');
+document.write('<script src="src/test/javascript/testConfig.js"></script>');
 document.write(
-    '<script src="src/main/webapp/js/external/djk/dojo/dojo.js"></script>');
+    '<script src="src/main/javascript/external/djk/dojo/dojo.js"></script>');
 document.write('<script>setupDojoLoaderForJasmine()</script>');

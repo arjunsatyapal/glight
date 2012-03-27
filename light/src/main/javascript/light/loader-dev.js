@@ -13,31 +13,32 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+/**
+ * This file is just a replacement loader to avoid needing to build
+ * code using the dojo build system during development.
+ */
 dojoConfig = {
   async: true,
   isDebug: true,
   waitSeconds: 2,
   // Commented part used for testing i18n
   // locale: 'pt-br',
+  has: {
+    'light-dev': 1
+  },
   deferredOnError: function(e) { console.log(e.message, e.stack); },
     packages: [{
         name: 'light',
         location: '/js/light'
     },
-    { name: 'dojo', location: '/js/external/djk/dojo' },
-    { name: 'dijit', location: '/js/external/djk/dijit' },
-    { name: 'dojox', location: '/js/external/djk/dojox' }
+    { name: 'dojo', location: '/js/dojo' },
+    { name: 'dijit', location: '/js/dijit' },
+    { name: 'dojox', location: '/js/dojox' }
     ]
 };
-document.write('<script src="/js/external/djk/dojo/dojo.js"></script>');
-document.write('<link rel="stylesheet" type="text/css" ' +
-        'href="/js/external/djk/dojo/resources/dojo.css">');
-document.write('<link rel="stylesheet" type="text/css" ' +
-        'href="/js/external/djk/dijit/themes/claro/claro.css">');
+document.write('<script src="/js/dojo/dojo.js"></script>');
 // window.onload to the rescue! IE was not getting the older
 // loading method of writing a script tag with the following require code.
 window.onload = function() {
-  require(['dojo/query', 'dojo/domReady!', lightMain], function($) {
-    $('body')[0].setAttribute('class', 'claro');
-  })
+  require(['light/main/LoaderMain'], function() {});
 }
