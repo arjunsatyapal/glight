@@ -16,20 +16,22 @@
 package com.google.light.server.servlets;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.light.server.utils.LightUtils.wrapIntoRuntimeExceptionAndThrow;
 
-import com.google.inject.Inject;
-import com.google.inject.Injector;
-import com.google.light.server.guice.providers.InstanceProvider;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.google.inject.Inject;
+import com.google.inject.Injector;
+import com.google.light.server.guice.providers.InstanceProvider;
+
 /**
  * Base servlets for all Light Servlets. Essentially it forces all the derived servlets to implement
- * this methods. This ensures that any of the deriving classes does not miss any of these REST 
+ * this methods. This ensures that any of the deriving classes does not miss any of these REST
  * methods. NOTE :<br>
- * * If Child class does not support a method, it should throw 
- * {@link UnsupportedOperationException}.
+ * * If Child class does not support a method, it should throw {@link UnsupportedOperationException}
+ * .
  * 
  * @author Arjun Satyapal
  */
@@ -59,7 +61,9 @@ public abstract class AbstractLightServlet extends HttpServlet {
       super.service(request, response);
     } catch (Exception e) {
       // TODO(arjuns): Auto-generated catch block
-      throw new RuntimeException(e);
+      
+      
+      wrapIntoRuntimeExceptionAndThrow(e);
     }
   }
 

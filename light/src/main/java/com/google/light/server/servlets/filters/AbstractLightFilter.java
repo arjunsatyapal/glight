@@ -20,6 +20,8 @@ import static com.google.light.server.utils.LightPreconditions.checkPersonIsGaeA
 
 import com.google.common.base.Throwables;
 import com.google.light.server.annotations.AnotHttpSession;
+import com.google.light.server.constants.HttpStatusCodesEnum;
+import com.google.light.server.exception.unchecked.httpexception.LightHttpException;
 import com.google.light.server.exception.unchecked.httpexception.PersonLoginRequiredException;
 import com.google.light.server.servlets.path.ServletPathEnum;
 import java.io.IOException;
@@ -46,44 +48,40 @@ public abstract class AbstractLightFilter implements Filter {
   private static final Logger logger = Logger.getLogger(Filter.class.getName());
   private FilterConfig filterConfig;
 
-  public void validateAndDoFilter(HttpSession session, ServletRequest req, ServletResponse res,
-      FilterChain filterChain, ServletPathEnum servletPath) {
-    try {
-      HttpServletRequest request = (HttpServletRequest) req;
-      HttpServletResponse response = (HttpServletResponse) res;
+  private void validateAndDoFilter(HttpSession session, ServletRequest req, ServletResponse res,
+      FilterChain filterChain, ServletPathEnum servletPath) throws IOException, ServletException {
+    HttpServletRequest request = (HttpServletRequest) req;
+    HttpServletResponse response = (HttpServletResponse) res;
 
-      /*
-       * For Admin Privileges, we depend on GAE. So even if on ServletPathEnum, we mandate that for
-       * requireAdminPrivilege, requireLogin should be true (as that is conceptually) correct. And
-       * infact will work fine on real AppEngine. But in testing world, we are using FakeLogins. So
-       * essentially at the time of login, session is established, which will be used for detecting
-       * login. But for detecting whether User is Admin, we depend on AppEngine. In order to make
-       * testing easier, we first check if Admin Privileges is required. If that is true, then we
-       * ask GAE if user is logged in. And if UserIs logged in, then without checking the session,
-       * we allow the user to visit those URLs. This makes testing easier, as it reduces one
-       * additional step of Logging in and creating Session which is of no use for Servlets that
-       * require Admin Privileges.
-       */
-      if (servletPath.isRequiredAdminPrivilege()) {
-        checkPersonIsGaeAdmin();
-      } else if (servletPath.isRequiredLogin()) {
-        if (session == null) {
-          throw new PersonLoginRequiredException("");
-        } else if (session.isNew()) {
-          session.invalidate();
-          throw new PersonLoginRequiredException(
-              "Session should not be created inside AbstractLightFiter.");
-        } else {
-          seedEntityInRequestScope(request, HttpSession.class, AnotHttpSession.class, session);
-        }
+    /*
+     * For Admin Privileges, we depend on GAE. So even if on ServletPathEnum, we mandate that for
+     * requireAdminPrivilege, requireLogin should be true (as that is conceptually) correct. And
+     * infact will work fine on real AppEngine. But in testing world, we are using FakeLogins. So
+     * essentially at the time of login, session is established, which will be used for detecting
+     * login. But for detecting whether User is Admin, we depend on AppEngine. In order to make
+     * testing easier, we first check if Admin Privileges is required. If that is true, then we ask
+     * GAE if user is logged in. And if UserIs logged in, then without checking the session, we
+     * allow the user to visit those URLs. This makes testing easier, as it reduces one additional
+     * step of Logging in and creating Session which is of no use for Servlets that require Admin
+     * Privileges.
+     */
+    if (servletPath.isRequiredAdminPrivilege()) {
+      checkPersonIsGaeAdmin();
+    } else if (servletPath.isRequiredLogin()) {
+      if (session == null) {
+        throw new PersonLoginRequiredException("");
+      } else if (session.isNew()) {
+        session.invalidate();
+        throw new PersonLoginRequiredException(
+            "Session should not be created inside AbstractLightFiter.");
+      } else {
+        seedEntityInRequestScope(request, HttpSession.class, AnotHttpSession.class, session);
       }
-
-      // TODO(arjuns) : Add changeLog.
-      filterChain.doFilter(request, response);
-    } catch (Exception e) {
-      // TODO(arjuns) : check log(level, message, throwable) logs whole stack.
-      logger.severe("Failed due to : " + Throwables.getStackTraceAsString(e));
     }
+
+    // TODO(arjuns) : Add changeLog.
+    filterChain.doFilter(request, response);
+
   }
 
   /**
@@ -114,14 +112,26 @@ public abstract class AbstractLightFilter implements Filter {
    */
   void handleFilterChain(ServletRequest request, ServletResponse response, FilterChain filterChain)
       throws IOException, ServletException {
-    HttpServletRequest req = (HttpServletRequest) request;
+    HttpServletResponse resp = (HttpServletResponse) response;
+    try {
+      HttpServletRequest req = (HttpServletRequest) request;
 
-    ServletPathEnum servletPath = ServletPathEnum.getServletPathEnum(req.getRequestURI());
+      ServletPathEnum servletPath = ServletPathEnum.getServletPathEnum(req.getRequestURI());
 
-    if (servletPath.isRequiredLogin()) {
-      validateAndDoFilter(req.getSession(false), req, response, filterChain, servletPath);
-    } else {
-      filterChain.doFilter(request, response);
+      if (servletPath.isRequiredLogin()) {
+        validateAndDoFilter(req.getSession(false), req, response, filterChain, servletPath);
+      } else {
+        filterChain.doFilter(request, response);
+      }
+    } catch (Exception e) {
+      if(LightHttpException.class.isAssignableFrom(e.getClass())) {
+        resp.sendError(((LightHttpException)e).getHttpCode().getStatusCode(), e.getMessage());
+      } else {
+        resp.sendError(HttpStatusCodesEnum.INTERNAL_SERVER_ERROR.getStatusCode(),
+            "Internal Server Error");
+        // TODO(arjuns) : check log(level, message, throwable) logs whole stack.
+        logger.severe("Failed due to : " + Throwables.getStackTraceAsString(e));
+      }
     }
   }
 

@@ -17,6 +17,16 @@ package com.google.light.server.servlets.test;
 
 import static com.google.light.server.utils.LightPreconditions.checkIsNotEnv;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.Enumeration;
+import java.util.Map;
+
+import javax.servlet.ServletInputStream;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;
 import com.google.gson.Gson;
@@ -24,14 +34,6 @@ import com.google.gson.GsonBuilder;
 import com.google.inject.Inject;
 import com.google.light.server.constants.LightEnvEnum;
 import com.google.light.server.servlets.AbstractLightServlet;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.Enumeration;
-import java.util.Map;
-import javax.servlet.ServletInputStream;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 /**
  * A simple servlet to show all the headers sent by the client.
@@ -105,12 +107,15 @@ public class TestHeaders extends AbstractLightServlet {
       builder.append("<br>localPort = " + request.getLocalPort());
       builder.append("<br>method = " + request.getMethod());
 
-      Map<String, String> paramMap = request.getParameterMap();
+      Map<String, String[]> paramMap = request.getParameterMap();
       builder.append("<br>ParameterMap = ");
 
       if (paramMap != null) {
         for (String currKey : paramMap.keySet()) {
-          builder.append("<br>    [" + currKey + "] = [" + paramMap.get(currKey));
+          String[] currValueArray = paramMap.get(currKey);
+          for(String currValue : currValueArray) {
+            builder.append("<br>    [" + currKey + "] = [" + currValue + "]");
+          }
         }
       } else {
         builder.append("null");

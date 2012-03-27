@@ -15,14 +15,15 @@
  */
 package com.google.light.server.guice;
 
-import com.google.light.server.exception.unchecked.ServerConfigurationException;
+import java.util.logging.Logger;
 
 import com.google.inject.Scopes;
 import com.google.inject.servlet.ServletModule;
+import com.google.light.server.exception.unchecked.ServerConfigurationException;
+import com.google.light.server.servlets.filters.CharacterEncondingFilter;
 import com.google.light.server.servlets.filters.FilterPathEnum;
 import com.google.light.server.servlets.path.ServletPathEnum;
 import com.google.light.server.utils.GaeUtils;
-import java.util.logging.Logger;
 
 /**
  * Guice Servlet Module to bind Servlets & Filters to corresponding URL Patterns.
@@ -40,13 +41,13 @@ public class LightServletModule extends ServletModule {
         || GaeUtils.isProductionServer()
         || GaeUtils.isQaServer()
         || GaeUtils.isUnitTestServer();
-    
+
     if (!knownEnv) {
       throw new ServerConfigurationException("Unknown AppId : " + GaeUtils.getAppId());
     }
-    
+
     // First registering the Filters.
-    boolean isProduction = GaeUtils.isProductionServer(); 
+    boolean isProduction = GaeUtils.isProductionServer();
     if (isProduction) {
       initFilters(FilterPathEnum.API);
     } else {
@@ -68,6 +69,12 @@ public class LightServletModule extends ServletModule {
    * Method to initialize Servlet Filters.
    */
   private void initFilters(FilterPathEnum filter) {
+    /*
+     * Binding the CharacterEncondingFilter here to be sure no other filter
+     * will be called before it.
+     */
+    filter("*").through(CharacterEncondingFilter.class);
+
     bind(filter.getClazz()).in(Scopes.SINGLETON);
     for (String currPattern : filter.getUrlPatterns()) {
       logger.finest("Binding [" + currPattern + "] to filter [" + filter.getClazz() + "].");
@@ -80,7 +87,8 @@ public class LightServletModule extends ServletModule {
    */
   private void initServlet(ServletPathEnum servletPath) {
     bind(servletPath.getClazz()).in(Scopes.SINGLETON);
-    logger.finest("Binding [" + servletPath.get() + "] to Servlet [" + servletPath.getClazz() + "].");
+    logger.finest("Binding [" + servletPath.get() + "] to Servlet [" + servletPath.getClazz()
+        + "].");
     serve(servletPath.get()).with(servletPath.getClazz());
     logger.finest("Binding [" + servletPath.getRoot() + "] to Servlet [" + servletPath.getClazz()
         + "].");

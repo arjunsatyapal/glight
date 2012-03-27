@@ -24,6 +24,8 @@ import static com.google.light.server.constants.RequestParmKeyEnum.LOGIN_PROVIDE
 import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;
 import com.google.light.server.constants.OAuth2Provider;
+import com.google.light.server.exception.unchecked.httpexception.LightHttpException;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -110,5 +112,14 @@ public class LightUtils {
   
   // Utility class.
   private LightUtils() {
+  }
+  
+  public static void wrapIntoRuntimeExceptionAndThrow(Exception e) {
+    // Allowing LightHttpException to pass through so the filters can handle it properly.
+    if(LightHttpException.class.isAssignableFrom(e.getClass())) {
+      throw (LightHttpException) e;
+    } else {
+      throw new RuntimeException(e);
+    }
   }
 }

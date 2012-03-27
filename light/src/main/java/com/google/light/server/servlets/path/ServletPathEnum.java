@@ -18,7 +18,7 @@ package com.google.light.server.servlets.path;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
-import com.google.light.server.servlets.test.SessionInfoServlet;
+import javax.servlet.http.HttpServlet;
 
 import com.google.light.server.exception.unchecked.httpexception.NotFoundException;
 import com.google.light.server.servlets.admin.ConfigServlet;
@@ -27,10 +27,11 @@ import com.google.light.server.servlets.login.LoginServlet;
 import com.google.light.server.servlets.oauth2.google.login.GoogleLoginCallbackServlet;
 import com.google.light.server.servlets.oauth2.google.login.GoogleLoginServlet;
 import com.google.light.server.servlets.person.PersonServlet;
+import com.google.light.server.servlets.search.SearchServlet;
+import com.google.light.server.servlets.test.SessionInfoServlet;
 import com.google.light.server.servlets.test.TestHeaders;
 import com.google.light.server.servlets.test.TestLogin;
 import com.google.light.server.servlets.test.oauth2.google.login.FakeLoginServlet;
-import javax.servlet.http.HttpServlet;
 
 /**
  * Enum to Map Servlets with their Paths and URL Patterns.
@@ -44,6 +45,8 @@ public enum ServletPathEnum {
   // TODO(arjuns) : Find a way to end URLs without /.
   PERSON(PersonServlet.class, "/api/person",
          true, false, false),
+  SEARCH(SearchServlet.class, "/api/search",
+                false, false, false),
   LOGIN(LoginServlet.class, "/login",
         false, false, false),
 
