@@ -254,6 +254,21 @@
       <version>0.9.22</version>
     </dependency>
 
+    <!-- Selenium -->
+    <dependency>
+      <groupId>org.seleniumhq.selenium</groupId>
+      <artifactId>selenium-java</artifactId>
+      <version>${selenium.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency><!-- Needed by selenium -->
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpclient</artifactId>
+      <version>4.1.3</version>
+      <scope>test</scope>
+    </dependency>
+
     <!--
       Test Dependency :
       Scope = Test Only.
@@ -657,17 +672,21 @@
       default.
     -->
     <gae.application.version>test</gae.application.version>
-    
+
     <light.wardir>${basedir}/target/${gaeApplicationName}-1.0-SNAPSHOT</light.wardir>
-    
+
     <!-- JSTestDriver properties -->
     <jstd.plugin.version>1.3.2.5</jstd.plugin.version>
     <jstd.version>1.3.4-a</jstd.version>
-    
+
     <!-- Dojo -->
     <dojo.path>${basedir}/src/main/javascript/external/djk</dojo.path>
     <dojo.build.release.location>${light.wardir}/js</dojo.build.release.location>
     <dojo.build.extraArgs></dojo.build.extraArgs>
+
+    <!-- Selenium -->
+    <selenium.version>2.20.0</selenium.version>
+    <selenium.driver>org.openqa.selenium.firefox.FirefoxDriver</selenium.driver>
   </properties>
 
   <profiles>
@@ -717,7 +736,8 @@
                 </goals>
                 <configuration>
                   <tasks>
-                    <copy file="${project.basedir}/src/main/javascript/light/loader-dev.js" tofile="${dojo.build.release.location}/light/build/loader.js" />
+                    <copy file="${project.basedir}/src/main/javascript/light/loader-dev.js"
+                      tofile="${dojo.build.release.location}/light/build/loader.js" />
                   </tasks>
                 </configuration>
               </execution>
@@ -726,7 +746,7 @@
         </plugins>
       </build>
     </profile>
-  
+
     <profile>
       <id>light-prod</id>
       <activation>
@@ -736,13 +756,13 @@
       </activation>
       <build>
         <plugins>
-          
+
           <!-- Dojo build -->
           <plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>exec-maven-plugin</artifactId>
             <version>1.2.1</version>
-  
+
             <configuration>
               <executable>${java.home}/bin/java</executable>
               <workingDirectory>${dojo.path}/util/buildscripts</workingDirectory>
@@ -758,7 +778,7 @@
                 ${dojo.build.extraArgs}
               </commandlineArgs>
             </configuration>
-  
+
             <executions>
               <execution>
                 <id>dojo-build</id>
@@ -769,7 +789,7 @@
               </execution>
             </executions>
           </plugin>
-          
+
           <plugin>
             <artifactId>maven-antrun-plugin</artifactId>
             <executions>
@@ -796,11 +816,11 @@
             </executions>
           </plugin>
         </plugins>
-        
-        
-        
+
+
+
       </build>
-    </profile>  
+    </profile>
 
     <!-- Download Dojo Toolkit and unpack it -->
     <profile>
@@ -885,12 +905,12 @@
               -->
               <scriptLoaderPath>../../../../src/test/javascript/loaderForJasmineMaven.js</scriptLoaderPath>
               <!--
-                We need to use Chrome instead of HTMLUnit for now because in the current HTMLUnit
+                We need to use a browser instead of HTMLUnit for now because in the current HTMLUnit
                 there is no implementation of getBoundingClientRect, which is used by dojo during
                 the testing of Light's Views.
               -->
-              <webDriverClassName>org.openqa.selenium.chrome.ChromeDriver</webDriverClassName>
-              
+              <webDriverClassName>${selenium.driver}</webDriverClassName>
+
               <jsSrcDir>${project.basedir}/src/main/javascript</jsSrcDir>
               <jsTestSrcDir>${project.basedir}/src/test/javascript</jsTestSrcDir>
 
@@ -916,6 +936,14 @@
               </specIncludes>
 
             </configuration>
+            <dependencies>
+              <!-- Overriding the selenium version used by jasmine -->
+              <dependency>
+                <groupId>org.seleniumhq.selenium</groupId>
+                <artifactId>selenium-java</artifactId>
+                <version>${selenium.version}</version>
+              </dependency>
+            </dependencies>
           </plugin>
         </plugins>
       </build>
