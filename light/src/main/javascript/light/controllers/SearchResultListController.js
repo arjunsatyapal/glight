@@ -15,16 +15,18 @@
  */
 define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
         'light/enums/SearchEventsEnum', 'dojo/_base/connect'],
-        function(declare, AbstractLightController, SearchEventsEnum,
-                connect) {
-  /**
-   * @class
-   * @name light.controllers.SearchBarController
-   */
-  return declare('light.controllers.SearchBarController',
+        function(declare, AbstractLightController, SearchEventsEnum, connect) {
+  return declare('light.controller.SearchResultListController',
           AbstractLightController, {
+    /** @lends light.controller.SearchResultListController# */
 
-    /** @lends light.controllers.SearchBarController# */
+    /**
+     * @extends light.controllers.AbstractLightController
+     * @constructs
+     */
+    constructor: function(searchService) {
+      this.searchService = searchService;
+    },
 
     /**
      * Wire's this object to the dojo event system so it can
@@ -38,20 +40,20 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
     /**
      * Handler for search state change events.
      */
-    _onSearchStateChange: function(searchState, source) {
-      if (source != this)
-        this._view.setQuery(searchState.query);
-    },
+    _onSearchStateChange: function(searchState) {
 
-    /**
-     * Handler for submit events in the search form.
-     */
-    onSubmit: function() {
-      connect.publish(SearchEventsEnum.SEARCH_STATE_CHANGED, [{
-        query: this._view.getQuery(),
-        page: 1
-      }, this]);
+      // Canceling last search
+      this.searchService.cancelLastSearch();
+
+      var view = this._view;
+      if (searchState.query.match(/^\s+$/)) {
+        view.clear();
+      } else {
+        this.searchService.search(searchState).then(function(data) {
+          view.show(searchState, data);
+        });
+      }
+
     }
-
   });
 });

@@ -1,15 +1,15 @@
-<div width="100%" style="padding: 20px; text-align: center">
+<div style="padding: 20px; text-align: center">
   <!-- TODO(waltercacau): move this into a CSS -->
   ${messages.instructions}<br /><br />
   <div data-dojo-type="dijit.form.Form" data-dojo-attach-event="onSubmit:_onSubmit" data-dojo-attach-point="_form" style="display: inline-block">
   <table>
     <tr>
       <td style="text-align: right"><label for="${id}_firstName">${messages.firstNameTextBoxLabel}</label></td>
-      <td><input required="true" id="${id}_firstName" data-dojo-type="dijit.form.ValidationTextBox" style="width: 15em" data-dojo-attach-point="_firstNameTextBox"/></label></td>
+      <td><input required="required" id="${id}_firstName" data-dojo-type="dijit.form.ValidationTextBox" style="width: 15em" data-dojo-attach-point="_firstNameTextBox"/></td>
     </tr>
     <tr>
       <td style="text-align: right"><label for="${id}_lastName">${messages.lastNameTextBoxLabel}</label></td>
-      <td><input required="true" id="${id}_lastName" data-dojo-type="dijit.form.ValidationTextBox" style="width: 15em" data-dojo-attach-point="_lastNameTextBox"/></td>
+      <td><input required="required" id="${id}_lastName" data-dojo-type="dijit.form.ValidationTextBox" style="width: 15em" data-dojo-attach-point="_lastNameTextBox"/></td>
     </tr>
     <tr>
       <td style="text-align: right"><label for="${id}_tosTextarea">${messages.tosTextareaLabel}</label></td>

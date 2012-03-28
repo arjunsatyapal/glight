@@ -14,8 +14,19 @@
  * the License.
  */
 define(['light/views/SearchBarView', 'light/SearchRouter',
-        'light/controllers/SearchBarController', 'dojo/domReady!'],
-        function(SearchBarView, SearchRouter, SearchBarController) {
+        'light/controllers/SearchBarController', 
+        'light/controllers/SearchResultListController',
+        'light/views/SearchResultListView', 'light/SearchService',
+        'dojo/domReady!'],
+        function(SearchBarView, SearchRouter, SearchBarController,
+                 SearchResultListController, SearchResultListView,
+                 SearchService) {
+  searchResultListView = new SearchResultListView({}, 'searchResults');
+  searchResultListController =
+    new SearchResultListController(new SearchService());
+  searchResultListController.setView(searchResultListView);
+  searchResultListView.setController(searchResultListController);
+  
   searchBarView = new SearchBarView({}, 'searchBar');
   searchBarController = new SearchBarController();
   searchBarController.setView(searchBarView);
@@ -23,11 +34,13 @@ define(['light/views/SearchBarView', 'light/SearchRouter',
   
   searchRouter = new SearchRouter();
   /*
-   * It is important that the searchBarController is
-   * wired to the event system before the searchRouter, because
-   * the searchRouter will analyze the current hash and dispatch
-   * an event for SearchEventsEnum.SEARCH_STATE_CHANGED
-   */ 
+   * It is important that the searchBarController and
+   * searchResultListController are wired to the event system before the
+   * searchRouter, because the searchRouter will analyze the current
+   * hash and dispatch an event for
+   * SearchEventsEnum.SEARCH_STATE_CHANGED
+   */
+  searchResultListController.watch();
   searchBarController.watch();
   searchRouter.watch();
   

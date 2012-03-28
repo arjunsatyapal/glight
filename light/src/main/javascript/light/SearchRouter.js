@@ -13,11 +13,12 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-define(['dojo/_base/connect', 'dojo/_base/declare', 'light/URLHashUtil',
+define(['dojo/_base/connect', 'dojo/_base/declare', 'light/utils/URLHashUtils',
         'dojo', 'light/enums/SearchEventsEnum'],
         function(connect, declare, hashUtil, dojo, SearchEventsEnum) {
-
-  return declare('light.SearchRouter', null, {
+  
+  /** @exports SearchRouter as light.SearchRouter */
+  var SearchRouter = declare('light.SearchRouter', null, {
     /** @lends light.SearchRouter# */
 
     /**
@@ -91,7 +92,7 @@ define(['dojo/_base/connect', 'dojo/_base/declare', 'light/URLHashUtil',
     _onSearchStateChange: function(searchState, source) {
       if(source != this) {
         this._lastSearchState = searchState;
-        this._setHash(this._searchStateToHash(searchState));
+        this._setHash(SearchRouter.searchStateToHash(searchState));
       }
     },
 
@@ -109,7 +110,7 @@ define(['dojo/_base/connect', 'dojo/_base/declare', 'light/URLHashUtil',
         return;
       var searchState = null;
       try {
-        searchState = this._hashToSearchState(hash);
+        searchState = SearchRouter.hashToSearchState(hash);
       } catch (e) {
         // TODO(waltercacau): Warn the user that his query was wrong
       }
@@ -117,30 +118,33 @@ define(['dojo/_base/connect', 'dojo/_base/declare', 'light/URLHashUtil',
         this._lastSearchState = searchState;
         connect.publish(SearchEventsEnum.SEARCH_STATE_CHANGED, [searchState, this]);
       } else {
-        this._setHash(this._searchStateToHash(this._lastSearchState));
+        this._setHash(SearchRouter.searchStateToHash(this._lastSearchState));
       }
-    },
-
-    _searchStateToHash: function(data) {
-      return dojo.objectToQuery(data);
-    },
-
-    _hashToSearchState: function(hash) {
-      if (hash == '')
-        return this.defaultSearchState;
-      var data = dojo.queryToObject(hash);
-      if (typeof data.page != 'string' || !data.page.match(/[0-9]+/)) {
-        throw new Error('Page is not a number');
-      }
-      data.page = parseInt(data.page);
-      if (data.page <= 0) {
-        throw new Error('Page is less then 1');
-      }
-      if (data.query === undefined) {
-        throw new Error('Query Undefined');
-      }
-
-      return data;
     }
   });
+  
+  SearchRouter.searchStateToHash = function(data) {
+    return dojo.objectToQuery(data);
+  }
+  
+  SearchRouter.hashToSearchState = function(hash) {
+    if (hash == '')
+      return this.defaultSearchState;
+    var data = dojo.queryToObject(hash);
+    if (typeof data.page != 'string' || !data.page.match(/[0-9]+/)) {
+      throw new Error('Page is not a number');
+    }
+    data.page = parseInt(data.page);
+    if (data.page <= 0) {
+      throw new Error('Page is less then 1');
+    }
+    if (typeof data.query != 'string') {
+      throw new Error('Query is not a string');
+    }
+
+    return data;
+  }
+  
+  return SearchRouter;
+  
 });

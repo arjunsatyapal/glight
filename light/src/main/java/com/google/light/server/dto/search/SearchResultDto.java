@@ -23,7 +23,8 @@ import com.google.light.server.utils.JsonUtils;
 public class SearchResultDto implements DtoInterface<SearchResultDto> {
   private List<SearchResultItemDto> items;
 
-  private boolean hasNextPage;
+  // JAXB needs Boolean instead of the primitive type
+  private Boolean hasNextPage;
 
   private String suggestion;
   private String suggestionQuery;
@@ -36,11 +37,11 @@ public class SearchResultDto implements DtoInterface<SearchResultDto> {
     this.items = items;
   }
 
-  public boolean hasNextPage() {
+  public Boolean getHasNextPage() {
     return hasNextPage;
   }
 
-  public void setHasNextPage(boolean hasNextPage) {
+  public void setHasNextPage(Boolean hasNextPage) {
     this.hasNextPage = hasNextPage;
   }
 
@@ -104,7 +105,7 @@ public class SearchResultDto implements DtoInterface<SearchResultDto> {
       return this;
     }
 
-    public Builder hasNextPage(boolean hasNextPage) {
+    public Builder hasNextPage(Boolean hasNextPage) {
       this.hasNextPage = hasNextPage;
       return this;
     }

@@ -37,7 +37,7 @@ public class SearchResultDtoTest extends AbstractDtoToPersistenceTest {
 
   private SearchResultDto.Builder getDtoBuilder() {
     return new SearchResultDto.Builder().items(new ArrayList<SearchResultItemDto>())
-        .suggestion(null).suggestionQuery(null);
+        .suggestion(null).suggestionQuery(null).hasNextPage(false);
   }
 
   @Test
@@ -96,6 +96,14 @@ public class SearchResultDtoTest extends AbstractDtoToPersistenceTest {
     // Negative Test : items = null
     try {
       getDtoBuilder().items(null).build();
+      fail("should have failed.");
+    } catch (NullPointerException e) {
+      // expected.
+    }
+    
+    // Negative Test : hasNextPage = null
+    try {
+      getDtoBuilder().hasNextPage(null).build();
       fail("should have failed.");
     } catch (NullPointerException e) {
       // expected.

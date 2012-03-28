@@ -55,6 +55,9 @@
           name: 'lightTest',
           location: base + 'src/test/javascript/lightTest'
       }, {
+          name: 'testResources',
+          location: base + 'src/test/resources'
+      }, {
         name: 'dojo',
         location: base + 'src/main/javascript/external/djk/dojo'
       }, {

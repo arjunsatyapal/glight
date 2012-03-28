@@ -14,7 +14,8 @@
  * the License.
  */
 define(['dojo/_base/declare', 'dijit/focus', 'dojo/_base/event',
-        'dijit/_WidgetsInTemplateMixin', 'dojo/text!./RegisterFormView.html',
+        'dijit/_WidgetsInTemplateMixin',
+        'dojo/text!light/templates/RegisterFormTemplate.html',
         'dojo/i18n!light/nls/RegisterFormMessages',
         'dijit/Tooltip', 'light/views/TemplatedLightView', 'dojo/query',
         'dijit/form/ValidationTextBox', 'dijit/form/Textarea',
