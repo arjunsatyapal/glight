@@ -1,12 +1,9 @@
 /*
  * Copyright (C) Google Inc.
- *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- *
  * http://www.apache.org/licenses/LICENSE-2.0
- *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -15,8 +12,8 @@
  */
 package com.google.light.server.constants;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNonEmptyList;
-import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkValidUri;
 
 import com.google.common.collect.Lists;
@@ -26,33 +23,43 @@ import java.util.ArrayList;
 /**
  * Enum to encapsulate details for different OAuth2 providers.
  * 
- * TODO(arjuns): Add test for this class.
- * TODO(arjuns): See how credentials can be best managed with multiple types for same provider.
- * e.g. for Google Docs etc.
  * @author Arjun Satyapal
  */
-public enum OAuth2Provider {
-  // TODO(arjuns) : Once we have more values here, then update tests to get a random value from this.
-  GOOGLE_LOGIN("google",
+public enum OAuth2ProviderService {
+  // TODO(arjuns) : Once we have more values here, then update tests to get a random value from
+  // this.
+  GOOGLE_LOGIN(OAuth2ProviderEnum.GOOGLE,
                "https://accounts.google.com/o/oauth2/auth",
                "https://accounts.google.com/o/oauth2/token",
                Lists.newArrayList(
                    "https://www.googleapis.com/auth/userinfo.email",
                    "https://www.googleapis.com/auth/userinfo.profile"
-                   ));
+                   )),
+  GOOGLE_DOC(OAuth2ProviderEnum.GOOGLE,
+             "https://accounts.google.com/o/oauth2/auth",
+             "https://accounts.google.com/o/oauth2/token",
+             Lists.newArrayList(
+                 "https://docs.google.com/feeds/",
+                 "https://docs.googleusercontent.com/",
+                 "https://spreadsheets.google.com/feeds/"
+                 ));
 
-  private String providerName;
+  /**
+   * OAuth2 Provider for this ProviderService. More then one ProviderSerivce can share the same
+   * provider.
+   */
+  private OAuth2ProviderEnum provider;
   private String authServerUrl;
   private String tokenServerUrl;
   private ArrayList<String> scopes;
 
-  private OAuth2Provider(
-      String providerName, 
-      String authServerUrl, 
+  private OAuth2ProviderService(
+      OAuth2ProviderEnum provider,
+      String authServerUrl,
       String tokenServerUrl,
       ArrayList<String> scopes) {
     try {
-      this.providerName = checkNotBlank(providerName);
+      this.provider = checkNotNull(provider, "provider");
       this.authServerUrl = checkValidUri(authServerUrl);
       this.tokenServerUrl = checkValidUri(tokenServerUrl);
       this.scopes = (ArrayList<String>) checkNonEmptyList(scopes);
@@ -61,10 +68,15 @@ public enum OAuth2Provider {
     }
   }
 
-  public String getProviderName() {
-    return providerName;
+  /**
+   * Get OAuth2 Provider for this.
+   * 
+   * @return
+   */
+  public OAuth2ProviderEnum getProvider() {
+    return provider;
   }
-  
+
   public String getAuthServerUrl() {
     return authServerUrl;
   }

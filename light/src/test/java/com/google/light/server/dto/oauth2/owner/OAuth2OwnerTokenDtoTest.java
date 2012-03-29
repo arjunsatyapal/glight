@@ -22,7 +22,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
-import com.google.light.server.constants.OAuth2Provider;
+import com.google.light.server.constants.OAuth2ProviderService;
 import com.google.light.server.dto.AbstractDtoToPersistenceTest;
 import com.google.light.server.exception.unchecked.BlankStringException;
 import com.google.light.server.persistence.entity.oauth2.owner.OAuth2OwnerTokenEntity;
@@ -37,7 +37,8 @@ import org.junit.Test;
  */
 public class OAuth2OwnerTokenDtoTest extends AbstractDtoToPersistenceTest {
   private long personId;
-  private OAuth2Provider defaultOAuthProvider = OAuth2Provider.GOOGLE_LOGIN;
+  private OAuth2ProviderService defaultProviderService = OAuth2ProviderService.GOOGLE_LOGIN;
+  private String providerUserId;
   private String accessToken;
   private String refreshToken;
   private long expiresInMillis;
@@ -50,6 +51,7 @@ public class OAuth2OwnerTokenDtoTest extends AbstractDtoToPersistenceTest {
   @Before
   public void setUp() {
     personId = getRandomPersonId();
+    providerUserId = getRandomString();
     accessToken = getRandomString();
     refreshToken = getRandomString();
     expiresInMillis = getRandomLongNumber();
@@ -59,7 +61,8 @@ public class OAuth2OwnerTokenDtoTest extends AbstractDtoToPersistenceTest {
   private OAuth2OwnerTokenDto.Builder getDtoBuilder() {
     return new OAuth2OwnerTokenDto.Builder()
       .personId(personId)
-      .provider(defaultOAuthProvider)
+      .provider(defaultProviderService)
+      .providerUserId(providerUserId)
       .accessToken(accessToken)
       .refreshToken(refreshToken)
       .expiresInMillis(expiresInMillis)
@@ -111,7 +114,8 @@ public class OAuth2OwnerTokenDtoTest extends AbstractDtoToPersistenceTest {
   public void test_toPersistenceEntity_noParam() throws Exception {
     OAuth2OwnerTokenEntity entity = new OAuth2OwnerTokenEntity.Builder()
       .personId(personId)
-      .provider(defaultOAuthProvider)
+      .provider(defaultProviderService)
+      .providerUserId(providerUserId)
       .accessToken(accessToken)
       .refreshToken(refreshToken)
       .expiresInMillis(expiresInMillis)
@@ -149,6 +153,22 @@ public class OAuth2OwnerTokenDtoTest extends AbstractDtoToPersistenceTest {
       getDtoBuilder().provider(null).build();
       fail("should have failed.");
     } catch (NullPointerException e) {
+      // Expected
+    }
+    
+    // Negative Test : null providerUserId
+    try {
+      getDtoBuilder().providerUserId(null).build();
+      fail("should have failed.");
+    } catch (BlankStringException e) {
+      // Expected
+    }
+    
+    // Negative Test : blank providerUserId
+    try {
+      getDtoBuilder().providerUserId(" ").build();
+      fail("should have failed.");
+    } catch (BlankStringException e) {
       // Expected
     }
     
@@ -224,7 +244,7 @@ public class OAuth2OwnerTokenDtoTest extends AbstractDtoToPersistenceTest {
       // Expected
     }
     
-    // Negative Test : blank tokenType
+    // Negative Test : blank tokenInfo
     try {
       getDtoBuilder().tokenInfo(" ").build();
       fail("should have failed.");

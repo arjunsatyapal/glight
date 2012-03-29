@@ -23,12 +23,14 @@ import com.google.light.server.exception.unchecked.httpexception.UnsupportedMedi
 /**
  * Enum for encapsulating Content Type.
  * 
+ * TODO(arjuns): Add encoding here.
  * @author Arjun Satyapal
  */
 public enum ContentTypeEnum {
   APPLICATION_JSON("application/json"),
   APPLICATION_XML("application/xml"),
-  TEXT_HTML("text/html");
+  TEXT_HTML("text/html"),
+  TEXT_PLAIN("text/plain");
   
   private String type;
   

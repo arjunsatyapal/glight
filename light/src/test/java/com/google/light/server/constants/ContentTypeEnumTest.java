@@ -18,6 +18,7 @@ package com.google.light.server.constants;
 import static com.google.light.server.constants.ContentTypeEnum.APPLICATION_JSON;
 import static com.google.light.server.constants.ContentTypeEnum.APPLICATION_XML;
 import static com.google.light.server.constants.ContentTypeEnum.TEXT_HTML;
+import static com.google.light.server.constants.ContentTypeEnum.TEXT_PLAIN;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
@@ -40,7 +41,7 @@ public class ContentTypeEnumTest implements EnumTestInterface {
   @Test
   @Override
   public void test_count() {
-    assertEquals("Update test_getContentTypeByString as required.", 3,
+    assertEquals("Update test_getContentTypeByString as required.", 4,
         ContentTypeEnum.values().length);
   }
 
@@ -53,6 +54,7 @@ public class ContentTypeEnumTest implements EnumTestInterface {
         .put("application/json", APPLICATION_JSON)
         .put("application/xml", APPLICATION_XML)
         .put("text/html", TEXT_HTML)
+        .put("text/plain", TEXT_PLAIN)
         .build();
 
     for (String curr : map.keySet()) {
