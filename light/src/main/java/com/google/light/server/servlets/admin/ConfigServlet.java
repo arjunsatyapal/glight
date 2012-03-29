@@ -129,14 +129,6 @@ public class ConfigServlet extends AbstractLightServlet {
    * {@inheritDoc}
    */
   @Override
-  public long getLastModified(HttpServletRequest request) {
-    return -1;
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
   public void doHead(HttpServletRequest request, HttpServletResponse response) {
     // TODO(arjuns): Auto-generated method stub
     throw new UnsupportedOperationException();

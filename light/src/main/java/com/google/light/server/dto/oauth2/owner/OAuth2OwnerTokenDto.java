@@ -86,7 +86,7 @@ public class OAuth2OwnerTokenDto implements
   public OAuth2OwnerTokenEntity toPersistenceEntity() {
     return new OAuth2OwnerTokenEntity.Builder()
         .personId(personId)
-        .provider(providerService)
+        .providerService(providerService)
         .providerUserId(providerUserId)
         .accessToken(accessToken)
         .refreshToken(refreshToken)
