@@ -48,7 +48,7 @@ public class PersonDao extends AbstractBasicDao<PersonDto, PersonEntity, Long> {
 
   /**
    * Fetch PersonEntity by Email. The underlying assumption is that only one Person Exists with an
-   * email.
+   * email. If no PersonEntity is found, then returns null.
    * 
    * @param email
    * @return
@@ -96,7 +96,8 @@ public class PersonDao extends AbstractBasicDao<PersonDto, PersonEntity, Long> {
   }
 
   /**
-   * Asserts that records returned by this is <= 1. If it is < 1, then returns null.
+   * TODO(arjuns): Make this generic, and move to ObjectifyUtils..
+   * Asserts that records returned by this is <= 1. If it is < 1, then return null.
    */
   private PersonEntity assertAndReturnUniqueUserEntity(String email, Query<PersonEntity> filter) {
     List<PersonEntity> tempList = Lists.newArrayList(filter.iterator());

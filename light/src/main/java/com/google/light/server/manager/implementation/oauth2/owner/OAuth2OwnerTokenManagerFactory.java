@@ -1,5 +1,5 @@
 /*
- * Copyright (C) Google Inc.
+ * Copyright 2012 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -13,26 +13,18 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.server.guice.modules;
+package com.google.light.server.manager.implementation.oauth2.owner;
 
-import static com.google.light.server.utils.LightPreconditions.checkIsEnv;
+import com.google.light.server.manager.interfaces.OAuth2OwnerTokenManager;
 
-import com.google.light.server.constants.LightEnvEnum;
+import com.google.light.server.constants.OAuth2ProviderService;
 
 /**
- * QA Guice Module for QA Environment.
- * 
- * Note : All bindings should be in request scoped.
+ * Guice Factory for {@link OAuth2OwnerTokenManager} which is implemented by 
+ * {@link OAuth2OwnerTokenManagerImpl}.
  * 
  * @author Arjun Satyapal
  */
-public class QaModule extends BaseGuiceModule {
-  public QaModule() {
-    checkIsEnv(this, LightEnvEnum.QA);
-  }
-
-  @Override
-  protected void configure() {
-    super.configure();
-  }
+public interface OAuth2OwnerTokenManagerFactory {
+  public OAuth2OwnerTokenManager create(OAuth2ProviderService providerService);
 }

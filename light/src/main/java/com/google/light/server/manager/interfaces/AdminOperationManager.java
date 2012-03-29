@@ -15,10 +15,9 @@
  */
 package com.google.light.server.manager.interfaces;
 
-import java.util.List;
-
-import com.google.light.server.constants.OAuth2Provider;
+import com.google.light.server.constants.OAuth2ProviderEnum;
 import com.google.light.server.persistence.entity.admin.OAuth2ConsumerCredentialEntity;
+import java.util.List;
 
 /**
  * Manager class for managing Admin Operations.
@@ -29,7 +28,7 @@ import com.google.light.server.persistence.entity.admin.OAuth2ConsumerCredential
  */
 public interface AdminOperationManager {
   /**
-   * Method to Create/Updated OAuth2Consumer Credential for Light for {@link OAuth2Provider}.
+   * Method to Create/Updated OAuth2Consumer Credential for Light for {@link OAuth2ProviderService}.
    * 
    * @param dto
    * @return
@@ -40,10 +39,10 @@ public interface AdminOperationManager {
   /**
    * Method to fetch OAuth2ConsumerCredentials from Persistence.
    * 
-   * @param provider
+   * @param providerService
    * @return
    */
-  public OAuth2ConsumerCredentialEntity getOAuth2ConsumerCredential(OAuth2Provider provider);
+  public OAuth2ConsumerCredentialEntity getOAuth2ConsumerCredential(OAuth2ProviderEnum provider);
   
   /**
    * Method to fetch all OAuth2ConsumerCredentials.

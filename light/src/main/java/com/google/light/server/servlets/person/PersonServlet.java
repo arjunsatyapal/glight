@@ -63,23 +63,11 @@ public class PersonServlet extends AbstractLightServlet {
     SessionManager sessionManager = getInstanceProvider().getSessionManager();
     
     try {
-      response.getWriter().println("hello : " + sessionManager.getLoginProviderUserEmail());
+      response.getWriter().println("hello : " + sessionManager.getEmail());
     } catch (IOException e) {
       // TODO(arjuns): Auto-generated catch block
       throw new RuntimeException(e);
     }
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public long getLastModified(HttpServletRequest request) {
-    /*
-     * TODO(arjuns): Fix this by replacing from MemCache. At present defaulting to -1 so that
-     * request can be executed.
-     */
-    return -1L;
   }
 
   /**

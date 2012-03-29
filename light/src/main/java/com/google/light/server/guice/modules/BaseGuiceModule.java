@@ -1,12 +1,9 @@
 /*
  * Copyright (C) Google Inc.
- *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- *
  * http://www.apache.org/licenses/LICENSE-2.0
- *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -15,21 +12,28 @@
  */
 package com.google.light.server.guice.modules;
 
-import com.google.light.server.manager.implementation.PersonManagerImpl;
-
-import com.google.light.server.manager.interfaces.PersonManager;
-
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson.JacksonFactory;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
+import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.light.server.annotations.AnotHttpSession;
 import com.google.light.server.manager.implementation.AdminOperationManagerImpl;
+import com.google.light.server.manager.implementation.PersonManagerImpl;
+import com.google.light.server.manager.implementation.oauth2.consumer.OAuth2ConsumerCredentialManagerFactory;
+import com.google.light.server.manager.implementation.oauth2.consumer.OAuth2ConsumerManagerImpl;
+import com.google.light.server.manager.implementation.oauth2.owner.OAuth2OwnerTokenManagerFactory;
+import com.google.light.server.manager.implementation.oauth2.owner.OAuth2OwnerTokenManagerImpl;
 import com.google.light.server.manager.interfaces.AdminOperationManager;
 import com.google.light.server.manager.interfaces.OAuth2ConsumerCredentialManager;
+import com.google.light.server.manager.interfaces.OAuth2OwnerTokenManager;
+import com.google.light.server.manager.interfaces.PersonManager;
 import com.google.light.server.persistence.dao.OAuth2ConsumerCredentialDao;
+import com.google.light.server.servlets.oauth2.google.OAuth2HelperImpl;
+import com.google.light.server.servlets.oauth2.google.GoogleOAuth2HelperFactoryInterface;
+import com.google.light.server.servlets.oauth2.google.OAuth2Helper;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpSession;
 
@@ -55,14 +59,30 @@ public abstract class BaseGuiceModule extends AbstractModule {
   @Override
   protected void configure() {
     requireBinding(HttpTransport.class);
-    requireBinding(OAuth2ConsumerCredentialManager.class);
 
     // TODO(arjuns): Can this be removed.
     bind(OAuth2ConsumerCredentialDao.class);
     
-    bind(PersonManager.class).to(PersonManagerImpl.class);
+    
+    // Guice Assisted Inject Bindings.
+    install(new FactoryModuleBuilder()
+      .implement(OAuth2Helper.class, OAuth2HelperImpl.class)
+      .build(GoogleOAuth2HelperFactoryInterface.class));
+    
+    install(new FactoryModuleBuilder()
+      .implement(OAuth2OwnerTokenManager.class, OAuth2OwnerTokenManagerImpl.class)
+      .build(OAuth2OwnerTokenManagerFactory.class));
+    
+    install(new FactoryModuleBuilder()
+      .implement(OAuth2ConsumerCredentialManager.class, OAuth2ConsumerManagerImpl.class)
+      .build(OAuth2ConsumerCredentialManagerFactory.class));
+    
+    // Binding Manager Implementations.
     bind(AdminOperationManager.class)
         .to(AdminOperationManagerImpl.class);
+
+    bind(PersonManager.class)
+        .to(PersonManagerImpl.class);
 
     bind(HttpSession.class)
         .annotatedWith(AnotHttpSession.class)

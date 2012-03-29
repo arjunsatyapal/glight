@@ -23,6 +23,8 @@ import java.util.ArrayList;
 /**
  * Enum to encapsulate details for different OAuth2 providers.
  * 
+ * TODO(arjuns): Add a boolean which says if this service is used for Login.
+ * 
  * @author Arjun Satyapal
  */
 public enum OAuth2ProviderService {

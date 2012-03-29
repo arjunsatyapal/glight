@@ -1,5 +1,5 @@
 /*
- * Copyright (C) Google Inc.
+ * Copyright 2012 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -13,26 +13,17 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.server.guice.modules;
+package com.google.light.server.servlets.oauth2.google;
 
-import static com.google.light.server.utils.LightPreconditions.checkIsEnv;
-
-import com.google.light.server.constants.LightEnvEnum;
+import com.google.light.server.constants.OAuth2ProviderService;
 
 /**
- * QA Guice Module for QA Environment.
+ *
  * 
- * Note : All bindings should be in request scoped.
- * 
+ * TODO(arjuns): Add test for this class.
+ *
  * @author Arjun Satyapal
  */
-public class QaModule extends BaseGuiceModule {
-  public QaModule() {
-    checkIsEnv(this, LightEnvEnum.QA);
-  }
-
-  @Override
-  protected void configure() {
-    super.configure();
-  }
+public interface GoogleOAuth2HelperFactoryInterface {
+  public OAuth2HelperImpl create(OAuth2ProviderService providerService);
 }
