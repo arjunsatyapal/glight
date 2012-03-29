@@ -23,14 +23,13 @@ import java.util.ArrayList;
 /**
  * Enum to encapsulate details for different OAuth2 providers.
  * 
- * TODO(arjuns): Add a boolean which says if this service is used for Login.
- * 
  * @author Arjun Satyapal
  */
 public enum OAuth2ProviderService {
   // TODO(arjuns) : Once we have more values here, then update tests to get a random value from
   // this.
   GOOGLE_LOGIN(OAuth2ProviderEnum.GOOGLE,
+               true /* usedForLogin */,
                "https://accounts.google.com/o/oauth2/auth",
                "https://accounts.google.com/o/oauth2/token",
                Lists.newArrayList(
@@ -38,6 +37,7 @@ public enum OAuth2ProviderService {
                    "https://www.googleapis.com/auth/userinfo.profile"
                    )),
   GOOGLE_DOC(OAuth2ProviderEnum.GOOGLE,
+             false /* usedForLogin */,
              "https://accounts.google.com/o/oauth2/auth",
              "https://accounts.google.com/o/oauth2/token",
              Lists.newArrayList(
@@ -51,17 +51,20 @@ public enum OAuth2ProviderService {
    * provider.
    */
   private OAuth2ProviderEnum provider;
+  private boolean usedForLogin;
   private String authServerUrl;
   private String tokenServerUrl;
   private ArrayList<String> scopes;
 
   private OAuth2ProviderService(
       OAuth2ProviderEnum provider,
+      boolean usedForLogin,
       String authServerUrl,
       String tokenServerUrl,
       ArrayList<String> scopes) {
     try {
       this.provider = checkNotNull(provider, "provider");
+      this.usedForLogin = usedForLogin;
       this.authServerUrl = checkValidUri(authServerUrl);
       this.tokenServerUrl = checkValidUri(tokenServerUrl);
       this.scopes = (ArrayList<String>) checkNonEmptyList(scopes);
@@ -89,5 +92,9 @@ public enum OAuth2ProviderService {
 
   public ArrayList<String> getScopes() {
     return scopes;
+  }
+  
+  public boolean isUsedForLogin() {
+    return usedForLogin;
   }
 }

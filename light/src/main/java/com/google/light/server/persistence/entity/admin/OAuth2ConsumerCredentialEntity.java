@@ -18,7 +18,8 @@ package com.google.light.server.persistence.entity.admin;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
-import com.google.light.server.constants.OAuth2Provider;
+import com.google.light.server.constants.OAuth2ProviderEnum;
+
 import com.google.light.server.dto.admin.OAuth2ConsumerCredentialDto;
 import com.google.light.server.persistence.PersistenceToDtoInterface;
 import javax.persistence.Id;
@@ -45,7 +46,7 @@ public class OAuth2ConsumerCredentialEntity implements
   @Override
   public OAuth2ConsumerCredentialDto toDto() {
     return new OAuth2ConsumerCredentialDto.Builder()
-        .provider(OAuth2Provider.valueOf(oAuth2ProviderKey))
+        .provider(OAuth2ProviderEnum.valueOf(oAuth2ProviderKey))
         .clientId(clientId)
         .clientSecret(clientSecret)
         .build();
@@ -107,7 +108,7 @@ public class OAuth2ConsumerCredentialEntity implements
   @SuppressWarnings("synthetic-access")
   private OAuth2ConsumerCredentialEntity(Builder builder) {
     // Ensures that oAuth2ProviderKey is valid.
-    checkNotNull(OAuth2Provider.valueOf(builder.oAuth2ProviderKey), "invalid ProviderKey["
+    checkNotNull(OAuth2ProviderEnum.valueOf(builder.oAuth2ProviderKey), "invalid ProviderKey["
         + oAuth2ProviderKey + "].");
     this.oAuth2ProviderKey = checkNotBlank(builder.oAuth2ProviderKey, "oAuth2ProviderKey");
     this.clientId = checkNotBlank(builder.clientId, "clientId is blank");
