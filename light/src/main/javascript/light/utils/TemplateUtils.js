@@ -86,8 +86,8 @@ define(['dojo/_base/declare', 'dojox/html/entities', 'dojo/string',
     toDom: function(tmpl, context) {
       return domConstruct.toDom(
           TemplateUtils.safelyInjectProperties(tmpl, context));
-    },
-    
+    }
+
   };
 
   return TemplateUtils;

@@ -30,6 +30,10 @@ define(['light/controllers/SearchResultListController', 'light/SearchService',
     query: '  ',
     page: 1
   };
+  var EMPTY_QUERY_REQUEST = {
+    query: '',
+    page: 1
+  };
   var ADDITION_QUERY_SAMPLE_RESULT = {
     some: 'Thing'
   };
@@ -38,6 +42,7 @@ define(['light/controllers/SearchResultListController', 'light/SearchService',
     it('should be good', function() {
       TestUtils.validateSchema(ADDITION_QUERY_REQUEST, SearchStateSchema);
       TestUtils.validateSchema(BLANK_QUERY_REQUEST, SearchStateSchema);
+      TestUtils.validateSchema(EMPTY_QUERY_REQUEST, SearchStateSchema);
     });
   });
 
@@ -67,6 +72,13 @@ define(['light/controllers/SearchResultListController', 'light/SearchService',
     });
 
     describe('_onSearchStateChange', function() {
+      describe('when receiving a empty query request', function() {
+        it('should clear the view', function() {
+          controller._onSearchStateChange(EMPTY_QUERY_REQUEST);
+
+          expect(view.clear).toHaveBeenCalled();
+        });
+      });
       describe('when receiving a blank query request', function() {
         it('should clear the view', function() {
           controller._onSearchStateChange(BLANK_QUERY_REQUEST);

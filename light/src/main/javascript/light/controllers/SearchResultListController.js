@@ -46,7 +46,7 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
       this.searchService.cancelLastSearch();
 
       var view = this._view;
-      if (searchState.query.match(/^\s+$/)) {
+      if (searchState.query.match(/^\s*$/)) {
         view.clear();
       } else {
         this.searchService.search(searchState).then(function(data) {
