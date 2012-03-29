@@ -17,6 +17,10 @@ package com.google.light.server.utils;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.collect.Lists;
+import com.googlecode.objectify.Query;
+import java.util.List;
+
 import com.googlecode.objectify.impl.conv.joda.JodaTimeConverters;
 
 import java.util.logging.Logger;
@@ -169,6 +173,28 @@ public class ObjectifyUtils {
     return txn.query(clazz).ancestor(parentKey).filter(filter, filterValues).fetch();
   }
 
+  /**
+   * Utility method that will ensure that for a given Query, only one output exists, else
+   * it will throw an errorMessage.
+   * 
+   * @param query
+   * @param errMessage
+   * @return
+   */
+  public static <T> T assertAndReturnUniqueEntity(Query<T> query, String errMessage) {
+    List<T> tempList = Lists.newArrayList(query.iterator());
+
+    if (tempList != null && tempList.size() > 1) {
+      throw new IllegalStateException(errMessage);
+    }
+
+    if (tempList.size() == 0) {
+      return null;
+    }
+
+    return tempList.get(0);
+  }
+  
   // Utility class.
   private ObjectifyUtils() {
   }

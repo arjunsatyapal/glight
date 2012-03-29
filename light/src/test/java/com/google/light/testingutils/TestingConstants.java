@@ -17,6 +17,8 @@ package com.google.light.testingutils;
 
 import static com.google.light.testingutils.TestResourcePaths.GOOGLE_TOKEN_INFO_JSON;
 import static com.google.light.testingutils.TestingUtils.getResourceAsString;
+
+
 import com.google.api.client.http.GenericUrl;
 
 /**

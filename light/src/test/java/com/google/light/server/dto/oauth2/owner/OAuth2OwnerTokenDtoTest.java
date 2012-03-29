@@ -114,7 +114,7 @@ public class OAuth2OwnerTokenDtoTest extends AbstractDtoToPersistenceTest {
   public void test_toPersistenceEntity_noParam() throws Exception {
     OAuth2OwnerTokenEntity entity = new OAuth2OwnerTokenEntity.Builder()
       .personId(personId)
-      .provider(defaultProviderService)
+      .providerService(defaultProviderService)
       .providerUserId(providerUserId)
       .accessToken(accessToken)
       .refreshToken(refreshToken)

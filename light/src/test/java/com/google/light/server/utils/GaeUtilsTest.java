@@ -22,8 +22,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import com.google.light.server.constants.LightEnvEnumTest;
-
 import com.google.appengine.api.utils.SystemProperty;
 import com.google.light.server.constants.LightEnvEnum;
 import com.google.light.testingutils.GaeTestingUtils;

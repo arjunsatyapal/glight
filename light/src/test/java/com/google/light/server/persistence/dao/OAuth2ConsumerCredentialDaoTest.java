@@ -26,6 +26,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import com.google.light.server.constants.OAuth2ProviderEnum;
+
 import com.google.light.server.dto.admin.OAuth2ConsumerCredentialDto;
 import com.google.light.server.persistence.entity.admin.OAuth2ConsumerCredentialEntity;
 import com.google.light.server.utils.ObjectifyUtils;
@@ -42,6 +44,7 @@ import org.junit.Test;
 public class OAuth2ConsumerCredentialDaoTest extends
     AbstractBasicDaoTest<OAuth2ConsumerCredentialDto, OAuth2ConsumerCredentialEntity, String> {
 
+  private OAuth2ProviderEnum defaultProvider = OAuth2ProviderEnum.GOOGLE;
   public OAuth2ConsumerCredentialDaoTest() {
     super(OAuth2ConsumerCredentialEntity.class, String.class);
   }
@@ -59,7 +62,7 @@ public class OAuth2ConsumerCredentialDaoTest extends
     return new OAuth2ConsumerCredentialEntity.Builder()
         .clientId(DEFAULT_CLIENT_ID)
         .clientSecret(DEFAULT_CLIENT_SECRET)
-        .oAuth2ProviderKey(defaultLoginProvider.name());
+        .oAuth2ProviderKey(defaultProvider.name());
   }
 
   /**

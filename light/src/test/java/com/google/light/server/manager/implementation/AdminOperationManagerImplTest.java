@@ -57,6 +57,7 @@ public class AdminOperationManagerImplTest extends AbstractLightServerTest {
       .clientSecret(clientSecret)
       .oAuth2ProviderKey(defaultProvider.name());
   }
+  
   /**
    * Test for
    * {@link AdminOperationManagerImpl#putOAuth2ConsumerCredential(OAuth2ConsumerCredentialEntity)}

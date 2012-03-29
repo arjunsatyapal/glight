@@ -12,6 +12,7 @@
  */
 package com.google.light.server;
 
+import static com.google.light.server.constants.OAuth2ProviderService.GOOGLE_LOGIN;
 import static com.google.light.testingutils.TestingUtils.getMockSessionForTesting;
 import static com.google.light.testingutils.TestingUtils.getRandomEmail;
 import static com.google.light.testingutils.TestingUtils.getRandomFederatedId;
@@ -20,7 +21,7 @@ import static com.google.light.testingutils.TestingUtils.getRandomUserId;
 
 import com.google.inject.Injector;
 import com.google.light.server.constants.LightEnvEnum;
-import com.google.light.server.constants.OAuth2Provider;
+import com.google.light.server.constants.OAuth2ProviderService;
 import com.google.light.server.guice.TestInstanceProvider;
 import com.google.light.testingutils.GaeTestingUtils;
 import com.google.light.testingutils.TestingUtils;
@@ -41,7 +42,7 @@ public abstract class AbstractLightServerTest {
 
   protected static LightEnvEnum defaultEnv = LightEnvEnum.UNIT_TEST;
   
-  protected static OAuth2Provider defaultLoginProvider = OAuth2Provider.GOOGLE_LOGIN;
+  protected static OAuth2ProviderService defaultProviderService = GOOGLE_LOGIN;
   protected String testUserId;
   protected String testEmail;
   protected String testFederatedId;
@@ -78,8 +79,7 @@ public abstract class AbstractLightServerTest {
    * @param isLoggedIn
    * @param isAdmin
    */
-  protected void gaeEnvReset(OAuth2Provider provider, String email, String federatedId, String userId,
-      boolean isLoggedIn, boolean isAdmin) {
+  protected void gaeEnvReset(String email, boolean isLoggedIn, boolean isAdmin) {
     // TODO(arjuns): Fix this.
 //    gaeTestingUtils.setAuthDomain(authDomain);
     gaeTestingUtils.setEmail(email);
@@ -97,10 +97,9 @@ public abstract class AbstractLightServerTest {
     testLastName = getRandomString();
 
     if (!gaeSetupDone) {
-      gaeEnvReset(defaultLoginProvider, testEmail, testFederatedId, testUserId,
-          true /* loggedIn */, false /* isAdmin */);
+      gaeEnvReset(testEmail, true /* loggedIn */, false /* isAdmin */);
     }
-    HttpSession mockSession = getMockSessionForTesting(defaultLoginProvider, testUserId, testEmail);
+    HttpSession mockSession = getMockSessionForTesting(defaultProviderService, testUserId, testEmail);
 
     injector = TestingUtils.getInjectorByEnv(LightEnvEnum.UNIT_TEST, mockSession);
     testInstanceProvider = injector.getInstance(TestInstanceProvider.class);

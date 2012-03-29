@@ -73,7 +73,7 @@ public class OAuth2OwnerTokenDaoTest extends
   private Builder getDefaultEntityBuilder(OAuth2ProviderService providerService, String providerUserId) {
     return new OAuth2OwnerTokenEntity.Builder()
         .personId(personId)
-        .provider(providerService)
+        .providerService(providerService)
         .providerUserId(providerUserId)
         .accessToken(DEFAULT_ACCESS_TOKEN)
         .refreshToken(DEFAULT_REFRESH_TOKEN)

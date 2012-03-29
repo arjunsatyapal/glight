@@ -116,7 +116,7 @@ public class OAuth2ConsumerCredentialServlet extends HttpServlet {
         .clientSecret(clientSecret)
         .build();
 
-    adminOperationManager.putOAuth2ConsumerCredential(dto.toPersistenceEntity(null));
+    adminOperationManager.putOAuth2ConsumerCredential(dto.toPersistenceEntity());
     doGet(request, response);
   }
 }

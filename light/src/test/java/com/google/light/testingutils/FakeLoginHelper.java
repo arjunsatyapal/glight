@@ -15,11 +15,12 @@
  */
 package com.google.light.testingutils;
 
+import static com.google.light.server.constants.RequestParmKeyEnum.DEFAULT_EMAIL;
 import static com.google.light.server.constants.RequestParmKeyEnum.LOGIN_PROVIDER_ID;
-import static com.google.light.server.constants.RequestParmKeyEnum.LOGIN_PROVIDER_USER_EMAIL;
-import static com.google.light.server.constants.RequestParmKeyEnum.LOGIN_PROVIDER_USER_ID;
+import static com.google.light.server.constants.RequestParmKeyEnum.PERSON_ID;
 import static com.google.light.server.utils.LightPreconditions.checkEmail;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
+import static com.google.light.server.utils.LightPreconditions.checkPersonId;
 
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpHeaders;
@@ -31,9 +32,8 @@ import com.google.api.client.http.UrlEncodedContent;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
-import com.google.light.server.constants.OAuth2Provider;
+import com.google.light.server.constants.OAuth2ProviderService;
 import com.google.light.server.servlets.path.ServletPathEnum;
-import com.google.light.server.servlets.test.oauth2.google.login.FakeLoginServlet;
 import com.google.light.server.utils.LightPreconditions;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -47,16 +47,16 @@ import java.util.Map;
 public class FakeLoginHelper {
 
   private String serverUrl;
-  private OAuth2Provider provider;
-  private String providerUserId;
+  private OAuth2ProviderService providerService;
+  private long personId;
   private String providerUserEmail;
   private String cookie;
 
-  public FakeLoginHelper(String serverUrl, OAuth2Provider provider, String providerUserId,
+  public FakeLoginHelper(String serverUrl, OAuth2ProviderService providerService, long personId,
       String providerUserEmail, boolean isUserAdmin) throws IOException {
     this.serverUrl = checkNotBlank(serverUrl);
-    this.provider = Preconditions.checkNotNull(provider);
-    this.providerUserId = checkNotBlank(providerUserId);
+    this.providerService = Preconditions.checkNotNull(providerService);
+    this.personId = checkPersonId(personId);
     this.providerUserEmail = checkEmail(providerUserEmail);
     init();
   }
@@ -71,9 +71,9 @@ public class FakeLoginHelper {
     GenericUrl url = new GenericUrl(serverUrl + ServletPathEnum.FAKE_LOGIN.get());
 
     Map<String, String> map = new ImmutableMap.Builder<String, String>()
-        .put(LOGIN_PROVIDER_ID.get(), provider.name())
-        .put(LOGIN_PROVIDER_USER_ID.get(), providerUserId)
-        .put(LOGIN_PROVIDER_USER_EMAIL.get(), providerUserEmail)
+        .put(LOGIN_PROVIDER_ID.get(), providerService.name())
+        .put(PERSON_ID.get(), Long.toString(personId))
+        .put(DEFAULT_EMAIL.get(), providerUserEmail)
         .build();
     
     HttpRequest request = requestFactory.buildPostRequest(url, new UrlEncodedContent(map));

@@ -17,21 +17,18 @@ package com.google.light.server.servlets.person;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
-
-import org.junit.Before;
+import static com.google.light.server.utils.LightPreconditions.checkPersonId;
 
 import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson.JacksonFactory;
-import com.google.light.server.constants.OAuth2Provider;
-import com.google.light.server.servlets.AbstractLightServlet;
+import com.google.light.server.constants.OAuth2ProviderService;
 import com.google.light.testingutils.FakeLoginHelper;
 import com.google.light.testingutils.TestingUtils;
 import java.io.IOException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -41,8 +38,8 @@ import org.junit.Test;
  */
 public abstract class AbstractLightIntegrationTest {
   protected FakeLoginHelper loginProvider;
-  protected OAuth2Provider provider;
-  protected String providerUserId;
+  protected OAuth2ProviderService providerService;
+  protected long personId;
   protected String providerEmail;
   protected HttpTransport HTTP_TRANSPORT = new NetHttpTransport();
   protected final JsonFactory JSON_FACTORY = new JacksonFactory();
@@ -52,10 +49,10 @@ public abstract class AbstractLightIntegrationTest {
 
   protected boolean isLocalHost = false;
 
-  protected AbstractLightIntegrationTest(OAuth2Provider provider, String providerUserId,
+  protected AbstractLightIntegrationTest(OAuth2ProviderService providerService, long personId,
       String providerEmail) {
-    this.provider = checkNotNull(provider);
-    this.providerUserId = checkNotBlank(providerUserId);
+    this.providerService = checkNotNull(providerService);
+    this.personId = checkPersonId(personId);
     this.providerEmail = checkNotBlank(providerEmail);
   }
 
@@ -75,12 +72,12 @@ public abstract class AbstractLightIntegrationTest {
       isLocalHost = false;
     }
 
-    providerUserId = TestingUtils.getRandomUserId();
+    personId = TestingUtils.getRandomPersonId();
     providerEmail = "unit-test@myopenedu.com";
 
     try {
       loginProvider =
-          new FakeLoginHelper(serverUrl, provider, providerUserId, providerEmail, false);
+          new FakeLoginHelper(serverUrl, providerService, personId, providerEmail, false);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

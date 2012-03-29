@@ -1,9 +1,12 @@
 /*
  * Copyright (C) Google Inc.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -14,8 +17,6 @@ package com.google.light.server.servlets.oauth2.google.pojo;
 
 import static com.google.light.server.utils.LightPreconditions.checkEmail;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
-
-import com.google.light.server.dto.DtoInterface;
 import com.google.light.server.exception.unchecked.JsonException;
 import com.google.light.server.utils.JsonUtils;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -32,9 +33,9 @@ import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
 
 /**
  * Java representation for the JSON object returned by Google as a response to
- * {@link OldGoogleOAuth2Helper#getUserInfo(String)}
+ * {@link OldGoogleOAuth2Helper#getTokenInfo(String)}
  * 
- * TODO(arjuns): Ensure that the original JSON is stored on Datastore instead of converted one.
+ * TODO(arjuns): Update tests. and package for test.
  * 
  * @author Arjun Satyapal
  */
@@ -42,53 +43,21 @@ import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
 @XmlRootElement(name = "TokenInfo")
 @XmlAccessorType(XmlAccessType.PROPERTY)
 @JsonSerialize(include = Inclusion.NON_NULL)
-
-// TODO(arjuns): Add test for this and token info.
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class GoogleUserInfo implements DtoInterface<GoogleUserInfo> {
-  private String id;
+public class GoogleLoginTokenInfo extends AbstractGoogleOAuth2TokenInfo<GoogleLoginTokenInfo>{
+  private String userId;
   private String email;
   private boolean verifiedEmail;
+  
 
-  private String name;
-  private String givenName;
-  private String familyName;
-  private String locale;
-
-  public String getId() {
-    return id;
+  @JsonProperty(value = "user_id")
+  public String getUserId() {
+    return userId;
   }
 
-  public void setId(String id) {
-    this.id = id;
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public void setName(String audience) {
-    this.name = audience;
-  }
-
-  @JsonProperty(value = "given_name")
-  public String getGivenName() {
-    return givenName;
-  }
-
-  @JsonProperty(value = "given_name")
-  public void setGivenName(String userId) {
-    this.givenName = userId;
-  }
-
-  @JsonProperty(value = "family_name")
-  public String getFamilyName() {
-    return familyName;
-  }
-
-  @JsonProperty(value = "family_name")
-  public void setFamilyName(String scope) {
-    this.familyName = scope;
+  @JsonProperty(value = "user_id")
+  public void setUserId(String userId) {
+    this.userId = userId;
   }
 
   public String getEmail() {
@@ -109,12 +78,18 @@ public class GoogleUserInfo implements DtoInterface<GoogleUserInfo> {
     this.verifiedEmail = verifiedEmail;
   }
 
-  public String getLocale() {
-    return locale;
-  }
+  /**
+   * Ensures that all values are set. This does not check whether token is expired or not.
+   * 
+   * @return
+   */
+  @Override
+  public GoogleLoginTokenInfo validate() {
+    super.validate();
+    checkNotBlank(userId, "userId");
+    checkEmail(email);
 
-  public void setLocale(String locale) {
-    this.locale = locale;
+    return this;
   }
 
   @Override
@@ -133,47 +108,19 @@ public class GoogleUserInfo implements DtoInterface<GoogleUserInfo> {
   }
 
   /**
-   * {@inheritDoc} TODO(arjuns): Add test for this.
+   * {@inheritDoc} TODO(arjuns) : Add test for this.
    */
   @Override
   public String toJson() {
     try {
       return JsonUtils.toJson(this);
     } catch (Exception e) {
-      throw new JsonException("Failed to convert " + getClass().getSimpleName() + " to Json.", e);
+      throw new JsonException("Conversion of " + getClass().getSimpleName() + " to Json failed.", e);
     }
-  }
-
-  /**
-   * {@inheritDoc} TODO(arjuns): Add test for this.
-   */
-  @Override
-  public String toXml() {
-    throw new UnsupportedOperationException();
-  }
-
-  /**
-   * {@inheritDoc} TODO(arjuns): Add test for this.
-   */
-  @Override
-  public GoogleUserInfo validate() {
-    checkNotBlank(id, "id");
-    checkEmail(email);
-    checkNotBlank(name, "name");
-    checkNotBlank(givenName, "givenName");
-    checkNotBlank(familyName, "familyName");
-
-    // TODO(arjuns) : Add more tests for Locale validation.
-    if (locale != null) {
-      checkNotBlank(locale, "locale");
-    } else {
-      this.locale = "en";
-    }
-    return this;
   }
 
   // For JAXB.
   @JsonCreator
-  public GoogleUserInfo() {
+  public GoogleLoginTokenInfo() {
   }
 }

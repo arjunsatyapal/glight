@@ -17,13 +17,14 @@ package com.google.light.server.utils;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.constants.LightConstants.SESSION_MAX_INACTIVITY_PERIOD;
+import static com.google.light.server.constants.RequestParmKeyEnum.DEFAULT_EMAIL;
 import static com.google.light.server.constants.RequestParmKeyEnum.LOGIN_PROVIDER_ID;
-import static com.google.light.server.constants.RequestParmKeyEnum.LOGIN_PROVIDER_USER_EMAIL;
 import static com.google.light.server.constants.RequestParmKeyEnum.LOGIN_PROVIDER_USER_ID;
+import static com.google.light.server.constants.RequestParmKeyEnum.PERSON_ID;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;
-import com.google.light.server.constants.OAuth2Provider;
+import com.google.light.server.constants.OAuth2ProviderService;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -35,6 +36,7 @@ import org.joda.time.DateTimeZone;
 
 /**
  * General Utility methods for Light.
+ * TOOD(arjuns): Fix tests.
  * 
  * @author Arjun Satyapal
  */
@@ -47,7 +49,7 @@ public class LightUtils {
   }
 
   public static void appendSectionHeader(StringBuilder builder, String sectionHeader) {
-    builder.append("<br><br><b>").append(sectionHeader).append(": </b>");
+    builder.append("<br><br><b>").append(sectionHeader).append(": </b><br>");
   }
 
   public static void appendKeyValue(StringBuilder builder, String key, Object value) {
@@ -61,15 +63,17 @@ public class LightUtils {
 
   // TODO(arjuns): Abstract out common userInfo.
   // TODO(arjuns): Add token expiry time here.
-  public static void prepareSession(HttpSession session, OAuth2Provider loginProvider,
-      String providerUserId, String providerUserEmail) {
+  // TODO(arjuns): Fix the callers of this method.
+  public static void prepareSession(HttpSession session, OAuth2ProviderService loginProvider,
+      long personId, String providerUserId, String defaultEmail) {
     synchronized (session) {
       logger.info("Prepairing session with provider[" + loginProvider 
-          + ", providerUserId[" + providerUserId
-          + "], providerUserEmail[" + providerUserEmail + "].");
+          + ", providerUserId[" + personId
+          + "], providerUserEmail[" + defaultEmail + "].");
       session.setAttribute(LOGIN_PROVIDER_ID.get(), loginProvider.name());
+      session.setAttribute(PERSON_ID.get(), personId);
+      session.setAttribute(DEFAULT_EMAIL.get(), defaultEmail);
       session.setAttribute(LOGIN_PROVIDER_USER_ID.get(), providerUserId);
-      session.setAttribute(LOGIN_PROVIDER_USER_EMAIL.get(), providerUserEmail);
       session.setMaxInactiveInterval(SESSION_MAX_INACTIVITY_PERIOD);
     }
   }

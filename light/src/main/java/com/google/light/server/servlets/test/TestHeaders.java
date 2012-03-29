@@ -24,7 +24,6 @@ import com.google.gson.GsonBuilder;
 import com.google.inject.Inject;
 import com.google.light.server.constants.LightEnvEnum;
 import com.google.light.server.servlets.AbstractLightServlet;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Enumeration;
 import java.util.Map;
@@ -149,16 +148,6 @@ public class TestHeaders extends AbstractLightServlet {
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public long getLastModified(HttpServletRequest request) {
-    // TODO(arjuns): Auto-generated method stub
-    // throw new UnsupportedOperationException();
-    return -1L;
   }
 
   /**

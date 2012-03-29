@@ -125,7 +125,7 @@ public class OAuth2OwnerTokenEntityTest extends AbstractPersistenceEntityTest {
     try {
       getEntityBuilder().providerService(GOOGLE_DOC).providerUserId(getRandomString()).build();
       fail("should have failed.");
-    } catch (BlankStringException e) {
+    } catch (IllegalArgumentException e) {
       // Expected
     }
 

@@ -354,7 +354,6 @@ public class LightPreconditionsTest {
     // Positive Testing.
     checkProviderUserId(GOOGLE_LOGIN, getRandomString());
     checkProviderUserId(GOOGLE_DOC, null);
-    checkProviderUserId(GOOGLE_DOC, " ");
     
     // Negative Testing : GOOGLE_LOGIN with null.
     try {
@@ -369,6 +368,14 @@ public class LightPreconditionsTest {
       checkProviderUserId(GOOGLE_LOGIN, " ");
       fail("should have failed.");
     } catch (BlankStringException e) {
+      // Expected
+    }
+
+    // Negative Testing : GOOGLE_DOC with blank string
+    try {
+      checkProviderUserId(GOOGLE_DOC, " ");
+      fail("should have failed.");
+    } catch (IllegalArgumentException e) {
       // Expected
     }
     

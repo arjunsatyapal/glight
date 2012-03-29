@@ -15,7 +15,6 @@
  */
 package com.google.light.server.persistence.entity;
 
-import com.google.light.server.persistence.PersistenceToDtoInterface;
 import org.junit.Test;
 
 /**
