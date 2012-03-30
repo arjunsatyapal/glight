@@ -111,7 +111,7 @@ var profile = (function() {
     layers: {
 
       /*
-       * This is the main loader module. It should be the only script
+       * This is the main loader layer. It should be the only script
        * that you need to declare in an HTML page.
        *
        * **IMPORTANT**: You shouldn't put any localized resource here. Dojo
@@ -144,14 +144,14 @@ var profile = (function() {
         boot: true,
         customBase: true
       },
-
-      // Making the usual hardcoded dojo/dojo module just a dummy file
+      
+      // Making the usual hardcoded dojo/dojo layer just a dummy file
       'dojo/dojo': {
         customBase: true
       },
 
       /*
-       * This is the core module. It contains stuff that usually
+       * This is the core layer. It contains stuff that usually
        * should be loaded in every light page so it can be
        * properly cached by the browsers.
        */

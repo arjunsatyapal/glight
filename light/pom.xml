@@ -843,6 +843,22 @@
               </execution>
             </executions>
           </plugin>
+        </plugins>
+
+
+
+      </build>
+    </profile>
+    
+    <profile>
+      <id>light-prod-cleanup</id>
+      <activation>
+        <property>
+          <name>!light-dev</name>
+        </property>
+      </activation>
+      <build>
+        <plugins>
 
           <plugin>
             <artifactId>maven-antrun-plugin</artifactId>
@@ -869,10 +885,8 @@
               </execution>
             </executions>
           </plugin>
+        
         </plugins>
-
-
-
       </build>
     </profile>
 
