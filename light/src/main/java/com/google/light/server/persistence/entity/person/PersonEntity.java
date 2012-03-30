@@ -18,7 +18,6 @@ package com.google.light.server.persistence.entity.person;
 import static com.google.light.server.utils.LightPreconditions.checkEmail;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPersonId;
-
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
@@ -29,7 +28,6 @@ import com.google.common.collect.Lists;
 import com.google.light.server.dto.person.PersonDto;
 import com.google.light.server.persistence.PersistenceToDtoInterface;
 import java.util.List;
-import javax.annotation.Nullable;
 import javax.persistence.Embedded;
 import javax.persistence.Id;
 
@@ -49,6 +47,7 @@ public class PersonEntity implements PersistenceToDtoInterface<PersonEntity, Per
   public static final String OFY_EMAIL_QUERY_STRING = "email";
   String email;
 
+  // TODO(arjuns) : Fix this.
   @Embedded
   List<IdProviderDetail> idProviderDetails;
 
@@ -67,30 +66,16 @@ public class PersonEntity implements PersistenceToDtoInterface<PersonEntity, Per
     return EqualsBuilder.reflectionEquals(this, obj);
   }
 
-  // TODO(arjuns) : Add test for constructor.
-  protected PersonEntity(@Nullable Long id, String firstName, String lastName, 
-      @Nullable String email, @Nullable List<IdProviderDetail> idProviderDetails) {
-    this.id = id;
-    this.firstName = checkNotBlank(firstName);
-    this.lastName = checkNotBlank(lastName);
-    this.email = email == null ? null : checkEmail(email);
-    this.idProviderDetails = idProviderDetails;
-  }
-
   @Override
   public PersonDto toDto() {
     PersonDto dto = new PersonDto.Builder()
-      .firstName(firstName)
-      .lastName(lastName)
-      .email(email)
-      .build();
+        .firstName(firstName)
+        .lastName(lastName)
+        .email(email)
+        .build();
     return dto.validate();
   }
 
-  // For Objectify.
-  @SuppressWarnings("unused")
-  private PersonEntity() {
-  }
 
   // Getters and setters.
   public Long getId() {
@@ -104,8 +89,8 @@ public class PersonEntity implements PersistenceToDtoInterface<PersonEntity, Per
   public void setId(Long id) {
     if (this.id != null) {
       throw new UnsupportedOperationException("Id cannot be changed once it is set.");
-    } 
-    
+    }
+
     this.id = checkPersonId(id);
   }
 
@@ -145,6 +130,7 @@ public class PersonEntity implements PersistenceToDtoInterface<PersonEntity, Per
     private String lastName;
     private String email;
     private List<IdProviderDetail> idProviderDetails;
+
     public Builder id(Long id) {
       this.id = id;
       return this;
@@ -159,20 +145,33 @@ public class PersonEntity implements PersistenceToDtoInterface<PersonEntity, Per
       this.lastName = lastName;
       return this;
     }
-    
+
     public Builder email(String email) {
       this.email = email;
       return this;
     }
-    
+
     public Builder idProviderDetails(List<IdProviderDetail> idProviderDetails) {
       this.idProviderDetails = idProviderDetails;
       return this;
     }
 
+    @SuppressWarnings("synthetic-access")
     public PersonEntity build() {
-      // Id should not be set using builder. It should be set separately if required.
-      return new PersonEntity(id, firstName, lastName, email, idProviderDetails);
+      return new PersonEntity(this);
     }
+  }
+
+  @SuppressWarnings("synthetic-access")
+  private PersonEntity(Builder builder) {
+    this.id = builder.id != null ? checkPersonId(builder.id) : null;
+    this.firstName = checkNotBlank(builder.firstName, "firstName");
+    this.lastName = checkNotBlank(builder.lastName, "lastName");
+    this.email = builder.email != null ? checkEmail(builder.email) : null;
+    this.idProviderDetails = builder.idProviderDetails;
+  }
+  
+  // For Objectify.
+  private PersonEntity() {
   }
 }

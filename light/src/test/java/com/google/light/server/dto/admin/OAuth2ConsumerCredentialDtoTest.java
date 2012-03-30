@@ -34,8 +34,8 @@ import org.junit.Test;
  * @author Arjun Satyapal
  */
 public class OAuth2ConsumerCredentialDtoTest extends AbstractDtoToPersistenceTest {
-  private String clientId = getRandomString();
-  private String clientSecret = getRandomString();
+  private String clientId;
+  private String clientSecret;
   private OAuth2Provider defaultProvider = OAuth2Provider.GOOGLE_LOGIN;
 
   @Before
@@ -81,7 +81,7 @@ public class OAuth2ConsumerCredentialDtoTest extends AbstractDtoToPersistenceTes
   @Test
   public void test_toPersistenceEntity() throws Exception {
     OAuth2ConsumerCredentialEntity entity = new OAuth2ConsumerCredentialEntity.Builder()
-      .provider(defaultProvider.name())
+      .oAuth2ProviderKey(defaultProvider.name())
       .clientId(clientId)
       .clientSecret(clientSecret)
       .build();

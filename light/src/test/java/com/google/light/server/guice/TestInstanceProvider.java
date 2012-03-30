@@ -17,6 +17,8 @@ package com.google.light.server.guice;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.light.server.utils.GuiceUtils;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.light.server.guice.providers.InstanceProvider;
@@ -25,11 +27,10 @@ import com.google.light.server.persistence.dao.PersonDao;
 
 /**
  * Classes which are not added to {@link InstanceProvider} can be added here for test.
- * 
+ * @deprecated Instead use {@link GuiceUtils#getInstance(Injector, Class)}.
  * @author Arjun Satyapal
  */
-
-@SuppressWarnings("deprecation")
+@Deprecated
 public class TestInstanceProvider {
   private Injector injector;
   

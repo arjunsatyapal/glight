@@ -19,18 +19,18 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
-import javax.annotation.Nullable;
-
 import com.google.light.server.constants.OAuth2Provider;
 import com.google.light.server.dto.DtoToPersistenceInterface;
 import com.google.light.server.persistence.entity.admin.OAuth2ConsumerCredentialEntity;
+import javax.annotation.Nullable;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
 /**
  * DTO for OAuth2Consumer Credentials.
- * 
+ * migrate this to builder pattern.
+ *  
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
@@ -47,12 +47,12 @@ public class OAuth2ConsumerCredentialDto implements
    * @param clientId
    * @param clientSecret
    */
-  protected OAuth2ConsumerCredentialDto(OAuth2Provider provider, String clientId, 
+  protected OAuth2ConsumerCredentialDto(OAuth2Provider provider, String clientId,
       String clientSecret) {
     this.provider = provider;
     this.clientId = clientId;
     this.clientSecret = clientSecret;
-    
+
     this.validate();
   }
 
@@ -71,13 +71,13 @@ public class OAuth2ConsumerCredentialDto implements
   @Override
   public OAuth2ConsumerCredentialEntity toPersistenceEntity(@Nullable String id) {
     checkArgument(id == null);
-    
+
     return new OAuth2ConsumerCredentialEntity.Builder()
-      .clientId(clientId)
-      .clientSecret(clientSecret)
-      .provider(provider.name())
-      .build();
-    
+        .clientId(clientId)
+        .clientSecret(clientSecret)
+        .oAuth2ProviderKey(provider.name())
+        .build();
+
   }
 
   /**
@@ -85,10 +85,10 @@ public class OAuth2ConsumerCredentialDto implements
    */
   @Override
   public OAuth2ConsumerCredentialDto validate() {
-    checkNotNull(provider);
-    checkNotBlank(clientId);
-    checkNotBlank(clientSecret);
-    
+    checkNotNull(provider, "provider");
+    checkNotBlank(clientId, "clientId");
+    checkNotBlank(clientSecret, "clientSecret");
+
     return this;
   }
 
@@ -147,8 +147,16 @@ public class OAuth2ConsumerCredentialDto implements
       return this;
     }
 
+    @SuppressWarnings("synthetic-access")
     public OAuth2ConsumerCredentialDto build() {
-      return new OAuth2ConsumerCredentialDto(provider, clientId, clientSecret);
+      return new OAuth2ConsumerCredentialDto(this).validate();
     }
+  }
+
+  @SuppressWarnings("synthetic-access")
+  private OAuth2ConsumerCredentialDto(Builder builder) {
+    this.provider = builder.provider;
+    this.clientId = builder.clientId;
+    this.clientSecret = builder.clientSecret;
   }
 }

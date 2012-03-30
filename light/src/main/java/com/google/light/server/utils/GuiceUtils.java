@@ -15,6 +15,9 @@
  */
 package com.google.light.server.utils;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import com.google.inject.Injector;
+
 import javax.servlet.http.HttpServletRequest;
 
 import com.google.inject.Key;
@@ -82,6 +85,18 @@ public class GuiceUtils {
     request.setAttribute(key.toString(), object);
   }
 
+  /**
+   * TODO(arjuns): Add test for this.
+   * Returns instance for a class.
+   * 
+   * @param injector
+   * @param clazz
+   * @return
+   */
+  public static <T> T getInstance(Injector injector, Class<T> clazz) {
+    return checkNotNull(injector.getInstance(clazz));
+  }
+  
   // Utility class.
   private GuiceUtils() {
   }

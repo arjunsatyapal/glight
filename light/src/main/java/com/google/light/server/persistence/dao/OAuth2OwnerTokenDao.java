@@ -13,26 +13,26 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.server.persistence.entity;
+package com.google.light.server.persistence.dao;
 
-import com.google.light.server.persistence.PersistenceToDtoInterface;
-import org.junit.Test;
+import com.google.inject.Inject;
+import com.google.light.server.dto.oauth2.owner.OAuth2OwnerTokenDto;
+import com.google.light.server.persistence.entity.oauth2.owner.OAuth2OwnerTokenEntity;
+import com.googlecode.objectify.ObjectifyService;
 
 /**
- * Test for Entities of type {@link PersistenceToDtoInterface}
+ * DAO for {@link OAuth2OwnerTokenEntity}.
  * 
  * @author Arjun Satyapal
  */
-public abstract class AbstractPersistenceEntityTest {
-  /**
-   * Test for constructor for each entity.
-   */
-  @Test
-  public abstract void test_builder_with_constructor();
-  
-  /**
-   * Test for {@link PersistenceToDtoInterface#toDto()}
-   */
-  @Test
-  public abstract void test_toDto();
+public class OAuth2OwnerTokenDao extends
+    AbstractBasicDao<OAuth2OwnerTokenDto, OAuth2OwnerTokenEntity, String> {
+  static {
+    ObjectifyService.register(OAuth2OwnerTokenEntity.class);
+  }
+
+  @Inject
+  public OAuth2OwnerTokenDao() {
+    super(OAuth2OwnerTokenEntity.class, String.class);
+  }
 }

@@ -39,17 +39,6 @@ public class OAuth2ConsumerCredentialEntity implements
   private String clientId;
   private String clientSecret;
 
-  protected OAuth2ConsumerCredentialEntity(String oAuth2ProviderKey, String clientId,
-      String clientSecret) {
-    // Ensure that oAuth2ProviderKey is valid.
-    this.oAuth2ProviderKey = checkNotBlank(oAuth2ProviderKey);
-    checkNotNull(OAuth2Provider.valueOf(oAuth2ProviderKey), "invalid ProviderKey["
-        + oAuth2ProviderKey + "].");
-    
-    this.clientId = checkNotBlank(clientId, "clientId is blank");
-    this.clientSecret = checkNotBlank(clientSecret, "clientSecret is blank");
-  }
-
   /**
    * {@inheritDoc}
    */
@@ -89,17 +78,12 @@ public class OAuth2ConsumerCredentialEntity implements
     return clientSecret;
   }
 
-  // For Objectify.
-  @SuppressWarnings("unused")
-  private OAuth2ConsumerCredentialEntity() {
-  }
-
   public static class Builder {
     private String oAuth2ProviderKey;
     private String clientId;
     private String clientSecret;
 
-    public Builder provider(String oAuth2ProviderKey) {
+    public Builder oAuth2ProviderKey(String oAuth2ProviderKey) {
       this.oAuth2ProviderKey = oAuth2ProviderKey;
       return this;
     }
@@ -114,8 +98,23 @@ public class OAuth2ConsumerCredentialEntity implements
       return this;
     }
 
+    @SuppressWarnings("synthetic-access")
     public OAuth2ConsumerCredentialEntity build() {
-      return new OAuth2ConsumerCredentialEntity(oAuth2ProviderKey, clientId, clientSecret);
+      return new OAuth2ConsumerCredentialEntity(this);
     }
+  }
+
+  @SuppressWarnings("synthetic-access")
+  private OAuth2ConsumerCredentialEntity(Builder builder) {
+    // Ensures that oAuth2ProviderKey is valid.
+    checkNotNull(OAuth2Provider.valueOf(builder.oAuth2ProviderKey), "invalid ProviderKey["
+        + oAuth2ProviderKey + "].");
+    this.oAuth2ProviderKey = checkNotBlank(builder.oAuth2ProviderKey, "oAuth2ProviderKey");
+    this.clientId = checkNotBlank(builder.clientId, "clientId is blank");
+    this.clientSecret = checkNotBlank(builder.clientSecret, "clientSecret");
+  }
+  
+  // For Objectify.
+  private OAuth2ConsumerCredentialEntity() {
   }
 }
