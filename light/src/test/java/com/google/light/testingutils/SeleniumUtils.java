@@ -13,27 +13,14 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.server.exception.unchecked;
+package com.google.light.testingutils;
 
-/**
- * Indicates that some exception occured during Google Login Flow.
- * 
- * @author Arjun Satyapal
- */
-@SuppressWarnings("serial")
-public class GoogleLoginException extends LightRuntimeException {
-  /**
-   * {@inheritDoc}
-   * @param message
-   */
-  public GoogleLoginException(String message) {
-      super(message);
-  }
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
 
-  /**
-   * {@inheritDoc}
-   */
-  public GoogleLoginException(String message, Throwable cause) {
-      super(message, cause);
+public class SeleniumUtils {
+  // TODO(waltercacau): Add a command line flag to change which browser to use.
+  public static WebDriver getWebDriver() {
+    return new FirefoxDriver();
   }
 }

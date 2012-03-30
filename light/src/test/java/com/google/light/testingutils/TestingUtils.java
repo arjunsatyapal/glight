@@ -16,11 +16,13 @@
 package com.google.light.testingutils;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.light.server.constants.OAuth2ProviderService.GOOGLE_LOGIN;
+import static com.google.light.server.constants.RequestParmKeyEnum.DEFAULT_EMAIL;
 import static com.google.light.server.constants.RequestParmKeyEnum.LOGIN_PROVIDER_ID;
-import static com.google.light.server.constants.RequestParmKeyEnum.LOGIN_PROVIDER_USER_EMAIL;
 import static com.google.light.server.constants.RequestParmKeyEnum.LOGIN_PROVIDER_USER_ID;
-import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
-import static com.google.light.testingutils.TestResourcePaths.UNIT_TEST_OAUTH_2_OWNER_TOKEN_INFO;
+import static com.google.light.server.constants.RequestParmKeyEnum.PERSON_ID;
+import static com.google.light.server.utils.GuiceUtils.getInstance;
+import static com.google.light.server.utils.LightPreconditions.checkNull;
 import static org.mockito.Mockito.when;
 
 import java.io.BufferedReader;
@@ -46,15 +48,24 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.servlet.ServletModule;
 import com.google.light.server.constants.LightEnvEnum;
-import com.google.light.server.constants.OAuth2Provider;
+import com.google.light.server.constants.OAuth2ProviderService;
 import com.google.light.server.guice.LightServletModule;
 import com.google.light.server.guice.module.UnitTestModule;
 import com.google.light.server.guice.modules.DevServerModule;
 import com.google.light.server.guice.modules.ProdModule;
 import com.google.light.server.guice.modules.QaModule;
-import com.google.light.server.servlets.oauth2.google.pojo.GoogleTokenInfo;
-import com.google.light.server.utils.JsonUtils;
+import com.google.light.server.manager.interfaces.PersonManager;
+import com.google.light.server.persistence.entity.person.PersonEntity;
 import com.google.light.server.utils.LightUtils;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicLong;
+import javax.annotation.Nullable;
+import javax.servlet.http.HttpSession;
+import org.mockito.Mockito;
 
 /**
  * 
@@ -119,11 +130,11 @@ public class TestingUtils {
   }
 
   /**
-   * Get a random UserId.
+   * Get a random ProviderUserId.
    * 
    * @return
    */
-  public static String getRandomUserId() {
+  public static String getRandomProviderUserId() {
     return getRandomString();
   }
 
@@ -137,28 +148,6 @@ public class TestingUtils {
   }
 
   /**
-   * Get a random FederatedId.
-   * 
-   * @deprecated
-   * @return
-   */
-  @Deprecated
-  public static String getRandomFederatedId() {
-    return "federatedId:" + getRandomString();
-  }
-
-  /**
-   * Get a random FederatedAuthority.
-   * 
-   * @deprecated
-   * @return
-   */
-  @Deprecated
-  public static String getRandomFederatedAuthority() {
-    return "federatedAuthority:" + getRandomString();
-  }
-
-  /**
    * Returns a resource as a string.
    * 
    * @param resourcePath
@@ -166,7 +155,7 @@ public class TestingUtils {
    */
   public static String getResourceAsString(String resourcePath) {
     try {
-      InputStream is = System.class.getResourceAsStream(resourcePath);
+      InputStream is = getResourceAsStream(resourcePath);
       return LightUtils.getInputStreamAsString(is);
     } catch (Exception e) {
       throw new RuntimeException("Failed to load " + resourcePath);
@@ -183,9 +172,28 @@ public class TestingUtils {
    * use this.
    * 
    * @param env
+   * @param session Session is required only for Unit Test Env.
+   * @return
+   */
+  public static Injector getInjectorByEnv(LightEnvEnum env) {
+    return getInjectorByEnv(env, null);
+  }
+  
+  /**
+   * Get Injector on the basis of the Environment. TODO(arjuns): Move other injector creations to
+   * use this.
+   * 
+   * @param env
+   * @param session Session is required only for Unit Test Env.
    * @return
    */
   public static Injector getInjectorByEnv(LightEnvEnum env, @Nullable HttpSession session) {
+    if (env == LightEnvEnum.UNIT_TEST) {
+      checkNotNull(session, "session should be set for UNIT_TEST env.");
+    } else {
+      checkNull(session, "Session should not be set for non UNIT-TEST env.");
+    }
+    
     ServletModule servletModule = new LightServletModule();
     switch (env) {
       case DEV_SERVER:
@@ -210,82 +218,34 @@ public class TestingUtils {
    * things, then can use this method. TODO(arjuns): Move all the GAE setups to use this eventually.
    */
   public static GaeTestingUtils gaeSetup(LightEnvEnum env) {
-    GaeTestingUtils gaeTestingUtils =
-        new GaeTestingUtils(env,
-            OAuth2Provider.GOOGLE_LOGIN,
-            getRandomEmail(),
-            getRandomUserId(),
-            false /* isAdmin */);
+    GaeTestingUtils gaeTestingUtils = new GaeTestingUtils(env, GOOGLE_LOGIN, 
+        getRandomProviderUserId(), getRandomEmail(), getRandomPersonId(), false /* isAdmin */);
     gaeTestingUtils.setUp();
 
     return gaeTestingUtils;
   }
 
   /**
-   * Utility method to read a line of String from Command Line.
-   * 
-   * @param message
-   * @return
-   * @throws IOException
-   */
-  public static String readLineFromConsole(String message) throws IOException {
-    System.out.println(message);
-    InputStreamReader converter = new InputStreamReader(System.in);
-    BufferedReader in = new BufferedReader(converter);
-
-    return checkNotBlank(in.readLine());
-  }
-
-  /**
-   * Create a Mock session using {@link OAuth2Provider}, userId and email.
+   * Create a Mock session using {@link OAuth2ProviderService}, userId and email.
    * 
    * @param provider
    * @param userId
    * @param email
    * @return
    */
-  public static HttpSession getMockSessionForTesting(OAuth2Provider provider, String userId,
-      String email) {
+  public static HttpSession getMockSessionForTesting(LightEnvEnum env, 
+      OAuth2ProviderService providerService, String providerUserId, Long personId, String email) {
+    if (env != LightEnvEnum.UNIT_TEST) {
+      return null;
+    }
+    
     HttpSession mockSession = Mockito.mock(HttpSession.class);
-    when(mockSession.getAttribute(LOGIN_PROVIDER_ID.get())).thenReturn(provider.name());
-    when(mockSession.getAttribute(LOGIN_PROVIDER_USER_ID.get())).thenReturn(userId);
-    when(mockSession.getAttribute(LOGIN_PROVIDER_USER_EMAIL.get())).thenReturn(email);
+    when(mockSession.getAttribute(LOGIN_PROVIDER_ID.get())).thenReturn(providerService.name());
+    when(mockSession.getAttribute(LOGIN_PROVIDER_USER_ID.get())).thenReturn(providerUserId);
+    when(mockSession.getAttribute(PERSON_ID.get())).thenReturn(personId);
+    when(mockSession.getAttribute(DEFAULT_EMAIL.get())).thenReturn(email);
 
     return mockSession;
-  }
-
-  /**
-   * Get GoogleTokenInfo for a Owner from File. If it is PROD/QA, then a
-   * 
-   * @param env
-   * @return
-   * @throws JsonParseException
-   * @throws JsonMappingException
-   * @throws IOException
-   */
-  public static GoogleTokenInfo getGoogleTokenInfo(LightEnvEnum env) throws JsonParseException,
-      JsonMappingException, IOException {
-
-    if (env == LightEnvEnum.PROD || env == LightEnvEnum.QA) {
-      throw new IllegalStateException("This should not be called for PROD/QA env.");
-    }
-    String jsonString = getFileAsString(
-        TestResourcePaths.valueOf(env.name() + "_OAUTH_2_OWNER_TOKEN_INFO").get());
-    return JsonUtils.getDto(jsonString, GoogleTokenInfo.class);
-  }
-
-  /**
-   * Update Google Token info on FileSystem.
-   * 
-   * @param updatedTokenInfo
-   * @throws JsonGenerationException
-   * @throws JsonMappingException
-   * @throws IOException
-   */
-  public static void updateGoogleTokenInfo(GoogleTokenInfo updatedTokenInfo)
-      throws JsonGenerationException, JsonMappingException, IOException {
-    String jsonString = JsonUtils.toJson(updatedTokenInfo, false);
-    createFile(jsonString, UNIT_TEST_OAUTH_2_OWNER_TOKEN_INFO);
   }
 
   /**
@@ -316,7 +276,7 @@ public class TestingUtils {
    * This method tries to compare scopes. e.g. Lists.of("a", "b") and {"a b"} are comparable. Order
    * of "a" and "b" inside both list and array does not matter.
    * 
-   * @param listOfScopes Here the scopes are part of a list as defined in {@link OAuth2Provider}.
+   * @param listOfScopes Here the scopes are part of a list as defined in {@link OAuth2ProviderService}.
    * @param strScopes This is returned by Google.
    * @return returns true if they are equivalent.
    */
@@ -333,5 +293,20 @@ public class TestingUtils {
     }
 
     return true;
+  }
+  
+  /**
+   * Create a Random Person.
+   */
+  public static PersonEntity createRandomPerson(LightEnvEnum env, HttpSession session) {
+    Injector injector = TestingUtils.getInjectorByEnv(env, session);
+    PersonManager personManager = getInstance(injector, PersonManager.class);
+    
+    PersonEntity personEntity = new PersonEntity.Builder()
+        .firstName(getRandomString())
+        .lastName(getRandomString())
+        .build();
+    
+    return personManager.createPerson(personEntity);
   }
 }

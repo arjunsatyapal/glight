@@ -80,14 +80,6 @@ public class TestLogin extends AbstractLightServlet {
    * {@inheritDoc}
    */
   @Override
-  public long getLastModified(HttpServletRequest request) {
-    return -1;
-  }
-
-  /** 
-   * {@inheritDoc}
-   */
-  @Override
   public void doHead(HttpServletRequest request, HttpServletResponse response) {
     doGet(request, response);
   }

@@ -18,8 +18,6 @@ package com.google.light.server.guice.modules;
 import static com.google.light.server.utils.LightPreconditions.checkIsEnv;
 
 import com.google.light.server.constants.LightEnvEnum;
-import com.google.light.server.manager.implementation.oauth2.consumer.GoogleOAuth2ConsumerManagerImpl;
-import com.google.light.server.manager.interfaces.OAuth2ConsumerCredentialManager;
 
 /**
  * QA Guice Module for QA Environment.
@@ -36,9 +34,5 @@ public class QaModule extends BaseGuiceModule {
   @Override
   protected void configure() {
     super.configure();
-    // Add QA Environment specific bindings here.
-    // Add Production Environment specific bindings here.
-    bind(OAuth2ConsumerCredentialManager.class)
-      .to(GoogleOAuth2ConsumerManagerImpl.class);
   }
 }

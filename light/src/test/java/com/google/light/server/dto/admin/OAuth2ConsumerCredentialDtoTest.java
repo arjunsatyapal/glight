@@ -20,9 +20,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
+import com.google.light.server.constants.OAuth2ProviderEnum;
+
 import com.google.light.server.exception.unchecked.BlankStringException;
 
-import com.google.light.server.constants.OAuth2Provider;
 import com.google.light.server.dto.AbstractDtoToPersistenceTest;
 import com.google.light.server.persistence.entity.admin.OAuth2ConsumerCredentialEntity;
 import org.junit.Before;
@@ -30,13 +31,14 @@ import org.junit.Test;
 
 /**
  * Test for {@link OAuth2ConsumerCredentialDto}.
+ * TODO(arjuns): Add more tests once we have more {@link OAuth2ProviderEnum}.
  * 
  * @author Arjun Satyapal
  */
 public class OAuth2ConsumerCredentialDtoTest extends AbstractDtoToPersistenceTest {
-  private String clientId = getRandomString();
-  private String clientSecret = getRandomString();
-  private OAuth2Provider defaultProvider = OAuth2Provider.GOOGLE_LOGIN;
+  private String clientId;
+  private String clientSecret;
+  private OAuth2ProviderEnum defaultProvider = OAuth2ProviderEnum.GOOGLE;
 
   @Before
   public void setUp() {
@@ -76,17 +78,32 @@ public class OAuth2ConsumerCredentialDtoTest extends AbstractDtoToPersistenceTes
 
   /**
    * {@inheritDoc}
+   * Original method is deliberately deprecated so that callers can use the correct method.
    */
+  @SuppressWarnings("deprecation")
   @Override
   @Test
   public void test_toPersistenceEntity() throws Exception {
+    try {
+      getDtoBuilder().build().toPersistenceEntity(null);
+      fail("should have failed.");
+    } catch (UnsupportedOperationException e) {
+      // Expected.
+    }
+  }
+  
+  /**
+   * {@inheritDoc}
+   */
+  @Test
+  public void test_toPersistenceEntity_noarg() throws Exception {
     OAuth2ConsumerCredentialEntity entity = new OAuth2ConsumerCredentialEntity.Builder()
-      .provider(defaultProvider.name())
+      .oAuth2ProviderKey(defaultProvider.name())
       .clientId(clientId)
       .clientSecret(clientSecret)
       .build();
 
-    assertEquals(entity, getDtoBuilder().build().toPersistenceEntity(null));
+    assertEquals(entity, getDtoBuilder().build().toPersistenceEntity());
   }
 
   /**

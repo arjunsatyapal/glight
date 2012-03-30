@@ -18,6 +18,9 @@ package com.google.light.server.servlets;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightUtils.wrapIntoRuntimeExceptionAndThrow;
 
+
+import com.google.inject.Inject;
+import com.google.inject.Injector;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -35,21 +38,13 @@ import com.google.light.server.guice.providers.InstanceProvider;
  * 
  * @author Arjun Satyapal
  */
-@SuppressWarnings({ "deprecation", "serial" })
+@SuppressWarnings({ "serial" })
 public abstract class AbstractLightServlet extends HttpServlet {
   @Inject
   private Injector injector;
-  private InstanceProvider instanceProvider;
 
   protected Injector getInjector() {
     return checkNotNull(injector);
-  }
-
-  protected InstanceProvider getInstanceProvider() {
-    if (instanceProvider == null) {
-      this.instanceProvider = checkNotNull(injector.getInstance(InstanceProvider.class));
-    }
-    return instanceProvider;
   }
 
   /**
@@ -61,8 +56,6 @@ public abstract class AbstractLightServlet extends HttpServlet {
       super.service(request, response);
     } catch (Exception e) {
       // TODO(arjuns): Auto-generated catch block
-      
-      
       wrapIntoRuntimeExceptionAndThrow(e);
     }
   }
@@ -85,7 +78,9 @@ public abstract class AbstractLightServlet extends HttpServlet {
    * @return
    */
   @Override
-  public abstract long getLastModified(HttpServletRequest request);
+  public long getLastModified(HttpServletRequest request) {
+    return -1;
+  }
 
   /**
    * {@inheritDoc}

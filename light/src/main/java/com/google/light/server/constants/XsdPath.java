@@ -28,7 +28,7 @@ public enum XsdPath {
   private String xsdPath;
   
   private XsdPath(String xsdPath) {
-    this.xsdPath = checkNotBlank(xsdPath);
+    this.xsdPath = checkNotBlank(xsdPath, "xsdPath");
   }
   
   public String get() {

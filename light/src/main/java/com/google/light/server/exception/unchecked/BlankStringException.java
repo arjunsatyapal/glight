@@ -15,8 +15,6 @@
  */
 package com.google.light.server.exception.unchecked;
 
-import com.google.light.server.utils.LightPreconditions;
-
 /**
  * Exception thrown by {@link LightPreconditions#checkNotBlank(String)} when 
  * <br> String is null.

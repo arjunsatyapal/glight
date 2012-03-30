@@ -34,7 +34,7 @@ import com.googlecode.objectify.Objectify;
  * Guice.
  * 
  * D : DTO for P.
- * P : PersistenceEntity Type.
+ * P : Type of PersistenceEntity.
  * I : Type of Id used by P.
  * 
  * @author Arjun Satyapal
@@ -45,6 +45,7 @@ public abstract class AbstractBasicDao<D, P extends PersistenceToDtoInterface<P,
 
   /**
    * This method is purely for testing. Should not be used in production.
+   * 
    * @return
    */
   @VisibleForTesting
@@ -54,6 +55,7 @@ public abstract class AbstractBasicDao<D, P extends PersistenceToDtoInterface<P,
 
   /**
    * This method is purely for testing. Should not be used in production.
+   * 
    * @return
    */
   @VisibleForTesting
@@ -65,7 +67,7 @@ public abstract class AbstractBasicDao<D, P extends PersistenceToDtoInterface<P,
   public AbstractBasicDao(Class<P> entityClazz, Class<I> idTypeClazz) {
     this.entityClazz = checkNotNull(entityClazz);
     this.idTypeClazz = checkNotNull(idTypeClazz);
-    
+
     // Objectify allows Ids of Type Long and String only.
     if (idTypeClazz.isAssignableFrom(Long.class) ||
         idTypeClazz.isAssignableFrom(String.class)) {
@@ -74,7 +76,7 @@ public abstract class AbstractBasicDao<D, P extends PersistenceToDtoInterface<P,
       throw new IllegalKeyTypeException(idTypeClazz.getName());
     }
   }
-  
+
   /**
    * Put an entity on DataStore. TODO(arjuns) : Look into improving transaction. Reference :
    * http://code.google.com/p/objectify-appengine/wiki/BestPractices#Use_Pythonic_Transactions
@@ -114,9 +116,9 @@ public abstract class AbstractBasicDao<D, P extends PersistenceToDtoInterface<P,
    */
   protected Key<P> getKey(I id) {
     if (idTypeClazz.isAssignableFrom(Long.class)) {
-      return new Key<P>(entityClazz, (Long)id);
+      return new Key<P>(entityClazz, (Long) id);
     } else if (id instanceof String) {
-      return new Key<P>(entityClazz, (String)id);
+      return new Key<P>(entityClazz, (String) id);
     } else {
       throw new IllegalKeyTypeException();
     }
@@ -130,13 +132,13 @@ public abstract class AbstractBasicDao<D, P extends PersistenceToDtoInterface<P,
    * @return
    * @throws IllegalKeyTypeException
    */
-  public final P get(I id) throws IllegalKeyTypeException {
+  public P get(I id) throws IllegalKeyTypeException {
     return get(null, id);
   }
 
   /**
-   * Get Entity of Type<T> from DataStore which has Id of type <String> in a Transaction. If Entity
-   * Id of type <String> then DAO should overload it and make it public.
+   * Get Entity of Type<P> from DataStore which has Id of type <I> in a Transaction. If any
+   * DAO wants to use this, then it should overload it.
    * 
    * @param ofy Objectify Transaction.
    * @param id Id of object to be fetched.
@@ -150,13 +152,13 @@ public abstract class AbstractBasicDao<D, P extends PersistenceToDtoInterface<P,
   }
 
   /**
-   * Get an entity from Datastore for given Key. If it needs to be fetched inside a transaction, then
-   * Transaction should be active.
+   * Get an entity from Datastore for given Key. If it needs to be fetched inside a transaction,
+   * then transaction should be active.
    * 
    * @param ofy
    * @param key
    * @return
-   * @throws ObjectifyTxnShouldBeRunningException 
+   * @throws ObjectifyTxnShouldBeRunningException
    */
   public P get(Objectify ofy, Key<P> key) {
     if (ofy == null) {
@@ -169,7 +171,7 @@ public abstract class AbstractBasicDao<D, P extends PersistenceToDtoInterface<P,
 
     return ofy.find(key);
   }
-  
+
   protected static <T> T logAndReturn(Logger logger, T returnObject, String message) {
     logger.info(message);
     return returnObject;

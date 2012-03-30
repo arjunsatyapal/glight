@@ -17,6 +17,8 @@ package com.google.light.server.utils;
 
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
+import com.google.light.server.servlets.path.ServletPathEnum;
+
 import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;
 import com.google.light.server.constants.ContentTypeEnum;
@@ -94,11 +96,23 @@ public class ServletUtils {
 
     String reqEntityString = CharStreams.toString(new InputStreamReader(
         request.getInputStream(), Charsets.UTF_8));
-    checkNotBlank(reqEntityString);
+    checkNotBlank(reqEntityString, "reqEntityString");
 
     return new ServletRequestPojo<D>(request, contentType, reqEntityString, clazz);
   }
 
+  /**
+   * Returns complete url for a Servlet.
+   * TODO(arjuns): "Add test for this.
+   * 
+   * @param serverUrl
+   * @param servletPath
+   * @return
+   */
+  public static String getServletUrl(HttpServletRequest request, ServletPathEnum servletPath) {
+    return getServerUrl(request) + servletPath.get();
+  }
+  
   // Utility Method
   private ServletUtils() {
   }

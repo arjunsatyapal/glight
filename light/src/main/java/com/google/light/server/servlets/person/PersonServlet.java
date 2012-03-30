@@ -16,11 +16,13 @@
 package com.google.light.server.servlets.person;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.light.server.utils.GuiceUtils.getInstance;
 import static com.google.light.server.utils.ServletUtils.getRequestPojo;
 
 import com.google.common.base.Throwables;
 import com.google.light.server.dto.person.PersonDto;
 import com.google.light.server.exception.unchecked.httpexception.MethodNotAllowedException;
+import com.google.light.server.manager.interfaces.PersonManager;
 import com.google.light.server.persistence.entity.person.PersonEntity;
 import com.google.light.server.servlets.AbstractLightServlet;
 import com.google.light.server.servlets.SessionManager;
@@ -35,14 +37,18 @@ import javax.servlet.http.HttpServletResponse;
  * 
  * @author Arjun Satyapal
  */
-@SuppressWarnings({ "deprecation", "serial" })
+@SuppressWarnings("serial")
 public class PersonServlet extends AbstractLightServlet {
+  private PersonManager personManager;
+  private SessionManager sessionManager;
   /**
    * {@inheritDoc}
    */
   @Override
   public void service(HttpServletRequest request, HttpServletResponse response) {
-    getInstanceProvider().getSessionManager().checkPersonLoggedIn();
+    this.personManager = getInstance(getInjector(), PersonManager.class);
+    this.sessionManager = getInstance(getInjector(), SessionManager.class);
+    sessionManager.checkPersonLoggedIn();
     super.service(request, response);
   }
 
@@ -59,27 +65,12 @@ public class PersonServlet extends AbstractLightServlet {
    */
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) {
-    // TODO(arjuns): Move sessionManager to Constructor.
-    SessionManager sessionManager = getInstanceProvider().getSessionManager();
-    
     try {
-      response.getWriter().println("hello : " + sessionManager.getLoginProviderUserEmail());
+      response.getWriter().println("hello : " + sessionManager.getEmail());
     } catch (IOException e) {
       // TODO(arjuns): Auto-generated catch block
       throw new RuntimeException(e);
     }
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public long getLastModified(HttpServletRequest request) {
-    /*
-     * TODO(arjuns): Fix this by replacing from MemCache. At present defaulting to -1 so that
-     * request can be executed.
-     */
-    return -1L;
   }
 
   /**
@@ -110,8 +101,8 @@ public class PersonServlet extends AbstractLightServlet {
           request, PersonDto.class));
       PersonDto dto = requestPojo.getValidDto();
 
-      PersonEntity personEntity = getInstanceProvider().getPersonManager()
-          .createPerson(dto.toPersistenceEntity(null/* personId */));
+      PersonEntity personEntity = personManager.createPerson(
+          dto.toPersistenceEntity(null/* personId */));
 
       ServletResponsePojo<PersonDto> responsePojo = new ServletResponsePojo<PersonDto>(
           response, requestPojo.getContentType(), personEntity.toDto());

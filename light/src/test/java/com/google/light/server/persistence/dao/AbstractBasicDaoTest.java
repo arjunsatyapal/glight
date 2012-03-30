@@ -19,10 +19,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-import com.googlecode.objectify.Key;
-
-import com.googlecode.objectify.Objectify;
-
 import com.google.light.server.persistence.PersistenceToDtoInterface;
 
 import com.google.light.server.AbstractLightServerTest;
@@ -99,7 +95,7 @@ public abstract class AbstractBasicDaoTest<D, P extends PersistenceToDtoInterfac
    * 
    * Test to get Entity within Objectify Transaction for provided <Id>.
    */
-  public abstract void test_get_ofyId();
+  public abstract void test_get();
 
   /**
    * Test for {@link AbstractBasicDao#getKey(Object)}

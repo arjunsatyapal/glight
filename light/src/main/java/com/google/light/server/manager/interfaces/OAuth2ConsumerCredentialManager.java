@@ -20,7 +20,7 @@ package com.google.light.server.manager.interfaces;
  * All OAuth Consumer Implementations should implement this.
  * 
  * TODO(arjuns): Add test for this class.
- *
+ * TODO(arjuns): Add methods for listAll, and updateCredentails.
  * @author Arjun Satyapal
  */
 public interface OAuth2ConsumerCredentialManager {

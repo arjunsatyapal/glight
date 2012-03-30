@@ -13,18 +13,20 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.server.servlets.test.oauth2.google.login;
+package com.google.light.server.servlets.test.oauth2.login;
 
+import static com.google.light.server.constants.RequestParmKeyEnum.DEFAULT_EMAIL;
 import static com.google.light.server.constants.RequestParmKeyEnum.LOGIN_PROVIDER_ID;
-import static com.google.light.server.constants.RequestParmKeyEnum.LOGIN_PROVIDER_USER_EMAIL;
 import static com.google.light.server.constants.RequestParmKeyEnum.LOGIN_PROVIDER_USER_ID;
+import static com.google.light.server.constants.RequestParmKeyEnum.PERSON_ID;
 import static com.google.light.server.utils.LightPreconditions.checkIsNotEnv;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
+import static com.google.light.server.utils.LightPreconditions.checkPersonId;
 
 import com.google.inject.Inject;
 import com.google.light.server.constants.ContentTypeEnum;
 import com.google.light.server.constants.LightEnvEnum;
-import com.google.light.server.constants.OAuth2Provider;
+import com.google.light.server.constants.OAuth2ProviderService;
 import com.google.light.server.utils.LightUtils;
 import java.io.IOException;
 import java.util.logging.Logger;
@@ -55,20 +57,24 @@ public class FakeLoginServlet extends HttpServlet {
       throws ServletException, IOException {
     doGet(request, response);
   }
-  
+
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     HttpSession session = request.getSession();
 
-    String providerNameStr = checkNotBlank(request.getParameter(LOGIN_PROVIDER_ID.get()));
-    OAuth2Provider provider = OAuth2Provider.valueOf(providerNameStr);
-    
-    String providerUserId = checkNotBlank(request.getParameter(LOGIN_PROVIDER_USER_ID.get()));
-    String providerUserEmail = checkNotBlank(request.getParameter(LOGIN_PROVIDER_USER_EMAIL.get()));
-    session.setMaxInactiveInterval(120 /*seconds*/);
+    String providerNameStr = checkNotBlank(
+        request.getParameter(LOGIN_PROVIDER_ID.get()), "loginProvider");
+    OAuth2ProviderService providerService = OAuth2ProviderService.valueOf(providerNameStr);
 
-    LightUtils.prepareSession(session, provider, providerUserId, providerUserEmail);
-    
+    String personIdStr = checkNotBlank(request.getParameter(PERSON_ID.get()), "personId");
+    long personId = checkPersonId(Long.parseLong(personIdStr));
+    String providerUserId =
+        checkNotBlank(request.getParameter(LOGIN_PROVIDER_USER_ID.get()), "loginProviderUserId");
+    String defaultEmail = checkNotBlank(request.getParameter(DEFAULT_EMAIL.get()), "email");
+    session.setMaxInactiveInterval(120 /* seconds */);
+
+    LightUtils.prepareSession(session, providerService, personId, providerUserId, defaultEmail);
+
     StringBuilder builder = new StringBuilder();
     LightUtils.appendSessionData(builder, session);
 

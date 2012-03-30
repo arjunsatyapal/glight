@@ -12,16 +12,16 @@
  */
 package com.google.light.server;
 
+import static com.google.light.server.constants.OAuth2ProviderService.GOOGLE_LOGIN;
 import static com.google.light.testingutils.TestingUtils.getMockSessionForTesting;
 import static com.google.light.testingutils.TestingUtils.getRandomEmail;
-import static com.google.light.testingutils.TestingUtils.getRandomFederatedId;
+import static com.google.light.testingutils.TestingUtils.getRandomPersonId;
+import static com.google.light.testingutils.TestingUtils.getRandomProviderUserId;
 import static com.google.light.testingutils.TestingUtils.getRandomString;
-import static com.google.light.testingutils.TestingUtils.getRandomUserId;
 
 import com.google.inject.Injector;
 import com.google.light.server.constants.LightEnvEnum;
-import com.google.light.server.constants.OAuth2Provider;
-import com.google.light.server.guice.TestInstanceProvider;
+import com.google.light.server.constants.OAuth2ProviderService;
 import com.google.light.testingutils.GaeTestingUtils;
 import com.google.light.testingutils.TestingUtils;
 import javax.servlet.http.HttpSession;
@@ -35,21 +35,18 @@ import org.junit.BeforeClass;
  * 
  * @author Arjun Satyapal
  */
-@SuppressWarnings("deprecation")
 public abstract class AbstractLightServerTest {
-  private static boolean gaeSetupDone = false;
-
   protected static LightEnvEnum defaultEnv = LightEnvEnum.UNIT_TEST;
   
-  protected static OAuth2Provider defaultLoginProvider = OAuth2Provider.GOOGLE_LOGIN;
-  protected String testUserId;
+  protected static OAuth2ProviderService defaultProviderService = GOOGLE_LOGIN;
+  protected HttpSession testSession;
+  protected long testPersonId;
+  protected String testProviderUserId;
   protected String testEmail;
-  protected String testFederatedId;
   protected String testFirstName;
   protected String testLastName;
 
   protected Injector injector;
-  protected TestInstanceProvider testInstanceProvider;
   protected static GaeTestingUtils gaeTestingUtils = null;
 
   // TODO(arjuns): Fix this setup part so that we dont see exceptions in console.
@@ -57,61 +54,28 @@ public abstract class AbstractLightServerTest {
   public static void gaeSetup() {
     // This causes GAE Test Setup once.
     gaeTestingUtils = TestingUtils.gaeSetup(defaultEnv);
-    /*
-     * Deliberately keeping this false so that each test is forced to initiate with its own Env with
-     * each setup.
-     */
-
-    gaeSetupDone = true;
   }
 
   @AfterClass
   public static void gaeTearDown() {
     gaeTestingUtils.tearDown();
-    gaeSetupDone = false;
-  }
-
-  /**
-   * This will simulate the user state for different calls.
-   * 
-   * @param gaeUserEmail
-   * @param isLoggedIn
-   * @param isAdmin
-   */
-  protected void gaeEnvReset(OAuth2Provider provider, String email, String federatedId, String userId,
-      boolean isLoggedIn, boolean isAdmin) {
-    // TODO(arjuns): Fix this.
-//    gaeTestingUtils.setAuthDomain(authDomain);
-    gaeTestingUtils.setEmail(email);
-    gaeTestingUtils.setAdmin(isAdmin);
-
-    gaeSetupDone = true;
   }
 
   @Before
   public void setUp() {
-    testUserId = getRandomUserId();
+    testPersonId = getRandomPersonId();
+    testProviderUserId = getRandomProviderUserId();
     testEmail = getRandomEmail();
-    testFederatedId = getRandomFederatedId();
     testFirstName = getRandomString();
     testLastName = getRandomString();
 
-    if (!gaeSetupDone) {
-      gaeEnvReset(defaultLoginProvider, testEmail, testFederatedId, testUserId,
-          true /* loggedIn */, false /* isAdmin */);
-    }
-    HttpSession mockSession = getMockSessionForTesting(defaultLoginProvider, testUserId, testEmail);
+    testSession = getMockSessionForTesting(defaultEnv, defaultProviderService, 
+        testProviderUserId, testPersonId, testEmail);
 
-    injector = TestingUtils.getInjectorByEnv(LightEnvEnum.UNIT_TEST, mockSession);
-    testInstanceProvider = injector.getInstance(TestInstanceProvider.class);
+    injector = TestingUtils.getInjectorByEnv(LightEnvEnum.UNIT_TEST, testSession);
   }
 
   @After
   public void tearDown() {
-    testFirstName = null;
-    testLastName = null;
-    testUserId = null;
-    testEmail = null;
-    gaeSetupDone = false;
   }
 }

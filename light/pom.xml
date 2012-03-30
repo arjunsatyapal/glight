@@ -189,6 +189,12 @@
       <version>3.0</version>
     </dependency>
 
+    <dependency>
+      <groupId>com.google.inject.extensions</groupId>
+      <artifactId>guice-assistedinject</artifactId>
+      <version>3.0</version>
+    </dependency>
+
     <!--
       JAXB Dependencies :
       Used for converting DTO to Json and XML.
@@ -208,10 +214,15 @@
       <version>1.1</version>
     </dependency>
 
+    <!--
+      Jetty Servlet Tester Dependency.
+    -->
+
     <dependency>
-      <groupId>xerces</groupId>
-      <artifactId>xercesImpl</artifactId>
-      <version>2.10.0</version>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-servlet-tester</artifactId>
+      <version>7.0.0.M2</version>
+      <scope>test</scope>
     </dependency>
 
     <!--
@@ -281,6 +292,21 @@
       <version>0.9.22</version>
     </dependency>
 
+    <!-- Selenium -->
+    <dependency>
+      <groupId>org.seleniumhq.selenium</groupId>
+      <artifactId>selenium-java</artifactId>
+      <version>${selenium.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency><!-- Needed by selenium -->
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpclient</artifactId>
+      <version>4.1.3</version>
+      <scope>test</scope>
+    </dependency>
+
     <!--
       Test Dependency :
       Scope = Test Only.
@@ -297,6 +323,22 @@
       <artifactId>mockito-all</artifactId>
       <version>1.9.0</version>
       <scope>test</scope>
+    </dependency>
+
+    <!--
+      Xerces Dependency :
+    -->
+    <dependency>
+      <groupId>xerces</groupId>
+      <artifactId>xerces</artifactId>
+      <version>2.4.0</version>
+    </dependency>
+
+    <!-- TODO(waltercacau): See if we really need xercesImpl -->
+    <dependency><!-- Needed to deploy JDOM to appengine -->
+      <groupId>xerces</groupId>
+      <artifactId>xercesImpl</artifactId>
+      <version>2.10.0</version>
     </dependency>
 
     <!--
@@ -695,6 +737,10 @@
     <dojo.path>${basedir}/src/main/javascript/external/djk</dojo.path>
     <dojo.build.release.location>${light.wardir}/js</dojo.build.release.location>
     <dojo.build.extraArgs></dojo.build.extraArgs>
+
+    <!-- Selenium -->
+    <selenium.version>2.20.0</selenium.version>
+    <selenium.driver>org.openqa.selenium.firefox.FirefoxDriver</selenium.driver>
   </properties>
 
   <profiles>
@@ -913,11 +959,12 @@
               -->
               <scriptLoaderPath>../../../../src/test/javascript/loaderForJasmineMaven.js</scriptLoaderPath>
               <!--
-                We need to use Chrome instead of HTMLUnit for now because in the current HTMLUnit
+                We need to use a browser instead of HTMLUnit for now because in the current HTMLUnit
                 there is no implementation of getBoundingClientRect, which is used by dojo during
                 the testing of Light's Views.
               -->
-              <webDriverClassName>org.openqa.selenium.chrome.ChromeDriver</webDriverClassName>
+
+              <webDriverClassName>${selenium.driver}</webDriverClassName>
 
               <jsSrcDir>${project.basedir}/src/main/javascript</jsSrcDir>
               <jsTestSrcDir>${project.basedir}/src/test/javascript</jsTestSrcDir>
@@ -944,6 +991,14 @@
               </specIncludes>
 
             </configuration>
+            <dependencies>
+              <!-- Overriding the selenium version used by jasmine -->
+              <dependency>
+                <groupId>org.seleniumhq.selenium</groupId>
+                <artifactId>selenium-java</artifactId>
+                <version>${selenium.version}</version>
+              </dependency>
+            </dependencies>
           </plugin>
         </plugins>
       </build>

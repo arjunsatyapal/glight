@@ -15,17 +15,20 @@
  */
 package com.google.light.server.servlets;
 
+import static com.google.light.server.constants.RequestParmKeyEnum.DEFAULT_EMAIL;
 import static com.google.light.server.constants.RequestParmKeyEnum.LOGIN_PROVIDER_ID;
-import static com.google.light.server.constants.RequestParmKeyEnum.LOGIN_PROVIDER_USER_EMAIL;
 import static com.google.light.server.constants.RequestParmKeyEnum.LOGIN_PROVIDER_USER_ID;
 import static com.google.light.server.constants.RequestParmKeyEnum.PERSON_ID;
 import static com.google.light.server.utils.LightPreconditions.checkEmail;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPersonId;
+import static org.apache.commons.lang.StringUtils.isBlank;
+
+import com.google.light.server.exception.unchecked.BlankStringException;
 
 import com.google.inject.Inject;
 import com.google.light.server.annotations.AnotHttpSession;
-import com.google.light.server.constants.OAuth2Provider;
+import com.google.light.server.constants.OAuth2ProviderService;
 import com.google.light.server.exception.unchecked.httpexception.PersonLoginRequiredException;
 import javax.servlet.http.HttpSession;
 
@@ -49,16 +52,36 @@ public class SessionManager {
    * 
    * @return
    */
-  public OAuth2Provider getLoginProvider() {
+  public OAuth2ProviderService getLoginProviderService() {
     String loginProviderStr = (String) session.getAttribute(LOGIN_PROVIDER_ID.get());
-    return OAuth2Provider.valueOf(loginProviderStr);
+    return OAuth2ProviderService.valueOf(loginProviderStr);
   }
-  
+
   /**
    * Store Person's Login Provider in session.
    */
-  public void setLoginProvider(OAuth2Provider provider) {
-    session.setAttribute(LOGIN_PROVIDER_ID.get(), provider.name());
+  public void setLoginProviderService(OAuth2ProviderService providerService) {
+    session.setAttribute(LOGIN_PROVIDER_ID.get(), providerService.name());
+  }
+  
+  /**
+   * Get Person's Login Provider User Id.
+   * TODO(arjuns): Add test.
+   * 
+   * @return
+   */
+  public String getLoginProviderUserId() {
+    String providerUserId = (String) session.getAttribute(LOGIN_PROVIDER_USER_ID.get());
+    return checkNotBlank(providerUserId, "providerUserId");
+  }
+
+  /**
+   * Store Person's Login Provider in session.
+   * TODO(arjuns): Add test
+   */
+  public void setLoginProviderUserId(String providerUserId) {
+    session.setAttribute(LOGIN_PROVIDER_USER_ID.get(), 
+        checkNotBlank(providerUserId, "providerUserId"));
   }
 
   /**
@@ -66,8 +89,8 @@ public class SessionManager {
    * 
    * @return
    */
-  public String getLoginProviderUserEmail() {
-    String email = (String) session.getAttribute(LOGIN_PROVIDER_USER_EMAIL.get());
+  public String getEmail() {
+    String email = (String) session.getAttribute(DEFAULT_EMAIL.get());
     return checkEmail(email);
   }
 
@@ -77,17 +100,7 @@ public class SessionManager {
    * @return
    */
   public void setProviderUserEmail(String email) {
-    session.setAttribute(LOGIN_PROVIDER_USER_EMAIL.get(), checkEmail(email));
-  }
-
-  /**
-   * Get Person's UserId provided by LoginProvider from Session.
-   * 
-   * @return
-   */
-  public String getLoginProviderUserId() {
-    String userId = (String) session.getAttribute(LOGIN_PROVIDER_USER_ID.get());
-    return checkNotBlank(userId);
+    session.setAttribute(DEFAULT_EMAIL.get(), checkEmail(email));
   }
 
   /**
@@ -95,8 +108,8 @@ public class SessionManager {
    * 
    * @return
    */
-  public void setLoginProviderUserId(String id) {
-    session.setAttribute(LOGIN_PROVIDER_USER_ID.get(), checkNotBlank(id));
+  public void setPersonId(Long id) {
+    session.setAttribute(PERSON_ID.get(), checkPersonId(id));
   }
 
   /**
@@ -111,22 +124,22 @@ public class SessionManager {
   }
 
   /**
-   * Store PersonId in Session.
+   * Returns true if Person is logged in. In order to determine if User is logged in or not, we
+   * depend on whether Session is null or not.
    * 
-   * @return
-   */
-  public void setPersonId(Long personId) {
-    session.setAttribute(PERSON_ID.get(), checkPersonId(personId));
-  }
-
-  /**
-   * Returns true if Person is logged in. In order to determine if User is logged in or not, 
-   * we depend on whether Session is null or not.
-   * 
+   * TODO(arjuns): Add test.
    * @return
    */
   public boolean isPersonLoggedIn() {
-    return session != null;
+    if (session == null) {
+      return false;
+    }
+    
+    try {
+      return !isBlank(getLoginProviderUserId());
+    } catch (BlankStringException e) {
+      return false;
+    }
   }
 
   /**
@@ -138,5 +151,25 @@ public class SessionManager {
     if (!isPersonLoggedIn()) {
       throw new PersonLoginRequiredException("");
     }
+  }
+  
+
+  // TODO(arjuns): Add tests.
+  /**
+   * Returns true if session is valid.
+   * 
+   * @return
+   */
+  public boolean isValidSession() {
+    try {
+      getLoginProviderService();
+      getLoginProviderUserId();
+      getEmail();
+      getPersonId();
+    } catch (Exception e) {
+      return false;
+    }
+
+    return true;
   }
 }

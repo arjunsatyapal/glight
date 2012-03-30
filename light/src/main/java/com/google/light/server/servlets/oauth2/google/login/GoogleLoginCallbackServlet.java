@@ -1,110 +1,370 @@
 package com.google.light.server.servlets.oauth2.google.login;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.light.server.constants.OAuth2Provider.GOOGLE_LOGIN;
+import static com.google.light.server.constants.OAuth2ProviderService.GOOGLE_LOGIN;
+import static com.google.light.server.servlets.oauth2.google.pojo.AbstractGoogleOAuth2TokenInfo.calculateExpireInMillis;
+import static com.google.light.server.servlets.path.ServletPathEnum.OAUTH2_GOOGLE_LOGIN_CB;
 import static com.google.light.server.servlets.path.ServletPathEnum.SESSION;
-import static com.google.light.server.utils.ServletUtils.getRequestUriWithQueryParams;
-import static com.google.light.server.utils.ServletUtils.getServerUrl;
+import static com.google.light.server.utils.GuiceUtils.getInstance;
+import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
+import static com.google.light.server.utils.LightUtils.prepareSession;
 
-import com.google.light.server.utils.JsonUtils;
+import com.google.common.base.Preconditions;
 
 import com.google.api.client.auth.oauth2.AuthorizationCodeResponseUrl;
 import com.google.api.client.auth.oauth2.TokenResponse;
+import com.google.common.base.Strings;
 import com.google.inject.Inject;
-import com.google.inject.Provider;
-import com.google.light.server.exception.unchecked.GoogleLoginException;
-import com.google.light.server.servlets.oauth2.google.GoogleOAuth2Helper;
-import com.google.light.server.servlets.oauth2.google.pojo.GoogleTokenInfo;
+import com.google.inject.Injector;
+import com.google.light.server.dto.oauth2.owner.OAuth2OwnerTokenDto;
+import com.google.light.server.dto.person.PersonDto;
+import com.google.light.server.exception.unchecked.GoogleAuthorizationException;
+import com.google.light.server.manager.implementation.oauth2.owner.OAuth2OwnerTokenManagerFactory;
+import com.google.light.server.manager.interfaces.OAuth2OwnerTokenManager;
+import com.google.light.server.manager.interfaces.PersonManager;
+import com.google.light.server.persistence.entity.oauth2.owner.OAuth2OwnerTokenEntity;
+import com.google.light.server.persistence.entity.person.PersonEntity;
+import com.google.light.server.servlets.SessionManager;
+import com.google.light.server.servlets.oauth2.google.GoogleOAuth2Utils;
+import com.google.light.server.servlets.oauth2.google.OAuth2Helper;
+import com.google.light.server.servlets.oauth2.google.OAuth2HelperFactoryInterface;
+import com.google.light.server.servlets.oauth2.google.pojo.GoogleLoginTokenInfo;
 import com.google.light.server.servlets.oauth2.google.pojo.GoogleUserInfo;
 import com.google.light.server.utils.GaeUtils;
-import com.google.light.server.utils.LightUtils;
+import com.google.light.server.utils.GuiceUtils;
+import com.google.light.server.utils.ServletUtils;
 import java.io.IOException;
-import java.util.logging.Logger;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 /**
  * Servlet called by Google during Google Login flow.
  * 
- * TODO(arjuns): Add test for this.
- * TODO(arjuns): Add code for revoke token.
- *
+ * TODO(arjuns): Add test for this. TODO(arjuns): Add code for revoke token.
+ * 
  * @author arjuns@google.com (Arjun Satyapal)
  */
 @SuppressWarnings("serial")
 public class GoogleLoginCallbackServlet extends HttpServlet {
-  private static final Logger logger = Logger.getLogger(GoogleLoginCallbackServlet.class.getName());
+  private Injector injector;
 
-  private GoogleOAuth2Helper googleOAuth2Helper;
+  private OAuth2Helper helperInstance;
+  private OAuth2OwnerTokenManager googLoginTokenManager;
+
+  private String lightCbUrl = null;
 
   @Inject
-  public GoogleLoginCallbackServlet(Provider<GoogleOAuth2Helper> googleOAuth2HelperProvider) {
-    this.googleOAuth2Helper = checkNotNull(googleOAuth2HelperProvider.get());
+  public GoogleLoginCallbackServlet(Injector injector) {
+    this.injector = checkNotNull(injector, "injector");
+  }
+
+  @Override
+  public void service(HttpServletRequest request, HttpServletResponse response) {
+    OAuth2HelperFactoryInterface helperFactory = getInstance(
+        injector, OAuth2HelperFactoryInterface.class);
+    helperInstance = helperFactory.create(GOOGLE_LOGIN);
+
+    OAuth2OwnerTokenManagerFactory tokenManagerFactory = getInstance(
+        injector, OAuth2OwnerTokenManagerFactory.class);
+    googLoginTokenManager = tokenManagerFactory.create(GOOGLE_LOGIN);
+
+    lightCbUrl = ServletUtils.getServletUrl(request, OAUTH2_GOOGLE_LOGIN_CB);
+    try {
+      super.service(request, response);
+    } catch (Exception e) {
+      // TODO(arjuns): Auto-generated catch block
+      throw new RuntimeException(e);
+    }
   }
 
   @Override
   protected void doGet(HttpServletRequest request, HttpServletResponse response)
       throws IOException {
     AuthorizationCodeResponseUrl authorizationCodeResponseUrl =
-        new AuthorizationCodeResponseUrl(getRequestUriWithQueryParams(request));
+        new AuthorizationCodeResponseUrl(ServletUtils.getRequestUriWithQueryParams(request));
     String code = authorizationCodeResponseUrl.getCode();
 
     // TODO(arjun): Move error before the code == null.
     if (code == null) {
-      throw new GoogleLoginException("Google did not return Authorization Code.");
+      throw new GoogleAuthorizationException("Google did not return Authorization Code.");
     } else if (authorizationCodeResponseUrl.getError() != null) {
       onError(request, response, authorizationCodeResponseUrl);
     } else {
-      TokenResponse tokenResponse = googleOAuth2Helper.getAccessToken(getServerUrl(request), code);
-      logger.info("accessToken = " + tokenResponse.getAccessToken());
-      logger.info("refreshToken = " + tokenResponse.getRefreshToken());
-      
-      /*
-       * Since tokenResponse is a final class, so in order to aid in testing, we are passing
-       * all required parameters to getTokenInfo method. 
-       */
-      GoogleTokenInfo tokenInfo = googleOAuth2Helper.getTokenInfo(tokenResponse.getTokenType(), 
-          tokenResponse.getAccessToken(), tokenResponse.getRefreshToken());
-      
-      // TODO(arjuns): Add support to show this on session.
-      // TODO(arjuns): Store TokenInfo.
-      logger.info("\nTokenInfo : " + JsonUtils.toJson(tokenInfo));
-      logger.info("\nTokenInfo\n : " + JsonUtils.toJson(tokenInfo, false));
-      
-      // TODO(arjuns): Store UserInfo.
-      GoogleUserInfo userInfo = googleOAuth2Helper.getUserInfo(tokenResponse.getAccessToken());
-      logger.info("\nUserINfo : " + JsonUtils.toJson(userInfo));
-      
-      GoogleTokenInfo refreshTokenInfo = googleOAuth2Helper.refreshToken(tokenInfo.getRefreshToken());
-      logger.info("\nRefreshTokenInfo :\n " + JsonUtils.toJson(refreshTokenInfo));
-      logger.info("\nRefreshTokenInfo :\n " + JsonUtils.toJson(refreshTokenInfo, false));
+      // TODO(arjuns): Move following to onSuccess.
+      // TODO(arjuns) : First Check for session.
+      // TODO(arjuns) : Break this method into more parts.
+      // TODO(arjuns) : Write whole workflow as this is complex to understand.
 
-      onSuccess(request, response, tokenInfo, userInfo);
+      String email = null;
+      String providerUserId = null;
+      boolean createNewPerson = false;
+      String refreshToken = null;
+
+      /*
+       * Whenever Login is initiated, session is already invalidated in the Login Servlet.
+       */
+      HttpSession session = request.getSession();
+      /*
+       * For non-login servlets SessionManager is injected but here we are creating by hand.
+       */
+      SessionManager sessionManager = new SessionManager(session);
+
+      TokenResponse tokenResponse = helperInstance.getAccessToken(lightCbUrl, code);
+
+      GoogleLoginTokenInfo googTokenInfo =
+          helperInstance.getTokenInfo(tokenResponse.getAccessToken(),
+              GoogleLoginTokenInfo.class);
+      email = googTokenInfo.getEmail();
+      providerUserId = googTokenInfo.getUserId();
+      refreshToken = tokenResponse.getRefreshToken();
+
+      /*
+       * Update session with required values except PersonId so that SessionManager is available
+       * for Guice injection.
+       */
+      prepareSessionAfterLogin(request, null, providerUserId, email);
+
+      // TODO(arjuns): Replace this with OwnerManager as dao should not be used here.
+      PersonEntity personEntity = null;
+      personEntity = getPersonEntityIfExists(email, providerUserId);
+
+      /*
+       * If Google does not return refreshToken, that means Person had visited light earlier and had
+       * given Access. So lets search for the Person on Light. On the other hand, if refreshToken is
+       * set, then that means Person was prompted to give Access. That means the refreshToken has
+       * changed and needs to be updated on DataStore. So for both the cases we need to find the
+       * associated Person.
+       */
+      boolean updatePersistedTokenDetails = false;
+
+      /*
+       * If person is still not found, then it is safe to assume that a new person needs to be
+       * created.
+       */
+      Long personId = null;
+      if (personEntity == null) {
+        personEntity = createNewPersonEnttiy(tokenResponse);
+        updatePersistedTokenDetails = true;
+      } else {
+        personId = personEntity.getId();
+      }
+
+      checkNotNull(personEntity, "After this point, personEntity should not be null.");
+      personId = personEntity.getId();
+
+      // Update session with personId which is not available.
+      prepareSessionAfterLogin(request, personId, providerUserId, email);
+
+      boolean newRefreshToken = !Strings.isNullOrEmpty(tokenResponse.getRefreshToken());
+
+      if (newRefreshToken) {
+        /*
+         * At present Light is not in a position to determine whether new Person needs to be created
+         * or not. Reason being, user might have revoked the access, and then tried to visit Light
+         * again. So first, fetch User's profile from Google, so that Light has access to Person's
+         * Google UserId.
+         */
+        refreshToken = tokenResponse.getRefreshToken();
+        updatePersistedTokenDetails = true;
+      }
+
+      /*
+       * If refreshToken was not returned, and Light cannot find a associated Person, then Person
+       * must be redirected back to Login screen with a forced Prompt, so that Google will redirect
+       * back with a RefreshToken. Otherwise Person will be in a bad state due to absence of
+       * RefreshToken.
+       */
+      boolean forceLoginWithPrompt = !newRefreshToken && createNewPerson;
+      if (forceLoginWithPrompt) {
+        forceLoginWithPrompt(request, response);
+        return;
+      }
+
+      /*
+       * Now see that TokenDetails are present. It is possible that Person was successfully created,
+       * but we failed to store the TokenDetails. This check will ensure that values are present.
+       */
+
+      // TODO(arjuns): Fix this hardcoded id generation.
+      updatePersistedTokenDetails = doesTokenDetailEntityNeedsUpdate(
+          personId, updatePersistedTokenDetails);
+
+      if (updatePersistedTokenDetails) {
+        if (Strings.isNullOrEmpty(refreshToken)) {
+          forceLoginWithPrompt(request, response);
+          return;
+        }
+        updateOwnerTokenEntity(personId, providerUserId, tokenResponse);
+      }
+
+      /*
+       * Now update the session with relevant parameters, so that Person's next visit will not
+       * require him to login again.
+       */
+      prepareSessionAfterLogin(request, personId, providerUserId, email);
+
+      // TODO(arjuns): Add handler for redirectUri.
+      if (!GaeUtils.isProductionServer()) {
+        response.sendRedirect(SESSION.get());
+      } else {
+        response.getWriter().println("success");
+      }
     }
   }
 
   /**
-   * TODO(arjuns): Update Javadoc and add test.
-   * 
+   * @param personId
+   * @param updatePersistedTokenDetails
+   * @return
+   */
+  private boolean doesTokenDetailEntityNeedsUpdate(Long personId,
+      boolean updatePersistedTokenDetails) {
+    OAuth2OwnerTokenEntity fetchedTokenEntity = googLoginTokenManager.getToken(personId);
+    if (fetchedTokenEntity == null) {
+      updatePersistedTokenDetails = true;
+    }
+    return updatePersistedTokenDetails;
+  }
+
+  /**
    * @param request
-   * @param response
-   * @param userInfo
-   * @param tokenInfo
+   * @param personId
+   * @param providerUserId
+   * @param personEntity
+   */
+  private void prepareSessionAfterLogin(HttpServletRequest request, Long personId,
+      String providerUserId, String email) {
+    try {
+      prepareSession(request.getSession(), GOOGLE_LOGIN, personId,
+          providerUserId, email);
+    } catch (Exception e) {
+      try {
+        request.getSession().invalidate();
+      } catch (Exception e1) {
+        // ignore this exception.
+      }
+      // TODO(arjuns) : Fix this exception handling.
+      throw new RuntimeException(e);
+    }
+  }
+
+  /**
+   * @param personId
+   * @param providerUserId
+   * @param tokenResponse
+   * @param googTokenInfo
+   * @param expiresInMillis
    * @throws IOException
    */
-  private void onSuccess(HttpServletRequest request, HttpServletResponse response, 
-      GoogleTokenInfo tokenInfo, GoogleUserInfo userInfo) throws IOException {
-    LightUtils.prepareSession(request.getSession(), GOOGLE_LOGIN, 
-        userInfo.getId(), userInfo.getEmail());
-    response.getWriter().println("success");
-    
-    // TODO(arjuns): Add handler for redirectUri.
-    if (!GaeUtils.isProductionServer()) {
-      response.sendRedirect(SESSION.get());
+  private void updateOwnerTokenEntity(Long personId, String providerUserId,
+      TokenResponse tokenResponse) throws IOException {
+    long expiresInMillis = calculateExpireInMillis(tokenResponse.getExpiresInSeconds());
+
+    GoogleLoginTokenInfo googTokenInfo = helperInstance.getTokenInfo(
+        tokenResponse.getAccessToken(), GoogleLoginTokenInfo.class);
+
+    googTokenInfo.getExpiresIn();
+
+    OAuth2OwnerTokenDto tokenDto = new OAuth2OwnerTokenDto.Builder()
+        .personId(personId)
+        .provider(GOOGLE_LOGIN)
+        .providerUserId(providerUserId)
+        .accessToken(tokenResponse.getAccessToken())
+        .refreshToken(tokenResponse.getRefreshToken())
+        .expiresInMillis(expiresInMillis)
+        .tokenType(tokenResponse.getTokenType())
+        .tokenInfo(googTokenInfo.toJson())
+        .build();
+
+    googLoginTokenManager.putToken(tokenDto.toPersistenceEntity());
+  }
+
+  /**
+   * @param tokenResponse
+   * @return
+   * @throws IOException
+   */
+  private PersonEntity createNewPersonEnttiy(TokenResponse tokenResponse) throws IOException {
+    PersonEntity personEntity;
+    checkNotBlank(tokenResponse.getRefreshToken(),
+        "refreshToken cannot be blank, when trying to create a new Person.");
+
+    /*
+     * First fetch UserInfo from Google.
+     */
+
+    GoogleUserInfo userInfo = GoogleOAuth2Utils.getUserInfo(helperInstance.getHttpTransport(),
+        tokenResponse.getAccessToken());
+
+    PersonDto dto = new PersonDto.Builder()
+        .firstName(userInfo.getGivenName())
+        .lastName(userInfo.getFamilyName())
+        .build();
+
+    PersonManager personManager = GuiceUtils.getInstance(injector, PersonManager.class);
+    personEntity = personManager.createPerson(dto.toPersistenceEntity(null));
+    return personEntity;
+  }
+
+  /**
+   * @param personId
+   * @param email
+   * @param providerUserId
+   * @param ownerTokenDao
+   * @param personManager
+   * @param personEntity
+   * @return
+   */
+  private PersonEntity getPersonEntityIfExists(String email, String providerUserId) {
+    Long personId = null;
+    PersonManager personManager = GuiceUtils.getInstance(injector, PersonManager.class);
+
+    PersonEntity personEntity = null;
+    /*
+     * Search by loginProviderUserId is prioritized above email, because its possible that a email
+     * provided by LoginProvider may change. But assumption here is that providerUserId will never
+     * change.
+     */
+    OAuth2OwnerTokenEntity ownerTokenEntity =
+        googLoginTokenManager.getTokenByProviderUserId(providerUserId);
+
+    if (ownerTokenEntity != null) {
+      personId = ownerTokenEntity.getPersonId();
+      personEntity = personManager.getPerson(personId);
     } else {
-      response.getWriter().println("success");
+      /*
+       * Search by Email. The underLying assumption is that no two accounts will share same-email
+       * ever. It is possible that two different Persons can try to game the system by sharing the
+       * Email. That can cause some issues here.
+       */
+
+      /*
+       * TODO(arjuns): Document the consequences when two different Persons try to share
+       * defaultEmail.
+       */
+      personEntity = personManager.getPersonByEmail(email);
     }
+
+    return personEntity;
+  }
+
+  /**
+   * @param request
+   * @param response
+   * @throws IOException
+   */
+  private void forceLoginWithPrompt(HttpServletRequest request,
+      HttpServletResponse response) throws IOException {
+    /*
+     * Will reinitialize session once Light has refreshToken. So we dont care whether
+     * request.getSession() returns existing session or new session.
+     */
+
+    request.getSession().invalidate();
+    response.sendRedirect(helperInstance.getOAuth2RedirectUriWithPrompt(lightCbUrl));
+    return;
   }
 
   /**

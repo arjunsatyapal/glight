@@ -18,6 +18,7 @@ package com.google.light.server.manager.implementation;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkPersonId;
+import static com.google.light.server.utils.LightPreconditions.checkValidSession;
 
 import com.google.inject.Inject;
 import com.google.light.server.exception.unchecked.IdShouldNotBeSet;
@@ -28,6 +29,10 @@ import com.google.light.server.servlets.SessionManager;
 
 /**
  * Implementation class for {@link PersonManager}
+ * In constructor, we only check for Person is logged in which depends on presence of 
+ * LoginProviderUserId. Unlike other managers, where Session should be valid, this Servlet is an
+ * exception to that group because in PersonManager we create a Person which returns PersonId.
+ * So all the methods other then createPerson should ensure that Session is valid.
  * 
  * @author Arjun Satyapal
  */
@@ -37,10 +42,10 @@ public class PersonManagerImpl implements PersonManager {
 
   @Inject
   public PersonManagerImpl(SessionManager sessionManager, PersonDao personDao) {
-    this.sessionManager = checkNotNull(sessionManager);
-    this.personDao = checkNotNull(personDao);
+    this.sessionManager = checkNotNull(sessionManager, "sessionManager");
+    this.personDao = checkNotNull(personDao, "personDao");
     
-    checkArgument(sessionManager.isPersonLoggedIn());
+    sessionManager.checkPersonLoggedIn();
   }
 
   /**
@@ -48,24 +53,20 @@ public class PersonManagerImpl implements PersonManager {
    */
   @Override
   public PersonEntity createPerson(PersonEntity entity) {
-    // We don't trust client to provide PersonId at time of Creation. So it has to be set
-    // on the server side.
+    /*
+     * We don't trust client to provide PersonId at time of Creation. So it has to be set
+     * on the server side.
+     */
     if (entity.getId() != null) {
       throw new IdShouldNotBeSet();
     }
 
-    // TODO(arjuns) : Add test for this.
-    checkArgument(entity.getIdProviderDetails() == null);
-
-    // TODO(arjuns) : Fix this with Federated Login.
-//    IdProviderDetail currIdProviderDetail = new IdProviderDetail(
-//        GaeUtils.getGaeAuthDomain(),
-//        GaeUtils.getGaeUserEmail(),
-//        GaeUtils.getFederatedIdentity());
-//    entity.addIdProviderDetail(currIdProviderDetail);
-
-    checkArgument(entity.getEmail() == null);
-    entity.setEmail(sessionManager.getLoginProviderUserEmail());
+    /*
+     * Similarly, we dont trust email given by Client at the time of creation. We fetch it from
+     * session.
+     */
+    checkArgument(entity.getEmail() == null, "email should not be set for createPerson.");
+    entity.setEmail(sessionManager.getEmail());
     
     // This is a heavy operation, so perform this validation just before persisting.
     PersonEntity personByEmail = getPersonByEmail(entity.getEmail());
@@ -82,6 +83,8 @@ public class PersonManagerImpl implements PersonManager {
    */
   @Override
   public PersonEntity updatePerson(PersonEntity updatedEntity) {
+    checkValidSession(sessionManager);
+    
     // TODO(arjuns): Auto-generated method stub
     throw new UnsupportedOperationException();
   }
@@ -91,14 +94,22 @@ public class PersonManagerImpl implements PersonManager {
    */
   @Override
   public PersonEntity getPerson(Long id) {
+    /*
+     * We dont check for session validity as this is used for finding person at the time of creating
+     * a person.
+     */
     return personDao.get(checkPersonId(id));
   }
-
+  
   /**
    * {@inheritDoc}
    */
   @Override
   public PersonEntity getPersonByEmail(String email) {
+    /*
+     * We dont check for session validity as this is used for finding person at the time of creating
+     * a person.
+     */
     return personDao.getByEmail(email);
   }
 
@@ -107,6 +118,7 @@ public class PersonManagerImpl implements PersonManager {
    */
   @Override
   public PersonEntity deletePerson(String id) {
+    checkValidSession(sessionManager);
     // TODO(arjuns): Auto-generated method stub
     throw new UnsupportedOperationException();
   }

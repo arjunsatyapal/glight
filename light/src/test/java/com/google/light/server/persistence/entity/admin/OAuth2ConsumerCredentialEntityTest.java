@@ -20,7 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
-import com.google.light.server.constants.OAuth2Provider;
+import com.google.light.server.constants.OAuth2ProviderEnum;
 import com.google.light.server.dto.admin.OAuth2ConsumerCredentialDto;
 import com.google.light.server.exception.unchecked.BlankStringException;
 import com.google.light.server.persistence.entity.AbstractPersistenceEntityTest;
@@ -33,7 +33,7 @@ import org.junit.Test;
  * @author Arjun Satyapal
  */
 public class OAuth2ConsumerCredentialEntityTest extends AbstractPersistenceEntityTest {
-  private OAuth2Provider defaultProvider = OAuth2Provider.GOOGLE_LOGIN;
+  private OAuth2ProviderEnum defaultProvider = OAuth2ProviderEnum.GOOGLE;
   private String clientId;
   private String clientSecret;
 
@@ -45,7 +45,7 @@ public class OAuth2ConsumerCredentialEntityTest extends AbstractPersistenceEntit
 
   private OAuth2ConsumerCredentialEntity.Builder getEntityBuilder() {
     return new OAuth2ConsumerCredentialEntity.Builder()
-        .provider(defaultProvider.name())
+        .oAuth2ProviderKey(defaultProvider.name())
         .clientId(clientId)
         .clientSecret(clientSecret);
   }
@@ -55,29 +55,29 @@ public class OAuth2ConsumerCredentialEntityTest extends AbstractPersistenceEntit
    */
   @Override
   @Test
-  public void test_builder() {
+  public void test_builder_with_constructor() {
     // Positive Testing :
     assertNotNull(getEntityBuilder().build());
 
     // Negative Testing : providerKey = null
     try {
-      getEntityBuilder().provider(null).build();
+      getEntityBuilder().oAuth2ProviderKey(null).build();
       fail("should have failed.");
-    } catch (BlankStringException e) {
+    } catch (NullPointerException e) {
       // Expected
     }
     
     // Negative Testing : providerKey = " "
     try {
-      getEntityBuilder().provider("  ").build();
+      getEntityBuilder().oAuth2ProviderKey("  ").build();
       fail("should have failed.");
-    } catch (BlankStringException e) {
+    } catch (IllegalArgumentException e) {
       // Expected
     }
     
     // Negative Testing : providerKey = Invalid string.
     try {
-      getEntityBuilder().provider(getRandomString()).build();
+      getEntityBuilder().oAuth2ProviderKey(getRandomString()).build();
       fail("should have failed.");
     } catch (IllegalArgumentException e) {
       // Expected

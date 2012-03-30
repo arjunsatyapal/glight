@@ -18,12 +18,15 @@ package com.google.light.server.servlets.filters;
 import static com.google.light.server.utils.LightPreconditions.checkIsNotEnv;
 
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.google.light.server.constants.LightEnvEnum;
 import java.io.IOException;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Servlet Filter for QA and Test environment.
@@ -33,7 +36,8 @@ import javax.servlet.ServletResponse;
 
 public class TestServletFilter extends AbstractLightFilter {
   @Inject
-  private TestServletFilter() {
+  private TestServletFilter(Injector injector) {
+    super(injector);
     checkIsNotEnv(this, LightEnvEnum.PROD);
   }
 
@@ -43,6 +47,8 @@ public class TestServletFilter extends AbstractLightFilter {
   @Override
   public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain)
       throws IOException, ServletException {
-    handleFilterChain(request, response, filterChain);
+    HttpServletRequest req = (HttpServletRequest) request;
+    HttpServletResponse resp = (HttpServletResponse) response;
+    handleFilterChain(req, resp, filterChain);
   }
 }

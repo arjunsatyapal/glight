@@ -15,6 +15,10 @@
  */
 package com.google.light.testingutils;
 
+import static com.google.light.testingutils.TestResourcePaths.GOOGLE_TOKEN_INFO_JSON;
+import static com.google.light.testingutils.TestingUtils.getResourceAsString;
+
+
 import com.google.api.client.http.GenericUrl;
 
 /**
@@ -23,7 +27,27 @@ import com.google.api.client.http.GenericUrl;
  * @author Arjun Satyapal
  */
 public class TestingConstants {
-  public static final GenericUrl devServerUrl =  new GenericUrl("http://localhost:8080/_ah/login");
-  
+  public static final GenericUrl devServerUrl = new GenericUrl("http://localhost:8080/_ah/login");
+
+  /**
+   * Following values should match in file mentioned at
+   * {@link TestResourcePaths#GOOGLE_TOKEN_INFO_JSON}
+   */
+  public static final String DEFAULT_GOOGLE_USER_ID = "115639870677665060321";
   public static final String RESOURCE_OWNER_EMAIL = "unit-test1@myopenedu.com";
+  public static final String DEFAULT_ACCESS_TOKEN = "access_token";
+  public static final String DEFAULT_REFRESH_TOKEN = "refresh_token";
+  public static final String DEFAULT_ACCESS_TYPE = "offline";
+  public static final String DEFAULT_TOKEN_TYPE = "Bearer";
+  public static final String DEFAULT_GOOGLE_CLIENT_ID = "160638920188.apps.googleusercontent.com";
+  public static final long DEFAULT_TOKEN_EXPIRES_IN = 3600L;
+  public static final long DEFAULT_TOKEN_EXPIRES_IN_MILLIS = 1332491059527L;
+  public static final long DEFAULT_PERSON_ID = 1234L;
+  public static final String DEFAULT_TOKEN_INFO = getResourceAsString(GOOGLE_TOKEN_INFO_JSON.get());
+  
+  /**
+   * Following values are default values for Consumer Credentials.
+   */
+  public static final String DEFAULT_CLIENT_ID = "client_id";
+  public static final String DEFAULT_CLIENT_SECRET = "client_secret";
 }

@@ -17,17 +17,19 @@ package com.google.light.server.utils;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.Lists.newArrayList;
 
-import com.google.appengine.api.users.UserServiceFactory;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.light.server.constants.LightEnvEnum;
+import com.google.light.server.constants.OAuth2ProviderService;
 import com.google.light.server.exception.unchecked.BlankStringException;
 import com.google.light.server.exception.unchecked.InvalidPersonIdException;
+import com.google.light.server.exception.unchecked.InvalidSessionException;
 import com.google.light.server.exception.unchecked.ServerConfigurationException;
 import com.google.light.server.exception.unchecked.httpexception.UnauthorizedException;
+import com.google.light.server.servlets.SessionManager;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
@@ -45,16 +47,6 @@ import org.apache.commons.validator.routines.LongValidator;
 public class LightPreconditions {
   private static EmailValidator emailValidator = EmailValidator.getInstance();
   private static LongValidator longValidator = LongValidator.getInstance();
-
-  /**
-   * Ensures that the passed String reference is neither null nor empty string.
-   * 
-   * @param reference
-   * @return
-   */
-  public static String checkNotBlank(String reference) {
-    return checkNotBlank(reference, "");
-  }
 
   /**
    * Javadoc is same as for {{@link #checkNotBlank(String)}. This throws an exception with cause as
@@ -86,7 +78,7 @@ public class LightPreconditions {
   // TODO(arjuns) : Fix this validation eventually.
   public static Long checkPersonId(Long personId) {
     try {
-      return checkPositiveLong(personId);
+      return checkPositiveLong(personId, "personId");
     } catch (Exception e) {
       throw new InvalidPersonIdException(e);
     }
@@ -110,9 +102,9 @@ public class LightPreconditions {
    * @param value
    * @return
    */
-  public static Long checkPositiveLong(Long value) {
-    checkNotNull(value);
-    checkArgument(longValidator.isInRange(value, 1, Long.MAX_VALUE));
+  public static Long checkPositiveLong(Long value, String message) {
+    checkNotNull(value, message);
+    checkArgument(longValidator.isInRange(value, 1, Long.MAX_VALUE), message);
     return value;
   }
 
@@ -120,31 +112,17 @@ public class LightPreconditions {
    * Ensures that the object passed to the referenced method is null. This is opposite of
    * {@link Preconditions#checkNotNull(Object)}.
    */
-  public static void checkNull(Object object) {
+  public static void checkNull(Object object, String message) {
     if (object != null) {
-      throw new IllegalArgumentException("Expected null.");
+      throw new IllegalArgumentException(message);
     }
   }
 
   /**
-   * Returns true if current user is GAE Admin. Returns false if user is not admin / user is not
-   * logged in.
-   * 
-   * For GAE Admin, we always trust on AppEngine Environment.
-   * 
-   * @return
-   */
-  public static boolean isGaeAdmin() {
-    return UserServiceFactory.getUserService().isUserAdmin();
-  }
-
-  /**
    * Ensures that Person is Admin.
-   * 
-   * TODO(arjuns) : Add test for this.
    */
   public static void checkPersonIsGaeAdmin() {
-    if (!isGaeAdmin()) {
+    if (!GaeUtils.isUserAdmin()) {
       throw new UnauthorizedException("Admin priviliges required.");
     }
   }
@@ -152,11 +130,10 @@ public class LightPreconditions {
   /**
    * Ensures that the the given String is a valid URI.
    * 
-   * TODO(arjuns): Add test for this.
-   * 
    * @throws URISyntaxException
    */
   public static String checkValidUri(String uri) throws URISyntaxException {
+    checkNotBlank(uri, "uri");
     new URI(uri);
     return uri;
   }
@@ -211,6 +188,37 @@ public class LightPreconditions {
     return false;
   }
 
+  /**
+   * Checks whether providerUserId is required or not.
+   * 
+   * @param providerService
+   * @param providerUserId
+   * @return 
+   */
+  public static String checkProviderUserId(OAuth2ProviderService providerService,
+      String providerUserId) {
+    if (providerService.isUsedForLogin()) {
+      checkNotBlank(providerUserId, "providerUserId should not be null for " + providerService);
+    } else {
+      checkArgument(isNullOrEmpty(providerUserId),
+          "for " + providerService + ", providerUserId should be null");
+    }
+    
+    return providerUserId;
+  }
+  
+  /**
+   * Ensures that Session is valid.
+   * NOTE : Unlike other check functions, this does not return anything.
+   * 
+   * @param sessionManager
+   */
+  public static void checkValidSession(SessionManager sessionManager) {
+    if (!sessionManager.isValidSession()) {
+      throw new InvalidSessionException("Invalid Session.");
+    }
+  }
+  
   // Utility class.
   private LightPreconditions() {
   }

@@ -30,7 +30,7 @@ import com.google.light.server.servlets.SessionManager;
  * Service Provider for various Guice Injected Classes.
  * 
  * NOTE : DAOs should be injected directly in the relevant managers.
- * @deprecated Remove this class.
+ * @deprecated Remove this class. Instead use {@link GuiceUtils#getInstance(Injector, Class)}.
  * @author Arjun Satyapal
  */
 @Deprecated

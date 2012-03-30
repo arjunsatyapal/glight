@@ -15,12 +15,12 @@
  */
 package com.google.light.server.servlets.oauth2.google.pojo;
 
-import static com.google.light.server.utils.LightPreconditions.checkEmail;
+import static com.google.light.server.constants.LightConstants.TASK_QUEUUE_TIMEOUT_IN_SEC;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
 import static com.google.light.server.utils.LightUtils.getCurrentTimeInMillis;
 
-import com.google.light.server.servlets.oauth2.google.GoogleOAuth2Helper;
+import com.google.light.server.dto.DtoInterface;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -36,33 +36,26 @@ import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
 
 /**
  * Java representation for the JSON object returned by Google as a response to
- * {@link GoogleOAuth2Helper#getTokenInfo(String)}
+ * {@link OldGoogleOAuth2Helper#getTokenInfo(String)}
  * 
- * TODO(arjuns): Update tests.
+ * TODO(arjuns): Update tests. and package for test.
  * 
  * @author Arjun Satyapal
  */
+@SuppressWarnings("serial")
 @XmlRootElement(name = "TokenInfo")
 @XmlAccessorType(XmlAccessType.PROPERTY)
 @JsonSerialize(include = Inclusion.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class GoogleTokenInfo {
+public abstract class AbstractGoogleOAuth2TokenInfo<D> implements DtoInterface<D> {
   private String issuedTo;
   private String audience;
-  private String userId;
   private String scope;
   // This value is not of much use as it is in seconds.
   private long expiresIn;
-  private long expiresInMillis = 0; // Hack to tell that value has not been set.
-  private String email;
-  private boolean verifiedEmail;
+  // Hack to tell that value has not been set and then validate method updates this.
+  private long expiresInMillis = 0;
   private String accessType;
-
-  // Following values are fetched from TokenResponse.
-  private String tokenType;
-  private String accessToken;
-  private String refreshToken;
-  
 
   @JsonProperty(value = "issued_to")
   public String getIssuedTo() {
@@ -80,16 +73,6 @@ public class GoogleTokenInfo {
 
   public void setAudience(String audience) {
     this.audience = audience;
-  }
-
-  @JsonProperty(value = "user_id")
-  public String getUserId() {
-    return userId;
-  }
-
-  @JsonProperty(value = "user_id")
-  public void setUserId(String userId) {
-    this.userId = userId;
   }
 
   public String getScope() {
@@ -110,24 +93,6 @@ public class GoogleTokenInfo {
     this.expiresIn = expiresInMillis;
   }
 
-  public String getEmail() {
-    return email;
-  }
-
-  public void setEmail(String email) {
-    this.email = email;
-  }
-
-  @JsonProperty(value = "verified_email")
-  public boolean getVerifiedEmail() {
-    return verifiedEmail;
-  }
-
-  @JsonProperty(value = "verified_email")
-  public void setVerifiedEmail(boolean verifiedEmail) {
-    this.verifiedEmail = verifiedEmail;
-  }
-
   @JsonProperty(value = "access_type")
   public String getAccessType() {
     return accessType;
@@ -138,88 +103,33 @@ public class GoogleTokenInfo {
     this.accessType = accessType;
   }
 
-  @JsonProperty(value = "token_type")
-  public String getTokenType() {
-    return tokenType;
-  }
-
-  // TODO(arjuns): At the time of persistence, ensure that this value is set, as
-  // it does not come directly from the TokenInfo Url, but is present, when it was created.
-  @JsonProperty(value = "token_type")
-  public void setTokenType(String tokenType) {
-    this.tokenType = tokenType;
-  }
-
-  @JsonProperty(value = "access_token")
-  public String getAccessToken() {
-    return accessToken;
-  }
-
-  // TODO(arjuns): At the time of persistence, ensure that this value is set, as
-  // it does not come directly from the TokenInfo Url, but is present, when it was created.
-  @JsonProperty(value = "access_token")
-  public void setAccessToken(String accessToken) {
-    this.accessToken = accessToken;
-  }
-
-  @JsonProperty(value = "refresh_token")
-  public String getRefreshToken() {
-    return refreshToken;
-  }
-
-  // TODO(arjuns): At the time of persistence, ensure that this value is set, as
-  // it does not come directly from the TokenInfo Url, but is present, when it was created.
-  @JsonProperty(value = "refresh_token")
-  public void setRefreshToken(String refreshToken) {
-    this.refreshToken = refreshToken;
-  }
-  
-  @JsonProperty(value = "expires_in_millis")
-  public long getExpiresInMillis() {
-    return expiresInMillis;
-  }
-
-  // TODO(arjuns): At the time of persistence, ensure that this value is set, as
-  // it does not come directly from the TokenInfo Url, but is present, when it was created.
-  @JsonProperty(value = "expires_in_millis")
-  public void setExpiresInMillis(long expiresInMillis) {
-    this.expiresInMillis = expiresInMillis;
-  }
-  
-
   /**
    * Ensures that all values are set. This does not check whether token is expired or not.
    * 
    * @return
    */
-  public GoogleTokenInfo validate() {
+  @Override
+  public D validate() {
     checkNotBlank(issuedTo, "issuedTo");
     checkNotBlank(audience, "audience");
-    checkNotBlank(userId, "userId");
     checkNotBlank(scope, "scope");
     checkNotBlank(issuedTo, "issuedTo");
-    checkPositiveLong(expiresIn);
-    
+    checkPositiveLong(expiresIn, "expiresIn");
+
     if (expiresInMillis == 0) {
       // This means object was created when parsing the TokenInfo from Google.
-      // So now we will calculate the actual expirty time and set it.
+      // So now we will calculate the actual expiry time and set it.
       expiresInMillis = calculateExpireInMillis(expiresIn);
-      
+
     } else {
       // expiresInMillis was already stored. So nothing to do.
     }
-    checkPositiveLong(expiresInMillis);
-    
-    checkEmail(email);
+    checkPositiveLong(expiresInMillis, "expiresInMillis");
+
     checkNotBlank(issuedTo, "issuedTo");
     checkNotBlank(accessType, "accessType");
 
-    // Following values are fetched from TokenResponse.
-    checkNotBlank(tokenType, "tokenType");
-    checkNotBlank(accessToken, "accessToken");
-    checkNotBlank(refreshToken, "refreshToken");
-
-    return this;
+    return (D) this;
   }
 
   @Override
@@ -243,26 +153,41 @@ public class GoogleTokenInfo {
   }
 
   /**
+   * {@inheritDoc} TODO(arjuns) : Add test for this.
+   */
+  @Override
+  public abstract String toJson();
+
+  /**
+   * {@inheritDoc} TODO(arjuns) : Add test for this.
+   */
+  @Override
+  public String toXml() {
+    // TODO(arjuns): Auto-generated method stub
+    throw new UnsupportedOperationException();
+  }
+
+  /**
    * From Google, we receive expiry in Seconds from time of Generation of AccessToken. We convert it
    * to absolute expiry time in millis so that calculation of expiry time becomes easier as we dont
    * have to store the token creationTime. In case its required then it can be reverse computed.
    * 
-   * In addition to that, we are deliberately shortening the life of AccessToken by 10 minutes.
-   * Reason for doing this is we have a TimeOut of 30seconds for FrontEnd and 10 minutes for
-   * TaskQueues. And we don't want to get any access exception during those tasks. In addition in
-   * future, once we start using FrontEnds, still we may not want to run any task for more then 10
-   * mins. If some task happens to run for more then 10minutes, then at that time that task should
-   * take care of this.
+   * In addition to that, we are deliberately shortening the life of AccessToken by
+   * {@link LightConstants#TASK_QUEUUE_TIMEOUT_IN_SEC} seconds. Reason for doing this is we have a
+   * TimeOut of 30 seconds for FrontEnd and 10 minutes for TaskQueues. And we don't want to get any
+   * access exception during those TaskQueue execution. In addition in future, once we start using
+   * FrontEnds, still we may not want to run any task for more then 10 mins. If some task happens
+   * to run for more then 10minutes, then at that time that task should take care of this.
    * 
    * TODO(arjuns) : Add support for automatic refreshing when token expires.
    * 
    * @param expiresInSecFromNow
-   * @return 
+   * @return
    */
   @JsonIgnore(value = true)
-  public long calculateExpireInMillis(long expiresInSecFromNow) {
+  public static long calculateExpireInMillis(long expiresInSecFromNow) {
     long nowInMillis = getCurrentTimeInMillis();
-    long modifiedExpiryInMillis = (expiresInSecFromNow - 10 * 60 /* 10mins */) * 1000;
+    long modifiedExpiryInMillis = (expiresInSecFromNow - TASK_QUEUUE_TIMEOUT_IN_SEC) * 1000;
     if (modifiedExpiryInMillis < 0) {
       modifiedExpiryInMillis = 0;
     }
@@ -273,6 +198,6 @@ public class GoogleTokenInfo {
 
   // For JAXB.
   @JsonCreator
-  public GoogleTokenInfo() {
+  public AbstractGoogleOAuth2TokenInfo() {
   }
 }

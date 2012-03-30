@@ -1,12 +1,9 @@
 /*
  * Copyright (C) Google Inc.
- *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- *
  * http://www.apache.org/licenses/LICENSE-2.0
- *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -18,7 +15,8 @@ package com.google.light.server.servlets.test;
 import static com.google.light.server.utils.LightPreconditions.checkIsNotEnv;
 
 import com.google.light.server.constants.LightEnvEnum;
-import com.google.light.server.constants.OAuth2Provider;
+import com.google.light.server.constants.OAuth2ProviderEnum;
+import com.google.light.server.constants.OAuth2ProviderService;
 
 /**
  * A utility class that will be used for testing purpose.
@@ -45,7 +43,7 @@ public class CredentialUtils {
   }
 
   /**
-   * Returns Credentials directory. e.g. /home/foo/credentials
+   * Returns Credentials directory. e.g. /home/foo/light-credentials
    * 
    * @return
    */
@@ -54,67 +52,70 @@ public class CredentialUtils {
   }
 
   /**
-   * Returns path for directory containing Credentials for specific Env. e.g.
-   * /home/foo/credentials/DEV_SERVER
-   * 
-   * @param env
-   * @return
-   */
-  public static String getEnvCredneitalDir(LightEnvEnum env) {
-    return getCredentialDir() + "/" + env;
-  }
-
-  /**
-   * Returns path for a Standard for a given env. /home/foo/credentials/DEV_SERVER/OAUTH2
+   * Returns path for a Standard for a given env. /home/foo/credentials/OAUTH2
    * 
    * @param env
    * @param standard
    * @return
    */
-  public static String getStdCredentialDir(LightEnvEnum env, CredentialStandardEnum standard) {
-    return getEnvCredneitalDir(env) + "/" + standard;
+  public static String getStdCredentialDir(CredentialStandardEnum standard) {
+    return getCredentialDir() + "/" + standard;
   }
 
   /**
    * Returns path to the directory for Resource Owner for a Specific env and Standard. e.g
-   * /home/foo/credentials/DEV_SERVER/OAUTH2/owner/unit-test1@gmail.com
+   * /home/foo/credentials/OAUTH2/owner/unit-test1@gmail.com
    * 
    * @return
    */
-  public static String getOwnerCredentialDir(LightEnvEnum env, CredentialStandardEnum standard,
-      String ownerEmail) {
-    return getStdCredentialDir(env, standard) + "/" + "owner/" + ownerEmail;
+  public static String getOwnerCredentialDir(CredentialStandardEnum standard) {
+    return getStdCredentialDir(standard) + "/" + "owner";
   }
-  
+
   /**
    * Returns path to the password file for Resource Owner.
-   * 
+   * e.g. /home/foo/credentials/OAUTH2/owner/unit-test1@gmail.com/passwd 
    * @return
    */
-  public static String getOwnerCredentialPasswdFilePath(LightEnvEnum env, CredentialStandardEnum standard,
-      String ownerEmail) {
-    return getOwnerCredentialDir(env, standard, ownerEmail) + "/passwd"; 
+  public static String getOwnerCredentialPasswdFilePath(CredentialStandardEnum standard) {
+    return getOwnerCredentialDir(standard) + "/credential";
   }
-  
+
   /**
    * Returns path to TokenInfo file for Resource Owner.
-   * 
+   * e.g. /home/foo/credentials/OAUTH2/owner/unit-test1@gmail.com/GOOGLE_LOGIN
    * @return
    */
-  public static String getOwnerTokenInfoFilePath(LightEnvEnum env, CredentialStandardEnum standard,
-      String ownerEmail) {
-    return getOwnerCredentialDir(env, standard, ownerEmail) + "/tokeninfo"; 
+  public static String getOwnerTokenInfoFilePath(CredentialStandardEnum standard,
+      OAuth2ProviderService providerService) {
+    return getOwnerCredentialDir(standard) + "." + providerService.name();
   }
 
   /**
    * Returns path to the directory for Resource Consumer for a Specific env. e.g
-   * /home/foo/credentials/DEV_SERVER/OAUTH2/consumer/google
+   * /home/foo/credentials/OAUTH2/consumer/
    * 
    * @return
    */
-  public static String getConsumerCredentialDir(LightEnvEnum env, CredentialStandardEnum standard, 
-      OAuth2Provider provider) {
-    return getStdCredentialDir(env, standard) + "/" + "consumer/" + provider.getProviderName();
+  public static String getConsumerCredentialDir(CredentialStandardEnum standard) {
+    return getStdCredentialDir(standard) + "/" + "consumer";
+  }
+
+  /**
+   * Returns path to the file containing consumer credentials.
+   * e.g. /home/foo/credentials/OAUTH2/consumer/GOOGLE
+   * 
+   * @param standard
+   * @param provider
+   * @return
+   */
+  public static String getConsumerCredentialFilePath(
+      CredentialStandardEnum standard, OAuth2ProviderEnum provider) {
+    return getConsumerCredentialDir(standard) + "/" + provider.name();
+  }
+  
+  public static String getCredentialZipFilePath() {
+    return getCredentialDir() + "/credential.zip";
   }
 
   // Utility class.

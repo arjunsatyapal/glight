@@ -42,8 +42,8 @@ public class SearchRequestDto implements DtoInterface<SearchRequestDto> {
 
   @Override
   public SearchRequestDto validate() {
-    checkState(page > 0);
-    checkNotBlank(query);
+    checkState(page > 0, "Page number need to be greater then 0");
+    checkNotBlank(query, "query");
     return this;
   }
 

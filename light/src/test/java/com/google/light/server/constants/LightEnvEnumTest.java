@@ -16,12 +16,17 @@
 package com.google.light.server.constants;
 
 import static com.google.light.server.constants.LightEnvEnum.getLightEnvByAppId;
+import static com.google.light.server.utils.LightPreconditions.checkNonEmptyList;
+import static com.google.light.testingutils.TestingUtils.getRandomString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
+import com.google.light.server.exception.unchecked.ServerConfigurationException;
 import com.google.light.testingutils.GaeTestingUtils;
 import com.google.light.testingutils.TestingUtils;
+import java.util.List;
 import org.junit.Test;
 
 /**
@@ -88,5 +93,24 @@ public class LightEnvEnumTest implements EnumTestInterface {
         assertTrue(LightEnvEnum.DEV_SERVER != getLightEnvByAppId(currAppId));
       }
     }
+    
+    try {
+      getLightEnvByAppId(getRandomString());
+      fail("should have failed.");
+    } catch (ServerConfigurationException e) {
+      // Expected
+    }
+  }
+  
+  /**
+   * Test for {@link LightEnvEnum#getAppIds()}.
+   */
+  @Test
+  public void test_getAppIds() {
+    // We are just testing for Prod, but others can be similar.
+    List<String> appIdList = LightEnvEnum.PROD.getAppIds();
+    checkNonEmptyList(appIdList);
+    assertEquals(1, appIdList.size());
+    assertTrue(appIdList.contains("light-prod"));
   }
 }

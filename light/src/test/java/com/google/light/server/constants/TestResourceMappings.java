@@ -36,10 +36,10 @@ public enum TestResourceMappings {
 
   private TestResourceMappings(String jsonReqPath, String jsonResPath,
       String xmlReqPath, String xmlResPath) {
-    this.jsonReqPath = checkNotBlank(jsonReqPath);
-    this.jsonResPath = checkNotBlank(jsonResPath);
-    this.xmlReqPath = checkNotBlank(xmlReqPath);
-    this.xmlResPath = checkNotBlank(xmlResPath);
+    this.jsonReqPath = checkNotBlank(jsonReqPath, "jsonReqPath");
+    this.jsonResPath = checkNotBlank(jsonResPath, "jsonResPath");
+    this.xmlReqPath = checkNotBlank(xmlReqPath, "xmlReqPath");
+    this.xmlResPath = checkNotBlank(xmlResPath, "xmlResPath");
   }
 
   public String getJsonReqPath() {

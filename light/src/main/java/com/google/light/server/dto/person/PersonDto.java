@@ -18,12 +18,6 @@ package com.google.light.server.dto.person;
 import static com.google.light.server.utils.LightPreconditions.checkEmail;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
-import org.codehaus.jackson.annotate.JsonCreator;
-
-import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
-
-import org.codehaus.jackson.map.annotate.JsonSerialize;
-
 import com.google.light.server.constants.XsdPath;
 import com.google.light.server.dto.DtoToPersistenceInterface;
 import com.google.light.server.persistence.entity.person.PersonEntity;
@@ -37,6 +31,9 @@ import javax.xml.bind.annotation.XmlType;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
+import org.codehaus.jackson.annotate.JsonCreator;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
+import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
 
 /**
  * DTO for {@link PersonEntity}.
@@ -45,7 +42,7 @@ import org.apache.commons.lang.builder.ToStringBuilder;
  */
 @SuppressWarnings("serial")
 @XmlRootElement(name = "person")
-@XmlType(name = "personType", propOrder = {"firstName", "lastName", "email" })
+@XmlType(name = "personType", propOrder = { "firstName", "lastName", "email" })
 @XmlAccessorType(XmlAccessType.FIELD)
 @JsonSerialize(include = Inclusion.NON_NULL)
 public class PersonDto implements DtoToPersistenceInterface<PersonDto, PersonEntity, Long> {
@@ -59,14 +56,9 @@ public class PersonDto implements DtoToPersistenceInterface<PersonDto, PersonEnt
   private String email;
 
   @Override
-  public String toString() {
-    return ToStringBuilder.reflectionToString(this);
-  }
-
-  @Override
   public PersonDto validate() {
-    checkNotBlank(firstName);
-    checkNotBlank(lastName);
+    checkNotBlank(firstName, "firstName");
+    checkNotBlank(lastName, "lastName");
     if (email != null) {
       checkEmail(email);
     }
@@ -74,20 +66,25 @@ public class PersonDto implements DtoToPersistenceInterface<PersonDto, PersonEnt
   }
 
   @Override
+  public boolean equals(Object obj) {
+    return EqualsBuilder.reflectionEquals(this, obj);
+  }
+  
+  @Override
   public int hashCode() {
     return HashCodeBuilder.reflectionHashCode(this);
   }
 
   @Override
-  public boolean equals(Object obj) {
-    return EqualsBuilder.reflectionEquals(this, obj);
+  public String toString() {
+    return ToStringBuilder.reflectionToString(this);
   }
 
   @Override
   public String toJson() {
     try {
-      
-        return JsonUtils.toJson(this);
+
+      return JsonUtils.toJson(this);
     } catch (Exception e) {
       // TODO(arjuns) : Add exception handling later.
       throw new RuntimeException(e);
@@ -97,12 +94,11 @@ public class PersonDto implements DtoToPersistenceInterface<PersonDto, PersonEnt
   @Override
   public PersonEntity toPersistenceEntity(Long id) {
     return new PersonEntity.Builder()
-      .id(id)
-      .firstName(firstName)
-      .lastName(lastName)
-      .email(email)
-      .idProviderDetails(null)
-      .build();
+        .id(id)
+        .firstName(firstName)
+        .lastName(lastName)
+        .email(email)
+        .build();
   }
 
   @Override
@@ -113,27 +109,6 @@ public class PersonDto implements DtoToPersistenceInterface<PersonDto, PersonEnt
       // TODO(arjuns) : Add exception handling later.
       throw new RuntimeException(e);
     }
-  }
-
-  // For JAXB.
-  @SuppressWarnings("unused")
-  @JsonCreator
-  private PersonDto() {
-  }
-
-  /**
-   * Constructor for PersonDto.
-   * 
-   * @param id
-   * @param firstName
-   * @param lastName
-   * @param email
-   */
-  protected PersonDto(String firstName, String lastName, String email) {
-    this.firstName = firstName;
-    this.lastName = lastName;
-    this.email = email;
-    validate();
   }
 
   // Getters and setters.
@@ -181,9 +156,21 @@ public class PersonDto implements DtoToPersistenceInterface<PersonDto, PersonEnt
       return this;
     }
 
+    @SuppressWarnings("synthetic-access")
     public PersonDto build() {
-      PersonDto dto = new PersonDto(firstName, lastName, email);
-      return dto.validate();
+      return new PersonDto(this).validate();
     }
+  }
+
+  @SuppressWarnings("synthetic-access")
+  private PersonDto(Builder builder) {
+    this.firstName = builder.firstName;
+    this.lastName = builder.lastName;
+    this.email = builder.email;
+  }
+  
+  // For JAXB.
+  @JsonCreator
+  private PersonDto() {
   }
 }

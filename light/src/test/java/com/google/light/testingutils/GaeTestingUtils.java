@@ -17,7 +17,10 @@ package com.google.light.testingutils;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkEmail;
-import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
+import static com.google.light.testingutils.TestingUtils.getInjectorByEnv;
+import static com.google.light.testingutils.TestingUtils.getMockSessionForTesting;
+
+import com.google.light.server.utils.LightPreconditions;
 
 import com.google.appengine.api.utils.SystemProperty;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
@@ -27,8 +30,7 @@ import com.google.appengine.tools.development.testing.LocalUserServiceTestConfig
 import com.google.inject.Injector;
 import com.google.inject.servlet.GuiceFilter;
 import com.google.light.server.constants.LightEnvEnum;
-import com.google.light.server.constants.OAuth2Provider;
-import com.google.light.server.utils.GaeUtils;
+import com.google.light.server.constants.OAuth2ProviderService;
 import javax.servlet.http.HttpSession;
 
 /**
@@ -40,9 +42,10 @@ import javax.servlet.http.HttpSession;
  */
 public class GaeTestingUtils {
   private LightEnvEnum env;
-  private OAuth2Provider provider;
+  private OAuth2ProviderService providerService;
+  private String providerUserId;
   private String email;
-  private String userId;
+  private long personId;
   
   /** See similar variables in {@link com.google.appengine.api.users.UserServiceImpl} */
   static final String USER_ID_KEY =
@@ -59,12 +62,13 @@ public class GaeTestingUtils {
 
   private LocalServiceTestHelper gaeTestHelper;
 
-  public GaeTestingUtils(LightEnvEnum env, OAuth2Provider provider, String email,
-      String userId, boolean isAdmin) {
+  public GaeTestingUtils(LightEnvEnum env, OAuth2ProviderService providerService, 
+      String providerUserId, String email, long personId, boolean isAdmin) {
     this.env = checkNotNull(env);
-    this.provider = checkNotNull(provider);
+    this.providerService = checkNotNull(providerService);
+    this.providerUserId = LightPreconditions.checkNotBlank(providerUserId, "providerUserId");
     this.email = checkEmail(email);
-    this.userId = checkNotBlank(userId);
+    this.personId = personId;
     
     this.env = checkNotNull(env);
     basicSystemPropertySetup(env);
@@ -76,7 +80,6 @@ public class GaeTestingUtils {
         
     // TODO(arjuns): Fix this.
         .setEnvAuthDomain("google")
-        .setEnvEmail(email)
         .setEnvIsAdmin(isAdmin)
         .setEnvAppId(env.getAppIds().get(0));
     
@@ -115,8 +118,9 @@ public class GaeTestingUtils {
    * Teardown GAE testing environment.
    */
   public void tearDown() {
-    HttpSession mockSession = TestingUtils.getMockSessionForTesting(provider, userId, email);
-    Injector injector = TestingUtils.getInjectorByEnv(env, mockSession);
+    HttpSession mockSession = getMockSessionForTesting(env, providerService, providerUserId, 
+        personId, email);
+    Injector injector = getInjectorByEnv(env, mockSession);
     injector.getInstance(GuiceFilter.class).destroy();
     gaeTestHelper.tearDown();
   }
@@ -135,11 +139,22 @@ public class GaeTestingUtils {
   }
 
   /**
+   * Enable Logged in.
+   * 
+   * @param isAdmin
+   */
+  public void setLoggedIn(boolean isLoggedIn) {
+    gaeTestHelper.setEnvIsLoggedIn(isLoggedIn);
+  }
+  
+  /**
    * Set current GAE user as GAE Admin.
    * 
    * @param isAdmin
    */
   public void setAdmin(boolean isAdmin) {
+    // For becoming Admin, one has to log in first.
+    gaeTestHelper.setEnvIsLoggedIn(true);
     gaeTestHelper.setEnvIsAdmin(isAdmin);
   }
 

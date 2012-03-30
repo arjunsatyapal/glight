@@ -54,7 +54,7 @@ public class ServletRequestPojo<D extends DtoInterface<D>> {
     this.request = checkNotNull(request);
     this.contentType = checkNotNull(contentType);
     logger.info("Content-Type[" + contentType + "], RequestBody = [" + requestString + "].");
-    this.requestString = checkNotBlank(requestString);
+    this.requestString = checkNotBlank(requestString, "requestString");
     
     switch (contentType) {
       case APPLICATION_JSON:
