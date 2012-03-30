@@ -17,25 +17,27 @@ package com.google.light.server.manager.implementation.oauth2.consumer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.light.server.constants.OAuth2Provider;
+import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
+import com.google.light.server.constants.OAuth2ProviderEnum;
 import com.google.light.server.manager.interfaces.OAuth2ConsumerCredentialManager;
 import com.google.light.server.persistence.dao.OAuth2ConsumerCredentialDao;
 
 /**
  * Test implementation for {@link OAuth2ConsumerCredentialManager}.
  * 
- * TODO(arjuns): Add test for this class.
  * TODO(arjuns): Add caching for this.
  * 
  * @author Arjun Satyapal
  */
-public class AbstractOAuth2ConsumerManagerImpl implements OAuth2ConsumerCredentialManager {
-  private OAuth2Provider oAuth2Provider;
+public class OAuth2ConsumerCredentialManagerImpl implements OAuth2ConsumerCredentialManager {
+  private OAuth2ProviderEnum provider;
   private OAuth2ConsumerCredentialDao dao;
   
-  protected AbstractOAuth2ConsumerManagerImpl(OAuth2Provider oauth2Provider, 
+  @Inject
+  public OAuth2ConsumerCredentialManagerImpl(@Assisted OAuth2ProviderEnum provider, 
       OAuth2ConsumerCredentialDao dao) {
-    this.oAuth2Provider = checkNotNull(oauth2Provider);
+    this.provider = checkNotNull(provider);
     this.dao = checkNotNull(dao);
   }
 
@@ -44,7 +46,7 @@ public class AbstractOAuth2ConsumerManagerImpl implements OAuth2ConsumerCredenti
    */
   @Override
   public String getClientId() {
-    return dao.get(oAuth2Provider.name()).getClientId();
+    return dao.get(provider.name()).getClientId();
   }
 
   /**
@@ -52,6 +54,6 @@ public class AbstractOAuth2ConsumerManagerImpl implements OAuth2ConsumerCredenti
    */
   @Override
   public String getClientSecret() {
-    return dao.get(oAuth2Provider.name()).getClientSecret();
+    return dao.get(provider.name()).getClientSecret();
   }
 }

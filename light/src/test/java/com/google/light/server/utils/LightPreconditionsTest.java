@@ -15,6 +15,8 @@
  */
 package com.google.light.server.utils;
 
+import static com.google.light.server.constants.OAuth2ProviderService.GOOGLE_DOC;
+import static com.google.light.server.constants.OAuth2ProviderService.GOOGLE_LOGIN;
 import static com.google.light.server.utils.LightPreconditions.checkEmail;
 import static com.google.light.server.utils.LightPreconditions.checkIsEnv;
 import static com.google.light.server.utils.LightPreconditions.checkIsNotEnv;
@@ -23,6 +25,8 @@ import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkNull;
 import static com.google.light.server.utils.LightPreconditions.checkPersonId;
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
+import static com.google.light.server.utils.LightPreconditions.checkProviderUserId;
+import static com.google.light.testingutils.TestingUtils.getRandomString;
 import static com.google.light.testingutils.TestingUtils.getUUIDString;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -336,6 +340,41 @@ public class LightPreconditionsTest {
 
     try {
       checkNull("");
+      fail("should have failed.");
+    } catch (IllegalArgumentException e) {
+      // Expected
+    }
+  }
+  
+  /**
+   * Test for {@link LightPreconditions#checkProviderUserId(OAuth2ProviderService, String)}.
+   */
+  @Test
+  public void test_checkProviderUserId() {
+    // Positive Testing.
+    checkProviderUserId(GOOGLE_LOGIN, getRandomString());
+    checkProviderUserId(GOOGLE_DOC, null);
+    checkProviderUserId(GOOGLE_DOC, " ");
+    
+    // Negative Testing : GOOGLE_LOGIN with null.
+    try {
+      checkProviderUserId(GOOGLE_LOGIN, null);
+      fail("should have failed.");
+    } catch (BlankStringException e) {
+      // Expected
+    }
+    
+    // Negative Testing : GOOGLE_LOGIN with blank string.
+    try {
+      checkProviderUserId(GOOGLE_LOGIN, " ");
+      fail("should have failed.");
+    } catch (BlankStringException e) {
+      // Expected
+    }
+    
+    // Negative Testing : GOOGLE_DOC with non-null
+    try {
+      checkProviderUserId(GOOGLE_DOC, getRandomString());
       fail("should have failed.");
     } catch (IllegalArgumentException e) {
       // Expected

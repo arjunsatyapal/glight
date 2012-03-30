@@ -15,21 +15,16 @@
  */
 package com.google.light.server.manager.implementation.oauth2.consumer;
 
-import com.google.inject.Inject;
-import com.google.light.server.constants.OAuth2Provider;
+import com.google.light.server.constants.OAuth2ProviderEnum;
 import com.google.light.server.manager.interfaces.OAuth2ConsumerCredentialManager;
-import com.google.light.server.persistence.dao.OAuth2ConsumerCredentialDao;
 
 /**
- * Test implementation for {@link OAuth2ConsumerCredentialManager}.
+ *
  * 
  * TODO(arjuns): Add test for this class.
- * 
+ *
  * @author Arjun Satyapal
  */
-public class GoogleOAuth2ConsumerManagerImpl extends AbstractOAuth2ConsumerManagerImpl {
-  @Inject
-  public GoogleOAuth2ConsumerManagerImpl(OAuth2ConsumerCredentialDao dao) {
-    super(OAuth2Provider.GOOGLE_LOGIN, dao);
-  }
+public interface OAuth2ConsumerCredentialManagerFactory {
+  public OAuth2ConsumerCredentialManager create(OAuth2ProviderEnum provider);
 }

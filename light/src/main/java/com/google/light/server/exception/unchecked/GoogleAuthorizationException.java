@@ -13,26 +13,27 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.server.guice.modules;
-
-import static com.google.light.server.utils.LightPreconditions.checkIsEnv;
-
-import com.google.light.server.constants.LightEnvEnum;
+package com.google.light.server.exception.unchecked;
 
 /**
- * QA Guice Module for QA Environment.
- * 
- * Note : All bindings should be in request scoped.
+ * Indicates that some exception occurred during Google OAuth2 Flow.
  * 
  * @author Arjun Satyapal
  */
-public class QaModule extends BaseGuiceModule {
-  public QaModule() {
-    checkIsEnv(this, LightEnvEnum.QA);
+@SuppressWarnings("serial")
+public class GoogleAuthorizationException extends LightRuntimeException {
+  /**
+   * {@inheritDoc}
+   * @param message
+   */
+  public GoogleAuthorizationException(String message) {
+      super(message);
   }
 
-  @Override
-  protected void configure() {
-    super.configure();
+  /**
+   * {@inheritDoc}
+   */
+  public GoogleAuthorizationException(String message, Throwable cause) {
+      super(message, cause);
   }
 }

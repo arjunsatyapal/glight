@@ -20,21 +20,31 @@ import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 /**
  * Enum to hold Keys for Http Headers.
  * 
- * TODO(arjuns): Add test for this class.
+ * TODO(arjuns): Move params to another class which are not used for Production.
  *
  * @author Arjun Satyapal
  */
 public enum RequestParmKeyEnum {
-  // TODO(arjuns): Add cateogry to differentiate on what goes in Sessino and what comes in URL.
+  CLIENT_ID("client_id", true),
+  CLIENT_SECRET("client_secret", true),
+
+  DEFAULT_EMAIL("default_email", true),
+
+  GOOGLE_DOC_URL("google_doc_url", true),
+  
+  // TODO(arjuns): Add category to differentiate on what goes in Session and what comes in URL.
   LOGIN_PROVIDER_ID("login_provider_id", true),
   LOGIN_PROVIDER_USER_ID("login_provider_user_id", true),
-  LOGIN_PROVIDER_USER_EMAIL("login_provider_user_email", true),
-  
-  PERSON_ID("person_id", true),
-  
+
   OAUTH2_PROVIDER_NAME("oauth2_provider_name", true),
-  CLIENT_ID("client_id", true),
-  CLIENT_SECRET("client_secret", true);
+  
+  PASSWORD("password", false),
+  
+  REDIRECT("redirect", true),
+
+  PERSON_ID("person_id", true);
+  
+  
   
   private String key;
   private boolean allowedInProd;

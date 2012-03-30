@@ -13,26 +13,41 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.server.guice.modules;
-
-import static com.google.light.server.utils.LightPreconditions.checkIsEnv;
-
-import com.google.light.server.constants.LightEnvEnum;
+package com.google.light.server.exception.unchecked;
 
 /**
- * QA Guice Module for QA Environment.
- * 
- * Note : All bindings should be in request scoped.
+ * This indicates that there was some JSON exception while serializing/de-serializing.
  * 
  * @author Arjun Satyapal
  */
-public class QaModule extends BaseGuiceModule {
-  public QaModule() {
-    checkIsEnv(this, LightEnvEnum.QA);
+@SuppressWarnings("serial")
+public class JsonException extends RuntimeException {
+  /**
+   * {@inheritDoc}
+   */
+  public JsonException() {
+      super();
   }
 
-  @Override
-  protected void configure() {
-    super.configure();
+  /**
+   * {@inheritDoc}
+   * @param message
+   */
+  public JsonException(String message) {
+      super(message);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public JsonException(String message, Throwable cause) {
+      super(message, cause);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public JsonException(Throwable cause) {
+      super(cause);
   }
 }

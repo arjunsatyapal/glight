@@ -177,6 +177,12 @@
       <version>3.0</version>
     </dependency>
 
+    <dependency>
+      <groupId>com.google.inject.extensions</groupId>
+      <artifactId>guice-assistedinject</artifactId>
+      <version>3.0</version>
+    </dependency>
+
     <!--
       JAXB Dependencies :
       Used for converting DTO to Json and XML.
@@ -287,6 +293,15 @@
       <scope>test</scope>
     </dependency>
 
+    <!--
+      Xerces Dependency :
+    -->
+    <dependency>
+      <groupId>xerces</groupId>
+      <artifactId>xerces</artifactId>
+      <version>2.4.0</version>
+    </dependency>
+    
     <!--
       Objectify Dependency :
       Scope : Production.

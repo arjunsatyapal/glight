@@ -17,10 +17,7 @@ package com.google.light.server.guice.modules;
 
 import static com.google.light.server.utils.LightPreconditions.checkIsEnv;
 
-import com.google.inject.Scopes;
 import com.google.light.server.constants.LightEnvEnum;
-import com.google.light.server.manager.interfaces.OAuth2ConsumerCredentialManager;
-import com.google.light.server.servlets.test.TestGoogleOAuth2ConsumerCredentialManagerImpl;
 
 
 /**
@@ -38,10 +35,5 @@ public class DevServerModule extends BaseGuiceModule {
   @Override
   protected void configure() {
     super.configure();
-    
-    // Add QA Environment specific bindings here.
-    bind(OAuth2ConsumerCredentialManager.class)
-      .to(TestGoogleOAuth2ConsumerCredentialManagerImpl.class)
-      .in(Scopes.SINGLETON);
   }
 }

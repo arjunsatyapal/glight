@@ -1,12 +1,9 @@
 /*
  * Copyright (C) Google Inc.
- *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- *
  * http://www.apache.org/licenses/LICENSE-2.0
- *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -15,11 +12,11 @@
  */
 package com.google.light.server.dto.admin;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
-import com.google.light.server.constants.OAuth2Provider;
+import com.google.light.server.constants.OAuth2ProviderEnum;
+
 import com.google.light.server.dto.DtoToPersistenceInterface;
 import com.google.light.server.persistence.entity.admin.OAuth2ConsumerCredentialEntity;
 import javax.annotation.Nullable;
@@ -36,7 +33,7 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 @SuppressWarnings("serial")
 public class OAuth2ConsumerCredentialDto implements
     DtoToPersistenceInterface<OAuth2ConsumerCredentialDto, OAuth2ConsumerCredentialEntity, String> {
-  private OAuth2Provider provider;
+  private OAuth2ProviderEnum provider;
   private String clientId;
   private String clientSecret;
 
@@ -47,7 +44,9 @@ public class OAuth2ConsumerCredentialDto implements
    * @param clientId
    * @param clientSecret
    */
-  protected OAuth2ConsumerCredentialDto(OAuth2Provider provider, String clientId,
+
+  protected OAuth2ConsumerCredentialDto(OAuth2ProviderEnum provider, String clientId,
+
       String clientSecret) {
     this.provider = provider;
     this.clientId = clientId;
@@ -65,19 +64,25 @@ public class OAuth2ConsumerCredentialDto implements
   }
 
   /**
-   * {@inheritDoc}
-   * Here id should be set as null as {@link OAuth2Provider#name()} is used as the id.
+   * {@inheritDoc} This method should not be called. Instead call {@link #toPersistenceEntity()}.
    */
   @Override
-  public OAuth2ConsumerCredentialEntity toPersistenceEntity(@Nullable String id) {
-    checkArgument(id == null);
+  public OAuth2ConsumerCredentialEntity toPersistenceEntity(String id) {
+    throw new UnsupportedOperationException("this should not be called.");
+  }
+
+  /**
+   * Method to convert to {@link OAuth2ConsumerCredentialEntity}.
+   * 
+   * @return
+   */
+  public OAuth2ConsumerCredentialEntity toPersistenceEntity() {
 
     return new OAuth2ConsumerCredentialEntity.Builder()
         .clientId(clientId)
         .clientSecret(clientSecret)
         .oAuth2ProviderKey(provider.name())
         .build();
-
   }
 
   /**
@@ -115,7 +120,7 @@ public class OAuth2ConsumerCredentialDto implements
     return EqualsBuilder.reflectionEquals(this, obj);
   }
 
-  public OAuth2Provider getProvider() {
+  public OAuth2ProviderEnum getProvider() {
     return provider;
   }
 
@@ -128,11 +133,11 @@ public class OAuth2ConsumerCredentialDto implements
   }
 
   public static class Builder {
-    private OAuth2Provider provider;
+    private OAuth2ProviderEnum provider;
     private String clientId;
     private String clientSecret;
 
-    public Builder provider(OAuth2Provider provider) {
+    public Builder provider(OAuth2ProviderEnum provider) {
       this.provider = provider;
       return this;
     }

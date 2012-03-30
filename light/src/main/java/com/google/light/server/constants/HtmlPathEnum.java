@@ -1,5 +1,5 @@
 /*
- * Copyright (C) Google Inc.
+ * Copyright 2012 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -13,26 +13,25 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.server.guice.modules;
+package com.google.light.server.constants;
 
-import static com.google.light.server.utils.LightPreconditions.checkIsEnv;
-
-import com.google.light.server.constants.LightEnvEnum;
+import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
 /**
- * QA Guice Module for QA Environment.
- * 
- * Note : All bindings should be in request scoped.
+ * Path to HTML files.
  * 
  * @author Arjun Satyapal
  */
-public class QaModule extends BaseGuiceModule {
-  public QaModule() {
-    checkIsEnv(this, LightEnvEnum.QA);
+public enum HtmlPathEnum {
+  PUT_OAUTH2_CONSUMER_CREDENTIAL("/html/admin/put_oauth2_consumer_credential.html");
+  
+  private String path;
+  
+  private HtmlPathEnum(String path) {
+    this.path = checkNotBlank(path, "path");
   }
-
-  @Override
-  protected void configure() {
-    super.configure();
+  
+  public String get() {
+    return path;
   }
 }

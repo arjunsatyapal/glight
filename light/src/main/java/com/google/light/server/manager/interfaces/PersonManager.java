@@ -1,7 +1,5 @@
 package com.google.light.server.manager.interfaces;
 
-import com.google.light.server.exception.unchecked.EmailInUseException;
-import com.google.light.server.exception.unchecked.IllegalKeyTypeException;
 import com.google.light.server.persistence.entity.person.PersonEntity;
 
 /**
@@ -37,7 +35,7 @@ public interface PersonManager {
   public PersonEntity getPerson(Long id);
 
   /**
-   * Get details of an existing Person by Email.
+   * Get details of an existing Person by Email. Returns null if not found.
    * 
    * @param email
    * @return

@@ -64,8 +64,9 @@ public class PersonManagerImpl implements PersonManager {
 //        GaeUtils.getFederatedIdentity());
 //    entity.addIdProviderDetail(currIdProviderDetail);
 
-    checkArgument(entity.getEmail() == null, "email Should not be set for createPerson.");
-    entity.setEmail(sessionManager.getLoginProviderUserEmail());
+    // TODO(arjuns): Once session is working fine, uncomment this.
+//    checkArgument(entity.getEmail() == null, "email Should not be set for createPerson.");
+//    entity.setEmail(sessionManager.getLoginProviderUserEmail());
     
     // This is a heavy operation, so perform this validation just before persisting.
     PersonEntity personByEmail = getPersonByEmail(entity.getEmail());
