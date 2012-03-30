@@ -15,12 +15,20 @@
  */
 package com.google.light.server.servlets.filters;
 
+import static com.google.light.server.utils.GuiceUtils.getInstance;
 import static com.google.light.server.utils.GuiceUtils.seedEntityInRequestScope;
 import static com.google.light.server.utils.LightPreconditions.checkPersonIsGaeAdmin;
 
+import com.google.light.server.servlets.SessionManager;
+
+import com.google.inject.Inject;
+
+import com.google.inject.Injector;
+
+import com.google.common.base.Preconditions;
+
 import com.google.common.base.Throwables;
 import com.google.light.server.annotations.AnotHttpSession;
-import com.google.light.server.exception.unchecked.httpexception.PersonLoginRequiredException;
 import com.google.light.server.servlets.path.ServletPathEnum;
 import java.io.IOException;
 import java.util.Set;
@@ -29,8 +37,6 @@ import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -45,13 +51,16 @@ import javax.servlet.http.HttpSession;
 public abstract class AbstractLightFilter implements Filter {
   private static final Logger logger = Logger.getLogger(Filter.class.getName());
   private FilterConfig filterConfig;
+  private Injector injector;
+  
+  @Inject
+  protected AbstractLightFilter(Injector injector) {
+    this.injector = Preconditions.checkNotNull(injector);
+  }
 
-  public void validateAndDoFilter(HttpSession session, ServletRequest req, ServletResponse res,
-      FilterChain filterChain, ServletPathEnum servletPath) {
+  public void validateAndDoFilter(HttpServletRequest request,
+      HttpServletResponse response, FilterChain filterChain, ServletPathEnum servletPath) {
     try {
-      HttpServletRequest request = (HttpServletRequest) req;
-      HttpServletResponse response = (HttpServletResponse) res;
-
       /*
        * For Admin Privileges, we depend on GAE. So even if on ServletPathEnum, we mandate that for
        * requireAdminPrivilege, requireLogin should be true (as that is conceptually) correct. And
@@ -67,15 +76,9 @@ public abstract class AbstractLightFilter implements Filter {
       if (servletPath.isRequiredAdminPrivilege()) {
         checkPersonIsGaeAdmin();
       } else if (servletPath.isRequiredLogin()) {
-        if (session == null) {
-          throw new PersonLoginRequiredException("");
-        } else if (session.isNew()) {
-          session.invalidate();
-          throw new PersonLoginRequiredException(
-              "Session should not be created inside AbstractLightFiter.");
-        } else {
-          seedEntityInRequestScope(request, HttpSession.class, AnotHttpSession.class, session);
-        }
+        // Ensure that user is Loggedin.
+        SessionManager sessionManager = getInstance(injector, SessionManager.class);
+        sessionManager.checkPersonLoggedIn();
       }
 
       // TODO(arjuns) : Add changeLog.
@@ -112,14 +115,20 @@ public abstract class AbstractLightFilter implements Filter {
    * @throws IOException
    * @throws ServletException
    */
-  void handleFilterChain(ServletRequest request, ServletResponse response, FilterChain filterChain)
+  void handleFilterChain(HttpServletRequest request, HttpServletResponse response,
+      FilterChain filterChain)
       throws IOException, ServletException {
-    HttpServletRequest req = (HttpServletRequest) request;
-
-    ServletPathEnum servletPath = ServletPathEnum.getServletPathEnum(req.getRequestURI());
-
+    ServletPathEnum servletPath = ServletPathEnum.getServletPathEnum(request.getRequestURI());
+    
+    /*
+     * Create a session irrespective of whether session already exists. Then make it 
+     * avaialable in RequestScope so that it can be injected by Guice.
+     */
+    HttpSession session = request.getSession();
+    seedEntityInRequestScope(request, HttpSession.class, AnotHttpSession.class, session);
+    
     if (servletPath.isRequiredLogin()) {
-      validateAndDoFilter(req.getSession(false), req, response, filterChain, servletPath);
+      validateAndDoFilter(request, response, filterChain, servletPath);
     } else {
       filterChain.doFilter(request, response);
     }

@@ -17,6 +17,12 @@ package com.google.light.server.servlets.filters;
 
 import static com.google.light.server.utils.LightPreconditions.checkIsEnv;
 
+import com.google.inject.Injector;
+
+import javax.servlet.http.HttpServletResponse;
+
+import javax.servlet.http.HttpServletRequest;
+
 import com.google.inject.Inject;
 import com.google.light.server.constants.LightEnvEnum;
 import java.io.IOException;
@@ -32,8 +38,10 @@ import javax.servlet.ServletResponse;
  * @author Arjun Satyapal
  */
 public class ProdServletFilter extends AbstractLightFilter {
+  
   @Inject
-  private ProdServletFilter() {
+  private ProdServletFilter(Injector injector) {
+    super(injector);
     checkIsEnv(this, LightEnvEnum.PROD);
   }
 
@@ -43,6 +51,10 @@ public class ProdServletFilter extends AbstractLightFilter {
     // TODO(arjuns): If user is logged in and tries to visit a cached URL without going through
     // login flow, it may be an issue. Will fix that once we have some more infrastructure around
     // login.
-    handleFilterChain(request, response, filterChain);
+    
+    
+    HttpServletRequest req = (HttpServletRequest) request;
+    HttpServletResponse resp = (HttpServletResponse) response;
+    handleFilterChain(req, resp, filterChain);
   }
 }

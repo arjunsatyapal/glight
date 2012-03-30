@@ -67,7 +67,7 @@ public class GaeUtils {
    */
   public static String getAppId() {
     Environment env = ApiProxy.getCurrentEnvironment();
-    return checkNotBlank(env.getAppId());
+    return checkNotBlank(env.getAppId(), "appId");
   }
 
   /**

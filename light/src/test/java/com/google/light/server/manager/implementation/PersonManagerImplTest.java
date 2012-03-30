@@ -16,15 +16,21 @@
 package com.google.light.server.manager.implementation;
 
 import static com.google.light.server.utils.GuiceUtils.getInstance;
+import static com.google.light.server.utils.GuiceUtils.isExpectedException;
+import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
+import static com.google.light.testingutils.TestingUtils.getInjectorByEnv;
+import static com.google.light.testingutils.TestingUtils.getMockSessionForTesting;
 import static com.google.light.testingutils.TestingUtils.getRandomEmail;
 import static com.google.light.testingutils.TestingUtils.getRandomPersonId;
-import static com.google.light.testingutils.TestingUtils.getRandomUserId;
+import static com.google.light.testingutils.TestingUtils.getRandomProviderUserId;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import com.google.common.base.Throwables;
+import com.google.inject.Injector;
 import com.google.inject.ProvisionException;
 import com.google.light.server.AbstractLightServerTest;
 import com.google.light.server.exception.unchecked.IdShouldNotBeSet;
@@ -32,9 +38,9 @@ import com.google.light.server.exception.unchecked.InvalidPersonIdException;
 import com.google.light.server.exception.unchecked.httpexception.PersonLoginRequiredException;
 import com.google.light.server.manager.interfaces.PersonManager;
 import com.google.light.server.persistence.entity.person.PersonEntity;
-import com.google.light.server.utils.GuiceUtils;
-import org.junit.Ignore;
+import javax.servlet.http.HttpSession;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 /**
  * Tests for {@link PersonManagerImpl}
@@ -51,66 +57,46 @@ public class PersonManagerImplTest extends AbstractLightServerTest {
     this.personManager = getInstance(injector, PersonManager.class);
   }
 
-  @Override
-  public void tearDown() {
-    personManager = null;
-    super.tearDown();
+  private PersonEntity.Builder getEntityBuilder() {
+    return new PersonEntity.Builder()
+        .firstName(testFirstName)
+        .lastName(testLastName);
   }
 
   /**
    * Test for {@link PersonLoginRequiredException}
    */
-  @Ignore(value="TODO(arjuns): Fix this eventually.")
   @Test
   public void test_UserLoginRequired() throws Exception {
-    /*
-     * Explicitly creating our own gaeTestingUtil as things are binded in LightScope and
-     * AbstractLightTest inits the LightScope by default.
-     */
     try {
-      tearDown();
-      // If user is not Logged In, then essentially any of the PersonManager methods cannot
-      // be called. Here we have to override default setup values.
-      gaeEnvReset(getRandomEmail(), false /* isUserLoggedIn */, false /* isGaeAdmin */);
-      setUp();
-
-      PersonEntity dummyPerson = new PersonEntity.Builder()
-          .firstName(testFirstName)
-          .lastName(testLastName)
-          .build();
-      personManager.createPerson(dummyPerson);
+      // First create a empty session and bind it under RequestScope.
+      Injector tempInjector = getInjectorByEnv(defaultEnv, Mockito.mock(HttpSession.class));
+      getInstance(tempInjector, PersonManager.class);
       fail("should have failed.");
     } catch (ProvisionException e) {
-      assertTrue(GuiceUtils.isExpectedException(e, PersonLoginRequiredException.class));
+      // Expected
+      assertTrue(isExpectedException(e, PersonLoginRequiredException.class));
     }
   }
 
   /**
    * Test for {@link PersonManagerImpl#createPerson(PersonEntity)}
    */
-  @Ignore(value="TODO(arjuns) : fix me.")
   @Test
   public void test_createPerson() throws Exception {
     // Success Testing.
-    PersonEntity person1 = new PersonEntity.Builder()
-        .firstName(testFirstName)
-        .lastName(testLastName)
-        .build();
+    PersonEntity person1 = getEntityBuilder().build();
+    PersonEntity afterCreate = personManager.createPerson(person1);
 
-    PersonEntity expectedPerson = person1;
-    PersonEntity afterCreate = personManager.createPerson(expectedPerson);
-
+    assertNotNull(afterCreate.getId());
+    checkPositiveLong(afterCreate.getId(), "expected positive id.");
     assertEquals(testFirstName, afterCreate.getFirstName());
     assertEquals(testLastName, afterCreate.getLastName());
     assertEquals(testEmail, afterCreate.getEmail());
 
     // Negative Testing : Try to create Person with Id. This should fail.
     try {
-      PersonEntity dummy = new PersonEntity.Builder()
-          .firstName(testFirstName)
-          .lastName(testLastName)
-          .id(getRandomPersonId()) // This should trigger negative scenario.
-          .build();
+      PersonEntity dummy = getEntityBuilder().id(getRandomPersonId()).build();
 
       personManager.createPerson(dummy);
       fail("Should have failed.");
@@ -119,22 +105,15 @@ public class PersonManagerImplTest extends AbstractLightServerTest {
     }
 
     /*
-     * Negative Testing : Try to create a person with entity having a email different from Login
-     * Email. This should fail till we don't support other federated logins.
+     * Negative Testing : Try to create a person with email set. This should fail.
      */
     try {
-      PersonEntity dummy = new PersonEntity.Builder()
-          .firstName(testFirstName)
-          .lastName(testLastName)
-          .email(getRandomEmail()) // This is going to be different from what env is initialized.
-          .build();
-
-      // ensuring that test is init with a different email.
-      gaeEnvReset(getRandomEmail(), true /* isUserLoggedIn */, false /* isGaeAdmin */);
+      PersonEntity dummy = getEntityBuilder().email(getRandomEmail()).build();
       personManager.createPerson(dummy);
       fail("should have failed.");
     } catch (IllegalArgumentException e) {
       // expected.
+      assertTrue(Throwables.getStackTraceAsString(e).contains("email should not be set"));
     }
 
   }
@@ -144,15 +123,11 @@ public class PersonManagerImplTest extends AbstractLightServerTest {
    */
   @Test
   public void test_getPerson() throws Exception {
-    PersonEntity person1 = new PersonEntity.Builder()
-        .firstName(testFirstName)
-        .lastName(testLastName)
-        .build();
+    PersonEntity person = getEntityBuilder().build();
 
-    PersonEntity expectedPerson = personManager.createPerson(person1);
-    PersonEntity actualPerson = personManager.getPerson(expectedPerson.getId());
-
-    assertEquals(expectedPerson, actualPerson);
+    PersonEntity savedPerson = personManager.createPerson(person);
+    PersonEntity fetchedPerson = personManager.getPerson(savedPerson.getId());
+    assertEquals(savedPerson, fetchedPerson);
 
     // Negative Testing : Try to search with nullId.
     try {
@@ -171,7 +146,7 @@ public class PersonManagerImplTest extends AbstractLightServerTest {
     }
 
     /*
-     * Negative Testing : Reset env to some other email, so that GAE returns different UserId.
+     * Negative Testing : Search with random PersonId.
      */
     assertNull(personManager.getPerson(getRandomPersonId()));
 
@@ -180,51 +155,52 @@ public class PersonManagerImplTest extends AbstractLightServerTest {
   /**
    * Test for {@link PersonManager#getPersonByEmail(String)}
    */
-  @Ignore(value="TODO(arjuns): Fix me.")
   @Test
   public void test_getPersonByEmail() throws Exception {
-    String userId1 = getRandomUserId();
-    String email1 = getRandomEmail();
-    gaeEnvReset(email1, true /* isUserLoggedIn */, false /* isGaeAdmin */);
-
-    PersonEntity person = new PersonEntity.Builder()
-        .firstName(testFirstName)
-        .lastName(testLastName)
-        .build();
-
-    PersonEntity expectedPerson1 = personManager.createPerson(person);
-
-    PersonEntity actualPerson1 = personManager.getPersonByEmail(email1);
-    assertNotNull(actualPerson1);
-    assertEquals(expectedPerson1, actualPerson1);
+    PersonEntity person1 = getEntityBuilder().build();
+    PersonEntity expectedPerson1 = personManager.createPerson(person1);
+    PersonEntity fetchedPerson1_1 = personManager.getPersonByEmail(testEmail);
+    assertNotNull(fetchedPerson1_1);
+    assertEquals(expectedPerson1, fetchedPerson1_1);
 
     // Now creating one more Person.
-    String userId2 = getRandomUserId();
-    assertTrue(!userId1.equals(userId2));
+    String email2 = getRandomEmail(); // Emai will be added to PersonEntity via Session.
+    assertTrue(!testEmail.equals(email2));
+    PersonEntity person2 = getEntityBuilder().build();
 
-    String email2 = getRandomEmail();
-    assertTrue(!email1.equals(email2));
-
-    gaeEnvReset(email2, true /* isUserLoggedIn */, false /* isGaeAdmin */);
-
-    PersonEntity newPerson = new PersonEntity.Builder()
-        .firstName(testFirstName)
-        .lastName(testLastName)
-        .build();
-    PersonEntity expectedPerson2 = personManager.createPerson(newPerson);
+    /*
+     * In order to persist Person2 properly, we will have to create a new session2 and a new
+     * PersonManager which will get this session2 as part of the SessionManager.
+     */
+    
+    HttpSession session2 = getMockSessionForTesting(defaultEnv, defaultProviderService, 
+        getRandomProviderUserId(), null, email2);
+    Injector tempInjector = getInjectorByEnv(defaultEnv, session2);
+    PersonManager personManager2 = getInstance(tempInjector, PersonManager.class);
+    
+    PersonEntity expectedPerson2 = personManager2.createPerson(person2);
     assertTrue(!expectedPerson1.equals(expectedPerson2));
-
-    PersonEntity actualPerson2 = personManager.getPersonByEmail(email2);
-    assertNotNull(actualPerson2);
-    assertEquals(expectedPerson2, actualPerson2);
+    
+    // After this personManager2 is not required.
+    System.out.println(email2);
+    PersonEntity fetchedPerson2_1 = personManager.getPersonByEmail(email2);
+    System.out.println(fetchedPerson2_1.getEmail());
+    assertNotNull(fetchedPerson2_1);
+    assertEquals(expectedPerson2, fetchedPerson2_1);
 
     // Some more validation
-    assertTrue(!actualPerson1.equals(actualPerson2));
+    assertTrue(!person1.equals(person2));
+    assertTrue(!fetchedPerson1_1.equals(fetchedPerson2_1));
 
-    // Downloading again and confirming to ensure no data has changed while storing Person2.
-    actualPerson1 = personManager.getPersonByEmail(email1);
-    assertNotNull(actualPerson1);
-    assertTrue(!actualPerson1.equals(actualPerson2));
+    // Downloading again and confirming to ensure no data has changed for Person1.
+    PersonEntity fetchedPerson1_2 = personManager.getPersonByEmail(testEmail);
+    assertEquals(fetchedPerson1_1, fetchedPerson1_2);
+
+    // Downloading again and confirming to ensure no data has changed for Person2
+    PersonEntity fetchedPerson2_2 = personManager.getPersonByEmail(email2);
+    assertEquals(fetchedPerson2_1, fetchedPerson2_2);
+    
+    assertTrue(!fetchedPerson1_2.equals(fetchedPerson2_2));
 
     // Negative Testing : Check for non-existing email.
     assertNull(personManager.getPersonByEmail(getRandomEmail()));

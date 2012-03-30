@@ -22,6 +22,9 @@ import static com.google.light.server.constants.RequestParmKeyEnum.PERSON_ID;
 import static com.google.light.server.utils.LightPreconditions.checkEmail;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPersonId;
+import static org.apache.commons.lang.StringUtils.isBlank;
+
+import com.google.light.server.exception.unchecked.BlankStringException;
 
 import com.google.inject.Inject;
 import com.google.light.server.annotations.AnotHttpSession;
@@ -69,7 +72,7 @@ public class SessionManager {
    */
   public String getLoginProviderUserId() {
     String providerUserId = (String) session.getAttribute(LOGIN_PROVIDER_USER_ID.get());
-    return checkNotBlank(providerUserId);
+    return checkNotBlank(providerUserId, "providerUserId");
   }
 
   /**
@@ -77,7 +80,8 @@ public class SessionManager {
    * TODO(arjuns): Add test
    */
   public void setLoginProviderUserId(String providerUserId) {
-    session.setAttribute(LOGIN_PROVIDER_USER_ID.get(), checkNotBlank(providerUserId));
+    session.setAttribute(LOGIN_PROVIDER_USER_ID.get(), 
+        checkNotBlank(providerUserId, "providerUserId"));
   }
 
   /**
@@ -123,10 +127,19 @@ public class SessionManager {
    * Returns true if Person is logged in. In order to determine if User is logged in or not, we
    * depend on whether Session is null or not.
    * 
+   * TODO(arjuns): Add test.
    * @return
    */
   public boolean isPersonLoggedIn() {
-    return session != null;
+    if (session == null) {
+      return false;
+    }
+    
+    try {
+      return !isBlank(getLoginProviderUserId());
+    } catch (BlankStringException e) {
+      return false;
+    }
   }
 
   /**

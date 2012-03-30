@@ -20,6 +20,7 @@ import static com.google.light.server.constants.LightConstants.SESSION_MAX_INACT
 import static com.google.light.server.constants.OAuth2ProviderService.GOOGLE_LOGIN;
 import static com.google.light.server.constants.RequestParmKeyEnum.DEFAULT_EMAIL;
 import static com.google.light.server.constants.RequestParmKeyEnum.LOGIN_PROVIDER_ID;
+import static com.google.light.server.constants.RequestParmKeyEnum.LOGIN_PROVIDER_USER_ID;
 import static com.google.light.server.constants.RequestParmKeyEnum.PERSON_ID;
 import static com.google.light.server.utils.LightUtils.appendKeyValue;
 import static com.google.light.server.utils.LightUtils.appendSectionHeader;
@@ -27,6 +28,7 @@ import static com.google.light.server.utils.LightUtils.getPST8PDTime;
 import static com.google.light.server.utils.LightUtils.prepareSession;
 import static com.google.light.testingutils.TestingUtils.getRandomEmail;
 import static com.google.light.testingutils.TestingUtils.getRandomPersonId;
+import static com.google.light.testingutils.TestingUtils.getRandomProviderUserId;
 import static com.google.light.testingutils.TestingUtils.getRandomString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -35,6 +37,10 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+
+import com.google.light.testingutils.TestingUtils;
+
+import com.google.light.server.constants.RequestParmKeyEnum;
 
 import com.google.common.collect.ImmutableMapBuilder;
 import com.google.light.server.constants.OAuth2ProviderService;
@@ -115,48 +121,58 @@ public class LightUtilsTest {
   /**
    * Test for {@link LightUtils#prepareSession(HttpSession, OAuth2ProviderService, String, String)}.
    */
-  @Ignore(value="TODO(arjuns) : fix me.")
   @Test
   public void test_prepareSession() {
     OAuth2ProviderService providerService = GOOGLE_LOGIN;
 
     long personId = getRandomPersonId();
-    String userEmail = getRandomEmail();
-    String providerUserId = getRandomString();
+    String providerUserId = getRandomProviderUserId();
+    String email = getRandomEmail();
 
     HttpSession session = mock(HttpSession.class);
-    handleMockSession(session, providerService, personId, userEmail, false);
-    prepareSession(session, providerService, personId, providerUserId, userEmail);
-    handleMockSession(session, providerService, personId, userEmail, true);
+    handleMockSession(session, providerService, providerUserId, personId, email, false);
+    prepareSession(session, providerService, personId, providerUserId, email);
+    handleMockSession(session, providerService, providerUserId, personId, email, true);
 
-    // Negative Test : Now try to verify with some userId.
+    // Negative Test : Now try to verify with some random personId.
     try {
-      handleMockSession(session, providerService, getRandomPersonId(), userEmail, true);
+      handleMockSession(session, providerService, providerUserId, getRandomPersonId(), email,
+          true);
       fail("should have failed.");
     } catch (WantedButNotInvoked e) {
-       // Expected
+      // Expected
       assertTrue(getStackTraceAsString(e).contains(PERSON_ID.get()));
     }
-    
-    // Negative Test : Now try to verify with some email.
+
+    // Negative Test : Now try to verify with some random email.
     try {
-      handleMockSession(session, providerService, personId, getRandomEmail(), true);
+      handleMockSession(session, providerService, providerUserId, personId, getRandomEmail(), true);
       fail("should have failed.");
     } catch (WantedButNotInvoked e) {
-       // Expected
+      // Expected
       assertTrue(getStackTraceAsString(e).contains(DEFAULT_EMAIL.get()));
     }
-    
+
+    // Negative Test : Now try to verify with some random providerUserId.
+    try {
+      handleMockSession(session, providerService, getRandomProviderUserId(), personId, email, true);
+      fail("should have failed.");
+    } catch (WantedButNotInvoked e) {
+      // Expected
+      assertTrue(getStackTraceAsString(e).contains(LOGIN_PROVIDER_USER_ID.get()));
+    }
+
     // TODO(arjuns): See if there is a way to write a multi-threaded session modification test
     // At present we are assuming that synchronized will take care of it.
   }
 
   private void handleMockSession(HttpSession session, OAuth2ProviderService providerService,
-      long personId, String userEmail, boolean isVerifyMode) {
+      String providerUserId, Long personId, String userEmail, boolean isVerifyMode) {
 
-    Map<String, String> map = new ImmutableMapBuilder<String, String>()
+    Map<String, Object> map = new ImmutableMapBuilder<String, Object>()
         .put(LOGIN_PROVIDER_ID.get(), providerService.name())
-        .put(PERSON_ID.get(), Long.toString(personId))
+        .put(LOGIN_PROVIDER_USER_ID.get(), providerUserId)
+        .put(PERSON_ID.get(), personId)
         .put(DEFAULT_EMAIL.get(), userEmail)
         .getMap();
 
@@ -169,7 +185,7 @@ public class LightUtilsTest {
     };
 
     for (String currKey : map.keySet()) {
-      String value = map.get(currKey);
+      Object value = map.get(currKey);
 
       if (isVerifyMode) {
         verify(session, times(1)).setAttribute(currKey, value);
@@ -177,13 +193,13 @@ public class LightUtilsTest {
         doAnswer(answer).when(session).setAttribute(currKey, value);
       }
     }
-    
+
     // Additional things.
     if (isVerifyMode) {
       verify(session, times(1)).setMaxInactiveInterval(SESSION_MAX_INACTIVITY_PERIOD);
     } else {
       doAnswer(answer).when(session).setMaxInactiveInterval(SESSION_MAX_INACTIVITY_PERIOD);
     }
-    
+
   }
 }

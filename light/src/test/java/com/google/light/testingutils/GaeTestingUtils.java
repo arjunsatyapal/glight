@@ -20,6 +20,8 @@ import static com.google.light.server.utils.LightPreconditions.checkEmail;
 import static com.google.light.testingutils.TestingUtils.getInjectorByEnv;
 import static com.google.light.testingutils.TestingUtils.getMockSessionForTesting;
 
+import com.google.light.server.utils.LightPreconditions;
+
 import com.google.appengine.api.utils.SystemProperty;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
@@ -41,6 +43,7 @@ import javax.servlet.http.HttpSession;
 public class GaeTestingUtils {
   private LightEnvEnum env;
   private OAuth2ProviderService providerService;
+  private String providerUserId;
   private String email;
   private long personId;
   
@@ -59,10 +62,11 @@ public class GaeTestingUtils {
 
   private LocalServiceTestHelper gaeTestHelper;
 
-  public GaeTestingUtils(LightEnvEnum env, OAuth2ProviderService providerService, String email,
-      long personId, boolean isAdmin) {
+  public GaeTestingUtils(LightEnvEnum env, OAuth2ProviderService providerService, 
+      String providerUserId, String email, long personId, boolean isAdmin) {
     this.env = checkNotNull(env);
     this.providerService = checkNotNull(providerService);
+    this.providerUserId = LightPreconditions.checkNotBlank(providerUserId, "providerUserId");
     this.email = checkEmail(email);
     this.personId = personId;
     
@@ -114,7 +118,8 @@ public class GaeTestingUtils {
    * Teardown GAE testing environment.
    */
   public void tearDown() {
-    HttpSession mockSession = getMockSessionForTesting(env, providerService, personId, email);
+    HttpSession mockSession = getMockSessionForTesting(env, providerService, providerUserId, 
+        personId, email);
     Injector injector = getInjectorByEnv(env, mockSession);
     injector.getInstance(GuiceFilter.class).destroy();
     gaeTestHelper.tearDown();

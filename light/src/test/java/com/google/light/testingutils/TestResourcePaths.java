@@ -35,7 +35,7 @@ public enum TestResourcePaths {
   private String path;
 
   private TestResourcePaths(String path) {
-    this.path = checkNotBlank(path);
+    this.path = checkNotBlank(path, "path");
   }
 
   public String get() {

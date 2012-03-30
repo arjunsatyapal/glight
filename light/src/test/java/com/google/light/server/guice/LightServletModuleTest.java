@@ -19,6 +19,7 @@ import static com.google.light.server.constants.OAuth2ProviderService.GOOGLE_LOG
 import static com.google.light.testingutils.TestingUtils.getMockSessionForTesting;
 import static com.google.light.testingutils.TestingUtils.getRandomEmail;
 import static com.google.light.testingutils.TestingUtils.getRandomPersonId;
+import static com.google.light.testingutils.TestingUtils.getRandomProviderUserId;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -45,8 +46,8 @@ public class LightServletModuleTest {
   public void test_ensureBindingPossible() throws Exception {
     for (LightEnvEnum currEnv : LightEnvEnum.values()) {
       HttpSession session = null;
-      session = getMockSessionForTesting(currEnv, GOOGLE_LOGIN, getRandomPersonId(),
-          getRandomEmail());
+      session = getMockSessionForTesting(currEnv, GOOGLE_LOGIN, getRandomProviderUserId(), 
+          getRandomPersonId(), getRandomEmail());
       GaeTestingUtils gaeTestingUtils = TestingUtils.gaeSetup(currEnv);
       try {
         Injector injector = TestingUtils.getInjectorByEnv(currEnv, session);

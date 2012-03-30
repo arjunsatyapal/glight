@@ -212,6 +212,7 @@ public class LoginITCase {
     }
   }
 
+  @SuppressWarnings("unused")
   private boolean isElementPresent(By by) {
     try {
       driver.findElement(by);

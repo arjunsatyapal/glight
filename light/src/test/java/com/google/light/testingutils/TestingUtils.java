@@ -19,9 +19,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.constants.OAuth2ProviderService.GOOGLE_LOGIN;
 import static com.google.light.server.constants.RequestParmKeyEnum.DEFAULT_EMAIL;
 import static com.google.light.server.constants.RequestParmKeyEnum.LOGIN_PROVIDER_ID;
+import static com.google.light.server.constants.RequestParmKeyEnum.LOGIN_PROVIDER_USER_ID;
 import static com.google.light.server.constants.RequestParmKeyEnum.PERSON_ID;
 import static com.google.light.server.utils.GuiceUtils.getInstance;
-import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkNull;
 import static org.mockito.Mockito.when;
 
@@ -40,11 +40,9 @@ import com.google.light.server.guice.modules.QaModule;
 import com.google.light.server.manager.interfaces.PersonManager;
 import com.google.light.server.persistence.entity.person.PersonEntity;
 import com.google.light.server.utils.LightUtils;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
@@ -115,11 +113,11 @@ public class TestingUtils {
   }
 
   /**
-   * Get a random UserId.
+   * Get a random ProviderUserId.
    * 
    * @return
    */
-  public static String getRandomUserId() {
+  public static String getRandomProviderUserId() {
     return getRandomString();
   }
 
@@ -197,26 +195,11 @@ public class TestingUtils {
    * things, then can use this method. TODO(arjuns): Move all the GAE setups to use this eventually.
    */
   public static GaeTestingUtils gaeSetup(LightEnvEnum env) {
-    GaeTestingUtils gaeTestingUtils = new GaeTestingUtils(env, GOOGLE_LOGIN, getRandomEmail(),
-        getRandomPersonId(), false /* isAdmin */);
+    GaeTestingUtils gaeTestingUtils = new GaeTestingUtils(env, GOOGLE_LOGIN, 
+        getRandomProviderUserId(), getRandomEmail(), getRandomPersonId(), false /* isAdmin */);
     gaeTestingUtils.setUp();
 
     return gaeTestingUtils;
-  }
-
-  /**
-   * Utility method to read a line of String from Command Line.
-   * 
-   * @param message
-   * @return
-   * @throws IOException
-   */
-  public static String readLineFromConsole(String message) throws IOException {
-    System.out.println(message);
-    InputStreamReader converter = new InputStreamReader(System.in);
-    BufferedReader in = new BufferedReader(converter);
-
-    return checkNotBlank(in.readLine());
   }
 
   /**
@@ -228,13 +211,14 @@ public class TestingUtils {
    * @return
    */
   public static HttpSession getMockSessionForTesting(LightEnvEnum env, 
-      OAuth2ProviderService provider, long personId, String email) {
+      OAuth2ProviderService providerService, String providerUserId, Long personId, String email) {
     if (env != LightEnvEnum.UNIT_TEST) {
       return null;
     }
     
     HttpSession mockSession = Mockito.mock(HttpSession.class);
-    when(mockSession.getAttribute(LOGIN_PROVIDER_ID.get())).thenReturn(provider.name());
+    when(mockSession.getAttribute(LOGIN_PROVIDER_ID.get())).thenReturn(providerService.name());
+    when(mockSession.getAttribute(LOGIN_PROVIDER_USER_ID.get())).thenReturn(providerUserId);
     when(mockSession.getAttribute(PERSON_ID.get())).thenReturn(personId);
     when(mockSession.getAttribute(DEFAULT_EMAIL.get())).thenReturn(email);
 
@@ -291,13 +275,13 @@ public class TestingUtils {
   /**
    * Create a Random Person.
    */
-  public static PersonEntity createRandomPerson(Injector injector) {
+  public static PersonEntity createRandomPerson(LightEnvEnum env, HttpSession session) {
+    Injector injector = TestingUtils.getInjectorByEnv(env, session);
     PersonManager personManager = getInstance(injector, PersonManager.class);
     
     PersonEntity personEntity = new PersonEntity.Builder()
         .firstName(getRandomString())
         .lastName(getRandomString())
-        .email(getRandomEmail())
         .build();
     
     return personManager.createPerson(personEntity);

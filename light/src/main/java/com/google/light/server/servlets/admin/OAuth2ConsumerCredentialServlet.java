@@ -104,11 +104,12 @@ public class OAuth2ConsumerCredentialServlet extends HttpServlet {
    */
   @Override
   public void doPut(HttpServletRequest request, HttpServletResponse response) {
-    String oauth2ProviderKey = checkNotBlank(request.getParameter(OAUTH2_PROVIDER_NAME.get()));
+    String oauth2ProviderKey = checkNotBlank(
+        request.getParameter(OAUTH2_PROVIDER_NAME.get()), "providerName");
     OAuth2ProviderEnum provider = OAuth2ProviderEnum.valueOf(oauth2ProviderKey);
 
-    String clientId = checkNotBlank(request.getParameter(CLIENT_ID.get()));
-    String clientSecret = checkNotBlank(request.getParameter(CLIENT_SECRET.get()));
+    String clientId = checkNotBlank(request.getParameter(CLIENT_ID.get()), "clientId");
+    String clientSecret = checkNotBlank(request.getParameter(CLIENT_SECRET.get()), "clientSecret");
 
     OAuth2ConsumerCredentialDto dto = new OAuth2ConsumerCredentialDto.Builder()
         .provider(provider)

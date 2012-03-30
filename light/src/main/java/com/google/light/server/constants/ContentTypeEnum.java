@@ -35,7 +35,7 @@ public enum ContentTypeEnum {
   private String type;
   
   private ContentTypeEnum(String type) {
-    this.type = checkNotBlank(type);
+    this.type = checkNotBlank(type, "type");
   }
   
   public String get() {

@@ -43,6 +43,7 @@ import javax.servlet.http.HttpServlet;
 public enum ServletPathEnum {
   // TODO(arjuns): Add regex checks here.
   // TODO(arjuns) : Find a way to end URLs without /.
+  
   PERSON(PersonServlet.class, "/api/person",
          true, false, false),
 
@@ -99,9 +100,9 @@ public enum ServletPathEnum {
   private ServletPathEnum(Class<? extends HttpServlet> clazz, String servletPath,
       boolean requireLogin, boolean requireAdminPrivilege, boolean onlyForTest) {
     this.clazz = clazz;
-    this.servletPath = checkNotBlank(servletPath);
+    this.servletPath = checkNotBlank(servletPath, "servletPath");
     checkArgument(!servletPath.endsWith("/"));
-    this.servletRoot = checkNotBlank(servletPath + "/");
+    this.servletRoot = checkNotBlank(servletPath + "/", "servletPath/");
     this.requiresLogin = requireLogin;
 
     if (!requireLogin && requireAdminPrivilege) {

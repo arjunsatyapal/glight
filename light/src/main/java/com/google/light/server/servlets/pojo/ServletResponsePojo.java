@@ -63,7 +63,7 @@ public class ServletResponsePojo<D extends DtoInterface<D>> {
         throw new UnsupportedMediaTypeException("Invalid Content-Type : " + contentType);
     }
 
-    checkNotBlank(responseString);
+    checkNotBlank(responseString, "responseString");
   }
 
   public HttpServletResponse getResponse() {

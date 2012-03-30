@@ -13,25 +13,27 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.server.constants;
-
-import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
+package com.google.light.server.exception.unchecked;
 
 /**
- * Enum to keep track of Paths for XSDs.
+ * Indicates that Session is invalid.
  * 
  * @author Arjun Satyapal
  */
-public enum XsdPath {
-  PERSON("/schema/person/xsd/person.xsd");
-  
-  private String xsdPath;
-  
-  private XsdPath(String xsdPath) {
-    this.xsdPath = checkNotBlank(xsdPath, "xsdPath");
+@SuppressWarnings("serial")
+public class InvalidSessionException extends LightRuntimeException {
+  /**
+   * {@inheritDoc}
+   * @param message
+   */
+  public InvalidSessionException(String message) {
+      super(message);
   }
-  
-  public String get() {
-    return xsdPath;
+
+  /**
+   * {@inheritDoc}
+   */
+  public InvalidSessionException(String message, Throwable cause) {
+      super(message, cause);
   }
 }

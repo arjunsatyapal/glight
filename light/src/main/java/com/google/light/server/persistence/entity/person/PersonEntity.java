@@ -18,18 +18,13 @@ package com.google.light.server.persistence.entity.person;
 import static com.google.light.server.utils.LightPreconditions.checkEmail;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPersonId;
-import org.apache.commons.lang.builder.HashCodeBuilder;
 
-import org.apache.commons.lang.builder.EqualsBuilder;
-
-import org.apache.commons.lang.builder.ToStringBuilder;
-
-import com.google.common.collect.Lists;
 import com.google.light.server.dto.person.PersonDto;
 import com.google.light.server.persistence.PersistenceToDtoInterface;
-import java.util.List;
-import javax.persistence.Embedded;
 import javax.persistence.Id;
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.commons.lang.builder.ToStringBuilder;
 
 /**
  * Persistence object for {@link PersonDto}.
@@ -46,10 +41,6 @@ public class PersonEntity implements PersistenceToDtoInterface<PersonEntity, Per
   // This is used in Objectify Query.
   public static final String OFY_EMAIL_QUERY_STRING = "email";
   String email;
-
-  // TODO(arjuns) : Fix this.
-  @Embedded
-  List<IdProviderDetail> idProviderDetails;
 
   @Override
   public String toString() {
@@ -94,20 +85,6 @@ public class PersonEntity implements PersistenceToDtoInterface<PersonEntity, Per
     this.id = checkPersonId(id);
   }
 
-  public List<IdProviderDetail> getIdProviderDetails() {
-    return idProviderDetails;
-  }
-
-  public void addIdProviderDetail(IdProviderDetail idProviderDetails) {
-    if (this.idProviderDetails == null) {
-      this.idProviderDetails = Lists.newArrayList();
-    }
-
-    if (!this.idProviderDetails.contains(idProviderDetails)) {
-      this.idProviderDetails.add(idProviderDetails);
-    }
-  }
-
   public String getFirstName() {
     return firstName;
   }
@@ -129,7 +106,6 @@ public class PersonEntity implements PersistenceToDtoInterface<PersonEntity, Per
     private String firstName;
     private String lastName;
     private String email;
-    private List<IdProviderDetail> idProviderDetails;
 
     public Builder id(Long id) {
       this.id = id;
@@ -151,11 +127,6 @@ public class PersonEntity implements PersistenceToDtoInterface<PersonEntity, Per
       return this;
     }
 
-    public Builder idProviderDetails(List<IdProviderDetail> idProviderDetails) {
-      this.idProviderDetails = idProviderDetails;
-      return this;
-    }
-
     @SuppressWarnings("synthetic-access")
     public PersonEntity build() {
       return new PersonEntity(this);
@@ -168,7 +139,6 @@ public class PersonEntity implements PersistenceToDtoInterface<PersonEntity, Per
     this.firstName = checkNotBlank(builder.firstName, "firstName");
     this.lastName = checkNotBlank(builder.lastName, "lastName");
     this.email = builder.email != null ? checkEmail(builder.email) : null;
-    this.idProviderDetails = builder.idProviderDetails;
   }
   
   // For Objectify.

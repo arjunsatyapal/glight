@@ -52,7 +52,7 @@ public enum RequestParmKeyEnum {
   private boolean allowedInProd;
   
   private RequestParmKeyEnum(String key, boolean allowedInProd) {
-    this.key = checkNotBlank(key);
+    this.key = checkNotBlank(key, "key");
     this.allowedInProd = allowedInProd;
   }
   

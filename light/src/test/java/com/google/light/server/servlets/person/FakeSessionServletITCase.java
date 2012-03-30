@@ -94,7 +94,7 @@ public class FakeSessionServletITCase {
     HttpResponse response = request.execute();
 
     String cookie = FakeLoginHelper.getCookieFromResponse(response);
-    checkNotBlank(cookie);
+    checkNotBlank(cookie, "cookie");
 
     assertTrue(response.isSuccessStatusCode());
   }

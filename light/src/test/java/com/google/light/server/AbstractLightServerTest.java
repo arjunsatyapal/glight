@@ -16,6 +16,7 @@ import static com.google.light.server.constants.OAuth2ProviderService.GOOGLE_LOG
 import static com.google.light.testingutils.TestingUtils.getMockSessionForTesting;
 import static com.google.light.testingutils.TestingUtils.getRandomEmail;
 import static com.google.light.testingutils.TestingUtils.getRandomPersonId;
+import static com.google.light.testingutils.TestingUtils.getRandomProviderUserId;
 import static com.google.light.testingutils.TestingUtils.getRandomString;
 
 import com.google.inject.Injector;
@@ -38,7 +39,9 @@ public abstract class AbstractLightServerTest {
   protected static LightEnvEnum defaultEnv = LightEnvEnum.UNIT_TEST;
   
   protected static OAuth2ProviderService defaultProviderService = GOOGLE_LOGIN;
+  protected HttpSession testSession;
   protected long testPersonId;
+  protected String testProviderUserId;
   protected String testEmail;
   protected String testFirstName;
   protected String testLastName;
@@ -56,35 +59,20 @@ public abstract class AbstractLightServerTest {
   @AfterClass
   public static void gaeTearDown() {
     gaeTestingUtils.tearDown();
-//    gaeSetupDone = false;
-  }
-
-  /**
-   * This will simulate the user state for different calls.
-   * 
-   * @param gaeUserEmail
-   * @param isLoggedIn
-   * @param isAdmin
-   */
-  @Deprecated
-  protected void gaeEnvReset(String email, boolean isLoggedIn, boolean isAdmin) {
-    // TODO(arjuns): Fix this.
-//    gaeTestingUtils.setAuthDomain(authDomain);
-    gaeTestingUtils.setEmail(email);
-    gaeTestingUtils.setAdmin(isAdmin);
   }
 
   @Before
   public void setUp() {
     testPersonId = getRandomPersonId();
+    testProviderUserId = getRandomProviderUserId();
     testEmail = getRandomEmail();
     testFirstName = getRandomString();
     testLastName = getRandomString();
 
-    HttpSession mockSession = getMockSessionForTesting(defaultEnv, defaultProviderService, 
-        testPersonId, testEmail);
+    testSession = getMockSessionForTesting(defaultEnv, defaultProviderService, 
+        testProviderUserId, testPersonId, testEmail);
 
-    injector = TestingUtils.getInjectorByEnv(LightEnvEnum.UNIT_TEST, mockSession);
+    injector = TestingUtils.getInjectorByEnv(LightEnvEnum.UNIT_TEST, testSession);
   }
 
   @After

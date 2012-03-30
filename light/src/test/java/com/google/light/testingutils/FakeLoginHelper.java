@@ -53,8 +53,8 @@ public class FakeLoginHelper {
   private String cookie;
 
   public FakeLoginHelper(String serverUrl, OAuth2ProviderService providerService, long personId,
-      String providerUserEmail, boolean isUserAdmin) throws IOException {
-    this.serverUrl = checkNotBlank(serverUrl);
+      String providerUserEmail) throws IOException {
+    this.serverUrl = checkNotBlank(serverUrl, "serverUrl");
     this.providerService = Preconditions.checkNotNull(providerService);
     this.personId = checkPersonId(personId);
     this.providerUserEmail = checkEmail(providerUserEmail);

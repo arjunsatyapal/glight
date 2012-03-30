@@ -15,8 +15,10 @@
  */
 package com.google.light.server.utils;
 
+import static com.google.light.server.constants.LightEnvEnum.UNIT_TEST;
 import static com.google.light.server.constants.OAuth2ProviderService.GOOGLE_DOC;
 import static com.google.light.server.constants.OAuth2ProviderService.GOOGLE_LOGIN;
+import static com.google.light.server.utils.GuiceUtils.getInstance;
 import static com.google.light.server.utils.LightPreconditions.checkEmail;
 import static com.google.light.server.utils.LightPreconditions.checkIsEnv;
 import static com.google.light.server.utils.LightPreconditions.checkIsNotEnv;
@@ -27,23 +29,33 @@ import static com.google.light.server.utils.LightPreconditions.checkPersonId;
 import static com.google.light.server.utils.LightPreconditions.checkPersonIsGaeAdmin;
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
 import static com.google.light.server.utils.LightPreconditions.checkProviderUserId;
+import static com.google.light.server.utils.LightPreconditions.checkValidSession;
+import static com.google.light.server.utils.LightPreconditions.checkValidUri;
 import static com.google.light.testingutils.TestingUtils.gaeSetup;
+import static com.google.light.testingutils.TestingUtils.getInjectorByEnv;
+import static com.google.light.testingutils.TestingUtils.getMockSessionForTesting;
+import static com.google.light.testingutils.TestingUtils.getRandomEmail;
+import static com.google.light.testingutils.TestingUtils.getRandomPersonId;
+import static com.google.light.testingutils.TestingUtils.getRandomProviderUserId;
 import static com.google.light.testingutils.TestingUtils.getRandomString;
 import static com.google.light.testingutils.TestingUtils.getUUIDString;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import com.google.light.server.exception.unchecked.httpexception.UnauthorizedException;
-
 import com.google.common.collect.Lists;
 import com.google.light.server.constants.LightEnvEnum;
+import com.google.light.server.constants.OAuth2ProviderService;
 import com.google.light.server.exception.unchecked.BlankStringException;
 import com.google.light.server.exception.unchecked.InvalidPersonIdException;
+import com.google.light.server.exception.unchecked.InvalidSessionException;
 import com.google.light.server.exception.unchecked.ServerConfigurationException;
+import com.google.light.server.exception.unchecked.httpexception.UnauthorizedException;
+import com.google.light.server.servlets.SessionManager;
 import com.google.light.testingutils.GaeTestingUtils;
 import com.google.light.testingutils.TestingUtils;
 import java.security.SecureRandom;
 import java.util.List;
+import javax.servlet.http.HttpSession;
 import org.junit.Test;
 
 /**
@@ -204,38 +216,6 @@ public class LightPreconditionsTest {
       checkNonEmptyList(Lists.newArrayList());
       fail("should have failed.");
     } catch (IllegalArgumentException e) {
-      // expected.
-    }
-  }
-
-  /**
-   * Test for {@link LightPreconditions#checkNotBlank(String)}
-   */
-  @Test
-  public void test_checkNotBlank() {
-    checkNotBlank("hello");
-
-    // Negative : string=null
-    try {
-      checkNotBlank(null);
-      fail("should have failed.");
-    } catch (BlankStringException e) {
-      // expected.
-    }
-
-    // Negative : string=""
-    try {
-      checkNotBlank("");
-      fail("should have failed.");
-    } catch (BlankStringException e) {
-      // expected.
-    }
-
-    // Negative : string="    "
-    try {
-      checkNotBlank("    ");
-      fail("should have failed.");
-    } catch (BlankStringException e) {
       // expected.
     }
   }
@@ -416,5 +396,101 @@ public class LightPreconditionsTest {
     } catch (IllegalArgumentException e) {
       // Expected
     }
+  }
+
+  /**
+   * Test for {@link LightPreconditions#checkValidSession(SessionManager)}
+   */
+  @Test
+  public void test_checkValidSession() {
+    // Positive Testing : provide all parameters for session.
+    assertSession(GOOGLE_LOGIN, getRandomProviderUserId(), getRandomPersonId(),  
+        getRandomEmail(), true /*should pass*/); 
+  
+    // Negative Test : providerUserId = null
+    assertSession(GOOGLE_LOGIN, null, getRandomPersonId(),  
+        getRandomEmail(), false /*should pass*/); 
+    
+    // Negative Test : providerUserId = blank string
+    assertSession(GOOGLE_LOGIN, " ", getRandomPersonId(),  
+        getRandomEmail(), false /*should pass*/); 
+    
+    // Negative Test : personId = null
+    assertSession(GOOGLE_LOGIN, getRandomProviderUserId(), null,  
+        getRandomEmail(), false /*should pass*/); 
+    
+    // Negative Test : personId = null
+    assertSession(GOOGLE_LOGIN, getRandomProviderUserId(), null,  
+        getRandomEmail(), false /*should pass*/); 
+    
+    // Negative Test : email = null
+    assertSession(GOOGLE_LOGIN, getRandomProviderUserId(), getRandomPersonId(),  
+        null, false /*should pass*/);
+    
+    // Negative Test : email = blank
+    assertSession(GOOGLE_LOGIN, getRandomProviderUserId(), getRandomPersonId(),  
+        null, false /*should pass*/); 
+  }
+  
+  private void assertSession(OAuth2ProviderService providerService,
+      String providerUserId, Long personId, String email, boolean shouldPass) {
+    GaeTestingUtils.cheapEnvSwitch(UNIT_TEST);
+    HttpSession session = getMockSessionForTesting(UNIT_TEST, providerService, providerUserId, 
+        personId, email);
+    
+    SessionManager sessionManager = getInstance(getInjectorByEnv(UNIT_TEST, session), 
+        SessionManager.class);
+    
+    if (shouldPass) {
+      checkValidSession(sessionManager);
+    } else {
+      try {
+        checkValidSession(sessionManager);
+        fail("should have failed.");
+      } catch (InvalidSessionException e) {
+        // Expected
+      }
+    }
+  }
+  
+  /**
+   * Test for {@link LightPreconditions#checkValidUri(String)}.
+   */
+  @Test
+  public void test_checkValidUri() throws Exception {
+    // Positive tests.
+    checkValidUri("hello");
+    checkValidUri("/hello");
+    checkValidUri("http://localhost/hello");
+    checkValidUri("http://localhost:8080/hello");
+    checkValidUri("http://light-qa.appspot.com/hello");
+    checkValidUri("http://light-qa.appspot.com/hello?key=value");
+    checkValidUri("http://light-qa.appspot.com/hello#1234");
+    checkValidUri("http://light-qa.appspot.com/hello?key=value#1234");
+    
+    // Negative Test : uri = null
+    try {
+      checkValidUri(null);
+      fail("should have failed.");
+    } catch (BlankStringException e) {
+      // Expected
+    }
+    
+    // Negative Test : uri = blank string
+    try {
+      checkValidUri(" ");
+      fail("should have failed.");
+    } catch (BlankStringException e) {
+      // Expected
+    }
+    
+    // Negative Test : uri = blank string
+    try {
+      checkValidUri(" ");
+      fail("should have failed.");
+    } catch (BlankStringException e) {
+      // Expected
+    }
+
   }
 }

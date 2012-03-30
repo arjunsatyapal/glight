@@ -98,7 +98,6 @@ public class PersonDto implements DtoToPersistenceInterface<PersonDto, PersonEnt
         .firstName(firstName)
         .lastName(lastName)
         .email(email)
-        .idProviderDetails(null)
         .build();
   }
 

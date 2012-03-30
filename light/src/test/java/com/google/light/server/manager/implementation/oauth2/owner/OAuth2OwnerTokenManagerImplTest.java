@@ -16,6 +16,7 @@ import static com.google.light.server.constants.OAuth2ProviderService.GOOGLE_DOC
 import static com.google.light.server.constants.OAuth2ProviderService.GOOGLE_LOGIN;
 import static com.google.light.server.utils.GuiceUtils.getInstance;
 import static com.google.light.server.utils.LightUtils.getCurrentTimeInMillis;
+import static com.google.light.testingutils.TestingUtils.createRandomPerson;
 import static com.google.light.testingutils.TestingUtils.getRandomString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -26,7 +27,6 @@ import com.google.light.server.exception.unchecked.BlankStringException;
 import com.google.light.server.manager.interfaces.OAuth2OwnerTokenManager;
 import com.google.light.server.persistence.entity.oauth2.owner.OAuth2OwnerTokenEntity;
 import com.google.light.server.persistence.entity.person.PersonEntity;
-import com.google.light.testingutils.TestingUtils;
 import org.junit.Test;
 
 /**
@@ -49,7 +49,7 @@ public class OAuth2OwnerTokenManagerImplTest extends AbstractLightServerTest {
   @Override
   public void setUp() {
     super.setUp();
-    randomPerson = TestingUtils.createRandomPerson(injector);
+    randomPerson = createRandomPerson(defaultEnv, testSession);
 
     providerUserId = getRandomString();
     accessToken = getRandomString();

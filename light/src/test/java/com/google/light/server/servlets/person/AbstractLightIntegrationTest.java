@@ -53,7 +53,7 @@ public abstract class AbstractLightIntegrationTest {
       String providerEmail) {
     this.providerService = checkNotNull(providerService);
     this.personId = checkPersonId(personId);
-    this.providerEmail = checkNotBlank(providerEmail);
+    this.providerEmail = checkNotBlank(providerEmail, "providerEmail");
   }
 
   @Before
@@ -77,7 +77,7 @@ public abstract class AbstractLightIntegrationTest {
 
     try {
       loginProvider =
-          new FakeLoginHelper(serverUrl, providerService, personId, providerEmail, false);
+          new FakeLoginHelper(serverUrl, providerService, personId, providerEmail);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

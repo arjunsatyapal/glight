@@ -26,8 +26,10 @@ import com.google.light.server.constants.LightEnvEnum;
 import com.google.light.server.constants.OAuth2ProviderService;
 import com.google.light.server.exception.unchecked.BlankStringException;
 import com.google.light.server.exception.unchecked.InvalidPersonIdException;
+import com.google.light.server.exception.unchecked.InvalidSessionException;
 import com.google.light.server.exception.unchecked.ServerConfigurationException;
 import com.google.light.server.exception.unchecked.httpexception.UnauthorizedException;
+import com.google.light.server.servlets.SessionManager;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
@@ -45,16 +47,6 @@ import org.apache.commons.validator.routines.LongValidator;
 public class LightPreconditions {
   private static EmailValidator emailValidator = EmailValidator.getInstance();
   private static LongValidator longValidator = LongValidator.getInstance();
-
-  /**
-   * Ensures that the passed String reference is neither null nor empty string.
-   * 
-   * @param reference
-   * @return
-   */
-  public static String checkNotBlank(String reference) {
-    return checkNotBlank(reference, "");
-  }
 
   /**
    * Javadoc is same as for {{@link #checkNotBlank(String)}. This throws an exception with cause as
@@ -138,11 +130,10 @@ public class LightPreconditions {
   /**
    * Ensures that the the given String is a valid URI.
    * 
-   * TODO(arjuns): Add test for this.
-   * 
    * @throws URISyntaxException
    */
   public static String checkValidUri(String uri) throws URISyntaxException {
+    checkNotBlank(uri, "uri");
     new URI(uri);
     return uri;
   }
@@ -214,6 +205,18 @@ public class LightPreconditions {
     }
     
     return providerUserId;
+  }
+  
+  /**
+   * Ensures that Session is valid.
+   * NOTE : Unlike other check functions, this does not return anything.
+   * 
+   * @param sessionManager
+   */
+  public static void checkValidSession(SessionManager sessionManager) {
+    if (!sessionManager.isValidSession()) {
+      throw new InvalidSessionException("Invalid Session.");
+    }
   }
   
   // Utility class.

@@ -22,6 +22,7 @@ import static com.google.light.server.utils.GuiceUtils.isExpectedException;
 import static com.google.light.testingutils.GaeTestingUtils.cheapEnvSwitch;
 import static com.google.light.testingutils.TestingUtils.getInjectorByEnv;
 import static com.google.light.testingutils.TestingUtils.getMockSessionForTesting;
+import static com.google.light.testingutils.TestingUtils.getRandomProviderUserId;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -57,13 +58,16 @@ public class GuiceUtilsTest {
   private String email;
   
   private OAuth2ProviderService defaultProviderService = GOOGLE_LOGIN;
+  private String providerUserId;
   private LightEnvEnum defaultEnv = LightEnvEnum.PROD;
   @Before
   public void setUp() {
+    this.providerUserId = getRandomProviderUserId();
     this.personId = TestingUtils.getRandomPersonId();
     this.email = TestingUtils.getRandomEmail();
     cheapEnvSwitch(defaultEnv);
-    this.session = getMockSessionForTesting(defaultEnv, defaultProviderService, personId, email);
+    this.session = getMockSessionForTesting(defaultEnv, defaultProviderService, providerUserId, 
+        personId, email);
     injector = getInjectorByEnv(defaultEnv, session);
   }
   /**

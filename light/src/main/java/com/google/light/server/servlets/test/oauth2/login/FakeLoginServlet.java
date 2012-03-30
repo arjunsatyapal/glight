@@ -57,22 +57,24 @@ public class FakeLoginServlet extends HttpServlet {
       throws ServletException, IOException {
     doGet(request, response);
   }
-  
+
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     HttpSession session = request.getSession();
 
-    String providerNameStr = checkNotBlank(request.getParameter(LOGIN_PROVIDER_ID.get()));
+    String providerNameStr = checkNotBlank(
+        request.getParameter(LOGIN_PROVIDER_ID.get()), "loginProvider");
     OAuth2ProviderService providerService = OAuth2ProviderService.valueOf(providerNameStr);
-    
-    String personIdStr = checkNotBlank(request.getParameter(PERSON_ID.get()));
+
+    String personIdStr = checkNotBlank(request.getParameter(PERSON_ID.get()), "personId");
     long personId = checkPersonId(Long.parseLong(personIdStr));
-    String providerUserId = checkNotBlank(request.getParameter(LOGIN_PROVIDER_USER_ID.get()));
-    String defaultEmail = checkNotBlank(request.getParameter(DEFAULT_EMAIL.get()));
-    session.setMaxInactiveInterval(120 /*seconds*/);
+    String providerUserId =
+        checkNotBlank(request.getParameter(LOGIN_PROVIDER_USER_ID.get()), "loginProviderUserId");
+    String defaultEmail = checkNotBlank(request.getParameter(DEFAULT_EMAIL.get()), "email");
+    session.setMaxInactiveInterval(120 /* seconds */);
 
     LightUtils.prepareSession(session, providerService, personId, providerUserId, defaultEmail);
-    
+
     StringBuilder builder = new StringBuilder();
     LightUtils.appendSessionData(builder, session);
 

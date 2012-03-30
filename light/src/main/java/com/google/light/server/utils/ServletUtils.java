@@ -96,7 +96,7 @@ public class ServletUtils {
 
     String reqEntityString = CharStreams.toString(new InputStreamReader(
         request.getInputStream(), Charsets.UTF_8));
-    checkNotBlank(reqEntityString);
+    checkNotBlank(reqEntityString, "reqEntityString");
 
     return new ServletRequestPojo<D>(request, contentType, reqEntityString, clazz);
   }

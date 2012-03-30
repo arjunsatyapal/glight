@@ -153,8 +153,7 @@ public abstract class AbstractBasicDao<D, P extends PersistenceToDtoInterface<P,
 
   /**
    * Get an entity from Datastore for given Key. If it needs to be fetched inside a transaction,
-   * then
-   * Transaction should be active.
+   * then transaction should be active.
    * 
    * @param ofy
    * @param key
