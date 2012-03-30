@@ -76,8 +76,8 @@ public enum ServletPathEnum {
   // Some test servlets.
   FAKE_LOGIN(FakeLoginServlet.class, "/test/fakelogin",
              false, false, true),
-  TEST_CREDENTIAL_BACKUP_SERVLET(TestCredentialBackupServlet.class, "/test/test_credential_backup",
-                                 false, false, true),
+  TEST_CREDENTIAL_BACKUP_SERVLET(TestCredentialBackupServlet.class, "/test/admin/test_credential_backup",
+                                 true, true, true),
   TEST_WORKFLOW_SERVLETS(TestOAuth2WorkFlowServlet.class, "/test/test_oauth2_workflow",
                          false, false, true),
 

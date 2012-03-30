@@ -80,11 +80,13 @@ public class LoginITCase {
   @Before
   public void seleniumSetup() throws Exception {
     GaeTestingUtils.cheapEnvSwitch(defaultEnv);
-
+    
+    System.out.println(getOwnerCredentialPasswdFilePath(OAUTH2));
     ownerCredentials = loadProperties(getOwnerCredentialPasswdFilePath(OAUTH2));
     validatePropertiesFile(ownerCredentials, Lists.newArrayList(PASSWORD.get()));
     password = ownerCredentials.getProperty(PASSWORD.get());
 
+    System.out.println(getConsumerCredentialFilePath(OAUTH2, GOOGLE));
     consumerCredentials = loadProperties(getConsumerCredentialFilePath(OAUTH2, GOOGLE));
     validatePropertiesFile(consumerCredentials, Lists.newArrayList(
         CLIENT_ID.get(), CLIENT_SECRET.get()));

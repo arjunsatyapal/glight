@@ -18,10 +18,14 @@ package com.google.light.server.servlets.person;
 import static com.google.light.server.constants.OAuth2ProviderService.GOOGLE_LOGIN;
 import static com.google.light.server.constants.RequestParmKeyEnum.DEFAULT_EMAIL;
 import static com.google.light.server.constants.RequestParmKeyEnum.LOGIN_PROVIDER_ID;
+import static com.google.light.server.constants.RequestParmKeyEnum.LOGIN_PROVIDER_USER_ID;
 import static com.google.light.server.constants.RequestParmKeyEnum.PERSON_ID;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.testingutils.TestingUtils.getRandomPersonId;
+import static com.google.light.testingutils.TestingUtils.getRandomProviderUserId;
 import static org.junit.Assert.assertTrue;
+
+import com.google.light.server.constants.RequestParmKeyEnum;
 
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpRequest;
@@ -47,6 +51,7 @@ import org.junit.Test;
  */
 public class FakeSessionServletITCase {
   private static String serverUrl;
+  private static String providerUserId;
   private static String email;
   private static long personId;
   private static final HttpTransport HTTP_TRANSPORT = new NetHttpTransport();
@@ -66,7 +71,7 @@ public class FakeSessionServletITCase {
     } else {
     }
 
-    // email = "unit-test@myopenedu.com";
+    providerUserId = getRandomProviderUserId();
     email = TestingUtils.getRandomEmail();
     personId = getRandomPersonId();
   }
@@ -85,6 +90,7 @@ public class FakeSessionServletITCase {
     
     Map<String, String> map = new ImmutableMap.Builder<String, String>()
         .put(LOGIN_PROVIDER_ID.get(), GOOGLE_LOGIN.name())
+        .put(LOGIN_PROVIDER_USER_ID.get(), providerUserId)
         .put(DEFAULT_EMAIL.get(), email)
         .put(PERSON_ID.get(), Long.toString(personId))
         .build();

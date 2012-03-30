@@ -1,6 +1,5 @@
 package com.google.light.server.servlets.oauth2.google.login;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.constants.OAuth2ProviderService.GOOGLE_LOGIN;
 import static com.google.light.server.servlets.oauth2.google.pojo.AbstractGoogleOAuth2TokenInfo.calculateExpireInMillis;
@@ -10,9 +9,7 @@ import static com.google.light.server.utils.GuiceUtils.getInstance;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightUtils.prepareSession;
 
-import com.google.light.server.servlets.oauth2.google.OAuth2Helper;
-
-import com.google.light.server.manager.implementation.oauth2.owner.OAuth2OwnerTokenManagerFactory;
+import com.google.common.base.Preconditions;
 
 import com.google.api.client.auth.oauth2.AuthorizationCodeResponseUrl;
 import com.google.api.client.auth.oauth2.TokenResponse;
@@ -22,13 +19,15 @@ import com.google.inject.Injector;
 import com.google.light.server.dto.oauth2.owner.OAuth2OwnerTokenDto;
 import com.google.light.server.dto.person.PersonDto;
 import com.google.light.server.exception.unchecked.GoogleAuthorizationException;
+import com.google.light.server.manager.implementation.oauth2.owner.OAuth2OwnerTokenManagerFactory;
 import com.google.light.server.manager.interfaces.OAuth2OwnerTokenManager;
 import com.google.light.server.manager.interfaces.PersonManager;
 import com.google.light.server.persistence.entity.oauth2.owner.OAuth2OwnerTokenEntity;
 import com.google.light.server.persistence.entity.person.PersonEntity;
 import com.google.light.server.servlets.SessionManager;
-import com.google.light.server.servlets.oauth2.google.OAuth2HelperFactoryInterface;
 import com.google.light.server.servlets.oauth2.google.GoogleOAuth2Utils;
+import com.google.light.server.servlets.oauth2.google.OAuth2Helper;
+import com.google.light.server.servlets.oauth2.google.OAuth2HelperFactoryInterface;
 import com.google.light.server.servlets.oauth2.google.pojo.GoogleLoginTokenInfo;
 import com.google.light.server.servlets.oauth2.google.pojo.GoogleUserInfo;
 import com.google.light.server.utils.GaeUtils;
@@ -50,10 +49,10 @@ import javax.servlet.http.HttpSession;
 @SuppressWarnings("serial")
 public class GoogleLoginCallbackServlet extends HttpServlet {
   private Injector injector;
-  
+
   private OAuth2Helper helperInstance;
   private OAuth2OwnerTokenManager googLoginTokenManager;
-  
+
   private String lightCbUrl = null;
 
   @Inject
@@ -66,7 +65,7 @@ public class GoogleLoginCallbackServlet extends HttpServlet {
     OAuth2HelperFactoryInterface helperFactory = getInstance(
         injector, OAuth2HelperFactoryInterface.class);
     helperInstance = helperFactory.create(GOOGLE_LOGIN);
-    
+
     OAuth2OwnerTokenManagerFactory tokenManagerFactory = getInstance(
         injector, OAuth2OwnerTokenManagerFactory.class);
     googLoginTokenManager = tokenManagerFactory.create(GOOGLE_LOGIN);
@@ -98,54 +97,38 @@ public class GoogleLoginCallbackServlet extends HttpServlet {
       // TODO(arjuns) : Break this method into more parts.
       // TODO(arjuns) : Write whole workflow as this is complex to understand.
 
-      Long personId = null;
       String email = null;
       String providerUserId = null;
       boolean createNewPerson = false;
       String refreshToken = null;
 
+      /*
+       * Whenever Login is initiated, session is already invalidated in the Login Servlet.
+       */
       HttpSession session = request.getSession();
-      // For non-login servlets this is injected.
+      /*
+       * For non-login servlets SessionManager is injected but here we are creating by hand.
+       */
       SessionManager sessionManager = new SessionManager(session);
-      if (!sessionManager.isValidSession()) {
-        request.getSession().invalidate();
-        session = request.getSession(true);
-        checkArgument(session.isNew(), "session should be new.");
-      }
 
       TokenResponse tokenResponse = helperInstance.getAccessToken(lightCbUrl, code);
 
-      GoogleLoginTokenInfo googTokenInfo = null;
-      if (session.isNew()) {
-        /*
-         * Then seed providerUserId and providerUserEmail from TokenInfo.
-         */
-        googTokenInfo = helperInstance.getTokenInfo(tokenResponse.getAccessToken(),
-            GoogleLoginTokenInfo.class);
-        email = googTokenInfo.getEmail();
-        providerUserId = googTokenInfo.getUserId();
-        refreshToken = tokenResponse.getRefreshToken();
-      } else {
-        /*
-         * Assumption is that session has been validated earlier. And since session is valid so
-         * fetching values from session instead of TokenInfo.
-         */
-        email = sessionManager.getEmail();
-        providerUserId = sessionManager.getLoginProviderUserId();
-        personId = sessionManager.getPersonId();
-      }
+      GoogleLoginTokenInfo googTokenInfo =
+          helperInstance.getTokenInfo(tokenResponse.getAccessToken(),
+              GoogleLoginTokenInfo.class);
+      email = googTokenInfo.getEmail();
+      providerUserId = googTokenInfo.getUserId();
+      refreshToken = tokenResponse.getRefreshToken();
+
+      /*
+       * Update session with required values except PersonId so that SessionManager is available
+       * for Guice injection.
+       */
+      prepareSessionAfterLogin(request, null, providerUserId, email);
 
       // TODO(arjuns): Replace this with OwnerManager as dao should not be used here.
       PersonEntity personEntity = null;
-      personEntity = getPersonEntityIfExists(personId, email, providerUserId);
-
-      /*
-       * If person is still not found, then it is safe to assume that a new person needs to be
-       * created.
-       */
-      if (personEntity == null) {
-        createNewPerson = true;
-      }
+      personEntity = getPersonEntityIfExists(email, providerUserId);
 
       /*
        * If Google does not return refreshToken, that means Person had visited light earlier and had
@@ -155,6 +138,25 @@ public class GoogleLoginCallbackServlet extends HttpServlet {
        * associated Person.
        */
       boolean updatePersistedTokenDetails = false;
+
+      /*
+       * If person is still not found, then it is safe to assume that a new person needs to be
+       * created.
+       */
+      Long personId = null;
+      if (personEntity == null) {
+        personEntity = createNewPersonEnttiy(tokenResponse);
+        updatePersistedTokenDetails = true;
+      } else {
+        personId = personEntity.getId();
+      }
+
+      checkNotNull(personEntity, "After this point, personEntity should not be null.");
+      personId = personEntity.getId();
+
+      // Update session with personId which is not available.
+      prepareSessionAfterLogin(request, personId, providerUserId, email);
+
       boolean newRefreshToken = !Strings.isNullOrEmpty(tokenResponse.getRefreshToken());
 
       if (newRefreshToken) {
@@ -180,15 +182,6 @@ public class GoogleLoginCallbackServlet extends HttpServlet {
         return;
       }
 
-      if (createNewPerson) {
-        request.getSession().invalidate();
-        personEntity = createNewPersonEnttiy(tokenResponse);
-        updatePersistedTokenDetails = true;
-      }
-
-      checkNotNull(personEntity, "After this point, personEntity should not be null.");
-      personId = personEntity.getId();
-
       /*
        * Now see that TokenDetails are present. It is possible that Person was successfully created,
        * but we failed to store the TokenDetails. This check will ensure that values are present.
@@ -210,7 +203,7 @@ public class GoogleLoginCallbackServlet extends HttpServlet {
        * Now update the session with relevant parameters, so that Person's next visit will not
        * require him to login again.
        */
-      prepareSessionAfterLogin(request, personId, providerUserId, personEntity);
+      prepareSessionAfterLogin(request, personId, providerUserId, email);
 
       // TODO(arjuns): Add handler for redirectUri.
       if (!GaeUtils.isProductionServer()) {
@@ -242,10 +235,10 @@ public class GoogleLoginCallbackServlet extends HttpServlet {
    * @param personEntity
    */
   private void prepareSessionAfterLogin(HttpServletRequest request, Long personId,
-      String providerUserId, PersonEntity personEntity) {
+      String providerUserId, String email) {
     try {
       prepareSession(request.getSession(), GOOGLE_LOGIN, personId,
-          providerUserId, personEntity.getEmail());
+          providerUserId, email);
     } catch (Exception e) {
       try {
         request.getSession().invalidate();
@@ -301,14 +294,13 @@ public class GoogleLoginCallbackServlet extends HttpServlet {
     /*
      * First fetch UserInfo from Google.
      */
-    
-    GoogleUserInfo userInfo = GoogleOAuth2Utils.getUserInfo(helperInstance.getHttpTransport(), 
+
+    GoogleUserInfo userInfo = GoogleOAuth2Utils.getUserInfo(helperInstance.getHttpTransport(),
         tokenResponse.getAccessToken());
 
     PersonDto dto = new PersonDto.Builder()
         .firstName(userInfo.getGivenName())
         .lastName(userInfo.getFamilyName())
-        .email(userInfo.getEmail())
         .build();
 
     PersonManager personManager = GuiceUtils.getInstance(injector, PersonManager.class);
@@ -325,46 +317,36 @@ public class GoogleLoginCallbackServlet extends HttpServlet {
    * @param personEntity
    * @return
    */
-  private PersonEntity getPersonEntityIfExists(Long personId, String email, String providerUserId) {
+  private PersonEntity getPersonEntityIfExists(String email, String providerUserId) {
+    Long personId = null;
     PersonManager personManager = GuiceUtils.getInstance(injector, PersonManager.class);
 
     PersonEntity personEntity = null;
-    if (personId == null) {
-      /*
-       * Search by loginProviderUserId is prioritized above email, because its possible that a email
-       * provided by LoginProvider may change. But assumption here is that providerUserId will never
-       * change.
-       */
-      OAuth2OwnerTokenEntity ownerTokenEntity =
-          googLoginTokenManager.getTokenByProviderUserId(providerUserId);
-
-      if (ownerTokenEntity != null) {
-        personId = ownerTokenEntity.getPersonId();
-      } else {
-        /*
-         * Search by Email. The underLying assumption is that no two accounts will share same-email
-         * ever. It is possible that two different Persons can try to game the system by sharing the
-         * Email. That can cause some issues here.
-         */
-
-        /*
-         * TODO(arjuns): Document the consequences when two different Persons try to share
-         * defaultEmail.
-         */
-        personEntity = personManager.getPersonByEmail(email);
-      }
-    }
-
     /*
-     * Since there is a chance to get PersonId from OwnerTokenEntity, so we are not putting this in
-     * a separate block
+     * Search by loginProviderUserId is prioritized above email, because its possible that a email
+     * provided by LoginProvider may change. But assumption here is that providerUserId will never
+     * change.
      */
-    if (personId != null) {
-      /*
-       * Search by personId.
-       */
+    OAuth2OwnerTokenEntity ownerTokenEntity =
+        googLoginTokenManager.getTokenByProviderUserId(providerUserId);
+
+    if (ownerTokenEntity != null) {
+      personId = ownerTokenEntity.getPersonId();
       personEntity = personManager.getPerson(personId);
+    } else {
+      /*
+       * Search by Email. The underLying assumption is that no two accounts will share same-email
+       * ever. It is possible that two different Persons can try to game the system by sharing the
+       * Email. That can cause some issues here.
+       */
+
+      /*
+       * TODO(arjuns): Document the consequences when two different Persons try to share
+       * defaultEmail.
+       */
+      personEntity = personManager.getPersonByEmail(email);
     }
+
     return personEntity;
   }
 

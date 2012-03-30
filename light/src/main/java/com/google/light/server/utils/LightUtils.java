@@ -65,7 +65,7 @@ public class LightUtils {
   // TODO(arjuns): Add token expiry time here.
   // TODO(arjuns): Fix the callers of this method.
   public static void prepareSession(HttpSession session, OAuth2ProviderService loginProvider,
-      long personId, String providerUserId, String defaultEmail) {
+      Long personId, String providerUserId, String defaultEmail) {
     synchronized (session) {
       logger.info("Prepairing session with provider[" + loginProvider 
           + ", providerUserId[" + personId

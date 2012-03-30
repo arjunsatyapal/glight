@@ -53,12 +53,18 @@ public class PersonManagerImpl implements PersonManager {
    */
   @Override
   public PersonEntity createPerson(PersonEntity entity) {
-    // We don't trust client to provide PersonId at time of Creation. So it has to be set
-    // on the server side.
+    /*
+     * We don't trust client to provide PersonId at time of Creation. So it has to be set
+     * on the server side.
+     */
     if (entity.getId() != null) {
       throw new IdShouldNotBeSet();
     }
 
+    /*
+     * Similarly, we dont trust email given by Client at the time of creation. We fetch it from
+     * session.
+     */
     checkArgument(entity.getEmail() == null, "email should not be set for createPerson.");
     entity.setEmail(sessionManager.getEmail());
     
@@ -88,7 +94,10 @@ public class PersonManagerImpl implements PersonManager {
    */
   @Override
   public PersonEntity getPerson(Long id) {
-    checkValidSession(sessionManager);
+    /*
+     * We dont check for session validity as this is used for finding person at the time of creating
+     * a person.
+     */
     return personDao.get(checkPersonId(id));
   }
   

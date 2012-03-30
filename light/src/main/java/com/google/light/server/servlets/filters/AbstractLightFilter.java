@@ -52,7 +52,7 @@ public abstract class AbstractLightFilter implements Filter {
   private static final Logger logger = Logger.getLogger(Filter.class.getName());
   private FilterConfig filterConfig;
   private Injector injector;
-  
+
   @Inject
   protected AbstractLightFilter(Injector injector) {
     this.injector = Preconditions.checkNotNull(injector);
@@ -116,22 +116,17 @@ public abstract class AbstractLightFilter implements Filter {
    * @throws ServletException
    */
   void handleFilterChain(HttpServletRequest request, HttpServletResponse response,
-      FilterChain filterChain)
-      throws IOException, ServletException {
+      FilterChain filterChain) {
     ServletPathEnum servletPath = ServletPathEnum.getServletPathEnum(request.getRequestURI());
-    
+
     /*
-     * Create a session irrespective of whether session already exists. Then make it 
+     * Create a session irrespective of whether session already exists. Then make it
      * avaialable in RequestScope so that it can be injected by Guice.
      */
     HttpSession session = request.getSession();
     seedEntityInRequestScope(request, HttpSession.class, AnotHttpSession.class, session);
-    
-    if (servletPath.isRequiredLogin()) {
-      validateAndDoFilter(request, response, filterChain, servletPath);
-    } else {
-      filterChain.doFilter(request, response);
-    }
+
+    validateAndDoFilter(request, response, filterChain, servletPath);
   }
 
   public FilterConfig getFilterConfig() {

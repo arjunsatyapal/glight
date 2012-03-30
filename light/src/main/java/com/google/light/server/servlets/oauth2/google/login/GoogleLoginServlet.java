@@ -48,6 +48,8 @@ public class GoogleLoginServlet extends HttpServlet {
   @Override
   protected void doGet(HttpServletRequest request, HttpServletResponse response)
       throws IOException {
+    // Since we are logging in, so invalidate existing session.
+    request.getSession().invalidate();
     String callbackUrl = ServletUtils.getServletUrl(request, OAUTH2_GOOGLE_LOGIN_CB);
     
     OAuth2Helper instance = factory.create(GOOGLE_LOGIN);
