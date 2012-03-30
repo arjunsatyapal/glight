@@ -87,7 +87,7 @@ public class PersonDaoTest extends AbstractBasicDaoTest<PersonDto, PersonEntity,
    */
   @Test
   @Override
-  public void test_get_ofyId() {
+  public void test_get() {
     Long id = getRandomPersonId();
     PersonEntity testEntity = getDefaultEntityBuilder().id(id).build();
 

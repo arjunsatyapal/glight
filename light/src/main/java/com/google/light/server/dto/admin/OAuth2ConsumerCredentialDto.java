@@ -16,18 +16,16 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
 import com.google.light.server.constants.OAuth2ProviderEnum;
-
 import com.google.light.server.dto.DtoToPersistenceInterface;
 import com.google.light.server.persistence.entity.admin.OAuth2ConsumerCredentialEntity;
-import javax.annotation.Nullable;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
 /**
- * DTO for OAuth2Consumer Credentials.
- * migrate this to builder pattern.
- *  
+ * DTO for OAuth2Consumer Credentials. Corresponding Entity is
+ * {@link OAuth2ConsumerCredentialEntity}.
+ * 
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
@@ -44,9 +42,7 @@ public class OAuth2ConsumerCredentialDto implements
    * @param clientId
    * @param clientSecret
    */
-
   protected OAuth2ConsumerCredentialDto(OAuth2ProviderEnum provider, String clientId,
-
       String clientSecret) {
     this.provider = provider;
     this.clientId = clientId;
@@ -64,8 +60,10 @@ public class OAuth2ConsumerCredentialDto implements
   }
 
   /**
-   * {@inheritDoc} This method should not be called. Instead call {@link #toPersistenceEntity()}.
+   * {@inheritDoc} This method should not be called. 
+   * @deprecated call {@link #toPersistenceEntity()}.
    */
+  @Deprecated
   @Override
   public OAuth2ConsumerCredentialEntity toPersistenceEntity(String id) {
     throw new UnsupportedOperationException("this should not be called.");
@@ -77,7 +75,6 @@ public class OAuth2ConsumerCredentialDto implements
    * @return
    */
   public OAuth2ConsumerCredentialEntity toPersistenceEntity() {
-
     return new OAuth2ConsumerCredentialEntity.Builder()
         .clientId(clientId)
         .clientSecret(clientSecret)

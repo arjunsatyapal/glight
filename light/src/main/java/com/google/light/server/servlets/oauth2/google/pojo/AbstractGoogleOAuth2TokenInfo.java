@@ -15,6 +15,7 @@
  */
 package com.google.light.server.servlets.oauth2.google.pojo;
 
+import static com.google.light.server.constants.LightConstants.TASK_QUEUUE_TIMEOUT_IN_SEC;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
 import static com.google.light.server.utils.LightUtils.getCurrentTimeInMillis;
@@ -52,9 +53,10 @@ public abstract class AbstractGoogleOAuth2TokenInfo<D> implements DtoInterface<D
   private String scope;
   // This value is not of much use as it is in seconds.
   private long expiresIn;
-  private long expiresInMillis = 0; // Hack to tell that value has not been set.
+  // Hack to tell that value has not been set and then validate method updates this.
+  private long expiresInMillis = 0;
   private String accessType;
-  
+
   @JsonProperty(value = "issued_to")
   public String getIssuedTo() {
     return issuedTo;
@@ -170,12 +172,12 @@ public abstract class AbstractGoogleOAuth2TokenInfo<D> implements DtoInterface<D
    * to absolute expiry time in millis so that calculation of expiry time becomes easier as we dont
    * have to store the token creationTime. In case its required then it can be reverse computed.
    * 
-   * In addition to that, we are deliberately shortening the life of AccessToken by 10 minutes.
-   * Reason for doing this is we have a TimeOut of 30seconds for FrontEnd and 10 minutes for
-   * TaskQueues. And we don't want to get any access exception during those tasks. In addition in
-   * future, once we start using FrontEnds, still we may not want to run any task for more then 10
-   * mins. If some task happens to run for more then 10minutes, then at that time that task should
-   * take care of this.
+   * In addition to that, we are deliberately shortening the life of AccessToken by
+   * {@link LightConstants#TASK_QUEUUE_TIMEOUT_IN_SEC} seconds. Reason for doing this is we have a
+   * TimeOut of 30 seconds for FrontEnd and 10 minutes for TaskQueues. And we don't want to get any
+   * access exception during those TaskQueue execution. In addition in future, once we start using
+   * FrontEnds, still we may not want to run any task for more then 10 mins. If some task happens
+   * to run for more then 10minutes, then at that time that task should take care of this.
    * 
    * TODO(arjuns) : Add support for automatic refreshing when token expires.
    * 
@@ -185,7 +187,7 @@ public abstract class AbstractGoogleOAuth2TokenInfo<D> implements DtoInterface<D
   @JsonIgnore(value = true)
   public static long calculateExpireInMillis(long expiresInSecFromNow) {
     long nowInMillis = getCurrentTimeInMillis();
-    long modifiedExpiryInMillis = (expiresInSecFromNow - 10 * 60 /* 10mins */) * 1000;
+    long modifiedExpiryInMillis = (expiresInSecFromNow - TASK_QUEUUE_TIMEOUT_IN_SEC) * 1000;
     if (modifiedExpiryInMillis < 0) {
       modifiedExpiryInMillis = 0;
     }

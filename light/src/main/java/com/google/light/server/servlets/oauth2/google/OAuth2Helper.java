@@ -1,9 +1,12 @@
 /*
- * Copyright 2012 Google Inc.
+ * Copyright (C) Google Inc.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -11,6 +14,8 @@
  * the License.
  */
 package com.google.light.server.servlets.oauth2.google;
+
+import com.google.api.client.http.HttpTransport;
 
 import com.google.api.client.auth.oauth2.AuthorizationCodeFlow;
 import com.google.api.client.auth.oauth2.TokenResponse;
@@ -129,4 +134,11 @@ public interface OAuth2Helper {
    * @return
    */
   public <D extends DtoInterface<D>> boolean isValidAccessToken(String accessToken, Class<D> clazz);
+
+  /**
+   * Returns HttpTransport.
+   * 
+   * @return
+   */
+  public HttpTransport getHttpTransport();
 }

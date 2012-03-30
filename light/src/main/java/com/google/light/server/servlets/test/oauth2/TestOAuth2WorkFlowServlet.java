@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * Servlet to trigger any OAuth2 workflow.
  * 
+ * TODO(arjuns): Move utility methods to LightUtils.
  * 
  * @author Arjun Satyapal
  */

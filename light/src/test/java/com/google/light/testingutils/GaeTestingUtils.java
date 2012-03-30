@@ -17,7 +17,8 @@ package com.google.light.testingutils;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkEmail;
-import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
+import static com.google.light.testingutils.TestingUtils.getInjectorByEnv;
+import static com.google.light.testingutils.TestingUtils.getMockSessionForTesting;
 
 import com.google.appengine.api.utils.SystemProperty;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
@@ -41,7 +42,7 @@ public class GaeTestingUtils {
   private LightEnvEnum env;
   private OAuth2ProviderService providerService;
   private String email;
-  private String userId;
+  private long personId;
   
   /** See similar variables in {@link com.google.appengine.api.users.UserServiceImpl} */
   static final String USER_ID_KEY =
@@ -59,11 +60,11 @@ public class GaeTestingUtils {
   private LocalServiceTestHelper gaeTestHelper;
 
   public GaeTestingUtils(LightEnvEnum env, OAuth2ProviderService providerService, String email,
-      String userId, boolean isAdmin) {
+      long personId, boolean isAdmin) {
     this.env = checkNotNull(env);
     this.providerService = checkNotNull(providerService);
     this.email = checkEmail(email);
-    this.userId = checkNotBlank(userId);
+    this.personId = personId;
     
     this.env = checkNotNull(env);
     basicSystemPropertySetup(env);
@@ -75,7 +76,6 @@ public class GaeTestingUtils {
         
     // TODO(arjuns): Fix this.
         .setEnvAuthDomain("google")
-        .setEnvEmail(email)
         .setEnvIsAdmin(isAdmin)
         .setEnvAppId(env.getAppIds().get(0));
     
@@ -114,8 +114,8 @@ public class GaeTestingUtils {
    * Teardown GAE testing environment.
    */
   public void tearDown() {
-    HttpSession mockSession = TestingUtils.getMockSessionForTesting(providerService, userId, email);
-    Injector injector = TestingUtils.getInjectorByEnv(env, mockSession);
+    HttpSession mockSession = getMockSessionForTesting(env, providerService, personId, email);
+    Injector injector = getInjectorByEnv(env, mockSession);
     injector.getInstance(GuiceFilter.class).destroy();
     gaeTestHelper.tearDown();
   }
@@ -134,11 +134,22 @@ public class GaeTestingUtils {
   }
 
   /**
+   * Enable Logged in.
+   * 
+   * @param isAdmin
+   */
+  public void setLoggedIn(boolean isLoggedIn) {
+    gaeTestHelper.setEnvIsLoggedIn(isLoggedIn);
+  }
+  
+  /**
    * Set current GAE user as GAE Admin.
    * 
    * @param isAdmin
    */
   public void setAdmin(boolean isAdmin) {
+    // For becoming Admin, one has to log in first.
+    gaeTestHelper.setEnvIsLoggedIn(true);
     gaeTestHelper.setEnvIsAdmin(isAdmin);
   }
 

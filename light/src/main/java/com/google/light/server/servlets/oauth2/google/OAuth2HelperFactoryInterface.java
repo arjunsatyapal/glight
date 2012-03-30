@@ -18,12 +18,10 @@ package com.google.light.server.servlets.oauth2.google;
 import com.google.light.server.constants.OAuth2ProviderService;
 
 /**
- *
+ * Guice Factory for {@link OAuth2Helper} implemented by {@link OAuth2HelperImpl}.
  * 
- * TODO(arjuns): Add test for this class.
- *
  * @author Arjun Satyapal
  */
-public interface GoogleOAuth2HelperFactoryInterface {
-  public OAuth2HelperImpl create(OAuth2ProviderService providerService);
+public interface OAuth2HelperFactoryInterface {
+  public OAuth2Helper create(OAuth2ProviderService providerService);
 }

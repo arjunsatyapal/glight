@@ -24,12 +24,16 @@ import static com.google.light.server.utils.LightPreconditions.checkNonEmptyList
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkNull;
 import static com.google.light.server.utils.LightPreconditions.checkPersonId;
+import static com.google.light.server.utils.LightPreconditions.checkPersonIsGaeAdmin;
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
 import static com.google.light.server.utils.LightPreconditions.checkProviderUserId;
+import static com.google.light.testingutils.TestingUtils.gaeSetup;
 import static com.google.light.testingutils.TestingUtils.getRandomString;
 import static com.google.light.testingutils.TestingUtils.getUUIDString;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
+import com.google.light.server.exception.unchecked.httpexception.UnauthorizedException;
 
 import com.google.common.collect.Lists;
 import com.google.light.server.constants.LightEnvEnum;
@@ -134,8 +138,8 @@ public class LightPreconditionsTest {
       gaeTestingUtils.tearDown();
     }
   }
-  
-  private LightEnvEnum getRandomOtherEnvExcept(LightEnvEnum...envs) {
+
+  private LightEnvEnum getRandomOtherEnvExcept(LightEnvEnum... envs) {
     List<LightEnvEnum> remainingEnvList = Lists.newArrayList(LightEnvEnum.values());
     remainingEnvList.removeAll(Lists.newArrayList(envs));
 
@@ -143,7 +147,7 @@ public class LightPreconditionsTest {
     LightEnvEnum extraEnv = remainingEnvList.get(randomExtraEnvIndex);
     return extraEnv;
   }
-  
+
   /**
    * Test for {@link LightPreconditions#checkIsNotEnv(Object, LightEnvEnum...)}
    */
@@ -157,15 +161,14 @@ public class LightPreconditionsTest {
 
       LightEnvEnum otherEnv1 = getRandomOtherEnvExcept(currEnv);
       LightEnvEnum otherEnv2 = getRandomOtherEnvExcept(currEnv, otherEnv1);
-      
+
       assertTrue(currEnv != otherEnv1);
       assertTrue(currEnv != otherEnv2 && otherEnv1 != otherEnv2);
-      
+
       GaeTestingUtils gaeTestingUtils = TestingUtils.gaeSetup(currEnv);
 
       // Positive Test : Send currEnv and extraEnv
-        checkIsNotEnv(this, otherEnv1, otherEnv2);
-      
+      checkIsNotEnv(this, otherEnv1, otherEnv2);
 
       /*
        * Negative Test : As extraEnv is different from currEnv, so if we limit checkIsEnv only to
@@ -290,6 +293,33 @@ public class LightPreconditionsTest {
   }
 
   /**
+   * Test for {@link LightPreconditions#checkPersonIsGaeAdmin()}
+   */
+  @Test
+  public void test_checkPersonIsGaeAdmin() {
+    GaeTestingUtils gaeTestingUtils = null;
+    try {
+      gaeTestingUtils = gaeSetup(LightEnvEnum.PROD);
+      // Default is non-admin so should fail.
+      checkPersonIsGaeAdmin();
+      fail("should have failed.");
+    } catch (UnauthorizedException e) {
+      // Expected
+    } finally {
+      gaeTestingUtils.tearDown();
+    }
+
+    // Now change to admin and check again.
+    try {
+      gaeTestingUtils.setAdmin(true /* isAdmin */);
+      gaeTestingUtils.setUp();
+      checkPersonIsGaeAdmin();
+    } finally {
+      gaeTestingUtils.tearDown();
+    }
+  }
+
+  /**
    * Test for {@link LightPreconditions#checkPositiveLong(Long)}
    */
   @Test
@@ -336,16 +366,16 @@ public class LightPreconditionsTest {
    */
   @Test
   public void test_checkNull() {
-    checkNull(null);
+    checkNull(null, "");
 
     try {
-      checkNull("");
+      checkNull(" ", "should fail");
       fail("should have failed.");
     } catch (IllegalArgumentException e) {
       // Expected
     }
   }
-  
+
   /**
    * Test for {@link LightPreconditions#checkProviderUserId(OAuth2ProviderService, String)}.
    */
@@ -354,7 +384,7 @@ public class LightPreconditionsTest {
     // Positive Testing.
     checkProviderUserId(GOOGLE_LOGIN, getRandomString());
     checkProviderUserId(GOOGLE_DOC, null);
-    
+
     // Negative Testing : GOOGLE_LOGIN with null.
     try {
       checkProviderUserId(GOOGLE_LOGIN, null);
@@ -362,7 +392,7 @@ public class LightPreconditionsTest {
     } catch (BlankStringException e) {
       // Expected
     }
-    
+
     // Negative Testing : GOOGLE_LOGIN with blank string.
     try {
       checkProviderUserId(GOOGLE_LOGIN, " ");
@@ -378,7 +408,7 @@ public class LightPreconditionsTest {
     } catch (IllegalArgumentException e) {
       // Expected
     }
-    
+
     // Negative Testing : GOOGLE_DOC with non-null
     try {
       checkProviderUserId(GOOGLE_DOC, getRandomString());

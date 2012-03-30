@@ -1,9 +1,12 @@
 /*
  * Copyright (C) Google Inc.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -12,6 +15,7 @@
  */
 package com.google.light.server.persistence.dao;
 
+import static com.google.light.server.utils.ObjectifyUtils.assertAndReturnUniqueEntity;
 import com.google.inject.Inject;
 import com.google.light.server.constants.OAuth2ProviderService;
 import com.google.light.server.dto.oauth2.owner.OAuth2OwnerTokenDto;
@@ -48,7 +52,7 @@ public class OAuth2OwnerTokenDao extends
    * @param email
    * @return
    */
-  public OAuth2OwnerTokenEntity getTokenByProviderUserId(
+  public OAuth2OwnerTokenEntity getTokenByProviderAndUserId(
       OAuth2ProviderService providerService, String providerUserId) {
     Objectify ofy = ObjectifyUtils.nonTransaction();
 
@@ -58,13 +62,14 @@ public class OAuth2OwnerTokenDao extends
 
     String errMessage = "Found more then one entry for providerService[" + providerService +
         "], providerUserId[" + providerUserId + "].";
-    return ObjectifyUtils.assertAndReturnUniqueEntity(query, errMessage);
+    return assertAndReturnUniqueEntity(query, errMessage);
   }
 
   /**
    * OAuth2 Owner Tokens dont use a DataStore generatedId. Instead they have a derived Id.
-   * Therefore, clients should use {{@link #get(String, OAuth2ProviderService)}.
+   * @deprecated clients should use {{@link #get(String, OAuth2ProviderService)}.
    */
+  @Deprecated
   @Override
   public OAuth2OwnerTokenEntity get(String id) {
     throw new UnsupportedOperationException(
@@ -78,7 +83,8 @@ public class OAuth2OwnerTokenDao extends
    * @param providerService
    * @return
    */
-  public OAuth2OwnerTokenEntity get(long personId, OAuth2ProviderService providerService) {
+  public OAuth2OwnerTokenEntity getByPersonIdAndOAuth2ProviderService(
+      long personId, OAuth2ProviderService providerService) {
     String fetchId = personId + "." + providerService.name();
     return super.get(fetchId);
   }

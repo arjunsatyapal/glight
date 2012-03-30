@@ -229,4 +229,14 @@ public class OAuth2OwnerTokenEntityTest extends AbstractPersistenceEntityTest {
 
     assertEquals(dto, getEntityBuilder().build().toDto());
   }
+  
+  /**
+   * Test for {@link OAuth2OwnerTokenEntity#computeId(long, OAuth2ProviderService)}.
+   */
+  @Test
+  public void test_computeId() {
+    String expectedId = personId + "." + defaultProviderService.name();
+    OAuth2OwnerTokenEntity entity = getEntityBuilder().build();
+    assertEquals(expectedId, entity.getId());
+  }
 }

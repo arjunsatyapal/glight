@@ -43,7 +43,7 @@ public class OAuth2OwnerTokenManagerImpl implements OAuth2OwnerTokenManager {
    */
   @Override
   public OAuth2OwnerTokenEntity getToken(long personId) {
-    return dao.get(personId, providerService);
+    return dao.getByPersonIdAndOAuth2ProviderService(personId, providerService);
   }
 
   /**
@@ -62,7 +62,7 @@ public class OAuth2OwnerTokenManagerImpl implements OAuth2OwnerTokenManager {
   @Override
   public OAuth2OwnerTokenEntity getTokenByProviderUserId(String providerUserId) {
     if (providerService.isUsedForLogin()) {
-      return dao.getTokenByProviderUserId(providerService, providerUserId);
+      return dao.getTokenByProviderAndUserId(providerService, providerUserId);
     }
 
     throw new IllegalArgumentException(

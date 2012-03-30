@@ -49,6 +49,7 @@ public class PersonServletITCase extends AbstractLightIntegrationTest {
   private static String email = "unit-test@myopenedu.com";
   
   public PersonServletITCase() {
+    // TODO(arjuns): extract 1234L into a constant, and add javadoc why it is needed.
     super(GOOGLE_LOGIN, 1234L, email);
   }
   

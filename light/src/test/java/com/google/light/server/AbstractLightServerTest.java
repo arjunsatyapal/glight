@@ -15,14 +15,12 @@ package com.google.light.server;
 import static com.google.light.server.constants.OAuth2ProviderService.GOOGLE_LOGIN;
 import static com.google.light.testingutils.TestingUtils.getMockSessionForTesting;
 import static com.google.light.testingutils.TestingUtils.getRandomEmail;
-import static com.google.light.testingutils.TestingUtils.getRandomFederatedId;
+import static com.google.light.testingutils.TestingUtils.getRandomPersonId;
 import static com.google.light.testingutils.TestingUtils.getRandomString;
-import static com.google.light.testingutils.TestingUtils.getRandomUserId;
 
 import com.google.inject.Injector;
 import com.google.light.server.constants.LightEnvEnum;
 import com.google.light.server.constants.OAuth2ProviderService;
-import com.google.light.server.guice.TestInstanceProvider;
 import com.google.light.testingutils.GaeTestingUtils;
 import com.google.light.testingutils.TestingUtils;
 import javax.servlet.http.HttpSession;
@@ -36,21 +34,16 @@ import org.junit.BeforeClass;
  * 
  * @author Arjun Satyapal
  */
-@SuppressWarnings("deprecation")
 public abstract class AbstractLightServerTest {
-  private static boolean gaeSetupDone = false;
-
   protected static LightEnvEnum defaultEnv = LightEnvEnum.UNIT_TEST;
   
   protected static OAuth2ProviderService defaultProviderService = GOOGLE_LOGIN;
-  protected String testUserId;
+  protected long testPersonId;
   protected String testEmail;
-  protected String testFederatedId;
   protected String testFirstName;
   protected String testLastName;
 
   protected Injector injector;
-  protected TestInstanceProvider testInstanceProvider;
   protected static GaeTestingUtils gaeTestingUtils = null;
 
   // TODO(arjuns): Fix this setup part so that we dont see exceptions in console.
@@ -58,18 +51,12 @@ public abstract class AbstractLightServerTest {
   public static void gaeSetup() {
     // This causes GAE Test Setup once.
     gaeTestingUtils = TestingUtils.gaeSetup(defaultEnv);
-    /*
-     * Deliberately keeping this false so that each test is forced to initiate with its own Env with
-     * each setup.
-     */
-
-    gaeSetupDone = true;
   }
 
   @AfterClass
   public static void gaeTearDown() {
     gaeTestingUtils.tearDown();
-    gaeSetupDone = false;
+//    gaeSetupDone = false;
   }
 
   /**
@@ -79,38 +66,28 @@ public abstract class AbstractLightServerTest {
    * @param isLoggedIn
    * @param isAdmin
    */
+  @Deprecated
   protected void gaeEnvReset(String email, boolean isLoggedIn, boolean isAdmin) {
     // TODO(arjuns): Fix this.
 //    gaeTestingUtils.setAuthDomain(authDomain);
     gaeTestingUtils.setEmail(email);
     gaeTestingUtils.setAdmin(isAdmin);
-
-    gaeSetupDone = true;
   }
 
   @Before
   public void setUp() {
-    testUserId = getRandomUserId();
+    testPersonId = getRandomPersonId();
     testEmail = getRandomEmail();
-    testFederatedId = getRandomFederatedId();
     testFirstName = getRandomString();
     testLastName = getRandomString();
 
-    if (!gaeSetupDone) {
-      gaeEnvReset(testEmail, true /* loggedIn */, false /* isAdmin */);
-    }
-    HttpSession mockSession = getMockSessionForTesting(defaultProviderService, testUserId, testEmail);
+    HttpSession mockSession = getMockSessionForTesting(defaultEnv, defaultProviderService, 
+        testPersonId, testEmail);
 
     injector = TestingUtils.getInjectorByEnv(LightEnvEnum.UNIT_TEST, mockSession);
-    testInstanceProvider = injector.getInstance(TestInstanceProvider.class);
   }
 
   @After
   public void tearDown() {
-    testFirstName = null;
-    testLastName = null;
-    testUserId = null;
-    testEmail = null;
-    gaeSetupDone = false;
   }
 }

@@ -18,7 +18,6 @@ package com.google.light.server.utils;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
-import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.appengine.api.utils.SystemProperty;
@@ -35,7 +34,7 @@ public class GaeUtils {
 
   /**
    * Get GAE User Service.
-   * TODO(arjuns) : add test for it.
+   * 
    * @return
    */
   public static UserService getUserService() {
@@ -43,31 +42,8 @@ public class GaeUtils {
   }
 
   /**
-   * Get current logged in GAE User.
-   * TODO(arjuns) : add test for this.
-   * @return Return current Logged In user. Null if user is not logged in.
-   */
-  @Deprecated
-  public static User getUser() {
-    return checkNotNull(getUserService().getCurrentUser(), "Seems user is not logged in.");
-  }
-
-  /**
-   * Get current logged in GAE User's id. This should be called when you are sure that user is
-   * logged in.
-   * TODO(arjuns) : Remove this method or add test for it.
-   * @deprecated Going forward {@link SessionManager#getPersonId()} should be used. 
-   * @return
-   */
-  @Deprecated
-  public static String getGaeUserId() {
-    return checkNotBlank(getUser().getUserId(), "userId is blank.");
-  }
-
-  /**
    * Returns true if user is logged in.
    * 
-   * TODO(arjuns): Add test for this.
    * @return
    */
   public static boolean isUserLoggedIn() {
@@ -78,13 +54,11 @@ public class GaeUtils {
    * Returns true if current user is Admin. Returns false if user is not admin / user is not logged
    * in.
    * 
-   * TODO(arjuns): Add test for this.
    * @return
    */
   public static boolean isUserAdmin() {
     return isUserLoggedIn() && getUserService().isUserAdmin();
   }
-
 
   /**
    * Returns Appengine AppId for the current environment.
@@ -99,12 +73,12 @@ public class GaeUtils {
   /**
    * Ensures that Application is running on AppEngine.
    * 
-   * TODO(arjuns): Add test for this.
    * @return
    */
   public static boolean isRunningOnGAE() {
     return SystemProperty.Environment.Value.Production == SystemProperty.environment.value();
   }
+
   /**
    * Returns true if Application is running on local DevelopmentServer.
    * This depends on the {@link SystemProperty#environment}.
@@ -112,7 +86,7 @@ public class GaeUtils {
   public static boolean isDevServer() {
     return SystemProperty.Environment.Value.Development == SystemProperty.environment.value();
   }
-  
+
   /**
    * Returns true if Light Instance is running on AppEngine and is configured as a Production App.
    * This depends on AppId.
@@ -138,7 +112,7 @@ public class GaeUtils {
     return SystemProperty.environment.value() == null
         && LightEnvEnum.UNIT_TEST == LightEnvEnum.getLightEnv();
   }
-  
+
   // Utility Class.
   private GaeUtils() {
   }

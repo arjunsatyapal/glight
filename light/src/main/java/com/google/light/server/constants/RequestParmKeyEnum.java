@@ -18,9 +18,11 @@ package com.google.light.server.constants;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
 /**
- * Enum to hold Keys for Http Headers.
+ * Enum to encapsulate Strings that are used for RequestParameters, Stored in Persistence etc.
  * 
  * TODO(arjuns): Move params to another class which are not used for Production.
+ * TODO(arjuns): Add boolean category to show what is used for RequestParams and what is used
+ * for Persistence.
  *
  * @author Arjun Satyapal
  */

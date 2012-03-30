@@ -15,19 +15,17 @@
  */
 package com.google.light.server.persistence.dao;
 
-import java.util.logging.Logger;
+import static com.google.light.server.utils.ObjectifyUtils.assertAndReturnUniqueEntity;
 
-import com.google.light.server.dto.person.PersonDto;
-
-import com.google.common.collect.Lists;
 import com.google.inject.Inject;
+import com.google.light.server.dto.person.PersonDto;
 import com.google.light.server.exception.unchecked.EmailInUseException;
 import com.google.light.server.persistence.entity.person.PersonEntity;
 import com.google.light.server.utils.ObjectifyUtils;
 import com.googlecode.objectify.Objectify;
 import com.googlecode.objectify.ObjectifyService;
 import com.googlecode.objectify.Query;
-import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * DAO for {@link PersonEntity}.
@@ -59,7 +57,8 @@ public class PersonDao extends AbstractBasicDao<PersonDto, PersonEntity, Long> {
     Query<PersonEntity> query =
         ofy.query(PersonEntity.class).filter(PersonEntity.OFY_EMAIL_QUERY_STRING, email);
 
-    return assertAndReturnUniqueUserEntity(email, query);
+    String errMessage = "For email=[" + email + "], found more then 1 record.";
+    return assertAndReturnUniqueEntity(query, errMessage);
   }
 
   /**
@@ -93,24 +92,5 @@ public class PersonDao extends AbstractBasicDao<PersonDto, PersonEntity, Long> {
     }
 
     return logAndReturn(logger, returnEntity, returnMsg);
-  }
-
-  /**
-   * TODO(arjuns): Make this generic, and move to ObjectifyUtils..
-   * Asserts that records returned by this is <= 1. If it is < 1, then return null.
-   */
-  private PersonEntity assertAndReturnUniqueUserEntity(String email, Query<PersonEntity> filter) {
-    List<PersonEntity> tempList = Lists.newArrayList(filter.iterator());
-
-    if (tempList != null && tempList.size() > 1) {
-      throw new IllegalStateException("For email=[" + email + "], found [" + tempList.size()
-          + "] records.");
-    }
-
-    if (tempList.size() == 0) {
-      return null;
-    }
-
-    return tempList.get(0);
   }
 }

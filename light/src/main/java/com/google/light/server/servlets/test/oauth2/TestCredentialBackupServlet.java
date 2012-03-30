@@ -19,7 +19,7 @@ import static com.google.light.server.constants.OAuth2ProviderService.GOOGLE_LOG
 import static com.google.light.server.servlets.test.CredentialStandardEnum.OAUTH2;
 import static com.google.light.server.servlets.test.CredentialUtils.getOwnerTokenInfoFilePath;
 import static com.google.light.server.utils.GuiceUtils.getInstance;
-import static com.google.light.server.utils.LightPreconditions.checkIsEnv;
+import static com.google.light.server.utils.LightPreconditions.checkIsNotEnv;
 
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
@@ -71,13 +71,18 @@ public class TestCredentialBackupServlet extends HttpServlet {
 
   @Inject
   public TestCredentialBackupServlet(Injector injector) {
-    checkIsEnv(this, LightEnvEnum.DEV_SERVER, LightEnvEnum.UNIT_TEST, LightEnvEnum.QA);
+    checkIsNotEnv(this, LightEnvEnum.PROD);
     this.injector = checkNotNull(injector, "injector");
   }
 
   @Override
   public void service(HttpServletRequest request, HttpServletResponse response) {
-    if (LightEnvEnum.getLightEnv() == LightEnvEnum.QA) {
+    if (LightEnvEnum.getLightEnv() != LightEnvEnum.DEV_SERVER) {
+      /*
+       *  Even though we allow instantiation of this servlet for Test, we dont allow
+       *  this to be called in non DEV_SERVER environments for safety reasons.
+       */
+      
       throw new UnsupportedOperationException("This Servlet is not supported in QA");
     }
     
@@ -148,6 +153,11 @@ public class TestCredentialBackupServlet extends HttpServlet {
     }
   }
 
+  /**
+   * Get JSON representation for Consumer Credentials.
+   * 
+   * TODO(arjuns): Add test for this.
+   */
   private String getConsumerCredJsonString()
       throws JsonGenerationException, JsonMappingException, IOException {
     List<OAuth2ConsumerCredentialEntity> entities = consumerCredentialDao.getAllOAuth2ConsumerCredentials();
@@ -155,6 +165,11 @@ public class TestCredentialBackupServlet extends HttpServlet {
     return JsonUtils.toJson(entities);
   }
   
+  /**
+   * Get JSON Representation for OwnerToken.
+   * 
+   * TODO(arjuns): Add test for this.
+   */
   private String getOwnerTokenJsonString(OAuth2OwnerTokenManager tokenManager, long personId)
       throws JsonGenerationException, JsonMappingException, IOException {
     OAuth2OwnerTokenEntity entity = tokenManager.getToken(personId);

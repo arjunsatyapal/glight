@@ -32,7 +32,7 @@ import com.google.light.server.manager.interfaces.OAuth2OwnerTokenManager;
 import com.google.light.server.manager.interfaces.PersonManager;
 import com.google.light.server.persistence.dao.OAuth2ConsumerCredentialDao;
 import com.google.light.server.servlets.oauth2.google.OAuth2HelperImpl;
-import com.google.light.server.servlets.oauth2.google.GoogleOAuth2HelperFactoryInterface;
+import com.google.light.server.servlets.oauth2.google.OAuth2HelperFactoryInterface;
 import com.google.light.server.servlets.oauth2.google.OAuth2Helper;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpSession;
@@ -67,7 +67,7 @@ public abstract class BaseGuiceModule extends AbstractModule {
     // Guice Assisted Inject Bindings.
     install(new FactoryModuleBuilder()
       .implement(OAuth2Helper.class, OAuth2HelperImpl.class)
-      .build(GoogleOAuth2HelperFactoryInterface.class));
+      .build(OAuth2HelperFactoryInterface.class));
     
     install(new FactoryModuleBuilder()
       .implement(OAuth2OwnerTokenManager.class, OAuth2OwnerTokenManagerImpl.class)

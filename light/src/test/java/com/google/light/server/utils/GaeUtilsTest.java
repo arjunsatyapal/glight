@@ -15,6 +15,10 @@
  */
 package com.google.light.server.utils;
 
+import static com.google.light.server.constants.LightEnvEnum.PROD;
+import static com.google.light.server.constants.LightEnvEnum.UNIT_TEST;
+import static com.google.light.server.utils.GaeUtils.isUserAdmin;
+import static com.google.light.server.utils.GaeUtils.isUserLoggedIn;
 import static com.google.light.testingutils.TestingUtils.gaeSetup;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -36,19 +40,33 @@ public class GaeUtilsTest {
   private GaeTestingUtils gaeTestingUtils = null;
   /**
    * Test for {@link GaeUtils#getAppId()}.
-   * This is just one test for QA Env. Others are done as part of the {@link LightEnvEnumTest}.
+   * This is just one test for Prod Env. Others are done as part of the {@link LightEnvEnumTest}.
    */
   @Test
   public void test_getAppId() {
-    String expectedAppId = "light-qa";
+    String expectedAppId = "light-prod";
 
     try {
-      gaeTestingUtils = gaeSetup(LightEnvEnum.QA);
+      gaeTestingUtils = gaeSetup(LightEnvEnum.PROD);
       assertEquals(expectedAppId, GaeUtils.getAppId());
     } finally {
       gaeTestingUtils.tearDown();
     }
   }
+  
+  /**
+   * Test for {@link GaeUtils#getUserService()}.
+   */
+  @Test
+  public void test_getUserService() {
+    try {
+      gaeTestingUtils = gaeSetup(LightEnvEnum.QA);
+      assertNotNull(GaeUtils.getUserService());
+    } finally {
+      gaeTestingUtils.tearDown();
+    }
+  }
+  
 
   /**
    * Test for {@link GaeUtils#isDevServer()}
@@ -132,13 +150,49 @@ public class GaeUtilsTest {
   @Test
   public void test_isUnitTestServer() {
     try {
-      gaeTestingUtils = gaeSetup(LightEnvEnum.UNIT_TEST);
+      gaeTestingUtils = gaeSetup(UNIT_TEST);
       assertFalse(GaeUtils.isDevServer());
       assertFalse(GaeUtils.isProductionServer());
       assertFalse(GaeUtils.isQaServer());
       assertFalse(GaeUtils.isRunningOnGAE());
       assertTrue(GaeUtils.isUnitTestServer());
       assertNull(SystemProperty.environment.value());
+    } finally {
+      gaeTestingUtils.tearDown();
+    }
+  }
+  
+  /**
+   * Test for {@link GaeUtils#isUserAdmin()}.
+   */
+  @Test
+  public void test_isUserAdmin() {
+    // Positive Test.
+    try {
+      gaeTestingUtils = gaeSetup(PROD);
+      gaeTestingUtils.setLoggedIn(true /*isLoggedIn*/);
+      assertFalse(isUserAdmin());
+      
+      
+      gaeTestingUtils.setAdmin(true /*isAdmin*/);
+      assertTrue(isUserAdmin());
+    } finally {
+      gaeTestingUtils.tearDown();
+    }
+  }
+  
+  /**
+   * Test for {@link GaeUtils#isUserLoggedIn()}.
+   */
+  @Test
+  public void test_isUserLoggedIn() {
+    try {
+      gaeTestingUtils =  gaeSetup(PROD);
+      gaeTestingUtils.setLoggedIn(false /*isLoggedIn*/);
+      assertFalse(isUserLoggedIn());
+      
+      gaeTestingUtils.setLoggedIn(true /*isLoggedIn*/);
+      assertTrue(isUserLoggedIn());
     } finally {
       gaeTestingUtils.tearDown();
     }

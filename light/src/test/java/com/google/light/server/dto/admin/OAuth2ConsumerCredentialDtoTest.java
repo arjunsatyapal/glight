@@ -78,7 +78,9 @@ public class OAuth2ConsumerCredentialDtoTest extends AbstractDtoToPersistenceTes
 
   /**
    * {@inheritDoc}
+   * Original method is deliberately deprecated so that callers can use the correct method.
    */
+  @SuppressWarnings("deprecation")
   @Override
   @Test
   public void test_toPersistenceEntity() throws Exception {
@@ -94,7 +96,7 @@ public class OAuth2ConsumerCredentialDtoTest extends AbstractDtoToPersistenceTes
    * {@inheritDoc}
    */
   @Test
-  public void test_toPersistenceEntity_null() throws Exception {
+  public void test_toPersistenceEntity_noarg() throws Exception {
     OAuth2ConsumerCredentialEntity entity = new OAuth2ConsumerCredentialEntity.Builder()
       .oAuth2ProviderKey(defaultProvider.name())
       .clientId(clientId)
