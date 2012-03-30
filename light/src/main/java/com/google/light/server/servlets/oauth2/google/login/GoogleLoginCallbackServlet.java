@@ -10,6 +10,8 @@ import static com.google.light.server.utils.GuiceUtils.getInstance;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightUtils.prepareSession;
 
+import com.google.light.server.servlets.oauth2.google.OAuth2Helper;
+
 import com.google.light.server.manager.implementation.oauth2.owner.OAuth2OwnerTokenManagerFactory;
 
 import com.google.api.client.auth.oauth2.AuthorizationCodeResponseUrl;
@@ -25,8 +27,7 @@ import com.google.light.server.manager.interfaces.PersonManager;
 import com.google.light.server.persistence.entity.oauth2.owner.OAuth2OwnerTokenEntity;
 import com.google.light.server.persistence.entity.person.PersonEntity;
 import com.google.light.server.servlets.SessionManager;
-import com.google.light.server.servlets.oauth2.google.OAuth2HelperImpl;
-import com.google.light.server.servlets.oauth2.google.GoogleOAuth2HelperFactoryInterface;
+import com.google.light.server.servlets.oauth2.google.OAuth2HelperFactoryInterface;
 import com.google.light.server.servlets.oauth2.google.GoogleOAuth2Utils;
 import com.google.light.server.servlets.oauth2.google.pojo.GoogleLoginTokenInfo;
 import com.google.light.server.servlets.oauth2.google.pojo.GoogleUserInfo;
@@ -50,7 +51,7 @@ import javax.servlet.http.HttpSession;
 public class GoogleLoginCallbackServlet extends HttpServlet {
   private Injector injector;
   
-  private OAuth2HelperImpl helperInstance;
+  private OAuth2Helper helperInstance;
   private OAuth2OwnerTokenManager googLoginTokenManager;
   
   private String lightCbUrl = null;
@@ -62,8 +63,8 @@ public class GoogleLoginCallbackServlet extends HttpServlet {
 
   @Override
   public void service(HttpServletRequest request, HttpServletResponse response) {
-    GoogleOAuth2HelperFactoryInterface helperFactory = getInstance(
-        injector, GoogleOAuth2HelperFactoryInterface.class);
+    OAuth2HelperFactoryInterface helperFactory = getInstance(
+        injector, OAuth2HelperFactoryInterface.class);
     helperInstance = helperFactory.create(GOOGLE_LOGIN);
     
     OAuth2OwnerTokenManagerFactory tokenManagerFactory = getInstance(

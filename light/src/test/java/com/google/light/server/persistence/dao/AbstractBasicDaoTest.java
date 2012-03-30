@@ -95,7 +95,7 @@ public abstract class AbstractBasicDaoTest<D, P extends PersistenceToDtoInterfac
    * 
    * Test to get Entity within Objectify Transaction for provided <Id>.
    */
-  public abstract void test_get_ofyId();
+  public abstract void test_get();
 
   /**
    * Test for {@link AbstractBasicDao#getKey(Object)}

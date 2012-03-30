@@ -6,8 +6,8 @@ import static com.google.light.server.servlets.path.ServletPathEnum.OAUTH2_GOOGL
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-import com.google.light.server.servlets.oauth2.google.OAuth2HelperImpl;
-import com.google.light.server.servlets.oauth2.google.GoogleOAuth2HelperFactoryInterface;
+import com.google.light.server.servlets.oauth2.google.OAuth2Helper;
+import com.google.light.server.servlets.oauth2.google.OAuth2HelperFactoryInterface;
 import com.google.light.server.utils.GuiceUtils;
 import com.google.light.server.utils.ServletUtils;
 import java.io.IOException;
@@ -27,13 +27,12 @@ import javax.servlet.http.HttpServletResponse;
 public class GoogleLoginServlet extends HttpServlet {
   private static final Logger logger = Logger.getLogger(GoogleLoginServlet.class.getName());
 
-  private Injector injector;
-  private GoogleOAuth2HelperFactoryInterface factory;
+  private OAuth2HelperFactoryInterface factory;
 
   @Inject
   public GoogleLoginServlet(Injector injector) {
-    this.injector = checkNotNull(injector);
-    this.factory = GuiceUtils.getInstance(injector, GoogleOAuth2HelperFactoryInterface.class);
+    checkNotNull(injector);
+    this.factory = GuiceUtils.getInstance(injector, OAuth2HelperFactoryInterface.class);
   }
   
   @Override
@@ -51,7 +50,7 @@ public class GoogleLoginServlet extends HttpServlet {
       throws IOException {
     String callbackUrl = ServletUtils.getServletUrl(request, OAUTH2_GOOGLE_LOGIN_CB);
     
-    OAuth2HelperImpl instance = factory.create(GOOGLE_LOGIN);
+    OAuth2Helper instance = factory.create(GOOGLE_LOGIN);
     
     String actualRedirectUrl = instance.getOAuth2RedirectUri(callbackUrl); 
         

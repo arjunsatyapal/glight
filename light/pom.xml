@@ -194,6 +194,18 @@
     </dependency>
 
     <!--
+      Jetty Servlet Tester Dependency.
+    -->
+
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-servlet-tester</artifactId>
+      <version>7.0.0.M2</version>
+      <scope>test</scope>
+    </dependency>
+    
+    
+    <!--
       Joda Time Dependency :
     -->
     <dependency>
@@ -301,7 +313,7 @@
       <artifactId>xerces</artifactId>
       <version>2.4.0</version>
     </dependency>
-    
+
     <!--
       Objectify Dependency :
       Scope : Production.

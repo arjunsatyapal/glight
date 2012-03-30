@@ -34,7 +34,7 @@ import org.junit.Test;
  * 
  * @author Arjun Satyapal
  */
-public class GoogleTokenInfoTest {
+public class GoogleLoginTokenInfoTest {
   /**
    * Test to validate JSON Parsing for {@link GoogleLoginTokenInfo}.
    * TODO(arjuns) : Fix this test.

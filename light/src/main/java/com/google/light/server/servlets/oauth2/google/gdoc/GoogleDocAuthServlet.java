@@ -6,8 +6,8 @@ import static com.google.light.server.servlets.path.ServletPathEnum.OAUTH2_GOOGL
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-import com.google.light.server.servlets.oauth2.google.OAuth2HelperImpl;
-import com.google.light.server.servlets.oauth2.google.GoogleOAuth2HelperFactoryInterface;
+import com.google.light.server.servlets.oauth2.google.OAuth2Helper;
+import com.google.light.server.servlets.oauth2.google.OAuth2HelperFactoryInterface;
 import com.google.light.server.utils.GuiceUtils;
 import com.google.light.server.utils.ServletUtils;
 import java.io.IOException;
@@ -28,12 +28,12 @@ import javax.servlet.http.HttpServletResponse;
 public class GoogleDocAuthServlet extends HttpServlet {
   private static final Logger logger = Logger.getLogger(GoogleDocAuthServlet.class.getName());
 
-  private GoogleOAuth2HelperFactoryInterface factory;
+  private OAuth2HelperFactoryInterface factory;
 
   @Inject
   public GoogleDocAuthServlet(Injector injector) {
     checkNotNull(injector);
-    this.factory = GuiceUtils.getInstance(injector, GoogleOAuth2HelperFactoryInterface.class);
+    this.factory = GuiceUtils.getInstance(injector, OAuth2HelperFactoryInterface.class);
   }
   
   @Override
@@ -52,7 +52,7 @@ public class GoogleDocAuthServlet extends HttpServlet {
       throws IOException {
     String callbackUrl = ServletUtils.getServletUrl(request, OAUTH2_GOOGLE_DOC_AUTH_CB);
     
-    OAuth2HelperImpl instance = factory.create(GOOGLE_DOC);
+    OAuth2Helper instance = factory.create(GOOGLE_DOC);
 
     String actualRedirectUrl = instance.getOAuth2RedirectUri(callbackUrl);
     logger.info("Redirecting to : " + actualRedirectUrl);

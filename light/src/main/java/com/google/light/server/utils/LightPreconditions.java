@@ -120,16 +120,14 @@ public class LightPreconditions {
    * Ensures that the object passed to the referenced method is null. This is opposite of
    * {@link Preconditions#checkNotNull(Object)}.
    */
-  public static void checkNull(Object object) {
+  public static void checkNull(Object object, String message) {
     if (object != null) {
-      throw new IllegalArgumentException("Expected null.");
+      throw new IllegalArgumentException(message);
     }
   }
 
   /**
    * Ensures that Person is Admin.
-   * 
-   * TODO(arjuns) : Add test for this.
    */
   public static void checkPersonIsGaeAdmin() {
     if (!GaeUtils.isUserAdmin()) {

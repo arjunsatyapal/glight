@@ -2,12 +2,9 @@ package com.google.light.server.servlets.oauth2.google.gdoc;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.constants.OAuth2ProviderService.GOOGLE_DOC;
-import static com.google.light.server.constants.OAuth2ProviderService.GOOGLE_LOGIN;
 import static com.google.light.server.servlets.oauth2.google.pojo.AbstractGoogleOAuth2TokenInfo.calculateExpireInMillis;
 import static com.google.light.server.servlets.path.ServletPathEnum.OAUTH2_GOOGLE_DOC_AUTH_CB;
 import static com.google.light.server.utils.GuiceUtils.getInstance;
-
-import com.google.light.server.manager.implementation.oauth2.owner.OAuth2OwnerTokenManagerFactory;
 
 import com.google.api.client.auth.oauth2.AuthorizationCodeResponseUrl;
 import com.google.api.client.auth.oauth2.TokenResponse;
@@ -16,13 +13,14 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.light.server.dto.oauth2.owner.OAuth2OwnerTokenDto;
 import com.google.light.server.exception.unchecked.GoogleAuthorizationException;
+import com.google.light.server.manager.implementation.oauth2.owner.OAuth2OwnerTokenManagerFactory;
 import com.google.light.server.manager.interfaces.OAuth2OwnerTokenManager;
 import com.google.light.server.manager.interfaces.PersonManager;
 import com.google.light.server.persistence.entity.oauth2.owner.OAuth2OwnerTokenEntity;
 import com.google.light.server.persistence.entity.person.PersonEntity;
 import com.google.light.server.servlets.SessionManager;
-import com.google.light.server.servlets.oauth2.google.OAuth2HelperImpl;
-import com.google.light.server.servlets.oauth2.google.GoogleOAuth2HelperFactoryInterface;
+import com.google.light.server.servlets.oauth2.google.OAuth2Helper;
+import com.google.light.server.servlets.oauth2.google.OAuth2HelperFactoryInterface;
 import com.google.light.server.servlets.oauth2.google.pojo.GoogleOAuth2TokenInfo;
 import com.google.light.server.utils.ServletUtils;
 import java.io.IOException;
@@ -45,7 +43,7 @@ import javax.servlet.http.HttpServletResponse;
 public class GoogleDocAuthCallbackServlet extends HttpServlet {
   private Injector injector;
 
-  private OAuth2HelperImpl helperInstance;
+  private OAuth2Helper helperInstance;
   private OAuth2OwnerTokenManager googDocTokenManager;
   
   private SessionManager sessionManager;
@@ -61,8 +59,8 @@ public class GoogleDocAuthCallbackServlet extends HttpServlet {
   
   @Override
   public void service(HttpServletRequest request, HttpServletResponse response) {
-    GoogleOAuth2HelperFactoryInterface helperFactory = getInstance(
-        injector, GoogleOAuth2HelperFactoryInterface.class);
+    OAuth2HelperFactoryInterface helperFactory = getInstance(
+        injector, OAuth2HelperFactoryInterface.class);
     helperInstance = helperFactory.create(GOOGLE_DOC);
 
     OAuth2OwnerTokenManagerFactory tokenManagerFactory = getInstance(

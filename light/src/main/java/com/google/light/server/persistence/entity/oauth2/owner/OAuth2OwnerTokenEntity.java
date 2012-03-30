@@ -183,7 +183,7 @@ public class OAuth2OwnerTokenEntity implements
   }
   
   @VisibleForTesting
-  private String computeId(long personId, OAuth2ProviderService providerService) {
+  protected String computeId(long personId, OAuth2ProviderService providerService) {
     return checkPersonId(personId) + "." + providerService.name();
   }
 

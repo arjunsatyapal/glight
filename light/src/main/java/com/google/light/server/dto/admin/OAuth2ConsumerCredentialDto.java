@@ -23,7 +23,8 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
 /**
- * DTO for OAuth2Consumer Credentials.
+ * DTO for OAuth2Consumer Credentials. Corresponding Entity is
+ * {@link OAuth2ConsumerCredentialEntity}.
  * 
  * @author Arjun Satyapal
  */
@@ -59,8 +60,10 @@ public class OAuth2ConsumerCredentialDto implements
   }
 
   /**
-   * {@inheritDoc} This method should not be called. Instead call {@link #toPersistenceEntity()}.
+   * {@inheritDoc} This method should not be called. 
+   * @deprecated call {@link #toPersistenceEntity()}.
    */
+  @Deprecated
   @Override
   public OAuth2ConsumerCredentialEntity toPersistenceEntity(String id) {
     throw new UnsupportedOperationException("this should not be called.");

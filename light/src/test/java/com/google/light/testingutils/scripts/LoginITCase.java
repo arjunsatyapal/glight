@@ -27,7 +27,6 @@ import static com.google.light.server.servlets.test.CredentialUtils.getCredentia
 import static com.google.light.server.servlets.test.CredentialUtils.getOwnerCredentialPasswdFilePath;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.FileOutputStream;

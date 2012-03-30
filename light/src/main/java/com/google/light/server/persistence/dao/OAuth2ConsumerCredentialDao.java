@@ -42,17 +42,6 @@ public class OAuth2ConsumerCredentialDao extends
     super(OAuth2ConsumerCredentialEntity.class, String.class);
   }
   
-  // TODO(arjuns): Remove this.
-//
-//  /**
-//   * @param entityClazz
-//   * @param idTypeClazz
-//   */
-//  public OAuth2ConsumerCredentialDao(Class<OAuth2ConsumerCredentialEntity> entityClazz,
-//      Class<String> idTypeClazz) {
-//    super(entityClazz, idTypeClazz);
-//  }
-  
   /** 
    * Method to get all OAuth2Consumer credentials for all {@link OAuth2ProviderService} for Light.
    */

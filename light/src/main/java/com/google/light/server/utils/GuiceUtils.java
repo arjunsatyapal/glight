@@ -38,7 +38,7 @@ public class GuiceUtils {
    * 
    * E : Entity Class. A : Binding Annotation class.
    * 
-   * TODO(arjuns): Add test. TODO(arjuns) : Rename this method to getAnnotationBindingKey.
+   * TODO(arjuns) : Rename this method to getAnnotationBindingKey.
    * 
    * @param entityClass
    * @param anotClazz
@@ -72,8 +72,6 @@ public class GuiceUtils {
    * 
    * E : Entity to be put under RequestScope. A : Binding annotation.
    * 
-   * TODO(arjuns): Add test for this.
-   * 
    * @param request
    * @param entityClass
    * @param anotClass
@@ -86,7 +84,7 @@ public class GuiceUtils {
   }
 
   /**
-   * TODO(arjuns): Add test for this. Returns instance for a class.
+   * Returns instance for a class.
    * 
    * @param injector
    * @param clazz
@@ -97,8 +95,7 @@ public class GuiceUtils {
   }
 
   /**
-   * TODO(arjuns): Add test for this. Returns instance for a class annotated with a
-   * {@link BindingAnnotation}.
+   * Returns instance for a class annotated with a {@link BindingAnnotation}.
    * 
    * @param injector
    * @param clazz
@@ -107,7 +104,6 @@ public class GuiceUtils {
   public static <T, A extends Annotation> T getInstance(Injector injector, Class<T> clazz,
       Class<A> anotClazz) {
     Key<T> guiceKey = getKeyForScopeSeed(clazz, anotClazz);
-    System.out.println("i am key : " + guiceKey);
     return checkNotNull(injector.getInstance(guiceKey));
   }
   

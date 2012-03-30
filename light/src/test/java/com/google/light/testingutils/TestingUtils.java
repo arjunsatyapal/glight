@@ -16,11 +16,13 @@
 package com.google.light.testingutils;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.light.server.constants.OAuth2ProviderService.GOOGLE_LOGIN;
 import static com.google.light.server.constants.RequestParmKeyEnum.DEFAULT_EMAIL;
 import static com.google.light.server.constants.RequestParmKeyEnum.LOGIN_PROVIDER_ID;
 import static com.google.light.server.constants.RequestParmKeyEnum.PERSON_ID;
 import static com.google.light.server.utils.GuiceUtils.getInstance;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
+import static com.google.light.server.utils.LightPreconditions.checkNull;
 import static org.mockito.Mockito.when;
 
 import com.google.common.base.Charsets;
@@ -131,28 +133,6 @@ public class TestingUtils {
   }
 
   /**
-   * Get a random FederatedId.
-   * 
-   * @deprecated
-   * @return
-   */
-  @Deprecated
-  public static String getRandomFederatedId() {
-    return "federatedId:" + getRandomString();
-  }
-
-  /**
-   * Get a random FederatedAuthority.
-   * 
-   * @deprecated
-   * @return
-   */
-  @Deprecated
-  public static String getRandomFederatedAuthority() {
-    return "federatedAuthority:" + getRandomString();
-  }
-
-  /**
    * Returns a resource as a string.
    * 
    * @param resourcePath
@@ -166,15 +146,33 @@ public class TestingUtils {
       throw new RuntimeException("Failed to load " + resourcePath);
     }
   }
-
   /**
    * Get Injector on the basis of the Environment. TODO(arjuns): Move other injector creations to
    * use this.
    * 
    * @param env
+   * @param session Session is required only for Unit Test Env.
+   * @return
+   */
+  public static Injector getInjectorByEnv(LightEnvEnum env) {
+    return getInjectorByEnv(env, null);
+  }
+  
+  /**
+   * Get Injector on the basis of the Environment. TODO(arjuns): Move other injector creations to
+   * use this.
+   * 
+   * @param env
+   * @param session Session is required only for Unit Test Env.
    * @return
    */
   public static Injector getInjectorByEnv(LightEnvEnum env, @Nullable HttpSession session) {
+    if (env == LightEnvEnum.UNIT_TEST) {
+      checkNotNull(session, "session should be set for UNIT_TEST env.");
+    } else {
+      checkNull(session, "Session should not be set for non UNIT-TEST env.");
+    }
+    
     ServletModule servletModule = new LightServletModule();
     switch (env) {
       case DEV_SERVER:
@@ -199,12 +197,8 @@ public class TestingUtils {
    * things, then can use this method. TODO(arjuns): Move all the GAE setups to use this eventually.
    */
   public static GaeTestingUtils gaeSetup(LightEnvEnum env) {
-    GaeTestingUtils gaeTestingUtils =
-        new GaeTestingUtils(env,
-            OAuth2ProviderService.GOOGLE_LOGIN,
-            getRandomEmail(),
-            getRandomUserId(),
-            false /* isAdmin */);
+    GaeTestingUtils gaeTestingUtils = new GaeTestingUtils(env, GOOGLE_LOGIN, getRandomEmail(),
+        getRandomPersonId(), false /* isAdmin */);
     gaeTestingUtils.setUp();
 
     return gaeTestingUtils;
@@ -233,11 +227,15 @@ public class TestingUtils {
    * @param email
    * @return
    */
-  public static HttpSession getMockSessionForTesting(OAuth2ProviderService provider, String userId,
-      String email) {
+  public static HttpSession getMockSessionForTesting(LightEnvEnum env, 
+      OAuth2ProviderService provider, long personId, String email) {
+    if (env != LightEnvEnum.UNIT_TEST) {
+      return null;
+    }
+    
     HttpSession mockSession = Mockito.mock(HttpSession.class);
     when(mockSession.getAttribute(LOGIN_PROVIDER_ID.get())).thenReturn(provider.name());
-    when(mockSession.getAttribute(PERSON_ID.get())).thenReturn(userId);
+    when(mockSession.getAttribute(PERSON_ID.get())).thenReturn(personId);
     when(mockSession.getAttribute(DEFAULT_EMAIL.get())).thenReturn(email);
 
     return mockSession;

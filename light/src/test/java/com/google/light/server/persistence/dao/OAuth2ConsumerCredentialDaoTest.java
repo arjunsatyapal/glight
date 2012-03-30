@@ -27,12 +27,12 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import com.google.light.server.constants.OAuth2ProviderEnum;
-
 import com.google.light.server.dto.admin.OAuth2ConsumerCredentialDto;
 import com.google.light.server.persistence.entity.admin.OAuth2ConsumerCredentialEntity;
 import com.google.light.server.utils.ObjectifyUtils;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Objectify;
+import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -88,7 +88,7 @@ public class OAuth2ConsumerCredentialDaoTest extends
    */
   @Test
   @Override
-  public void test_get_ofyId() {
+  public void test_get() {
     OAuth2ConsumerCredentialEntity testEntity = getDefaultEntityBuilder().build();
 
     OAuth2ConsumerCredentialEntity savedEntity = dao.put(testEntity);
@@ -173,5 +173,22 @@ public class OAuth2ConsumerCredentialDaoTest extends
      * to put will create/update entry. And there is no-uniqueness constraint across two different
      * entities.
      */
+  }
+  
+  /**
+   * Test for {@link OAuth2ConsumerCredentialDao#getAllOAuth2ConsumerCredentials()}.
+   */
+  @Test
+  public void test_getAllOAuth2ConsumerCredentials() {
+    assertEquals("When more providers are added, update this test.", 
+        1, OAuth2ProviderEnum.values().length);
+    
+    OAuth2ConsumerCredentialEntity testEntity = getDefaultEntityBuilder().build();
+    dao.put(testEntity);
+    
+    List<OAuth2ConsumerCredentialEntity> entities = dao.getAllOAuth2ConsumerCredentials();
+    assertEquals(1, entities.size());
+    assertTrue(entities.contains(testEntity));
+    
   }
 }
