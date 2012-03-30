@@ -1,8 +1,8 @@
-package com.google.light.server.servlets.oauth2.google.login;
+package com.google.light.server.servlets.oauth2.google.gdoc;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.light.server.constants.OAuth2ProviderService.GOOGLE_LOGIN;
-import static com.google.light.server.servlets.path.ServletPathEnum.OAUTH2_GOOGLE_LOGIN_CB;
+import static com.google.light.server.constants.OAuth2ProviderService.GOOGLE_DOC;
+import static com.google.light.server.servlets.path.ServletPathEnum.OAUTH2_GOOGLE_DOC_AUTH_CB;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -20,41 +20,41 @@ import javax.servlet.http.HttpServletResponse;
  * Servlet to handle Google Login.
  * 
  * TODO(arjuns): Add test for this.
- *
+ * TODO(arjuns): Add check for person is logged in.
+ * 
  * @author arjuns@google.com (Arjun Satyapal)
  */
 @SuppressWarnings("serial")
-public class GoogleLoginServlet extends HttpServlet {
-  private static final Logger logger = Logger.getLogger(GoogleLoginServlet.class.getName());
+public class GoogleDocAuthServlet extends HttpServlet {
+  private static final Logger logger = Logger.getLogger(GoogleDocAuthServlet.class.getName());
 
-  private Injector injector;
   private GoogleOAuth2HelperFactoryInterface factory;
 
   @Inject
-  public GoogleLoginServlet(Injector injector) {
-    this.injector = checkNotNull(injector);
+  public GoogleDocAuthServlet(Injector injector) {
+    checkNotNull(injector);
     this.factory = GuiceUtils.getInstance(injector, GoogleOAuth2HelperFactoryInterface.class);
   }
   
   @Override
-  public void service(HttpServletRequest request, HttpServletResponse response) {
+  public void service(HttpServletRequest req, HttpServletResponse resp) {
     try {
-      super.service(request, response);
+      super.service(req, resp);
     } catch (Exception e) {
       // TODO(arjuns): Auto-generated catch block
       throw new RuntimeException(e);
     }
   }
   
+
   @Override
   protected void doGet(HttpServletRequest request, HttpServletResponse response)
       throws IOException {
-    String callbackUrl = ServletUtils.getServletUrl(request, OAUTH2_GOOGLE_LOGIN_CB);
+    String callbackUrl = ServletUtils.getServletUrl(request, OAUTH2_GOOGLE_DOC_AUTH_CB);
     
-    OAuth2HelperImpl instance = factory.create(GOOGLE_LOGIN);
-    
-    String actualRedirectUrl = instance.getOAuth2RedirectUri(callbackUrl); 
-        
+    OAuth2HelperImpl instance = factory.create(GOOGLE_DOC);
+
+    String actualRedirectUrl = instance.getOAuth2RedirectUri(callbackUrl);
     logger.info("Redirecting to : " + actualRedirectUrl);
     response.sendRedirect(actualRedirectUrl);
   }

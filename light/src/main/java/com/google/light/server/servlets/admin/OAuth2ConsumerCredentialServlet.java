@@ -1,12 +1,9 @@
 /*
  * Copyright (C) Google Inc.
- *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- *
  * http://www.apache.org/licenses/LICENSE-2.0
- *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -24,13 +21,14 @@ import static com.google.light.server.utils.LightPreconditions.checkPersonIsGaeA
 
 import com.google.inject.Inject;
 import com.google.light.server.constants.ContentTypeEnum;
-import com.google.light.server.constants.OAuth2Provider;
+import com.google.light.server.constants.OAuth2ProviderEnum;
 import com.google.light.server.dto.admin.OAuth2ConsumerCredentialDto;
 import com.google.light.server.manager.interfaces.AdminOperationManager;
 import com.google.light.server.persistence.entity.admin.OAuth2ConsumerCredentialEntity;
-import com.google.light.server.servlets.AbstractLightServlet;
 import java.io.IOException;
 import java.util.List;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -42,7 +40,7 @@ import javax.servlet.http.HttpServletResponse;
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
-public class OAuth2ConsumerCredentialServlet extends AbstractLightServlet {
+public class OAuth2ConsumerCredentialServlet extends HttpServlet {
   private AdminOperationManager adminOperationManager;
 
   @Inject
@@ -51,7 +49,8 @@ public class OAuth2ConsumerCredentialServlet extends AbstractLightServlet {
   }
 
   @Override
-  public void service(HttpServletRequest request, HttpServletResponse response) {
+  public void service(HttpServletRequest request, HttpServletResponse response)
+      throws ServletException, IOException {
     checkPersonIsGaeAdmin();
     super.service(request, response);
   }
@@ -89,42 +88,9 @@ public class OAuth2ConsumerCredentialServlet extends AbstractLightServlet {
   }
 
   /**
-   * {@inheritDoc}
-   */
-  @Override
-  public void doDelete(HttpServletRequest request, HttpServletResponse response) {
-    // TODO(arjuns): Auto-generated method stub
-    throw new UnsupportedOperationException();
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public long getLastModified(HttpServletRequest request) {
-    return -1;
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public void doHead(HttpServletRequest request, HttpServletResponse response) {
-    throw new UnsupportedOperationException();
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public void doOptions(HttpServletRequest request, HttpServletResponse response) {
-    // TODO(arjuns): Auto-generated method stub
-    throw new UnsupportedOperationException();
-  }
-
-  /**
    * {@inheritDoc} Since HTML Forms do not support PUT, so forwarding the request to PUT. PUT is
-   * used in order to follow the semantics that for a given {@link OAuth2Provider}, there will be
+   * used in order to follow the semantics that for a given {@link OAuth2ProviderService}, there will
+   * be
    * only
    * 
    */
@@ -139,7 +105,7 @@ public class OAuth2ConsumerCredentialServlet extends AbstractLightServlet {
   @Override
   public void doPut(HttpServletRequest request, HttpServletResponse response) {
     String oauth2ProviderKey = checkNotBlank(request.getParameter(OAUTH2_PROVIDER_NAME.get()));
-    OAuth2Provider provider = OAuth2Provider.valueOf(oauth2ProviderKey);
+    OAuth2ProviderEnum provider = OAuth2ProviderEnum.valueOf(oauth2ProviderKey);
 
     String clientId = checkNotBlank(request.getParameter(CLIENT_ID.get()));
     String clientSecret = checkNotBlank(request.getParameter(CLIENT_SECRET.get()));
@@ -150,7 +116,7 @@ public class OAuth2ConsumerCredentialServlet extends AbstractLightServlet {
         .clientSecret(clientSecret)
         .build();
 
-    adminOperationManager.putOAuth2ConsumerCredential(dto.toPersistenceEntity(null));
+    adminOperationManager.putOAuth2ConsumerCredential(dto.toPersistenceEntity());
     doGet(request, response);
   }
 }

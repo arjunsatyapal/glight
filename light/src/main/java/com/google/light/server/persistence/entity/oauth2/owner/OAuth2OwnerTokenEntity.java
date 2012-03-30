@@ -19,21 +19,21 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPersonId;
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
+import static com.google.light.server.utils.LightPreconditions.checkProviderUserId;
 
+import com.google.common.annotations.VisibleForTesting;
+
+import com.google.light.server.constants.OAuth2ProviderService;
+import com.google.light.server.dto.oauth2.owner.OAuth2OwnerTokenDto;
+import com.google.light.server.persistence.PersistenceToDtoInterface;
+import javax.persistence.Id;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
-import com.google.light.server.constants.OAuth2Provider;
-import com.google.light.server.dto.oauth2.owner.OAuth2OwnerTokenDto;
-import com.google.light.server.persistence.PersistenceToDtoInterface;
-import javax.persistence.Id;
-
 /**
  * Persistence entity for OAuth2 Tokens.
  * Corresponding DTO is {@link OAuth2OwnerTokenDto}.
- * 
- * TODO(arjuns): Add test for this class.
  * 
  * @author Arjun Satyapal
  */
@@ -43,7 +43,15 @@ public class OAuth2OwnerTokenEntity implements
   @Id
   String id;
   long personId;
-  OAuth2Provider provider;
+  
+  // This is used in Objectify Query.
+  public static final String OFY_PROVIDER= "providerService";
+  OAuth2ProviderService providerService;
+  
+  // This is used in Objectify Query.
+  public static final String OFY_PROVIDER_USER_ID = "providerUserId";
+  String providerUserId;
+  
   String accessToken;
   String refreshToken;
   long expiresInMillis;
@@ -57,7 +65,8 @@ public class OAuth2OwnerTokenEntity implements
   public OAuth2OwnerTokenDto toDto() {
     return new OAuth2OwnerTokenDto.Builder()
       .personId(personId)
-      .provider(provider)
+      .provider(providerService)
+      .providerUserId(providerUserId)
       .accessToken(accessToken)
       .refreshToken(refreshToken)
       .expiresInMillis(expiresInMillis)
@@ -89,8 +98,12 @@ public class OAuth2OwnerTokenEntity implements
     return personId;
   }
 
-  public OAuth2Provider getProvider() {
-    return provider;
+  public OAuth2ProviderService getProviderService() {
+    return providerService;
+  }
+  
+  public String providerUserId() {
+    return providerUserId;
   }
 
   public String getAccessToken() {
@@ -115,7 +128,8 @@ public class OAuth2OwnerTokenEntity implements
 
   public static class Builder {
     private long personId;
-    private OAuth2Provider provider;
+    private OAuth2ProviderService providerService;
+    private String providerUserId;
     private String accessToken;
     private String refreshToken;
     private long expiresInMillis;
@@ -127,11 +141,16 @@ public class OAuth2OwnerTokenEntity implements
       return this;
     }
 
-    public Builder provider(OAuth2Provider provider) {
-      this.provider = provider;
+    public Builder providerService(OAuth2ProviderService providerService) {
+      this.providerService = providerService;
       return this;
     }
 
+    public Builder providerUserId(String providerUserId) {
+      this.providerUserId = providerUserId;
+      return this;
+    }
+    
     public Builder accessToken(String accessToken) {
       this.accessToken = accessToken;
       return this;
@@ -162,14 +181,20 @@ public class OAuth2OwnerTokenEntity implements
       return new OAuth2OwnerTokenEntity(this);
     }
   }
+  
+  @VisibleForTesting
+  private String computeId(long personId, OAuth2ProviderService providerService) {
+    return checkPersonId(personId) + "." + providerService.name();
+  }
 
   @SuppressWarnings("synthetic-access")
   private OAuth2OwnerTokenEntity(Builder builder) {
     this.personId = checkPersonId(builder.personId);
-    this.provider = checkNotNull(builder.provider, "provider");
+    this.providerService = checkNotNull(builder.providerService, "provider");
     // In order to setId, personId, and provider needs to be set.
-    this.id = personId + "." + provider.name();
+    this.id = computeId(personId, providerService);
     
+    this.providerUserId = checkProviderUserId(builder.providerService, builder.providerUserId);
     this.accessToken = checkNotBlank(builder.accessToken, "accessToken");
     this.refreshToken = checkNotBlank(builder.refreshToken, "refreshToken");
     this.expiresInMillis = checkPositiveLong(builder.expiresInMillis, "expiresInMillis");

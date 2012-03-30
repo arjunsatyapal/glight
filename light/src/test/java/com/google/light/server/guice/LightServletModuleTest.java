@@ -15,6 +15,7 @@
  */
 package com.google.light.server.guice;
 
+import static com.google.light.server.constants.OAuth2ProviderService.GOOGLE_LOGIN;
 import static com.google.light.testingutils.TestingUtils.getMockSessionForTesting;
 import static com.google.light.testingutils.TestingUtils.getRandomEmail;
 import static com.google.light.testingutils.TestingUtils.getRandomUserId;
@@ -24,7 +25,6 @@ import static org.mockito.Mockito.when;
 import com.google.inject.Injector;
 import com.google.inject.servlet.GuiceFilter;
 import com.google.light.server.constants.LightEnvEnum;
-import com.google.light.server.constants.OAuth2Provider;
 import com.google.light.testingutils.GaeTestingUtils;
 import com.google.light.testingutils.TestingUtils;
 import javax.servlet.FilterConfig;
@@ -46,8 +46,7 @@ public class LightServletModuleTest {
     for (LightEnvEnum currEnv : LightEnvEnum.values()) {
       HttpSession session = null;
       if (currEnv == LightEnvEnum.UNIT_TEST) {
-        session = getMockSessionForTesting(OAuth2Provider.GOOGLE_LOGIN, getRandomUserId(),
-            getRandomEmail());
+        session = getMockSessionForTesting(GOOGLE_LOGIN, getRandomUserId(), getRandomEmail());
       }
       GaeTestingUtils gaeTestingUtils = TestingUtils.gaeSetup(currEnv);
       try {

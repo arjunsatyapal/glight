@@ -130,7 +130,7 @@ public abstract class AbstractBasicDao<D, P extends PersistenceToDtoInterface<P,
    * @return
    * @throws IllegalKeyTypeException
    */
-  public final P get(I id) throws IllegalKeyTypeException {
+  public P get(I id) throws IllegalKeyTypeException {
     return get(null, id);
   }
 

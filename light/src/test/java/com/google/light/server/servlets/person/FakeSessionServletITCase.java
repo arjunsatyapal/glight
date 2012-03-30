@@ -15,10 +15,13 @@
  */
 package com.google.light.server.servlets.person;
 
+import static com.google.light.server.constants.OAuth2ProviderService.GOOGLE_LOGIN;
+import static com.google.light.server.constants.RequestParmKeyEnum.DEFAULT_EMAIL;
+import static com.google.light.server.constants.RequestParmKeyEnum.LOGIN_PROVIDER_ID;
+import static com.google.light.server.constants.RequestParmKeyEnum.PERSON_ID;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
+import static com.google.light.testingutils.TestingUtils.getRandomPersonId;
 import static org.junit.Assert.assertTrue;
-
-import com.google.light.server.servlets.test.SessionInfoServlet;
 
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpRequest;
@@ -28,14 +31,10 @@ import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.UrlEncodedContent;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.common.collect.ImmutableMap;
-import com.google.light.server.constants.OAuth2Provider;
-import com.google.light.server.constants.RequestParmKeyEnum;
 import com.google.light.server.servlets.path.ServletPathEnum;
 import com.google.light.testingutils.FakeLoginHelper;
 import com.google.light.testingutils.TestingUtils;
 import java.util.Map;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -49,7 +48,7 @@ import org.junit.Test;
 public class FakeSessionServletITCase {
   private static String serverUrl;
   private static String email;
-  private static String userId;
+  private static long personId;
   private static final HttpTransport HTTP_TRANSPORT = new NetHttpTransport();
 
   @BeforeClass
@@ -69,7 +68,7 @@ public class FakeSessionServletITCase {
 
     // email = "unit-test@myopenedu.com";
     email = TestingUtils.getRandomEmail();
-    userId = TestingUtils.getRandomUserId();
+    personId = getRandomPersonId();
   }
 
   /**
@@ -85,9 +84,9 @@ public class FakeSessionServletITCase {
     GenericUrl fakeLoginServletUrl = new GenericUrl(serverUrl + ServletPathEnum.FAKE_LOGIN.get());
     
     Map<String, String> map = new ImmutableMap.Builder<String, String>()
-        .put(RequestParmKeyEnum.LOGIN_PROVIDER_ID.get(), OAuth2Provider.GOOGLE_LOGIN.name())
-        .put(RequestParmKeyEnum.LOGIN_PROVIDER_USER_EMAIL.get(), email)
-        .put(RequestParmKeyEnum.LOGIN_PROVIDER_USER_ID.get(), userId)
+        .put(LOGIN_PROVIDER_ID.get(), GOOGLE_LOGIN.name())
+        .put(DEFAULT_EMAIL.get(), email)
+        .put(PERSON_ID.get(), Long.toString(personId))
         .build();
 
     HttpRequest request = requestFactory.buildPostRequest(

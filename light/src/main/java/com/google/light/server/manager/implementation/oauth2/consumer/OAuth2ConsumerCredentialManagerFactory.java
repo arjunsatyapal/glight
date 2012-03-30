@@ -19,9 +19,8 @@ import com.google.light.server.constants.OAuth2ProviderEnum;
 import com.google.light.server.manager.interfaces.OAuth2ConsumerCredentialManager;
 
 /**
- *
- * 
- * TODO(arjuns): Add test for this class.
+ * Guice Factory for {@link OAuth2ConsumerCredentialManager} which is binded to
+ * {@link OAuth2ConsumerCredentialManagerImpl}
  *
  * @author Arjun Satyapal
  */

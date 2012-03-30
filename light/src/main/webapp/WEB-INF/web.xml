@@ -11,6 +11,8 @@
     <url-pattern>/admin/*</url-pattern>
     <url-pattern>/api/*</url-pattern>
     <url-pattern>/login/*</url-pattern>
+    <url-pattern>/logout/*</url-pattern>
+    <url-pattern>/oauth2/*</url-pattern>
     <url-pattern>/test/*</url-pattern>
   </filter-mapping>
 

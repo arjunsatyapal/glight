@@ -16,6 +16,7 @@
 package com.google.light.server.utils;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.google.inject.Injector;
 
 import javax.servlet.http.HttpServletRequest;
@@ -35,11 +36,9 @@ public class GuiceUtils {
   /**
    * Utility method to return {@link Key} which uses {@link Key#get(Class, Annotation)}.
    * 
-   * E : Entity Class.
-   * A : Binding Annotation class.
+   * E : Entity Class. A : Binding Annotation class.
    * 
-   * TODO(arjuns): Add test.
-   * TODO(arjuns) : Rename this method to getAnnotationBindingKey.
+   * TODO(arjuns): Add test. TODO(arjuns) : Rename this method to getAnnotationBindingKey.
    * 
    * @param entityClass
    * @param anotClazz
@@ -47,6 +46,8 @@ public class GuiceUtils {
    */
   public static <E, A extends Annotation> Key<E> getKeyForScopeSeed(Class<E> entityClass,
       Class<A> anotClazz) {
+    checkNotNull(entityClass);
+    checkNotNull(anotClazz);
     return Key.get(entityClass, anotClazz);
   }
 
@@ -69,8 +70,7 @@ public class GuiceUtils {
   /**
    * Utility method to enqueue an entity under a RequestScope.
    * 
-   * E : Entity to be put under RequestScope.
-   * A : Binding annotation.
+   * E : Entity to be put under RequestScope. A : Binding annotation.
    * 
    * TODO(arjuns): Add test for this.
    * 
@@ -81,13 +81,12 @@ public class GuiceUtils {
    */
   public static <E, A extends Annotation> void seedEntityInRequestScope(
       HttpServletRequest request, Class<E> entityClass, Class<A> anotClass, E object) {
-    Key<E> key = getKeyForScopeSeed(entityClass, anotClass); 
+    Key<E> key = getKeyForScopeSeed(entityClass, anotClass);
     request.setAttribute(key.toString(), object);
   }
 
   /**
-   * TODO(arjuns): Add test for this.
-   * Returns instance for a class.
+   * TODO(arjuns): Add test for this. Returns instance for a class.
    * 
    * @param injector
    * @param clazz
@@ -95,6 +94,21 @@ public class GuiceUtils {
    */
   public static <T> T getInstance(Injector injector, Class<T> clazz) {
     return checkNotNull(injector.getInstance(clazz));
+  }
+
+  /**
+   * TODO(arjuns): Add test for this. Returns instance for a class annotated with a
+   * {@link BindingAnnotation}.
+   * 
+   * @param injector
+   * @param clazz
+   * @return
+   */
+  public static <T, A extends Annotation> T getInstance(Injector injector, Class<T> clazz,
+      Class<A> anotClazz) {
+    Key<T> guiceKey = getKeyForScopeSeed(clazz, anotClazz);
+    System.out.println("i am key : " + guiceKey);
+    return checkNotNull(injector.getInstance(guiceKey));
   }
   
   // Utility class.

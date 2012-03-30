@@ -17,8 +17,6 @@ package com.google.light.server.guice.providers;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.light.server.utils.GuiceUtils;
-
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.inject.Inject;

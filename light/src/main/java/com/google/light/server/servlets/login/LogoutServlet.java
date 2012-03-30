@@ -13,27 +13,23 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.server.exception.unchecked;
+package com.google.light.server.servlets.login;
+
+import java.io.IOException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
- * Indicates that some exception occured during Google Login Flow.
+ * Servlet that allows a user to Logout.
  * 
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
-public class GoogleLoginException extends LightRuntimeException {
-  /**
-   * {@inheritDoc}
-   * @param message
-   */
-  public GoogleLoginException(String message) {
-      super(message);
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  public GoogleLoginException(String message, Throwable cause) {
-      super(message, cause);
+public class LogoutServlet extends HttpServlet {
+  @Override
+  public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    request.getSession().invalidate();
+    response.getWriter().println("Successfully Logged out.");
   }
 }

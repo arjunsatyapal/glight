@@ -15,6 +15,7 @@
  */
 package com.google.light.server.manager.implementation;
 
+import static com.google.light.server.utils.GuiceUtils.getInstance;
 import static com.google.light.testingutils.TestingUtils.getRandomEmail;
 import static com.google.light.testingutils.TestingUtils.getRandomPersonId;
 import static com.google.light.testingutils.TestingUtils.getRandomUserId;
@@ -47,7 +48,7 @@ public class PersonManagerImplTest extends AbstractLightServerTest {
   @Override
   public void setUp() {
     super.setUp();
-    this.personManager = injector.getInstance(PersonManager.class);
+    this.personManager = getInstance(injector, PersonManager.class);
   }
 
   @Override

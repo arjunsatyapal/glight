@@ -25,8 +25,6 @@ import com.google.light.server.persistence.entity.oauth2.owner.OAuth2OwnerTokenE
 /**
  * Implementation for {@link OAuth2OwnerTokenManager}.
  * 
- * TODO(arjuns): Add test for this class.
- * 
  * @author Arjun Satyapal
  */
 public class OAuth2OwnerTokenManagerImpl implements OAuth2OwnerTokenManager {

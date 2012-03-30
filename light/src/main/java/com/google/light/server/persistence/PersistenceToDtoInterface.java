@@ -33,11 +33,11 @@ public interface PersistenceToDtoInterface<P, D> extends Serializable {
   public D toDto();
 
   @Override
-  public boolean equals(Object obj);
+  public abstract boolean equals(Object obj);
 
   @Override
-  public int hashCode();
+  public abstract int hashCode();
 
   @Override
-  public String toString();
+  public abstract String toString();
 }

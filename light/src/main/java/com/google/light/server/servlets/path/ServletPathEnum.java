@@ -1,12 +1,9 @@
 /*
  * Copyright (C) Google Inc.
- *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- *
  * http://www.apache.org/licenses/LICENSE-2.0
- *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -18,18 +15,22 @@ package com.google.light.server.servlets.path;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
-import com.google.light.server.servlets.test.SessionInfoServlet;
-
 import com.google.light.server.exception.unchecked.httpexception.NotFoundException;
 import com.google.light.server.servlets.admin.ConfigServlet;
 import com.google.light.server.servlets.admin.OAuth2ConsumerCredentialServlet;
 import com.google.light.server.servlets.login.LoginServlet;
+import com.google.light.server.servlets.login.LogoutServlet;
+import com.google.light.server.servlets.oauth2.google.gdoc.GoogleDocAuthCallbackServlet;
+import com.google.light.server.servlets.oauth2.google.gdoc.GoogleDocAuthServlet;
 import com.google.light.server.servlets.oauth2.google.login.GoogleLoginCallbackServlet;
 import com.google.light.server.servlets.oauth2.google.login.GoogleLoginServlet;
 import com.google.light.server.servlets.person.PersonServlet;
+import com.google.light.server.servlets.test.SessionInfoServlet;
 import com.google.light.server.servlets.test.TestHeaders;
 import com.google.light.server.servlets.test.TestLogin;
-import com.google.light.server.servlets.test.oauth2.google.login.FakeLoginServlet;
+import com.google.light.server.servlets.test.oauth2.TestCredentialBackupServlet;
+import com.google.light.server.servlets.test.oauth2.TestOAuth2WorkFlowServlet;
+import com.google.light.server.servlets.test.oauth2.login.FakeLoginServlet;
 import javax.servlet.http.HttpServlet;
 
 /**
@@ -44,14 +45,24 @@ public enum ServletPathEnum {
   // TODO(arjuns) : Find a way to end URLs without /.
   PERSON(PersonServlet.class, "/api/person",
          true, false, false),
+
   LOGIN(LoginServlet.class, "/login",
         false, false, false),
+  LOGOUT(LogoutServlet.class, "/logout",
+         false, false, false),
 
-  LOGIN_GOOGLE(GoogleLoginServlet.class, "/login/google",
-               false, false, false),
+  // OAuth2 Related Servlets.
+  OAUTH2_GOOGLE_LOGIN(GoogleLoginServlet.class, "/login/google",
+                      false, false, false),
 
-  LOGIN_GOOGLE_CB(GoogleLoginCallbackServlet.class, "/login/google_login_callback",
-                  false, false, false),
+  OAUTH2_GOOGLE_LOGIN_CB(GoogleLoginCallbackServlet.class, "/login/google_login_callback",
+                         false, false, false),
+
+  OAUTH2_GOOGLE_DOC_AUTH(GoogleDocAuthServlet.class, "/oauth2/google_doc",
+                         true, false, false),
+
+  OAUTH2_GOOGLE_DOC_AUTH_CB(GoogleDocAuthCallbackServlet.class, "/oauth2/google_doc_cb",
+                            true, false, false),
 
   // Admin Servlets
   CONFIG(ConfigServlet.class, "/admin/config",
@@ -64,6 +75,10 @@ public enum ServletPathEnum {
   // Some test servlets.
   FAKE_LOGIN(FakeLoginServlet.class, "/test/fakelogin",
              false, false, true),
+  TEST_CREDENTIAL_BACKUP_SERVLET(TestCredentialBackupServlet.class, "/test/test_credential_backup",
+                                 false, false, true),
+  TEST_WORKFLOW_SERVLETS(TestOAuth2WorkFlowServlet.class, "/test/test_oauth2_workflow",
+                         false, false, true),
 
   SESSION(SessionInfoServlet.class, "/test/session",
           true, false, true),

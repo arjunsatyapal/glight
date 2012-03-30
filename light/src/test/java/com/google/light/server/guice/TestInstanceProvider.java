@@ -17,11 +17,8 @@ package com.google.light.server.guice;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.light.server.utils.GuiceUtils;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-import com.google.light.server.guice.providers.InstanceProvider;
 import com.google.light.server.manager.interfaces.OAuth2ConsumerCredentialManager;
 import com.google.light.server.persistence.dao.PersonDao;
 

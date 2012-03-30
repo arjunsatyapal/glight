@@ -23,7 +23,7 @@ import com.google.light.server.annotations.AnotHttpSession;
 import com.google.light.server.manager.implementation.AdminOperationManagerImpl;
 import com.google.light.server.manager.implementation.PersonManagerImpl;
 import com.google.light.server.manager.implementation.oauth2.consumer.OAuth2ConsumerCredentialManagerFactory;
-import com.google.light.server.manager.implementation.oauth2.consumer.OAuth2ConsumerManagerImpl;
+import com.google.light.server.manager.implementation.oauth2.consumer.OAuth2ConsumerCredentialManagerImpl;
 import com.google.light.server.manager.implementation.oauth2.owner.OAuth2OwnerTokenManagerFactory;
 import com.google.light.server.manager.implementation.oauth2.owner.OAuth2OwnerTokenManagerImpl;
 import com.google.light.server.manager.interfaces.AdminOperationManager;
@@ -74,7 +74,7 @@ public abstract class BaseGuiceModule extends AbstractModule {
       .build(OAuth2OwnerTokenManagerFactory.class));
     
     install(new FactoryModuleBuilder()
-      .implement(OAuth2ConsumerCredentialManager.class, OAuth2ConsumerManagerImpl.class)
+      .implement(OAuth2ConsumerCredentialManager.class, OAuth2ConsumerCredentialManagerImpl.class)
       .build(OAuth2ConsumerCredentialManagerFactory.class));
     
     // Binding Manager Implementations.

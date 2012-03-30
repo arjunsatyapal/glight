@@ -58,7 +58,7 @@ public abstract class AbstractLightServlet extends HttpServlet {
     try {
       super.service(request, response);
     } catch (Exception e) {
-      // TODO(arjuns): Auto-generated catch block
+      // TODO(arjuns): Add exception handling.
       throw new RuntimeException(e);
     }
   }
@@ -81,7 +81,9 @@ public abstract class AbstractLightServlet extends HttpServlet {
    * @return
    */
   @Override
-  public abstract long getLastModified(HttpServletRequest request);
+  public long getLastModified(HttpServletRequest request) {
+    return -1;
+  }
 
   /**
    * {@inheritDoc}

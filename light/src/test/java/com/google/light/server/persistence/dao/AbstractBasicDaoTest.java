@@ -19,10 +19,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-import com.googlecode.objectify.Key;
-
-import com.googlecode.objectify.Objectify;
-
 import com.google.light.server.persistence.PersistenceToDtoInterface;
 
 import com.google.light.server.AbstractLightServerTest;

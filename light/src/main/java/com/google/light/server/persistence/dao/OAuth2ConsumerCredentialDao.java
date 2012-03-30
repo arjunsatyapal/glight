@@ -15,8 +15,6 @@
  */
 package com.google.light.server.persistence.dao;
 
-import com.google.light.server.constants.OAuth2Provider;
-
 import com.google.appengine.api.datastore.QueryResultIterable;
 import com.google.common.collect.Lists;
 import com.google.light.server.utils.ObjectifyUtils;
@@ -56,7 +54,7 @@ public class OAuth2ConsumerCredentialDao extends
 //  }
   
   /** 
-   * Method to get all OAuth2Consumer credentials for all {@link OAuth2Provider} for Light.
+   * Method to get all OAuth2Consumer credentials for all {@link OAuth2ProviderService} for Light.
    */
   public List<OAuth2ConsumerCredentialEntity> getAllOAuth2ConsumerCredentials() {
     Objectify ofy = ObjectifyUtils.nonTransaction();

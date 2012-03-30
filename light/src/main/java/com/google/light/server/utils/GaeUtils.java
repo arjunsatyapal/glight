@@ -25,7 +25,6 @@ import com.google.appengine.api.utils.SystemProperty;
 import com.google.apphosting.api.ApiProxy;
 import com.google.apphosting.api.ApiProxy.Environment;
 import com.google.light.server.constants.LightEnvEnum;
-import com.google.light.server.servlets.SessionManager;
 
 /**
  * Utility class to wrap different GAE specific functions.

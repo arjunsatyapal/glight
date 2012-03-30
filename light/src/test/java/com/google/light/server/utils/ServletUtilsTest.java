@@ -49,7 +49,7 @@ public class ServletUtilsTest {
     
     String codeKeyValue = "code=" + code;
     StringBuffer googLoginCbReqUrlBuffer = new StringBuffer(serverUrl)
-        .append(ServletPathEnum.LOGIN_GOOGLE_CB.get())
+        .append(ServletPathEnum.OAUTH2_GOOGLE_LOGIN_CB.get())
         .append("?")
         .append(codeKeyValue);
     when(request1.getRequestURL()).thenReturn(googLoginCbReqUrlBuffer);
@@ -67,7 +67,7 @@ public class ServletUtilsTest {
     HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
     
     String codeKeyValue = "code=" + code;
-    String uri = ServletPathEnum.LOGIN_GOOGLE_CB.get() + "?" + codeKeyValue;
+    String uri = ServletPathEnum.OAUTH2_GOOGLE_LOGIN_CB.get() + "?" + codeKeyValue;
     
     StringBuffer googLoginCbReqUrlBuffer = new StringBuffer(serverUrl)
         .append(uri);

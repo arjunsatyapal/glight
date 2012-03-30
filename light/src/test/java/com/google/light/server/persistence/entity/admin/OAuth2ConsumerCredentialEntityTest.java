@@ -20,7 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
-import com.google.light.server.constants.OAuth2Provider;
+import com.google.light.server.constants.OAuth2ProviderEnum;
 import com.google.light.server.dto.admin.OAuth2ConsumerCredentialDto;
 import com.google.light.server.exception.unchecked.BlankStringException;
 import com.google.light.server.persistence.entity.AbstractPersistenceEntityTest;
@@ -33,7 +33,7 @@ import org.junit.Test;
  * @author Arjun Satyapal
  */
 public class OAuth2ConsumerCredentialEntityTest extends AbstractPersistenceEntityTest {
-  private OAuth2Provider defaultProvider = OAuth2Provider.GOOGLE_LOGIN;
+  private OAuth2ProviderEnum defaultProvider = OAuth2ProviderEnum.GOOGLE;
   private String clientId;
   private String clientSecret;
 
