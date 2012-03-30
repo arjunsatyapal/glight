@@ -198,7 +198,7 @@ public class GoogleTokenInfo {
     checkNotBlank(userId, "userId");
     checkNotBlank(scope, "scope");
     checkNotBlank(issuedTo, "issuedTo");
-    checkPositiveLong(expiresIn);
+    checkPositiveLong(expiresIn, "expiresIn");
     
     if (expiresInMillis == 0) {
       // This means object was created when parsing the TokenInfo from Google.
@@ -208,7 +208,7 @@ public class GoogleTokenInfo {
     } else {
       // expiresInMillis was already stored. So nothing to do.
     }
-    checkPositiveLong(expiresInMillis);
+    checkPositiveLong(expiresInMillis, "expiresInMillis");
     
     checkEmail(email);
     checkNotBlank(issuedTo, "issuedTo");

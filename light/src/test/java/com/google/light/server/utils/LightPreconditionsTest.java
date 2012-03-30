@@ -291,12 +291,12 @@ public class LightPreconditionsTest {
   @Test
   public void test_checkPositiveLong() {
     // Positive Tests.
-    checkPositiveLong(1L);
-    checkPositiveLong(Long.MAX_VALUE);
+    checkPositiveLong(1L, "usual value failed.");
+    checkPositiveLong(Long.MAX_VALUE, "maxValue failed");
 
     // Negative Test : Null value.
     try {
-      checkPositiveLong(null);
+      checkPositiveLong(null, "null");
       fail("should have failed.");
     } catch (NullPointerException e) {
       // Expected
@@ -304,7 +304,7 @@ public class LightPreconditionsTest {
 
     // Negative Test : 0L
     try {
-      checkPositiveLong(0L);
+      checkPositiveLong(0L, "zero");
       fail("should have failed.");
     } catch (IllegalArgumentException e) {
       // Expected
@@ -312,7 +312,7 @@ public class LightPreconditionsTest {
 
     // Negative Test : -1L
     try {
-      checkPositiveLong(-1L);
+      checkPositiveLong(-1L, "negative");
       fail("should have failed.");
     } catch (IllegalArgumentException e) {
       // Expected
@@ -320,7 +320,7 @@ public class LightPreconditionsTest {
 
     // Negative Test : Long.MIN_VALUE
     try {
-      checkPositiveLong(Long.MIN_VALUE);
+      checkPositiveLong(Long.MIN_VALUE, "min value");
       fail("should have failed.");
     } catch (IllegalArgumentException e) {
       // Expected

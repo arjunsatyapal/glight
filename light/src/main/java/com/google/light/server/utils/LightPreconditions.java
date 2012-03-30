@@ -86,7 +86,7 @@ public class LightPreconditions {
   // TODO(arjuns) : Fix this validation eventually.
   public static Long checkPersonId(Long personId) {
     try {
-      return checkPositiveLong(personId);
+      return checkPositiveLong(personId, "personId");
     } catch (Exception e) {
       throw new InvalidPersonIdException(e);
     }
@@ -110,9 +110,9 @@ public class LightPreconditions {
    * @param value
    * @return
    */
-  public static Long checkPositiveLong(Long value) {
-    checkNotNull(value);
-    checkArgument(longValidator.isInRange(value, 1, Long.MAX_VALUE));
+  public static Long checkPositiveLong(Long value, String message) {
+    checkNotNull(value, message);
+    checkArgument(longValidator.isInRange(value, 1, Long.MAX_VALUE), message);
     return value;
   }
 
