@@ -15,21 +15,25 @@
  */
 package com.google.light.server.dto.search;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableMapBuilder;
+import com.google.light.server.constants.LightConstants;
+import com.google.light.server.dto.AbstractDtoToPersistenceTest;
 import com.google.light.server.exception.unchecked.BlankStringException;
 import com.google.light.server.utils.QueryUtils;
-import com.google.light.server.utils.QueryUtilsTest;
+import com.google.light.testingutils.TestingUtils;
 
 /**
  * Test for {@link SearchRequestDto}
  * 
  * @author waltercacau
  */
-public class SearchRequestDtoTest {
+public class SearchRequestDtoTest extends AbstractDtoToPersistenceTest {
 
   private static final int SAMPLE_PAGE = 3;
   private static final String SAMPLE_QUERY = "Addition";
@@ -39,18 +43,21 @@ public class SearchRequestDtoTest {
     // Just positive tests. We can count with enough negative tests in QueryUtilsTest
 
     SearchRequestDto searchRequest =
-        QueryUtils.getValidDto(QueryUtilsTest
+        QueryUtils.getValidDto(TestingUtils
             .getMockedRequestWithParameterMap(new ImmutableMapBuilder<String, String[]>()
                 .put("query", new String[] { SAMPLE_QUERY })
                 .getMap()), SearchRequestDto.class);
 
-    assertEquals("Default page must be 1", 1, searchRequest.getPage());
+    assertNotNull(searchRequest);
+    assertEquals("Default page must be " + LightConstants.FIRST_SEARCH_PAGE_NUMBER, LightConstants.FIRST_SEARCH_PAGE_NUMBER, searchRequest.getPage());
 
-    QueryUtils.getValidDto(
-        QueryUtilsTest.getMockedRequestWithParameterMap(new ImmutableMapBuilder<String, String[]>()
+    searchRequest = QueryUtils.getValidDto(
+        TestingUtils.getMockedRequestWithParameterMap(new ImmutableMapBuilder<String, String[]>()
             .put("query", new String[] { SAMPLE_QUERY })
             .put("page", new String[] { Integer.toString(SAMPLE_PAGE) })
             .getMap()), SearchRequestDto.class);
+    
+    assertNotNull(searchRequest);
 
   }
 
@@ -58,12 +65,14 @@ public class SearchRequestDtoTest {
   public void test_validate() {
     // Positive test
     SearchRequestDto searchRequest = new SearchRequestDto.Builder().query(SAMPLE_QUERY).build();
-
+    assertNotNull(searchRequest);
+    
     // Default page must be one
-    assertEquals("Default page must be 1", 1, searchRequest.getPage());
+    assertEquals("Default page must be " + LightConstants.FIRST_SEARCH_PAGE_NUMBER, LightConstants.FIRST_SEARCH_PAGE_NUMBER, searchRequest.getPage());
 
     // Positive test: page = 3
-    new SearchRequestDto.Builder().query(SAMPLE_QUERY).page(SAMPLE_PAGE).build();
+    searchRequest = new SearchRequestDto.Builder().query(SAMPLE_QUERY).page(SAMPLE_PAGE).build();
+    assertNotNull(searchRequest);
 
     // Negative test: query = null
     try {
@@ -89,6 +98,38 @@ public class SearchRequestDtoTest {
       // expected.
     }
 
+  }
+
+  @Override
+  public void test_builder() throws Exception {
+    // No validation logic in constructor. So nothing to test here.
+  }
+
+  @Override
+  public void test_toJson() throws Exception {
+    // Not used as JSON
+    try {
+      new SearchRequestDto.Builder().query(SAMPLE_QUERY).build().toJson();
+      fail("should have failed.");
+    } catch (UnsupportedOperationException e) {
+      // expected.
+    }
+  }
+
+  @Override
+  public void test_toPersistenceEntity() throws Exception {
+    // Not persisted
+  }
+
+  @Override
+  public void test_toXml() throws Exception {
+    // Not used as XML
+    try {
+      new SearchRequestDto.Builder().query(SAMPLE_QUERY).build().toXml();
+      fail("should have failed.");
+    } catch (UnsupportedOperationException e) {
+      // expected.
+    }
   }
 
 }

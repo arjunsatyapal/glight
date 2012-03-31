@@ -34,11 +34,25 @@ import org.w3c.dom.Document;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 
-public class TestingXmlUtils {
+/**
+ * Utilities for validating xml.
+ * 
+ * @author Walter Cacau
+ */
+public class XmlTestingUtils {
 
   private static final String HTTP_DTD_PLACEHOLDER = "http://DTD_PLACEHOLDER";
 
-  public static void assertValidXmlAccordingToDTD(InputStream inputStream, final String DTDUrl) throws Exception {
+  /**
+   * Assert's that a given xml is valid according to a given DTD specified by the
+   * given DTDUrl
+   * 
+   * @param xmlContentStream A stream with the xml contents.
+   * @param DTDUrl Url for the DTD.
+   * @throws Exception
+   */
+  public static void assertValidXmlAccordingToDTD(InputStream xmlContentStream, final String DTDUrl)
+      throws Exception {
 
     final InputStream dtdStream = new URL(DTDUrl).openStream();
 
@@ -49,7 +63,7 @@ public class TestingXmlUtils {
     factory.setValidating(false);
     DocumentBuilder builder = factory.newDocumentBuilder();
 
-    Document xmlDocument = builder.parse(inputStream);
+    Document xmlDocument = builder.parse(xmlContentStream);
     DOMSource source = new DOMSource(xmlDocument);
 
     ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -77,7 +91,7 @@ public class TestingXmlUtils {
 
     org.jdom.Document doc =
         saxBuilder.build(new InputSource(new ByteArrayInputStream(out.toByteArray())));
-    
+
     // Forcing the parser to read and validate the input
     new XMLOutputter().outputString(doc);
 

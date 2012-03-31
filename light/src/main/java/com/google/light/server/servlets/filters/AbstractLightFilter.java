@@ -19,32 +19,30 @@ import static com.google.light.server.utils.GuiceUtils.getInstance;
 import static com.google.light.server.utils.GuiceUtils.seedEntityInRequestScope;
 import static com.google.light.server.utils.LightPreconditions.checkPersonIsGaeAdmin;
 
-import com.google.light.server.servlets.SessionManager;
-
-import com.google.inject.Inject;
-
-import com.google.inject.Injector;
-
-import com.google.common.base.Preconditions;
-
-import com.google.common.base.Throwables;
-import com.google.light.server.annotations.AnotHttpSession;
-import com.google.light.server.constants.HttpStatusCodesEnum;
-import com.google.light.server.exception.unchecked.httpexception.LightHttpException;
-import com.google.light.server.exception.unchecked.httpexception.PersonLoginRequiredException;
-import com.google.light.server.servlets.path.ServletPathEnum;
-import com.google.light.server.utils.LightUtils;
-
 import java.io.IOException;
 import java.util.Set;
 import java.util.logging.Logger;
+
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+
+import com.google.common.base.Preconditions;
+import com.google.common.base.Throwables;
+import com.google.inject.Inject;
+import com.google.inject.Injector;
+import com.google.light.server.annotations.AnotHttpSession;
+import com.google.light.server.constants.HttpStatusCodesEnum;
+import com.google.light.server.exception.unchecked.httpexception.LightHttpException;
+import com.google.light.server.servlets.SessionManager;
+import com.google.light.server.servlets.path.ServletPathEnum;
+import com.google.light.server.utils.LightUtils;
 
 /**
  * Servlet Filter for All Light Requests. See {@link FilterPathEnum} to see what all URLs are
@@ -91,6 +89,7 @@ public abstract class AbstractLightFilter implements Filter {
     } catch (Exception e) {
       try {
         if(LightHttpException.class.isAssignableFrom(e.getClass())) {
+          // TODO(arjuns): Hide the stacktrace in production.
           response.sendError(((LightHttpException)e).getHttpCode().getStatusCode(), e.getMessage());
         } else {
           response.sendError(HttpStatusCodesEnum.INTERNAL_SERVER_ERROR.getStatusCode(),

@@ -23,8 +23,8 @@ import com.google.light.server.dto.DtoInterface;
  * 
  * This class could not be a private static class inside QueryUtilsTest because
  * Apache Commons BeanUtils does not work with such kind of class.
- * @author waltercacau
- *
+ * 
+ * @author Walter Cacau
  */
 public class QueryUtilsTestSampleDto implements DtoInterface<QueryUtilsTestSampleDto> {
 
@@ -56,16 +56,20 @@ public class QueryUtilsTestSampleDto implements DtoInterface<QueryUtilsTestSampl
 
   @Override
   public String toJson() {
-    return null;
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public String toXml() {
-    return null;
+    throw new UnsupportedOperationException();
   }
 
   // Used for latter assert that the DTO was validated.
-  public boolean wasValidated = false;
+  private boolean wasValidated = false;
+
+  public boolean wasValidated() {
+    return wasValidated;
+  }
 
   @Override
   public QueryUtilsTestSampleDto validate() {

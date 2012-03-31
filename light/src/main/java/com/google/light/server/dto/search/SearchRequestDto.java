@@ -18,6 +18,7 @@ package com.google.light.server.dto.search;
 import static com.google.common.base.Preconditions.*;
 import static com.google.light.server.utils.LightPreconditions.*;
 
+import com.google.light.server.constants.LightConstants;
 import com.google.light.server.dto.DtoInterface;
 import com.google.light.server.utils.QueryUtils;
 
@@ -29,16 +30,23 @@ import com.google.light.server.utils.QueryUtils;
 @SuppressWarnings("serial")
 public class SearchRequestDto implements DtoInterface<SearchRequestDto> {
   /**
-   * Default search page.
+   * User's search query
+   */
+  private String query;
+  
+  /**
+   * Search page number.
+   * 
+   * This attribute controls the search results range the user is requesting
+   * to see. Value {@link LightConstants#FIRST_SEARCH_PAGE_NUMBER} means the results 1 to 10,
+   * {@link LightConstants#FIRST_SEARCH_PAGE_NUMBER}+1 means results 11 to 20, ...
    * 
    * Friendly reminder: This Dto is constructed through a builder or through QueryUtils. So it is
    * important to make sure that through both ways if page is not defined it must be set to this
    * value.
    */
-  private static final int DEFAULT_PAGE = 1;
-
-  String query;
-  int page = DEFAULT_PAGE;
+  // TODO(waltercacau): Check with arjun about renaming this variable (issue 39002)
+  private int page = LightConstants.FIRST_SEARCH_PAGE_NUMBER;
 
   @Override
   public SearchRequestDto validate() {
@@ -74,7 +82,7 @@ public class SearchRequestDto implements DtoInterface<SearchRequestDto> {
   }
 
   public static class Builder {
-    private int page = DEFAULT_PAGE;
+    private int page = LightConstants.FIRST_SEARCH_PAGE_NUMBER;
     private String query;
 
     public Builder query(String query) {

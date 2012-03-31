@@ -25,7 +25,13 @@ import static com.google.light.testingutils.TestingUtils.getRandomPersonId;
 import static com.google.light.testingutils.TestingUtils.getRandomProviderUserId;
 import static org.junit.Assert.assertTrue;
 
-import com.google.light.server.constants.RequestParmKeyEnum;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpRequest;
@@ -36,11 +42,9 @@ import com.google.api.client.http.UrlEncodedContent;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.common.collect.ImmutableMap;
 import com.google.light.server.servlets.path.ServletPathEnum;
+import com.google.light.server.servlets.test.SessionInfoServlet;
 import com.google.light.testingutils.FakeLoginHelper;
 import com.google.light.testingutils.TestingUtils;
-import java.util.Map;
-import org.junit.BeforeClass;
-import org.junit.Test;
 
 /**
  * Test for {@link SessionInfoServlet}.

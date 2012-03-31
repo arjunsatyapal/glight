@@ -16,7 +16,7 @@
 package com.google.light.server.servlets.search;
 
 import static com.google.light.server.utils.LightUtils.wrapIntoRuntimeExceptionAndThrow;
-
+import static com.google.common.base.Preconditions.checkNotNull;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -43,16 +43,7 @@ public class SearchServlet extends AbstractLightServlet {
 
   @Inject
   public SearchServlet(Provider<SearchManager> searchManagerProvider) {
-    // TODO Auto-generated constructor stub
-    this.searchManagerProvider = searchManagerProvider;
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public void service(HttpServletRequest request, HttpServletResponse response) {
-    super.service(request, response);
+    this.searchManagerProvider = checkNotNull(searchManagerProvider);
   }
 
   /**
@@ -82,14 +73,6 @@ public class SearchServlet extends AbstractLightServlet {
     } catch (Exception e) {
       wrapIntoRuntimeExceptionAndThrow(e);
     }
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public long getLastModified(HttpServletRequest request) {
-    return -1L;
   }
 
   /**

@@ -15,16 +15,19 @@
  */
 package com.google.light.server.dto.search;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
 import org.junit.Test;
+
+import com.google.light.server.dto.AbstractDtoToPersistenceTest;
 
 /**
  * Test for {@link SearchResultItemDto}
  * 
  * @author waltercacau
  */
-public class SearchResultItemDtoTest {
+public class SearchResultItemDtoTest extends AbstractDtoToPersistenceTest {
   private final String SAMPLE_TITLE = "Some <b>cool</b> title";
   private final String SAMPLE_DESCRIPTION = "Some <b>cool</b> description";
   private final String SAMPLE_LINK = "http://somecooloer.com";
@@ -39,7 +42,8 @@ public class SearchResultItemDtoTest {
   @Test
   public void test_validate() {
     // Positive Test
-    getDtoBuilder().build();
+    SearchResultItemDto searchResultItem = getDtoBuilder().build();
+    assertNotNull(searchResultItem);
 
     // Negative Test : title=null
     try {
@@ -62,6 +66,38 @@ public class SearchResultItemDtoTest {
       getDtoBuilder().link(null).build();
       fail("should have failed.");
     } catch (NullPointerException e) {
+      // expected.
+    }
+  }
+  
+  @Override
+  public void test_builder() throws Exception {
+    // No validation logic in constructor. So nothing to test here.
+  }
+  
+  @Override
+  public void test_toJson() throws Exception {
+    // Not used as JSON
+    try {
+      getDtoBuilder().build().toJson();
+      fail("should have failed.");
+    } catch (UnsupportedOperationException e) {
+      // expected.
+    }
+  }
+
+  @Override
+  public void test_toPersistenceEntity() throws Exception {
+    // Not persisted
+  }
+
+  @Override
+  public void test_toXml() throws Exception {
+    // Not used as XML
+    try {
+      getDtoBuilder().build().toXml();
+      fail("should have failed.");
+    } catch (UnsupportedOperationException e) {
       // expected.
     }
   }

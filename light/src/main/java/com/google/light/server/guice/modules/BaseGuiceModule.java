@@ -89,14 +89,14 @@ public abstract class BaseGuiceModule extends AbstractModule {
         .to(AdminOperationManagerImpl.class);
 
     bind(PersonManager.class)
-        .to(PersonManagerImpl.class);
-    bind(SearchManager.class).to(SearchManagerGSSImpl.class);
+    .to(PersonManagerImpl.class);
 
+    bind(SearchManager.class).to(SearchManagerGSSImpl.class);
+    
     bind(HttpSession.class)
         .annotatedWith(AnotHttpSession.class)
         .to(HttpSession.class);
 
-    // TODO(arjuns): Following bindings are global bindings. Need to be fixed.
     /**
      * Implementation is thread-safe, so using it as a singleton.
      * TODO(waltercacau): See if we should use UrlFetchTransport instead.

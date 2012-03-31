@@ -12,6 +12,8 @@
  */
 package com.google.light.server.constants;
 
+import com.google.light.server.dto.search.SearchRequestDto;
+
 /**
  * Miscellaneous constants for Light.
  * 
@@ -30,5 +32,14 @@ public class LightConstants {
   
   
   public static int TASK_QUEUUE_TIMEOUT_IN_SEC = 10 * 60; // Seconds.
+
+  public static final int SEARCH_RESULTS_PER_PAGE = 10;
+
+  /**
+   * Default value for {@link SearchRequestDto#page}.
+   * 
+   * Note: Client side is assuming this to be 1
+   */
+  public static final int FIRST_SEARCH_PAGE_NUMBER = 1;
 
 }

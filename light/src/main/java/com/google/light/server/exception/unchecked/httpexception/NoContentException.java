@@ -18,13 +18,13 @@ package com.google.light.server.exception.unchecked.httpexception;
 import com.google.light.server.constants.HttpStatusCodesEnum;
 
 /**
- * HTTP Internal Server Error.
+ * HTTP Bad Request Exception.
  * 
  * @author Walter Cacau
  */
 @SuppressWarnings("serial")
-public class InternalServerErrorException extends LightHttpException {
-  public InternalServerErrorException(String errString) {
-    super(HttpStatusCodesEnum.INTERNAL_SERVER_ERROR, errString);
+public class NoContentException extends LightHttpException {
+  public NoContentException(String errString) {
+    super(HttpStatusCodesEnum.NO_CONTENT, errString);
   }
 }

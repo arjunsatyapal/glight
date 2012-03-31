@@ -18,13 +18,6 @@ package com.google.light.server.servlets.test;
 import static com.google.light.server.utils.LightPreconditions.checkIsNotEnv;
 
 import java.io.IOException;
-import com.google.common.base.Charsets;
-import com.google.common.io.CharStreams;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.inject.Inject;
-import com.google.light.server.constants.LightEnvEnum;
-import com.google.light.server.servlets.AbstractLightServlet;
 import java.io.InputStreamReader;
 import java.util.Enumeration;
 import java.util.Map;

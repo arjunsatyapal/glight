@@ -9,7 +9,12 @@ import static com.google.light.server.utils.GuiceUtils.getInstance;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightUtils.prepareSession;
 
-import com.google.common.base.Preconditions;
+import java.io.IOException;
+
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import com.google.api.client.auth.oauth2.AuthorizationCodeResponseUrl;
 import com.google.api.client.auth.oauth2.TokenResponse;
@@ -33,11 +38,6 @@ import com.google.light.server.servlets.oauth2.google.pojo.GoogleUserInfo;
 import com.google.light.server.utils.GaeUtils;
 import com.google.light.server.utils.GuiceUtils;
 import com.google.light.server.utils.ServletUtils;
-import java.io.IOException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 /**
  * Servlet called by Google during Google Login flow.
