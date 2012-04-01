@@ -20,6 +20,8 @@ import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
 import static com.google.light.server.utils.LightPreconditions.checkProviderUserId;
 
+import com.google.light.server.persistence.entity.person.PersonEntity;
+
 import com.google.light.server.constants.OAuth2ProviderService;
 import com.google.light.server.dto.DtoToPersistenceInterface;
 import com.google.light.server.persistence.entity.oauth2.owner.OAuth2OwnerTokenEntity;
@@ -67,7 +69,7 @@ public class OAuth2OwnerTokenDto implements
    */
   @Override
   public OAuth2OwnerTokenDto validate() {
-    checkPositiveLong(personId, "personId");
+    checkPositiveLong(personId, "personId[" + personId + "]");
     checkNotNull(providerService, "provider");
     checkProviderUserId(providerService, providerUserId);
     checkNotBlank(accessToken, "accessToken");
@@ -88,7 +90,7 @@ public class OAuth2OwnerTokenDto implements
 
   public OAuth2OwnerTokenEntity toPersistenceEntity() {
     return new OAuth2OwnerTokenEntity.Builder()
-        .personId(personId)
+        .personKey(PersonEntity.generateKey(personId))
         .providerService(providerService)
         .providerUserId(providerUserId)
         .accessToken(accessToken)

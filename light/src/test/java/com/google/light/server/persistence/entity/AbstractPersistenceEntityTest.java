@@ -15,6 +15,7 @@
  */
 package com.google.light.server.persistence.entity;
 
+import com.google.light.server.AbstractGAETest;
 import org.junit.Test;
 
 /**
@@ -22,12 +23,27 @@ import org.junit.Test;
  * 
  * @author Arjun Satyapal
  */
-public abstract class AbstractPersistenceEntityTest {
+public abstract class AbstractPersistenceEntityTest extends AbstractGAETest {
   /**
    * Test for constructor for each entity.
    */
   @Test
   public abstract void test_builder_with_constructor();
+  
+
+  /**
+   * Test for {@link PersistenceToDtoInterface#getKey()}.
+   */
+  @Test
+  public abstract void test_getKey();
+  
+  /**
+   * This test is not present in the {@link PersistenceToDtoInterface} but should be present
+   * in all the entities.
+   */
+  @Test
+  public abstract void test_generateKey();
+  
   
   /**
    * Test for {@link PersistenceToDtoInterface#toDto()}

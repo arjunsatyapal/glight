@@ -24,6 +24,7 @@ import com.google.light.server.constants.OAuth2ProviderEnum;
 import com.google.light.server.dto.admin.OAuth2ConsumerCredentialDto;
 import com.google.light.server.exception.unchecked.BlankStringException;
 import com.google.light.server.persistence.entity.AbstractPersistenceEntityTest;
+import com.googlecode.objectify.Key;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -45,7 +46,7 @@ public class OAuth2ConsumerCredentialEntityTest extends AbstractPersistenceEntit
 
   private OAuth2ConsumerCredentialEntity.Builder getEntityBuilder() {
     return new OAuth2ConsumerCredentialEntity.Builder()
-        .oAuth2ProviderKey(defaultProvider.name())
+        .providerName(defaultProvider.name())
         .clientId(clientId)
         .clientSecret(clientSecret);
   }
@@ -61,23 +62,23 @@ public class OAuth2ConsumerCredentialEntityTest extends AbstractPersistenceEntit
 
     // Negative Testing : providerKey = null
     try {
-      getEntityBuilder().oAuth2ProviderKey(null).build();
+      getEntityBuilder().providerName(null).build();
       fail("should have failed.");
     } catch (NullPointerException e) {
       // Expected
     }
-    
+
     // Negative Testing : providerKey = " "
     try {
-      getEntityBuilder().oAuth2ProviderKey("  ").build();
+      getEntityBuilder().providerName("  ").build();
       fail("should have failed.");
     } catch (IllegalArgumentException e) {
       // Expected
     }
-    
+
     // Negative Testing : providerKey = Invalid string.
     try {
-      getEntityBuilder().oAuth2ProviderKey(getRandomString()).build();
+      getEntityBuilder().providerName(getRandomString()).build();
       fail("should have failed.");
     } catch (IllegalArgumentException e) {
       // Expected
@@ -90,7 +91,7 @@ public class OAuth2ConsumerCredentialEntityTest extends AbstractPersistenceEntit
     } catch (BlankStringException e) {
       // Expected
     }
-    
+
     // Negative Testing : clientId = "  "
     try {
       getEntityBuilder().clientId("  ").build();
@@ -98,7 +99,7 @@ public class OAuth2ConsumerCredentialEntityTest extends AbstractPersistenceEntit
     } catch (BlankStringException e) {
       // Expected
     }
-    
+
     // Negative Testing : clientSecret = null
     try {
       getEntityBuilder().clientSecret(null).build();
@@ -106,7 +107,7 @@ public class OAuth2ConsumerCredentialEntityTest extends AbstractPersistenceEntit
     } catch (BlankStringException e) {
       // Expected
     }
-    
+
     // Negative Testing : clientSecret = "  "
     try {
       getEntityBuilder().clientSecret("  ").build();
@@ -123,10 +124,38 @@ public class OAuth2ConsumerCredentialEntityTest extends AbstractPersistenceEntit
   @Test
   public void test_toDto() {
     OAuth2ConsumerCredentialDto expectedDto = new OAuth2ConsumerCredentialDto.Builder()
-      .provider(defaultProvider)
-      .clientId(clientId)
-      .clientSecret(clientSecret)
-      .build();
+        .provider(defaultProvider)
+        .clientId(clientId)
+        .clientSecret(clientSecret)
+        .build();
     assertEquals(expectedDto, getEntityBuilder().build().toDto());
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Test
+  @Override
+  public void test_getKey() {
+    OAuth2ConsumerCredentialEntity entity = getEntityBuilder().build();
+    Key<OAuth2ConsumerCredentialEntity> expectedKey = new Key<OAuth2ConsumerCredentialEntity>(
+        OAuth2ConsumerCredentialEntity.class, defaultProvider.name());
+    assertEquals(expectedKey, entity.getKey());
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void test_generateKey() {
+    // Positive tests done already as part of test_getKey. Doing negative testing.
+    
+    // Negative Test : Invalid Provider.
+    try {
+      OAuth2ConsumerCredentialEntity.generateKey(getRandomString());
+      fail("should have failed.");
+    } catch (EnumConstantNotPresentException e) {
+      // Expected
+    }
   }
 }

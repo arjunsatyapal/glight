@@ -98,7 +98,7 @@ public class OAuth2ConsumerCredentialDtoTest extends AbstractDtoToPersistenceTes
   @Test
   public void test_toPersistenceEntity_noarg() throws Exception {
     OAuth2ConsumerCredentialEntity entity = new OAuth2ConsumerCredentialEntity.Builder()
-      .oAuth2ProviderKey(defaultProvider.name())
+      .providerName(defaultProvider.name())
       .clientId(clientId)
       .clientSecret(clientSecret)
       .build();

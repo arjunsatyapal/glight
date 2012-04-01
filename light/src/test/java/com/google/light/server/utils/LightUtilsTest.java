@@ -29,7 +29,6 @@ import static com.google.light.server.utils.LightUtils.prepareSession;
 import static com.google.light.testingutils.TestingUtils.getRandomEmail;
 import static com.google.light.testingutils.TestingUtils.getRandomPersonId;
 import static com.google.light.testingutils.TestingUtils.getRandomProviderUserId;
-import static com.google.light.testingutils.TestingUtils.getRandomString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -38,16 +37,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import com.google.light.testingutils.TestingUtils;
-
-import com.google.light.server.constants.RequestParmKeyEnum;
-
 import com.google.common.collect.ImmutableMapBuilder;
 import com.google.light.server.constants.OAuth2ProviderService;
 import java.util.Map;
 import javax.servlet.http.HttpSession;
 import org.joda.time.DateTime;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.exceptions.verification.WantedButNotInvoked;
 import org.mockito.invocation.InvocationOnMock;

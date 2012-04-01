@@ -72,7 +72,7 @@ public class OAuth2ConsumerCredentialServlet extends HttpServlet {
 
       for (OAuth2ConsumerCredentialEntity curr : list) {
         builder.append("<tr>");
-        builder.append("<td>").append(curr.getOAuth2ProviderKey()).append("</td>");
+        builder.append("<td>").append(curr.getOAuth2Provider()).append("</td>");
         builder.append("<td>").append(curr.getClientId()).append("</td>");
         builder.append("<td>").append(curr.getClientSecret()).append("</td>");
         builder.append("</tr>");

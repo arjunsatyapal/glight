@@ -18,16 +18,14 @@ package com.google.light.server.persistence.dao;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.util.logging.Logger;
-
-import com.google.light.server.persistence.PersistenceToDtoInterface;
-
 import com.google.common.annotations.VisibleForTesting;
 import com.google.light.server.exception.unchecked.IllegalKeyTypeException;
 import com.google.light.server.exception.unchecked.ObjectifyTxnShouldBeRunningException;
+import com.google.light.server.persistence.PersistenceToDtoInterface;
 import com.google.light.server.utils.ObjectifyUtils;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Objectify;
+import java.util.logging.Logger;
 
 /**
  * Each child should register the Entity with Objectify and provide a constructor to bind with
@@ -39,9 +37,8 @@ import com.googlecode.objectify.Objectify;
  * 
  * @author Arjun Satyapal
  */
-public abstract class AbstractBasicDao<D, P extends PersistenceToDtoInterface<P, D>, I> {
+public abstract class AbstractBasicDao<D, P extends PersistenceToDtoInterface<P, D>> {
   private final Class<P> entityClazz;
-  private final Class<I> idTypeClazz;
 
   /**
    * This method is purely for testing. Should not be used in production.
@@ -53,28 +50,9 @@ public abstract class AbstractBasicDao<D, P extends PersistenceToDtoInterface<P,
     return entityClazz;
   }
 
-  /**
-   * This method is purely for testing. Should not be used in production.
-   * 
-   * @return
-   */
   @VisibleForTesting
-  protected Class<I> getIdTypeClazz() {
-    return idTypeClazz;
-  }
-
-  @VisibleForTesting
-  public AbstractBasicDao(Class<P> entityClazz, Class<I> idTypeClazz) {
+  public AbstractBasicDao(Class<P> entityClazz) {
     this.entityClazz = checkNotNull(entityClazz);
-    this.idTypeClazz = checkNotNull(idTypeClazz);
-
-    // Objectify allows Ids of Type Long and String only.
-    if (idTypeClazz.isAssignableFrom(Long.class) ||
-        idTypeClazz.isAssignableFrom(String.class)) {
-      return;
-    } else {
-      throw new IllegalKeyTypeException(idTypeClazz.getName());
-    }
   }
 
   /**
@@ -108,23 +86,6 @@ public abstract class AbstractBasicDao<D, P extends PersistenceToDtoInterface<P,
   }
 
   /**
-   * Get a Objectify-Key for an id stored as String.
-   * 
-   * @param id
-   * @return
-   * @throws IllegalKeyTypeException
-   */
-  protected Key<P> getKey(I id) {
-    if (idTypeClazz.isAssignableFrom(Long.class)) {
-      return new Key<P>(entityClazz, (Long) id);
-    } else if (id instanceof String) {
-      return new Key<P>(entityClazz, (String) id);
-    } else {
-      throw new IllegalKeyTypeException();
-    }
-  }
-
-  /**
    * Get Entity of Type<T> from DataStore which has Id of type <U>. If some overridden behavior
    * is required, override {@link #get(Objectify, Key)}
    * 
@@ -132,23 +93,8 @@ public abstract class AbstractBasicDao<D, P extends PersistenceToDtoInterface<P,
    * @return
    * @throws IllegalKeyTypeException
    */
-  public P get(I id) throws IllegalKeyTypeException {
-    return get(null, id);
-  }
-
-  /**
-   * Get Entity of Type<P> from DataStore which has Id of type <I> in a Transaction. If any
-   * DAO wants to use this, then it should overload it.
-   * 
-   * @param ofy Objectify Transaction.
-   * @param id Id of object to be fetched.
-   * @return
-   * @throws IllegalKeyTypeException
-   */
-  protected final P get(Objectify ofy, I id) throws IllegalKeyTypeException {
-    Key<P> key = getKey(id);
-
-    return get(ofy, key);
+  public P get(Key<P> key) throws IllegalKeyTypeException {
+    return get(null, key);
   }
 
   /**

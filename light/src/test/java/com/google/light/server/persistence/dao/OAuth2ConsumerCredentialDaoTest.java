@@ -17,20 +17,17 @@ package com.google.light.server.persistence.dao;
 
 import static com.google.light.server.utils.GuiceUtils.getInstance;
 import static com.google.light.server.utils.ObjectifyUtils.commitTransaction;
-import static com.google.light.server.utils.ObjectifyUtils.getKey;
 import static com.google.light.server.utils.ObjectifyUtils.initiateTransaction;
 import static com.google.light.testingutils.TestingConstants.DEFAULT_CLIENT_ID;
 import static com.google.light.testingutils.TestingConstants.DEFAULT_CLIENT_SECRET;
 import static com.google.light.testingutils.TestingUtils.getRandomString;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import com.google.light.server.constants.OAuth2ProviderEnum;
 import com.google.light.server.dto.admin.OAuth2ConsumerCredentialDto;
 import com.google.light.server.persistence.entity.admin.OAuth2ConsumerCredentialEntity;
 import com.google.light.server.utils.ObjectifyUtils;
-import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Objectify;
 import java.util.List;
 import org.junit.Before;
@@ -42,11 +39,11 @@ import org.junit.Test;
  * @author Arjun Satyapal
  */
 public class OAuth2ConsumerCredentialDaoTest extends
-    AbstractBasicDaoTest<OAuth2ConsumerCredentialDto, OAuth2ConsumerCredentialEntity, String> {
+    AbstractBasicDaoTest<OAuth2ConsumerCredentialDto, OAuth2ConsumerCredentialEntity> {
 
   private OAuth2ProviderEnum defaultProvider = OAuth2ProviderEnum.GOOGLE;
   public OAuth2ConsumerCredentialDaoTest() {
-    super(OAuth2ConsumerCredentialEntity.class, String.class);
+    super(OAuth2ConsumerCredentialEntity.class);
   }
 
   private OAuth2ConsumerCredentialDao dao;
@@ -62,21 +59,20 @@ public class OAuth2ConsumerCredentialDaoTest extends
     return new OAuth2ConsumerCredentialEntity.Builder()
         .clientId(DEFAULT_CLIENT_ID)
         .clientSecret(DEFAULT_CLIENT_SECRET)
-        .oAuth2ProviderKey(defaultProvider.name());
+        .providerName(defaultProvider.name());
   }
 
   /**
    * {@inheritDoc}
    */
   @Override
-  public void test_get_ofyKey() {
+  public void test_get_by_key_in_txn() {
     OAuth2ConsumerCredentialEntity testEntity = getDefaultEntityBuilder().build();
     OAuth2ConsumerCredentialEntity savedEntity = dao.put(testEntity);
 
     Objectify ofy = ObjectifyUtils.initiateTransaction();
     try {
-      Key<OAuth2ConsumerCredentialEntity> key = dao.getKey(savedEntity.getOAuth2ProviderKey());
-      OAuth2ConsumerCredentialEntity getEntity = dao.get(ofy, key);
+      OAuth2ConsumerCredentialEntity getEntity = dao.get(ofy, savedEntity.getKey());
       assertEquals(savedEntity, getEntity);
     } catch (Exception e) {
       ObjectifyUtils.rollbackTransaction(ofy);
@@ -88,15 +84,18 @@ public class OAuth2ConsumerCredentialDaoTest extends
    */
   @Test
   @Override
-  public void test_get() {
+  public void test_get_by_key() {
     OAuth2ConsumerCredentialEntity testEntity = getDefaultEntityBuilder().build();
 
     OAuth2ConsumerCredentialEntity savedEntity = dao.put(testEntity);
-    OAuth2ConsumerCredentialEntity getEntity = dao.get(savedEntity.getOAuth2ProviderKey());
+    OAuth2ConsumerCredentialEntity getEntity = dao.get(savedEntity.getKey());
     assertEquals(savedEntity, getEntity);
 
-    // Negative test : Try to fetch with randomId.
-    assertNull(dao.get(getRandomString()));
+    /*
+     * Negative test : Since we are using Enum name as a key, and we dont allow custom enum
+     * construction, so negative test is possible at the moment.
+     */
+    
   }
 
   /**
@@ -104,17 +103,7 @@ public class OAuth2ConsumerCredentialDaoTest extends
    */
   @Test
   @Override
-  public void test_get_key() {
-    String id = getRandomString();
-    assertEquals(getKey(OAuth2ConsumerCredentialEntity.class, id), dao.getKey(id));
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Test
-  @Override
-  public void test_put_ofyEntity() {
+  public void test_put_txn() {
     OAuth2ConsumerCredentialEntity testEntity = getDefaultEntityBuilder().build();
 
     // Positive Test :
@@ -123,7 +112,7 @@ public class OAuth2ConsumerCredentialDaoTest extends
 
     dao.put(txn, testEntity);
     commitTransaction(txn);
-    OAuth2ConsumerCredentialEntity getEntity = dao.get(testEntity.getOAuth2ProviderKey());
+    OAuth2ConsumerCredentialEntity getEntity = dao.get(testEntity.getOAuth2Provider());
     assertEquals(testEntity, getEntity);
 
     /*
@@ -142,7 +131,7 @@ public class OAuth2ConsumerCredentialDaoTest extends
     OAuth2ConsumerCredentialEntity testEntity = getDefaultEntityBuilder().build();
     OAuth2ConsumerCredentialEntity savedEntity = dao.put(testEntity);
 
-    OAuth2ConsumerCredentialEntity getEntity = dao.get(testEntity.getOAuth2ProviderKey());
+    OAuth2ConsumerCredentialEntity getEntity = dao.get(testEntity.getOAuth2Provider());
     assertEquals(savedEntity, getEntity);
 
     // Same entity can be persisted twice. Change clientId & clientSecret and persist.
@@ -159,7 +148,7 @@ public class OAuth2ConsumerCredentialDaoTest extends
     assertEquals(newSavedEntity, dao.put(testEntity));
 
     // Ensures that savedEntity and newSavedEntity refer to same Entity.
-    assertEquals(savedEntity.getOAuth2ProviderKey(), newSavedEntity.getOAuth2ProviderKey());
+    assertEquals(savedEntity.getOAuth2Provider(), newSavedEntity.getOAuth2Provider());
     // Ensures that savedEntity and newSavedEntity are not equal post modification.
     assertTrue(!savedEntity.equals(newSavedEntity));
 

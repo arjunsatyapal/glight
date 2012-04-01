@@ -59,9 +59,7 @@ public class PersonDto implements DtoToPersistenceInterface<PersonDto, PersonEnt
   public PersonDto validate() {
     checkNotBlank(firstName, "firstName");
     checkNotBlank(lastName, "lastName");
-    if (email != null) {
-      checkEmail(email);
-    }
+    checkEmail(email);
     return this;
   }
 

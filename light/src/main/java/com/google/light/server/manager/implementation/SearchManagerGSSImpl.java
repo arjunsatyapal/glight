@@ -48,6 +48,7 @@ public class SearchManagerGSSImpl implements SearchManager {
     this.httpTransportProvider = httpTransportProvider;
   }
 
+  @Override
   public SearchResultDto search(SearchRequestDto searchRequest) {
     String query = searchRequest.getQuery();
     int page = searchRequest.getPage();

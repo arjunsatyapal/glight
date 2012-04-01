@@ -25,6 +25,8 @@ import com.google.light.server.dto.person.PersonDto;
 import com.google.light.server.exception.unchecked.BlankStringException;
 import com.google.light.server.exception.unchecked.InvalidPersonIdException;
 import com.google.light.server.persistence.entity.AbstractPersistenceEntityTest;
+import com.google.light.testingutils.TestingUtils;
+import com.googlecode.objectify.Key;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -243,5 +245,50 @@ public class PersonEntityTest extends AbstractPersistenceEntityTest {
     } catch (InvalidPersonIdException e) {
       // expected.
     }
+  }
+
+  /** 
+   * {@inheritDoc}
+   */
+  @Test
+  @Override
+  public void test_getKey() {
+    Long randomPersonId = TestingUtils.getRandomPersonId();
+    PersonEntity entity = getEntityBuilderWithoutId().id(randomPersonId).build();
+    Key<PersonEntity> expectedKey = new Key<PersonEntity>(PersonEntity.class, randomPersonId);
+    assertEquals(expectedKey, entity.getKey());
+  }
+
+  /** 
+   * {@inheritDoc}
+   */
+  @Override
+  public void test_generateKey() {
+    // Positive tests are done as part of test_getKey
+    
+    // Negative test : persondId = null
+    try {
+      PersonEntity.generateKey(null);
+      fail("should have failed.");
+    } catch (InvalidPersonIdException e) {
+      // Expected
+    }
+    
+    // Negative test : persondId = 0
+    try {
+      PersonEntity.generateKey(0L);
+      fail("should have failed.");
+    } catch (InvalidPersonIdException e) {
+      // Expected
+    }
+    
+    // Negative test : persondId = negative
+    try {
+      PersonEntity.generateKey(-3L);
+      fail("should have failed.");
+    } catch (InvalidPersonIdException e) {
+      // Expected
+    }
+    
   }
 }

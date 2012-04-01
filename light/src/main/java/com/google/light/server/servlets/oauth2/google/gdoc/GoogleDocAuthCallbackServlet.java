@@ -5,6 +5,9 @@ import static com.google.light.server.constants.OAuth2ProviderService.GOOGLE_DOC
 import static com.google.light.server.servlets.oauth2.google.pojo.AbstractGoogleOAuth2TokenInfo.calculateExpireInMillis;
 import static com.google.light.server.servlets.path.ServletPathEnum.OAUTH2_GOOGLE_DOC_AUTH_CB;
 import static com.google.light.server.utils.GuiceUtils.getInstance;
+import static com.google.light.server.utils.LightPreconditions.checkValidSession;
+
+import com.google.light.server.utils.LightPreconditions;
 
 import com.google.api.client.auth.oauth2.AuthorizationCodeResponseUrl;
 import com.google.api.client.auth.oauth2.TokenResponse;
@@ -68,6 +71,8 @@ public class GoogleDocAuthCallbackServlet extends HttpServlet {
     googDocTokenManager = tokenManagerFactory.create(GOOGLE_DOC);
     
     sessionManager = getInstance(injector, SessionManager.class);
+    checkValidSession(sessionManager);
+    
     personManager = getInstance(injector, PersonManager.class);
     lightCbUrl = ServletUtils.getServletUrl(request, OAUTH2_GOOGLE_DOC_AUTH_CB);
 
@@ -98,13 +103,13 @@ public class GoogleDocAuthCallbackServlet extends HttpServlet {
       // TODO(arjuns) : Write whole workflow as this is complex to understand.
 
       Long personId = sessionManager.getPersonId();
-      PersonEntity personEntity = personManager.getPerson(personId);
+      PersonEntity personEntity = personManager.get(personId);
       checkNotNull(personEntity, "personEntity cannot be null as person is in session.");
 
       TokenResponse tokenResponse = helperInstance.getAccessToken(lightCbUrl, code);
       boolean newRefreshToken = !Strings.isNullOrEmpty(tokenResponse.getRefreshToken());
 
-      OAuth2OwnerTokenEntity tokenEntity = googDocTokenManager.getToken(personId);
+      OAuth2OwnerTokenEntity tokenEntity = googDocTokenManager.get(personId);
       
       if (tokenEntity == null && !newRefreshToken) {
           /*
@@ -155,7 +160,7 @@ public class GoogleDocAuthCallbackServlet extends HttpServlet {
         .tokenInfo(googTokenInfo.toJson())
         .build();
 
-    googDocTokenManager.putToken(tokenDto.toPersistenceEntity());
+    googDocTokenManager.put(tokenDto.toPersistenceEntity());
   }
 
   /**

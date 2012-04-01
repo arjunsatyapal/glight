@@ -18,7 +18,6 @@ package com.google.light.server.persistence.dao;
 import static com.google.light.server.constants.OAuth2ProviderService.GOOGLE_LOGIN;
 import static com.google.light.server.utils.GuiceUtils.getInstance;
 import static com.google.light.server.utils.ObjectifyUtils.commitTransaction;
-import static com.google.light.server.utils.ObjectifyUtils.getKey;
 import static com.google.light.server.utils.ObjectifyUtils.initiateTransaction;
 import static com.google.light.testingutils.TestingConstants.DEFAULT_ACCESS_TOKEN;
 import static com.google.light.testingutils.TestingConstants.DEFAULT_REFRESH_TOKEN;
@@ -30,7 +29,6 @@ import static com.google.light.testingutils.TestingUtils.getMockSessionForTestin
 import static com.google.light.testingutils.TestingUtils.getRandomEmail;
 import static com.google.light.testingutils.TestingUtils.getRandomString;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -40,8 +38,6 @@ import com.google.light.server.persistence.entity.oauth2.owner.OAuth2OwnerTokenE
 import com.google.light.server.persistence.entity.oauth2.owner.OAuth2OwnerTokenEntity.Builder;
 import com.google.light.server.persistence.entity.person.PersonEntity;
 import com.google.light.server.utils.ObjectifyUtils;
-import com.google.light.testingutils.TestingUtils;
-import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Objectify;
 import javax.servlet.http.HttpSession;
 import org.junit.Before;
@@ -53,31 +49,25 @@ import org.junit.Test;
  * @author Arjun Satyapal
  */
 public class OAuth2OwnerTokenDaoTest extends
-    AbstractBasicDaoTest<OAuth2OwnerTokenDto, OAuth2OwnerTokenEntity, String> {
+    AbstractBasicDaoTest<OAuth2OwnerTokenDto, OAuth2OwnerTokenEntity> {
 
   public OAuth2OwnerTokenDaoTest() {
-    super(OAuth2OwnerTokenEntity.class, String.class);
+    super(OAuth2OwnerTokenEntity.class);
   }
 
-  private String providerUserId;
-  private PersonEntity personEntity;
   private OAuth2OwnerTokenDao dao;
-  private Long personId;
 
   @Override
   @Before
   public void setUp() {
     super.setUp();
-    personEntity = createRandomPerson(defaultEnv, testSession);
-    personId = personEntity.getId();
-    providerUserId = getRandomString();
     dao = getInstance(injector, OAuth2OwnerTokenDao.class);
   }
 
   private Builder getDefaultEntityBuilder(OAuth2ProviderService providerService,
       String providerUserId) {
     return new OAuth2OwnerTokenEntity.Builder()
-        .personId(personId)
+        .personKey(testPerson.getKey())
         .providerService(providerService)
         .providerUserId(providerUserId)
         .accessToken(DEFAULT_ACCESS_TOKEN)
@@ -92,15 +82,29 @@ public class OAuth2OwnerTokenDaoTest extends
    */
   @Test
   @Override
-  public void test_get_ofyKey() {
-    OAuth2OwnerTokenEntity testEntity = getDefaultEntityBuilder(GOOGLE_LOGIN, providerUserId).build();
-    OAuth2OwnerTokenEntity savedEntity = dao.put(testEntity);
+  public void test_get_by_key() {
+    OAuth2OwnerTokenEntity testEntity =
+        getDefaultEntityBuilder(GOOGLE_LOGIN, testProviderUserId).build();
+    dao.put(testEntity);
+
+    OAuth2OwnerTokenEntity getEntiy = dao.get(testEntity.getKey());
+    assertEquals(testEntity, getEntiy);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Test
+  @Override
+  public void test_get_by_key_in_txn() {
+    OAuth2OwnerTokenEntity testEntity =
+        getDefaultEntityBuilder(GOOGLE_LOGIN, testProviderUserId).build();
+    dao.put(testEntity);
 
     Objectify ofy = ObjectifyUtils.initiateTransaction();
     try {
-      Key<OAuth2OwnerTokenEntity> key = dao.getKey(savedEntity.getId());
-      OAuth2OwnerTokenEntity getEntiy = dao.get(ofy, key);
-      assertEquals(savedEntity, getEntiy);
+      OAuth2OwnerTokenEntity getEntiy = dao.get(ofy, testEntity.getKey());
+      assertEquals(testEntity, getEntiy);
     } catch (Exception e) {
       ObjectifyUtils.rollbackTransaction(ofy);
     }
@@ -108,38 +112,12 @@ public class OAuth2OwnerTokenDaoTest extends
 
   /**
    * {@inheritDoc}
-   * In the parent class, it is deprecated to ensure callers use proper method.
-   */
-  @SuppressWarnings("deprecation")
-  @Test
-  @Override
-  public void test_get() {
-    try {
-      dao.get(TestingUtils.getRandomString());
-      fail("should have failed.");
-    } catch (UnsupportedOperationException e) {
-      // Expected. If you implement method, then fix this.
-    }
-  }
-
-  /**
-   * {@inheritDoc}
    */
   @Test
   @Override
-  public void test_get_key() {
-    String id = getRandomString();
-    assertEquals(getKey(OAuth2OwnerTokenEntity.class, id), dao.getKey(id));
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Test
-  @Override
-  public void test_put_ofyEntity() {
-    OAuth2OwnerTokenEntity testEntity =
-        getDefaultEntityBuilder(GOOGLE_LOGIN, providerUserId).build();
+  public void test_put_txn() {
+    OAuth2OwnerTokenEntity testEntity = getDefaultEntityBuilder(
+        GOOGLE_LOGIN, testProviderUserId).build();
 
     // Positive Test :
     Objectify txn = initiateTransaction();
@@ -148,7 +126,7 @@ public class OAuth2OwnerTokenDaoTest extends
     dao.put(txn, testEntity);
     commitTransaction(txn);
     OAuth2OwnerTokenEntity getEntity =
-        dao.getByPersonIdAndOAuth2ProviderService(personId, defaultProviderService);
+        dao.getByProviderService(GOOGLE_LOGIN);
     assertEquals(testEntity, getEntity);
 
     /*
@@ -164,37 +142,37 @@ public class OAuth2OwnerTokenDaoTest extends
   @Test
   @Override
   public void test_put() {
+    OAuth2OwnerTokenEntity originalEntity = getDefaultEntityBuilder(
+        GOOGLE_LOGIN, testProviderUserId).build();
+    OAuth2OwnerTokenEntity savedEntity = dao.put(originalEntity);
+    assertEquals(originalEntity, savedEntity);
 
-    OAuth2OwnerTokenEntity testEntity =
-        getDefaultEntityBuilder(GOOGLE_LOGIN, providerUserId).build();
-    OAuth2OwnerTokenEntity savedEntity = dao.put(testEntity);
-
-    OAuth2OwnerTokenEntity getEntity =
-        dao.getByPersonIdAndOAuth2ProviderService(personId, defaultProviderService);
-    assertEquals(savedEntity, getEntity);
+    OAuth2OwnerTokenEntity getEntity = dao.getByProviderService(defaultProviderService);
+    assertEquals(originalEntity, getEntity);
 
     // Same entity can be persisted twice. Change accessToken & refreshToken.
     String newAccessToken = getRandomString();
     String newRefreshToken = getRandomString();
 
-    testEntity = getDefaultEntityBuilder(GOOGLE_LOGIN, providerUserId)
+    originalEntity = getDefaultEntityBuilder(GOOGLE_LOGIN, testProviderUserId)
         .accessToken(newAccessToken)
         .refreshToken(newRefreshToken)
         .build();
 
-    OAuth2OwnerTokenEntity newSavedEntity = dao.put(testEntity);
-    assertEquals(newSavedEntity, dao.put(testEntity));
-    assertEquals(newSavedEntity, dao.put(testEntity));
+    OAuth2OwnerTokenEntity newSavedEntity = dao.put(originalEntity);
+    assertEquals(newSavedEntity, dao.put(originalEntity));
+    assertEquals(newSavedEntity, dao.put(originalEntity));
 
     // Ensures that savedEntity and newSavedEntity refer to same Entity.
-    assertEquals(savedEntity.getId(), newSavedEntity.getId());
+    assertEquals(savedEntity.getKey().getId(), newSavedEntity.getKey().getId());
+
     // Ensures that savedEntity and newSavedEntity are not equal post modification.
     assertTrue(!savedEntity.equals(newSavedEntity));
 
     // Now original accessToken and refreshToken is set back.
-    testEntity = getDefaultEntityBuilder(GOOGLE_LOGIN, providerUserId).build();
-    newSavedEntity = dao.put(testEntity);
-    assertEquals(savedEntity, newSavedEntity);
+    originalEntity = getDefaultEntityBuilder(GOOGLE_LOGIN, testProviderUserId).build();
+    newSavedEntity = dao.put(originalEntity);
+    assertEquals(originalEntity, newSavedEntity);
 
     /*
      * Negative : No negative test, as the key is based on PersonId + OAuth2Provider and therefore
@@ -204,48 +182,51 @@ public class OAuth2OwnerTokenDaoTest extends
   }
 
   /**
-   * Test for
-   * {@link OAuth2OwnerTokenDao#getByPersonIdAndOAuth2ProviderService(long, OAuth2ProviderService)}.
+   * Test for {@link OAuth2OwnerTokenDao#getByOAuth2ProviderService(long, OAuth2ProviderService)}.
    */
   @Test
-  public void test_getByPersonIdAndOAuth2ProviderService() {
+  public void test_getOAuth2ProviderService() {
     OAuth2OwnerTokenEntity testEntity =
-        getDefaultEntityBuilder(GOOGLE_LOGIN, providerUserId).build();
+        getDefaultEntityBuilder(GOOGLE_LOGIN, testProviderUserId).build();
 
     OAuth2OwnerTokenEntity savedEntity = dao.put(testEntity);
     OAuth2OwnerTokenEntity getEntity =
-        dao.getByPersonIdAndOAuth2ProviderService(personId, defaultProviderService);
+        dao.getByProviderService(defaultProviderService);
     assertEquals(savedEntity, getEntity);
 
-    // Negative test : Try to fetch with randomId.
-    assertNull(dao.getByPersonIdAndOAuth2ProviderService(TestingUtils.getRandomPersonId(),
-        defaultProviderService));
+    // Negative test : Since we don't allow custom enums, no negative test possible at the moment.
   }
 
   /**
-   * Test for {@link OAuth2OwnerTokenDao#getTokenByProviderAndUserId(OAuth2ProviderService, String)}.
+   * Test for {@link OAuth2OwnerTokenDao#getTokenByProviderAndUserId(OAuth2ProviderService, String)}
+   * .
    */
   @Test
   public void test_getTokenByProviderUserId() {
-    OAuth2OwnerTokenEntity token1 = getDefaultEntityBuilder(GOOGLE_LOGIN, providerUserId).build();
+    OAuth2OwnerTokenEntity token1 =
+        getDefaultEntityBuilder(GOOGLE_LOGIN, testProviderUserId).build();
     dao.put(token1);
 
-    OAuth2OwnerTokenEntity fetchedToken1 = dao.getTokenByProviderAndUserId(
-        GOOGLE_LOGIN, providerUserId);
+    OAuth2OwnerTokenEntity fetchedToken1 = dao.getByProviderServiceAndProviderUserId(
+        GOOGLE_LOGIN, testProviderUserId);
     assertEquals(token1, fetchedToken1);
 
     // Negative Testing : Create two different people with same providerUserId.
     String email2 = getRandomEmail();
-    HttpSession session2 = getMockSessionForTesting(defaultEnv, defaultProviderService, 
-        providerUserId, null, email2);
+    HttpSession session2 = getMockSessionForTesting(defaultEnv, defaultProviderService,
+        testProviderUserId, null/* personId */, email2);
     PersonEntity randomPerson2 = createRandomPerson(defaultEnv, session2);
-    OAuth2OwnerTokenEntity token2 = getDefaultEntityBuilder(GOOGLE_LOGIN, providerUserId)
-        .personId(randomPerson2.getId())
+    OAuth2OwnerTokenEntity token2 = getDefaultEntityBuilder(GOOGLE_LOGIN, testProviderUserId)
+        .personKey(randomPerson2.getKey())
         .build();
+
+    // Ensure that token1 and token2 are two different entities for persistence.
+    assertTrue(!token1.getKey().equals(token2.getKey()));
+
     dao.put(token2);
 
     try {
-      dao.getTokenByProviderAndUserId(GOOGLE_LOGIN, providerUserId);
+      dao.getByProviderServiceAndProviderUserId(GOOGLE_LOGIN, testProviderUserId);
       fail("should have failed as two Persons have same providerUserId.");
     } catch (IllegalStateException e) {
       // Expected

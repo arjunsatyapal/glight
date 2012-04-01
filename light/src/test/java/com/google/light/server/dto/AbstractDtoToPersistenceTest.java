@@ -15,6 +15,7 @@
  */
 package com.google.light.server.dto;
 
+import com.google.light.server.AbstractGAETest;
 import org.junit.Test;
 
 /**
@@ -22,7 +23,7 @@ import org.junit.Test;
  * 
  * @author Arjun Satyapal
  */
-public abstract class AbstractDtoToPersistenceTest {
+public abstract class AbstractDtoToPersistenceTest extends AbstractGAETest {
   /**
    * Test for constructor for each entity.
    */

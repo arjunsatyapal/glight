@@ -22,14 +22,16 @@ import static com.google.light.server.constants.RequestParmKeyEnum.PERSON_ID;
 import static com.google.light.server.utils.LightPreconditions.checkEmail;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPersonId;
+import static com.google.light.server.utils.LightPreconditions.checkPersonKey;
 import static org.apache.commons.lang.StringUtils.isBlank;
-
-import com.google.light.server.exception.unchecked.BlankStringException;
 
 import com.google.inject.Inject;
 import com.google.light.server.annotations.AnotHttpSession;
 import com.google.light.server.constants.OAuth2ProviderService;
+import com.google.light.server.exception.unchecked.BlankStringException;
 import com.google.light.server.exception.unchecked.httpexception.PersonLoginRequiredException;
+import com.google.light.server.persistence.entity.person.PersonEntity;
+import com.googlecode.objectify.Key;
 import javax.servlet.http.HttpSession;
 
 /**
@@ -121,6 +123,11 @@ public class SessionManager {
     checkPersonLoggedIn();
     Long personId = (Long) session.getAttribute(PERSON_ID.get());
     return checkPersonId(personId);
+  }
+  
+  public Key<PersonEntity> getPersonKey() {
+    Key<PersonEntity> personKey = PersonEntity.generateKey(getPersonId());
+    return checkPersonKey(personKey);
   }
 
   /**

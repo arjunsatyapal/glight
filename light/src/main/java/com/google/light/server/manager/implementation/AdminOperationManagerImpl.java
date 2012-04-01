@@ -52,7 +52,7 @@ public class AdminOperationManagerImpl implements AdminOperationManager {
   @Override
   public OAuth2ConsumerCredentialEntity getOAuth2ConsumerCredential(
       OAuth2ProviderEnum provider) {
-    return consumerCredentialDao.get(provider.name());
+    return consumerCredentialDao.get(provider);
   }
 
   /**

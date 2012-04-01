@@ -15,6 +15,8 @@
  */
 package com.google.light.server.persistence;
 
+import com.googlecode.objectify.Key;
+
 import java.io.Serializable;
 
 /**
@@ -25,6 +27,11 @@ import java.io.Serializable;
  * @author Arjun Satyapal
  */
 public interface PersistenceToDtoInterface<P, D> extends Serializable {
+  /**
+   * Return Objectify Key.
+   */
+  public Key<P> getKey();
+  
   /**
    * Convert Persistence entity to corresponding DTO.
    * 

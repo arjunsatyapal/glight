@@ -90,8 +90,6 @@ public class LoginITCase {
     consumerCredentials = loadProperties(getConsumerCredentialFilePath(OAUTH2, GOOGLE));
     validatePropertiesFile(consumerCredentials, Lists.newArrayList(
         CLIENT_ID.get(), CLIENT_SECRET.get()));
-
-    
   }
 
   /**

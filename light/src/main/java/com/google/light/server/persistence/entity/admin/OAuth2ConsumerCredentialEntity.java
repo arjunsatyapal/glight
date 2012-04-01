@@ -19,9 +19,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
 import com.google.light.server.constants.OAuth2ProviderEnum;
-
 import com.google.light.server.dto.admin.OAuth2ConsumerCredentialDto;
 import com.google.light.server.persistence.PersistenceToDtoInterface;
+import com.googlecode.objectify.Key;
 import javax.persistence.Id;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -36,7 +36,7 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 public class OAuth2ConsumerCredentialEntity implements
     PersistenceToDtoInterface<OAuth2ConsumerCredentialEntity, OAuth2ConsumerCredentialDto> {
   @Id
-  private String oAuth2ProviderKey;
+  private String providerName;
   private String clientId;
   private String clientSecret;
 
@@ -46,7 +46,7 @@ public class OAuth2ConsumerCredentialEntity implements
   @Override
   public OAuth2ConsumerCredentialDto toDto() {
     return new OAuth2ConsumerCredentialDto.Builder()
-        .provider(OAuth2ProviderEnum.valueOf(oAuth2ProviderKey))
+        .provider(OAuth2ProviderEnum.valueOf(providerName))
         .clientId(clientId)
         .clientSecret(clientSecret)
         .build();
@@ -67,8 +67,8 @@ public class OAuth2ConsumerCredentialEntity implements
     return EqualsBuilder.reflectionEquals(this, obj);
   }
 
-  public String getOAuth2ProviderKey() {
-    return oAuth2ProviderKey;
+  public OAuth2ProviderEnum getOAuth2Provider() {
+    return OAuth2ProviderEnum.valueOf(providerName);
   }
 
   public String getClientId() {
@@ -80,12 +80,12 @@ public class OAuth2ConsumerCredentialEntity implements
   }
 
   public static class Builder {
-    private String oAuth2ProviderKey;
+    private String providerName;
     private String clientId;
     private String clientSecret;
 
-    public Builder oAuth2ProviderKey(String oAuth2ProviderKey) {
-      this.oAuth2ProviderKey = oAuth2ProviderKey;
+    public Builder providerName(String providerName) {
+      this.providerName = providerName;
       return this;
     }
 
@@ -108,14 +108,41 @@ public class OAuth2ConsumerCredentialEntity implements
   @SuppressWarnings("synthetic-access")
   private OAuth2ConsumerCredentialEntity(Builder builder) {
     // Ensures that oAuth2ProviderKey is valid.
-    checkNotNull(OAuth2ProviderEnum.valueOf(builder.oAuth2ProviderKey), "invalid ProviderKey["
-        + oAuth2ProviderKey + "].");
-    this.oAuth2ProviderKey = checkNotBlank(builder.oAuth2ProviderKey, "oAuth2ProviderKey");
+    checkNotNull(OAuth2ProviderEnum.valueOf(builder.providerName), "invalid providerName["
+        + providerName + "].");
+    this.providerName = checkNotBlank(builder.providerName, "providerName");
     this.clientId = checkNotBlank(builder.clientId, "clientId is blank");
     this.clientSecret = checkNotBlank(builder.clientSecret, "clientSecret");
   }
   
   // For Objectify.
   private OAuth2ConsumerCredentialEntity() {
+  }
+
+  /** 
+   * {@inheritDoc}
+   */
+  @Override
+  public Key<OAuth2ConsumerCredentialEntity> getKey() {
+    return generateKey(providerName);
+  }
+  
+  /**
+   * Method to generate Objectify key for {@link OAuth2ConsumerCredentialEntity}.
+   * 
+   * @param providerName
+   * @return
+   */
+  public static Key<OAuth2ConsumerCredentialEntity> generateKey(String providerName) {
+    // Ensure that Provider is valid.
+    try {
+      checkNotBlank(providerName, "provider");
+      checkNotNull(OAuth2ProviderEnum.valueOf(providerName), "providerEnum");
+    } catch (Exception e) {
+      throw new EnumConstantNotPresentException(OAuth2ProviderEnum.class, providerName);
+    }
+    
+    return new Key<OAuth2ConsumerCredentialEntity>(OAuth2ConsumerCredentialEntity.class,
+        providerName);
   }
 }

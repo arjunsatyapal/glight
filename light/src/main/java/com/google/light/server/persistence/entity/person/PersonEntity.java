@@ -21,6 +21,7 @@ import static com.google.light.server.utils.LightPreconditions.checkPersonId;
 
 import com.google.light.server.dto.person.PersonDto;
 import com.google.light.server.persistence.PersistenceToDtoInterface;
+import com.googlecode.objectify.Key;
 import javax.persistence.Id;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -72,7 +73,23 @@ public class PersonEntity implements PersistenceToDtoInterface<PersonEntity, Per
   public Long getId() {
     return id;
   }
+  
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public Key<PersonEntity> getKey() {
+    return generateKey(id);
+  }
 
+  /**
+   * Method to generate Objectify key for {@link PersonEntity}.
+   */
+  public static Key<PersonEntity> generateKey(Long personId) {
+    checkPersonId(personId);
+    return new Key<PersonEntity>(PersonEntity.class, personId);
+  }
+  
   // TODO(arjuns) : Add a test.
   /**
    * Id can be set only when a User is Logged In.
@@ -138,7 +155,7 @@ public class PersonEntity implements PersistenceToDtoInterface<PersonEntity, Per
     this.id = builder.id != null ? checkPersonId(builder.id) : null;
     this.firstName = checkNotBlank(builder.firstName, "firstName");
     this.lastName = checkNotBlank(builder.lastName, "lastName");
-    this.email = builder.email != null ? checkEmail(builder.email) : null;
+    this.email = checkEmail(builder.email);
   }
   
   // For Objectify.

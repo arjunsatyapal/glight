@@ -17,7 +17,6 @@ package com.google.light.server.servlets.test;
 
 import static com.google.light.server.utils.LightPreconditions.checkIsNotEnv;
 
-import java.io.IOException;
 import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;
 import com.google.gson.Gson;
@@ -33,14 +32,6 @@ import javax.servlet.ServletInputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import com.google.common.base.Charsets;
-import com.google.common.io.CharStreams;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.inject.Inject;
-import com.google.light.server.constants.LightEnvEnum;
-import com.google.light.server.servlets.AbstractLightServlet;
 
 /**
  * A simple servlet to show all the headers sent by the client.

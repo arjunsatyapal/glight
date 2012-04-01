@@ -55,7 +55,7 @@ public class AdminOperationManagerImplTest extends AbstractLightServerTest {
     return new OAuth2ConsumerCredentialEntity.Builder()
       .clientId(clientId)
       .clientSecret(clientSecret)
-      .oAuth2ProviderKey(defaultProvider.name());
+      .providerName(defaultProvider.name());
   }
   
   /**

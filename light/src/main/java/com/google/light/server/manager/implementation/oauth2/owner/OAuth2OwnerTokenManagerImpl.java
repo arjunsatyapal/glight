@@ -42,15 +42,15 @@ public class OAuth2OwnerTokenManagerImpl implements OAuth2OwnerTokenManager {
    * {@inheritDoc}
    */
   @Override
-  public OAuth2OwnerTokenEntity getToken(long personId) {
-    return dao.getByPersonIdAndOAuth2ProviderService(personId, providerService);
+  public OAuth2OwnerTokenEntity get(long personId) {
+    return dao.getByProviderService(providerService);
   }
 
   /**
    * {@inheritDoc}
    */
   @Override
-  public OAuth2OwnerTokenEntity putToken(OAuth2OwnerTokenEntity entity) {
+  public OAuth2OwnerTokenEntity put(OAuth2OwnerTokenEntity entity) {
     checkArgument(providerService == entity.getProviderService(), "TokenManager for "
         + providerService + " was used to persist Token of type " + entity.getProviderService());
     return dao.put(entity);
@@ -60,9 +60,9 @@ public class OAuth2OwnerTokenManagerImpl implements OAuth2OwnerTokenManager {
    * {@inheritDoc}
    */
   @Override
-  public OAuth2OwnerTokenEntity getTokenByProviderUserId(String providerUserId) {
+  public OAuth2OwnerTokenEntity getByProviderUserId(String providerUserId) {
     if (providerService.isUsedForLogin()) {
-      return dao.getTokenByProviderAndUserId(providerService, providerUserId);
+      return dao.getByProviderServiceAndProviderUserId(providerService, providerUserId);
     }
 
     throw new IllegalArgumentException(

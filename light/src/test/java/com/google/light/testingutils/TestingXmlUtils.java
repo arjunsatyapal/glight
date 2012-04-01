@@ -66,6 +66,7 @@ public class TestingXmlUtils {
     SAXBuilder saxBuilder = new SAXBuilder();
     saxBuilder.setValidation(true);
     saxBuilder.setEntityResolver(new EntityResolver() {
+      @Override
       public InputSource resolveEntity(String publicId, String systemId) {
         if (HTTP_DTD_PLACEHOLDER.equals(systemId))
           return new InputSource(dtdStream);

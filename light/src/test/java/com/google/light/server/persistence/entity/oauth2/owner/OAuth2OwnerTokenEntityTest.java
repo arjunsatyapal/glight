@@ -17,12 +17,10 @@ package com.google.light.server.persistence.entity.oauth2.owner;
 
 import static com.google.light.server.constants.OAuth2ProviderService.GOOGLE_DOC;
 import static com.google.light.server.constants.OAuth2ProviderService.GOOGLE_LOGIN;
-import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.testingutils.TestingUtils.getRandomLongNumber;
 import static com.google.light.testingutils.TestingUtils.getRandomPersonId;
 import static com.google.light.testingutils.TestingUtils.getRandomString;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
 import com.google.light.server.constants.OAuth2ProviderService;
@@ -30,7 +28,9 @@ import com.google.light.server.dto.oauth2.owner.OAuth2OwnerTokenDto;
 import com.google.light.server.exception.unchecked.BlankStringException;
 import com.google.light.server.exception.unchecked.InvalidPersonIdException;
 import com.google.light.server.persistence.entity.AbstractPersistenceEntityTest;
+import com.google.light.server.persistence.entity.person.PersonEntity;
 import com.google.light.testingutils.TestingConstants;
+import com.googlecode.objectify.Key;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -63,7 +63,7 @@ public class OAuth2OwnerTokenEntityTest extends AbstractPersistenceEntityTest {
 
   private OAuth2OwnerTokenEntity.Builder getEntityBuilder() {
     return new OAuth2OwnerTokenEntity.Builder()
-        .personId(personId)
+        .personKey(PersonEntity.generateKey(personId))
         .providerService(defaultProviderService)
         .providerUserId(providerUserId)
         .accessToken(accessToken)
@@ -78,16 +78,9 @@ public class OAuth2OwnerTokenEntityTest extends AbstractPersistenceEntityTest {
    */
   @Override
   public void test_builder_with_constructor() {
-    // Positive Test.
-    OAuth2OwnerTokenEntity entity = getEntityBuilder().build();
-    assertNotNull(entity);
-    String expectedId = personId + "." + defaultProviderService.name();
-    checkNotBlank(entity.getId(), "id");
-    assertEquals(expectedId, entity.getId());
-
     // Negative Test : Zero personId
     try {
-      getEntityBuilder().personId(0).build();
+      getEntityBuilder().personKey(PersonEntity.generateKey(0L)).build();
       fail("should have failed.");
     } catch (InvalidPersonIdException e) {
       // Expected
@@ -95,7 +88,7 @@ public class OAuth2OwnerTokenEntityTest extends AbstractPersistenceEntityTest {
 
     // Negative Test : Negative personId
     try {
-      getEntityBuilder().personId(-3).build();
+      getEntityBuilder().personKey(PersonEntity.generateKey(-3L)).build();
       fail("should have failed.");
     } catch (InvalidPersonIdException e) {
       // Expected
@@ -119,8 +112,7 @@ public class OAuth2OwnerTokenEntityTest extends AbstractPersistenceEntityTest {
 
     // Positive Test : blank providerUserId with GOOGLE_DOC
     getEntityBuilder().providerService(GOOGLE_DOC).providerUserId(null).build();
-    
-    
+
     // Negative Test : non-null providerUserId with GOOGLE_DOC.
     try {
       getEntityBuilder().providerService(GOOGLE_DOC).providerUserId(getRandomString()).build();
@@ -229,14 +221,35 @@ public class OAuth2OwnerTokenEntityTest extends AbstractPersistenceEntityTest {
 
     assertEquals(dto, getEntityBuilder().build().toDto());
   }
-  
+
   /**
-   * Test for {@link OAuth2OwnerTokenEntity#computeId(long, OAuth2ProviderService)}.
+   * {@inheritDoc}
    */
   @Test
-  public void test_computeId() {
-    String expectedId = personId + "." + defaultProviderService.name();
+  @Override
+  public void test_getKey() {
     OAuth2OwnerTokenEntity entity = getEntityBuilder().build();
-    assertEquals(expectedId, entity.getId());
+    Key<PersonEntity> personKey = PersonEntity.generateKey(personId);
+    Key<OAuth2OwnerTokenEntity> expectedKey = new Key<OAuth2OwnerTokenEntity>(personKey,
+        OAuth2OwnerTokenEntity.class, defaultProviderService.name());
+    assertEquals(expectedKey, entity.getKey());
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void test_generateKey() {
+    // Positive tests already done as part of test_getKey.
+    Long randomPersonId = getRandomPersonId();
+    Key<PersonEntity> personKey = PersonEntity.generateKey(randomPersonId);
+
+    // Negative Test : Invalid ProviderService.
+    try {
+      OAuth2OwnerTokenEntity.generateKey(personKey, getRandomString());
+      fail("should have failed.");
+    } catch (EnumConstantNotPresentException e) {
+      // Expected
+    }
   }
 }

@@ -25,10 +25,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.google.inject.Inject;
-import com.google.inject.Injector;
-import com.google.light.server.guice.providers.InstanceProvider;
-
 /**
  * Base servlets for all Light Servlets. Essentially it forces all the derived servlets to implement
  * this methods. This ensures that any of the deriving classes does not miss any of these REST

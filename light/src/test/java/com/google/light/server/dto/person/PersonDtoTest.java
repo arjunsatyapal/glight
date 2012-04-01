@@ -40,12 +40,12 @@ public class PersonDtoTest extends AbstractDtoToPersistenceTest {
   private String firstName;
   private String lastName;
   private String email;
-
+  
   @Before
   public void setUp() {
-    firstName = getRandomString();
-    lastName = getRandomString();
-    email = getRandomEmail();
+    this.firstName = getRandomString();
+    this.lastName = getRandomString();
+    this.email = getRandomEmail();
   }
   
   private PersonDto.Builder getDtoBuilder() {

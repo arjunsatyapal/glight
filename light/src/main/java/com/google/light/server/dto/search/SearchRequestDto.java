@@ -15,11 +15,10 @@
  */
 package com.google.light.server.dto.search;
 
-import static com.google.common.base.Preconditions.*;
-import static com.google.light.server.utils.LightPreconditions.*;
+import static com.google.common.base.Preconditions.checkState;
+import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
 import com.google.light.server.dto.DtoInterface;
-import com.google.light.server.utils.QueryUtils;
 
 /**
  * Dto to hold a search request.
@@ -87,11 +86,13 @@ public class SearchRequestDto implements DtoInterface<SearchRequestDto> {
       return this;
     }
 
+    @SuppressWarnings("synthetic-access")
     public SearchRequestDto build() {
       return new SearchRequestDto(this).validate();
     }
   }
 
+  @SuppressWarnings("synthetic-access")
   private SearchRequestDto(Builder builder) {
     this.query = builder.query;
     this.page = builder.page;

@@ -17,6 +17,7 @@ package com.google.light.server.dto.oauth2.owner;
 
 import static com.google.light.testingutils.TestingUtils.getRandomLongNumber;
 import static com.google.light.testingutils.TestingUtils.getRandomPersonId;
+import static com.google.light.testingutils.TestingUtils.getRandomProviderUserId;
 import static com.google.light.testingutils.TestingUtils.getRandomString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -26,6 +27,7 @@ import com.google.light.server.constants.OAuth2ProviderService;
 import com.google.light.server.dto.AbstractDtoToPersistenceTest;
 import com.google.light.server.exception.unchecked.BlankStringException;
 import com.google.light.server.persistence.entity.oauth2.owner.OAuth2OwnerTokenEntity;
+import com.google.light.server.persistence.entity.person.PersonEntity;
 import com.google.light.testingutils.TestingConstants;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,13 +38,13 @@ import org.junit.Test;
  * @author Arjun Satyapal
  */
 public class OAuth2OwnerTokenDtoTest extends AbstractDtoToPersistenceTest {
-  private long personId;
-  private OAuth2ProviderService defaultProviderService = OAuth2ProviderService.GOOGLE_LOGIN;
-  private String providerUserId;
+  private long testPersonId;
+  private String testProviderUserId;
   private String accessToken;
   private String refreshToken;
   private long expiresInMillis;
   private String defaultTokenType = TestingConstants.DEFAULT_ACCESS_TYPE;
+  private OAuth2ProviderService defaultProviderService = OAuth2ProviderService.GOOGLE_LOGIN;
   
   // At present it is some random string. Eventually may need fix.
   private String tokenInfo;
@@ -50,8 +52,8 @@ public class OAuth2OwnerTokenDtoTest extends AbstractDtoToPersistenceTest {
   
   @Before
   public void setUp() {
-    personId = getRandomPersonId();
-    providerUserId = getRandomString();
+    testPersonId = getRandomPersonId();
+    testProviderUserId = getRandomProviderUserId();
     accessToken = getRandomString();
     refreshToken = getRandomString();
     expiresInMillis = getRandomLongNumber();
@@ -60,9 +62,9 @@ public class OAuth2OwnerTokenDtoTest extends AbstractDtoToPersistenceTest {
   
   private OAuth2OwnerTokenDto.Builder getDtoBuilder() {
     return new OAuth2OwnerTokenDto.Builder()
-      .personId(personId)
+      .personId(testPersonId)
       .provider(defaultProviderService)
-      .providerUserId(providerUserId)
+      .providerUserId(testProviderUserId)
       .accessToken(accessToken)
       .refreshToken(refreshToken)
       .expiresInMillis(expiresInMillis)
@@ -113,9 +115,9 @@ public class OAuth2OwnerTokenDtoTest extends AbstractDtoToPersistenceTest {
   @Test
   public void test_toPersistenceEntity_noParam() throws Exception {
     OAuth2OwnerTokenEntity entity = new OAuth2OwnerTokenEntity.Builder()
-      .personId(personId)
+      .personKey(PersonEntity.generateKey(testPersonId))
       .providerService(defaultProviderService)
-      .providerUserId(providerUserId)
+      .providerUserId(testProviderUserId)
       .accessToken(accessToken)
       .refreshToken(refreshToken)
       .expiresInMillis(expiresInMillis)

@@ -17,12 +17,9 @@ package com.google.light.server.persistence.dao;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-
-import com.google.light.server.persistence.PersistenceToDtoInterface;
 
 import com.google.light.server.AbstractLightServerTest;
-import com.google.light.server.exception.unchecked.IllegalKeyTypeException;
+import com.google.light.server.persistence.PersistenceToDtoInterface;
 import org.junit.Test;
 
 /**
@@ -38,14 +35,12 @@ import org.junit.Test;
  * 
  * @author Arjun Satyapal
  */
-public abstract class AbstractBasicDaoTest<D, P extends PersistenceToDtoInterface<P, D>, I> extends
+public abstract class AbstractBasicDaoTest<D, P extends PersistenceToDtoInterface<P, D>> extends
     AbstractLightServerTest {
   private final Class<P> entityClazz;
-  private final Class<I> idTypeClazz;
 
-  protected AbstractBasicDaoTest(Class<P> clazz, Class<I> idTypeClazz) {
+  protected AbstractBasicDaoTest(Class<P> clazz) {
     this.entityClazz = checkNotNull(clazz);
-    this.idTypeClazz = checkNotNull(idTypeClazz);
   }
 
   /**
@@ -57,59 +52,42 @@ public abstract class AbstractBasicDaoTest<D, P extends PersistenceToDtoInterfac
      * Since AbstractBasicDao is an abstract class, extending it so that we can create a instance of
      * desired type.
      */
-    class AbstractTest extends AbstractBasicDao<D, P, I> {
+    class AbstractTest extends AbstractBasicDao<D, P> {
       /*
        * Deliberately not putting types to testEntityClazz & testIdTypeClazz so that we can do
        * negative testing.
        */
 
       @SuppressWarnings({ "unchecked", "rawtypes" })
-      public AbstractTest(Class testEntityClazz, Class testIdTypeClazz1) {
-        super(testEntityClazz, testIdTypeClazz1);
+      public AbstractTest(Class testEntityClazz) {
+        super(testEntityClazz);
       }
     }
-    AbstractTest object = new AbstractTest(this.entityClazz, this.idTypeClazz);
+    AbstractTest object = new AbstractTest(this.entityClazz);
     assertEquals(entityClazz.getClass(), object.getEntityClazz().getClass());
-    assertEquals(idTypeClazz.getClass(), object.getIdTypeClazz().getClass());
-
-    Class<?> testClazz = Float.class;
-
-    try {
-      new AbstractTest(this.entityClazz, testClazz);
-      fail("should have failed.");
-    } catch (IllegalKeyTypeException e) {
-      // Expected
-    }
   }
 
   /**
    * Test for {@link AbstractBasicDao#get(Objectify, Key)}
-   * 
-   * Test to get Entity within Objectify Transaction for provided <Key>.
+   * Test to get Entity from Datastore within a Objectify Transaction for provided <Key>.
    */
   @Test
-  public abstract void test_get_ofyKey();
+  public abstract void test_get_by_key_in_txn();
 
   /**
    * Test for {@link AbstractBasicDao#get(Objectify, Object)}.
+   * Test to get Entity from datastore without Transaction for provided <Key>.
    * 
-   * Test to get Entity within Objectify Transaction for provided <Id>.
    */
-  public abstract void test_get();
-
-  /**
-   * Test for {@link AbstractBasicDao#getKey(Object)}
-   */
-  @Test
-  public abstract void test_get_key();
+  public abstract void test_get_by_key();
 
   /**
    * Test for {@link AbstractBasicDao#put(Objectify, Object)}
    * 
-   * Test to put Entity using a Txn.
+   * Test to put Entity using a Objectify Txn.
    */
   @Test
-  public abstract void test_put_ofyEntity();
+  public abstract void test_put_txn();
 
   /**
    * Test for {@link AbstractBasicDao#put(Object)}

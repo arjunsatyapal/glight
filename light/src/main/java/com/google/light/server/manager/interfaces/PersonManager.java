@@ -15,7 +15,7 @@ public interface PersonManager {
    * @return
    * @throws EmailInUseException
    */
-  public PersonEntity createPerson(PersonEntity entity);
+  public PersonEntity create(PersonEntity entity);
 
   /**
    * Update an existing Person.
@@ -23,7 +23,7 @@ public interface PersonManager {
    * @param updatedEntity
    * @return
    */
-  public PersonEntity updatePerson(PersonEntity updatedEntity);
+  public PersonEntity update(PersonEntity updatedEntity);
 
   /**
    * Get details of an existing Person by PersonId.
@@ -32,7 +32,7 @@ public interface PersonManager {
    * @return
    * @throws IllegalKeyTypeException
    */
-  public PersonEntity getPerson(Long id);
+  public PersonEntity get(Long id);
 
   /**
    * Get details of an existing Person by Email. Returns null if not found.
@@ -40,7 +40,7 @@ public interface PersonManager {
    * @param email
    * @return
    */
-  public PersonEntity getPersonByEmail(String email);
+  public PersonEntity getByEmail(String email);
 
   /**
    * Delete an existing Person.
@@ -48,5 +48,5 @@ public interface PersonManager {
    * @param id
    * @return
    */
-  public PersonEntity deletePerson(String id);
+  public PersonEntity delete(String id);
 }

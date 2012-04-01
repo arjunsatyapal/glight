@@ -15,6 +15,7 @@
  */
 package com.google.light.server.persistence.dao;
 
+import static com.google.light.server.utils.LightPreconditions.checkPersonId;
 import static com.google.light.server.utils.ObjectifyUtils.assertAndReturnUniqueEntity;
 
 import com.google.inject.Inject;
@@ -32,7 +33,7 @@ import java.util.logging.Logger;
  * 
  * @author Arjun Satyapal
  */
-public class PersonDao extends AbstractBasicDao<PersonDto, PersonEntity, Long> {
+public class PersonDao extends AbstractBasicDao<PersonDto, PersonEntity> {
   private static final Logger logger = Logger.getLogger(PersonDao.class.getName());
 
   static {
@@ -41,7 +42,7 @@ public class PersonDao extends AbstractBasicDao<PersonDto, PersonEntity, Long> {
 
   @Inject
   public PersonDao() {
-    super(PersonEntity.class, Long.class);
+    super(PersonEntity.class);
   }
 
   /**
@@ -92,5 +93,14 @@ public class PersonDao extends AbstractBasicDao<PersonDto, PersonEntity, Long> {
     }
 
     return logAndReturn(logger, returnEntity, returnMsg);
+  }
+  
+  /**
+   * TODO(arjuns): Add test for this.
+   * Fetch Person via PersonId.
+   */
+  public PersonEntity get(long personId) {
+    checkPersonId(personId);
+    return super.get(PersonEntity.generateKey(personId));
   }
 }

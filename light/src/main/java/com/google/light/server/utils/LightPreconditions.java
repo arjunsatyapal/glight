@@ -20,6 +20,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.Lists.newArrayList;
 
+import com.google.light.server.persistence.entity.person.PersonEntity;
+
+import com.googlecode.objectify.Key;
+
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.light.server.constants.LightEnvEnum;
@@ -75,6 +79,9 @@ public class LightPreconditions {
     return email;
   }
 
+  /**
+   * Ensures that PersonId is valid.
+   */
   // TODO(arjuns) : Fix this validation eventually.
   public static Long checkPersonId(Long personId) {
     try {
@@ -83,7 +90,16 @@ public class LightPreconditions {
       throw new InvalidPersonIdException(e);
     }
   }
-
+  
+  /**
+   * TODO(arjuns): Add test for this.
+   * Ensures that Key<PersonEntity> is valid.
+   */
+  public static Key<PersonEntity> checkPersonKey(Key<PersonEntity> personKey) {
+    checkPersonId(personKey.getId());
+    return personKey;
+  }
+  
   /**
    * Ensures that the list passed to the referenced method is not empty.
    * 

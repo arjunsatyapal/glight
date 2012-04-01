@@ -6,9 +6,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
-import org.jdom.JDOMException;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -47,8 +44,7 @@ public class SearchManagerGSSImplTest {
   }
 
   @Test
-  public void test_search() throws JsonParseException, JsonMappingException,
-      IOException, JDOMException {
+  public void test_search() {
 
     for (String name : SAMPLE_TEST_FILES_PREFIXES) {
       fakeContent = TestingUtils.getResourceAsStream("/search/gss/" + name + "_input.xml");

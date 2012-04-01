@@ -17,11 +17,15 @@ package com.google.light.server.persistence.entity.oauth2.owner;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
-import static com.google.light.server.utils.LightPreconditions.checkPersonId;
+import static com.google.light.server.utils.LightPreconditions.checkPersonKey;
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
 import static com.google.light.server.utils.LightPreconditions.checkProviderUserId;
 
-import com.google.common.annotations.VisibleForTesting;
+import com.google.light.server.persistence.entity.person.PersonEntity;
+
+import com.googlecode.objectify.Key;
+
+import com.googlecode.objectify.annotation.Parent;
 
 import com.google.light.server.constants.OAuth2ProviderService;
 import com.google.light.server.dto.oauth2.owner.OAuth2OwnerTokenDto;
@@ -38,15 +42,11 @@ import org.apache.commons.lang.builder.ToStringBuilder;
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
-public class OAuth2OwnerTokenEntity implements
+public class OAuth2OwnerTokenEntity implements 
     PersistenceToDtoInterface<OAuth2OwnerTokenEntity, OAuth2OwnerTokenDto> {
   @Id
-  String id;
-  long personId;
-  
-  // This is used in Objectify Query.
-  public static final String OFY_PROVIDER= "providerService";
-  OAuth2ProviderService providerService;
+  String providerServiceName;
+  @Parent Key<PersonEntity> personKey;
   
   // This is used in Objectify Query.
   public static final String OFY_PROVIDER_USER_ID = "providerUserId";
@@ -64,8 +64,8 @@ public class OAuth2OwnerTokenEntity implements
   @Override
   public OAuth2OwnerTokenDto toDto() {
     return new OAuth2OwnerTokenDto.Builder()
-      .personId(personId)
-      .provider(providerService)
+      .personId(personKey.getId())
+      .provider(OAuth2ProviderService.valueOf(providerServiceName))
       .providerUserId(providerUserId)
       .accessToken(accessToken)
       .refreshToken(refreshToken)
@@ -90,16 +90,37 @@ public class OAuth2OwnerTokenEntity implements
     return ToStringBuilder.reflectionToString(this);
   }
   
-  public String getId() {
-    return id;
+  public Key<PersonEntity> getPersonKey() {
+    return personKey;
+  }
+  
+  /** 
+   * {@inheritDoc}
+   */
+  @Override
+  public Key<OAuth2OwnerTokenEntity> getKey() {
+    return generateKey(personKey, providerServiceName);
   }
 
-  public long getPersonId() {
-    return personId;
+  /**
+   * Method to generate Objectify key for {@link OAuth2OwnerTokenEntity}.
+   */
+  public static Key<OAuth2OwnerTokenEntity> generateKey(Key<PersonEntity> personKey,
+      String providerServiceName) {
+    // check that providerServiceName is valid.
+    try {
+      checkNotBlank(providerServiceName, "providerServiceName");
+      checkNotNull(OAuth2ProviderService.valueOf(providerServiceName));
+    } catch (Exception e) {
+      throw new EnumConstantNotPresentException(OAuth2ProviderService.class, providerServiceName);
+    }
+    
+    return new Key<OAuth2OwnerTokenEntity>(personKey, OAuth2OwnerTokenEntity.class, 
+        providerServiceName);
   }
 
   public OAuth2ProviderService getProviderService() {
-    return providerService;
+    return OAuth2ProviderService.valueOf(providerServiceName);
   }
   
   public String providerUserId() {
@@ -127,7 +148,7 @@ public class OAuth2OwnerTokenEntity implements
   }
 
   public static class Builder {
-    private long personId;
+    private Key<PersonEntity> personKey;
     private OAuth2ProviderService providerService;
     private String providerUserId;
     private String accessToken;
@@ -136,8 +157,8 @@ public class OAuth2OwnerTokenEntity implements
     private String tokenType;
     private String tokenInfo;
 
-    public Builder personId(long personId) {
-      this.personId = personId;
+    public Builder personKey(Key<PersonEntity>  personKey) {
+      this.personKey = personKey;
       return this;
     }
 
@@ -181,18 +202,12 @@ public class OAuth2OwnerTokenEntity implements
       return new OAuth2OwnerTokenEntity(this);
     }
   }
-  
-  @VisibleForTesting
-  protected String computeId(long personId, OAuth2ProviderService providerService) {
-    return checkPersonId(personId) + "." + providerService.name();
-  }
 
   @SuppressWarnings("synthetic-access")
   private OAuth2OwnerTokenEntity(Builder builder) {
-    this.personId = checkPersonId(builder.personId);
-    this.providerService = checkNotNull(builder.providerService, "provider");
-    // In order to setId, personId, and provider needs to be set.
-    this.id = computeId(personId, providerService);
+    this.personKey = checkPersonKey(builder.personKey);
+    checkNotNull(builder.providerService, "provider");
+    this.providerServiceName = builder.providerService.name();
     
     this.providerUserId = checkProviderUserId(builder.providerService, builder.providerUserId);
     this.accessToken = checkNotBlank(builder.accessToken, "accessToken");

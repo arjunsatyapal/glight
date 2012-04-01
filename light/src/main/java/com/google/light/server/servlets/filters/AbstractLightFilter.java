@@ -31,7 +31,6 @@ import com.google.common.base.Throwables;
 import com.google.light.server.annotations.AnotHttpSession;
 import com.google.light.server.constants.HttpStatusCodesEnum;
 import com.google.light.server.exception.unchecked.httpexception.LightHttpException;
-import com.google.light.server.exception.unchecked.httpexception.PersonLoginRequiredException;
 import com.google.light.server.servlets.path.ServletPathEnum;
 import com.google.light.server.utils.LightUtils;
 
@@ -41,7 +40,6 @@ import java.util.logging.Logger;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;

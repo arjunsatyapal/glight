@@ -15,15 +15,22 @@
  */
 package com.google.light.server.persistence.dao;
 
-import static com.google.light.server.utils.ObjectifyUtils.assertAndReturnUniqueEntity;
+import static com.google.light.server.utils.GuiceUtils.getInstance;
+import static com.google.light.server.utils.LightPreconditions.checkValidSession;
+
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.google.light.server.constants.OAuth2ProviderService;
 import com.google.light.server.dto.oauth2.owner.OAuth2OwnerTokenDto;
 import com.google.light.server.persistence.entity.oauth2.owner.OAuth2OwnerTokenEntity;
+import com.google.light.server.servlets.SessionManager;
 import com.google.light.server.utils.ObjectifyUtils;
+import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Objectify;
 import com.googlecode.objectify.ObjectifyService;
 import com.googlecode.objectify.Query;
+import java.util.List;
 
 /**
  * DAO for {@link OAuth2OwnerTokenEntity}.
@@ -31,14 +38,17 @@ import com.googlecode.objectify.Query;
  * @author Arjun Satyapal
  */
 public class OAuth2OwnerTokenDao extends
-    AbstractBasicDao<OAuth2OwnerTokenDto, OAuth2OwnerTokenEntity, String> {
+    AbstractBasicDao<OAuth2OwnerTokenDto, OAuth2OwnerTokenEntity> {
   static {
     ObjectifyService.register(OAuth2OwnerTokenEntity.class);
   }
 
+  private SessionManager sessionManager;
+
   @Inject
-  public OAuth2OwnerTokenDao() {
-    super(OAuth2OwnerTokenEntity.class, String.class);
+  public OAuth2OwnerTokenDao(Injector injector) {
+    super(OAuth2OwnerTokenEntity.class);
+    this.sessionManager = getInstance(injector, SessionManager.class);
   }
 
   /**
@@ -52,40 +62,102 @@ public class OAuth2OwnerTokenDao extends
    * @param email
    * @return
    */
-  public OAuth2OwnerTokenEntity getTokenByProviderAndUserId(
+  public OAuth2OwnerTokenEntity getByProviderServiceAndProviderUserId(
       OAuth2ProviderService providerService, String providerUserId) {
+    sessionManager.checkPersonLoggedIn();
+    
     Objectify ofy = ObjectifyUtils.nonTransaction();
 
     Query<OAuth2OwnerTokenEntity> query = ofy.query(OAuth2OwnerTokenEntity.class)
-        .filter(OAuth2OwnerTokenEntity.OFY_PROVIDER, providerService)
         .filter(OAuth2OwnerTokenEntity.OFY_PROVIDER_USER_ID, providerUserId);
 
-    String errMessage = "Found more then one entry for providerService[" + providerService +
-        "], providerUserId[" + providerUserId + "].";
-    return assertAndReturnUniqueEntity(query, errMessage);
+    List<OAuth2OwnerTokenEntity> ownerTokens = Lists.newArrayList(query.iterator());
+
+    // TODO(arjuns): Add test for this.
+    if (ownerTokens == null || ownerTokens.size() <= 0) {
+      return null;
+    }
+
+    /*
+     * First validate that all the records returned belongs to same person. Under following
+     * circumstances (though very rare), it is possible that Light has more then one PersonEntity
+     * with same providerUserId.
+     * 1. Due to some kind of race condition, Light ended up creating two PersonEntity for same
+     * real Human with same ProviderUserId for same Provider.
+     * 2. Provider has a bug and two different Persons end up sharing same PersonId. If this happens
+     * then Light will be in big trouble as Light is relying on Providers with the assumption that
+     * Providers will not reuse PersonIds.
+     * NOTE : Two different providers are allowed to have same providerUserId. e.g. Google and
+     * Yahoo can reuse same providerUserId. And they can be two different persons. Light's
+     * requirement is that combination of Provider & ProviderUserId is unique.
+     */
+    long currPersonId = 0;
+    for (int index = 0; index < ownerTokens.size() - 1; index++) {
+      OAuth2OwnerTokenEntity currToken = ownerTokens.get(index);
+      currPersonId = currToken.getPersonKey().getId();
+
+      for (int futureIndex = index + 1; futureIndex < ownerTokens.size(); futureIndex++) {
+        OAuth2OwnerTokenEntity otherToken = ownerTokens.get(futureIndex);
+        long otherPersonId = otherToken.getPersonKey().getId();
+
+        if (currPersonId == otherPersonId) {
+          /*
+           * Same person can have multiple providerService for same providerUserId. e.g.
+           * A person can have GOOGLE_DOC and GOOGLE_SITES as providerServices for same provider
+           * GOOGLE.
+           */
+          continue;
+        }
+        
+        if (currToken.getProviderService() == otherToken.getProviderService()) {
+          /*
+           * Though we may optimize and not fail by chekcing if the currently asked
+           * providerService is different from one for which this error has occurred. But at
+           * present we want to find out these potential issues, and therefore we will fail
+           * even if we may have proceeded.
+           */
+          String errMessage = "Two different Persons [" + currPersonId
+              + ", " + otherPersonId + "] share same providerUserId[" + providerUserId
+              + "for providerService[" + providerService + "].";
+          throw new IllegalStateException(errMessage);
+        }
+      }
+    }
+
+    /*
+     * Objectify does not allow filtering on Id field for child Entities. Since
+     * OAuth2OwnerTokenEntity is child of PersonEntity, so we cannot apply filter on
+     * providerServiceName. So now we have to fetch all the records for the given providerUserId
+     * and then filter for the record we are looking.
+     */
+
+    if (ownerTokens != null && ownerTokens.size() > 0) {
+      for (OAuth2OwnerTokenEntity currToken : ownerTokens) {
+        if (currToken.getProviderService() == providerService) {
+          return currToken;
+        }
+      }
+    }
+
+    return null;
   }
 
   /**
-   * OAuth2 Owner Tokens dont use a DataStore generatedId. Instead they have a derived Id.
-   * @deprecated clients should use {{@link #get(String, OAuth2ProviderService)}.
-   */
-  @Deprecated
-  @Override
-  public OAuth2OwnerTokenEntity get(String id) {
-    throw new UnsupportedOperationException(
-        "this should not be called. Instead use get(String, OAuth2Provider)");
-  }
-
-  /**
-   * Fetch OAuth2 Owner token from Datastore using PersonId and OAuth2Provider.
+   * Fetch OAuth2 Owner token from Datastore using {@link OAuth2ProviderService}.
+   * 
+   * TODO(arjuns): Add test for this.
+   * TODO(arjuns): Rename this method to get.
    * 
    * @param personId
    * @param providerService
    * @return
    */
-  public OAuth2OwnerTokenEntity getByPersonIdAndOAuth2ProviderService(
-      long personId, OAuth2ProviderService providerService) {
-    String fetchId = personId + "." + providerService.name();
-    return super.get(fetchId);
+  public OAuth2OwnerTokenEntity getByProviderService(OAuth2ProviderService providerService) {
+    checkValidSession(sessionManager);
+    
+    Key<OAuth2OwnerTokenEntity> fetchKey = OAuth2OwnerTokenEntity.generateKey(
+        sessionManager.getPersonKey(), providerService.name());
+
+    return super.get(fetchKey);
   }
 }

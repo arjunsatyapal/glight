@@ -21,6 +21,11 @@ import static com.google.light.server.servlets.test.CredentialUtils.getOwnerToke
 import static com.google.light.server.utils.GuiceUtils.getInstance;
 import static com.google.light.server.utils.LightPreconditions.checkIsNotEnv;
 
+import com.google.common.collect.Lists;
+
+
+import com.google.light.server.dto.admin.OAuth2ConsumerCredentialDto;
+
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -121,7 +126,7 @@ public class TestCredentialBackupServlet extends HttpServlet {
         "If you add more providers, add code to take backup here.");
         
     try {
-      PersonEntity personEntity = personManager.getPersonByEmail(email);
+      PersonEntity personEntity = personManager.getByEmail(email);
       checkNotNull(personEntity, "Persion should have been created first.");
 
       String googConsumerCredJsonString = getConsumerCredJsonString();
@@ -160,9 +165,17 @@ public class TestCredentialBackupServlet extends HttpServlet {
    */
   private String getConsumerCredJsonString()
       throws JsonGenerationException, JsonMappingException, IOException {
-    List<OAuth2ConsumerCredentialEntity> entities = consumerCredentialDao.getAllOAuth2ConsumerCredentials();
-    LightPreconditions.checkNonEmptyList(entities);
-    return JsonUtils.toJson(entities);
+    List<OAuth2ConsumerCredentialEntity> entities = 
+        consumerCredentialDao.getAllOAuth2ConsumerCredentials();
+    
+    List<OAuth2ConsumerCredentialDto> dtoList = Lists.newArrayList();
+    
+    for(OAuth2ConsumerCredentialEntity curr : entities) {
+      dtoList.add(curr.toDto());
+    }
+    
+    LightPreconditions.checkNonEmptyList(dtoList);
+    return JsonUtils.toJson(dtoList);
   }
   
   /**
@@ -172,10 +185,10 @@ public class TestCredentialBackupServlet extends HttpServlet {
    */
   private String getOwnerTokenJsonString(OAuth2OwnerTokenManager tokenManager, long personId)
       throws JsonGenerationException, JsonMappingException, IOException {
-    OAuth2OwnerTokenEntity entity = tokenManager.getToken(personId);
+    OAuth2OwnerTokenEntity entity = tokenManager.get(personId);
     Preconditions.checkNotNull(entity, "entity should not be null");
     // TODO(arjuns): Use entity.toDto().toJson();
-    return JsonUtils.toJson(entity);
+    return JsonUtils.toJson(entity.toDto());
   }
 
   private void addFileToZip(ZipOutputStream zipOut, String compFilePath, String content)

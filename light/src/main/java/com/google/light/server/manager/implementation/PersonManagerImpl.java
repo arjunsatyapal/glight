@@ -15,7 +15,6 @@
  */
 package com.google.light.server.manager.implementation;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkPersonId;
 import static com.google.light.server.utils.LightPreconditions.checkValidSession;
@@ -52,7 +51,7 @@ public class PersonManagerImpl implements PersonManager {
    * {@inheritDoc}
    */
   @Override
-  public PersonEntity createPerson(PersonEntity entity) {
+  public PersonEntity create(PersonEntity entity) {
     /*
      * We don't trust client to provide PersonId at time of Creation. So it has to be set
      * on the server side.
@@ -61,15 +60,8 @@ public class PersonManagerImpl implements PersonManager {
       throw new IdShouldNotBeSet();
     }
 
-    /*
-     * Similarly, we dont trust email given by Client at the time of creation. We fetch it from
-     * session.
-     */
-    checkArgument(entity.getEmail() == null, "email should not be set for createPerson.");
-    entity.setEmail(sessionManager.getEmail());
-    
     // This is a heavy operation, so perform this validation just before persisting.
-    PersonEntity personByEmail = getPersonByEmail(entity.getEmail());
+    PersonEntity personByEmail = getByEmail(entity.getEmail());
     
     if (personByEmail != null) {
       return personByEmail;
@@ -82,7 +74,7 @@ public class PersonManagerImpl implements PersonManager {
    * {@inheritDoc}
    */
   @Override
-  public PersonEntity updatePerson(PersonEntity updatedEntity) {
+  public PersonEntity update(PersonEntity updatedEntity) {
     checkValidSession(sessionManager);
     
     // TODO(arjuns): Auto-generated method stub
@@ -93,7 +85,7 @@ public class PersonManagerImpl implements PersonManager {
    * {@inheritDoc}
    */
   @Override
-  public PersonEntity getPerson(Long id) {
+  public PersonEntity get(Long id) {
     /*
      * We dont check for session validity as this is used for finding person at the time of creating
      * a person.
@@ -105,7 +97,7 @@ public class PersonManagerImpl implements PersonManager {
    * {@inheritDoc}
    */
   @Override
-  public PersonEntity getPersonByEmail(String email) {
+  public PersonEntity getByEmail(String email) {
     /*
      * We dont check for session validity as this is used for finding person at the time of creating
      * a person.
@@ -117,7 +109,7 @@ public class PersonManagerImpl implements PersonManager {
    * {@inheritDoc}
    */
   @Override
-  public PersonEntity deletePerson(String id) {
+  public PersonEntity delete(String id) {
     checkValidSession(sessionManager);
     // TODO(arjuns): Auto-generated method stub
     throw new UnsupportedOperationException();

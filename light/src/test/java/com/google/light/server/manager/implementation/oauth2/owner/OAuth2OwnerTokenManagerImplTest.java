@@ -72,7 +72,7 @@ public class OAuth2OwnerTokenManagerImplTest extends AbstractLightServerTest {
   private OAuth2OwnerTokenEntity.Builder getOwnerTokenEntiy(OAuth2ProviderService providerService,
       String providerUserId) {
     return new OAuth2OwnerTokenEntity.Builder()
-        .personId(randomPerson.getId())
+        .personKey(PersonEntity.generateKey(randomPerson.getId()))
         .providerService(providerService)
         .providerUserId(providerUserId)
         .accessToken(accessToken)
@@ -109,12 +109,12 @@ public class OAuth2OwnerTokenManagerImplTest extends AbstractLightServerTest {
     
     // Now fetch using providerUserId;
     OAuth2OwnerTokenEntity fetchedToken = 
-        googLogintokenManager.getTokenByProviderUserId(providerUserId);
+        googLogintokenManager.getByProviderUserId(providerUserId);
     assertEquals(expectedToken, fetchedToken);
     
     // Negative Testing : Try to fetch by providerUserId for GOOGLE_DOC token.
     try {
-      googDocTokenManager.getTokenByProviderUserId(providerUserId);
+      googDocTokenManager.getByProviderUserId(providerUserId);
       fail("should have failed.");
     } catch (IllegalArgumentException e) {
       // Expected
@@ -161,10 +161,10 @@ public class OAuth2OwnerTokenManagerImplTest extends AbstractLightServerTest {
   }
 
   private void doTestPutGet(OAuth2OwnerTokenEntity token, OAuth2OwnerTokenManager tokenManager, long personId) {
-    OAuth2OwnerTokenEntity savedToken = tokenManager.putToken(token);
+    OAuth2OwnerTokenEntity savedToken = tokenManager.put(token);
     assertEquals(token, savedToken);
     
-    OAuth2OwnerTokenEntity fetchedToken = tokenManager.getToken(personId);
+    OAuth2OwnerTokenEntity fetchedToken = tokenManager.get(personId);
     assertEquals(token, fetchedToken);
   }
 }

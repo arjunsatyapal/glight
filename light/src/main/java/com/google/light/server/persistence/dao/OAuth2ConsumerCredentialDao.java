@@ -17,14 +17,14 @@ package com.google.light.server.persistence.dao;
 
 import com.google.appengine.api.datastore.QueryResultIterable;
 import com.google.common.collect.Lists;
-import com.google.light.server.utils.ObjectifyUtils;
-import com.googlecode.objectify.Objectify;
-import java.util.List;
-
 import com.google.inject.Inject;
+import com.google.light.server.constants.OAuth2ProviderEnum;
 import com.google.light.server.dto.admin.OAuth2ConsumerCredentialDto;
 import com.google.light.server.persistence.entity.admin.OAuth2ConsumerCredentialEntity;
+import com.google.light.server.utils.ObjectifyUtils;
+import com.googlecode.objectify.Objectify;
 import com.googlecode.objectify.ObjectifyService;
+import java.util.List;
 
 /**
  * DAO for {@link OAuth2ConsumerCredentialEntity}.
@@ -32,14 +32,14 @@ import com.googlecode.objectify.ObjectifyService;
  * @author Arjun Satyapal
  */
 public class OAuth2ConsumerCredentialDao extends
-    AbstractBasicDao<OAuth2ConsumerCredentialDto, OAuth2ConsumerCredentialEntity, String> {
+    AbstractBasicDao<OAuth2ConsumerCredentialDto, OAuth2ConsumerCredentialEntity> {
   static {
     ObjectifyService.register(OAuth2ConsumerCredentialEntity.class);
   }
 
   @Inject
   public OAuth2ConsumerCredentialDao() {
-    super(OAuth2ConsumerCredentialEntity.class, String.class);
+    super(OAuth2ConsumerCredentialEntity.class);
   }
   
   /** 
@@ -51,5 +51,13 @@ public class OAuth2ConsumerCredentialDao extends
         ofy.query(OAuth2ConsumerCredentialEntity.class).fetch();
     
     return Lists.newArrayList(resultsIterable);
-  } 
+  }
+  
+  /**
+   * TODO(arjuns): Add test for this.
+   * Fetch Consumer Credential Dao via ProviderName.
+   */
+  public OAuth2ConsumerCredentialEntity get(OAuth2ProviderEnum provider) {
+    return super.get(OAuth2ConsumerCredentialEntity.generateKey(provider.name()));
+  }
 }

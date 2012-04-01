@@ -25,11 +25,11 @@ import static com.google.light.server.utils.GuiceUtils.getInstance;
 import static com.google.light.server.utils.LightPreconditions.checkNull;
 import static org.mockito.Mockito.when;
 
-import java.io.BufferedReader;
+import com.google.light.server.servlets.SessionManager;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
@@ -37,9 +37,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import javax.annotation.Nullable;
 import javax.servlet.http.HttpSession;
 
-import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
 import org.mockito.Mockito;
 
 import com.google.common.base.Charsets;
@@ -57,15 +54,6 @@ import com.google.light.server.guice.modules.QaModule;
 import com.google.light.server.manager.interfaces.PersonManager;
 import com.google.light.server.persistence.entity.person.PersonEntity;
 import com.google.light.server.utils.LightUtils;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.atomic.AtomicLong;
-import javax.annotation.Nullable;
-import javax.servlet.http.HttpSession;
-import org.mockito.Mockito;
 
 /**
  * 
@@ -162,8 +150,7 @@ public class TestingUtils {
     }
   }
   
-  public static InputStream getResourceAsStream(String resourcePath)
-      throws IOException {
+  public static InputStream getResourceAsStream(String resourcePath) {
     return System.class.getResourceAsStream(resourcePath);
   }
 
@@ -300,13 +287,18 @@ public class TestingUtils {
    */
   public static PersonEntity createRandomPerson(LightEnvEnum env, HttpSession session) {
     Injector injector = TestingUtils.getInjectorByEnv(env, session);
+    
+    SessionManager sessionManager = getInstance(injector, SessionManager.class);
+    sessionManager.checkPersonLoggedIn();
+    
     PersonManager personManager = getInstance(injector, PersonManager.class);
     
     PersonEntity personEntity = new PersonEntity.Builder()
         .firstName(getRandomString())
         .lastName(getRandomString())
+        .email(sessionManager.getEmail())
         .build();
     
-    return personManager.createPerson(personEntity);
+    return personManager.create(personEntity);
   }
 }

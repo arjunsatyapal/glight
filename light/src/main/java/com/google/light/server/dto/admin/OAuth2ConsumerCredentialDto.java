@@ -78,7 +78,7 @@ public class OAuth2ConsumerCredentialDto implements
     return new OAuth2ConsumerCredentialEntity.Builder()
         .clientId(clientId)
         .clientSecret(clientSecret)
-        .oAuth2ProviderKey(provider.name())
+        .providerName(provider.name())
         .build();
   }
 

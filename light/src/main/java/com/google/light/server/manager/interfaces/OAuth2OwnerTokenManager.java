@@ -31,7 +31,7 @@ public interface OAuth2OwnerTokenManager {
    * @param PersonId
    * @return
    */
-  public OAuth2OwnerTokenEntity getToken(long PersonId);
+  public OAuth2OwnerTokenEntity get(long PersonId);
   
   /**
    * Put OAuth2 Token on DataStore.
@@ -39,7 +39,7 @@ public interface OAuth2OwnerTokenManager {
    * @param entity
    * @return
    */
-  public OAuth2OwnerTokenEntity putToken(OAuth2OwnerTokenEntity entity);
+  public OAuth2OwnerTokenEntity put(OAuth2OwnerTokenEntity entity);
   
   /**
    * Fetch an OAuth2 Token by ProviderUserId.
@@ -48,5 +48,5 @@ public interface OAuth2OwnerTokenManager {
    * @param providerUserId
    * @return
    */
-  public OAuth2OwnerTokenEntity getTokenByProviderUserId(String providerUserId);
+  public OAuth2OwnerTokenEntity getByProviderUserId(String providerUserId);
 }

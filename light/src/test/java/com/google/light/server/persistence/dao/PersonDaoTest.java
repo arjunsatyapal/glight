@@ -17,7 +17,6 @@ package com.google.light.server.persistence.dao;
 
 import static com.google.light.server.utils.GuiceUtils.getInstance;
 import static com.google.light.server.utils.ObjectifyUtils.commitTransaction;
-import static com.google.light.server.utils.ObjectifyUtils.getKey;
 import static com.google.light.server.utils.ObjectifyUtils.initiateTransaction;
 import static com.google.light.testingutils.TestingUtils.getRandomEmail;
 import static com.google.light.testingutils.TestingUtils.getRandomPersonId;
@@ -27,11 +26,12 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import com.google.light.testingutils.TestingUtils;
+
 import com.google.light.server.dto.person.PersonDto;
 import com.google.light.server.exception.unchecked.EmailInUseException;
 import com.google.light.server.persistence.entity.person.PersonEntity;
 import com.google.light.server.utils.ObjectifyUtils;
-import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Objectify;
 import org.junit.Test;
 
@@ -40,24 +40,25 @@ import org.junit.Test;
  * 
  * @author Arjun Satyapal
  */
-public class PersonDaoTest extends AbstractBasicDaoTest<PersonDto, PersonEntity, Long> {
+public class PersonDaoTest extends AbstractBasicDaoTest<PersonDto, PersonEntity> {
 
   public PersonDaoTest() {
-    super(PersonEntity.class, Long.class);
+    super(PersonEntity.class);
   }
 
+  private String email;
   private PersonDao dao;
 
   @Override
   public void setUp() {
     super.setUp();
-
+    email = TestingUtils.getRandomEmail();
     dao = getInstance(injector, PersonDao.class);
   }
 
   private PersonEntity.Builder getDefaultEntityBuilder() {
     return new PersonEntity.Builder()
-        .email(testEmail)
+        .email(email)
         .firstName(testFirstName)
         .lastName(testLastName);
   }
@@ -67,15 +68,14 @@ public class PersonDaoTest extends AbstractBasicDaoTest<PersonDto, PersonEntity,
    */
   @Test
   @Override
-  public void test_get_ofyKey() {
+  public void test_get_by_key_in_txn() {
     Long id = getRandomPersonId();
     PersonEntity testEntity = getDefaultEntityBuilder().id(id).build();
     PersonEntity savedEntity = dao.put(testEntity);
 
     Objectify ofy = ObjectifyUtils.initiateTransaction();
     try {
-      Key<PersonEntity> key = dao.getKey(savedEntity.getId());
-      PersonEntity getEntiy = dao.get(ofy, key);
+      PersonEntity getEntiy = dao.get(ofy, savedEntity.getKey());
       assertEquals(savedEntity, getEntiy);
     } catch (Exception e) {
       ObjectifyUtils.rollbackTransaction(ofy);
@@ -87,7 +87,7 @@ public class PersonDaoTest extends AbstractBasicDaoTest<PersonDto, PersonEntity,
    */
   @Test
   @Override
-  public void test_get() {
+  public void test_get_by_key() {
     Long id = getRandomPersonId();
     PersonEntity testEntity = getDefaultEntityBuilder().id(id).build();
 
@@ -99,15 +99,6 @@ public class PersonDaoTest extends AbstractBasicDaoTest<PersonDto, PersonEntity,
     assertNull(dao.get(getRandomPersonId()));
   }
 
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public void test_get_key() {
-    Long id = getRandomPersonId();
-    assertEquals(getKey(PersonEntity.class, id), dao.getKey(id));
-  }
-
   @Test
   @Override
   public void test_put() {
@@ -115,7 +106,7 @@ public class PersonDaoTest extends AbstractBasicDaoTest<PersonDto, PersonEntity,
     PersonEntity savedEntity = dao.put(testEntity);
     Long entityId = savedEntity.getId();
 
-    PersonEntity getEntity = dao.getByEmail(testEmail);
+    PersonEntity getEntity = dao.getByEmail(email);
     assertEquals(savedEntity, getEntity);
 
     // Same entity can be persisted twice. Change email and persist.
@@ -136,7 +127,7 @@ public class PersonDaoTest extends AbstractBasicDaoTest<PersonDto, PersonEntity,
     // Now original email can be set back.
     testEntity = getDefaultEntityBuilder()
         .id(entityId)
-        .email(testEmail)
+        .email(email)
         .build();
     newSavedEntity = dao.put(testEntity);
     assertEquals(savedEntity, newSavedEntity);
@@ -145,7 +136,7 @@ public class PersonDaoTest extends AbstractBasicDaoTest<PersonDto, PersonEntity,
     try {
       PersonEntity dummy = new PersonEntity.Builder()
           .id(getRandomPersonId())
-          .email(testEmail)
+          .email(email)
           .firstName(testFirstName)
           .lastName(testLastName)
           .build();
@@ -165,7 +156,7 @@ public class PersonDaoTest extends AbstractBasicDaoTest<PersonDto, PersonEntity,
    */
   @Test
   @Override
-  public void test_put_ofyEntity() {
+  public void test_put_txn() {
     Long id = getRandomPersonId();
     PersonEntity testEntity = getDefaultEntityBuilder()
         .id(id)
@@ -207,7 +198,7 @@ public class PersonDaoTest extends AbstractBasicDaoTest<PersonDto, PersonEntity,
     PersonEntity savedPerson = dao.put(testPerson);
 
     // Positive Test :
-    PersonEntity getPerson = dao.getByEmail(testEmail);
+    PersonEntity getPerson = dao.getByEmail(email);
     assertEquals(savedPerson, getPerson);
 
     // Negative Test : Search by invalid email.
@@ -216,7 +207,7 @@ public class PersonDaoTest extends AbstractBasicDaoTest<PersonDto, PersonEntity,
     // Negative Test : Put two different person with same email. This should fail.
     try {
       PersonEntity dummy = new PersonEntity.Builder()
-          .email(testEmail)
+          .email(email)
           .firstName(getRandomString())
           .lastName(getRandomString())
           .build();
