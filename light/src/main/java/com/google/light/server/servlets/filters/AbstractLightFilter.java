@@ -29,7 +29,12 @@ import com.google.common.base.Preconditions;
 
 import com.google.common.base.Throwables;
 import com.google.light.server.annotations.AnotHttpSession;
+import com.google.light.server.constants.HttpStatusCodesEnum;
+import com.google.light.server.exception.unchecked.httpexception.LightHttpException;
+import com.google.light.server.exception.unchecked.httpexception.PersonLoginRequiredException;
 import com.google.light.server.servlets.path.ServletPathEnum;
+import com.google.light.server.utils.LightUtils;
+
 import java.io.IOException;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -80,12 +85,23 @@ public abstract class AbstractLightFilter implements Filter {
         SessionManager sessionManager = getInstance(injector, SessionManager.class);
         sessionManager.checkPersonLoggedIn();
       }
-
+    
       // TODO(arjuns) : Add changeLog.
       filterChain.doFilter(request, response);
     } catch (Exception e) {
-      // TODO(arjuns) : check log(level, message, throwable) logs whole stack.
-      logger.severe("Failed due to : " + Throwables.getStackTraceAsString(e));
+      try {
+        if(LightHttpException.class.isAssignableFrom(e.getClass())) {
+          response.sendError(((LightHttpException)e).getHttpCode().getStatusCode(), e.getMessage());
+        } else {
+          response.sendError(HttpStatusCodesEnum.INTERNAL_SERVER_ERROR.getStatusCode(),
+              "Internal Server Error");
+          // TODO(arjuns) : check log(level, message, throwable) logs whole stack.
+          logger.severe("Failed due to : " + Throwables.getStackTraceAsString(e));
+        }
+      } catch(IOException ioException) {
+        // TODO(arjuns): Handle this exception
+        LightUtils.wrapIntoRuntimeExceptionAndThrow(ioException);
+      }
     }
   }
 

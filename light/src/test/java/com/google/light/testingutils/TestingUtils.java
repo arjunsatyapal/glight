@@ -25,6 +25,23 @@ import static com.google.light.server.utils.GuiceUtils.getInstance;
 import static com.google.light.server.utils.LightPreconditions.checkNull;
 import static org.mockito.Mockito.when;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicLong;
+
+import javax.annotation.Nullable;
+import javax.servlet.http.HttpSession;
+
+import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.mockito.Mockito;
+
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 import com.google.inject.Guice;
@@ -138,12 +155,18 @@ public class TestingUtils {
    */
   public static String getResourceAsString(String resourcePath) {
     try {
-      InputStream is = System.class.getResourceAsStream(resourcePath);
+      InputStream is = getResourceAsStream(resourcePath);
       return LightUtils.getInputStreamAsString(is);
     } catch (Exception e) {
       throw new RuntimeException("Failed to load " + resourcePath);
     }
   }
+  
+  public static InputStream getResourceAsStream(String resourcePath)
+      throws IOException {
+    return System.class.getResourceAsStream(resourcePath);
+  }
+
   /**
    * Get Injector on the basis of the Environment. TODO(arjuns): Move other injector creations to
    * use this.

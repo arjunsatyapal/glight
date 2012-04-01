@@ -15,6 +15,8 @@ package com.google.light.server.servlets.path;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
+import javax.servlet.http.HttpServlet;
+
 import com.google.light.server.exception.unchecked.httpexception.NotFoundException;
 import com.google.light.server.servlets.admin.ConfigServlet;
 import com.google.light.server.servlets.admin.OAuth2ConsumerCredentialServlet;
@@ -25,13 +27,13 @@ import com.google.light.server.servlets.oauth2.google.gdoc.GoogleDocAuthServlet;
 import com.google.light.server.servlets.oauth2.google.login.GoogleLoginCallbackServlet;
 import com.google.light.server.servlets.oauth2.google.login.GoogleLoginServlet;
 import com.google.light.server.servlets.person.PersonServlet;
+import com.google.light.server.servlets.search.SearchServlet;
 import com.google.light.server.servlets.test.SessionInfoServlet;
 import com.google.light.server.servlets.test.TestHeaders;
 import com.google.light.server.servlets.test.TestLogin;
 import com.google.light.server.servlets.test.oauth2.TestCredentialBackupServlet;
 import com.google.light.server.servlets.test.oauth2.TestOAuth2WorkFlowServlet;
 import com.google.light.server.servlets.test.oauth2.login.FakeLoginServlet;
-import javax.servlet.http.HttpServlet;
 
 /**
  * Enum to Map Servlets with their Paths and URL Patterns.
@@ -46,7 +48,8 @@ public enum ServletPathEnum {
   
   PERSON(PersonServlet.class, "/api/person",
          true, false, false),
-
+  SEARCH(SearchServlet.class, "/api/search",
+                false, false, false),
   LOGIN(LoginServlet.class, "/login",
         false, false, false),
   LOGOUT(LogoutServlet.class, "/logout",

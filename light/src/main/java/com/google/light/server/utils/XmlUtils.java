@@ -15,11 +15,11 @@
  */
 package com.google.light.server.utils;
 
-import com.google.light.server.dto.person.PersonDto;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.net.URL;
+
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -31,7 +31,10 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
+
 import org.xml.sax.SAXException;
+
+import com.google.light.server.dto.person.PersonDto;
 
 /**
  * Utility class for Xml.

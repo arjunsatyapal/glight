@@ -12,16 +12,23 @@
  */
 package com.google.light.server.guice.modules;
 
+
+import java.util.logging.Logger;
+
+import javax.servlet.http.HttpSession;
+
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson.JacksonFactory;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
+import com.google.inject.Singleton;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.light.server.annotations.AnotHttpSession;
 import com.google.light.server.manager.implementation.AdminOperationManagerImpl;
 import com.google.light.server.manager.implementation.PersonManagerImpl;
+import com.google.light.server.manager.implementation.SearchManagerGSSImpl;
 import com.google.light.server.manager.implementation.oauth2.consumer.OAuth2ConsumerCredentialManagerFactory;
 import com.google.light.server.manager.implementation.oauth2.consumer.OAuth2ConsumerCredentialManagerImpl;
 import com.google.light.server.manager.implementation.oauth2.owner.OAuth2OwnerTokenManagerFactory;
@@ -30,12 +37,12 @@ import com.google.light.server.manager.interfaces.AdminOperationManager;
 import com.google.light.server.manager.interfaces.OAuth2ConsumerCredentialManager;
 import com.google.light.server.manager.interfaces.OAuth2OwnerTokenManager;
 import com.google.light.server.manager.interfaces.PersonManager;
+import com.google.light.server.manager.interfaces.SearchManager;
 import com.google.light.server.persistence.dao.OAuth2ConsumerCredentialDao;
-import com.google.light.server.servlets.oauth2.google.OAuth2HelperImpl;
-import com.google.light.server.servlets.oauth2.google.OAuth2HelperFactoryInterface;
 import com.google.light.server.servlets.oauth2.google.OAuth2Helper;
-import java.util.logging.Logger;
-import javax.servlet.http.HttpSession;
+import com.google.light.server.servlets.oauth2.google.OAuth2HelperFactoryInterface;
+import com.google.light.server.servlets.oauth2.google.OAuth2HelperImpl;
+
 
 /**
  * {@link BaseGuiceModule} will do two things : <br>
@@ -83,17 +90,19 @@ public abstract class BaseGuiceModule extends AbstractModule {
 
     bind(PersonManager.class)
         .to(PersonManagerImpl.class);
+    bind(SearchManager.class).to(SearchManagerGSSImpl.class);
 
     bind(HttpSession.class)
         .annotatedWith(AnotHttpSession.class)
         .to(HttpSession.class);
-  }
 
-  // TODO(arjuns): Following bindings are global bindings. Need to be fixed.
-  @Provides
-  public HttpTransport provideHttpTransport() {
-    logger.info("Creating new HttpTransport");
-    return new NetHttpTransport();
+    // TODO(arjuns): Following bindings are global bindings. Need to be fixed.
+    /**
+     * Implementation is thread-safe, so using it as a singleton.
+     * TODO(waltercacau): See if we should use UrlFetchTransport instead.
+     * @see http://code.google.com/p/google-http-java-client/wiki/GoogleAppEngine#HTTP_Transport
+     */
+    bind(HttpTransport.class).to(NetHttpTransport.class).in(Singleton.class);
   }
 
   @Provides

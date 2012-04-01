@@ -22,17 +22,21 @@ import static com.google.light.server.constants.RequestParmKeyEnum.LOGIN_PROVIDE
 import static com.google.light.server.constants.RequestParmKeyEnum.LOGIN_PROVIDER_USER_ID;
 import static com.google.light.server.constants.RequestParmKeyEnum.PERSON_ID;
 
-import com.google.common.base.Charsets;
-import com.google.common.io.CharStreams;
-import com.google.light.server.constants.OAuth2ProviderService;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Enumeration;
 import java.util.logging.Logger;
+
 import javax.servlet.http.HttpSession;
+
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
+
+import com.google.common.base.Charsets;
+import com.google.common.io.CharStreams;
+import com.google.light.server.constants.OAuth2ProviderService;
+import com.google.light.server.exception.unchecked.httpexception.LightHttpException;
 
 /**
  * General Utility methods for Light.
@@ -114,5 +118,14 @@ public class LightUtils {
   
   // Utility class.
   private LightUtils() {
+  }
+  
+  public static void wrapIntoRuntimeExceptionAndThrow(Exception e) {
+    // Allowing LightHttpException to pass through so the filters can handle it properly.
+    if(LightHttpException.class.isAssignableFrom(e.getClass())) {
+      throw (LightHttpException) e;
+    } else {
+      throw new RuntimeException(e);
+    }
   }
 }
