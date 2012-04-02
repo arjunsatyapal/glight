@@ -16,14 +16,12 @@
 define(['dojo/_base/declare', 'dojo', 'dojo/_base/xhr', 'dojo/_base/lang'],
         function(declare, dojo, xhr, lang) {
   return declare('light.SearchService', null, {
-    
-    
-    
+
     /**
-     * Issues an search request
+     * Issues a search request
      *
      * @param {Object}
-     *          request An search request object. See
+     *          request A search request object. See
      *          {@link light.schemas.SearchStateSchema}.
      * @return {Object} A promise object for when the server answers.
      */
@@ -35,16 +33,20 @@ define(['dojo/_base/declare', 'dojo', 'dojo/_base/xhr', 'dojo/_base/lang'],
       return this._lastXhr = xhr.get({
         url: '/api/search?' + dojo.objectToQuery(request),
         contentType: 'application/json',
-        handleAs: "json"
+        handleAs: 'json'
       }).then(null, function() {
         this._lastXhr = null;
       });
     },
-    
+
+    /**
+     * Cancel's the last issued search request if there is any
+     * and if it didn't succeed yet.
+     */
     cancelLastSearch: function() {
-      if(this._lastXhr) {
+      if (this._lastXhr) {
+        this._lastXhr.cancel();
         this._lastXhr = null;
-        //this._lastXhr.cancel();
       }
     }
   });

@@ -33,6 +33,7 @@ define(['dojo/_base/declare', 'light/views/AbstractLightView',
 
       this.clear();
 
+      // Showing suggestions if any
       if (data.suggestion) {
         var suggestionRequest = lang.mixin(lang.clone(request), {
           query: data.suggestionQuery
@@ -49,46 +50,55 @@ define(['dojo/_base/declare', 'light/views/AbstractLightView',
                   link: '#' + SearchRouter.searchStateToHash(suggestionRequest)
                 }));
       }
+
+      // Showing items or no results message
       var items = data.items;
       var len = items.length;
       if (len == 0) {
         this.domNode.appendChild(TemplateUtils.toDom(
                 '<div class="searchInfo">${noResults}</div>', messages));
       } else {
+
+        // Showing items
         for (var i = 0; i < len; i++) {
           this.domNode.appendChild(TemplateUtils.toDom(itemTemplate, items[i]));
         }
-        
-        
-        var pageInfo = domConstruct.toDom('<div class="searchInfo"></div>')
-        if(request.page > 1) {
+
+
+        var pageInfo = domConstruct.toDom('<div class="searchInfo"></div>');
+
+        // Prev page link
+        if (request.page > 1) {
           var prevPageRequest = lang.mixin(lang.clone(request), {
-            page: request.page-1
+            page: request.page - 1
           });
           pageInfo.appendChild(TemplateUtils.toDom(
                   '<a href="${link}">${messages.shortPrevious}</a> | ',
                   {
                     messages: messages,
-                    link: "#"+SearchRouter.searchStateToHash(prevPageRequest)
+                    link: '#' + SearchRouter.searchStateToHash(prevPageRequest)
                   }));
         }
-        
+
+        // Current page number
         pageInfo.appendChild(domConstruct.toDom(
                 htmlEntities.encode(string.substitute(messages.pageInfo, {
                   page: request.page
                 }))));
-        
-        if(data.hasNextPage) {
+
+        // Next page link
+        if (data.hasNextPage) {
           var nextPageRequest = lang.mixin(lang.clone(request), {
-            page: request.page+1
+            page: request.page + 1
           });
           pageInfo.appendChild(TemplateUtils.toDom(
                   ' | <a href="${link}">${messages.shortNext}</a>',
                   {
                     messages: messages,
-                    link: "#"+SearchRouter.searchStateToHash(nextPageRequest)
+                    link: '#' + SearchRouter.searchStateToHash(nextPageRequest)
                   }));
         }
+
         this.domNode.appendChild(pageInfo);
       }
     }

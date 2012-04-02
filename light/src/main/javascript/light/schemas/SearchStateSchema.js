@@ -14,7 +14,9 @@
  * the License.
  */
 /**
- * By convenience, this is the same format of a search request.
+ * For convenience, SearchState has the same format of a search request.
+ * TODO(waltercacau): Rename everything that talks about SearchState
+ * to SearchRequest.
  */
 define({
   description: 'light/schemas/SearchStateSchema',

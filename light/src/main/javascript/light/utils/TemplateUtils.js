@@ -28,7 +28,7 @@ define(['dojo/_base/declare', 'dojox/html/entities', 'dojo/string',
      * Implementation borrowed from Dojo 1.7.2'
      * {@link dijit._TemplatedMixin._stringRepl}.
      *
-     * Injects properties from an context object using
+     * Injects properties from a context object using
      * {@link dojo.string.substitute} format in a template string automatically
      * escaping HTML Entities in them.
      *
