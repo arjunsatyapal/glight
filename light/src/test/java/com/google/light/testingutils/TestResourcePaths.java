@@ -23,10 +23,10 @@ import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
  * @author Arjun Satyapal
  */
 public enum TestResourcePaths {
-  SEARCH_GSS_ADDITION_QUERY_INPUT_XML("/search/gss/addition_input.xml"),
-  SEARCH_GSS_ADDITION_QUERY_OUTPUT_JSON("/search/gss/addition_output.json"),
-  SEARCH_GSS_ADDXITION_QUERY_INPUT_XML("/search/gss/addxition_input.xml"),
-  SEARCH_GSS_ADDXITION_QUERY_OUTPUT_JSON("/search/gss/addxition_output.json"),
+  SEARCH_GSS_ADDITION_QUERY_INPUT_XML("/search/gss/addition_query_input.xml"),
+  SEARCH_GSS_ADDITION_QUERY_OUTPUT_JSON("/search/gss/addition_query_output.json"),
+  SEARCH_GSS_ADDXITION_QUERY_INPUT_XML("/search/gss/addxition_query_input.xml"),
+  SEARCH_GSS_ADDXITION_QUERY_OUTPUT_JSON("/search/gss/addxition_query_output.json"),
   // Values inside this file are randomly created.
   GOOGLE_TOKEN_INFO_JSON("/login/oauth2/google/google_token_info.json"),
   /*

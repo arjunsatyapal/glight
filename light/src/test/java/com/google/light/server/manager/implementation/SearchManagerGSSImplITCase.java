@@ -39,6 +39,7 @@ public class SearchManagerGSSImplITCase {
    * and second pages
    */
   private static final String TEST_QUERY = "Addition";
+  private static final String TEST_LANGUAGE_CODE = "en";
   private SearchManagerGSSImpl searchManager;
 
   @Before
@@ -55,7 +56,8 @@ public class SearchManagerGSSImplITCase {
   public void test_search() {
     for (int i = 1; i <= 2; i++) {
       SearchResultDto search =
-          searchManager.search(new SearchRequestDto.Builder().query(TEST_QUERY).page(i).build());
+          searchManager.search(new SearchRequestDto.Builder().query(TEST_QUERY)
+              .clientLanguageCode(TEST_LANGUAGE_CODE).page(i).build());
       assertNotNull("Page " + i + " has a null items list.", search.getItems());
       assertEquals(
           "The test query ("

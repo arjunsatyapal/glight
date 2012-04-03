@@ -17,6 +17,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Throwables;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.google.light.server.constants.GSSSupportedLanguageEnum;
 import com.google.light.server.constants.LightConstants;
 import com.google.light.server.dto.search.SearchRequestDto;
 import com.google.light.server.dto.search.SearchResultDto;
@@ -72,6 +73,8 @@ public class SearchManagerGSSImpl implements SearchManager {
     url.put("num", LightConstants.SEARCH_RESULTS_PER_PAGE);
     url.put("start", start);
     url.put("q", escapeQuery(query));
+    url.put("hl", GSSSupportedLanguageEnum.getClosestGSSSupportedLanguage(
+        searchRequest.getClientLanguageCode()).getLanguageCode());
 
     Document doc;
     try {
@@ -95,7 +98,7 @@ public class SearchManagerGSSImpl implements SearchManager {
   }
 
   protected String escapeQuery(String unescaped) {
-    return unescaped.replaceAll("\\s", "+");
+    return unescaped.replaceAll("\\s+", "+");
   }
 
   @SuppressWarnings("unchecked")

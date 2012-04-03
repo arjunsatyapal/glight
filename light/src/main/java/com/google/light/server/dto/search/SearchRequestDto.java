@@ -33,7 +33,12 @@ public class SearchRequestDto implements DtoInterface<SearchRequestDto> {
    * User's search query
    */
   private String query;
-  
+
+  /**
+   * User's languageCode
+   */
+  private String clientLanguageCode;
+
   /**
    * Search page number.
    * 
@@ -52,6 +57,7 @@ public class SearchRequestDto implements DtoInterface<SearchRequestDto> {
   public SearchRequestDto validate() {
     checkState(page > 0, "Page number need to be greater then 0");
     checkNotBlank(query, "query");
+    checkNotBlank(clientLanguageCode, "clientLanguageCode");
     return this;
   }
 
@@ -81,12 +87,26 @@ public class SearchRequestDto implements DtoInterface<SearchRequestDto> {
     this.page = page;
   }
 
+  public String getClientLanguageCode() {
+    return clientLanguageCode;
+  }
+
+  public void setClientLanguageCode(String clientLanguageCode) {
+    this.clientLanguageCode = clientLanguageCode;
+  }
+
   public static class Builder {
-    private int page = LightConstants.FIRST_SEARCH_PAGE_NUMBER;
     private String query;
+    private String clientLanguageCode;
+    private int page = LightConstants.FIRST_SEARCH_PAGE_NUMBER;
 
     public Builder query(String query) {
       this.query = query;
+      return this;
+    }
+
+    public Builder clientLanguageCode(String clientLanguageCode) {
+      this.clientLanguageCode = clientLanguageCode;
       return this;
     }
 
@@ -102,6 +122,7 @@ public class SearchRequestDto implements DtoInterface<SearchRequestDto> {
 
   private SearchRequestDto(Builder builder) {
     this.query = builder.query;
+    this.clientLanguageCode = builder.clientLanguageCode;
     this.page = builder.page;
   }
 

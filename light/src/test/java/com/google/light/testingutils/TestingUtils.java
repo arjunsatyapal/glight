@@ -155,7 +155,7 @@ public class TestingUtils {
       InputStream is = getResourceAsStream(resourcePath);
       return LightUtils.getInputStreamAsString(is);
     } catch (Exception e) {
-      throw new RuntimeException("Failed to load " + resourcePath);
+      throw new RuntimeException("Failed to load " + resourcePath, e);
     }
   }
 

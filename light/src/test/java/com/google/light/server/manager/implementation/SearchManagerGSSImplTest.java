@@ -24,6 +24,7 @@ import com.google.light.testingutils.XmlTestingUtils;
  * @author Walter Cacau
  */
 public class SearchManagerGSSImplTest {
+  private static final String SAMPLE_LANGUAGE_CODE = "en";
   private static final String GOOGLE_DTD_URL = "http://www.google.com/google.dtd";
 
   /**
@@ -51,7 +52,8 @@ public class SearchManagerGSSImplTest {
       // Building searchManager
       InputStream fakeContent =
           TestingUtils.getResourceAsStream(TestingConstants.SAMPLE_GSS_LIST_INPUTS.get(i));
-      HttpTransport mockedHttpTransport = TestingUtils.createHttpTransportMockForGetRequest(fakeContent);
+      HttpTransport mockedHttpTransport =
+          TestingUtils.createHttpTransportMockForGetRequest(fakeContent);
       SearchManagerGSSImpl searchManager =
           new SearchManagerGSSImpl(TestingUtils.getMockProviderFor(mockedHttpTransport));
 
@@ -60,12 +62,15 @@ public class SearchManagerGSSImplTest {
 
       // Deliberately comparing using the json string representation because it eases
       // debugging.
+      SearchRequestDto searchRequest =
+          new SearchRequestDto.Builder()
+              .query(TestingConstants.SAMPLE_GSS_LIST_QUERIES.get(i))
+              .clientLanguageCode(SAMPLE_LANGUAGE_CODE)
+              .build();
       assertEquals(
           "Unexpected output for " + TestingConstants.SAMPLE_GSS_LIST_QUERIES.get(i) + " input",
           stringOutput,
-          searchManager.search(
-              new SearchRequestDto.Builder().query(TestingConstants.SAMPLE_GSS_LIST_QUERIES.get(i))
-                  .build()).toJson());
+          searchManager.search(searchRequest).toJson());
     }
   }
 

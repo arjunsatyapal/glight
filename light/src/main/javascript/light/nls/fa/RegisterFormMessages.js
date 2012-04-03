@@ -15,14 +15,15 @@
  */
 /**
  * Calling window.define instead of define because of dojo build bug.
- * 
  * @see http://bugs.dojotoolkit.org/ticket/15057
  */
 window.define({
-  searchButtonLabel: 'Pesquisar',
-  didYouMeanBox: 'Você quis dizer ${suggestion}?',
-  noResults: 'Sua pesquisa não retornou resultados',
-  pageInfo: 'Página ${page}',
-  next: 'Próxima',
-  previous: 'Anterior'
+  instructions: "قبل از ادامه شما نیاز به پر کردن این فرم ثبت نام کوچک و شرایط نور از خدمات را بپذیرند.",
+  firstNameTextBoxLabel: "نام و نام خانوادگی:",
+  lastNameTextBoxLabel: "نام خانوادگی:",
+  tosTextareaLabel: "شرایط و ضوابط خدمات",
+  tosTextareaContent: "اصطلاحات حقوقی",
+  tosCheckboxLabel: "من با شرایط استفاده از خدمات موافقم",
+  submitButton: "ثبت نام",
+  tosTooltipError: "شما باید به شرایط و ضوابط خدمات قبل از اقدام به توافق برسند"
 });

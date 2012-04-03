@@ -17,9 +17,9 @@
  * This file should be bundled with our custom dojo loader so it can
  * load the correct Main.js file depending on the host html page.
  */
-define(['dojo/has', 'dojo/query', 'dojo/dom-construct'],
-        function(has, $, domConstruct) {
-  
+define(['dojo/has', 'dojo/query', 'dojo/dom-construct', 'dojo'],
+        function(has, $, domConstruct, dojo) {
+
   /**
    * Loads a CSS file
    *
@@ -34,6 +34,12 @@ define(['dojo/has', 'dojo/query', 'dojo/dom-construct'],
     e.rel = 'stylesheet';
     e.media = 'screen';
     domConstruct.place(e, $('head')[0], 'first');
+  }
+  
+  function loadMain(main) {
+    require(['light/main/CoreMain'], function() {
+      require(['light/main/' + pageMain], function() {});
+    });
   }
 
   // CSS Stuff
@@ -59,10 +65,10 @@ define(['dojo/has', 'dojo/query', 'dojo/dom-construct'],
      * way, we don't need to rebuild to test every time a file changes.
      */
     if (has('light-dev')) {
-      require(['light/main/' + pageMain], function() {});
+      loadMain(pageMain);
     } else {
       require(['light/build/core', 'light/build/' + page], function() {
-        require(['light/main/' + pageMain], function() {});
+        loadMain(pageMain);
       });
     }
 

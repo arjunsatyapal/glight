@@ -21,10 +21,11 @@ define(['dojo/_base/declare', 'light/views/AbstractLightView',
         'dojo/_base/lang',
         'dojo/string',
         'dojo/dom-construct',
+        'light/utils/LanguageUtils', 
         'dojo/i18n!light/nls/SearchPageMessages'],
         function(declare, AbstractLightView, itemTemplate, TemplateUtils,
                  SearchRouter, htmlEntities, lang, string,
-                 domConstruct, messages) {
+                 domConstruct, LanguageUtils, messages) {
   return declare('light.views.SearchResultListView', AbstractLightView, {
     clear: function() {
       domConstruct.empty(this.domNode);
@@ -73,7 +74,7 @@ define(['dojo/_base/declare', 'light/views/AbstractLightView',
             page: request.page - 1
           });
           pageInfo.appendChild(TemplateUtils.toDom(
-                  '<a href="${link}">${messages.shortPrevious}</a> | ',
+                  '<a href="${link}">${messages.previous}</a> | ',
                   {
                     messages: messages,
                     link: '#' + SearchRouter.searchStateToHash(prevPageRequest)
@@ -83,7 +84,7 @@ define(['dojo/_base/declare', 'light/views/AbstractLightView',
         // Current page number
         pageInfo.appendChild(domConstruct.toDom(
                 htmlEntities.encode(string.substitute(messages.pageInfo, {
-                  page: request.page
+                  page: LanguageUtils.formatNumber(request.page)
                 }))));
 
         // Next page link
@@ -92,7 +93,7 @@ define(['dojo/_base/declare', 'light/views/AbstractLightView',
             page: request.page + 1
           });
           pageInfo.appendChild(TemplateUtils.toDom(
-                  ' | <a href="${link}">${messages.shortNext}</a>',
+                  ' | <a href="${link}">${messages.next}</a>',
                   {
                     messages: messages,
                     link: '#' + SearchRouter.searchStateToHash(nextPageRequest)

@@ -19,8 +19,9 @@ define({
     didYouMeanBox: 'Did you mean ${suggestion}?',
     noResults: 'No results for this search',
     pageInfo: 'Page ${page}',
-    shortNext: 'Next',
-    shortPrevious: 'Prev'
+    next: 'Next',
+    previous: 'Previous'
   },
-  'pt-br': true
+  'pt-br': true,
+  'fa': true
 });

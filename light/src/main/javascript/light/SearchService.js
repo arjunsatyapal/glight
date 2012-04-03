@@ -13,19 +13,24 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-define(['dojo/_base/declare', 'dojo', 'dojo/_base/xhr', 'dojo/_base/lang'],
-        function(declare, dojo, xhr, lang) {
+define(['dojo/_base/declare', 'dojo', 'dojo/_base/xhr', 'dojo/_base/lang',
+        'light/utils/LanguageUtils'],
+        function(declare, dojo, xhr, lang, LanguageUtils) {
   return declare('light.SearchService', null, {
 
     /**
-     * Issues a search request
+     * Issues a search request based on a given SearchState
      *
      * @param {Object}
-     *          request A search request object. See
+     *          state A search state object. See
      *          {@link light.schemas.SearchStateSchema}.
      * @return {Object} A promise object for when the server answers.
      */
-    search: function(request) {
+    search: function(state) {
+      // Adding the clientLanguageCode to the request
+      request = lang.clone(state);
+      request['clientLanguageCode'] = LanguageUtils.currentLocale;
+
       /*
        * TODO(waltercacau): Wrap the original dojo promise from the
        * xhr.get into a more friendly interface

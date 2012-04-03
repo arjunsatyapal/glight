@@ -14,17 +14,17 @@
  * the License.
  */
 /**
- * For convenience, SearchState has the same format of a search request.
- * TODO(waltercacau): Rename everything that talks about SearchState
- * to SearchRequest.
+ * For convenience, SearchState has almost the same format of a search request,
+ * except for the clientLanguageCode parameter, which is missing in the
+ * SearchState.
  */
 define({
   description: 'light/schemas/SearchStateSchema',
-  type:'object',
-  properties:{
-    query: {type:'string'},
+  type: 'object',
+  properties: {
+    query: {type: 'string'},
     page: {
-      type:'number',
+      type: 'number',
       minimum: 1
     }
   }
