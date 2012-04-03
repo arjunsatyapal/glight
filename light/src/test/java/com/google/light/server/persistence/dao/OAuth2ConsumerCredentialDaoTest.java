@@ -93,7 +93,7 @@ public class OAuth2ConsumerCredentialDaoTest extends
 
     /*
      * Negative test : Since we are using Enum name as a key, and we dont allow custom enum
-     * construction, so negative test is possible at the moment.
+     * construction, so negative test is not possible at the moment.
      */
     
   }
