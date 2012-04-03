@@ -17,6 +17,8 @@ package com.google.light.server.servlets.test;
 
 import static com.google.light.server.utils.LightPreconditions.checkIsNotEnv;
 
+import com.google.light.server.servlets.test.oauth2.TestCredentialBackupServlet;
+
 import com.google.light.server.constants.LightEnvEnum;
 import com.google.light.server.constants.OAuth2ProviderEnum;
 import com.google.light.server.constants.OAuth2ProviderService;
@@ -24,7 +26,10 @@ import com.google.light.server.constants.OAuth2ProviderService;
 /**
  * A utility class that will be used for testing purpose.
  * Unfortunately in order to work with both Dev Server and TestEnv it has to be placed
- * inside Test directory.
+ * inside servlets/test directory.
+ * <br>
+ * This file is used by {@link TestCredentialBackupServlet} which runs on DEV_SERVER and 
+ * therefore needs to be present inside src/java branch. 
  * 
  * TODO(arjuns): Add test for this class.
  * 
@@ -55,7 +60,7 @@ public class CredentialUtils {
   }
 
   /**
-   * Returns path for a Standard for a given env. /home/foo/credentials/OAUTH2
+   * Returns relaitve path for a CredentialStandard. light-credentials/OAUTH2
    * 
    * @param env
    * @param standard
@@ -66,8 +71,8 @@ public class CredentialUtils {
   }
 
   /**
-   * Returns path to the directory for Resource Owner for a Specific env and Standard. e.g
-   * /home/foo/credentials/OAUTH2/owner/unit-test1@gmail.com
+   * Returns relative path to the directory for Resource Owner for a CredentialStandard. e.g
+   * light-credentials/OAUTH2/owner/unit-test1@gmail.com
    * 
    * @return
    */
@@ -76,8 +81,8 @@ public class CredentialUtils {
   }
 
   /**
-   * Returns path to the password file for Resource Owner.
-   * e.g. /home/foo/credentials/OAUTH2/owner/unit-test1@gmail.com/passwd 
+   * Returns relative path for the password file for Resource Owner.
+   * e.g. light-credentials/OAUTH2/owner/unit-test1@gmail.com/passwd 
    * @return
    */
   public static String getOwnerCredentialPasswdFileAbsPath(CredentialStandardEnum standard) {
@@ -85,8 +90,8 @@ public class CredentialUtils {
   }
   
   /**
-   * Returns path to TokenInfo file for Resource Owner.
-   * e.g. /home/foo/credentials/OAUTH2/owner/unit-test1@gmail.com/GOOGLE_LOGIN
+   * Returns relative path for TokenInfo file for Resource Owner.
+   * e.g. light-credentials/OAUTH2/owner/unit-test1@gmail.com/GOOGLE_LOGIN
    * @return
    */
   public static String getOwnerTokenInfoFilePath(CredentialStandardEnum standard,
@@ -95,8 +100,8 @@ public class CredentialUtils {
   }
   
   /**
-   * Returns path to the directory for Resource Consumer for a Specific env. e.g
-   * /home/foo/credentials/OAUTH2/consumer/
+   * Returns abstolute path for the directory for Resource Consumer for a Specific env. e.g
+   * light-credentials/OAUTH2/consumer/
    * 
    * @return
    */
@@ -116,8 +121,8 @@ public class CredentialUtils {
   }
   
   /**
-   * Returns path to the file containing consumer credentials.
-   * e.g. /home/foo/credentials/OAUTH2/consumer/GOOGLE
+   * Returns absolute  path for the file containing consumer credentials.
+   * e.g. /home/foo/light-credentials/OAUTH2/consumer/GOOGLE
    * 
    * @param standard
    * @param provider
@@ -128,6 +133,12 @@ public class CredentialUtils {
     return getHomeDir() + "/" + getConsumerCredentialFilePath(standard, provider);
   }
   
+  /**
+   * Returns absolute file path for the zip file containing the credentials downloaded from 
+   * DEV_SERVER. e.g. /home/foo/light-credentials/credential.zip
+   * 
+   * @return
+   */
   public static String getCredentialZipFilePath() {
     return getHomeDir() + "/" + getCredentialDir() + "/credential.zip";
   }

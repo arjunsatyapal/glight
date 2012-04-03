@@ -24,6 +24,8 @@ import java.io.IOException;
 /**
  * Interface to encapsulate methods required by a generic OAuth2 Helper.
  * 
+ * TODO(arjuns): Move this out of Google Package.
+ * 
  * @author Arjun Satyapal
  */
 public interface OAuth2Helper {
@@ -96,7 +98,7 @@ public interface OAuth2Helper {
    * see {@link https://developers.google.com/accounts/docs/OAuth2WebServer#formingtheurl}.
    * <p>
    * Note that, every time user gives an approval, value of refreshToken changes. And if caller of
-   * this method has persisted refreshToken earlier, then client is responsible for updating it.
+   * this method has persisted refreshToken earlier, then caller is responsible for updating it.
    * </pre>
    * 
    * @param cbUrl

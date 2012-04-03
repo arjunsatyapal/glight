@@ -29,13 +29,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * Servlet called by Google during Google Login flow.
+ * Servlet called by Google during Google OAuth2 Authorization flow for 
+ * {@link OAuth2ProviderService#GOOGLE_DOC}
  * 
  * TODO(arjuns): Add test for this.
- * TODO(arjuns): Add code for revoke token.
- * TODO(arjuns) : Lot of
- * code is common between this and Google Login servlet. TODO(arjuns): See what needs to be done
- * when session is invalid.
+ * TODO(arjuns) : Lot of code is common between this and Google Login servlet. Refactor !!!
  * 
  * @author Arjun Satyapal
  */

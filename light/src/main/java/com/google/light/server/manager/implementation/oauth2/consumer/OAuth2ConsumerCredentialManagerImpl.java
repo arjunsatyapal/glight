@@ -27,7 +27,7 @@ import com.google.light.server.manager.interfaces.OAuth2ConsumerCredentialManage
 import com.google.light.server.persistence.dao.OAuth2ConsumerCredentialDao;
 
 /**
- * Test implementation for {@link OAuth2ConsumerCredentialManager}.
+ * Implementation for {@link OAuth2ConsumerCredentialManager}.
  * 
  * TODO(arjuns): Add mem-cache for this.
  * 
