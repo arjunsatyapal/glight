@@ -14,6 +14,8 @@ package com.google.light.server.servlets.test;
 
 import static com.google.light.server.utils.LightPreconditions.checkIsNotEnv;
 
+import com.google.light.server.servlets.test.oauth2.TestCredentialBackupServlet;
+
 import com.google.light.server.constants.LightEnvEnum;
 import com.google.light.server.constants.OAuth2ProviderEnum;
 import com.google.light.server.constants.OAuth2ProviderService;
@@ -21,7 +23,10 @@ import com.google.light.server.constants.OAuth2ProviderService;
 /**
  * A utility class that will be used for testing purpose.
  * Unfortunately in order to work with both Dev Server and TestEnv it has to be placed
- * inside Test directory.
+ * inside servlets/test directory.
+ * <br>
+ * This file is used by {@link TestCredentialBackupServlet} which runs on DEV_SERVER and 
+ * therefore needs to be present inside src/java branch. 
  * 
  * TODO(arjuns): Add test for this class.
  * 
