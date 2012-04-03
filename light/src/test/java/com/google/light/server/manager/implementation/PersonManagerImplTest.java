@@ -164,7 +164,7 @@ public class PersonManagerImplTest extends AbstractLightServerTest {
     assertEquals(expectedPerson1, fetchedPerson1_1);
 
     // Now creating one more Person.
-    String email2 = getRandomEmail(); // Emai will be added to PersonEntity via Session.
+    String email2 = getRandomEmail(); // Email will be added to PersonEntity via Session.
     assertTrue(!testEmail.equals(email2));
     PersonEntity person2 = getEntityBuilder().build();
 

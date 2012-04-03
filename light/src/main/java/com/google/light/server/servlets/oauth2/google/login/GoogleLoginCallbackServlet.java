@@ -93,7 +93,6 @@ public class GoogleLoginCallbackServlet extends HttpServlet {
       onError(request, response, authorizationCodeResponseUrl);
     } else {
       // TODO(arjuns): Move following to onSuccess.
-      // TODO(arjuns) : First Check for session.
       // TODO(arjuns) : Break this method into more parts.
       // TODO(arjuns) : Write whole workflow as this is complex to understand.
 
@@ -145,7 +144,7 @@ public class GoogleLoginCallbackServlet extends HttpServlet {
        */
       Long personId = null;
       if (personEntity == null) {
-        personEntity = createNewPersonEnttiy(tokenResponse);
+        personEntity = createNewPersonEntity(tokenResponse);
         updatePersistedTokenDetails = true;
       } else {
         personId = personEntity.getId();
@@ -282,11 +281,12 @@ public class GoogleLoginCallbackServlet extends HttpServlet {
   }
 
   /**
+   * TODO(arjuns): Move this to {@link PersonManager#createPerson(PersonEntity)}.
    * @param tokenResponse
    * @return
    * @throws IOException
    */
-  private PersonEntity createNewPersonEnttiy(TokenResponse tokenResponse) throws IOException {
+  private PersonEntity createNewPersonEntity(TokenResponse tokenResponse) throws IOException {
     PersonEntity personEntity;
     checkNotBlank(tokenResponse.getRefreshToken(),
         "refreshToken cannot be blank, when trying to create a new Person.");

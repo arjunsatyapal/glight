@@ -30,6 +30,7 @@ import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Objectify;
 
 /**
+ * TODO(arjuns): Make get(Key) protected.
  * Each child should register the Entity with Objectify and provide a constructor to bind with
  * Guice.
  * 

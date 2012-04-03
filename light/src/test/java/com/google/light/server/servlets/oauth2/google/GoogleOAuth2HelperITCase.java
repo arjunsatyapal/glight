@@ -1,58 +1,39 @@
-///*
-// * Copyright (C) Google Inc.
-// *
-// * Licensed under the Apache License, Version 2.0 (the "License"); you may not
-// * use this file except in compliance with the License. You may obtain a copy of
-// * the License at
-// *
-// * http://www.apache.org/licenses/LICENSE-2.0
-// *
-// * Unless required by applicable law or agreed to in writing, software
-// * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-// * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
-// * License for the specific language governing permissions and limitations under
-// * the License.
-// */
-//package com.google.light.server.servlets.oauth2.google;
-//
-//import static com.google.common.base.Preconditions.checkArgument;
-//import static com.google.common.base.Preconditions.checkNotNull;
-//import static com.google.light.server.constants.OAuth2Provider.GOOGLE_LOGIN;
-//import static com.google.light.testingutils.TestResourcePaths.GOOGLE_USER_INFO_JSON;
-//import static com.google.light.testingutils.TestingUtils.getMockSessionForTesting;
-//import static com.google.light.testingutils.TestingUtils.getResourceAsString;
-//import static org.junit.Assert.assertEquals;
-//import static org.junit.Assert.assertNotNull;
-//import static org.junit.Assert.assertNull;
-//import static org.junit.Assert.assertTrue;
-//
-//import com.google.api.client.auth.oauth2.AuthorizationCodeFlow;
-//import com.google.api.client.auth.oauth2.ClientParametersAuthentication;
-//import com.google.api.client.http.HttpTransport;
-//import com.google.inject.Injector;
-//import com.google.light.server.constants.LightEnvEnum;
-//import com.google.light.server.constants.OAuth2Provider;
-//import com.google.light.server.manager.interfaces.OAuth2ConsumerCredentialManager;
-//import com.google.light.server.servlets.oauth2.google.pojo.GoogleTokenInfo;
-//import com.google.light.server.servlets.oauth2.google.pojo.GoogleUserInfo;
-//import com.google.light.server.servlets.path.ServletPathEnum;
-//import com.google.light.server.utils.JsonUtils;
-//import com.google.light.testingutils.GaeTestingUtils;
-//import com.google.light.testingutils.TestResourcePaths;
-//import com.google.light.testingutils.TestingUtils;
-//import com.google.light.testingutils.scripts.CreateCredentials;
-//import java.io.IOException;
-//import javax.servlet.http.HttpSession;
-//import org.junit.After;
-//import org.junit.Before;
-//import org.junit.Test;
-//
-///**
-// * Integration Test for {@link GoogleOAuth2Helper}.
-// * TODO(arjuns): Fix this file.
-// * @author Arjun Satyapal
-// */
-//public class GoogleOAuth2HelperITCase {
+/*
+ * Copyright (C) Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+package com.google.light.server.servlets.oauth2.google;
+
+import static org.junit.Assert.*;
+
+import org.junit.Ignore;
+
+import org.junit.Test;
+
+
+/**
+ * Integration Test for {@link GoogleOAuth2Helper}.
+ * TODO(arjuns): Fix this file.
+ * @author Arjun Satyapal
+ */
+
+public class GoogleOAuth2HelperITCase {
+  @Test
+  @Ignore(value="TODO(arjuns): Fix this whole class.")
+  public void test_foo() {
+    assertFalse(true);
+  }
 //  private static final String SERVER_URL = "http://localhost:8080";
 //
 //  /*
@@ -261,4 +242,4 @@
 //    test_getTokenInfo();
 //    test_getUserInfo();
 //  }
-//}
+}

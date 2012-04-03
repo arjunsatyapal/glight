@@ -57,7 +57,7 @@ public class CredentialUtils {
   }
 
   /**
-   * Returns path for a Standard for a given env. /home/foo/credentials/OAUTH2
+   * Returns relaitve path for a CredentialStandard. light-credentials/OAUTH2
    * 
    * @param env
    * @param standard
@@ -68,8 +68,8 @@ public class CredentialUtils {
   }
 
   /**
-   * Returns path to the directory for Resource Owner for a Specific env and Standard. e.g
-   * /home/foo/credentials/OAUTH2/owner/unit-test1@gmail.com
+   * Returns relative path to the directory for Resource Owner for a CredentialStandard. e.g
+   * light-credentials/OAUTH2/owner/unit-test1@gmail.com
    * 
    * @return
    */
@@ -78,8 +78,8 @@ public class CredentialUtils {
   }
 
   /**
-   * Returns path to the password file for Resource Owner.
-   * e.g. /home/foo/credentials/OAUTH2/owner/unit-test1@gmail.com/passwd 
+   * Returns relative path for the password file for Resource Owner.
+   * e.g. light-credentials/OAUTH2/owner/unit-test1@gmail.com/passwd 
    * @return
    */
   public static String getOwnerCredentialPasswdFilePath(CredentialStandardEnum standard) {
@@ -87,8 +87,8 @@ public class CredentialUtils {
   }
 
   /**
-   * Returns path to TokenInfo file for Resource Owner.
-   * e.g. /home/foo/credentials/OAUTH2/owner/unit-test1@gmail.com/GOOGLE_LOGIN
+   * Returns relative path for TokenInfo file for Resource Owner.
+   * e.g. light-credentials/OAUTH2/owner/unit-test1@gmail.com/GOOGLE_LOGIN
    * @return
    */
   public static String getOwnerTokenInfoFilePath(CredentialStandardEnum standard,
@@ -97,8 +97,8 @@ public class CredentialUtils {
   }
 
   /**
-   * Returns path to the directory for Resource Consumer for a Specific env. e.g
-   * /home/foo/credentials/OAUTH2/consumer/
+   * Returns abstolute path for the directory for Resource Consumer for a Specific env. e.g
+   * light-credentials/OAUTH2/consumer/
    * 
    * @return
    */
@@ -107,8 +107,8 @@ public class CredentialUtils {
   }
 
   /**
-   * Returns path to the file containing consumer credentials.
-   * e.g. /home/foo/credentials/OAUTH2/consumer/GOOGLE
+   * Returns absolute  path for the file containing consumer credentials.
+   * e.g. /home/foo/light-credentials/OAUTH2/consumer/GOOGLE
    * 
    * @param standard
    * @param provider
@@ -119,6 +119,12 @@ public class CredentialUtils {
     return getConsumerCredentialDir(standard) + "/" + provider.name();
   }
   
+  /**
+   * Returns absolute file path for the zip file containing the credentials downloaded from 
+   * DEV_SERVER. e.g. /home/foo/light-credentials/credential.zip
+   * 
+   * @return
+   */
   public static String getCredentialZipFilePath() {
     return getCredentialDir() + "/credential.zip";
   }

@@ -1,9 +1,12 @@
 /*
- * Copyright 2012 Google Inc.
+ * Copyright (C) Google Inc.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -87,7 +90,7 @@ public class OAuth2OwnerTokenManagerImplTest extends AbstractLightServerTest {
    */
   @Test
   public void test_putToken() {
-    do_test_put_get(randomPerson.getId());
+    do_test_put_get_personId(randomPerson.getId());
   }
 
   /**
@@ -95,7 +98,7 @@ public class OAuth2OwnerTokenManagerImplTest extends AbstractLightServerTest {
    */
   @Test
   public void test_getToken() {
-    do_test_put_get(randomPerson.getId());
+    do_test_put_get_personId(randomPerson.getId());
   }
   
   /**
@@ -105,7 +108,7 @@ public class OAuth2OwnerTokenManagerImplTest extends AbstractLightServerTest {
   public void test_getTokenByProviderUserId() {
     OAuth2OwnerTokenEntity expectedToken = getOwnerTokenEntiy(GOOGLE_LOGIN, providerUserId).build();
     // Now persisting token.
-    do_test_put_get(randomPerson.getId());
+    do_test_put_get_personId(randomPerson.getId());
     
     // Now fetch using providerUserId;
     OAuth2OwnerTokenEntity fetchedToken = 
@@ -121,7 +124,7 @@ public class OAuth2OwnerTokenManagerImplTest extends AbstractLightServerTest {
     }
   }
 
-  private void do_test_put_get(long personId) {
+  private void do_test_put_get_personId(long personId) {
     // First put Google Login Token.
     OAuth2OwnerTokenEntity googLoginToken =
         getOwnerTokenEntiy(GOOGLE_LOGIN, providerUserId).build();

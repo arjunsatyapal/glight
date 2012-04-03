@@ -198,7 +198,7 @@ public class LightPreconditions {
   public static String checkProviderUserId(OAuth2ProviderService providerService,
       String providerUserId) {
     if (providerService.isUsedForLogin()) {
-      checkNotBlank(providerUserId, "providerUserId should not be null for " + providerService);
+      checkNotBlank(providerUserId, "providerUserId should not be blank for " + providerService);
     } else {
       checkArgument(isNullOrEmpty(providerUserId),
           "for " + providerService + ", providerUserId should be null");
