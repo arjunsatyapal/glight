@@ -15,6 +15,8 @@
  */
 package com.google.light.server.utils;
 
+import com.google.light.server.dto.DtoInterface;
+
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -45,11 +47,12 @@ import com.google.light.server.dto.person.PersonDto;
  */
 public class XmlUtils {
   @SuppressWarnings("unchecked")
-  public static <T> T getDto(String xmlString) throws JAXBException {
+  public static <D extends DtoInterface<D>> D getDto(String xmlString) throws JAXBException {
     JAXBContext jaxbContext = JAXBContext.newInstance(PersonDto.class);
     Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
 
-    return ((T) unmarshaller.unmarshal(new StringReader(xmlString)));
+    D dto = ((D) unmarshaller.unmarshal(new StringReader(xmlString)));
+    return dto.validate();
   }
 
   public static <T> String toXml(T object) throws JAXBException {

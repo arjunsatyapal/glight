@@ -17,6 +17,7 @@ package com.google.light.server.servlets.oauth2.google.pojo;
 
 import static com.google.light.server.utils.LightPreconditions.checkEmail;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
+
 import com.google.light.server.exception.unchecked.JsonException;
 import com.google.light.server.utils.JsonUtils;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -44,7 +45,7 @@ import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
 @XmlAccessorType(XmlAccessType.PROPERTY)
 @JsonSerialize(include = Inclusion.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class GoogleLoginTokenInfo extends AbstractGoogleOAuth2TokenInfo<GoogleLoginTokenInfo>{
+public class GoogleLoginTokenInfo extends AbstractOAuth2TokenInfo<GoogleLoginTokenInfo>{
   private String userId;
   private String email;
   private boolean verifiedEmail;

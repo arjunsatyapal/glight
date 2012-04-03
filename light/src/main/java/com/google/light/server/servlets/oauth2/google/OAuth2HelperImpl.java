@@ -16,32 +16,24 @@
 package com.google.light.server.servlets.oauth2.google;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.light.server.constants.LightConstants.GOOLGE_TOKEN_INFO_URL;
 
 import com.google.api.client.auth.oauth2.AuthorizationCodeFlow;
 import com.google.api.client.auth.oauth2.AuthorizationCodeRequestUrl;
 import com.google.api.client.auth.oauth2.AuthorizationCodeTokenRequest;
 import com.google.api.client.auth.oauth2.BearerToken;
-import com.google.api.client.auth.oauth2.ClientParametersAuthentication;
-import com.google.api.client.auth.oauth2.RefreshTokenRequest;
 import com.google.api.client.auth.oauth2.TokenResponse;
 import com.google.api.client.http.GenericUrl;
-import com.google.api.client.http.HttpRequest;
-import com.google.api.client.http.HttpRequestFactory;
-import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
-import com.google.common.base.Charsets;
-import com.google.common.io.CharStreams;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import com.google.light.server.constants.OAuth2ProviderService;
-import com.google.light.server.dto.DtoInterface;
 import com.google.light.server.manager.implementation.oauth2.consumer.OAuth2ConsumerCredentialManagerFactory;
+import com.google.light.server.manager.implementation.oauth2.owner.OAuth2OwnerTokenManagerFactory;
 import com.google.light.server.manager.interfaces.OAuth2ConsumerCredentialManager;
-import com.google.light.server.utils.JsonUtils;
+import com.google.light.server.manager.interfaces.OAuth2OwnerTokenManager;
+import com.google.light.server.servlets.oauth2.google.pojo.AbstractOAuth2TokenInfo;
 import java.io.IOException;
-import java.io.InputStreamReader;
 
 /**
  * Implementation for {@link OAuth2Helper}.
@@ -56,28 +48,25 @@ public class OAuth2HelperImpl implements OAuth2Helper {
   private HttpTransport httpTransport;
   private JsonFactory jsonFactory;
   private OAuth2ConsumerCredentialManager consumerCredentialManager;
+  private OAuth2OwnerTokenManager ownerTokenManager;
   private OAuth2ProviderService providerService;
-  private final HttpRequestFactory requestFactory;
-
+  
   @Inject
   public OAuth2HelperImpl(OAuth2ConsumerCredentialManagerFactory consumerCredentialManagerFactory,
+      OAuth2OwnerTokenManagerFactory ownerTokenManagerFactory,
       HttpTransport httpTransport, JsonFactory jsonFactory,
       @Assisted OAuth2ProviderService providerService) {
     this.providerService = checkNotNull(providerService, "providerService");
 
     this.httpTransport = checkNotNull(httpTransport, "httpTransport");
     this.jsonFactory = checkNotNull(jsonFactory, "jsonFactory");
-    this.requestFactory = httpTransport.createRequestFactory();
+    httpTransport.createRequestFactory();
     this.consumerCredentialManager = checkNotNull(
             consumerCredentialManagerFactory.create(providerService.getProvider()),
             "consumerCredentialManager");
+    
+    this.ownerTokenManager = checkNotNull(ownerTokenManagerFactory.create(this.providerService));
 
-  }
-
-  private ClientParametersAuthentication getClientAuthentication() {
-    return new ClientParametersAuthentication(
-        consumerCredentialManager.getClientId(),
-        consumerCredentialManager.getClientSecret());
   }
 
   /**
@@ -92,7 +81,7 @@ public class OAuth2HelperImpl implements OAuth2Helper {
         httpTransport,
         jsonFactory,
         new GenericUrl(providerService.getTokenServerUrl()),
-        getClientAuthentication(),
+        consumerCredentialManager.getClientAuthentication(),
         consumerCredentialManager.getClientId(),
         providerService.getAuthServerUrl())
         .setScopes(providerService.getScopes())
@@ -125,19 +114,9 @@ public class OAuth2HelperImpl implements OAuth2Helper {
    * @throws IOException
    */
   @Override
-  public <D extends DtoInterface<D>> D getTokenInfo(String accessToken, Class<D> clazz)
+  public <D extends AbstractOAuth2TokenInfo<D>> D getTokenInfo(String accessToken, Class<D> clazz)
       throws IOException {
-    GenericUrl tokenUrl = new GenericUrl(GOOLGE_TOKEN_INFO_URL + "?access_token=" + accessToken);
-
-    HttpRequest tokenInfoRequest = requestFactory.buildGetRequest(tokenUrl);
-    HttpResponse tokenInfoResponse = tokenInfoRequest.execute();
-
-    String tokenInfoStr = CharStreams.toString(new InputStreamReader(
-        tokenInfoResponse.getContent(), Charsets.UTF_8));
-
-    DtoInterface<D> tokenInfo = JsonUtils.getDto(tokenInfoStr, clazz);
-
-    return tokenInfo.validate();
+    return ownerTokenManager.getInfoByAccessToken(accessToken);
   }
 
 
@@ -178,40 +157,6 @@ public class OAuth2HelperImpl implements OAuth2Helper {
      */
     authorizationUrlBuilder.set("access_type", "offline");
     return authorizationUrlBuilder;
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public <D extends DtoInterface<D>> D refreshAccessToken(String refreshToken, Class<D> clazz)
-      throws IOException {
-    RefreshTokenRequest refreshRequest = new RefreshTokenRequest(
-        httpTransport,
-        jsonFactory,
-        new GenericUrl(providerService.getTokenServerUrl()),
-        refreshToken)
-        .setClientAuthentication(getClientAuthentication());
-
-    TokenResponse tokenResponse = refreshRequest.execute();
-    // TODO(arjuns): See if refresh request returns a accessToken.
-    return getTokenInfo(tokenResponse.getAccessToken(), clazz);
-  }
-
-  // TODO(arjuns) : Add code for refreshToken for user unsubscription.
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public <D extends DtoInterface<D>> boolean isValidAccessToken(String accessToken, Class<D> clazz) {
-    try {
-      // TODO(arjuns) : see if additional checks are required her.
-      getTokenInfo(accessToken, clazz);
-      return true;
-    } catch (Exception e) {
-      return false;
-    }
   }
 
   @Override

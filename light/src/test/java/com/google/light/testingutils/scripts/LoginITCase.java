@@ -15,9 +15,9 @@ package com.google.light.testingutils.scripts;
 
 import static com.google.light.server.constants.HtmlPathEnum.PUT_OAUTH2_CONSUMER_CREDENTIAL;
 import static com.google.light.server.constants.OAuth2ProviderEnum.GOOGLE;
-import static com.google.light.server.constants.RequestParmKeyEnum.CLIENT_ID;
-import static com.google.light.server.constants.RequestParmKeyEnum.CLIENT_SECRET;
-import static com.google.light.server.constants.RequestParmKeyEnum.PASSWORD;
+import static com.google.light.server.constants.RequestParamKeyEnum.CLIENT_ID;
+import static com.google.light.server.constants.RequestParamKeyEnum.CLIENT_SECRET;
+import static com.google.light.server.constants.RequestParamKeyEnum.PASSWORD;
 import static com.google.light.server.servlets.path.ServletPathEnum.OAUTH2_GOOGLE_DOC_AUTH;
 import static com.google.light.server.servlets.path.ServletPathEnum.OAUTH2_GOOGLE_LOGIN;
 import static com.google.light.server.servlets.path.ServletPathEnum.TEST_CREDENTIAL_BACKUP_SERVLET;
@@ -47,7 +47,7 @@ import com.google.common.collect.Lists;
 import com.google.light.server.constants.LightEnvEnum;
 import com.google.light.server.constants.OAuth2ProviderEnum;
 import com.google.light.server.constants.OAuth2ProviderService;
-import com.google.light.server.constants.RequestParmKeyEnum;
+import com.google.light.server.constants.RequestParamKeyEnum;
 import com.google.light.server.servlets.path.ServletPathEnum;
 import com.google.light.testingutils.GaeTestingUtils;
 import com.google.light.testingutils.SeleniumUtils;
@@ -156,7 +156,7 @@ public class LoginITCase {
     driver.findElement(By.id(currElement)).click();
 
     // Now Provide OAuth2 Credentials
-    currElement = RequestParmKeyEnum.OAUTH2_PROVIDER_NAME.get();
+    currElement = RequestParamKeyEnum.OAUTH2_PROVIDER_NAME.get();
     driver.findElement(By.name(currElement)).clear();
     driver.findElement(By.name(currElement)).sendKeys(GOOGLE.name());
 

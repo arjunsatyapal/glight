@@ -2,12 +2,9 @@ package com.google.light.server.servlets.oauth2.google.gdoc;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.constants.OAuth2ProviderService.GOOGLE_DOC;
-import static com.google.light.server.servlets.oauth2.google.pojo.AbstractGoogleOAuth2TokenInfo.calculateExpireInMillis;
 import static com.google.light.server.servlets.path.ServletPathEnum.OAUTH2_GOOGLE_DOC_AUTH_CB;
 import static com.google.light.server.utils.GuiceUtils.getInstance;
 import static com.google.light.server.utils.LightPreconditions.checkValidSession;
-
-import com.google.light.server.utils.LightPreconditions;
 
 import com.google.api.client.auth.oauth2.AuthorizationCodeResponseUrl;
 import com.google.api.client.auth.oauth2.TokenResponse;
@@ -109,7 +106,7 @@ public class GoogleDocAuthCallbackServlet extends HttpServlet {
       TokenResponse tokenResponse = helperInstance.getAccessToken(lightCbUrl, code);
       boolean newRefreshToken = !Strings.isNullOrEmpty(tokenResponse.getRefreshToken());
 
-      OAuth2OwnerTokenEntity tokenEntity = googDocTokenManager.get(personId);
+      OAuth2OwnerTokenEntity tokenEntity = googDocTokenManager.get();
       
       if (tokenEntity == null && !newRefreshToken) {
           /*
@@ -127,7 +124,7 @@ public class GoogleDocAuthCallbackServlet extends HttpServlet {
       }
       
       if (newRefreshToken) {
-        updateOwnerTokenEntity(personId, tokenResponse); 
+        updateOwnerTokenEntity(personId, tokenResponse.getRefreshToken(), tokenResponse); 
       }
     }
     
@@ -143,22 +140,14 @@ public class GoogleDocAuthCallbackServlet extends HttpServlet {
    * @param expiresInMillis
    * @throws IOException
    */
-  private void updateOwnerTokenEntity(Long personId, TokenResponse tokenResponse) throws IOException {
-    long expiresInMillis = calculateExpireInMillis(tokenResponse.getExpiresInSeconds());
-
+  private void updateOwnerTokenEntity(Long personId, String refreshToken, 
+      TokenResponse tokenResponse) throws IOException {
     GoogleOAuth2TokenInfo googTokenInfo = helperInstance.getTokenInfo(
         tokenResponse.getAccessToken(), GoogleOAuth2TokenInfo.class);
-    googTokenInfo.getExpiresIn();
 
-    OAuth2OwnerTokenDto tokenDto = new OAuth2OwnerTokenDto.Builder()
-        .personId(personId)
-        .provider(GOOGLE_DOC)
-        .accessToken(tokenResponse.getAccessToken())
-        .refreshToken(tokenResponse.getRefreshToken())
-        .expiresInMillis(expiresInMillis)
-        .tokenType(tokenResponse.getTokenType())
-        .tokenInfo(googTokenInfo.toJson())
-        .build();
+    OAuth2OwnerTokenDto tokenDto = OAuth2OwnerTokenDto.getOAuth2OwnerTokenDto(
+        personId, refreshToken, tokenResponse, GOOGLE_DOC, null /*providerUserId*/,
+        googTokenInfo.toJson());
 
     googDocTokenManager.put(tokenDto.toPersistenceEntity());
   }
@@ -176,8 +165,6 @@ public class GoogleDocAuthCallbackServlet extends HttpServlet {
      * Will reinitialize session once Light has refreshToken. So we dont care whether
      * request.getSession() returns existing session or new session.
      */
-
-    request.getSession().invalidate();
     response.sendRedirect(helperInstance.getOAuth2RedirectUriWithPrompt(lightCbUrl));
     return;
   }

@@ -15,11 +15,10 @@
  */
 package com.google.light.server.servlets.oauth2.google;
 
-import com.google.api.client.http.HttpTransport;
-
 import com.google.api.client.auth.oauth2.AuthorizationCodeFlow;
 import com.google.api.client.auth.oauth2.TokenResponse;
-import com.google.light.server.dto.DtoInterface;
+import com.google.api.client.http.HttpTransport;
+import com.google.light.server.servlets.oauth2.google.pojo.AbstractOAuth2TokenInfo;
 import java.io.IOException;
 
 /**
@@ -47,17 +46,6 @@ public interface OAuth2Helper {
       throws IOException;
 
   /**
-   * Mehtod to refresh AccessToken.
-   * 
-   * @param refreshToken
-   * @param clazz
-   * @return
-   * @throws IOException
-   */
-  public <D extends DtoInterface<D>> D refreshAccessToken(String refreshToken, Class<D> clazz)
-      throws IOException;
-
-  /**
    * Method to fetch TokenInformation from OAuth2 Provider.
    * 
    * @param accessToken
@@ -65,7 +53,7 @@ public interface OAuth2Helper {
    * @return
    * @throws IOException
    */
-  public <D extends DtoInterface<D>> D getTokenInfo(String accessToken, Class<D> clazz)
+  public <D extends AbstractOAuth2TokenInfo<D>> D getTokenInfo(String accessToken, Class<D> clazz)
       throws IOException;
 
   /**
@@ -115,25 +103,6 @@ public interface OAuth2Helper {
    * @return
    */
   public String getOAuth2RedirectUriWithPrompt(String cbUrl);
-
-  /**
-   * Method to verify if the available accessToken is a valid AccessToken. It can become invalid in
-   * following scenarios : <br>
-   * 1. when Person revokes the access. <br>
-   * 2. If an invalid token value is used. <br>
-   * 3. TODO(arjuns): See what happens for expired token. <br>
-   * TODO(arjuns): See what is the proper exception to catch for invalid Token.
-   * 
-   * This method depends on {{@link #getTokenInfoFromGoogle(String, String, String)}
-   * 
-   * @param tokenInfo
-   * @return
-   * 
-   * @param accessToken
-   * @param clazz
-   * @return
-   */
-  public <D extends DtoInterface<D>> boolean isValidAccessToken(String accessToken, Class<D> clazz);
 
   /**
    * Returns HttpTransport.

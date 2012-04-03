@@ -18,6 +18,8 @@ package com.google.light.server.manager.implementation.oauth2.consumer;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
+import com.google.api.client.auth.oauth2.ClientParametersAuthentication;
+
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import com.google.light.server.constants.OAuth2ProviderEnum;
@@ -62,5 +64,13 @@ public class OAuth2ConsumerCredentialManagerImpl implements OAuth2ConsumerCreden
   @Override
   public String getClientSecret() {
     return clientSecret;
+  }
+  
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public ClientParametersAuthentication getClientAuthentication() {
+    return new ClientParametersAuthentication(getClientId(), getClientSecret());
   }
 }

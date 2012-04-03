@@ -16,10 +16,10 @@
 package com.google.light.server.servlets.person;
 
 import static com.google.light.server.constants.OAuth2ProviderService.GOOGLE_LOGIN;
-import static com.google.light.server.constants.RequestParmKeyEnum.DEFAULT_EMAIL;
-import static com.google.light.server.constants.RequestParmKeyEnum.LOGIN_PROVIDER_ID;
-import static com.google.light.server.constants.RequestParmKeyEnum.LOGIN_PROVIDER_USER_ID;
-import static com.google.light.server.constants.RequestParmKeyEnum.PERSON_ID;
+import static com.google.light.server.constants.RequestParamKeyEnum.DEFAULT_EMAIL;
+import static com.google.light.server.constants.RequestParamKeyEnum.LOGIN_PROVIDER_ID;
+import static com.google.light.server.constants.RequestParamKeyEnum.LOGIN_PROVIDER_USER_ID;
+import static com.google.light.server.constants.RequestParamKeyEnum.PERSON_ID;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.testingutils.TestingUtils.getRandomPersonId;
 import static com.google.light.testingutils.TestingUtils.getRandomProviderUserId;

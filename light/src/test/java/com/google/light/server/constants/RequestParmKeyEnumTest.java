@@ -32,9 +32,9 @@ public class RequestParmKeyEnumTest implements EnumTestInterface {
   @Test
   @Override
   public void test_count() {
-    assertEquals(10, RequestParmKeyEnum.values().length);
+    assertEquals(10, RequestParamKeyEnum.values().length);
     
-    for (RequestParmKeyEnum curr : RequestParmKeyEnum.values()) {
+    for (RequestParamKeyEnum curr : RequestParamKeyEnum.values()) {
       assertEquals(curr.name().toLowerCase(), curr.get());
     }
   }

@@ -26,7 +26,7 @@ import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
  *
  * @author Arjun Satyapal
  */
-public enum RequestParmKeyEnum {
+public enum RequestParamKeyEnum {
   CLIENT_ID("client_id", true),
   CLIENT_SECRET("client_secret", true),
 
@@ -51,7 +51,7 @@ public enum RequestParmKeyEnum {
   private String key;
   private boolean allowedInProd;
   
-  private RequestParmKeyEnum(String key, boolean allowedInProd) {
+  private RequestParamKeyEnum(String key, boolean allowedInProd) {
     this.key = checkNotBlank(key, "key");
     this.allowedInProd = allowedInProd;
   }

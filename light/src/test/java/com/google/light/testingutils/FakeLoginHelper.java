@@ -15,9 +15,9 @@
  */
 package com.google.light.testingutils;
 
-import static com.google.light.server.constants.RequestParmKeyEnum.DEFAULT_EMAIL;
-import static com.google.light.server.constants.RequestParmKeyEnum.LOGIN_PROVIDER_ID;
-import static com.google.light.server.constants.RequestParmKeyEnum.PERSON_ID;
+import static com.google.light.server.constants.RequestParamKeyEnum.DEFAULT_EMAIL;
+import static com.google.light.server.constants.RequestParamKeyEnum.LOGIN_PROVIDER_ID;
+import static com.google.light.server.constants.RequestParamKeyEnum.PERSON_ID;
 import static com.google.light.server.utils.LightPreconditions.checkEmail;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPersonId;

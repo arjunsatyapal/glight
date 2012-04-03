@@ -17,10 +17,10 @@ package com.google.light.server.utils;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.constants.LightConstants.SESSION_MAX_INACTIVITY_PERIOD;
-import static com.google.light.server.constants.RequestParmKeyEnum.DEFAULT_EMAIL;
-import static com.google.light.server.constants.RequestParmKeyEnum.LOGIN_PROVIDER_ID;
-import static com.google.light.server.constants.RequestParmKeyEnum.LOGIN_PROVIDER_USER_ID;
-import static com.google.light.server.constants.RequestParmKeyEnum.PERSON_ID;
+import static com.google.light.server.constants.RequestParamKeyEnum.DEFAULT_EMAIL;
+import static com.google.light.server.constants.RequestParamKeyEnum.LOGIN_PROVIDER_ID;
+import static com.google.light.server.constants.RequestParamKeyEnum.LOGIN_PROVIDER_USER_ID;
+import static com.google.light.server.constants.RequestParamKeyEnum.PERSON_ID;
 
 import java.io.IOException;
 import java.io.InputStream;

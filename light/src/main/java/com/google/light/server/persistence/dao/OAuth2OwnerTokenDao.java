@@ -94,11 +94,11 @@ public class OAuth2OwnerTokenDao extends
     long currPersonId = 0;
     for (int index = 0; index < ownerTokens.size() - 1; index++) {
       OAuth2OwnerTokenEntity currToken = ownerTokens.get(index);
-      currPersonId = currToken.getPersonKey().getId();
+      currPersonId = currToken.getPersonId();
 
       for (int futureIndex = index + 1; futureIndex < ownerTokens.size(); futureIndex++) {
         OAuth2OwnerTokenEntity otherToken = ownerTokens.get(futureIndex);
-        long otherPersonId = otherToken.getPersonKey().getId();
+        long otherPersonId = otherToken.getPersonId();
 
         if (currPersonId == otherPersonId) {
           /*
@@ -147,13 +147,16 @@ public class OAuth2OwnerTokenDao extends
    * 
    * TODO(arjuns): Add test for this.
    * TODO(arjuns): Rename this method to get.
+   * TODO(arjuns): See how more validation can be done to avoid misuse.
    * 
    * @param personId
    * @param providerService
    * @return
    */
   public OAuth2OwnerTokenEntity getByProviderService(OAuth2ProviderService providerService) {
-    checkValidSession(sessionManager);
+    if (!providerService.isUsedForLogin()) {
+      checkValidSession(sessionManager);
+    }
     
     Key<OAuth2OwnerTokenEntity> fetchKey = OAuth2OwnerTokenEntity.generateKey(
         sessionManager.getPersonKey(), providerService.name());

@@ -16,12 +16,13 @@
 package com.google.light.server.manager.interfaces;
 
 import com.google.light.server.persistence.entity.oauth2.owner.OAuth2OwnerTokenEntity;
+import com.google.light.server.servlets.oauth2.google.pojo.AbstractOAuth2TokenInfo;
 
 /**
  * Manager for OAuth2 Tokens for a Person.
  * 
  * TODO(arjuns): Add test for this class.
- *
+ * TODO(arjuns) : Add code for refreshToken for user unsubscription.
  * @author Arjun Satyapal
  */
 public interface OAuth2OwnerTokenManager {
@@ -31,7 +32,7 @@ public interface OAuth2OwnerTokenManager {
    * @param PersonId
    * @return
    */
-  public OAuth2OwnerTokenEntity get(long PersonId);
+  public OAuth2OwnerTokenEntity get();
   
   /**
    * Put OAuth2 Token on DataStore.
@@ -49,4 +50,29 @@ public interface OAuth2OwnerTokenManager {
    * @return
    */
   public OAuth2OwnerTokenEntity getByProviderUserId(String providerUserId);
+
+
+  /**
+   * Returns Tokeninfo for the current Token for given ProviderService.
+   * 
+   * @return
+   */
+  public <D extends AbstractOAuth2TokenInfo<D>> D getInfo();
+  
+  /**
+   * Fetches TokenInfo using AccessToken.
+   * 
+   * @return
+   */
+  public <D extends AbstractOAuth2TokenInfo<D>> D getInfoByAccessToken(String accessToken);
+  
+  
+  /**
+   * Refresh OAuth2 Token.
+   * 
+   * TODO(arjuns): Add test for this.
+   * 
+   * @return
+   */
+  public OAuth2OwnerTokenEntity refresh();
 }

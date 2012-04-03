@@ -15,10 +15,10 @@
  */
 package com.google.light.server.servlets.test.oauth2.login;
 
-import static com.google.light.server.constants.RequestParmKeyEnum.DEFAULT_EMAIL;
-import static com.google.light.server.constants.RequestParmKeyEnum.LOGIN_PROVIDER_ID;
-import static com.google.light.server.constants.RequestParmKeyEnum.LOGIN_PROVIDER_USER_ID;
-import static com.google.light.server.constants.RequestParmKeyEnum.PERSON_ID;
+import static com.google.light.server.constants.RequestParamKeyEnum.DEFAULT_EMAIL;
+import static com.google.light.server.constants.RequestParamKeyEnum.LOGIN_PROVIDER_ID;
+import static com.google.light.server.constants.RequestParamKeyEnum.LOGIN_PROVIDER_USER_ID;
+import static com.google.light.server.constants.RequestParamKeyEnum.PERSON_ID;
 import static com.google.light.server.utils.LightPreconditions.checkIsNotEnv;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPersonId;

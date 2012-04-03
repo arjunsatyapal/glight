@@ -125,18 +125,18 @@ public class OAuth2OwnerTokenManagerImplTest extends AbstractLightServerTest {
     // First put Google Login Token.
     OAuth2OwnerTokenEntity googLoginToken =
         getOwnerTokenEntiy(GOOGLE_LOGIN, providerUserId).build();
-    doTestPutGet(googLoginToken, googLogintokenManager, personId);
+    doTestPutGet(googLoginToken, googLogintokenManager);
 
     // Now put Google Doc Token
     OAuth2OwnerTokenEntity googDocToken =
         getOwnerTokenEntiy(GOOGLE_DOC, null /* non-login token */).build();
-    doTestPutGet(googDocToken, googDocTokenManager, personId);
+    doTestPutGet(googDocToken, googDocTokenManager);
 
     // Now some negative Testing.
 
     // Negative Test : Try to persiste Login Token with Null ProviderUserId.
     try {
-      doTestPutGet(getOwnerTokenEntiy(GOOGLE_LOGIN, null).build(), googLogintokenManager, personId);
+      doTestPutGet(getOwnerTokenEntiy(GOOGLE_LOGIN, null).build(), googLogintokenManager);
       fail("should have failed.");
     } catch (BlankStringException e) {
       // Expected
@@ -145,7 +145,7 @@ public class OAuth2OwnerTokenManagerImplTest extends AbstractLightServerTest {
     // Negative Test : Try to persiste Non-Login Token with non-null ProviderUserId.
     try {
       doTestPutGet(getOwnerTokenEntiy(GOOGLE_LOGIN, getRandomString()).build(),
-          googDocTokenManager, personId);
+          googDocTokenManager);
       fail("should have failed.");
     } catch (IllegalArgumentException e) {
       // Expected
@@ -153,18 +153,18 @@ public class OAuth2OwnerTokenManagerImplTest extends AbstractLightServerTest {
 
     // Negative Test : Try to persist one type of token with another type of tokenManager.
     try {
-      doTestPutGet(googLoginToken, googDocTokenManager, personId);
+      doTestPutGet(googLoginToken, googDocTokenManager);
       fail("should have failed.");
     } catch (IllegalArgumentException e) {
       // Expected
     }
   }
 
-  private void doTestPutGet(OAuth2OwnerTokenEntity token, OAuth2OwnerTokenManager tokenManager, long personId) {
+  private void doTestPutGet(OAuth2OwnerTokenEntity token, OAuth2OwnerTokenManager tokenManager) {
     OAuth2OwnerTokenEntity savedToken = tokenManager.put(token);
     assertEquals(token, savedToken);
     
-    OAuth2OwnerTokenEntity fetchedToken = tokenManager.get(personId);
+    OAuth2OwnerTokenEntity fetchedToken = tokenManager.get();
     assertEquals(token, fetchedToken);
   }
 }

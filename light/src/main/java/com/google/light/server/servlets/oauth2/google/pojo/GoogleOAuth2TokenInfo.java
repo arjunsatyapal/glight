@@ -17,14 +17,12 @@ package com.google.light.server.servlets.oauth2.google.pojo;
 
 import com.google.light.server.exception.unchecked.JsonException;
 import com.google.light.server.utils.JsonUtils;
-
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.apache.commons.lang.builder.ToStringBuilder;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.commons.lang.builder.ToStringBuilder;
 import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
@@ -43,7 +41,7 @@ import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
 @XmlAccessorType(XmlAccessType.PROPERTY)
 @JsonSerialize(include = Inclusion.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class GoogleOAuth2TokenInfo extends AbstractGoogleOAuth2TokenInfo<GoogleOAuth2TokenInfo> {
+public class GoogleOAuth2TokenInfo extends AbstractOAuth2TokenInfo<GoogleOAuth2TokenInfo> {
   /**
    * {@inheritDoc}
    */
@@ -78,6 +76,7 @@ public class GoogleOAuth2TokenInfo extends AbstractGoogleOAuth2TokenInfo<GoogleO
       throw new JsonException("Conversion of " + getClass().getSimpleName() + " to Json failed.", e);
     }
   }
+  
   // For Jaxb.
   @JsonCreator
   public GoogleOAuth2TokenInfo() {

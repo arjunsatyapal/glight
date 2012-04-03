@@ -20,16 +20,14 @@ import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPersonKey;
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
 import static com.google.light.server.utils.LightPreconditions.checkProviderUserId;
-
-import com.google.light.server.persistence.entity.person.PersonEntity;
-
-import com.googlecode.objectify.Key;
-
-import com.googlecode.objectify.annotation.Parent;
+import static com.google.light.server.utils.LightUtils.getCurrentTimeInMillis;
 
 import com.google.light.server.constants.OAuth2ProviderService;
 import com.google.light.server.dto.oauth2.owner.OAuth2OwnerTokenDto;
 import com.google.light.server.persistence.PersistenceToDtoInterface;
+import com.google.light.server.persistence.entity.person.PersonEntity;
+import com.googlecode.objectify.Key;
+import com.googlecode.objectify.annotation.Parent;
 import javax.persistence.Id;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -94,6 +92,14 @@ public class OAuth2OwnerTokenEntity implements
     return personKey;
   }
   
+  /**
+   * TODO(arjuns): Add test for this.
+   * @return
+   */
+  public long getPersonId() {
+    return getPersonKey().getId();
+  }
+  
   /** 
    * {@inheritDoc}
    */
@@ -123,7 +129,7 @@ public class OAuth2OwnerTokenEntity implements
     return OAuth2ProviderService.valueOf(providerServiceName);
   }
   
-  public String providerUserId() {
+  public String getProviderUserId() {
     return providerUserId;
   }
 
@@ -137,6 +143,11 @@ public class OAuth2OwnerTokenEntity implements
 
   public long getExpiresInMillis() {
     return expiresInMillis;
+  }
+  
+//  TODO(arjuns): Add test for this.
+  public boolean hasExpired() {
+    return getCurrentTimeInMillis() > expiresInMillis;
   }
 
   public String getTokenType() {

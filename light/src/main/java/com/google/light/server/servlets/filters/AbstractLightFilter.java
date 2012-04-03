@@ -19,6 +19,8 @@ import static com.google.light.server.utils.GuiceUtils.getInstance;
 import static com.google.light.server.utils.GuiceUtils.seedEntityInRequestScope;
 import static com.google.light.server.utils.LightPreconditions.checkPersonIsGaeAdmin;
 
+import java.util.logging.Level;
+
 import com.google.light.server.servlets.SessionManager;
 
 import com.google.inject.Inject;
@@ -89,6 +91,7 @@ public abstract class AbstractLightFilter implements Filter {
     } catch (Exception e) {
       try {
         if(LightHttpException.class.isAssignableFrom(e.getClass())) {
+          logger.log(Level.INFO, "", e);
           response.sendError(((LightHttpException)e).getHttpCode().getStatusCode(), e.getMessage());
         } else {
           response.sendError(HttpStatusCodesEnum.INTERNAL_SERVER_ERROR.getStatusCode(),

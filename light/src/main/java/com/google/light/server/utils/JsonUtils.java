@@ -15,6 +15,8 @@
  */
 package com.google.light.server.utils;
 
+import com.google.light.server.dto.DtoInterface;
+
 import org.codehaus.jackson.JsonGenerationException;
 
 import org.codehaus.jackson.map.ObjectWriter;
@@ -39,13 +41,15 @@ import org.codehaus.jackson.xc.JaxbAnnotationIntrospector;
 public class JsonUtils {
   // TODO(arjuns): Add javadocs in this class.
   // TODO(arjuns): See if this class can return object only after validation. Same for Xml Utils
-  public static <D> D getDto(String jsonString, Class<D> dtoClass) throws JsonParseException,
-      JsonMappingException, IOException {
+  public static <D extends DtoInterface<D>> D getDto(String jsonString, Class<D> dtoClass)
+      throws JsonParseException, JsonMappingException, IOException {
     ObjectMapper mapper = new ObjectMapper();
     AnnotationIntrospector introspector = new JaxbAnnotationIntrospector();
     // make serializer use JAXB annotations (only)
     mapper.getSerializationConfig().withAnnotationIntrospector(introspector);
-    return mapper.readValue(new StringReader(jsonString), dtoClass);
+    D dto = mapper.readValue(new StringReader(jsonString), dtoClass);
+    
+    return dto.validate();
   }
 
   public static <T> String toJson(T object) throws JsonGenerationException, JsonMappingException,
@@ -62,7 +66,7 @@ public class JsonUtils {
     mapper.getSerializationConfig().withAnnotationIntrospector(introspector);
 
     ObjectWriter writer = null;
-    
+
     if (prettyPrint) {
       writer = mapper.writerWithDefaultPrettyPrinter();
     } else {

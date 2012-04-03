@@ -15,6 +15,8 @@
  */
 package com.google.light.server.manager.interfaces;
 
+import com.google.api.client.auth.oauth2.ClientParametersAuthentication;
+
 
 /**
  * All OAuth Consumer Implementations should implement this.
@@ -25,10 +27,22 @@ package com.google.light.server.manager.interfaces;
  */
 public interface OAuth2ConsumerCredentialManager {
   /**
-   * Return OAuth2 client_id 
+   * Returns OAuth2 client_id 
    * @return
    */
   public String getClientId();
   
+  /**
+   * Returns OAuth2 client_secret.
+   * @return
+   */
   public String getClientSecret();
+  
+  /**
+   * Returns {@link ClientParametersAuthentication}.
+   * TODO(arjuns): Add test for this.
+   * 
+   * @return
+   */
+  public ClientParametersAuthentication getClientAuthentication();
 }

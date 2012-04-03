@@ -2,7 +2,6 @@ package com.google.light.server.servlets.oauth2.google.login;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.constants.OAuth2ProviderService.GOOGLE_LOGIN;
-import static com.google.light.server.servlets.oauth2.google.pojo.AbstractGoogleOAuth2TokenInfo.calculateExpireInMillis;
 import static com.google.light.server.servlets.path.ServletPathEnum.OAUTH2_GOOGLE_LOGIN_CB;
 import static com.google.light.server.servlets.path.ServletPathEnum.SESSION;
 import static com.google.light.server.utils.GuiceUtils.getInstance;
@@ -176,15 +175,14 @@ public class GoogleLoginCallbackServlet extends HttpServlet {
        */
 
       // TODO(arjuns): Fix this hardcoded id generation.
-      updatePersistedTokenDetails = doesTokenDetailEntityNeedsUpdate(
-          personId, updatePersistedTokenDetails);
+      updatePersistedTokenDetails = doesTokenDetailEntityNeedsUpdate(updatePersistedTokenDetails);
 
       if (updatePersistedTokenDetails) {
         if (Strings.isNullOrEmpty(refreshToken)) {
           forceLoginWithPrompt(request, response);
           return;
         }
-        updateOwnerTokenEntity(personId, providerUserId, tokenResponse);
+        updateOwnerTokenEntity(personId, providerUserId, refreshToken, tokenResponse);
       }
 
       /*
@@ -207,9 +205,8 @@ public class GoogleLoginCallbackServlet extends HttpServlet {
    * @param updatePersistedTokenDetails
    * @return
    */
-  private boolean doesTokenDetailEntityNeedsUpdate(Long personId,
-      boolean updatePersistedTokenDetails) {
-    OAuth2OwnerTokenEntity fetchedTokenEntity = googLoginTokenManager.get(personId);
+  private boolean doesTokenDetailEntityNeedsUpdate(boolean updatePersistedTokenDetails) {
+    OAuth2OwnerTokenEntity fetchedTokenEntity = googLoginTokenManager.get();
     if (fetchedTokenEntity == null) {
       updatePersistedTokenDetails = true;
     }
@@ -229,6 +226,7 @@ public class GoogleLoginCallbackServlet extends HttpServlet {
           providerUserId, email);
     } catch (Exception e) {
       try {
+        // TODO(arjuns): Revisit this convoluted logic again.
         request.getSession().invalidate();
       } catch (Exception e1) {
         // ignore this exception.
@@ -246,25 +244,12 @@ public class GoogleLoginCallbackServlet extends HttpServlet {
    * @param expiresInMillis
    * @throws IOException
    */
-  private void updateOwnerTokenEntity(Long personId, String providerUserId,
+  private void updateOwnerTokenEntity(Long personId, String providerUserId, String refreshToken,
       TokenResponse tokenResponse) throws IOException {
-    long expiresInMillis = calculateExpireInMillis(tokenResponse.getExpiresInSeconds());
-
     GoogleLoginTokenInfo googTokenInfo = helperInstance.getTokenInfo(
         tokenResponse.getAccessToken(), GoogleLoginTokenInfo.class);
-
-    googTokenInfo.getExpiresIn();
-
-    OAuth2OwnerTokenDto tokenDto = new OAuth2OwnerTokenDto.Builder()
-        .personId(personId)
-        .provider(GOOGLE_LOGIN)
-        .providerUserId(providerUserId)
-        .accessToken(tokenResponse.getAccessToken())
-        .refreshToken(tokenResponse.getRefreshToken())
-        .expiresInMillis(expiresInMillis)
-        .tokenType(tokenResponse.getTokenType())
-        .tokenInfo(googTokenInfo.toJson())
-        .build();
+    OAuth2OwnerTokenDto tokenDto = OAuth2OwnerTokenDto.getOAuth2OwnerTokenDto(
+        personId, refreshToken, tokenResponse, GOOGLE_LOGIN, providerUserId, googTokenInfo.toJson());
 
     googLoginTokenManager.put(tokenDto.toPersistenceEntity());
   }
@@ -317,7 +302,7 @@ public class GoogleLoginCallbackServlet extends HttpServlet {
         providerUserId);
 
     if (ownerTokenEntity != null) {
-      personId = ownerTokenEntity.getPersonKey().getId();
+      personId = ownerTokenEntity.getPersonId();
       personEntity = personManager.get(personId);
     } else {
       /*
@@ -347,7 +332,6 @@ public class GoogleLoginCallbackServlet extends HttpServlet {
      * Will reinitialize session once Light has refreshToken. So we dont care whether
      * request.getSession() returns existing session or new session.
      */
-
     request.getSession().invalidate();
     response.sendRedirect(helperInstance.getOAuth2RedirectUriWithPrompt(lightCbUrl));
     return;

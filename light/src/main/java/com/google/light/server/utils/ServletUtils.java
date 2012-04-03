@@ -17,12 +17,12 @@ package com.google.light.server.utils;
 
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
-import com.google.light.server.servlets.path.ServletPathEnum;
-
 import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;
 import com.google.light.server.constants.ContentTypeEnum;
+import com.google.light.server.constants.RequestParamKeyEnum;
 import com.google.light.server.dto.DtoInterface;
+import com.google.light.server.servlets.path.ServletPathEnum;
 import com.google.light.server.servlets.pojo.ServletRequestPojo;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -111,6 +111,13 @@ public class ServletUtils {
    */
   public static String getServletUrl(HttpServletRequest request, ServletPathEnum servletPath) {
     return getServerUrl(request) + servletPath.get();
+  }
+  
+  /**
+   * Returns value of a RequestParam.
+   */
+  public static String getRequestParameterValue(RequestParamKeyEnum key) {
+    return null;
   }
   
   // Utility Method

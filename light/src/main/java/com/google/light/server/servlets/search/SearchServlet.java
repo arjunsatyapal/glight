@@ -68,7 +68,6 @@ public class SearchServlet extends AbstractLightServlet {
    */
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) {
-
     SearchRequestDto searchRequest = QueryUtils.getValidDto(request, SearchRequestDto.class);
 
     try {

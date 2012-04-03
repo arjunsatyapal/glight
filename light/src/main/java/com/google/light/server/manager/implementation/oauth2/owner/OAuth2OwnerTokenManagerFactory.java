@@ -15,9 +15,9 @@
  */
 package com.google.light.server.manager.implementation.oauth2.owner;
 
-import com.google.light.server.manager.interfaces.OAuth2OwnerTokenManager;
-
 import com.google.light.server.constants.OAuth2ProviderService;
+import com.google.light.server.manager.interfaces.OAuth2OwnerTokenManager;
+import com.google.light.server.servlets.oauth2.google.pojo.AbstractOAuth2TokenInfo;
 
 /**
  * Guice Factory for {@link OAuth2OwnerTokenManager} which is implemented by 
@@ -26,5 +26,6 @@ import com.google.light.server.constants.OAuth2ProviderService;
  * @author Arjun Satyapal
  */
 public interface OAuth2OwnerTokenManagerFactory {
-  public OAuth2OwnerTokenManager create(OAuth2ProviderService providerService);
+  public <D extends AbstractOAuth2TokenInfo<D>> OAuth2OwnerTokenManager create(
+      OAuth2ProviderService providerService);
 }

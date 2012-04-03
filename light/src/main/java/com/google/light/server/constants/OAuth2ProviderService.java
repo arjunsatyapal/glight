@@ -16,6 +16,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNonEmptyList;
 import static com.google.light.server.utils.LightPreconditions.checkValidUri;
 
+import com.google.light.server.servlets.oauth2.google.pojo.GoogleOAuth2TokenInfo;
+
+import com.google.light.server.servlets.oauth2.google.pojo.GoogleLoginTokenInfo;
+
+import com.google.light.server.servlets.oauth2.google.pojo.AbstractOAuth2TokenInfo;
+
 import com.google.common.collect.Lists;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -32,6 +38,8 @@ public enum OAuth2ProviderService {
                true /* usedForLogin */,
                "https://accounts.google.com/o/oauth2/auth",
                "https://accounts.google.com/o/oauth2/token",
+               "https://www.googleapis.com/oauth2/v1/tokeninfo",
+               GoogleLoginTokenInfo.class,
                Lists.newArrayList(
                    "https://www.googleapis.com/auth/userinfo.email",
                    "https://www.googleapis.com/auth/userinfo.profile"
@@ -40,6 +48,8 @@ public enum OAuth2ProviderService {
              false /* usedForLogin */,
              "https://accounts.google.com/o/oauth2/auth",
              "https://accounts.google.com/o/oauth2/token",
+             "https://www.googleapis.com/oauth2/v1/tokeninfo",
+             GoogleOAuth2TokenInfo.class,
              Lists.newArrayList(
                  "https://docs.google.com/feeds/",
                  "https://docs.googleusercontent.com/",
@@ -54,19 +64,27 @@ public enum OAuth2ProviderService {
   private boolean usedForLogin;
   private String authServerUrl;
   private String tokenServerUrl;
+  private String tokenInfoUrl;
+  @SuppressWarnings("rawtypes")
+  private Class tokenInfoClazz;
   private ArrayList<String> scopes;
+  
 
-  private OAuth2ProviderService(
+  private <D extends AbstractOAuth2TokenInfo<D>> OAuth2ProviderService(
       OAuth2ProviderEnum provider,
       boolean usedForLogin,
       String authServerUrl,
       String tokenServerUrl,
+      String tokenInfoUrl,
+      Class<D> tokenInfoClazz,
       ArrayList<String> scopes) {
     try {
       this.provider = checkNotNull(provider, "provider");
       this.usedForLogin = usedForLogin;
       this.authServerUrl = checkValidUri(authServerUrl);
       this.tokenServerUrl = checkValidUri(tokenServerUrl);
+      this.tokenInfoUrl = checkValidUri(tokenInfoUrl);
+      this.tokenInfoClazz = checkNotNull(tokenInfoClazz);
       this.scopes = (ArrayList<String>) checkNonEmptyList(scopes);
     } catch (URISyntaxException e) {
       throw new IllegalArgumentException(e);
@@ -88,6 +106,15 @@ public enum OAuth2ProviderService {
 
   public String getTokenServerUrl() {
     return tokenServerUrl;
+  }
+  
+  public String getTokenInfoUrl() {
+    return tokenInfoUrl;
+  }
+
+  @SuppressWarnings("rawtypes")
+  public  Class<? extends AbstractOAuth2TokenInfo> getTokenInfoClazz() {
+    return tokenInfoClazz;
   }
 
   public ArrayList<String> getScopes() {

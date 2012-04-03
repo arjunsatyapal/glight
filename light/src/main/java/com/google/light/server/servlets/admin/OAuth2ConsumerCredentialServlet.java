@@ -13,9 +13,9 @@
 package com.google.light.server.servlets.admin;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.light.server.constants.RequestParmKeyEnum.CLIENT_ID;
-import static com.google.light.server.constants.RequestParmKeyEnum.CLIENT_SECRET;
-import static com.google.light.server.constants.RequestParmKeyEnum.OAUTH2_PROVIDER_NAME;
+import static com.google.light.server.constants.RequestParamKeyEnum.CLIENT_ID;
+import static com.google.light.server.constants.RequestParamKeyEnum.CLIENT_SECRET;
+import static com.google.light.server.constants.RequestParamKeyEnum.OAUTH2_PROVIDER_NAME;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPersonIsGaeAdmin;
 

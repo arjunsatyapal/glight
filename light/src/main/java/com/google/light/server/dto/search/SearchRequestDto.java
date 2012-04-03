@@ -33,6 +33,8 @@ public class SearchRequestDto implements DtoInterface<SearchRequestDto> {
    * Friendly reminder: This Dto is constructed through a builder or through QueryUtils. So it is
    * important to make sure that through both ways if page is not defined it must be set to this
    * value.
+   * 
+   * TODO(waltercacau) : move search under third_party.
    */
   private static final int DEFAULT_PAGE = 1;
 

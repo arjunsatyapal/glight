@@ -16,15 +16,16 @@
 package com.google.light.server.dto.oauth2.owner;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.light.server.servlets.oauth2.google.pojo.AbstractOAuth2TokenInfo.calculateExpireInMillis;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
 import static com.google.light.server.utils.LightPreconditions.checkProviderUserId;
 
-import com.google.light.server.persistence.entity.person.PersonEntity;
-
+import com.google.api.client.auth.oauth2.TokenResponse;
 import com.google.light.server.constants.OAuth2ProviderService;
 import com.google.light.server.dto.DtoToPersistenceInterface;
 import com.google.light.server.persistence.entity.oauth2.owner.OAuth2OwnerTokenEntity;
+import com.google.light.server.persistence.entity.person.PersonEntity;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
@@ -47,8 +48,7 @@ public class OAuth2OwnerTokenDto implements
   private String tokenInfo;
 
   /**
-   * {@inheritDoc}
-   * TODO(arjuns): Implement this method.
+   * {@inheritDoc} TODO(arjuns): Implement this method.
    */
   @Override
   public String toJson() {
@@ -64,8 +64,7 @@ public class OAuth2OwnerTokenDto implements
   }
 
   /**
-   * {@inheritDoc}
-   * TODO(arjuns): Update test.
+   * {@inheritDoc} TODO(arjuns): Update test.
    */
   @Override
   public OAuth2OwnerTokenDto validate() {
@@ -142,6 +141,43 @@ public class OAuth2OwnerTokenDto implements
 
   public String getTokenInfo() {
     return tokenInfo;
+  }
+
+  // TODO(arjuns): Add test for this.
+  /**
+   * Helper method to get {@link OAuth2OwnerTokenDto} for the most frequent use-case.
+   * 
+   * @param personId
+   * @param refreshToken
+   * @param tokenResponse
+   * @param providerService
+   * @param providerUserId
+   * @param tokenInfoInJson
+   * @return
+   */
+  public static OAuth2OwnerTokenDto getOAuth2OwnerTokenDto(Long personId, String refreshToken,
+      TokenResponse tokenResponse, OAuth2ProviderService providerService, String providerUserId,
+      String tokenInfoInJson) {
+    /*
+     * Refresh token from TokenResponss is not reliable as it is set only when user has given 
+     * access manually.
+     */
+    checkNotBlank(refreshToken, "refreshToken");
+    
+    long expiresInMillis = calculateExpireInMillis(tokenResponse.getExpiresInSeconds());
+
+    OAuth2OwnerTokenDto tokenDto = new OAuth2OwnerTokenDto.Builder()
+        .personId(personId)
+        .provider(providerService)
+        .providerUserId(providerUserId)
+        .accessToken(tokenResponse.getAccessToken())
+        .refreshToken(refreshToken)
+        .expiresInMillis(expiresInMillis)
+        .tokenType(tokenResponse.getTokenType())
+        .tokenInfo(tokenInfoInJson)
+        .build();
+
+    return tokenDto;
   }
 
   public static class Builder {

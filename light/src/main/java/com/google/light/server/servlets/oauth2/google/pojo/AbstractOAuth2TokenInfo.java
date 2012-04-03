@@ -47,7 +47,7 @@ import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
 @XmlAccessorType(XmlAccessType.PROPERTY)
 @JsonSerialize(include = Inclusion.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public abstract class AbstractGoogleOAuth2TokenInfo<D> implements DtoInterface<D> {
+public abstract class AbstractOAuth2TokenInfo<D> implements DtoInterface<D> {
   private String issuedTo;
   private String audience;
   private String scope;
@@ -198,6 +198,6 @@ public abstract class AbstractGoogleOAuth2TokenInfo<D> implements DtoInterface<D
 
   // For JAXB.
   @JsonCreator
-  public AbstractGoogleOAuth2TokenInfo() {
+  public AbstractOAuth2TokenInfo() {
   }
 }

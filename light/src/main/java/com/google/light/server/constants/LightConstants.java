@@ -20,11 +20,6 @@ package com.google.light.server.constants;
 public class LightConstants {
   public static int SESSION_MAX_INACTIVITY_PERIOD = 3600;
 
-  // URLs external to Light.
-  /** URL from where Information about a Google Access Token can be fetched. */
-  public static final String GOOLGE_TOKEN_INFO_URL =
-      "https://www.googleapis.com/oauth2/v1/tokeninfo";
-
   /** URL from where a Google Customer's Profile and Email can be fetched. */
   public static final String GOOGLE_USER_INFO_URL = "https://www.googleapis.com/oauth2/v1/userinfo";
   

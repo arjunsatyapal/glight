@@ -21,17 +21,14 @@ import static com.google.light.server.servlets.test.CredentialUtils.getOwnerToke
 import static com.google.light.server.utils.GuiceUtils.getInstance;
 import static com.google.light.server.utils.LightPreconditions.checkIsNotEnv;
 
-import com.google.common.collect.Lists;
-
-
-import com.google.light.server.dto.admin.OAuth2ConsumerCredentialDto;
-
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.light.server.constants.LightEnvEnum;
 import com.google.light.server.constants.OAuth2ProviderEnum;
 import com.google.light.server.constants.OAuth2ProviderService;
+import com.google.light.server.dto.admin.OAuth2ConsumerCredentialDto;
 import com.google.light.server.manager.implementation.oauth2.owner.OAuth2OwnerTokenManagerFactory;
 import com.google.light.server.manager.interfaces.OAuth2OwnerTokenManager;
 import com.google.light.server.manager.interfaces.PersonManager;
@@ -40,7 +37,6 @@ import com.google.light.server.persistence.entity.admin.OAuth2ConsumerCredential
 import com.google.light.server.persistence.entity.oauth2.owner.OAuth2OwnerTokenEntity;
 import com.google.light.server.persistence.entity.person.PersonEntity;
 import com.google.light.server.servlets.test.CredentialUtils;
-import com.google.light.server.utils.GuiceUtils;
 import com.google.light.server.utils.JsonUtils;
 import com.google.light.server.utils.LightPreconditions;
 import java.io.ByteArrayInputStream;
@@ -93,7 +89,7 @@ public class TestCredentialBackupServlet extends HttpServlet {
     
     personManager = getInstance(injector, PersonManager.class);
 
-    consumerCredentialDao = GuiceUtils.getInstance(injector, OAuth2ConsumerCredentialDao.class);
+    consumerCredentialDao = getInstance(injector, OAuth2ConsumerCredentialDao.class);
     
     OAuth2OwnerTokenManagerFactory tokenManagerFactory = getInstance(
         injector, OAuth2OwnerTokenManagerFactory.class);
@@ -127,11 +123,11 @@ public class TestCredentialBackupServlet extends HttpServlet {
         
     try {
       PersonEntity personEntity = personManager.getByEmail(email);
-      checkNotNull(personEntity, "Persion should have been created first.");
+      checkNotNull(personEntity, "Person should have been created first.");
 
       String googConsumerCredJsonString = getConsumerCredJsonString();
-      String googLoginTokenJsonString = getOwnerTokenJsonString(googLoginTokenManager, personEntity.getId());
-      String googDocTokenJsonString = getOwnerTokenJsonString(googDocTokenManager, personEntity.getId());
+      String googLoginTokenJsonString = getOwnerTokenJsonString(googLoginTokenManager);
+      String googDocTokenJsonString = getOwnerTokenJsonString(googDocTokenManager);
 
       response.setContentType("application/zip");
       response.setStatus(HttpServletResponse.SC_OK);
@@ -183,9 +179,9 @@ public class TestCredentialBackupServlet extends HttpServlet {
    * 
    * TODO(arjuns): Add test for this.
    */
-  private String getOwnerTokenJsonString(OAuth2OwnerTokenManager tokenManager, long personId)
+  private String getOwnerTokenJsonString(OAuth2OwnerTokenManager tokenManager)
       throws JsonGenerationException, JsonMappingException, IOException {
-    OAuth2OwnerTokenEntity entity = tokenManager.get(personId);
+    OAuth2OwnerTokenEntity entity = tokenManager.get();
     Preconditions.checkNotNull(entity, "entity should not be null");
     // TODO(arjuns): Use entity.toDto().toJson();
     return JsonUtils.toJson(entity.toDto());
