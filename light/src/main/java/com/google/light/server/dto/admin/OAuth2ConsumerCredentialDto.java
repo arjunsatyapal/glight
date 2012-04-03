@@ -15,6 +15,8 @@ package com.google.light.server.dto.admin;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
+import com.google.light.server.utils.JsonUtils;
+
 import com.google.light.server.constants.OAuth2ProviderEnum;
 import com.google.light.server.dto.DtoToPersistenceInterface;
 import com.google.light.server.persistence.entity.admin.OAuth2ConsumerCredentialEntity;
@@ -56,7 +58,12 @@ public class OAuth2ConsumerCredentialDto implements
    */
   @Override
   public String toJson() {
-    throw new UnsupportedOperationException();
+    try {
+    return JsonUtils.toJson(this);
+    } catch (Exception e) {
+      // TODO(arjuns): Add exception handling.
+      throw new RuntimeException(e);
+    }
   }
 
   /**
@@ -160,5 +167,10 @@ public class OAuth2ConsumerCredentialDto implements
     this.provider = builder.provider;
     this.clientId = builder.clientId;
     this.clientSecret = builder.clientSecret;
+  }
+
+  // For JAXB
+  @SuppressWarnings("unused")
+  private OAuth2ConsumerCredentialDto() {
   }
 }

@@ -22,6 +22,8 @@ package com.google.light.server.dto;
  * P : Persistence Entity.
  * I : Type of Id used by P (Persistence Entity).
  * 
+ * TODO(arjuns): See if this can be converted to abstract class.
+ * 
  * @author Arjun Satyapal
  */
 public interface DtoToPersistenceInterface<D, P, I> extends DtoInterface<D> {

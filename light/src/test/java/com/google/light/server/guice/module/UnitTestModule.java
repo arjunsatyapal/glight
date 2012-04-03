@@ -17,6 +17,14 @@ package com.google.light.server.guice.module;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.inject.assistedinject.FactoryModuleBuilder;
+import com.google.light.server.manager.implementation.oauth2.consumer.OAuth2ConsumerCredentialManagerFactory;
+import com.google.light.server.manager.implementation.oauth2.consumer.OAuth2ConsumerCredentialManagerImpl;
+
+import com.google.light.server.manager.implementation.oauth2.consumer.TestOAuth2ConsumerCredentialManagerImpl;
+
+import com.google.light.server.manager.interfaces.OAuth2ConsumerCredentialManager;
+
 import com.google.inject.Module;
 
 import com.google.inject.Guice;
@@ -52,6 +60,13 @@ public class UnitTestModule extends BaseGuiceModule {
     bind(HttpSession.class)
         .annotatedWith(AnotHttpSession.class)
         .toInstance(httpSession);
+    
+    bind(OAuth2ConsumerCredentialManager.class)
+      .to(TestOAuth2ConsumerCredentialManagerImpl.class);
+    
+    install(new FactoryModuleBuilder()
+    .implement(OAuth2ConsumerCredentialManager.class, TestOAuth2ConsumerCredentialManagerImpl.class)
+    .build(OAuth2ConsumerCredentialManagerFactory.class));
   }
 
   public static Module getModule(HttpSession httpSession, ServletModule servletModule) {

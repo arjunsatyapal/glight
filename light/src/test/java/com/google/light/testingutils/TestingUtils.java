@@ -17,10 +17,10 @@ package com.google.light.testingutils;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.constants.OAuth2ProviderService.GOOGLE_LOGIN;
-import static com.google.light.server.constants.RequestParmKeyEnum.DEFAULT_EMAIL;
-import static com.google.light.server.constants.RequestParmKeyEnum.LOGIN_PROVIDER_ID;
-import static com.google.light.server.constants.RequestParmKeyEnum.LOGIN_PROVIDER_USER_ID;
-import static com.google.light.server.constants.RequestParmKeyEnum.PERSON_ID;
+import static com.google.light.server.constants.RequestParamKeyEnum.DEFAULT_EMAIL;
+import static com.google.light.server.constants.RequestParamKeyEnum.LOGIN_PROVIDER_ID;
+import static com.google.light.server.constants.RequestParamKeyEnum.LOGIN_PROVIDER_USER_ID;
+import static com.google.light.server.constants.RequestParamKeyEnum.PERSON_ID;
 import static com.google.light.server.utils.GuiceUtils.getInstance;
 import static com.google.light.server.utils.LightPreconditions.checkNull;
 import static org.mockito.Mockito.when;

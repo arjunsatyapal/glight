@@ -66,7 +66,6 @@ public class OAuth2HelperImpl implements OAuth2Helper {
             "consumerCredentialManager");
     
     this.ownerTokenManager = checkNotNull(ownerTokenManagerFactory.create(this.providerService));
-
   }
 
   /**

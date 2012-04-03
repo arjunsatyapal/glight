@@ -15,9 +15,12 @@
  */
 package com.google.light.server.manager.implementation.oauth2.consumer;
 
+import static com.google.light.server.constants.OAuth2ProviderEnum.GOOGLE;
 import static com.google.light.server.utils.GuiceUtils.getInstance;
 import static com.google.light.testingutils.TestingUtils.getRandomString;
 import static org.junit.Assert.assertEquals;
+
+import com.google.light.server.persistence.dao.OAuth2ConsumerCredentialDao;
 
 import com.google.light.server.manager.interfaces.OAuth2ConsumerCredentialManager;
 
@@ -48,7 +51,10 @@ public class OAuth2ConsumerCredentialManagerImplTest extends AbstractLightServer
     this.adminOperationManager = getInstance(injector, AdminOperationManager.class);
     adminOperationManager.putOAuth2ConsumerCredential(getConsumerCredentialEntityBuilder().build());
     factory = getInstance(injector,  OAuth2ConsumerCredentialManagerFactory.class);
-    defaultCredentialManager = factory.create(defaultProvider);
+    
+    OAuth2ConsumerCredentialDao dao = getInstance(injector, OAuth2ConsumerCredentialDao.class);
+    // Usually this is injected, but for this class, manually creating this class.
+    defaultCredentialManager = new OAuth2ConsumerCredentialManagerImpl(GOOGLE, dao); 
   }
   
   @Override

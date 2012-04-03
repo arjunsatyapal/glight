@@ -22,12 +22,16 @@ import static com.google.light.server.servlets.path.ServletPathEnum.OAUTH2_GOOGL
 import static com.google.light.server.servlets.path.ServletPathEnum.OAUTH2_GOOGLE_LOGIN;
 import static com.google.light.server.servlets.path.ServletPathEnum.TEST_CREDENTIAL_BACKUP_SERVLET;
 import static com.google.light.server.servlets.test.CredentialStandardEnum.OAUTH2;
-import static com.google.light.server.servlets.test.CredentialUtils.getConsumerCredentialFilePath;
+import static com.google.light.server.servlets.test.CredentialUtils.getConsumerCredentialFileAbsPath;
 import static com.google.light.server.servlets.test.CredentialUtils.getCredentialZipFilePath;
-import static com.google.light.server.servlets.test.CredentialUtils.getOwnerCredentialPasswdFilePath;
+import static com.google.light.server.servlets.test.CredentialUtils.getOwnerCredentialPasswdFileAbsPath;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+
+import java.io.InputStream;
+
+import java.net.URL;
 
 import java.io.FileOutputStream;
 
@@ -81,13 +85,13 @@ public class LoginITCase {
   public void seleniumSetup() throws Exception {
     GaeTestingUtils.cheapEnvSwitch(defaultEnv);
     
-    System.out.println(getOwnerCredentialPasswdFilePath(OAUTH2));
-    ownerCredentials = loadProperties(getOwnerCredentialPasswdFilePath(OAUTH2));
+    System.out.println(getOwnerCredentialPasswdFileAbsPath(OAUTH2));
+    ownerCredentials = loadProperties(getOwnerCredentialPasswdFileAbsPath(OAUTH2));
     validatePropertiesFile(ownerCredentials, Lists.newArrayList(PASSWORD.get()));
     password = ownerCredentials.getProperty(PASSWORD.get());
 
-    System.out.println(getConsumerCredentialFilePath(OAUTH2, GOOGLE));
-    consumerCredentials = loadProperties(getConsumerCredentialFilePath(OAUTH2, GOOGLE));
+    System.out.println(getConsumerCredentialFileAbsPath(OAUTH2, GOOGLE));
+    consumerCredentials = loadProperties(getConsumerCredentialFileAbsPath(OAUTH2, GOOGLE));
     validatePropertiesFile(consumerCredentials, Lists.newArrayList(
         CLIENT_ID.get(), CLIENT_SECRET.get()));
   }
@@ -136,8 +140,8 @@ public class LoginITCase {
     driver.findElement(By.id("isAdmin")).click();
     driver.findElement(By.name("action")).click();
     
-    // First signin to Google Account.
     
+    // First signin to Google Account.
     driver
         .get("https://accounts.google.com/ServiceLogin?passive=1209600&continue=https%3A%2F%2Faccounts.google.com%2FManageAccount&followup=https%3A%2F%2Faccounts.google.com%2FManageAccount");
     driver.findElement(By.id("Email")).clear();
@@ -145,6 +149,8 @@ public class LoginITCase {
     driver.findElement(By.id("Passwd")).clear();
     driver.findElement(By.id("Passwd")).sendKeys(password);
     driver.findElement(By.id("signIn")).click();
+    
+    // Now revoking access
     driver.findElement(By.cssSelector("#nav-security > div.IurIzb")).click();
     driver.findElement(By.xpath("//div[5]/div[2]/a/div")).click();
     driver.findElement(By.linkText("Revoke Access")).click();
@@ -185,18 +191,22 @@ public class LoginITCase {
     driver.findElement(By.id(currElement)).click();
     driver.findElement(By.id("submit_approve_access")).click();
     
-    // Now all credentials are populated on DataStore of Dev Server. Now download the 
-    // Zip file for download.
+    /*
+     * Now all credentials are populated on DataStore of Dev Server. Now download the Zip file 
+     * for functional tests.
+     */
     GenericUrl zipUrl = new GenericUrl(serverUrl + TEST_CREDENTIAL_BACKUP_SERVLET.get());
     HttpTransport httpTransport = new NetHttpTransport();
     HttpRequest request = httpTransport.createRequestFactory().buildGetRequest(zipUrl);
     HttpResponse response = request.execute();
     
     String outputPath = getCredentialZipFilePath();
+    File file = new File(outputPath);
+    if (file.exists()) {
+      file.delete();
+    }
     
     ByteStreams.copy(response.getContent(), new FileOutputStream(new File(outputPath)));
-    
-    driver.get(serverUrl + ServletPathEnum.TEST_CREDENTIAL_BACKUP_SERVLET.get());
   }
 
   @After

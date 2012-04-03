@@ -21,7 +21,7 @@ import java.io.Serializable;
  * Interface to encapsulate methods related to DTO.
  * 
  * TODO(arjuns): Add test for this class.
- *
+ * TODO(arjuns): See if this can be converted to abstract class.
  * @author Arjun Satyapal
  */
 public interface DtoInterface<D> extends Serializable {

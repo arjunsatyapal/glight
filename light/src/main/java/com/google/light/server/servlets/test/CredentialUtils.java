@@ -1,9 +1,12 @@
 /*
  * Copyright (C) Google Inc.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -48,7 +51,7 @@ public class CredentialUtils {
    * @return
    */
   public static String getCredentialDir() {
-    return getHomeDir() + "/light-credentials";
+    return "light-credentials";
   }
 
   /**
@@ -77,10 +80,10 @@ public class CredentialUtils {
    * e.g. /home/foo/credentials/OAUTH2/owner/unit-test1@gmail.com/passwd 
    * @return
    */
-  public static String getOwnerCredentialPasswdFilePath(CredentialStandardEnum standard) {
-    return getOwnerCredentialDir(standard) + "/credential";
+  public static String getOwnerCredentialPasswdFileAbsPath(CredentialStandardEnum standard) {
+    return getHomeDir() + "/" + getOwnerCredentialDir(standard) + "/credential";
   }
-
+  
   /**
    * Returns path to TokenInfo file for Resource Owner.
    * e.g. /home/foo/credentials/OAUTH2/owner/unit-test1@gmail.com/GOOGLE_LOGIN
@@ -88,9 +91,9 @@ public class CredentialUtils {
    */
   public static String getOwnerTokenInfoFilePath(CredentialStandardEnum standard,
       OAuth2ProviderService providerService) {
-    return getOwnerCredentialDir(standard) + "." + providerService.name();
+    return getOwnerCredentialDir(standard) + "/" + providerService.name();
   }
-
+  
   /**
    * Returns path to the directory for Resource Consumer for a Specific env. e.g
    * /home/foo/credentials/OAUTH2/consumer/
@@ -100,11 +103,9 @@ public class CredentialUtils {
   public static String getConsumerCredentialDir(CredentialStandardEnum standard) {
     return getStdCredentialDir(standard) + "/" + "consumer";
   }
-
+  
   /**
-   * Returns path to the file containing consumer credentials.
-   * e.g. /home/foo/credentials/OAUTH2/consumer/GOOGLE
-   * 
+   * Returns relative path. e.g. credentials/OAUTH2/consumer/GOOGLE
    * @param standard
    * @param provider
    * @return
@@ -114,8 +115,21 @@ public class CredentialUtils {
     return getConsumerCredentialDir(standard) + "/" + provider.name();
   }
   
+  /**
+   * Returns path to the file containing consumer credentials.
+   * e.g. /home/foo/credentials/OAUTH2/consumer/GOOGLE
+   * 
+   * @param standard
+   * @param provider
+   * @return
+   */
+  public static String getConsumerCredentialFileAbsPath(
+      CredentialStandardEnum standard, OAuth2ProviderEnum provider) {
+    return getHomeDir() + "/" + getConsumerCredentialFilePath(standard, provider);
+  }
+  
   public static String getCredentialZipFilePath() {
-    return getCredentialDir() + "/credential.zip";
+    return getHomeDir() + "/" + getCredentialDir() + "/credential.zip";
   }
 
   // Utility class.
