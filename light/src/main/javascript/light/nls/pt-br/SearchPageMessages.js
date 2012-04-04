@@ -13,18 +13,16 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-define({
-  root: {
-    instructions: 'Before continuing you need to fill this small registration' +
-    ' form and accept Light\'s Terms of Service.',
-    firstNameTextBoxLabel: 'First Name:',
-    lastNameTextBoxLabel: 'Last Name:',
-    tosTextareaLabel: 'Terms of Service',
-    tosTextareaContent: 'Legal things and stuff :D',
-    tosCheckboxLabel: 'I agree with the Terms of Service',
-    submitButton: 'Register',
-    tosTooltipError: 'You should agree to the Terms of Service before proceeding'
-  },
-  'pt-br': true,
-  'fa': true
+/**
+ * Calling window.define instead of define because of dojo build bug.
+ * 
+ * @see http://bugs.dojotoolkit.org/ticket/15057
+ */
+window.define({
+  searchButtonLabel: 'Pesquisar',
+  didYouMeanBox: 'Você quis dizer ${suggestion}?',
+  noResults: 'Sua pesquisa não retornou resultados',
+  pageInfo: 'Página ${page}',
+  next: 'Próxima',
+  previous: 'Anterior'
 });

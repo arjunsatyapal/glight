@@ -15,22 +15,32 @@
  */
 package com.google.light.server.dto.search;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableMapBuilder;
+import com.google.light.server.constants.LightConstants;
+import com.google.light.server.dto.AbstractDtoToPersistenceTest;
+import com.google.light.server.dto.search.SearchRequestDto.Builder;
 import com.google.light.server.exception.unchecked.BlankStringException;
 import com.google.light.server.utils.QueryUtils;
-import com.google.light.server.utils.QueryUtilsTest;
+import com.google.light.testingutils.TestingUtils;
 
 /**
  * Test for {@link SearchRequestDto}
  * 
  * @author waltercacau
  */
-public class SearchRequestDtoTest {
+public class SearchRequestDtoTest extends AbstractDtoToPersistenceTest {
 
+  private static final String SAMPLE_LANGUAGE_CODE = "en";
+  /**
+   * SAMPLE_PAGE must differ from 1 because 1 is the default value and we want to use
+   * this to test if the builder and QueryUtils are correctly setting the page number
+   */
   private static final int SAMPLE_PAGE = 3;
   private static final String SAMPLE_QUERY = "Addition";
 
@@ -39,35 +49,52 @@ public class SearchRequestDtoTest {
     // Just positive tests. We can count with enough negative tests in QueryUtilsTest
 
     SearchRequestDto searchRequest =
-        QueryUtils.getValidDto(QueryUtilsTest
+        QueryUtils.getValidDto(TestingUtils
             .getMockedRequestWithParameterMap(new ImmutableMapBuilder<String, String[]>()
                 .put("query", new String[] { SAMPLE_QUERY })
+                .put("clientLanguageCode", new String[] { SAMPLE_LANGUAGE_CODE })
                 .getMap()), SearchRequestDto.class);
 
-    assertEquals("Default page must be 1", 1, searchRequest.getPage());
+    assertNotNull(searchRequest);
+    assertEquals(SAMPLE_QUERY, searchRequest.getQuery());
+    assertEquals(SAMPLE_LANGUAGE_CODE, searchRequest.getClientLanguageCode());
+    assertEquals("Default page must be " + LightConstants.FIRST_SEARCH_PAGE_NUMBER, LightConstants.FIRST_SEARCH_PAGE_NUMBER, searchRequest.getPage());
 
-    QueryUtils.getValidDto(
-        QueryUtilsTest.getMockedRequestWithParameterMap(new ImmutableMapBuilder<String, String[]>()
+    searchRequest = QueryUtils.getValidDto(
+        TestingUtils.getMockedRequestWithParameterMap(new ImmutableMapBuilder<String, String[]>()
             .put("query", new String[] { SAMPLE_QUERY })
             .put("page", new String[] { Integer.toString(SAMPLE_PAGE) })
+            .put("clientLanguageCode", new String[] { SAMPLE_LANGUAGE_CODE })
             .getMap()), SearchRequestDto.class);
+
+    assertNotNull(searchRequest);
+    assertEquals(SAMPLE_QUERY, searchRequest.getQuery());
+    assertEquals(SAMPLE_PAGE, searchRequest.getPage());
+    assertEquals(SAMPLE_LANGUAGE_CODE, searchRequest.getClientLanguageCode());
 
   }
 
   @Test
   public void test_validate() {
     // Positive test
-    SearchRequestDto searchRequest = new SearchRequestDto.Builder().query(SAMPLE_QUERY).build();
+    SearchRequestDto searchRequest = getDefaultBuilder().build();
+    assertNotNull(searchRequest);
+    assertEquals(SAMPLE_QUERY, searchRequest.getQuery());
+    assertEquals(SAMPLE_LANGUAGE_CODE, searchRequest.getClientLanguageCode());
 
     // Default page must be one
-    assertEquals("Default page must be 1", 1, searchRequest.getPage());
+    assertEquals("Default page must be " + LightConstants.FIRST_SEARCH_PAGE_NUMBER, LightConstants.FIRST_SEARCH_PAGE_NUMBER, searchRequest.getPage());
 
     // Positive test: page = 3
-    new SearchRequestDto.Builder().query(SAMPLE_QUERY).page(SAMPLE_PAGE).build();
+    searchRequest = getDefaultBuilder().page(SAMPLE_PAGE).build();
+    assertNotNull(searchRequest);
+    assertEquals(SAMPLE_QUERY, searchRequest.getQuery());
+    assertEquals(SAMPLE_PAGE, searchRequest.getPage());
+    assertEquals(SAMPLE_LANGUAGE_CODE, searchRequest.getClientLanguageCode());
 
     // Negative test: query = null
     try {
-      new SearchRequestDto.Builder().query(null).build();
+      getDefaultBuilder().query(null).build();
       fail("should have failed.");
     } catch (BlankStringException e) {
       // expected.
@@ -75,7 +102,7 @@ public class SearchRequestDtoTest {
 
     // Negative test: query = blank
     try {
-      new SearchRequestDto.Builder().query("").build();
+      getDefaultBuilder().query("").build();
       fail("should have failed.");
     } catch (BlankStringException e) {
       // expected.
@@ -83,12 +110,65 @@ public class SearchRequestDtoTest {
 
     // Negative test: page = 0
     try {
-      new SearchRequestDto.Builder().query(SAMPLE_QUERY).page(0).build();
+      getDefaultBuilder().page(0).build();
       fail("should have failed.");
     } catch (IllegalStateException e) {
       // expected.
     }
 
+    // Negative test: clientLanguageCode = null
+    try {
+      getDefaultBuilder().clientLanguageCode(null).build();
+      fail("should have failed.");
+    } catch (BlankStringException e) {
+      // expected.
+    }
+
+    // Negative test: clientLanguageCode = " "
+    try {
+      getDefaultBuilder().clientLanguageCode(" ").build();
+      fail("should have failed.");
+    } catch (BlankStringException e) {
+      // expected.
+    }
+
+  }
+
+  private Builder getDefaultBuilder() {
+    return new SearchRequestDto.Builder().query(SAMPLE_QUERY).clientLanguageCode(
+        SAMPLE_LANGUAGE_CODE);
+  }
+
+  @Override
+  public void test_builder() throws Exception {
+    // No validation logic in constructor. So nothing to test here.
+  }
+
+  @Override
+  public void test_toJson() throws Exception {
+    // Not used as JSON
+    try {
+      getDefaultBuilder().build().toJson();
+      fail("should have failed.");
+    } catch (UnsupportedOperationException e) {
+      // expected.
+    }
+  }
+
+  @Override
+  public void test_toPersistenceEntity() throws Exception {
+    // Not persisted
+  }
+
+  @Override
+  public void test_toXml() throws Exception {
+    // Not used as XML
+    try {
+      getDefaultBuilder().build().toXml();
+      fail("should have failed.");
+    } catch (UnsupportedOperationException e) {
+      // expected.
+    }
   }
 
 }

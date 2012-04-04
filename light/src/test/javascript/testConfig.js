@@ -39,6 +39,11 @@
     location.pathname.replace(/\/[^/]+$/, ''));
   if (base.substr(base.length - 1) != '/')
     base += '/';
+  
+  // If running inside jasmine:test, skipping target/jasmine folder
+  // and going direct to the root of the project.
+  base = base.replace(/\/target\/jasmine\/$/, "/");
+    
 
   dojoConfig = {
     //'dojo-undef-api': true, 'dojo-publish-privates': true,
@@ -54,6 +59,9 @@
       }, {
           name: 'lightTest',
           location: base + 'src/test/javascript/lightTest'
+      }, {
+          name: 'testResources',
+          location: base + 'src/test/resources'
       }, {
         name: 'dojo',
         location: base + 'src/main/javascript/external/djk/dojo'

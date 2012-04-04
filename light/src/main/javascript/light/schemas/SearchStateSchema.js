@@ -13,13 +13,18 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+/**
+ * For convenience, SearchState has almost the same format of a search request,
+ * except for the clientLanguageCode parameter, which is missing in the
+ * SearchState.
+ */
 define({
   description: 'light/schemas/SearchStateSchema',
-  type:'object',
-  properties:{
-    query: {type:'string'},
+  type: 'object',
+  properties: {
+    query: {type: 'string'},
     page: {
-      type:'number',
+      type: 'number',
       minimum: 1
     }
   }

@@ -1,82 +1,90 @@
 package com.google.light.server.manager.implementation;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 
-import org.junit.Before;
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.jdom.JDOMException;
 import org.junit.Test;
 
 import com.google.api.client.http.HttpTransport;
-import com.google.api.client.http.LowLevelHttpRequest;
-import com.google.api.client.http.LowLevelHttpResponse;
-import com.google.api.client.testing.http.MockHttpTransport;
-import com.google.api.client.testing.http.MockLowLevelHttpRequest;
-import com.google.api.client.testing.http.MockLowLevelHttpResponse;
-import com.google.common.collect.Lists;
-import com.google.inject.Provider;
+import com.google.light.server.constants.LightConstants;
 import com.google.light.server.dto.search.SearchRequestDto;
+import com.google.light.testingutils.TestingConstants;
 import com.google.light.testingutils.TestingUtils;
+import com.google.light.testingutils.XmlTestingUtils;
 
+/**
+ * Test for {@link SearchManagerGSSImpl}.
+ * 
+ * @author Walter Cacau
+ */
 public class SearchManagerGSSImplTest {
-
-  private static final String SAMPLE_QUERY = "query";
-  static final ArrayList<String> SAMPLE_TEST_FILES_PREFIXES = Lists.newArrayList("addition_query",
-      "addxition_query");
-  SearchManagerGSSImpl searchManager;
+  private static final String SAMPLE_LANGUAGE_CODE = "en";
+  private static final String GOOGLE_DTD_URL = "http://www.google.com/google.dtd";
 
   /**
-   * Temp variable to hold the content that the mocked httpTransport will return.
+   * Checks if {@link LightConstants.SEARCH_RESULTS_PER_PAGE} is greater
+   * then 0 and if it is less then or equal to the maximum number of results
+   * that CSE XML API supports.
+   * 
+   * @see https://developers.google.com/custom-search/docs/xml_results#numsp
    */
-  InputStream fakeContent;
-
-  @Before
-  public void setUp() {
-    final HttpTransport httpTransport = createHttpTransportMockForGetRequest();
-    searchManager = new SearchManagerGSSImpl(new Provider<HttpTransport>() {
-      @Override
-      public HttpTransport get() {
-        return httpTransport;
-      }
-    });
+  public void test_SEARCH_RESULTS_PER_PAGE_config() {
+    assertTrue("LightConstants.SEARCH_RESULTS_PER_PAGE should be greater then 0",
+        LightConstants.SEARCH_RESULTS_PER_PAGE > 0);
+    assertTrue("LightConstants.SEARCH_RESULTS_PER_PAGE should be less then or equal to 20",
+        LightConstants.SEARCH_RESULTS_PER_PAGE <= 20);
   }
 
+  /**
+   * Test for {@link SearchManagerGSSImpl#search(SearchRequestDto)}
+   */
   @Test
-  public void test_search() {
+  public void test_search() throws JsonParseException, JsonMappingException,
+      IOException, JDOMException {
 
-    for (String name : SAMPLE_TEST_FILES_PREFIXES) {
-      fakeContent = TestingUtils.getResourceAsStream("/search/gss/" + name + "_input.xml");
+    for (int i = 0; i < TestingConstants.SAMPLE_GSS_LIST_QUERIES.size(); i++) {
+      // Building searchManager
+      InputStream fakeContent =
+          TestingUtils.getResourceAsStream(TestingConstants.SAMPLE_GSS_LIST_INPUTS.get(i));
+      HttpTransport mockedHttpTransport =
+          TestingUtils.createHttpTransportMockForGetRequest(fakeContent);
+      SearchManagerGSSImpl searchManager =
+          new SearchManagerGSSImpl(TestingUtils.getMockProviderFor(mockedHttpTransport));
 
       String stringOutput =
-          TestingUtils.getResourceAsString("/search/gss/" + name + "_output.json");
+          TestingUtils.getResourceAsString(TestingConstants.SAMPLE_GSS_LIST_OUTPUTS.get(i));
 
       // Deliberately comparing using the json string representation because it eases
       // debugging.
-      assertEquals("Unexpected output for " + name + " input", stringOutput, searchManager
-          .search(new SearchRequestDto.Builder().query(SAMPLE_QUERY).build()).toJson());
+      SearchRequestDto searchRequest =
+          new SearchRequestDto.Builder()
+              .query(TestingConstants.SAMPLE_GSS_LIST_QUERIES.get(i))
+              .clientLanguageCode(SAMPLE_LANGUAGE_CODE)
+              .build();
+      assertEquals(
+          "Unexpected output for " + TestingConstants.SAMPLE_GSS_LIST_QUERIES.get(i) + " input",
+          stringOutput,
+          searchManager.search(searchRequest).toJson());
     }
   }
 
   /**
-   * Utility method that will create an mocked HttpTransport which will return for a GET request an
-   * HttpResponse with the content set to {@link SearchManagerGSSImplTest#fakeContent}.
+   * Tests if the test inputs we are using conform to Google's public DTD.
+   * 
+   * CSE output is not passing Google's DTD validation. Deactivating this test for now.
+   * TODO(waltercacau): Follow up with CSE team to check if the problem was resolved.
    */
-  private HttpTransport createHttpTransportMockForGetRequest() {
-    return new MockHttpTransport() {
-      @Override
-      public LowLevelHttpRequest buildGetRequest(String url) throws IOException {
-        return new MockLowLevelHttpRequest() {
-          @Override
-          public LowLevelHttpResponse execute() throws IOException {
-            MockLowLevelHttpResponse result = new MockLowLevelHttpResponse();
-            result.setContent(fakeContent);
-            return result;
-          }
-        };
-      }
-    };
+  // @Test
+  public void test_sampleInputsConformToPublicDTD() throws Exception {
+    for (String inputPath : TestingConstants.SAMPLE_GSS_LIST_INPUTS) {
+      XmlTestingUtils.assertValidXmlAccordingToDTD(
+          TestingUtils.getResourceAsStream(inputPath), GOOGLE_DTD_URL);
+    }
   }
-
 }

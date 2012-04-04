@@ -40,8 +40,10 @@ public class QueryUtils {
   private static final Logger logger = Logger.getLogger(QueryUtils.class.getName());
 
   /**
-   * Converts query strings parameters from an {@link HttpServletRequest} to a DTO of the given dtoClass and
+   * Converts query strings parameters from an {@link HttpServletRequest} to a DTO of the given
+   * dtoClass and
    * validates the DTO before returning it.
+   * 
    * @param request
    * @param dtoClass
    * @return
@@ -58,8 +60,11 @@ public class QueryUtils {
         instance = constructor.newInstance();
       } else {
         constructor.setAccessible(true);
-        instance = constructor.newInstance();
-        constructor.setAccessible(false);
+        try {
+          instance = constructor.newInstance();
+        } finally {
+          constructor.setAccessible(false);
+        }
       }
     } catch (Exception e) {
       String message = "Could not create a instance of " + dtoClass.getName();
@@ -70,22 +75,27 @@ public class QueryUtils {
 
     // Populating the fields using the query string parameters.
     // If we have more then one parameter value for the same name, just get the first one.
-    for (Entry<String, String[]> entry : ((Map<String, String[]>) request.getParameterMap())
-        .entrySet()) {
+    Map<String, String[]> parameterMap = (Map<String, String[]>) request.getParameterMap();
+    for (Entry<String, String[]> entry : parameterMap.entrySet()) {
       String property = entry.getKey();
 
+      String[] value = entry.getValue();
+      if (value.length > 1)
+        throw new BadRequestException("Multiple values for queryKey " + property);
+
       if (!PropertyUtils.isWriteable(instance, property)) {
-        throw new BadRequestException("Unknown property " + property);
+        throw new BadRequestException("Unknown queryKey " + property);
       }
 
       try {
-        BeanUtils.setProperty(instance, property, entry.getValue()[0]);
+        BeanUtils.setProperty(instance, property, value[0]);
       } catch (Exception e) {
         String message =
             "Could not set property " + property + " to "
                 + ToStringBuilder.reflectionToString(entry.getValue()[0]);
         logger.severe(message + ": "
             + Throwables.getStackTraceAsString(e));
+        // TODO(waltercacau): Recheck with there is a better exception to throw here.
         throw new RuntimeException(
             message + ": "
                 + Throwables.getStackTraceAsString(e));

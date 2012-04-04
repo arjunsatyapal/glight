@@ -17,26 +17,22 @@ package com.google.light.server.guice.module;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.inject.assistedinject.FactoryModuleBuilder;
-import com.google.light.server.manager.implementation.oauth2.consumer.OAuth2ConsumerCredentialManagerFactory;
-import com.google.light.server.manager.implementation.oauth2.consumer.OAuth2ConsumerCredentialManagerImpl;
-
-import com.google.light.server.manager.implementation.oauth2.consumer.TestOAuth2ConsumerCredentialManagerImpl;
-
-import com.google.light.server.manager.interfaces.OAuth2ConsumerCredentialManager;
-
-import com.google.inject.Module;
+import javax.servlet.http.HttpSession;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.Module;
+import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.servlet.ServletModule;
 import com.google.inject.util.Modules;
 import com.google.light.server.annotations.AnotHttpSession;
 import com.google.light.server.exception.unchecked.ServerConfigurationException;
 import com.google.light.server.guice.modules.BaseGuiceModule;
 import com.google.light.server.guice.modules.DevServerModule;
+import com.google.light.server.manager.implementation.oauth2.consumer.OAuth2ConsumerCredentialManagerFactory;
+import com.google.light.server.manager.implementation.oauth2.consumer.TestOAuth2ConsumerCredentialManagerImpl;
+import com.google.light.server.manager.interfaces.OAuth2ConsumerCredentialManager;
 import com.google.light.server.utils.GaeUtils;
-import javax.servlet.http.HttpSession;
 
 /**
  * UnitTest Guice Module for UnitTests Environment.

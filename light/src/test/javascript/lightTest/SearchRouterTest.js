@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-define(['dojo/_base/connect', 'dojo/_base/declare', 'light/URLHashUtil',
+define(['dojo/_base/connect', 'dojo/_base/declare', 'light/utils/URLHashUtils',
         'dojo', 'light/SearchRouter', 'light/schemas/SearchStateSchema',
         'lightTest/TestUtils', 'light/enums/SearchEventsEnum'],
         function(connect, declare, hashUtil, dojo, SearchRouter,
@@ -27,7 +27,7 @@ define(['dojo/_base/connect', 'dojo/_base/declare', 'light/URLHashUtil',
   var SAMPLE_HASH = 'SAMPLE_HASH';
   var SAMPLE_HASH_ALTERNATIVE = 'SAMPLE_HASH_ALTERNATIVE';
 
-  describe('lightTest.SearchRouterTest', function() {
+  describe('lightTest.SearchRouterTest inputs', function() {
     it('should be good', function() {
       TestUtils.validateSchema(SAMPLE_SEARCH_STATE, SearchStateSchema);
       expect(SAMPLE_HASH_ALTERNATIVE).not.toEqual(SAMPLE_HASH);
@@ -141,8 +141,8 @@ define(['dojo/_base/connect', 'dojo/_base/declare', 'light/URLHashUtil',
       describe('when the router has not published the event', function() {
         it('should change the hash', function() {
 
-          var _searchStateToHashStub = this.stub(router, '_searchStateToHash');
-          _searchStateToHashStub.withArgs(SAMPLE_SEARCH_STATE)
+          var searchStateToHashStub = this.stub(SearchRouter, 'searchStateToHash');
+          searchStateToHashStub.withArgs(SAMPLE_SEARCH_STATE)
               .returns(SAMPLE_HASH);
           var otherSource = {};
 
@@ -155,13 +155,13 @@ define(['dojo/_base/connect', 'dojo/_base/declare', 'light/URLHashUtil',
     });
 
     describe('_onHashChange', function() {
-      var _setHashStub, _hashToSearchStateStub, publishStub,
-          _searchStateToHashStub, _shouldSkipThisHashChangeStub;
+      var _setHashStub, hashToSearchStateStub, publishStub,
+          searchStateToHashStub, _shouldSkipThisHashChangeStub;
       beforeEach(function() {
         _setHashStub = this.stub(router, '_setHash');
-        _hashToSearchStateStub = this.stub(router, '_hashToSearchState');
+        hashToSearchStateStub = this.stub(SearchRouter, 'hashToSearchState');
         publishStub = this.stub(connect, 'publish');
-        _searchStateToHashStub = this.stub(router, '_searchStateToHash');
+        searchStateToHashStub = this.stub(SearchRouter, 'searchStateToHash');
         _shouldSkipThisHashChangeStub = this.stub(router,
                 '_shouldSkipThisHashChange');
       });
@@ -172,7 +172,7 @@ define(['dojo/_base/connect', 'dojo/_base/declare', 'light/URLHashUtil',
           router._onHashChange(SAMPLE_HASH);
 
           expect(publishStub).not.toHaveBeenCalled();
-          expect(_hashToSearchStateStub).not.toHaveBeenCalled();
+          expect(hashToSearchStateStub).not.toHaveBeenCalled();
           expect(_setHashStub).not.toHaveBeenCalled();
         });
       });
@@ -181,9 +181,9 @@ define(['dojo/_base/connect', 'dojo/_base/declare', 'light/URLHashUtil',
               function() {
         it('should set the hash to the last valid hash', function() {
           _shouldSkipThisHashChangeStub.withArgs(SAMPLE_HASH).returns(false);
-          _hashToSearchStateStub.withArgs(SAMPLE_HASH).throws();
+          hashToSearchStateStub.withArgs(SAMPLE_HASH).throws();
           router._lastSearchState = SAMPLE_SEARCH_STATE;
-          _searchStateToHashStub.withArgs(SAMPLE_SEARCH_STATE)
+          searchStateToHashStub.withArgs(SAMPLE_SEARCH_STATE)
               .returns(SAMPLE_HASH_ALTERNATIVE);
 
           router._onHashChange(SAMPLE_HASH);
@@ -197,7 +197,7 @@ define(['dojo/_base/connect', 'dojo/_base/declare', 'light/URLHashUtil',
         it('should change the search state and publish the corresponding event',
                 function() {
           _shouldSkipThisHashChangeStub.withArgs(SAMPLE_HASH).returns(false);
-          _hashToSearchStateStub.withArgs(SAMPLE_HASH)
+          hashToSearchStateStub.withArgs(SAMPLE_HASH)
               .returns(SAMPLE_SEARCH_STATE);
 
           router._onHashChange(SAMPLE_HASH);
@@ -212,12 +212,27 @@ define(['dojo/_base/connect', 'dojo/_base/declare', 'light/URLHashUtil',
       });
     });
 
-    describe('_hashToSearchState when feeded with ' +
-             '_searchStateToHash(searchState)', function() {
-      it('should return the initial searchState', function() {
-        expect(router._hashToSearchState(
-                router._searchStateToHash(SAMPLE_SEARCH_STATE)
-                )).toEqual(SAMPLE_SEARCH_STATE);
+    describe('hashToSearchState', function() {
+      describe('when feeded with ' +
+               'searchStateToHash(searchState)', function() {
+        it('should return the initial searchState', function() {
+          expect(SearchRouter.hashToSearchState(
+                  SearchRouter.searchStateToHash(SAMPLE_SEARCH_STATE)
+                  )).toEqual(SAMPLE_SEARCH_STATE);
+        });
+      });
+      describe('when feeded with a hash that represents a wrong search state', function() {
+        it('should throw', function() {
+          expect(function() {
+            SearchRouter.hashToSearchState("query=A&page=-1");
+          }).toThrow();
+          expect(function() {
+            SearchRouter.hashToSearchState("query=A");
+          }).toThrow();
+          expect(function() {
+            SearchRouter.hashToSearchState("page=1");
+          }).toThrow();
+        });
       });
     });
 

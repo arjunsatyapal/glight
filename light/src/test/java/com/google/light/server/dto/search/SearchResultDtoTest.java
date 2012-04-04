@@ -15,6 +15,7 @@
  */
 package com.google.light.server.dto.search;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
@@ -23,19 +24,20 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.google.common.collect.Lists;
+import com.google.light.server.dto.AbstractDtoToPersistenceTest;
 
 /**
  * Test for {@link SearchResultDto}
  * 
  * @author waltercacau
  */
-public class SearchResultDtoTest {
+public class SearchResultDtoTest extends AbstractDtoToPersistenceTest {
   private static final String SAMPLE_SUGGESTION = "suggestion";
   private static final String SAMPLE_SUGGESTION_QUERY = "suggestion query";
 
   private SearchResultDto.Builder getDtoBuilder() {
     return new SearchResultDto.Builder().items(new ArrayList<SearchResultItemDto>())
-        .suggestion(null).suggestionQuery(null);
+        .suggestion(null).suggestionQuery(null).hasNextPage(false);
   }
 
   @Test
@@ -44,22 +46,30 @@ public class SearchResultDtoTest {
     SearchResultItemDto item2 = Mockito.mock(SearchResultItemDto.class);
 
     // Positive Test : no items and no suggestion
-    getDtoBuilder().build();
+    SearchResultDto searchResult = getDtoBuilder().build();
+    assertNotNull(searchResult);
 
     // Positive Test : one item
-    getDtoBuilder().items(Lists.newArrayList(item1)).build();
+    searchResult = getDtoBuilder().items(Lists.newArrayList(item1)).build();
+    assertNotNull(searchResult);
 
     // Positive Test : two items
-    getDtoBuilder().items(Lists.newArrayList(item1, item2)).build();
+    searchResult = getDtoBuilder().items(Lists.newArrayList(item1, item2)).build();
+    assertNotNull(searchResult);
 
     // Positive Test : with suggestion, but without items
-    getDtoBuilder().suggestion(SAMPLE_SUGGESTION).suggestionQuery(SAMPLE_SUGGESTION_QUERY).build();
+    searchResult =
+        getDtoBuilder().suggestion(SAMPLE_SUGGESTION).suggestionQuery(SAMPLE_SUGGESTION_QUERY)
+            .build();
+    assertNotNull(searchResult);
 
     // Positive Test : with suggestion and with items
-    getDtoBuilder().items(Lists.newArrayList(item1, item2)).suggestion(SAMPLE_SUGGESTION)
-        .suggestionQuery(SAMPLE_SUGGESTION_QUERY).build();
+    searchResult =
+        getDtoBuilder().items(Lists.newArrayList(item1, item2)).suggestion(SAMPLE_SUGGESTION)
+            .suggestionQuery(SAMPLE_SUGGESTION_QUERY).build();
+    assertNotNull(searchResult);
 
-    // Negative Test : suggestion = null XOR suggestionQuery = null
+    // Negative Test : suggestion = null and suggestionQuery != null
     try {
       getDtoBuilder().suggestion(null).suggestionQuery(SAMPLE_SUGGESTION_QUERY).build();
       fail("should have failed.");
@@ -67,7 +77,7 @@ public class SearchResultDtoTest {
       // expected.
     }
 
-    // Negative Test : suggestion = null XOR suggestionQuery = null
+    // Negative Test : suggestion != null and suggestionQuery = null
     try {
       getDtoBuilder().suggestion(SAMPLE_SUGGESTION).suggestionQuery(null).build();
       fail("should have failed.");
@@ -90,6 +100,34 @@ public class SearchResultDtoTest {
     } catch (NullPointerException e) {
       // expected.
     }
+    
+    // Negative Test : hasNextPage = null
+    try {
+      getDtoBuilder().hasNextPage(null).build();
+      fail("should have failed.");
+    } catch (NullPointerException e) {
+      // expected.
+    }
 
+  }
+
+  @Override
+  public void test_builder() throws Exception {
+    // No validation logic in constructor. So nothing to test here.
+  }
+
+  @Override
+  public void test_toJson() throws Exception {
+    // TODO(waltercacau): Implement this test
+  }
+
+  @Override
+  public void test_toPersistenceEntity() throws Exception {
+    // Not persisted
+  }
+
+  @Override
+  public void test_toXml() throws Exception {
+    // TODO(waltercacau): Implement this test
   }
 }

@@ -72,6 +72,9 @@ public class LightServletModule extends ServletModule {
     /*
      * Binding the CharacterEncondingFilter here to be sure no other filter
      * will be called before it.
+     * 
+     * TODO(waltercacau): Remove this filter and set charset in a better place.
+     * Eg. the servlet's or while generating the response pojos.
      */
     filter("*").through(CharacterEncondingFilter.class);
 

@@ -34,6 +34,7 @@ import com.google.api.client.http.UrlEncodedContent;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.common.collect.ImmutableMap;
 import com.google.light.server.servlets.path.ServletPathEnum;
+import com.google.light.server.servlets.test.SessionInfoServlet;
 import com.google.light.testingutils.FakeLoginHelper;
 import com.google.light.testingutils.TestingUtils;
 import java.util.Map;

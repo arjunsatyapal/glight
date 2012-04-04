@@ -18,12 +18,12 @@ package com.google.light.server.servlets;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightUtils.wrapIntoRuntimeExceptionAndThrow;
 
-
-import com.google.inject.Inject;
-import com.google.inject.Injector;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import com.google.inject.Inject;
+import com.google.inject.Injector;
 
 /**
  * Base servlets for all Light Servlets. Essentially it forces all the derived servlets to implement

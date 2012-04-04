@@ -18,6 +18,7 @@ package com.google.light.server.dto.search;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
+import com.google.light.server.constants.LightConstants;
 import com.google.light.server.dto.DtoInterface;
 
 /**
@@ -28,7 +29,21 @@ import com.google.light.server.dto.DtoInterface;
 @SuppressWarnings("serial")
 public class SearchRequestDto implements DtoInterface<SearchRequestDto> {
   /**
-   * Default search page.
+   * User's search query
+   */
+  private String query;
+
+  /**
+   * User's languageCode
+   */
+  private String clientLanguageCode;
+
+  /**
+   * Search page number.
+   * 
+   * This attribute controls the search results range the user is requesting
+   * to see. Value {@link LightConstants#FIRST_SEARCH_PAGE_NUMBER} means the results 1 to 10,
+   * {@link LightConstants#FIRST_SEARCH_PAGE_NUMBER}+1 means results 11 to 20, ...
    * 
    * Friendly reminder: This Dto is constructed through a builder or through QueryUtils. So it is
    * important to make sure that through both ways if page is not defined it must be set to this
@@ -36,15 +51,14 @@ public class SearchRequestDto implements DtoInterface<SearchRequestDto> {
    * 
    * TODO(waltercacau) : move search under third_party.
    */
-  private static final int DEFAULT_PAGE = 1;
-
-  String query;
-  int page = DEFAULT_PAGE;
+  // TODO(waltercacau): Check with arjun about renaming this variable (issue 39002)
+  private int page = LightConstants.FIRST_SEARCH_PAGE_NUMBER;
 
   @Override
   public SearchRequestDto validate() {
     checkState(page > 0, "Page number need to be greater then 0");
     checkNotBlank(query, "query");
+    checkNotBlank(clientLanguageCode, "clientLanguageCode");
     return this;
   }
 
@@ -74,12 +88,26 @@ public class SearchRequestDto implements DtoInterface<SearchRequestDto> {
     this.page = page;
   }
 
+  public String getClientLanguageCode() {
+    return clientLanguageCode;
+  }
+
+  public void setClientLanguageCode(String clientLanguageCode) {
+    this.clientLanguageCode = clientLanguageCode;
+  }
+
   public static class Builder {
-    private int page = DEFAULT_PAGE;
     private String query;
+    private String clientLanguageCode;
+    private int page = LightConstants.FIRST_SEARCH_PAGE_NUMBER;
 
     public Builder query(String query) {
       this.query = query;
+      return this;
+    }
+
+    public Builder clientLanguageCode(String clientLanguageCode) {
+      this.clientLanguageCode = clientLanguageCode;
       return this;
     }
 
@@ -97,6 +125,7 @@ public class SearchRequestDto implements DtoInterface<SearchRequestDto> {
   @SuppressWarnings("synthetic-access")
   private SearchRequestDto(Builder builder) {
     this.query = builder.query;
+    this.clientLanguageCode = builder.clientLanguageCode;
     this.page = builder.page;
   }
 

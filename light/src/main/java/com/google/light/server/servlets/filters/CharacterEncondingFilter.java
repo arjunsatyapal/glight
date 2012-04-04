@@ -32,6 +32,9 @@ import com.google.inject.Singleton;
  * 
  * Currently it sets to UTF-8 by default.
  * 
+ * TODO(waltercacau): Remove this filter and set charset in a better place.
+ * Eg. the servlet's or while generating the response pojos.
+ * 
  * @author Walter Cacau
  */
 @Singleton
@@ -49,6 +52,7 @@ public class CharacterEncondingFilter implements Filter {
   }
 
   @Override
-  public void init(FilterConfig config) throws ServletException {}
+  public void init(FilterConfig config) throws ServletException {
+  }
 
 }

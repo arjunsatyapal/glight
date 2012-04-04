@@ -976,6 +976,12 @@
                 We try to mimic the same structure of the project baseDir, so our
                 configurations for the dojoLoader can be the same regardless of which tool
                 we are using (jasmine:bdd, jasmine:test or JSTestDriver).
+                
+                Actually, only the test and core files (test enviroment and dojo loader) will be
+                loaded from ${project.basedir}/target/jasmine, because testConfig.js configures
+                dojo load to load stuff directly from ${project.basedir}. This means
+                we are mirror everything from theses folder inside target/jasmine, when
+                we would only need to mirror only some of them.
               -->
               <srcDirectoryName>src/main/javascript</srcDirectoryName>
               <specDirectoryName>src/test/javascript</specDirectoryName>

@@ -18,8 +18,12 @@ package com.google.light.testingutils;
 import static com.google.light.testingutils.TestResourcePaths.GOOGLE_TOKEN_INFO_JSON;
 import static com.google.light.testingutils.TestingUtils.getResourceAsString;
 
+import java.util.ArrayList;
 
 import com.google.api.client.http.GenericUrl;
+import com.google.common.collect.Lists;
+import com.google.light.server.manager.implementation.SearchManagerGSSImplITCase;
+import com.google.light.server.manager.implementation.SearchManagerGSSImplTest;
 
 /**
  * Some constants for Testing Purposes.
@@ -44,10 +48,24 @@ public class TestingConstants {
   public static final long DEFAULT_TOKEN_EXPIRES_IN_MILLIS = 1332491059527L;
   public static final long DEFAULT_PERSON_ID = 1234L;
   public static final String DEFAULT_TOKEN_INFO = getResourceAsString(GOOGLE_TOKEN_INFO_JSON.get());
-  
+
   /**
    * Following values are default values for Consumer Credentials.
    */
   public static final String DEFAULT_CLIENT_ID = "client_id";
   public static final String DEFAULT_CLIENT_SECRET = "client_secret";
+
+  /**
+   * Tests constants for {@link SearchManagerGSSImplTest} and {@link SearchManagerGSSImplITCase}
+   */
+  public static final ArrayList<String> SAMPLE_GSS_LIST_QUERIES = Lists.newArrayList(
+      "addition_query",
+      "addxition_query");
+  public static final ArrayList<String> SAMPLE_GSS_LIST_INPUTS = Lists.newArrayList(
+      TestResourcePaths.SEARCH_GSS_ADDITION_QUERY_INPUT_XML.get(),
+      TestResourcePaths.SEARCH_GSS_ADDXITION_QUERY_INPUT_XML.get());
+  public static final ArrayList<String> SAMPLE_GSS_LIST_OUTPUTS = Lists.newArrayList(
+      TestResourcePaths.SEARCH_GSS_ADDITION_QUERY_OUTPUT_JSON.get(),
+      TestResourcePaths.SEARCH_GSS_ADDXITION_QUERY_OUTPUT_JSON.get());
+
 }

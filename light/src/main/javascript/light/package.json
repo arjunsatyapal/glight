@@ -1,5 +1,5 @@
 {
-	"name": "light",
-	"version": 1.0,
-	"dojoBuild": "light.profile.js"
+  "name": "light",
+  "version": 1.0,
+  "dojoBuild": "light.profile.js"
 }

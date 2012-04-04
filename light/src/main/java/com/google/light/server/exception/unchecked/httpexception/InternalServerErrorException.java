@@ -25,6 +25,6 @@ import com.google.light.server.constants.HttpStatusCodesEnum;
 @SuppressWarnings("serial")
 public class InternalServerErrorException extends LightHttpException {
   public InternalServerErrorException(String errString) {
-    super(HttpStatusCodesEnum.BAD_REQUEST, errString);
+    super(HttpStatusCodesEnum.INTERNAL_SERVER_ERROR, errString);
   }
 }

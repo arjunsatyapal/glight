@@ -14,14 +14,17 @@
  * the License.
  */
 define(['dojo/_base/declare', 'light/views/TemplatedLightView', 
-        'dijit/_WidgetsInTemplateMixin', 'dojo/text!./SearchBarView.html',
+        'dojo/i18n!light/nls/SearchPageMessages',
+        'dijit/_WidgetsInTemplateMixin',
+        'dojo/text!light/templates/SearchBarTemplate.html',
         'dojo/_base/event', 
         'dijit/form/TextBox', 'dijit/form/Button', 'dijit/form/Form'],
-        function(declare, TemplatedLightView,
+        function(declare, TemplatedLightView, messages,
                 _WidgetsInTemplateMixin, template, eventUtil) {
     return declare('light.views.SearchBarView',
             [TemplatedLightView, _WidgetsInTemplateMixin], {
         templateString: template,
+        messages: messages,
         
         _onSubmit: function(evt) {
           this._controller.onSubmit();

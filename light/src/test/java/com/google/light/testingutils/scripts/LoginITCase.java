@@ -29,25 +29,29 @@ import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-import java.io.InputStream;
-
-import java.net.URL;
-
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.List;
+import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
-import com.google.common.io.ByteStreams;
-
-import com.google.api.client.http.HttpResponse;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebDriver;
 
 import com.google.api.client.http.GenericUrl;
-
 import com.google.api.client.http.HttpRequest;
-
-import com.google.api.client.http.javanet.NetHttpTransport;
-
+import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.HttpTransport;
-
+import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.common.collect.Lists;
+import com.google.common.io.ByteStreams;
 import com.google.light.server.constants.LightEnvEnum;
 import com.google.light.server.constants.OAuth2ProviderEnum;
 import com.google.light.server.constants.OAuth2ProviderService;
@@ -55,19 +59,6 @@ import com.google.light.server.constants.RequestParamKeyEnum;
 import com.google.light.server.servlets.path.ServletPathEnum;
 import com.google.light.testingutils.GaeTestingUtils;
 import com.google.light.testingutils.SeleniumUtils;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.List;
-import java.util.Properties;
-import java.util.concurrent.TimeUnit;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.openqa.selenium.By;
-import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.WebDriver;
 
 public class LoginITCase {
   private WebDriver driver;

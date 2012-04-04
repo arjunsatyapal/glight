@@ -37,15 +37,19 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import com.google.common.collect.ImmutableMapBuilder;
-import com.google.light.server.constants.OAuth2ProviderService;
+import java.io.InputStream;
 import java.util.Map;
+
 import javax.servlet.http.HttpSession;
+
 import org.joda.time.DateTime;
 import org.junit.Test;
 import org.mockito.exceptions.verification.WantedButNotInvoked;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+
+import com.google.common.collect.ImmutableMapBuilder;
+import com.google.light.server.constants.OAuth2ProviderService;
 
 /**
  * Test for {@link LightUtils}.

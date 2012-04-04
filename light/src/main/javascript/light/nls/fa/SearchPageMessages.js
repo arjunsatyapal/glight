@@ -13,21 +13,15 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-define(['dojo/_base/declare', 'dojo/hash'], function(declare, dojoHash) {
-  /**
-   * Small wrapper around dojo's hash functionality to enable better testing
-   * @class
-   * @name light.URLHashUtil
-   */
-  return {
-    /** @lends light.URLHashUtil */
-
-    get: function() {
-      return dojoHash();
-    },
-
-    set: function(hash) {
-      return dojoHash(hash);
-    }
-  };
+/**
+ * Calling window.define instead of define because of dojo build bug.
+ * @see http://bugs.dojotoolkit.org/ticket/15057
+ */
+window.define({
+  searchButtonLabel: "جستجو",
+  didYouMeanBox: "آیا منظور شما ${suggestion}",
+  noResults: "هیچ نتیجه ای برای این جستجو",
+  pageInfo: "صفحه ${page}",
+  next: "بعد",
+  previous: "قبلی",
 });

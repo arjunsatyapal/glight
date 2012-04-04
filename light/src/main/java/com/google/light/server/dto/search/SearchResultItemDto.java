@@ -82,11 +82,20 @@ public class SearchResultItemDto implements DtoInterface<SearchResultItemDto> {
 
   @Override
   public SearchResultItemDto validate() {
-    // TODO(waltercacau): Sanitize the HTML received.
     checkNotNull(title);
     checkNotNull(description);
     // TODO(waltercacau): Add an URL validation here
     checkNotNull(link);
+    return this;
+  }
+  
+  /**
+   * Sanitizes the HTML content in this Dto.
+   * TODO(waltercacau): Implement this method.
+   * 
+   * @return
+   */
+  public SearchResultItemDto sanitize() {
     return this;
   }
 
@@ -110,13 +119,11 @@ public class SearchResultItemDto implements DtoInterface<SearchResultItemDto> {
       return this;
     }
 
-    @SuppressWarnings("synthetic-access")
     public SearchResultItemDto build() {
-      return new SearchResultItemDto(this).validate();
+      return new SearchResultItemDto(this).validate().sanitize();
     }
   }
 
-  @SuppressWarnings("synthetic-access")
   private SearchResultItemDto(Builder builder) {
     this.title = builder.title;
     this.description = builder.description;
