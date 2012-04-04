@@ -70,9 +70,9 @@ define(['dojo/_base/connect', 'dojo/_base/declare', 'light/utils/URLHashUtils',
      * Set's the hash taking care of avoiding this router
      * to handle this hashChange.
      */
-    _setHash: function(hash) {
+    _setHash: function(hash, replaceCurrentInHistory) {
       this._skipHash = hash;
-      hashUtil.set(hash);
+      hashUtil.set(hash, replaceCurrentInHistory);
     },
 
     /**
@@ -120,7 +120,8 @@ define(['dojo/_base/connect', 'dojo/_base/declare', 'light/utils/URLHashUtils',
         connect.publish(SearchEventsEnum.SEARCH_STATE_CHANGED,
                 [searchState, this]);
       } else {
-        this._setHash(SearchRouter.searchStateToHash(this._lastSearchState));
+        this._setHash(SearchRouter.searchStateToHash(this._lastSearchState),
+                      true /* replaces the current wrong one in browser history */);
       }
     }
   });

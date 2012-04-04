@@ -82,15 +82,28 @@ define(['dojo/_base/connect', 'dojo/_base/declare', 'light/utils/URLHashUtils',
     });
 
     describe('_setHash when called with a hash', function() {
-      it('change the pages hash and mark that we shouldn\'t ' +
-         'handle this hashchange event', function() {
-        var hashUtilSet = this.stub(hashUtil, 'set');
+      describe('and with second argument true', function() {
+        it('change the page hash and mark that we shouldn\'t ' +
+           'handle this hashchange event', function() {
+          var hashUtilSet = this.stub(hashUtil, 'set');
 
-        router._setHash(SAMPLE_HASH);
+          router._setHash(SAMPLE_HASH, true);
 
-        expect(router._skipHash).toBe(SAMPLE_HASH);
-        expect(hashUtilSet).toHaveBeenCalledWith(SAMPLE_HASH);
+          expect(router._skipHash).toBe(SAMPLE_HASH);
+          expect(hashUtilSet).toHaveBeenCalledWith(SAMPLE_HASH, true);
+        });
       });
+      describe('without second argument', function() {
+        it('change the page hash and mark that we shouldn\'t ' +
+           'handle this hashchange event', function() {
+          var hashUtilSet = this.stub(hashUtil, 'set');
+
+          router._setHash(SAMPLE_HASH);
+
+          expect(router._skipHash).toBe(SAMPLE_HASH);
+          expect(hashUtilSet).toHaveBeenCalledWith(SAMPLE_HASH, undefined);
+        });
+      })
     });
 
     describe('_shouldSkipThisHashChange', function() {
@@ -188,7 +201,7 @@ define(['dojo/_base/connect', 'dojo/_base/declare', 'light/utils/URLHashUtils',
 
           router._onHashChange(SAMPLE_HASH);
 
-          expect(_setHashStub).toHaveBeenCalledWith(SAMPLE_HASH_ALTERNATIVE);
+          expect(_setHashStub).toHaveBeenCalledWith(SAMPLE_HASH_ALTERNATIVE , true);
           expect(publishStub).not.toHaveBeenCalled();
         });
       });

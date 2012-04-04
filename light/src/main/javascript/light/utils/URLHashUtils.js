@@ -26,8 +26,8 @@ define(['dojo/_base/declare', 'dojo/hash'], function(declare, dojoHash) {
       return dojoHash();
     },
 
-    set: function(hash) {
-      return dojoHash(hash);
+    set: function(hash, replaceCurrentInHistory) {
+      return dojoHash(hash, replaceCurrentInHistory);
     }
   };
 });

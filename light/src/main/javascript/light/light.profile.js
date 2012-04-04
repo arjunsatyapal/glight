@@ -36,6 +36,9 @@ var profile = (function() {
 
   return {
 
+    // Supported locales
+    localeList: ['en-us', 'pt-br', 'fa'],
+
     // Packages as seen by the build system
     packages: [{
       name: 'light',
@@ -158,8 +161,7 @@ var profile = (function() {
           'light/views/AbstractLightView',
           'light/controllers/AbstractLightController',
           'light/stores/AbstractLightStore',
-          'light/views/TemplatedLightView',
-          'light/views/RegisterFormView'
+          'light/views/TemplatedLightView'
         ],
         exclude: ['light/build/loader']
       },
