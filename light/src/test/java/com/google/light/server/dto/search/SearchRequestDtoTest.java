@@ -23,7 +23,7 @@ import org.junit.Test;
 
 import com.google.common.collect.ImmutableMapBuilder;
 import com.google.light.server.constants.LightConstants;
-import com.google.light.server.dto.AbstractDtoToPersistenceTest;
+import com.google.light.server.dto.AbstractDtoTest;
 import com.google.light.server.dto.search.SearchRequestDto.Builder;
 import com.google.light.server.exception.unchecked.BlankStringException;
 import com.google.light.server.utils.QueryUtils;
@@ -34,7 +34,7 @@ import com.google.light.testingutils.TestingUtils;
  * 
  * @author waltercacau
  */
-public class SearchRequestDtoTest extends AbstractDtoToPersistenceTest {
+public class SearchRequestDtoTest extends AbstractDtoTest {
 
   private static final String SAMPLE_LANGUAGE_CODE = "en";
   /**
@@ -44,6 +44,9 @@ public class SearchRequestDtoTest extends AbstractDtoToPersistenceTest {
   private static final int SAMPLE_PAGE = 3;
   private static final String SAMPLE_QUERY = "Addition";
 
+  /**
+   * Test constructing this Dto through QueryUtils.
+   */
   @Test
   public void testConstructThroughQueryUtils() {
     // Just positive tests. We can count with enough negative tests in QueryUtilsTest
@@ -153,11 +156,6 @@ public class SearchRequestDtoTest extends AbstractDtoToPersistenceTest {
     } catch (UnsupportedOperationException e) {
       // expected.
     }
-  }
-
-  @Override
-  public void test_toPersistenceEntity() throws Exception {
-    // Not persisted
   }
 
   @Override

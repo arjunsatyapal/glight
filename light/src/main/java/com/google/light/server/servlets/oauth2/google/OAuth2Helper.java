@@ -73,9 +73,11 @@ public interface OAuth2Helper {
    * </pre>
    * 
    * @param cbUrl : Url where OAuth2 Provider should redirect the user.
+   * @param state : A string which will be echoed by the OAuth2 server in a query string parameter
+   *          with the same name.
    * @return
    */
-  public String getOAuth2RedirectUri(String cbUrl);
+  public String getOAuth2RedirectUri(String cbUrl, String state);
 
   /**
    * Method to get complete OAuth2 Redirect URI for the OAuth2 Provider, ensuring that user
@@ -102,9 +104,11 @@ public interface OAuth2Helper {
    * </pre>
    * 
    * @param cbUrl
+   * @param state : A string which will be echoed by the OAuth2 server in a query string parameter
+   *          with the same name.
    * @return
    */
-  public String getOAuth2RedirectUriWithPrompt(String cbUrl);
+  public String getOAuth2RedirectUriWithPrompt(String cbUrl, String state);
 
   /**
    * Returns HttpTransport.

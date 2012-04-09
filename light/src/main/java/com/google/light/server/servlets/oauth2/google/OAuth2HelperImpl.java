@@ -50,7 +50,7 @@ public class OAuth2HelperImpl implements OAuth2Helper {
   private OAuth2ConsumerCredentialManager consumerCredentialManager;
   private OAuth2OwnerTokenManager ownerTokenManager;
   private OAuth2ProviderService providerService;
-  
+
   @Inject
   public OAuth2HelperImpl(OAuth2ConsumerCredentialManagerFactory consumerCredentialManagerFactory,
       OAuth2OwnerTokenManagerFactory ownerTokenManagerFactory,
@@ -62,9 +62,9 @@ public class OAuth2HelperImpl implements OAuth2Helper {
     this.jsonFactory = checkNotNull(jsonFactory, "jsonFactory");
     httpTransport.createRequestFactory();
     this.consumerCredentialManager = checkNotNull(
-            consumerCredentialManagerFactory.create(providerService.getProvider()),
-            "consumerCredentialManager");
-    
+        consumerCredentialManagerFactory.create(providerService.getProvider()),
+        "consumerCredentialManager");
+
     this.ownerTokenManager = checkNotNull(ownerTokenManagerFactory.create(this.providerService));
   }
 
@@ -118,22 +118,30 @@ public class OAuth2HelperImpl implements OAuth2Helper {
     return ownerTokenManager.getInfoByAccessToken(accessToken);
   }
 
-
   /**
    * {@inheritDoc}
    */
   @Override
-  public String getOAuth2RedirectUri(String cbUrl) {
-    return getAuthorizationCodeRequestUrlForOfflineAccess(cbUrl).build();
+  public String getOAuth2RedirectUri(String cbUrl, String state) {
+    AuthorizationCodeRequestUrl codeRequestUrlBuilder =
+        getAuthorizationCodeRequestUrlForOfflineAccess(cbUrl);
+
+    if (state != null)
+      codeRequestUrlBuilder.setState(state);
+
+    return codeRequestUrlBuilder.build();
   }
 
   /**
    * {@inheritDoc}
    */
   @Override
-  public String getOAuth2RedirectUriWithPrompt(String cbUrl) {
+  public String getOAuth2RedirectUriWithPrompt(String cbUrl, String state) {
     AuthorizationCodeRequestUrl codeRequestUrlBuilder =
         getAuthorizationCodeRequestUrlForOfflineAccess(cbUrl);
+
+    if (state != null)
+      codeRequestUrlBuilder.setState(state);
 
     /*
      * approval_prompt is forced, so that refreshToken is returned irrespective of user visiting

@@ -54,7 +54,7 @@ public class GoogleDocAuthServlet extends HttpServlet {
     
     OAuth2Helper instance = factory.create(GOOGLE_DOC);
 
-    String actualRedirectUrl = instance.getOAuth2RedirectUri(callbackUrl);
+    String actualRedirectUrl = instance.getOAuth2RedirectUri(callbackUrl, null);
     logger.info("Redirecting to : " + actualRedirectUrl);
     response.sendRedirect(actualRedirectUrl);
   }

@@ -163,7 +163,7 @@ public class GoogleDocAuthCallbackServlet extends HttpServlet {
      * Will reinitialize session once Light has refreshToken. So we dont care whether
      * request.getSession() returns existing session or new session.
      */
-    response.sendRedirect(helperInstance.getOAuth2RedirectUriWithPrompt(lightCbUrl));
+    response.sendRedirect(helperInstance.getOAuth2RedirectUriWithPrompt(lightCbUrl, null));
     return;
   }
 

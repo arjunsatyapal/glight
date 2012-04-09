@@ -33,7 +33,9 @@ public enum TestResourcePaths {
    * Values inside this file are one's that are pulled from Google. So if some one changes values,
    * then those things will have to be fixed.
    */
-  GOOGLE_USER_INFO_JSON("/login/oauth2/google/google_user_info.json");
+  GOOGLE_USER_INFO_JSON("/login/oauth2/google/google_user_info.json"),
+  
+  LOGIN_STATE_JSON("/login/login_state.json");
 
 
   private String path;

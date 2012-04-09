@@ -24,14 +24,14 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.google.common.collect.Lists;
-import com.google.light.server.dto.AbstractDtoToPersistenceTest;
+import com.google.light.server.dto.AbstractDtoTest;
 
 /**
  * Test for {@link SearchResultDto}
  * 
  * @author waltercacau
  */
-public class SearchResultDtoTest extends AbstractDtoToPersistenceTest {
+public class SearchResultDtoTest extends AbstractDtoTest {
   private static final String SAMPLE_SUGGESTION = "suggestion";
   private static final String SAMPLE_SUGGESTION_QUERY = "suggestion query";
 
@@ -119,11 +119,6 @@ public class SearchResultDtoTest extends AbstractDtoToPersistenceTest {
   @Override
   public void test_toJson() throws Exception {
     // TODO(waltercacau): Implement this test
-  }
-
-  @Override
-  public void test_toPersistenceEntity() throws Exception {
-    // Not persisted
   }
 
   @Override

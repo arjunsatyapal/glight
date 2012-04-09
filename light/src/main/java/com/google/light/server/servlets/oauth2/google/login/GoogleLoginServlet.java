@@ -4,17 +4,21 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.constants.OAuth2ProviderService.GOOGLE_LOGIN;
 import static com.google.light.server.servlets.path.ServletPathEnum.OAUTH2_GOOGLE_LOGIN_CB;
 
-import com.google.inject.Inject;
-import com.google.inject.Injector;
-import com.google.light.server.servlets.oauth2.google.OAuth2Helper;
-import com.google.light.server.servlets.oauth2.google.OAuth2HelperFactoryInterface;
-import com.google.light.server.utils.GuiceUtils;
-import com.google.light.server.utils.ServletUtils;
 import java.io.IOException;
 import java.util.logging.Logger;
+
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import com.google.inject.Inject;
+import com.google.inject.Injector;
+import com.google.light.server.dto.LoginStateDto;
+import com.google.light.server.servlets.oauth2.google.OAuth2Helper;
+import com.google.light.server.servlets.oauth2.google.OAuth2HelperFactoryInterface;
+import com.google.light.server.utils.GuiceUtils;
+import com.google.light.server.utils.QueryUtils;
+import com.google.light.server.utils.ServletUtils;
 
 /**
  * Servlet to handle Google Login.
@@ -50,11 +54,13 @@ public class GoogleLoginServlet extends HttpServlet {
       throws IOException {
     // Since we are logging in, so invalidate existing session.
     request.getSession().invalidate();
+    
     String callbackUrl = ServletUtils.getServletUrl(request, OAUTH2_GOOGLE_LOGIN_CB);
+    String state = QueryUtils.getValidDto(request, LoginStateDto.class).toJson();
     
     OAuth2Helper instance = factory.create(GOOGLE_LOGIN);
     
-    String actualRedirectUrl = instance.getOAuth2RedirectUri(callbackUrl); 
+    String actualRedirectUrl = instance.getOAuth2RedirectUri(callbackUrl, state); 
         
     logger.info("Redirecting to : " + actualRedirectUrl);
     response.sendRedirect(actualRedirectUrl);

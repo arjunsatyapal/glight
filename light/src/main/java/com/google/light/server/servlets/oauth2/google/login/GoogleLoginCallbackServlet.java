@@ -18,6 +18,7 @@ import com.google.api.client.auth.oauth2.TokenResponse;
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import com.google.light.server.dto.LoginStateDto;
 import com.google.light.server.dto.oauth2.owner.OAuth2OwnerTokenDto;
 import com.google.light.server.dto.person.PersonDto;
 import com.google.light.server.exception.unchecked.GoogleAuthorizationException;
@@ -33,14 +34,15 @@ import com.google.light.server.servlets.oauth2.google.pojo.GoogleLoginTokenInfo;
 import com.google.light.server.servlets.oauth2.google.pojo.GoogleUserInfo;
 import com.google.light.server.utils.GaeUtils;
 import com.google.light.server.utils.GuiceUtils;
+import com.google.light.server.utils.JsonUtils;
 import com.google.light.server.utils.ServletUtils;
 
 /**
  * Servlet called by Google during Google Login flow.
  * 
  * TODO(arjuns): Add test for this.
- *  TODO(arjuns): Add code for revoke token.
- *  TODO(arjuns): Move createPerson inside personManager
+ * TODO(arjuns): Add code for revoke token.
+ * TODO(arjuns): Move createPerson inside personManager
  * 
  * @author arjuns@google.com (Arjun Satyapal)
  */
@@ -48,10 +50,10 @@ import com.google.light.server.utils.ServletUtils;
 public class GoogleLoginCallbackServlet extends HttpServlet {
   private Injector injector;
 
-  private OAuth2HelperFactoryInterface helperFactory; 
+  private OAuth2HelperFactoryInterface helperFactory;
   private OAuth2Helper helperInstance;
-  
-  private OAuth2OwnerTokenManagerFactory tokenManagerFactory; 
+
+  private OAuth2OwnerTokenManagerFactory tokenManagerFactory;
   private OAuth2OwnerTokenManager googLoginTokenManager;
 
   private String lightCbUrl = null;
@@ -82,6 +84,8 @@ public class GoogleLoginCallbackServlet extends HttpServlet {
     AuthorizationCodeResponseUrl authorizationCodeResponseUrl =
         new AuthorizationCodeResponseUrl(ServletUtils.getRequestUriWithQueryParams(request));
     String code = authorizationCodeResponseUrl.getCode();
+    LoginStateDto state =
+        JsonUtils.getDto(authorizationCodeResponseUrl.getState(), LoginStateDto.class).validate();
 
     // TODO(arjun): Move error before the code == null.
     if (code == null) {
@@ -143,7 +147,6 @@ public class GoogleLoginCallbackServlet extends HttpServlet {
 
       // Update session with personId which is not available.
       prepareSessionAfterLogin(request, personId, providerUserId, email);
-      
 
       boolean newRefreshToken = !Strings.isNullOrEmpty(tokenResponse.getRefreshToken());
 
@@ -166,7 +169,7 @@ public class GoogleLoginCallbackServlet extends HttpServlet {
        */
       boolean forceLoginWithPrompt = !newRefreshToken && createNewPerson;
       if (forceLoginWithPrompt) {
-        forceLoginWithPrompt(request, response);
+        forceLoginWithPrompt(request, response, state);
         return;
       }
 
@@ -180,7 +183,7 @@ public class GoogleLoginCallbackServlet extends HttpServlet {
 
       if (updatePersistedTokenDetails) {
         if (Strings.isNullOrEmpty(refreshToken)) {
-          forceLoginWithPrompt(request, response);
+          forceLoginWithPrompt(request, response, state);
           return;
         }
         updateOwnerTokenEntity(personId, providerUserId, refreshToken, tokenResponse);
@@ -192,11 +195,17 @@ public class GoogleLoginCallbackServlet extends HttpServlet {
        */
       prepareSessionAfterLogin(request, personId, providerUserId, email);
 
-      // TODO(arjuns): Add handler for redirectUri.
-      if (!GaeUtils.isProductionServer()) {
-        response.sendRedirect(SESSION.get());
+      String redirectPath = state.getRedirectPath();
+      if (redirectPath == null) {
+        if (!GaeUtils.isProductionServer()) {
+          response.sendRedirect(SESSION.get());
+        } else {
+          // TODO(waltercacau): Eliminate this and redirect to Light's main page
+          response.getWriter().println("success");
+        }
       } else {
-        response.getWriter().println("success");
+        // TODO(waltercacau): Add a integration test that covers this flow.
+        response.sendRedirect(redirectPath);
       }
     }
   }
@@ -249,14 +258,17 @@ public class GoogleLoginCallbackServlet extends HttpServlet {
       TokenResponse tokenResponse) throws IOException {
     GoogleLoginTokenInfo googTokenInfo = helperInstance.getTokenInfo(
         tokenResponse.getAccessToken(), GoogleLoginTokenInfo.class);
-    OAuth2OwnerTokenDto tokenDto = OAuth2OwnerTokenDto.getOAuth2OwnerTokenDto(
-        personId, refreshToken, tokenResponse, GOOGLE_LOGIN, providerUserId, googTokenInfo.toJson());
+    OAuth2OwnerTokenDto tokenDto =
+        OAuth2OwnerTokenDto.getOAuth2OwnerTokenDto(
+            personId, refreshToken, tokenResponse, GOOGLE_LOGIN, providerUserId,
+            googTokenInfo.toJson());
 
     googLoginTokenManager.put(tokenDto.toPersistenceEntity());
   }
 
   /**
    * TODO(arjuns): Move this to {@link PersonManager#createPerson(PersonEntity)}.
+   * 
    * @param tokenResponse
    * @return
    * @throws IOException
@@ -326,16 +338,18 @@ public class GoogleLoginCallbackServlet extends HttpServlet {
   /**
    * @param request
    * @param response
+   * @param state
    * @throws IOException
    */
   private void forceLoginWithPrompt(HttpServletRequest request,
-      HttpServletResponse response) throws IOException {
+      HttpServletResponse response, LoginStateDto state) throws IOException {
     /*
      * Will reinitialize session once Light has refreshToken. So we dont care whether
      * request.getSession() returns existing session or new session.
      */
     request.getSession().invalidate();
-    response.sendRedirect(helperInstance.getOAuth2RedirectUriWithPrompt(lightCbUrl));
+    response
+        .sendRedirect(helperInstance.getOAuth2RedirectUriWithPrompt(lightCbUrl, state.toJson()));
     return;
   }
 

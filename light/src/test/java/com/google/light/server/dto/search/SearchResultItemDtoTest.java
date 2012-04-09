@@ -20,14 +20,14 @@ import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
-import com.google.light.server.dto.AbstractDtoToPersistenceTest;
+import com.google.light.server.dto.AbstractDtoTest;
 
 /**
  * Test for {@link SearchResultItemDto}
  * 
  * @author waltercacau
  */
-public class SearchResultItemDtoTest extends AbstractDtoToPersistenceTest {
+public class SearchResultItemDtoTest extends AbstractDtoTest {
   private final String SAMPLE_TITLE = "Some <b>cool</b> title";
   private final String SAMPLE_DESCRIPTION = "Some <b>cool</b> description";
   private final String SAMPLE_LINK = "http://somecooloer.com";
@@ -84,11 +84,6 @@ public class SearchResultItemDtoTest extends AbstractDtoToPersistenceTest {
     } catch (UnsupportedOperationException e) {
       // expected.
     }
-  }
-
-  @Override
-  public void test_toPersistenceEntity() throws Exception {
-    // Not persisted
   }
 
   @Override
