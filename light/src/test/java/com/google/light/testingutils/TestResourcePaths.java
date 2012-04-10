@@ -34,9 +34,9 @@ public enum TestResourcePaths {
    * then those things will have to be fixed.
    */
   GOOGLE_USER_INFO_JSON("/login/oauth2/google/google_user_info.json"),
-  
-  LOGIN_STATE_JSON("/login/login_state.json");
 
+  LOGIN_STATE_JSON("/login/login_state.json"),
+  JS_VARIABLES_PRELOAD_JSON("/js_variables_preload.json");
 
   private String path;
 

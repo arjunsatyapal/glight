@@ -19,36 +19,37 @@ import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
 import com.google.light.server.exception.unchecked.httpexception.UnsupportedMediaTypeException;
 
-
 /**
  * Enum for encapsulating Content Type.
  * 
  * TODO(arjuns): Add encoding here.
+ * 
  * @author Arjun Satyapal
  */
 public enum ContentTypeEnum {
   APPLICATION_JSON("application/json"),
   APPLICATION_XML("application/xml"),
   TEXT_HTML("text/html"),
-  TEXT_PLAIN("text/plain");
-  
+  TEXT_PLAIN("text/plain"),
+  TEXT_JAVASCRIPT("text/javascript");
+
   private String type;
-  
+
   private ContentTypeEnum(String type) {
     this.type = checkNotBlank(type, "type");
   }
-  
+
   public String get() {
     return type;
   }
-  
+
   public static ContentTypeEnum getContentTypeByString(String type) {
     for (ContentTypeEnum curr : ContentTypeEnum.values()) {
       if (curr.get().equals(type)) {
         return curr;
       }
     }
-    
+
     throw new UnsupportedMediaTypeException("Invalid ContentType : " + type);
   }
 }

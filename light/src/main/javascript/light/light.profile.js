@@ -56,24 +56,37 @@ var profile = (function() {
 
     basePath: '..',
 
-    // Dojo configuration for runtime
-    userConfig: {
-
-      // Packages as seen by the runtime enviroment
-      packages: [{
-        name: 'light',
-        location: '/js/light'
-      }, {
-        name: 'dojo',
-        location: '/js/dojo'
-      }, {
-        name: 'dijit',
-        location: '/js/dijit'
-      }, {
-        name: 'dojox',
-        location: '/js/dojox'
-      }]
-    },
+    /*
+     * Dojo configuration for runtime
+     * 
+     * It is encapsulated in a function so we can add some
+     * runtime logic.
+     */
+    userConfig: "("+function() {
+      
+      var config = {
+        // Packages as seen by the runtime enviroment
+        packages: [{
+          name: 'light',
+          location: '/js/light'
+        }, {
+          name: 'dojo',
+          location: '/js/dojo'
+        }, {
+          name: 'dijit',
+          location: '/js/dijit'
+        }, {
+          name: 'dojox',
+          location: '/js/dojox'
+        }]
+      };
+      if(lightPreload && lightPreload.locale) {
+        config.locale = lightPreload.locale;
+      }
+      
+      return config;
+      
+    }.toString()+")()",
 
     // Builds a new release.
     action: 'release',

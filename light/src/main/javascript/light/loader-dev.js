@@ -21,8 +21,7 @@ dojoConfig = {
   async: true,
   isDebug: true,
   waitSeconds: 2,
-  // Commented part used for testing i18n
-  // locale: 'pt-br',
+  locale: lightPreload.locale,
   has: {
     'light-dev': 1
   },

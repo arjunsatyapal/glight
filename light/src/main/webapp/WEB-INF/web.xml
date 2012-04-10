@@ -13,6 +13,7 @@
     <url-pattern>/login/*</url-pattern>
     <url-pattern>/logout/*</url-pattern>
     <url-pattern>/oauth2/*</url-pattern>
+    <url-pattern>/preload</url-pattern>
     <url-pattern>/test/*</url-pattern>
   </filter-mapping>
 

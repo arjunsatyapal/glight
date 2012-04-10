@@ -41,7 +41,7 @@ public class ContentTypeEnumTest implements EnumTestInterface {
   @Test
   @Override
   public void test_count() {
-    assertEquals("Update test_getContentTypeByString as required.", 4,
+    assertEquals("Update test_getContentTypeByString as required.", 5,
         ContentTypeEnum.values().length);
   }
 
@@ -55,6 +55,7 @@ public class ContentTypeEnumTest implements EnumTestInterface {
         .put("application/xml", APPLICATION_XML)
         .put("text/html", TEXT_HTML)
         .put("text/plain", TEXT_PLAIN)
+        .put("text/javascript", ContentTypeEnum.TEXT_JAVASCRIPT)
         .build();
 
     for (String curr : map.keySet()) {

@@ -18,6 +18,7 @@ import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import javax.servlet.http.HttpServlet;
 
 import com.google.light.server.exception.unchecked.httpexception.NotFoundException;
+import com.google.light.server.servlets.JSVariablesPreloadServlet;
 import com.google.light.server.servlets.admin.ConfigServlet;
 import com.google.light.server.servlets.admin.OAuth2ConsumerCredentialServlet;
 import com.google.light.server.servlets.login.LoginServlet;
@@ -45,11 +46,13 @@ import com.google.light.server.servlets.test.oauth2.login.FakeLoginServlet;
 public enum ServletPathEnum {
   // TODO(arjuns): Add regex checks here.
   // TODO(arjuns) : Find a way to end URLs without /.
-  
+
   PERSON(PersonServlet.class, "/api/person",
          true, false, false),
   SEARCH(SearchServlet.class, "/api/search",
-                false, false, false),
+         false, false, false),
+  JS_VARIABLES_PRELOAD(JSVariablesPreloadServlet.class, "/preload",
+         false, false, false),
   LOGIN(LoginServlet.class, "/login",
         false, false, false),
   LOGOUT(LogoutServlet.class, "/logout",
@@ -79,7 +82,8 @@ public enum ServletPathEnum {
   // Some test servlets.
   FAKE_LOGIN(FakeLoginServlet.class, "/test/fakelogin",
              false, false, true),
-  TEST_CREDENTIAL_BACKUP_SERVLET(TestCredentialBackupServlet.class, "/test/admin/test_credential_backup",
+  TEST_CREDENTIAL_BACKUP_SERVLET(TestCredentialBackupServlet.class,
+                                 "/test/admin/test_credential_backup",
                                  false, false, true),
   TEST_WORKFLOW_SERVLETS(TestOAuth2WorkFlowServlet.class, "/test/test_oauth2_workflow",
                          false, false, true),

@@ -27,6 +27,7 @@ import com.google.light.server.servlets.pojo.ServletRequestPojo;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.JAXBException;
 
 /**
@@ -122,5 +123,16 @@ public class ServletUtils {
   
   // Utility Method
   private ServletUtils() {
+  }
+
+  /**
+   * Set's the response headers necessary to deactivate browsers caching.
+   * 
+   * @param resp
+   */
+  public static void avoidCaching(HttpServletResponse resp) {
+    resp.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); // HTTP 1.1
+    resp.setHeader("Pragma", "no-cache"); // HTTP 1.0
+    resp.setDateHeader("Expires", 0); // Proxies
   }
 }

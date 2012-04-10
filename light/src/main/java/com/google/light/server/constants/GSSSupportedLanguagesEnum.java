@@ -21,12 +21,12 @@ import static com.google.light.server.utils.LightPreconditions.*;
  * List of the supported language interfaces by GSS (Google Site Search).
  * 
  * This enum only show languages that are supported by Light's UI, although
- * GSS supports more.
+ * GSS supports more. See {@link SupportedLanguagesEnum}.
  * 
  * @author Walter Cacau
  * @see https://developers.google.com/custom-search/docs/xml_results?hl=en#interfaceLanguages
  */
-public enum GSSSupportedLanguageEnum {
+public enum GSSSupportedLanguagesEnum {
   ENGLISH("en"),
   PERSIAN("fa"),
   PORTUGUESE_BRAZIL("pt-BR"),
@@ -38,7 +38,7 @@ public enum GSSSupportedLanguageEnum {
   private String languageCode;
   private String languageCodeLowerCase;
 
-  GSSSupportedLanguageEnum(String languageCode) {
+  GSSSupportedLanguagesEnum(String languageCode) {
     this.languageCode = languageCode;
     this.languageCodeLowerCase = languageCode.toLowerCase();
   }
@@ -47,17 +47,15 @@ public enum GSSSupportedLanguageEnum {
    * Get's the enum value for the closest (most similar) language
    * to the one given or {@link ENGLISH} if it can't figure out a better one.
    * 
-   * TODO(waltercacau): Add test for this.
-   * 
    * @param clientLanguageCode
    * @return
    */
-  public static GSSSupportedLanguageEnum getClosestGSSSupportedLanguage(String clientLanguageCode) {
+  public static GSSSupportedLanguagesEnum getClosestGSSSupportedLanguage(String clientLanguageCode) {
     checkNotBlank(clientLanguageCode, "clientLanguageCode");
     clientLanguageCode = clientLanguageCode.toLowerCase();
 
     // first we look for an exact match
-    for (GSSSupportedLanguageEnum curr : GSSSupportedLanguageEnum.values()) {
+    for (GSSSupportedLanguagesEnum curr : GSSSupportedLanguagesEnum.values()) {
       if (curr.languageCodeLowerCase.equals(clientLanguageCode))
         return curr;
     }
@@ -65,7 +63,7 @@ public enum GSSSupportedLanguageEnum {
     // Then we look for partial matches
     String prefix = clientLanguageCode.split("-")[0];
     String prefixWithDash = prefix + "-";
-    for (GSSSupportedLanguageEnum curr : GSSSupportedLanguageEnum.values()) {
+    for (GSSSupportedLanguagesEnum curr : GSSSupportedLanguagesEnum.values()) {
       if (curr.languageCodeLowerCase.equals(prefix)
           || curr.languageCodeLowerCase.startsWith(prefixWithDash))
         return curr;
