@@ -353,6 +353,14 @@
   </dependencies>
 
   <build>
+  	<!--
+  	  Changing the build directory for java classes to the war folder makes
+  	  eclipse maven plugin build and load classes from the same directory
+  	  where the test server will be running allowing to do hot swapping of
+  	  classes during development.
+  	-->
+  	<outputDirectory>${light.wardir}/WEB-INF/classes</outputDirectory>
+
     <extensions>
       <extension>
         <groupId>org.apache.maven.archetype</groupId>
