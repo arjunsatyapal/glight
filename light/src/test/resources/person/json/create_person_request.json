@@ -1,4 +1,5 @@
 {
   "firstName" : "first name",
-  "lastName" : "last name"
+  "lastName" : "last name",
+  "acceptedTos" : true
 }

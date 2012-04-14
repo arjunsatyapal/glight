@@ -45,13 +45,28 @@ define(['light/views/AbstractLightView', 'dojox/json/schema', 'dojo'],
     },
 
     _currentSpec: null,
-    
+
+    /**
+     * Validates the given object agains an json schema.
+     * @param {*} obj
+     * @param {Object} schema
+     * @see http://json-schema.org/
+     */
     validateSchema: function(obj, schema) {
-      if(!jsonSchema.validate(obj, schema).valid) {
-        throw new Error('Given object does not conform to schema' + 
+      if (!jsonSchema.validate(obj, schema).valid) {
+        throw new Error('Given object does not conform to schema' +
             (schema.description ? ' ' + schema.description : '') +
-            ': '+dojo.toJson(obj));
+            ': ' + dojo.toJson(obj));
       }
+    },
+
+    getEnumNames: function(_enum) {
+      var names = [];
+      for (var name in _enum) {
+        if (_enum.hasOwnProperty(name) && name.toUpperCase() == name)
+          names.push(name);
+      }
+      return names;
     }
 
   };

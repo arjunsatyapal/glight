@@ -13,9 +13,9 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-define(['dojo/_base/connect', 'dojo/_base/declare', 'light/utils/URLHashUtils',
+define(['dojo/_base/connect', 'dojo/_base/declare', 'light/utils/URLUtils',
         'dojo', 'light/enums/SearchEventsEnum', 'light/RegexCommon'],
-        function(connect, declare, hashUtil, dojo,
+        function(connect, declare, URLUtils, dojo,
                  SearchEventsEnum, RegexCommon) {
 
   /** @exports SearchRouter as light.SearchRouter */
@@ -63,7 +63,7 @@ define(['dojo/_base/connect', 'dojo/_base/declare', 'light/utils/URLHashUtils',
       connect.subscribe('/dojo/hashchange', this, this._onHashChange);
       connect.subscribe(SearchEventsEnum.SEARCH_STATE_CHANGED, this,
               this._onSearchStateChange);
-      this._onHashChange(hashUtil.get());
+      this._onHashChange(URLUtils.getHash());
     },
 
     /**
@@ -72,7 +72,7 @@ define(['dojo/_base/connect', 'dojo/_base/declare', 'light/utils/URLHashUtils',
      */
     _setHash: function(hash, replaceCurrentInHistory) {
       this._skipHash = hash;
-      hashUtil.set(hash, replaceCurrentInHistory);
+      URLUtils.setHash(hash, replaceCurrentInHistory);
     },
 
     /**
@@ -121,7 +121,8 @@ define(['dojo/_base/connect', 'dojo/_base/declare', 'light/utils/URLHashUtils',
                 [searchState, this]);
       } else {
         this._setHash(SearchRouter.searchStateToHash(this._lastSearchState),
-                      true /* replaces the current wrong one in browser history */);
+                      true
+                      /* replaces the current wrong one in browser history */);
       }
     }
   });

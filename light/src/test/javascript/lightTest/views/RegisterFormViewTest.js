@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-define(['light/views/RegisterFormView', 
+define(['light/views/RegisterFormView',
         'light/controllers/RegisterFormController', 'dojo/_base/event',
         'dojo/query', 'lightTest/robot'],
         function(RegisterFormView, RegisterFormController,
@@ -27,9 +27,9 @@ define(['light/views/RegisterFormView',
       view.setController(controller);
       robot.attach(view);
     });
-    
+
     describe('_onSubmit when called', function() {
-      it('should call controller.onSubmit' + 
+      it('should call controller.onSubmit' +
          'and stop event propagation', function() {
         this.stub(eventUtil, 'stop');
         var fakeEvent = {'fakeEvent': 'is fake!'};
@@ -65,6 +65,28 @@ define(['light/views/RegisterFormView',
           view._tosCheckbox.set('checked', true);
           expect(view._tosValidation()).toBeTruthy();
         });
+      });
+    });
+
+    describe('setData when called with some person data', function() {
+      it('should use it to populate the form', function() {
+        view.setData({
+          firstName: 'FirstName',
+          lastName: 'LastName'
+        });
+
+        expect(view._firstNameTextBox.get('value')).toBe('FirstName');
+        expect(view._lastNameTextBox.get('value')).toBe('LastName');
+      });
+    });
+
+    describe('warnError when called', function() {
+      it('should warn the user about a server error', function() {
+        this.stub(window, 'alert');
+
+        view.warnError();
+
+        expect(window.alert).toHaveBeenCalled();
       });
     });
 
@@ -105,7 +127,8 @@ define(['light/views/RegisterFormView',
         it('should return the current filled data', function() {
           expect(view.getData()).toEqual({
             firstName: 'FirstName',
-            lastName: 'LastName'
+            lastName: 'LastName',
+            acceptedTos: true
           });
         });
       });

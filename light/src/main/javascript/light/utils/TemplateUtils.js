@@ -18,6 +18,9 @@ define(['dojo/_base/declare', 'dojox/html/entities', 'dojo/string',
         function(declare, htmlEntities, string, domConstruct, lang) {
   /**
    * Some utilities for dealing with templates.
+   *
+   * TODO(waltercacau): add test for this class
+   *
    * @class
    * @name light.utils.TemplateUtils
    */

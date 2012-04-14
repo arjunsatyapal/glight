@@ -17,8 +17,10 @@ define(['light/views/RegisterFormView',
         'light/controllers/RegisterFormController',
         'light/stores/PersonStore', 'dojo/domReady!'],
         function(RegisterFormView, RegisterFormController, PersonStore) {
+  personStore = new PersonStore();
   var registerFormView = new RegisterFormView({}, 'registerForm');
-  var registerFormController = new RegisterFormController(new PersonStore());
+  var registerFormController = new RegisterFormController(personStore);
   registerFormController.setView(registerFormView);
   registerFormView.setController(registerFormController);
+  registerFormController.setup();
 });

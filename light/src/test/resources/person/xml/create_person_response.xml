@@ -3,4 +3,5 @@
     <firstName>first name</firstName>
     <lastName>last name</lastName>
     <email>unit-test@myopenedu.com</email>
+    <acceptedTos>true</acceptedTos>
 </person>

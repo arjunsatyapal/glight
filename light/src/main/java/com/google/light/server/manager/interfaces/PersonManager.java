@@ -33,6 +33,16 @@ public interface PersonManager {
    * @throws IllegalKeyTypeException
    */
   public PersonEntity get(Long id);
+  
+  /**
+   * Get details of the current logged in person or null if no user
+   * is logged in.
+   * 
+   * @param id
+   * @return
+   * @throws IllegalKeyTypeException
+   */
+  public PersonEntity getCurrent();
 
   /**
    * Get details of an existing Person by Email. Returns null if not found.

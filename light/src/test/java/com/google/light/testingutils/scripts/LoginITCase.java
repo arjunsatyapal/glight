@@ -17,15 +17,18 @@ import static com.google.light.server.constants.HtmlPathEnum.PUT_OAUTH2_CONSUMER
 import static com.google.light.server.constants.OAuth2ProviderEnum.GOOGLE;
 import static com.google.light.server.constants.RequestParamKeyEnum.CLIENT_ID;
 import static com.google.light.server.constants.RequestParamKeyEnum.CLIENT_SECRET;
+import static com.google.light.server.constants.RequestParamKeyEnum.EMAIL;
+import static com.google.light.server.constants.RequestParamKeyEnum.FULLNAME;
 import static com.google.light.server.constants.RequestParamKeyEnum.PASSWORD;
 import static com.google.light.server.servlets.path.ServletPathEnum.OAUTH2_GOOGLE_DOC_AUTH;
-import static com.google.light.server.servlets.path.ServletPathEnum.OAUTH2_GOOGLE_LOGIN;
+import static com.google.light.server.servlets.path.ServletPathEnum.SEARCH_PAGE;
 import static com.google.light.server.servlets.path.ServletPathEnum.TEST_CREDENTIAL_BACKUP_SERVLET;
 import static com.google.light.server.servlets.test.CredentialStandardEnum.OAUTH2;
 import static com.google.light.server.servlets.test.CredentialUtils.getConsumerCredentialFileAbsPath;
 import static com.google.light.server.servlets.test.CredentialUtils.getCredentialZipFilePath;
 import static com.google.light.server.servlets.test.CredentialUtils.getOwnerCredentialPasswdFileAbsPath;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
+import static com.google.light.testingutils.SeleniumUtils.clickAtCenter;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
@@ -61,24 +64,29 @@ import com.google.light.testingutils.GaeTestingUtils;
 import com.google.light.testingutils.SeleniumUtils;
 
 public class LoginITCase {
+  private static final int MAX_NUMBER_OF_TOKENS_TO_REVOKE = 2;
   private WebDriver driver;
   private StringBuffer verificationErrors = new StringBuffer();
   private Properties ownerCredentials;
   private Properties consumerCredentials;
 
   private LightEnvEnum defaultEnv = LightEnvEnum.DEV_SERVER;
-  private String userName = "unit-test1@myopenedu.com";
+  private String email;
   private String password;
+  private String fullname;
 
   private final String serverUrl = "http://localhost:8080";
 
   @Before
   public void seleniumSetup() throws Exception {
     GaeTestingUtils.cheapEnvSwitch(defaultEnv);
-    
+
     System.out.println(getOwnerCredentialPasswdFileAbsPath(OAUTH2));
     ownerCredentials = loadProperties(getOwnerCredentialPasswdFileAbsPath(OAUTH2));
-    validatePropertiesFile(ownerCredentials, Lists.newArrayList(PASSWORD.get()));
+    validatePropertiesFile(ownerCredentials,
+        Lists.newArrayList(FULLNAME.get(), EMAIL.get(), PASSWORD.get()));
+    email = ownerCredentials.getProperty(EMAIL.get());
+    fullname = ownerCredentials.getProperty(FULLNAME.get());
     password = ownerCredentials.getProperty(PASSWORD.get());
 
     System.out.println(getConsumerCredentialFileAbsPath(OAUTH2, GOOGLE));
@@ -88,7 +96,7 @@ public class LoginITCase {
   }
 
   /**
-   * @return 
+   * @return
    * 
    */
   private WebDriver getSeleniumDriver() {
@@ -125,27 +133,31 @@ public class LoginITCase {
   @Test
   public void testLogin() throws Exception {
     driver = getSeleniumDriver();
-    
+
     // First login as Admin on Dev Server.
     driver.get(serverUrl + "/_ah/login");
     driver.findElement(By.id("isAdmin")).click();
     driver.findElement(By.name("action")).click();
-    
-    
+
+    // Cleaning up the datastore
+    driver.get(serverUrl + ServletPathEnum.TEST_CLEAN_UP_DATASTORE.get());
+
     // First signin to Google Account.
     driver
         .get("https://accounts.google.com/ServiceLogin?passive=1209600&continue=https%3A%2F%2Faccounts.google.com%2FManageAccount&followup=https%3A%2F%2Faccounts.google.com%2FManageAccount");
     driver.findElement(By.id("Email")).clear();
-    driver.findElement(By.id("Email")).sendKeys(userName);
+    driver.findElement(By.id("Email")).sendKeys(email);
     driver.findElement(By.id("Passwd")).clear();
     driver.findElement(By.id("Passwd")).sendKeys(password);
     driver.findElement(By.id("signIn")).click();
-    
+
     // Now revoking access
     driver.findElement(By.cssSelector("#nav-security > div.IurIzb")).click();
     driver.findElement(By.xpath("//div[5]/div[2]/a/div")).click();
-    driver.findElement(By.linkText("Revoke Access")).click();
-    driver.findElement(By.linkText("Revoke Access")).click();
+    for (int i = 0; i < MAX_NUMBER_OF_TOKENS_TO_REVOKE; i++) {
+      if (!SeleniumUtils.clickIfExists(driver, By.linkText("Revoke Access")))
+        break;
+    }
 
     // Now Load PUT_OAUTH2_CONSUMER_CREDENTIAL Page.
     driver.get(serverUrl + ServletPathEnum.TEST_WORKFLOW_SERVLETS.get());
@@ -170,33 +182,41 @@ public class LoginITCase {
 
     // Google OAuth2 consumer credentials are now saved.
 
-    // Now trigger GOOGLE_LOGIN OAuth2 flow for Owner.
-    driver.get(serverUrl + ServletPathEnum.TEST_WORKFLOW_SERVLETS.get());
-    currElement = OAUTH2_GOOGLE_LOGIN.name();
-    driver.findElement(By.id(currElement)).click();
+    // Now trigger open a light page (eg. SEARCH_PAGE) and start
+    // GOOGLE_LOGIN OAuth2 flow for Owner.
+    driver.get(serverUrl + SEARCH_PAGE.get());
+    clickAtCenter(driver, By.id("loginToolbar_loginButton"));
+    clickAtCenter(driver, By.id("loginToolbar_googleLoginProviderButton"));
+    // Accepting
     driver.findElement(By.id("submit_approve_access")).click();
+
+    // Asserting the User is logged in
+    clickAtCenter(driver, By.id("registerForm_tosCheckbox"));
+    clickAtCenter(driver, By.id("registerForm_submitButton"));
+    assertEquals(fullname, driver.findElement(By.id("loginToolbar_personNameSpan")).getText());
 
     // Now trigger the GOOGLE_DOC OAuth2 flow for Owner.
     driver.get(serverUrl + ServletPathEnum.TEST_WORKFLOW_SERVLETS.get());
     currElement = OAUTH2_GOOGLE_DOC_AUTH.name();
     driver.findElement(By.id(currElement)).click();
     driver.findElement(By.id("submit_approve_access")).click();
-    
+
     /*
-     * Now all credentials are populated on DataStore of Dev Server. Now download the Zip file 
+     * Now all credentials are populated on DataStore of Dev Server. Now download the Zip file
      * for functional tests.
      */
     GenericUrl zipUrl = new GenericUrl(serverUrl + TEST_CREDENTIAL_BACKUP_SERVLET.get());
+    zipUrl.put(EMAIL.get(), email);
     HttpTransport httpTransport = new NetHttpTransport();
     HttpRequest request = httpTransport.createRequestFactory().buildGetRequest(zipUrl);
     HttpResponse response = request.execute();
-    
+
     String outputPath = getCredentialZipFilePath();
     File file = new File(outputPath);
     if (file.exists()) {
       file.delete();
     }
-    
+
     ByteStreams.copy(response.getContent(), new FileOutputStream(new File(outputPath)));
   }
 
@@ -205,7 +225,7 @@ public class LoginITCase {
     if (driver == null) {
       return;
     }
-    
+
     driver.quit();
     String verificationErrorString = verificationErrors.toString();
     if (!"".equals(verificationErrorString)) {

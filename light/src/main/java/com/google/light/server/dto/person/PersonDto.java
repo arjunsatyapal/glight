@@ -15,25 +15,28 @@
  */
 package com.google.light.server.dto.person;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkEmail;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
-import com.google.light.server.constants.XsdPath;
-import com.google.light.server.dto.DtoToPersistenceInterface;
-import com.google.light.server.persistence.entity.person.PersonEntity;
-import com.google.light.server.utils.JsonUtils;
-import com.google.light.server.utils.XmlUtils;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
+
+import com.google.light.server.constants.XsdPath;
+import com.google.light.server.dto.DtoToPersistenceInterface;
+import com.google.light.server.persistence.entity.person.PersonEntity;
+import com.google.light.server.utils.JsonUtils;
+import com.google.light.server.utils.XmlUtils;
 
 /**
  * DTO for {@link PersonEntity}.
@@ -42,7 +45,7 @@ import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
  */
 @SuppressWarnings("serial")
 @XmlRootElement(name = "person")
-@XmlType(name = "personType", propOrder = { "firstName", "lastName", "email" })
+@XmlType(name = "personType", propOrder = { "firstName", "lastName", "email", "acceptedTos" })
 @XmlAccessorType(XmlAccessType.FIELD)
 @JsonSerialize(include = Inclusion.NON_NULL)
 public class PersonDto implements DtoToPersistenceInterface<PersonDto, PersonEntity, Long> {
@@ -54,11 +57,15 @@ public class PersonDto implements DtoToPersistenceInterface<PersonDto, PersonEnt
 
   @XmlElement
   private String email;
+  
+  @XmlElement
+  private boolean acceptedTos;
 
   @Override
   public PersonDto validate() {
     checkNotBlank(firstName, "firstName");
     checkNotBlank(lastName, "lastName");
+    checkNotNull(acceptedTos, "acceptedTos");
     checkEmail(email);
     return this;
   }
@@ -81,7 +88,6 @@ public class PersonDto implements DtoToPersistenceInterface<PersonDto, PersonEnt
   @Override
   public String toJson() {
     try {
-
       return JsonUtils.toJson(this);
     } catch (Exception e) {
       // TODO(arjuns) : Add exception handling later.
@@ -96,6 +102,7 @@ public class PersonDto implements DtoToPersistenceInterface<PersonDto, PersonEnt
         .firstName(firstName)
         .lastName(lastName)
         .email(email)
+        .acceptedTos(acceptedTos)
         .build();
   }
 
@@ -134,10 +141,19 @@ public class PersonDto implements DtoToPersistenceInterface<PersonDto, PersonEnt
     this.email = email;
   }
 
+  public boolean getAcceptedTos() {
+    return acceptedTos;
+  }
+
+  public void setAcceptedTos(boolean acceptedTos) {
+    this.acceptedTos = acceptedTos;
+  }
+
   public static class Builder {
     private String firstName;
     private String lastName;
     private String email;
+    private boolean acceptedTos;
 
     public Builder firstName(String firstName) {
       this.firstName = firstName;
@@ -154,6 +170,11 @@ public class PersonDto implements DtoToPersistenceInterface<PersonDto, PersonEnt
       return this;
     }
 
+    public Builder acceptedTos(boolean acceptedTos) {
+      this.acceptedTos = acceptedTos;
+      return this;
+    }
+
     @SuppressWarnings("synthetic-access")
     public PersonDto build() {
       return new PersonDto(this).validate();
@@ -165,6 +186,7 @@ public class PersonDto implements DtoToPersistenceInterface<PersonDto, PersonEnt
     this.firstName = builder.firstName;
     this.lastName = builder.lastName;
     this.email = builder.email;
+    this.acceptedTos = builder.acceptedTos;
   }
   
   // For JAXB.

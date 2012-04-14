@@ -24,13 +24,13 @@ import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
  */
 public enum HtmlPathEnum {
   PUT_OAUTH2_CONSUMER_CREDENTIAL("/html/admin/put_oauth2_consumer_credential.html");
-  
+
   private String path;
-  
+
   private HtmlPathEnum(String path) {
     this.path = checkNotBlank(path, "path");
   }
-  
+
   public String get() {
     return path;
   }

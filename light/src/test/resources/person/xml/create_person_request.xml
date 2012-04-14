@@ -2,4 +2,5 @@
 <person>
     <firstName>first name</firstName>
     <lastName>last name</lastName>
+    <acceptedTos>true</acceptedTos>
 </person>

@@ -104,25 +104,23 @@ public class GoogleDocAuthCallbackServlet extends HttpServlet {
       TokenResponse tokenResponse = helperInstance.getAccessToken(lightCbUrl, code);
       boolean newRefreshToken = !Strings.isNullOrEmpty(tokenResponse.getRefreshToken());
 
-      OAuth2OwnerTokenEntity tokenEntity = googDocTokenManager.get();
-      
-      if (tokenEntity == null && !newRefreshToken) {
+      if(newRefreshToken) {
+        updateOwnerTokenEntity(personId, tokenResponse.getRefreshToken(), tokenResponse);
+      } else {
+        OAuth2OwnerTokenEntity tokenEntity = googDocTokenManager.get();
+        
+        if (tokenEntity == null) {
           /*
            * Google did not return refreshToken as User had given Authorization earlier. But light
            * failed to locate a record for that token. So User needs to be forced to give access.
            */
           forceAuthFlowWithPrompt(request, response);
           return;
+        } else {
+          // nothing to to do.
+          // TODO(arjuns): Eventually redirect to the callback URI.
+          return;
         }
-      
-      if (tokenEntity != null && !newRefreshToken) {
-        // nothing to to do.
-        // TODO(arjuns): Eventually redirect to the callback URI.
-        return;
-      }
-      
-      if (newRefreshToken) {
-        updateOwnerTokenEntity(personId, tokenResponse.getRefreshToken(), tokenResponse); 
       }
     }
     

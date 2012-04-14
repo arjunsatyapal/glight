@@ -18,7 +18,7 @@ import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import javax.servlet.http.HttpServlet;
 
 import com.google.light.server.exception.unchecked.httpexception.NotFoundException;
-import com.google.light.server.servlets.JSVariablesPreloadServlet;
+import com.google.light.server.servlets.LightGenericJSPServlet;
 import com.google.light.server.servlets.admin.ConfigServlet;
 import com.google.light.server.servlets.admin.OAuth2ConsumerCredentialServlet;
 import com.google.light.server.servlets.login.LoginServlet;
@@ -30,6 +30,7 @@ import com.google.light.server.servlets.oauth2.google.login.GoogleLoginServlet;
 import com.google.light.server.servlets.person.PersonServlet;
 import com.google.light.server.servlets.search.SearchServlet;
 import com.google.light.server.servlets.test.SessionInfoServlet;
+import com.google.light.server.servlets.test.TestCleanUpDatastore;
 import com.google.light.server.servlets.test.TestHeaders;
 import com.google.light.server.servlets.test.TestLogin;
 import com.google.light.server.servlets.test.oauth2.TestCredentialBackupServlet;
@@ -49,15 +50,20 @@ public enum ServletPathEnum {
 
   PERSON(PersonServlet.class, "/api/person",
          true, false, false),
+  // TODO(waltercacau): Fix this hack
+  PERSONME(PersonServlet.class, "/api/person/me",
+             true, false, false),
   SEARCH(SearchServlet.class, "/api/search",
-         false, false, false),
-  JS_VARIABLES_PRELOAD(JSVariablesPreloadServlet.class, "/preload",
          false, false, false),
   LOGIN(LoginServlet.class, "/login",
         false, false, false),
   LOGOUT(LogoutServlet.class, "/logout",
          false, false, false),
 
+  // Client Side pages
+  SEARCH_PAGE(LightGenericJSPServlet.class, "/search", false, false, false),
+  REGISTER_PAGE(LightGenericJSPServlet.class, "/register", false, false, false),
+  
   // OAuth2 Related Servlets.
   OAUTH2_GOOGLE_LOGIN(GoogleLoginServlet.class, "/login/google",
                       false, false, false),
@@ -87,6 +93,8 @@ public enum ServletPathEnum {
                                  false, false, true),
   TEST_WORKFLOW_SERVLETS(TestOAuth2WorkFlowServlet.class, "/test/test_oauth2_workflow",
                          false, false, true),
+  TEST_CLEAN_UP_DATASTORE(TestCleanUpDatastore.class, "/test/admin/cleanupds",
+                         true, true, true),
 
   SESSION(SessionInfoServlet.class, "/test/session",
           true, false, true),

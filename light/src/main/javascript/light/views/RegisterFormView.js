@@ -35,7 +35,7 @@ define(['dojo/_base/declare', 'dijit/focus', 'dojo/_base/event',
       templateString: template,
 
       messages: messages,
-      
+
       postCreate: function() {
         // TODO(waltercacau): Test this when we discover what is more accessible.
         // Making tooltip autohide
@@ -51,8 +51,18 @@ define(['dojo/_base/declare', 'dijit/focus', 'dojo/_base/event',
       getData: function() {
         return {
           firstName: this._firstNameTextBox.get('value'),
-          lastName: this._lastNameTextBox.get('value')
+          lastName: this._lastNameTextBox.get('value'),
+          acceptedTos: this._tosCheckbox.get('checked')
         };
+      },
+
+      /**
+       * Prepopulates the form with the given data.
+       * @param {Object} Current data.
+       */
+      setData: function(data) {
+        this._firstNameTextBox.set('value', data.firstName);
+        this._lastNameTextBox.set('value', data.lastName);
       },
 
       /**
@@ -80,6 +90,14 @@ define(['dojo/_base/declare', 'dijit/focus', 'dojo/_base/event',
       },
 
       /**
+       * Warn's the user there was some problem talking to the server
+       */
+      warnError: function() {
+        // TODO(waltercacau): Make this warning more friendly
+        alert(this.messages.warnError);
+      },
+
+      /**
        * Validates that the user has agreed to the Terms of Service.
        * @return {boolean} True if the user has agreed.
        */
@@ -99,10 +117,10 @@ define(['dojo/_base/declare', 'dijit/focus', 'dojo/_base/event',
        * Callback to be called when the submit button is pressed.
        */
       _onSubmit: function(evt) {
-        this._controller.onSubmit();
-        
         // This avoids submitting the form
         eventUtil.stop(evt);
+
+        this._controller.onSubmit();
         return false;
       }
   });

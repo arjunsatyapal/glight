@@ -95,13 +95,13 @@ public class PersonServlet extends AbstractLightServlet {
    * {@inheritDoc}
    */
   @Override
-  public void doPost(HttpServletRequest request, HttpServletResponse response) {
+  public void doPut(HttpServletRequest request, HttpServletResponse response) {
     try {
       ServletRequestPojo<PersonDto> requestPojo = checkNotNull(getRequestPojo(
           request, PersonDto.class));
       PersonDto dto = requestPojo.getValidDto();
 
-      PersonEntity personEntity = personManager.create(
+      PersonEntity personEntity = personManager.update(
           dto.toPersistenceEntity(null/* personId */));
 
       ServletResponsePojo<PersonDto> responsePojo = new ServletResponsePojo<PersonDto>(
@@ -124,7 +124,7 @@ public class PersonServlet extends AbstractLightServlet {
    * {@inheritDoc}
    */
   @Override
-  public void doPut(HttpServletRequest request, HttpServletResponse response) {
+  public void doPost(HttpServletRequest request, HttpServletResponse response) {
     // TODO(arjuns): Auto-generated method stub
     throw new UnsupportedOperationException();
   }

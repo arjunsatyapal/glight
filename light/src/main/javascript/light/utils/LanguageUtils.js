@@ -17,6 +17,8 @@ define(['dojo/_base/declare', 'dojo/number'], function(declare, numberUtils) {
   /**
    * Some utilities for dealing with i18n.
    *
+   * TODO(waltercacau): add test for this class
+   *
    * @class
    * @name light.utils.LanguageUtils
    */
@@ -53,8 +55,10 @@ define(['dojo/_base/declare', 'dojo/number'], function(declare, numberUtils) {
     },
 
     /**
-     * The current locale for the UI according to dojo. Alias for
-     * {@link dojo.locale}
+     * The current locale for the UI according to dojo.
+     *
+     * <p>
+     * Alias for {@link dojo.locale}
      *
      * @const
      */

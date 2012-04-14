@@ -52,7 +52,8 @@ public class PersonDtoTest extends AbstractDtoToPersistenceTest {
     return new PersonDto.Builder()
         .firstName(firstName)
         .lastName(lastName)
-        .email(email);
+        .email(email)
+        .acceptedTos(false);
   }
 
   /**

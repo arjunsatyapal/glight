@@ -4,17 +4,17 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>Light</title>
     <!-- TODO(waltercacau): move this into a CSS -->
-    <script src="/preload"></script>
+    ${preload}
     <script src="/js/light/build/loader.js"></script>
     <style>
     body {
-    	font-size: 20px;
+        font-size: 20px;
     }
     </style>
   </head>
   <body>
-	<div id="registerForm">
-		
-	</div>
+    <div id="registerForm">
+        
+    </div>
   </body>
 </html>

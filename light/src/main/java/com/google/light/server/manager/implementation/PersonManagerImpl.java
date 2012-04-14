@@ -27,8 +27,8 @@ import com.google.light.server.persistence.entity.person.PersonEntity;
 import com.google.light.server.servlets.SessionManager;
 
 /**
- * Implementation class for {@link PersonManager}
- * In constructor, we only check for Person is logged in which depends on presence of 
+ * Implementation class for {@link PersonManager} In constructor, we only check for Person is logged
+ * in which depends on presence of
  * LoginProviderUserId. Unlike other managers, where Session should be valid, this Servlet is an
  * exception to that group because in PersonManager we create a Person which returns PersonId.
  * So all the methods other then createPerson should ensure that Session is valid.
@@ -43,7 +43,7 @@ public class PersonManagerImpl implements PersonManager {
   public PersonManagerImpl(SessionManager sessionManager, PersonDao personDao) {
     this.sessionManager = checkNotNull(sessionManager, "sessionManager");
     this.personDao = checkNotNull(personDao, "personDao");
-    
+
     sessionManager.checkPersonLoggedIn();
   }
 
@@ -62,7 +62,7 @@ public class PersonManagerImpl implements PersonManager {
 
     // This is a heavy operation, so perform this validation just before persisting.
     PersonEntity personByEmail = getByEmail(entity.getEmail());
-    
+
     if (personByEmail != null) {
       return personByEmail;
     }
@@ -77,8 +77,21 @@ public class PersonManagerImpl implements PersonManager {
   public PersonEntity update(PersonEntity updatedEntity) {
     checkValidSession(sessionManager);
     
-    // TODO(arjuns): Auto-generated method stub
-    throw new UnsupportedOperationException();
+    // TODO(arjuns & waltercacau): How to check if an email can be associated with the account?
+    // right now it is protected relying a person only can put on /api/person/me, but as soon
+    // as we allow admins to change person's data we might start a security issue.
+    
+    // For now, let's not even consider a client side provided ID.
+    if (updatedEntity.getId() != null) {
+      throw new IdShouldNotBeSet();
+    }
+    
+    updatedEntity.setId(sessionManager.getPersonId());
+    
+    // Overriding client side provided email
+    updatedEntity.setEmail(sessionManager.getEmail());
+    
+    return personDao.put(updatedEntity);
   }
 
   /**
@@ -92,7 +105,7 @@ public class PersonManagerImpl implements PersonManager {
      */
     return personDao.get(checkPersonId(id));
   }
-  
+
   /**
    * {@inheritDoc}
    */
@@ -113,6 +126,13 @@ public class PersonManagerImpl implements PersonManager {
     checkValidSession(sessionManager);
     // TODO(arjuns): Auto-generated method stub
     throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public PersonEntity getCurrent() {
+    if (!sessionManager.isValidSession())
+      return null;
+    return personDao.get(sessionManager.getPersonId());
   }
 
 }

@@ -15,19 +15,19 @@
  */
 package com.google.light.server.utils;
 
-import com.google.light.server.dto.DtoInterface;
-
-import org.codehaus.jackson.JsonGenerationException;
-
-import org.codehaus.jackson.map.ObjectWriter;
-
 import java.io.IOException;
 import java.io.StringReader;
+
+import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.AnnotationIntrospector;
+import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.ObjectWriter;
 import org.codehaus.jackson.xc.JaxbAnnotationIntrospector;
+
+import com.google.light.server.dto.DtoInterface;
 
 /**
  * Utility class for Json.
@@ -44,6 +44,7 @@ public class JsonUtils {
   public static <D extends DtoInterface<D>> D getDto(String jsonString, Class<D> dtoClass)
       throws JsonParseException, JsonMappingException, IOException {
     ObjectMapper mapper = new ObjectMapper();
+    mapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     AnnotationIntrospector introspector = new JaxbAnnotationIntrospector();
     // make serializer use JAXB annotations (only)
     mapper.getSerializationConfig().withAnnotationIntrospector(introspector);

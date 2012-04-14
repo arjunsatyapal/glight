@@ -80,8 +80,8 @@ var profile = (function() {
           location: '/js/dojox'
         }]
       };
-      if(lightPreload && lightPreload.locale) {
-        config.locale = lightPreload.locale;
+      if(this.lightPreload && this.lightPreload.locale) {
+        config.locale = this.lightPreload.locale;
       }
       
       return config;

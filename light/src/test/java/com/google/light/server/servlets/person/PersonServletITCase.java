@@ -148,7 +148,7 @@ public class PersonServletITCase extends AbstractLightIntegrationTest {
    */
   @Test
   @Override
-  public void test_doPost_Json()
+  public void test_doPut_Json()
       throws Exception {
     String jsonReqString = getResourceAsString(CREATE_PERSON.getJsonReqPath());
     GenericUrl requestUrl = new GenericUrl(serverUrl + ServletPathEnum.PERSON.get());
@@ -158,7 +158,7 @@ public class PersonServletITCase extends AbstractLightIntegrationTest {
         new InputStreamContent(ContentTypeEnum.APPLICATION_JSON.get(), is);
     isContent.setLength(jsonReqString.length());
 
-    HttpRequest newrequest = requestFactory.buildPostRequest(requestUrl, isContent);
+    HttpRequest newrequest = requestFactory.buildPutRequest(requestUrl, isContent);
     newrequest.setHeaders(headers);
 
     HttpResponse response = newrequest.execute();
@@ -174,7 +174,7 @@ public class PersonServletITCase extends AbstractLightIntegrationTest {
    */
   @Test
   @Override
-  public void test_doPost_Xml() throws Exception {
+  public void test_doPut_Xml() throws Exception {
     String xmlReqString = getResourceAsString(CREATE_PERSON.getXmlReqPath());
     GenericUrl requestUrl = new GenericUrl(serverUrl + ServletPathEnum.PERSON.get());
 
@@ -183,7 +183,7 @@ public class PersonServletITCase extends AbstractLightIntegrationTest {
         new InputStreamContent(ContentTypeEnum.APPLICATION_XML.get(), is);
     isContent.setLength(xmlReqString.length());
 
-    HttpRequest newrequest = requestFactory.buildPostRequest(requestUrl, isContent);
+    HttpRequest newrequest = requestFactory.buildPutRequest(requestUrl, isContent);
     newrequest.setHeaders(headers);
 
     HttpResponse response = newrequest.execute();
@@ -199,7 +199,7 @@ public class PersonServletITCase extends AbstractLightIntegrationTest {
    */
   @Test
   @Override
-  public void test_doPut_Json() {
+  public void test_doPost_Json() {
     // TODO(arjuns): Auto-generated method stub
   }
 
@@ -208,7 +208,7 @@ public class PersonServletITCase extends AbstractLightIntegrationTest {
    */
   @Test
   @Override
-  public void test_doPut_Xml() {
+  public void test_doPost_Xml() {
     // TODO(arjuns): Auto-generated method stub
   }
 

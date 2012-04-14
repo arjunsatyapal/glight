@@ -62,6 +62,16 @@ public class ContentTypeEnumTest implements EnumTestInterface {
       assertEquals(map.get(curr), ContentTypeEnum.getContentTypeByString(curr));
     }
 
+    // Plus charset and spaces
+    for (String curr : map.keySet()) {
+      assertEquals(map.get(curr), ContentTypeEnum.getContentTypeByString(curr + "; charset=UTF-8"));
+      assertEquals(map.get(curr), ContentTypeEnum.getContentTypeByString(curr + " ; charset=UTF-8"));
+      assertEquals(map.get(curr), ContentTypeEnum.getContentTypeByString(" " + curr + " ; charset=UTF-8"));
+      assertEquals(map.get(curr), ContentTypeEnum.getContentTypeByString(curr + " "));
+      assertEquals(map.get(curr), ContentTypeEnum.getContentTypeByString(" " + curr + " "));
+      assertEquals(map.get(curr), ContentTypeEnum.getContentTypeByString(" " + curr));
+    }
+
     // Negative Testing : Test for random value.
     try {
       ContentTypeEnum.getContentTypeByString("foo");

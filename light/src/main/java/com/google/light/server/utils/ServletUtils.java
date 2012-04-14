@@ -18,6 +18,7 @@ package com.google.light.server.utils;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
 import com.google.common.base.Charsets;
+import com.google.common.base.Throwables;
 import com.google.common.io.CharStreams;
 import com.google.light.server.constants.ContentTypeEnum;
 import com.google.light.server.constants.RequestParamKeyEnum;
@@ -26,6 +27,9 @@ import com.google.light.server.servlets.path.ServletPathEnum;
 import com.google.light.server.servlets.pojo.ServletRequestPojo;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.logging.Logger;
+
+import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.JAXBException;
@@ -38,6 +42,28 @@ import javax.xml.bind.JAXBException;
  * @author Arjun Satyapal
  */
 public class ServletUtils {
+  private static final Logger logger = Logger.getLogger(ServletUtils.class.getName());
+  
+  /**
+   * Forwards request and response to given path. Handles any
+   * exceptions caused by forward target by printing them to logger.
+   * 
+   * @param request
+   * @param response
+   * @param path
+   */
+  public static void forward(final HttpServletRequest request,
+          final HttpServletResponse response, final String path) {
+      try {
+          final RequestDispatcher rd = request.getRequestDispatcher(path);
+          rd.forward(request, response);
+      }
+      catch (Throwable tr) {
+          // TODO(waltercacau): Add a proper handler here. (Show a 404 or 50 error page for example)
+        logger.severe("Failed due to : " + Throwables.getStackTraceAsString(tr));
+      }
+  }
+  
   /**
    * Returns the URL along-with Query Parameters. Default {@link HttpServletRequest#getRequestURL()}
    * does not return query parameters.

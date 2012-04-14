@@ -23,6 +23,9 @@ define(['dojo/_base/declare', 'light/stores/AbstractLightStore'],
 
     /**
      * Store object for Person resource.
+     * 
+     * TODO(waltercacau): add test for this class
+     * 
      * @extends light.stores.AbstractLightStore
      * @constructs
      */

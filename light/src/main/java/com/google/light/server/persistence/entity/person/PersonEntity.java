@@ -19,13 +19,15 @@ import static com.google.light.server.utils.LightPreconditions.checkEmail;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPersonId;
 
-import com.google.light.server.dto.person.PersonDto;
-import com.google.light.server.persistence.PersistenceToDtoInterface;
-import com.googlecode.objectify.Key;
 import javax.persistence.Id;
+
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
+
+import com.google.light.server.dto.person.PersonDto;
+import com.google.light.server.persistence.PersistenceToDtoInterface;
+import com.googlecode.objectify.Key;
 
 /**
  * Persistence object for {@link PersonDto}.
@@ -38,6 +40,8 @@ public class PersonEntity implements PersistenceToDtoInterface<PersonEntity, Per
   Long id;
   String firstName;
   String lastName;
+  // defaulting to false so older entities can have the default value
+  boolean acceptedTos = false; 
 
   // This is used in Objectify Query.
   public static final String OFY_EMAIL_QUERY_STRING = "email";
@@ -64,6 +68,7 @@ public class PersonEntity implements PersistenceToDtoInterface<PersonEntity, Per
         .firstName(firstName)
         .lastName(lastName)
         .email(email)
+        .acceptedTos(acceptedTos)
         .build();
     return dto.validate();
   }
@@ -118,11 +123,20 @@ public class PersonEntity implements PersistenceToDtoInterface<PersonEntity, Per
     this.email = checkEmail(email);
   }
 
+  public boolean getAcceptedTos() {
+    return acceptedTos;
+  }
+
+  public void setAcceptedTos(boolean acceptedTos) {
+    this.acceptedTos = acceptedTos;
+  }
+
   public static class Builder {
     private Long id;
     private String firstName;
     private String lastName;
     private String email;
+    private boolean acceptedTos = false;
 
     public Builder id(Long id) {
       this.id = id;
@@ -144,6 +158,11 @@ public class PersonEntity implements PersistenceToDtoInterface<PersonEntity, Per
       return this;
     }
 
+    public Builder acceptedTos(boolean acceptedTos) {
+      this.acceptedTos = acceptedTos;
+      return this;
+    }
+
     @SuppressWarnings("synthetic-access")
     public PersonEntity build() {
       return new PersonEntity(this);
@@ -156,6 +175,7 @@ public class PersonEntity implements PersistenceToDtoInterface<PersonEntity, Per
     this.firstName = checkNotBlank(builder.firstName, "firstName");
     this.lastName = checkNotBlank(builder.lastName, "lastName");
     this.email = checkEmail(builder.email);
+    this.acceptedTos = builder.acceptedTos;
   }
   
   // For Objectify.

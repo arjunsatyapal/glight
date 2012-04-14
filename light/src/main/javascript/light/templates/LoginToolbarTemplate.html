@@ -1,0 +1,12 @@
+<div>
+  <div data-dojo-attach-point="_loggedDiv">
+    <span data-dojo-attach-point="_personNameSpan" id="${id}_personNameSpan"></span>
+    <button data-dojo-type="dijit.form.Button" data-dojo-attach-event="onClick:_logout" id="${id}_logoutButton">${messages.logout}</button>
+  </div>
+  <div data-dojo-attach-point="_unloggedDiv">
+    <div data-dojo-type="dijit.form.DropDownButton" id="${id}_loginButton">
+      <span>${messages.login}</span>
+      <div data-dojo-type="dijit.TooltipDialog" data-dojo-attach-point="_loginDialog"></div>
+    </div>
+  </div>
+</div>

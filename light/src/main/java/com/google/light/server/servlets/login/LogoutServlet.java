@@ -20,6 +20,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.google.light.server.constants.LightConstants;
+
 /**
  * Servlet that allows a user to Logout.
  * 
@@ -30,6 +32,6 @@ public class LogoutServlet extends HttpServlet {
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     request.getSession().invalidate();
-    response.getWriter().println("Successfully Logged out.");
+    response.sendRedirect(LightConstants.REDIRECT_PATH_AFTER_LOGOUT);
   }
 }

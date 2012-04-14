@@ -4,11 +4,13 @@
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
     <title>Light</title>
-    <script src="/preload"></script>
+    ${preload}
     <script src="/js/light/build/loader.js"></script>
     <!-- TODO(waltercacau): move this into a CSS -->
     <style>
-    #searchBar {
+    #searchHeader {
+        min-width: 700px;
+        position: relative;
         background: #F1F1F1;
         background: -webkit-gradient(radial,100 36,0,100 -40,120,from(#FAFAFA),to(#F1F1F1)),#F1F1F1
         border-bottom: 1px solid #666;
@@ -19,11 +21,19 @@
         padding-bottom: 10px;
         text-align: center;
     }
-    #searchBar .dijitTextBox {
+    #searchHeader .dijitTextBox {
         font-size: 20px;
     }
-    #searchBar .dijitButton {
+    #searchHeader {
         font-size: 18px;
+    }
+    #loginToolbar {
+        position: absolute;
+        right: 10px;
+    }
+    body[dir="rtl"] #loginToolbar {
+        left: 10px;
+        right: auto;
     }
     
     .searchResult:hover {
@@ -39,21 +49,24 @@
     }
     
     .searchInfo {
-		font-size: 18px;
-		text-align: center;
-		padding: 5px;
-	}
+        font-size: 18px;
+        text-align: center;
+        padding: 5px;
+    }
     
     
     body {
-    	font-size: 20px;
+        font-size: 20px;
     }
     
     
     </style>
   </head>
   <body>
-    <div id="searchBar"></div>
+    <div id="searchHeader">
+        <div id="loginToolbar"></div>
+        <div id="searchBar"></div>
+    </div>
     <div id="searchResults"></div>
   </body>
 </html>

@@ -13,21 +13,10 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-define(['dojo/_base/declare', 'dojo/hash'], function(declare, dojoHash) {
-  /**
-   * Small wrapper around dojo's hash functionality to enable better testing
-   * @class
-   * @name light.utils.URLHashUtils
-   */
-  return {
-    /** @lends light.utils.URLHashUtils */
-
-    get: function() {
-      return dojoHash();
-    },
-
-    set: function(hash, replaceCurrentInHistory) {
-      return dojoHash(hash, replaceCurrentInHistory);
-    }
-  };
+define({
+  root: {
+    googleLoginProvider: 'Google',
+    login: 'Login',
+    logout: 'Logout'
+  }
 });

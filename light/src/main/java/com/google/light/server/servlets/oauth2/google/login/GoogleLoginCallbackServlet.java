@@ -216,6 +216,8 @@ public class GoogleLoginCallbackServlet extends HttpServlet {
    * @return
    */
   private boolean doesTokenDetailEntityNeedsUpdate(boolean updatePersistedTokenDetails) {
+    if(updatePersistedTokenDetails)
+      return true;
     OAuth2OwnerTokenEntity fetchedTokenEntity = googLoginTokenManager.get();
     if (fetchedTokenEntity == null) {
       updatePersistedTokenDetails = true;
@@ -286,6 +288,7 @@ public class GoogleLoginCallbackServlet extends HttpServlet {
         .firstName(userInfo.getGivenName())
         .lastName(userInfo.getFamilyName())
         .email(userInfo.getEmail())
+        .acceptedTos(false)
         .build();
 
     PersonManager personManager = GuiceUtils.getInstance(injector, PersonManager.class);

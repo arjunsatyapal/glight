@@ -14,24 +14,26 @@
  * the License.
  */
 define(['light/views/SearchBarView', 'light/SearchRouter',
-        'light/controllers/SearchBarController', 
+        'light/controllers/SearchBarController',
         'light/controllers/SearchResultListController',
         'light/views/SearchResultListView', 'light/SearchService',
+        'light/views/LoginToolbarView',
+        'light/controllers/LoginToolbarController',
         'dojo/domReady!'],
         function(SearchBarView, SearchRouter, SearchBarController,
                  SearchResultListController, SearchResultListView,
-                 SearchService) {
-  searchResultListView = new SearchResultListView({}, 'searchResults');
-  searchResultListController =
+                 SearchService, LoginToolbarView, LoginToolbarController) {
+  var searchResultListView = new SearchResultListView({}, 'searchResults');
+  var searchResultListController =
     new SearchResultListController(new SearchService());
   searchResultListController.setView(searchResultListView);
   searchResultListView.setController(searchResultListController);
-  
-  searchBarView = new SearchBarView({}, 'searchBar');
-  searchBarController = new SearchBarController();
+
+  var searchBarView = new SearchBarView({}, 'searchBar');
+  var searchBarController = new SearchBarController();
   searchBarController.setView(searchBarView);
   searchBarView.setController(searchBarController);
-  
+
   searchRouter = new SearchRouter();
   /*
    * It is important that the searchBarController and
@@ -43,5 +45,11 @@ define(['light/views/SearchBarView', 'light/SearchRouter',
   searchResultListController.watch();
   searchBarController.watch();
   searchRouter.watch();
-  
+
+  var loginToolbarView = new LoginToolbarView({}, 'loginToolbar');
+  var loginToolbarController = new LoginToolbarController();
+  loginToolbarController.setView(loginToolbarView);
+  loginToolbarView.setController(loginToolbarController);
+  loginToolbarController.setup();
+
 });

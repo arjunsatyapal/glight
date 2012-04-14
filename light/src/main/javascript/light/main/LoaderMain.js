@@ -17,9 +17,42 @@
  * This file should be bundled with our custom dojo loader so it can
  * load the correct Main.js file depending on the host html page.
  */
-define(['dojo/has', 'dojo/query', 'dojo/dom-construct', 'dojo'],
-        function(has, $, domConstruct, dojo) {
+define(['dojo/has', 'dojo/query', 'dojo/dom-construct', 'dojo',
+        'light/utils/URLUtils', 'light/utils/PersonUtils',
+        'light/enums/PagesEnum'],
+        function(has, $, domConstruct, dojo, URLUtils, PersonUtils,
+                 PagesEnum) {
+  
+  function loadMain(main) {
+    require(['light/main/CoreMain'], function() {
+      require(['light/main/' + main], function() {});
+    });
+  }
 
+  var page = PagesEnum.getByPath(URLUtils.getPath());
+  if (page) {
+    
+    // Checking if the Person has accepted the Terms of Service.
+    PersonUtils.tosCheck(page);
+
+    /*
+     * If we are in development, we should not load code through layers. this
+     * way, we don't need to rebuild to test every time a file changes.
+     */
+    if (has('light-dev')) {
+      loadMain(page.main);
+    } else {
+      require(['light/build/core', 'light/build/' + page.build], function() {
+        loadMain(page.main);
+      });
+    }
+
+  } else {
+    // TODO(waltercacau): Find a friendly way to show that to the user
+    alert('Page not found');
+  }
+
+  // CSS Stuff
   /**
    * Loads a CSS file
    *
@@ -28,21 +61,14 @@ define(['dojo/has', 'dojo/query', 'dojo/dom-construct', 'dojo'],
    * @see http://dojo.codegreene.com/2009/03/dynamically-inserting-javascript-and-css-with-javascript/
    */
   function load_css(url) {
-    var e = document.createElement('link');
-    e.href = url;
-    e.type = 'text/css';
-    e.rel = 'stylesheet';
-    e.media = 'screen';
+    var e = domConstruct.create('link', {
+      'href': url,
+      'type': 'text/css',
+      'rel': 'stylesheet',
+      'media': 'screen'
+    });
     domConstruct.place(e, $('head')[0], 'first');
   }
-  
-  function loadMain(main) {
-    require(['light/main/CoreMain'], function() {
-      require(['light/main/' + pageMain], function() {});
-    });
-  }
-
-  // CSS Stuff
   require(['dojo/domReady!'], function() {
 
     // Loading CSS
@@ -53,27 +79,4 @@ define(['dojo/has', 'dojo/query', 'dojo/dom-construct', 'dojo'],
     $('body')[0].setAttribute('class', 'claro');
 
   });
-
-  var path = window.location.pathname;
-  var pageMatch = path.match(/\/([a-zA-Z0-9-_]+)(.html|.htm|)$/);
-  if (pageMatch) {
-    var page = pageMatch[1];
-    var pageMain = page[0].toUpperCase() + page.substr(1) + 'Main';
-
-    /*
-     * If we are in development, we should not load code through layers. this
-     * way, we don't need to rebuild to test every time a file changes.
-     */
-    if (has('light-dev')) {
-      loadMain(pageMain);
-    } else {
-      require(['light/build/core', 'light/build/' + page], function() {
-        loadMain(pageMain);
-      });
-    }
-
-  } else {
-    // TODO(waltercacau): Find a friendly way to show that to the user
-    alert('Page not found');
-  }
 });

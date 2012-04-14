@@ -310,6 +310,7 @@ public class TestingUtils {
         .firstName(getRandomString())
         .lastName(getRandomString())
         .email(sessionManager.getEmail())
+        .acceptedTos(true)
         .build();
     return personManager.create(personEntity);
   }

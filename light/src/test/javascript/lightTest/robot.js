@@ -181,6 +181,15 @@ define(['dojo/query', 'light/views/AbstractLightView'],
       var promise = this._createPromise();
       Syn.type(this._toDomElement(obj), promise.fulfill);
       return promise;
+    },
+    
+    /**
+     * Count's the number of elements that match the given CSS selector query.
+     * 
+     * @param {string} query
+     */
+    count: function(query) {
+      return $(query).length;
     }
 
   };

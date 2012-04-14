@@ -100,14 +100,6 @@ public class SearchResultDtoTest extends AbstractDtoTest {
     } catch (NullPointerException e) {
       // expected.
     }
-    
-    // Negative Test : hasNextPage = null
-    try {
-      getDtoBuilder().hasNextPage(null).build();
-      fail("should have failed.");
-    } catch (NullPointerException e) {
-      // expected.
-    }
 
   }
 

@@ -23,7 +23,8 @@ define({
     tosTextareaContent: 'Legal things and stuff :D',
     tosCheckboxLabel: 'I agree with the Terms of Service',
     submitButton: 'Register',
-    tosTooltipError: 'You should agree to the Terms of Service before proceeding'
+    tosTooltipError: 'You should agree to the Terms of Service before proceeding',
+    warnError: 'An error ocurred while talking to the server. Please try again.'
   },
   'pt-br': true,
   'fa': true

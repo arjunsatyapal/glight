@@ -14,9 +14,11 @@
  * the License.
  */
 define(['light/controllers/RegisterFormController', 'light/stores/PersonStore',
-        'light/views/RegisterFormView', 'lightTest/TestUtils'],
+        'light/views/RegisterFormView', 'light/utils/URLUtils',
+        'light/utils/PersonUtils', 'lightTest/TestUtils',
+        'light/enums/PagesEnum'],
         function(RegisterFormController, PersonStore, RegisterFormView,
-                 TestUtils) {
+                 URLUtils, PersonUtils, TestUtils, PagesEnum) {
   describe('light.controllers.RegisterFormController', function() {
     var controller, personStore, view;
 
@@ -27,23 +29,77 @@ define(['light/controllers/RegisterFormController', 'light/stores/PersonStore',
       controller.setView(view);
     });
 
+    describe('setup', function() {
+      var SAMPLE_PERSON = {
+        firstName: 'firstName',
+        lastName: 'lastName'
+      };
+      beforeEach(function() {
+        this.stub(PersonUtils, 'getCurrent').withArgs().returns(SAMPLE_PERSON);
+      });
+      describe('when we have a valid hash', function() {
+        it('should properly set the redirectPath', function() {
+          this.stub(URLUtils, 'getHash')
+              .withArgs().returns('redirectPath=somePath');
+
+          controller.setup();
+
+          expect(controller._redirectPath).toBe('somePath');
+        });
+      });
+      describe('when we don\'t have a valid hash', function() {
+        it('should properly keep the redirectPath to default one', function() {
+          this.stub(URLUtils, 'getHash').withArgs().returns('-');
+
+          controller.setup();
+
+          expect(controller._redirectPath).toBe(PagesEnum.SEARCH.path);
+        });
+      });
+
+
+    });
+
     describe('onSubmit', function() {
       describe('when form is valid', function() {
-        it('should disable the form', function() {
+        it('should disable the form and its callbacks should work', function() {
 
-          var sampleData = {
+          var SAMPLE_FORM_DATA = {
             firstName: 'firstName',
             lastName: 'lastName'
           };
+          var SAMPLE_STORED_DATA = {
+            id: 'me',
+            firstName: 'firstName',
+            lastName: 'lastName',
+            someOtherField: 'someOtherField'
+          };
+          controller._person = {
+            someOtherField: 'someOtherField'
+          };
 
           view.validate.withArgs().returns(true);
-          view.getData.withArgs().returns(sampleData);
+          view.getData.withArgs().returns(SAMPLE_FORM_DATA);
 
           controller.onSubmit();
 
           expect(view.disable).toHaveBeenCalled();
-          expect(personStore.newItem).toHaveBeenCalledWith(sampleData);
+          expect(personStore.newItem).toHaveBeenCalledWith(SAMPLE_STORED_DATA);
           expect(personStore.save).toHaveBeenCalled();
+
+          // Testing the callbacks
+          var callbacks = personStore.save.args[0][0];
+
+          // onComplete
+          this.stub(URLUtils, 'redirect');
+          callbacks.onComplete();
+          expect(URLUtils.redirect)
+              .toHaveBeenCalledWith(controller._redirectPath);
+
+          // onError
+          callbacks.onError();
+          expect(view.warnError).toHaveBeenCalled();
+          expect(view.enable).toHaveBeenCalled();
 
         });
       });

@@ -15,12 +15,49 @@
  */
 package com.google.light.testingutils;
 
+import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.interactions.Actions;
 
 public class SeleniumUtils {
   // TODO(waltercacau): Add a command line flag to change which browser to use.
   public static WebDriver getWebDriver() {
     return new FirefoxDriver();
+  }
+  
+  /**
+   * Click's at the center of the element. This helps when
+   * testing a page with Dojo widget's.
+   * @param driver
+   * @param by
+   */
+  public static void clickAtCenter(WebDriver driver, By by) {
+    WebElement element = driver.findElement(by);
+    Actions builder = new Actions(driver);
+    builder
+        .moveToElement(element)
+        .click()
+        .perform();
+  }
+  
+  /**
+   * Click's in an element if it exists.
+   * 
+   * @param driver
+   * @param by
+   * @return true if the element existed
+   */
+  public static boolean clickIfExists(WebDriver driver, By by) {
+    WebElement element;
+    try {
+      element = driver.findElement(by);
+    } catch (NoSuchElementException e) {
+      return false;
+    }
+    element.click();
+    return true;
   }
 }

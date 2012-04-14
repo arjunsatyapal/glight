@@ -44,6 +44,9 @@ public enum ContentTypeEnum {
   }
 
   public static ContentTypeEnum getContentTypeByString(String type) {
+    if(type.contains(";"))
+      type = type.split(";")[0];
+    type = type.trim();
     for (ContentTypeEnum curr : ContentTypeEnum.values()) {
       if (curr.get().equals(type)) {
         return curr;

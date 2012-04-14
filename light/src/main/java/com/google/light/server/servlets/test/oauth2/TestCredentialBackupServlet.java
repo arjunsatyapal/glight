@@ -29,6 +29,7 @@ import com.google.inject.Injector;
 import com.google.light.server.constants.LightEnvEnum;
 import com.google.light.server.constants.OAuth2ProviderEnum;
 import com.google.light.server.constants.OAuth2ProviderService;
+import com.google.light.server.constants.RequestParamKeyEnum;
 import com.google.light.server.manager.implementation.oauth2.owner.OAuth2OwnerTokenManagerFactory;
 import com.google.light.server.manager.interfaces.OAuth2OwnerTokenManager;
 import com.google.light.server.manager.interfaces.PersonManager;
@@ -70,7 +71,6 @@ public class TestCredentialBackupServlet extends HttpServlet {
   private OAuth2OwnerTokenManager googLoginTokenManager;
   private OAuth2OwnerTokenManager googDocTokenManager;
   private final String providerUserId = "115639870677665060321";
-  private final String email = "unit-test1@myopenedu.com";
   private PersonManager personManager;
 
   @Inject
@@ -81,6 +81,7 @@ public class TestCredentialBackupServlet extends HttpServlet {
 
   @Override
   public void service(HttpServletRequest request, HttpServletResponse response) {
+    String email = checkNotNull(request.getParameter(RequestParamKeyEnum.EMAIL.get()));
     if (LightEnvEnum.getLightEnv() != LightEnvEnum.DEV_SERVER) {
       /*
        *  Even though we allow instantiation of this servlet for Test, we dont allow
@@ -129,6 +130,7 @@ public class TestCredentialBackupServlet extends HttpServlet {
    */
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) {
+    String email = checkNotNull(request.getParameter(RequestParamKeyEnum.EMAIL.get()));
     checkArgument(1 == OAuth2ProviderEnum.values().length, 
         "If you add more providers, add code to take backup here.");
     

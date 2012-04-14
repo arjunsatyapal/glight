@@ -18,8 +18,13 @@ package com.google.light.server.persistence.entity.person;
 import static com.google.light.testingutils.TestingUtils.getRandomEmail;
 import static com.google.light.testingutils.TestingUtils.getRandomPersonId;
 import static com.google.light.testingutils.TestingUtils.getRandomString;
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertNotNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+
+import org.junit.Before;
+import org.junit.Test;
 
 import com.google.light.server.dto.person.PersonDto;
 import com.google.light.server.exception.unchecked.BlankStringException;
@@ -27,8 +32,6 @@ import com.google.light.server.exception.unchecked.InvalidPersonIdException;
 import com.google.light.server.persistence.entity.AbstractPersistenceEntityTest;
 import com.google.light.testingutils.TestingUtils;
 import com.googlecode.objectify.Key;
-import org.junit.Before;
-import org.junit.Test;
 
 /**
  * Test for {@link PersonEntity}.
@@ -36,10 +39,10 @@ import org.junit.Test;
  * @author Arjun Satyapal
  */
 public class PersonEntityTest extends AbstractPersistenceEntityTest {
-  private  Long personId;
-  private  String email;
-  private  String firstName;
-  private  String lastName;
+  private Long personId;
+  private String email;
+  private String firstName;
+  private String lastName;
 
   @Before
   public void setUp() {
@@ -65,7 +68,9 @@ public class PersonEntityTest extends AbstractPersistenceEntityTest {
     // Valid case is already tested.
 
     // Positive test : null personId should pass.
-    getEntityBuilderWithoutId().id(null).build();
+    PersonEntity entity = getEntityBuilderWithoutId().id(null).build();
+    assertNotNull(entity);
+    assertFalse("By default it should be false", entity.getAcceptedTos());
 
     // Negative test : zero personId
     try {
@@ -142,6 +147,7 @@ public class PersonEntityTest extends AbstractPersistenceEntityTest {
       .firstName(firstName)
       .lastName(lastName)
       .email(email)
+      .acceptedTos(false)
       .build();
     assertEquals(expectedDto, getEntityBuilderWithoutId().build().toDto());
     assertEquals(expectedDto, getEntityBuilderWithoutId().id(personId).build().toDto());

@@ -19,6 +19,7 @@ import static com.google.light.server.utils.GuiceUtils.getInstance;
 import static com.google.light.server.utils.GuiceUtils.isExpectedException;
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
 import static com.google.light.testingutils.TestingUtils.getInjectorByEnv;
+import static com.google.light.testingutils.TestingUtils.getMockSessionForTesting;
 import static com.google.light.testingutils.TestingUtils.getRandomEmail;
 import static com.google.light.testingutils.TestingUtils.getRandomPersonId;
 import static org.junit.Assert.assertEquals;
@@ -26,6 +27,11 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
+import javax.servlet.http.HttpSession;
+
+import org.junit.Test;
+import org.mockito.Mockito;
 
 import com.google.inject.Injector;
 import com.google.inject.ProvisionException;
@@ -35,9 +41,6 @@ import com.google.light.server.exception.unchecked.InvalidPersonIdException;
 import com.google.light.server.exception.unchecked.httpexception.PersonLoginRequiredException;
 import com.google.light.server.manager.interfaces.PersonManager;
 import com.google.light.server.persistence.entity.person.PersonEntity;
-import javax.servlet.http.HttpSession;
-import org.junit.Test;
-import org.mockito.Mockito;
 
 /**
  * Tests for {@link PersonManagerImpl}
@@ -78,10 +81,10 @@ public class PersonManagerImplTest extends AbstractLightServerTest {
   }
 
   /**
-   * Test for {@link PersonManagerImpl#createPerson(PersonEntity)}
+   * Test for {@link PersonManagerImpl#create(PersonEntity)}
    */
   @Test
-  public void test_createPerson() throws Exception {
+  public void test_create() throws Exception {
     // Success Testing.
     // we dont want to use TestEmail as two differnt person need to have two different emails.
     String email1 = getRandomEmail();
@@ -127,12 +130,48 @@ public class PersonManagerImplTest extends AbstractLightServerTest {
     }
 
   }
-
+  
   /**
-   * Test for {@link PersonManagerImpl#getPerson(Long)}
+   * Test for {@link PersonManagerImpl#update(PersonEntity)}
    */
   @Test
-  public void test_getPerson() throws Exception {
+  public void test_update() throws Exception {
+    // Success Testing.
+    String email = getRandomEmail(); // client side provided email which is different from testEmail
+    assertTrue(!email.equals(testEmail));
+    PersonEntity person = getEntityBuilder().acceptedTos(true).email(email).build();
+    PersonEntity afterUpdate = personManager.update(person);
+
+    assertNotNull(afterUpdate.getId());
+    checkPositiveLong(afterUpdate.getId(), "expected positive id.");
+    assertEquals(testFirstName, afterUpdate.getFirstName());
+    assertEquals(testLastName, afterUpdate.getLastName());
+    assertEquals(testEmail, afterUpdate.getEmail());
+    
+    // important to test, because if it is not persisted the user might
+    // be trapped into being redirected to the register page for
+    // every page he access loggining in.
+    assertTrue(afterUpdate.getAcceptedTos());
+    
+
+    // Negative Testing : Try to create Person with Id. This should fail.
+    try {
+      PersonEntity dummy = getEntityBuilder().id(getRandomPersonId()).build();
+
+      personManager.create(dummy);
+      fail("Should have failed.");
+    } catch (IdShouldNotBeSet e) {
+      // Expected.
+    }
+
+  }
+
+
+  /**
+   * Test for {@link PersonManagerImpl#get(Long)}
+   */
+  @Test
+  public void test_get() throws Exception {
     PersonEntity person = getEntityBuilder().build();
 
     PersonEntity savedPerson = personManager.create(person);
@@ -163,10 +202,10 @@ public class PersonManagerImplTest extends AbstractLightServerTest {
   }
 
   /**
-   * Test for {@link PersonManager#getPersonByEmail(String)}
+   * Test for {@link PersonManager#getByEmail(String)}
    */
   @Test
-  public void test_getPersonByEmail() throws Exception {
+  public void test_getByEmail() throws Exception {
     // Dont use testEmail for full control on this test.
     String email1 = getRandomEmail();
     
@@ -208,5 +247,22 @@ public class PersonManagerImplTest extends AbstractLightServerTest {
 
     // Negative Testing : Check for non-existing email.
     assertNull(personManager.getByEmail(getRandomEmail()));
+  }
+  
+  /**
+   * Test for {@link PersonManagerImpl#getCurrent()}
+   */
+  public void test_getCurrent() {
+    
+    // If the logged person was created in the datastore
+    assertEquals(testPerson, personManager.getCurrent());
+    
+    // If not:
+    testSession = getMockSessionForTesting(defaultEnv, defaultProviderService,
+        testProviderUserId, null /*personId*/, testEmail);
+    Injector tempInjector = getInjectorByEnv(defaultEnv, testSession);
+    PersonManager tempPersonManager = tempInjector.getInstance(PersonManager.class);
+    assertEquals(null, tempPersonManager.getCurrent());
+    
   }
 }

@@ -12,6 +12,9 @@
  */
 package com.google.light.server.constants;
 
+
+import static com.google.light.server.servlets.path.ServletPathEnum.SEARCH_PAGE;
+
 import com.google.light.server.dto.search.SearchRequestDto;
 
 /**
@@ -27,6 +30,8 @@ public class LightConstants {
   
   
   public static int TASK_QUEUUE_TIMEOUT_IN_SEC = 10 * 60; // Seconds.
+
+  public static String REDIRECT_PATH_AFTER_LOGOUT = SEARCH_PAGE.get();
 
   public static final int SEARCH_RESULTS_PER_PAGE = 10;
 

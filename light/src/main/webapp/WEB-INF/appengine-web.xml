@@ -8,7 +8,7 @@
         http://googleappengine.googlecode.com/svn/branches/1.2.1/java/docs/appengine-web.xsd">
 
     <application>light-qa</application>
-    <version>1</version>
+    <version>walter</version>
 
     <system-properties>
         <property
