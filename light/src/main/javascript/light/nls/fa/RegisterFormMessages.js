@@ -25,5 +25,6 @@ window.define({
   tosTextareaContent: "اصطلاحات حقوقی",
   tosCheckboxLabel: "من با شرایط استفاده از خدمات موافقم",
   submitButton: "ثبت نام",
-  tosTooltipError: "شما باید به شرایط و ضوابط خدمات قبل از اقدام به توافق برسند"
+  tosTooltipError: "شما باید به شرایط و ضوابط خدمات قبل از اقدام به توافق برسند",
+  warnError: 'مشکل با سرور است.لطفا دوباره سعی کنید.'
 });

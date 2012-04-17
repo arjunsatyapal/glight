@@ -26,5 +26,6 @@ window.define({
   tosTextareaContent: 'Coisas legais',
   tosCheckboxLabel: 'Eu aceito os Termos de Serviço',
   submitButton: 'Registrar',
-  tosTooltipError: 'Você deve aceitar os Termos de Serviço para prosseguir.'
+  tosTooltipError: 'Você deve aceitar os Termos de Serviço para prosseguir.',
+  warnError: ''
 });
