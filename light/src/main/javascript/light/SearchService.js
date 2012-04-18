@@ -14,8 +14,9 @@
  * the License.
  */
 define(['dojo/_base/declare', 'dojo', 'dojo/_base/xhr', 'dojo/_base/lang',
-        'light/utils/LanguageUtils'],
-        function(declare, dojo, xhr, lang, LanguageUtils) {
+        'light/utils/LanguageUtils', 'light/builders/SearchRequestBuilder'],
+        function(declare, dojo, xhr, lang, LanguageUtils,
+                 SearchRequestBuilder) {
   return declare('light.SearchService', null, {
 
     /**
@@ -28,8 +29,7 @@ define(['dojo/_base/declare', 'dojo', 'dojo/_base/xhr', 'dojo/_base/lang',
      */
     search: function(state) {
       // Adding the clientLanguageCode to the request
-      request = lang.clone(state);
-      request['clientLanguageCode'] = LanguageUtils.currentLocale;
+      request = new SearchRequestBuilder(state).clientLanguageCode(LanguageUtils.currentLocale);
 
       /*
        * TODO(waltercacau): Wrap the original dojo promise from the

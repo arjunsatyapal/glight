@@ -22,10 +22,11 @@ define(['dojo/_base/declare', 'light/views/AbstractLightView',
         'dojo/string',
         'dojo/dom-construct',
         'light/utils/LanguageUtils', 
+        'dojo/dnd/Source',
         'dojo/i18n!light/nls/SearchPageMessages'],
         function(declare, AbstractLightView, itemTemplate, TemplateUtils,
                  SearchRouter, htmlEntities, lang, string,
-                 domConstruct, LanguageUtils, messages) {
+                 domConstruct, LanguageUtils, dndSource, messages) {
   return declare('light.views.SearchResultListView', AbstractLightView, {
     clear: function() {
       domConstruct.empty(this.domNode);
@@ -61,10 +62,22 @@ define(['dojo/_base/declare', 'light/views/AbstractLightView',
       } else {
 
         // Showing items
-        for (var i = 0; i < len; i++) {
-          this.domNode.appendChild(TemplateUtils.toDom(itemTemplate, items[i]));
-        }
-
+        var searchResultListDomNode = domConstruct.toDom("<div></div>");
+        this.domNode.appendChild(searchResultListDomNode);
+        var searchResultList = new dndSource(searchResultListDomNode, {
+          accept: [],
+          selfAccept: false,
+          copyOnly: true,
+          selfCopy: false,
+          creator: function(item) {
+            return {
+              node: TemplateUtils.toDom(itemTemplate, item),
+              data: item,
+              type: ['searchResult']
+            };
+          }
+        });
+        searchResultList.insertNodes(false /* addSelected */, items);
 
         var pageInfo = domConstruct.toDom('<div class="searchInfo"></div>');
 

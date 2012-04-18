@@ -19,10 +19,12 @@ define(['light/views/SearchBarView', 'light/SearchRouter',
         'light/views/SearchResultListView', 'light/SearchService',
         'light/views/LoginToolbarView',
         'light/controllers/LoginToolbarController',
+        'light/views/LearningPathEditorSidebarView',
         'dojo/domReady!'],
         function(SearchBarView, SearchRouter, SearchBarController,
                  SearchResultListController, SearchResultListView,
-                 SearchService, LoginToolbarView, LoginToolbarController) {
+                 SearchService, LoginToolbarView, LoginToolbarController,
+                 LearningPathEditorSidebarView) {
   var searchResultListView = new SearchResultListView({}, 'searchResults');
   var searchResultListController =
     new SearchResultListController(new SearchService());
@@ -51,5 +53,7 @@ define(['light/views/SearchBarView', 'light/SearchRouter',
   loginToolbarController.setView(loginToolbarView);
   loginToolbarView.setController(loginToolbarController);
   loginToolbarController.setup();
+  
+  learningPathEditorSidebarView = new LearningPathEditorSidebarView({}, 'sidebar');
 
 });

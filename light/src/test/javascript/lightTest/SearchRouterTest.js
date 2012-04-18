@@ -48,6 +48,11 @@ define(['dojo/_base/connect', 'dojo/_base/declare', 'light/utils/URLUtils',
         TestUtils.validateSchema(router.DEFAULT_SEARCH_STATE,
                 SearchStateSchema);
       });
+      it('should not cause searchStateToHash to throw', function() {
+        expect(function() {
+          SearchRouter.searchStateToHash(router.DEFAULT_SEARCH_STATE);
+        }).not.toThrow();
+      })
     });
 
     describe('constructor', function() {

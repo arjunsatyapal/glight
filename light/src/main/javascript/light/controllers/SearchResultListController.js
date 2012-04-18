@@ -14,10 +14,11 @@
  * the License.
  */
 define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
-        'light/enums/SearchEventsEnum', 'dojo/_base/connect', 'light/RegexCommon'],
+        'light/enums/SearchEventsEnum', 'dojo/_base/connect',
+        'light/RegexCommon'],
         function(declare, AbstractLightController, SearchEventsEnum,
                  connect, RegexCommon) {
-  
+
   return declare('light.controller.SearchResultListController',
           AbstractLightController, {
     /** @lends light.controller.SearchResultListController# */
@@ -38,7 +39,7 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
       connect.subscribe(SearchEventsEnum.SEARCH_STATE_CHANGED, this,
               this._onSearchStateChange);
     },
-    
+
     /**
      * Handler for search state change events.
      */
@@ -51,9 +52,10 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
       if (searchState.query.match(RegexCommon.SPACES_ONLY)) {
         view.clear();
       } else {
-        this.searchService.search(searchState).then(function(data) {
-          view.show(searchState, data);
-        });
+        this.searchService.search(searchState)
+            .then(function(data) {
+              view.show(searchState, data);
+            });
       }
 
     }

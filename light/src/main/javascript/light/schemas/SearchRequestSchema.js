@@ -14,12 +14,12 @@
  * the License.
  */
 /**
- * For convenience, SearchState has almost the same format of a search request,
+ * For convenience, SearchRequest has almost the same format of a search state,
  * except for the clientLanguageCode parameter, which is missing in the
  * SearchState.
  */
 define({
-  description: 'light/schemas/SearchStateSchema',
+  description: 'light/schemas/SearchRequestSchema',
   type: 'object',
   properties: {
     query: {
@@ -31,5 +31,9 @@ define({
       minimum: 1,
       required : true
     },
+    clientLanguageCode: {
+      type: 'string',
+      required : true
+    }
   }
 });

@@ -76,7 +76,12 @@ define(['dojo/has', 'dojo/query', 'dojo/dom-construct', 'dojo',
     load_css(require.toUrl('dojo/resources/dojo.css'));
 
     // Adding the dojo theme class to the body element
-    $('body')[0].setAttribute('class', 'claro');
+    var body = $('body')[0];
+    var currentClassAttr = body.getAttribute('class');
+    if(currentClassAttr)
+      body.setAttribute('class', 'claro '+currentClassAttr);
+    else
+      body.setAttribute('class', 'claro');
 
   });
 });

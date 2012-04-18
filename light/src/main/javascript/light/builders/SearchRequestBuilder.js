@@ -13,25 +13,22 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-define(['dojo/_base/declare', 'dijit/_Widget'], function(declare, _Widget) {
+define(['light/utils/BuilderUtils',
+        'dojo/has!light-dev?light/schemas/SearchRequestSchema'],
+        function(BuilderUtils, schema) {
   /**
-   * Base abstract class for all light views.
-   * 
+   * Builder for the Search State
+   *
    * @class
-   * @name light.views.AbstractLightView
+   * @name light.builders.SearchRequestBuilder
    */
-  return declare('light.views.AbstractLightView', _Widget, {
-    /** @lends light.views.AbstractLightView# */
-
-    /**
-     * Defines the controller for this view.
-     * 
-     * @param {light.controllers.AbstractLightController}
-     *          controller Controller.
-     */
-    setController: function(controller) {
-      this._controller = controller;
-    }
-
-  });
+  return BuilderUtils.createBuilderClass(
+      'light.builders.SearchRequestBuilder',
+      ['query', 'page', 'clientLanguageCode'],
+      {
+        query: '',
+        page: 1
+      },
+      schema
+  );
 });

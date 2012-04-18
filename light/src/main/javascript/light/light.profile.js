@@ -45,14 +45,21 @@ var profile = (function() {
       location: './light'
     }, {
       name: 'dojo',
-      location: './external/djk/dojo'
+      location: './external/djk/dojo',
+      destLocation: './external/djk/dojo'
     }, {
       name: 'dijit',
-      location: './external/djk/dijit'
+      location: './external/djk/dijit',
+      destLocation: './external/djk/dijit'
     }, {
       name: 'dojox',
-      location: './external/djk/dojox'
+      location: './external/djk/dojox',
+      destLocation: './external/djk/dojox'
     }],
+    
+    files: [
+      []
+    ],
 
     basePath: '..',
 
@@ -71,13 +78,13 @@ var profile = (function() {
           location: '/js/light'
         }, {
           name: 'dojo',
-          location: '/js/dojo'
+          location: '/js/external/djk/dojo'
         }, {
           name: 'dijit',
-          location: '/js/dijit'
+          location: '/js/external/djk/dijit'
         }, {
           name: 'dojox',
-          location: '/js/dojox'
+          location: '/js/external/djk/dojox'
         }]
       };
       if(this.lightPreload && this.lightPreload.locale) {

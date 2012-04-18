@@ -773,16 +773,8 @@
                   <targetPath>js/light</targetPath>
                 </resource>
                 <resource>
-                  <directory>${dojo.path}/dojo</directory>
-                  <targetPath>js/dojo</targetPath>
-                </resource>
-                <resource>
-                  <directory>${dojo.path}/dojox</directory>
-                  <targetPath>js/dojox</targetPath>
-                </resource>
-                <resource>
-                  <directory>${dojo.path}/dijit</directory>
-                  <targetPath>js/dijit</targetPath>
+                  <directory>${basedir}/src/main/javascript/external</directory>
+                  <targetPath>js/external</targetPath>
                 </resource>
               </webResources>
             </configuration>
@@ -882,9 +874,10 @@
                     <delete includeemptydirs="true">
                       <fileset dir="${dojo.build.release.location}">
                         <exclude name="light/build/**" />
-                        <exclude name="dijit/themes/**" />
-                        <exclude name="dijit/icons/**" />
-                        <exclude name="dojo/resources/**" />
+                        <exclude name="external/djk/dijit/themes/**" />
+                        <exclude name="external/djk/dijit/icons/**" />
+                        <exclude name="external/djk/dojo/resources/**" />
+                        <exclude name="external/*.js"></exclude>
                         <exclude name="build-report.txt" />
                       </fileset>
                     </delete>

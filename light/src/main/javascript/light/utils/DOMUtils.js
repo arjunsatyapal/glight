@@ -40,6 +40,19 @@ define(['dojo/_base/declare', 'dojo/number',
     },
 
     /**
+     * Returns a textual representation of a HTML string or
+     * a DOM Node.
+     *
+     * @param {string|Node} node HTML string or Node.
+     * @return {string} Text representation.
+     */
+    asText: function(node) {
+      if (typeof node == 'string')
+        node = domConstruct.toDom(node);
+      return node.textContent || node.innerText || '';
+    },
+
+    /**
      * Hides a DOM node.
      *
      * @param {Node} node Node.

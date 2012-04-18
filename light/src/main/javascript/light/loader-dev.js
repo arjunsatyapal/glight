@@ -30,12 +30,12 @@ dojoConfig = {
         name: 'light',
         location: '/js/light'
     },
-    { name: 'dojo', location: '/js/dojo' },
-    { name: 'dijit', location: '/js/dijit' },
-    { name: 'dojox', location: '/js/dojox' }
+    { name: 'dojo', location: '/js/external/djk/dojo' },
+    { name: 'dijit', location: '/js/external/djk/dijit' },
+    { name: 'dojox', location: '/js/external/djk/dojox' }
     ]
 };
-document.write('<script src="/js/dojo/dojo.js"></script>');
+document.write('<script src="/js/external/djk/dojo/dojo.js"></script>');
 // window.onload to the rescue! IE was not getting the older
 // loading method of writing a script tag with the following require code.
 window.onload = function() {

@@ -14,9 +14,10 @@
  * the License.
  */
 define(['dojo/_base/connect', 'dojo/_base/declare', 'light/utils/URLUtils',
-        'dojo', 'light/enums/SearchEventsEnum', 'light/RegexCommon'],
+        'dojo', 'light/enums/SearchEventsEnum', 'light/RegexCommon',
+        'light/builders/SearchStateBuilder'],
         function(connect, declare, URLUtils, dojo,
-                 SearchEventsEnum, RegexCommon) {
+                 SearchEventsEnum, RegexCommon, SearchStateBuilder) {
 
   /** @exports SearchRouter as light.SearchRouter */
   var SearchRouter = declare('light.SearchRouter', null, {
@@ -48,10 +49,7 @@ define(['dojo/_base/connect', 'dojo/_base/declare', 'light/utils/URLUtils',
      *
      * @const
      */
-    DEFAULT_SEARCH_STATE: {
-      page: 1,
-      query: ''
-    },
+    DEFAULT_SEARCH_STATE: new SearchStateBuilder().build(),
 
     /**
      * Wire's this object to the dojo event system so it can
@@ -165,7 +163,7 @@ define(['dojo/_base/connect', 'dojo/_base/declare', 'light/utils/URLUtils',
       throw new Error('Query is not a string');
     }
 
-    return data;
+    return new SearchStateBuilder(data).build();
   }
 
   return SearchRouter;

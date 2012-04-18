@@ -150,6 +150,8 @@ public class LoginITCase {
     driver.findElement(By.id("Passwd")).clear();
     driver.findElement(By.id("Passwd")).sendKeys(password);
     driver.findElement(By.id("signIn")).click();
+    
+    SeleniumUtils.clickIfExists(driver, By.id("choose-account-0"));
 
     // Now revoking access
     driver.findElement(By.cssSelector("#nav-security > div.IurIzb")).click();
