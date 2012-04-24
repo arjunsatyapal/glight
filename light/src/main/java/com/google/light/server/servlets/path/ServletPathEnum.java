@@ -61,6 +61,7 @@ public enum ServletPathEnum {
          false, false, false),
 
   // Client Side pages
+  MYDASH_PAGE(LightGenericJSPServlet.class, "/mydash", false, false, false),
   SEARCH_PAGE(LightGenericJSPServlet.class, "/search", false, false, false),
   REGISTER_PAGE(LightGenericJSPServlet.class, "/register", false, false, false),
   

@@ -32,51 +32,71 @@ define(['dojo/_base/declare', 'dojo/_base/lang',
        *
        * @param {string} className Fully qualified class name.
        * @param {Array.<string>} fields List of fields.
-       * @param {Object=} defaults Map of default values for the fields.
+       * @param {Object=} params
+       *    Optional params like <code>schema</code> for
+       *    validation during development and map of <code>defaults</code> values.
        * @param {string|Object=} schema A schema or a JSON string of the schema.
        * @return {*} A Builder Class.
        */
-      createBuilderClass: function(className, fields, defaults, schema) {
-        if (has('light-dev') && typeof schema == "string") {
-          schema = dojo.fromJson(schema);
+      createBuilderClass: function(className, fields, params) {
+        if (has('light-dev') && typeof params.schema == 'string') {
+          params.schema = dojo.fromJson(params.schema);
         }
-        if (!defaults) {
-          defaults = {};
+        if (!params.defaults) {
+          params.defaults = {};
+        }
+        if (!params.normalize) {
+          params.defaults = {};
+        }
+        if (!params.validate) {
+          params.validate = {};
         }
 
         var proto = {
-          constructor: function(rawData) {
-            this._data = lang.clone(defaults);
+          constructor: function(rawData, mightHaveExtraKeys) {
+            this._data = lang.clone(params.defaults);
             if (rawData) {
 
               // During development, being more strict
-              if (has('light-dev')) {
+              if (has('light-dev') && !mightHaveExtraKeys) {
                 for (var key in rawData) {
                   if (rawData.hasOwnProperty(key) &&
                           array.indexOf(fields, key) == -1) {
-                    throw new Error(className + ': Invalid key ' + key);
+                    throw new Error(params.className + ': Invalid key ' + key);
                   }
                 }
               }
 
               var data = this._data;
               array.forEach(fields, function(field) {
-                data[field] = rawData[field];
+                if (rawData.hasOwnProperty(field)) {
+                  data[field] = rawData[field];
+                }
               });
             }
           },
+
           build: function() {
-            if (has('light-dev') && schema) {
-              if (!jsonSchema.validate(this._data, schema).valid) {
+            
+            if (has('light-dev') && params.schema) {
+              var validationData = jsonSchema.validate(this._data, params.schema);
+              if (!validationData.valid) {
+                console.log(validationData);
                 throw new Error(className +
                     ': Built object does not conform to schema' +
-                    (schema.description ? ' ' + schema.description : '') +
+                    (params.schema.description ? ' ' + params.schema.description : '') +
                     ': ' + dojo.toJson(this._data));
               }
             }
             return this._data;
           }
         };
+        if(params.normalize) {
+          proto.normalize = function() {
+            params.normalize.apply(this._data, []);
+            return this;
+          };
+        }
 
         // Creating getter/setter
         array.forEach(fields, function(field) {

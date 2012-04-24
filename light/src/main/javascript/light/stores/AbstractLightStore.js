@@ -13,81 +13,17 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-define(['dojo/_base/declare', 'dojo', 'dojox', 'dojox/data/JsonRestStore'],
-        function(declare, dojo, dojox, JsonRestStore) {
-  /**
-   * Creates custom getRequest that accepts/adds custom headers
-   *
-   * <p>This part is basically a copy of dojox.rpc.Rest from Dojo 1.7.2 inner
-   * function getRequest slightly modified.
-   * {@link http://svn.dojotoolkit.org/src/tags/release-1.7.2/dojox/rpc/Rest.js}
-   *
-   * <p>Since Dojo does not have custom headers
-   * implemented on its Rest and gives us no access to extend
-   * this inner getRequest function, we have to completely replace it.
-   *
-   * @param {string} path Resource path (eg. /api/person).
-   * @param {string} lightAPIVersion API version to communicate with our
-   *                 REST backend.
-   * @return {Function} The custom getRequest function.
-   */
-  function createCustomGetRequest(path, lightAPIVersion) {
-    var isJson = true;
-    return function getRequest(id, args) {
-      if (dojo.isObject(id)) {
-        id = dojo.objectToQuery(id);
-        id = id ? '?' + id : '';
-      }
-      if (args && args.sort && !args.queryStr) {
-        id += (id ? '&' : '?') + 'sort(';
-        for (var i = 0; i < args.sort.length; i++) {
-          var sort = args.sort[i];
-          id += (i > 0 ? ',' : '') + (sort.descending ? '-' : '+') +
-              encodeURIComponent(sort.attribute);
-        }
-        id += ')';
-      }
-      var request = {
-        url: path + (id == null ? '' : id),
-        handleAs: isJson ? 'json' : 'text',
-        contentType: isJson ? 'application/json' : 'text/plain',
-        sync: dojox.rpc._sync,
-        headers: {
-          Accept: isJson ? 'application/json,application/javascript' : '*/*',
-
-          // LightMod: The next header was not set in the original version.
-          // Light API Version
-          'X-Light-API-Version': lightAPIVersion
-
-          // TODO(waltercacau): Add X-CSRF-Token
-        }
-      };
-      if (args && (args.start >= 0 || args.count >= 0)) {
-        request.headers.Range = 'items=' + (args.start || '0') + '-' +
-          (('count' in args && args.count != Infinity) ?
-            (args.count + (args.start || 0) - 1) : '');
-      }
-      dojox.rpc._sync = false;
-      return request;
-    };
-  }
-
-  return declare('light.stores.AbstractLightStore', JsonRestStore, {
+define(['dojo/_base/xhr', 'dojo/json', 'dojo/_base/declare', 'dojo/store/util/QueryResults'],
+        function(xhr, JSON, declare, QueryResults) {
+  return declare('light.stores.AbstractLightStore', null, {
     /** @lends light.stores.AbstractLightStore# */
 
     /**
-     * This is the base abstract class for all Light stores.
+     * This is the base abstract class for all Light JSONRest stores.
      *
      * <p>It takes care of setting the right headers for communicating
      * with the Light backend.
      *
-     * <p>Make sure when you subclass this class that you call
-     * the parent constructor using this.inherited(arguments),
-     * otherwise the store will not be properly setup. We are
-     * using manual chaining for the constructors, so the
-     * superclass constructor is not called automatically.
-     *
-     * @extends dojox.data.JsonRestStore
      * @constructs
      */
     constructor: function(options) {
@@ -100,19 +36,159 @@ define(['dojo/_base/declare', 'dojo', 'dojox', 'dojox/data/JsonRestStore'],
       if (!options.target.match(/\/$/))
         options.target += '/';
 
-      this.service = dojox.rpc.JsonRest.services[options.target] ||
-          dojox.rpc.Rest(options.target, true, null,
-                  createCustomGetRequest(options.target,
-                          true, this.lightAPIVersion));
-
-      this.inherited(arguments, [options]);
+      declare.safeMixin(this, options);
     },
 
     lightAPIVersion: '1.0',
 
-    // Chain configuration should be at the end for JSDoc to work.
-    '-chains-': {
-      constructor: 'manual'
+    addLightHeaders: function(headers) {
+      // TODO(waltercacau): Add CSFR protection here
+      headers['X-Light-API-Version'] = this.lightAPIVersion;
+      return headers;
+    },
+
+    /*
+     * The rest of this class was borrowed from dojo.store.JsonRest with a few
+     * modifications to add custom headers.
+     *
+     * TODO(waltercacau): File a bug in dojo track about this.
+     *
+     * Unfortunately we have the requirement of adding custom headers to all
+     * our JSON Rest based calls, and dojo.store.JsonRest didn't gave the options we needed
+     * for all methods.
+     */
+    // target: String
+    //    The target base URL to use for all requests to the server. This string will be
+    //  prepended to the id to generate the URL (relative or absolute) for requests
+    //  sent to the server
+    target: '',
+    // idProperty: String
+    //    Indicates the property to use as the identity property. The values of this
+    //    property should be unique.
+    idProperty: 'id',
+    // sortParam: String
+    //    The query parameter to used for holding sort information. If this is omitted, than
+    //    the sort information is included in a functional query token to avoid colliding
+    //    with the set of name/value pairs.
+
+    get: function(id, options) {
+      //  summary:
+      //    Retrieves an object by its identity. This will trigger a GET request to the server using
+      //    the url `this.target + id`.
+      //  id: Number
+      //    The identity to use to lookup the object
+      //  returns: Object
+      //    The object in the store that matches the given id.
+      var headers = options || {};
+      headers.Accept = this.accepts;
+      return xhr('GET', {
+        url: this.target + id,
+        handleAs: 'json',
+        headers: this.addLightHeaders(headers)
+      });
+    },
+    // accepts: String
+    //    Defines the Accept header to use on HTTP requests
+    accepts: 'application/javascript, application/json',
+    getIdentity: function(object) {
+      // summary:
+      //    Returns an object's identity
+      // object: Object
+      //    The object to get the identity from
+      //  returns: Number
+      return object[this.idProperty];
+    },
+    put: function(object, options) {
+      // summary:
+      //    Stores an object. This will trigger a PUT request to the server
+      //    if the object has an id, otherwise it will trigger a POST request.
+      // object: Object
+      //    The object to store.
+      // options: dojo.store.api.Store.PutDirectives?
+      //    Additional metadata for storing the data.  Includes an "id"
+      //    property if a specific id is to be used.
+      //  returns: Number
+      options = options || {};
+      var id = ('id' in options) ? options.id : this.getIdentity(object);
+      var hasId = typeof id != 'undefined';
+      return xhr(hasId && !options.incremental ? 'PUT' : 'POST', {
+          url: hasId ? this.target + id : this.target,
+          postData: JSON.stringify(object),
+          handleAs: 'json',
+          headers: this.addLightHeaders({
+            'Content-Type': 'application/json',
+            Accept: this.accepts,
+            'If-Match': options.overwrite === true ? '*' : null,
+            'If-None-Match': options.overwrite === false ? '*' : null
+          })
+        });
+    },
+    add: function(object, options) {
+      // summary:
+      //    Adds an object. This will trigger a PUT request to the server
+      //    if the object has an id, otherwise it will trigger a POST request.
+      // object: Object
+      //    The object to store.
+      // options: dojo.store.api.Store.PutDirectives?
+      //    Additional metadata for storing the data.  Includes an "id"
+      //    property if a specific id is to be used.
+      options = options || {};
+      options.overwrite = false;
+      return this.put(object, options);
+    },
+    remove: function(id) {
+      // summary:
+      //    Deletes an object by its identity. This will trigger a DELETE request to the server.
+      // id: Number
+      //    The identity to use to delete the object
+      return xhr('DELETE', {
+        url: this.target + id,
+        headers: this.addLightHeaders({})
+      });
+    },
+    query: function(query, options) {
+      // summary:
+      //    Queries the store for objects. This will trigger a GET request to the server, with the
+      //    query added as a query string.
+      // query: Object
+      //    The query to use for retrieving objects from the store.
+      //  options: dojo.store.api.Store.QueryOptions?
+      //    The optional arguments to apply to the resultset.
+      //  returns: dojo.store.api.Store.QueryResults
+      //    The results of the query, extended with iterative methods.
+      var headers = {Accept: this.accepts};
+      options = options || {};
+
+      if (options.start >= 0 || options.count >= 0) {
+        headers.Range = 'items=' + (options.start || '0') + '-' +
+          (('count' in options && options.count != Infinity) ?
+            (options.count + (options.start || 0) - 1) : '');
+      }
+      if (query && typeof query == 'object') {
+        query = xhr.objectToQuery(query);
+        query = query ? '?' + query : '';
+      }
+      if (options && options.sort) {
+        var sortParam = this.sortParam;
+        query += (query ? '&' : '?') + (sortParam ? sortParam + '=' : 'sort(');
+        for (var i = 0; i < options.sort.length; i++) {
+          var sort = options.sort[i];
+          query += (i > 0 ? ',' : '') + (sort.descending ? '-' : '+') + encodeURIComponent(sort.attribute);
+        }
+        if (!sortParam) {
+          query += ')';
+        }
+      }
+      var results = xhr('GET', {
+        url: this.target + (query || ''),
+        handleAs: 'json',
+        headers: this.addLightHeaders(headers)
+      });
+      results.total = results.then(function() {
+        var range = results.ioArgs.xhr.getResponseHeader('Content-Range');
+        return range && (range = range.match(/\/(.*)/)) && +range[1];
+      });
+      return QueryResults(results);
     }
 
   });

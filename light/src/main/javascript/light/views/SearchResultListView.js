@@ -16,17 +16,20 @@
 define(['dojo/_base/declare', 'light/views/AbstractLightView',
         'dojo/text!light/templates/SearchResultListItemTemplate.html',
         'light/utils/TemplateUtils',
-        'light/SearchRouter',
         'dojox/html/entities',
         'dojo/_base/lang',
         'dojo/string',
         'dojo/dom-construct',
-        'light/utils/LanguageUtils', 
+        'light/utils/LanguageUtils',
+        'light/builders/SearchStateBuilder',
+        'light/utils/RouterManager',
+        'light/enums/EventsEnum',
         'dojo/dnd/Source',
         'dojo/i18n!light/nls/SearchPageMessages'],
         function(declare, AbstractLightView, itemTemplate, TemplateUtils,
-                 SearchRouter, htmlEntities, lang, string,
-                 domConstruct, LanguageUtils, dndSource, messages) {
+                 htmlEntities, lang, string,
+                 domConstruct, LanguageUtils, SearchStateBuilder, RouterManager,
+                 EventsEnum, dndSource, messages) {
   return declare('light.views.SearchResultListView', AbstractLightView, {
     clear: function() {
       domConstruct.empty(this.domNode);
@@ -37,9 +40,8 @@ define(['dojo/_base/declare', 'light/views/AbstractLightView',
 
       // Showing suggestions if any
       if (data.suggestion) {
-        var suggestionRequest = lang.mixin(lang.clone(request), {
-          query: data.suggestionQuery
-        });
+        var suggestionRequest = new SearchStateBuilder()
+            .query(data.suggestionQuery).build();
 
         this.domNode.appendChild(TemplateUtils.toDom(
                 '<div class="searchInfo">' +
@@ -49,7 +51,8 @@ define(['dojo/_base/declare', 'light/views/AbstractLightView',
                 '</div>',
                 {
                   suggestion: data.suggestion,
-                  link: '#' + SearchRouter.searchStateToHash(suggestionRequest)
+                  link: RouterManager.buildLocalLink(
+                          EventsEnum.SEARCH_STATE_CHANGED, suggestionRequest)
                 }));
       }
 
@@ -62,7 +65,7 @@ define(['dojo/_base/declare', 'light/views/AbstractLightView',
       } else {
 
         // Showing items
-        var searchResultListDomNode = domConstruct.toDom("<div></div>");
+        var searchResultListDomNode = domConstruct.toDom('<div></div>');
         this.domNode.appendChild(searchResultListDomNode);
         var searchResultList = new dndSource(searchResultListDomNode, {
           accept: [],
@@ -83,14 +86,14 @@ define(['dojo/_base/declare', 'light/views/AbstractLightView',
 
         // Prev page link
         if (request.page > 1) {
-          var prevPageRequest = lang.mixin(lang.clone(request), {
-            page: request.page - 1
-          });
+          var prevPageState = new SearchStateBuilder(request, true)
+              .page(request.page - 1).build();
           pageInfo.appendChild(TemplateUtils.toDom(
                   '<a href="${link}">${messages.previous}</a> | ',
                   {
                     messages: messages,
-                    link: '#' + SearchRouter.searchStateToHash(prevPageRequest)
+                    link: RouterManager.buildLocalLink(
+                            EventsEnum.SEARCH_STATE_CHANGED, prevPageState)
                   }));
         }
 
@@ -102,14 +105,14 @@ define(['dojo/_base/declare', 'light/views/AbstractLightView',
 
         // Next page link
         if (data.hasNextPage) {
-          var nextPageRequest = lang.mixin(lang.clone(request), {
-            page: request.page + 1
-          });
+          var nextPageState = new SearchStateBuilder(request, true)
+              .page(request.page + 1).build();
           pageInfo.appendChild(TemplateUtils.toDom(
                   ' | <a href="${link}">${messages.next}</a>',
                   {
                     messages: messages,
-                    link: '#' + SearchRouter.searchStateToHash(nextPageRequest)
+                    link: RouterManager.buildLocalLink(
+                            EventsEnum.SEARCH_STATE_CHANGED, nextPageState)
                   }));
         }
 

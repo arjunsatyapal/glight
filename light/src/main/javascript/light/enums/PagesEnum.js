@@ -19,34 +19,56 @@
  * @class
  * @name light.enums.PagesEnum
  */
-define({
-  /** @lends light.enums.PagesEnum */
+define(['light/enums/EventsEnum',
+        'light/builders/SearchStateBuilder'],
+        function(EventsEnum, SearchStateBuilder) {
+    return {
+    /** @lends light.enums.PagesEnum */
 
-  REGISTER: {
-    build: 'register',
-    main: 'RegisterMain',
-    path: '/register'
-  },
-  SEARCH: {
-    build: 'search',
-    main: 'SearchMain',
-    path: '/search'
-  },
+    REGISTER: {
+      build: 'register',
+      main: 'RegisterMain',
+      path: '/register',
+      states: []
+    },
+    SEARCH: {
+      build: 'search',
+      main: 'SearchMain',
+      path: '/search',
+      states: [
+        {
+          changeEvent: EventsEnum.SEARCH_STATE_CHANGED,
+          Builder: SearchStateBuilder
+        }
+      ]
+    },
+    MYDASH: {
+      build: 'mydash',
+      main: 'MyDashMain',
+      path: '/mydash',
+      states: [
+        {
+          changeEvent: EventsEnum.SEARCH_STATE_CHANGED,
+          Builder: SearchStateBuilder
+        }
+      ]
+    },
 
-  /**
-   * Get's the page for a given path.
-   *
-   * @param path
-   * @return
-   */
-  getByPath: function(path) {
-    // For now relying on the pattern applied
-    var pageMatch = path.match(/\/([a-zA-Z0-9-_]+)$/);
-    if (pageMatch) {
-      var page = this[pageMatch[1].toUpperCase()];
-      if (page)
-        return page;
+    /**
+     * Get's the page for a given path.
+     *
+     * @param path
+     * @return
+     */
+    getByPath: function(path) {
+      // For now relying on the pattern applied
+      var pageMatch = path.match(/\/([a-zA-Z0-9-_]+)$/);
+      if (pageMatch) {
+        var page = this[pageMatch[1].toUpperCase()];
+        if (page)
+          return page;
+      }
+      return null;
     }
-    return null;
-  }
+  };
 });

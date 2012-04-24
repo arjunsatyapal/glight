@@ -55,6 +55,15 @@ define(['dojo/_base/declare', 'dojo/hash'], function(declare, dojoHash) {
     },
 
     /**
+     * Redirects the user to the given URL/path replacing
+     * the current URL in the browsers history.
+     * @param {string} url URL/Path.
+     */
+    replace: function(urlOrPath) {
+      window.location.replace(urlOrPath);
+    },
+
+    /**
      * Return's the current path.
      *
      * Example: http://www.example.com/folder/page.html would return page.html

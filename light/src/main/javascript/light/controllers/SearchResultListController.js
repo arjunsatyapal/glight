@@ -14,9 +14,9 @@
  * the License.
  */
 define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
-        'light/enums/SearchEventsEnum', 'dojo/_base/connect',
+        'light/enums/EventsEnum', 'dojo/_base/connect',
         'light/RegexCommon'],
-        function(declare, AbstractLightController, SearchEventsEnum,
+        function(declare, AbstractLightController, EventsEnum,
                  connect, RegexCommon) {
 
   return declare('light.controller.SearchResultListController',
@@ -36,7 +36,7 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
      * watch for search state changes.
      */
     watch: function() {
-      connect.subscribe(SearchEventsEnum.SEARCH_STATE_CHANGED, this,
+      connect.subscribe(EventsEnum.SEARCH_STATE_CHANGED, this,
               this._onSearchStateChange);
     },
 

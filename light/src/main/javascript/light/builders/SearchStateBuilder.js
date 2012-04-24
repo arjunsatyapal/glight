@@ -14,21 +14,38 @@
  * the License.
  */
 define(['light/utils/BuilderUtils',
+        'light/RegexCommon',
         'dojo/has!light-dev?light/schemas/SearchStateSchema'],
-        function(BuilderUtils, schema) {
+        function(BuilderUtils, RegexCommon, schema) {
   /**
    * Builder for the Search State
    *
    * @class
-   * @name light.builders.SearchRequestBuilder
+   * @name light.builders.SearchStateBuilder
    */
   return BuilderUtils.createBuilderClass(
       'light.builders.SearchStateBuilder',
       ['query', 'page'],
       {
-        query: '',
-        page: 1
-      },
-      schema
+        defaults: {
+          query: '',
+          page: 1
+        },
+        schema: schema,
+        normalize: function() {
+          if (!(""+this.page).match(RegexCommon.INTEGER)) {
+            throw new Error('Page is not an integer');
+          }
+          this.page = parseInt(""+this.page);
+          if (this.page <= 0) {
+            throw new Error('Page is less then 1');
+          }
+          if (typeof this.query != 'string') {
+            throw new Error('Query is not a string');
+          }
+          return this;
+        }
+      }
+      
   );
 });

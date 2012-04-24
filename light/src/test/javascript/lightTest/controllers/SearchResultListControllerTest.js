@@ -15,11 +15,11 @@
  */
 define(['light/controllers/SearchResultListController', 'light/SearchService',
         'light/views/SearchResultListView', 'lightTest/TestUtils',
-        'dojo/_base/connect', 'light/enums/SearchEventsEnum',
+        'dojo/_base/connect', 'light/enums/EventsEnum',
         'light/schemas/SearchStateSchema'],
         function(SearchResultListController, SearchService,
                  SearchResultListView,
-                 TestUtils, connect, SearchEventsEnum, SearchStateSchema) {
+                 TestUtils, connect, EventsEnum, SearchStateSchema) {
 
   var ADDITION_QUERY_REQUEST = {
     query: 'addition',
@@ -64,7 +64,7 @@ define(['light/controllers/SearchResultListController', 'light/SearchService',
         controller.watch();
 
         expect(subscribeStub).toHaveBeenCalledWith(
-          SearchEventsEnum.SEARCH_STATE_CHANGED,
+          EventsEnum.SEARCH_STATE_CHANGED,
           controller, controller._onSearchStateChange
         );
 

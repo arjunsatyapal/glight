@@ -16,34 +16,47 @@
  define(['light/enums/PagesEnum', 'lightTest/TestUtils'],
         function(PagesEnum, TestUtils) {
    var SAMPLE_UNKOWN_PATH = 'SAMPLE_UNKOWN_PATH';
-   
+
    var enumNames = TestUtils.getEnumNames(PagesEnum);
 
    describe('light.enums.PagesEnum', function() {
-     
+
     describe('count', function() {
       it('should be ...', function() {
-        expect(enumNames.length).toBe(2);
+        expect(enumNames.length).toBe(3);
       });
     });
-    
+
     describe('values', function() {
       it('should be base on the name', function() {
-        for (var i=0, len = enumNames.length; i < len; i++) {
+        for (var i = 0, len = enumNames.length; i < len; i++) {
           var pageName = enumNames[i];
           var page = PagesEnum[enumNames[i]];
-          expect(page.path).toBe("/"+pageName.toLowerCase());
+          expect(page.path).toBe('/' + pageName.toLowerCase());
           expect(page.build).toBe(pageName.toLowerCase());
-          expect(page.main).toBe(pageName[0]+pageName.substr(1).toLowerCase()+"Main");
+          expect(page.main.toLowerCase()).toBe(pageName.toLowerCase() + 'main');
+          TestUtils.expectModuleToExist('light/main/' + page.main);
         }
       });
     });
-    
-    
+
+    describe('events default', function() {
+      it('should be valid', function() {
+        for (var i = 0, leni = enumNames.length; i < leni; i++) {
+          var page = PagesEnum[enumNames[i]];
+          for (var j = 0, lenj = page.states.length; j < lenj; j++) {
+            new page.states[j].Builder().build();
+          }
+        }
+      });
+    });
+
+
+
     describe('getByPath', function() {
       describe('when called with a known path', function() {
         it('should map to the correct enum value', function() {
-          for (var i=0, len = enumNames.length; i < len; i++) {
+          for (var i = 0, len = enumNames.length; i < len; i++) {
             var page = PagesEnum[enumNames[i]];
             expect(PagesEnum.getByPath(page.path)).toBe(page);
           }

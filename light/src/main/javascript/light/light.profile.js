@@ -181,7 +181,8 @@ var profile = (function() {
           'light/views/AbstractLightView',
           'light/controllers/AbstractLightController',
           'light/stores/AbstractLightStore',
-          'light/views/TemplatedLightView'
+          'light/views/TemplatedLightView',
+          'light/utils/PersonUtils'
         ],
         exclude: ['light/build/loader']
       },
@@ -196,6 +197,12 @@ var profile = (function() {
       'light/build/search': {
         include: [
           'light/main/SearchMain'
+        ],
+        exclude: ['light/build/loader', 'light/build/core']
+      },
+      'light/build/mydash': {
+        include: [
+          'light/main/MyDashMain'
         ],
         exclude: ['light/build/loader', 'light/build/core']
       }

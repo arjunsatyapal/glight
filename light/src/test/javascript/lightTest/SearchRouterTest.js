@@ -14,10 +14,10 @@
  * the License.
  */
 define(['dojo/_base/connect', 'dojo/_base/declare', 'light/utils/URLUtils',
-        'dojo', 'light/SearchRouter', 'light/schemas/SearchStateSchema',
-        'lightTest/TestUtils', 'light/enums/SearchEventsEnum'],
+        'dojo', 'light/routers/SearchRouter', 'light/schemas/SearchStateSchema',
+        'lightTest/TestUtils', 'light/enums/EventsEnum'],
         function(connect, declare, URLUtils, dojo, SearchRouter,
-                SearchStateSchema, TestUtils, SearchEventsEnum) {
+                SearchStateSchema, TestUtils, EventsEnum) {
 
   // Test inputs
   var SAMPLE_SEARCH_STATE = {
@@ -36,7 +36,7 @@ define(['dojo/_base/connect', 'dojo/_base/declare', 'light/utils/URLUtils',
     });
   });
 
-  describe('light.SearchRouter', function() {
+  describe('light.routers.SearchRouter', function() {
     var router;
 
     beforeEach(function() {
@@ -78,7 +78,7 @@ define(['dojo/_base/connect', 'dojo/_base/declare', 'light/utils/URLUtils',
           '/dojo/hashchange', router, router._onHashChange
         );
         expect(subscribeStub).toHaveBeenCalledWith(
-          SearchEventsEnum.SEARCH_STATE_CHANGED,
+          EventsEnum.SEARCH_STATE_CHANGED,
           router, router._onSearchStateChange
         );
         expect(_onHashChangeStub).toHaveBeenCalledWith(SAMPLE_HASH);
@@ -225,7 +225,7 @@ define(['dojo/_base/connect', 'dojo/_base/declare', 'light/utils/URLUtils',
 
           expect(_setHashStub).not.toHaveBeenCalled();
           expect(publishStub).toHaveBeenCalledWith(
-            SearchEventsEnum.SEARCH_STATE_CHANGED,
+            EventsEnum.SEARCH_STATE_CHANGED,
             [SAMPLE_SEARCH_STATE, router]
           );
           expect(router._lastSearchState).toBe(SAMPLE_SEARCH_STATE);

@@ -19,13 +19,16 @@
  */
 define(['dojo/has', 'dojo/query', 'dojo/dom-construct', 'dojo',
         'light/utils/URLUtils', 'light/utils/PersonUtils',
-        'light/enums/PagesEnum'],
+        'light/enums/PagesEnum', 
+        'light/utils/RouterManager'],
         function(has, $, domConstruct, dojo, URLUtils, PersonUtils,
-                 PagesEnum) {
+                 PagesEnum, RouterManager) {
   
-  function loadMain(main) {
+  function loadMainFor(page) {
     require(['light/main/CoreMain'], function() {
-      require(['light/main/' + main], function() {});
+      require(['light/main/' + page.main], function() {
+        RouterManager.watch(page);
+      });
     });
   }
 
@@ -40,10 +43,10 @@ define(['dojo/has', 'dojo/query', 'dojo/dom-construct', 'dojo',
      * way, we don't need to rebuild to test every time a file changes.
      */
     if (has('light-dev')) {
-      loadMain(page.main);
+      loadMainFor(page);
     } else {
       require(['light/build/core', 'light/build/' + page.build], function() {
-        loadMain(page.main);
+        loadMainFor(page);
       });
     }
 

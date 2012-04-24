@@ -14,9 +14,9 @@
  * the License.
  */
 define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
-        'light/enums/SearchEventsEnum', 'dojo/_base/connect',
+        'light/enums/EventsEnum', 'dojo/_base/connect',
         'light/builders/SearchStateBuilder'],
-        function(declare, AbstractLightController, SearchEventsEnum,
+        function(declare, AbstractLightController, EventsEnum,
                  connect, SearchStateBuilder) {
   /**
    * @class
@@ -32,7 +32,7 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
      * watch for search state changes.
      */
     watch: function() {
-      connect.subscribe(SearchEventsEnum.SEARCH_STATE_CHANGED, this,
+      connect.subscribe(EventsEnum.SEARCH_STATE_CHANGED, this,
               this._onSearchStateChange);
     },
     
@@ -48,8 +48,7 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
      * Handler for submit events in the search form.
      */
     onSubmit: function() {
-      console.log(new SearchStateBuilder().query(this._view.getQuery()).build());
-      connect.publish(SearchEventsEnum.SEARCH_STATE_CHANGED, [
+      connect.publish(EventsEnum.SEARCH_STATE_CHANGED, [
         new SearchStateBuilder().query(this._view.getQuery()).build(), this]);
     }
 

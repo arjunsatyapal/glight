@@ -19,6 +19,7 @@ define(['light/views/SearchBarView',
         'light/views/SearchResultListView', 'light/SearchService',
         'light/views/LoginToolbarView',
         'light/controllers/LoginToolbarController',
+        'light/views/LearningPathEditorSidebarView',
         'light/utils/PersonUtils',
         'light/utils/URLUtils',
         'light/enums/PagesEnum',
@@ -26,12 +27,12 @@ define(['light/views/SearchBarView',
         function(SearchBarView, SearchBarController,
                  SearchResultListController, SearchResultListView,
                  SearchService, LoginToolbarView, LoginToolbarController,
-                 PersonUtils, URLUtils, PagesEnum) {
+                 LearningPathEditorSidebarView, PersonUtils, URLUtils,
+                 PagesEnum) {
 
   // Going to the anonymous search page
-  // TODO(waltercacau): optimize the login somehow to go directly to MYDASH.
-  if (PersonUtils.isLogged()) {
-    URLUtils.replace(PagesEnum.MYDASH.path);
+  if (!PersonUtils.isLogged()) {
+    URLUtils.replace(PagesEnum.SEARCH.path);
   }
 
   var searchResultListView = new SearchResultListView({}, 'searchResults');
@@ -53,5 +54,8 @@ define(['light/views/SearchBarView',
   loginToolbarController.setView(loginToolbarView);
   loginToolbarView.setController(loginToolbarController);
   loginToolbarController.setup();
+
+  learningPathEditorSidebarView =
+      new LearningPathEditorSidebarView({}, 'sidebar');
 
 });

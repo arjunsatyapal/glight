@@ -134,6 +134,16 @@ public abstract class AbstractLightFilter implements Filter {
    */
   void handleFilterChain(HttpServletRequest request, HttpServletResponse response,
       FilterChain filterChain) {
+    
+    if(request.getRequestURI().startsWith("/_ah")) {
+      try {
+        filterChain.doFilter(request, response);
+      } catch (Exception e) {
+        LightUtils.wrapIntoRuntimeExceptionAndThrow(e);
+      }
+      return;
+    }
+    
     ServletPathEnum servletPath = ServletPathEnum.getServletPathEnum(request.getRequestURI());
 
     /*

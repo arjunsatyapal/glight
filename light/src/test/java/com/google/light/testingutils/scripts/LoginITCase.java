@@ -20,6 +20,7 @@ import static com.google.light.server.constants.RequestParamKeyEnum.CLIENT_SECRE
 import static com.google.light.server.constants.RequestParamKeyEnum.EMAIL;
 import static com.google.light.server.constants.RequestParamKeyEnum.FULLNAME;
 import static com.google.light.server.constants.RequestParamKeyEnum.PASSWORD;
+import static com.google.light.server.servlets.path.ServletPathEnum.MYDASH_PAGE;
 import static com.google.light.server.servlets.path.ServletPathEnum.OAUTH2_GOOGLE_DOC_AUTH;
 import static com.google.light.server.servlets.path.ServletPathEnum.SEARCH_PAGE;
 import static com.google.light.server.servlets.path.ServletPathEnum.TEST_CREDENTIAL_BACKUP_SERVLET;
@@ -29,6 +30,7 @@ import static com.google.light.server.servlets.test.CredentialUtils.getCredentia
 import static com.google.light.server.servlets.test.CredentialUtils.getOwnerCredentialPasswdFileAbsPath;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.testingutils.SeleniumUtils.clickAtCenter;
+import static junit.framework.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
@@ -40,6 +42,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
+
+import junit.framework.Assert;
 
 import org.junit.After;
 import org.junit.Before;
@@ -192,9 +196,18 @@ public class LoginITCase {
     // Accepting
     driver.findElement(By.id("submit_approve_access")).click();
 
-    // Asserting the User is logged in
+    // Making registration
     clickAtCenter(driver, By.id("registerForm_tosCheckbox"));
     clickAtCenter(driver, By.id("registerForm_submitButton"));
+    
+    // Asserting the User is logged in
+    driver.get(serverUrl + MYDASH_PAGE.get());
+    // javascript redirects are making selenium to have some race conditions internally.
+    // for now correcting it with a simple sleep
+    // TODO(waltercacau): 
+    synchronized (this) {
+      wait(2000);
+    }
     assertEquals(fullname, driver.findElement(By.id("loginToolbar_personNameSpan")).getText());
 
     // Now trigger the GOOGLE_DOC OAuth2 flow for Owner.

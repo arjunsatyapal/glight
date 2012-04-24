@@ -26,9 +26,11 @@ define(['light/utils/BuilderUtils',
       'light.builders.SearchRequestBuilder',
       ['query', 'page', 'clientLanguageCode'],
       {
-        query: '',
-        page: 1
-      },
-      schema
+        defaults: {
+          query: '',
+          page: 1
+        },
+        schema: schema
+      }
   );
 });
