@@ -112,7 +112,7 @@ public class OAuth2OwnerTokenManagerImpl implements OAuth2OwnerTokenManager {
         refresh();
         checkNotNull(entity, "After refresh, entity should not be null.");
         Preconditions.checkArgument(
-            entity.hasExpired(),
+            !entity.hasExpired(),
             "After refresh, entity should not be in expired state. This happened for PersonId : "
                 + entity.getPersonId() + " and ProviderService = "
                 + entity.getProviderService());
