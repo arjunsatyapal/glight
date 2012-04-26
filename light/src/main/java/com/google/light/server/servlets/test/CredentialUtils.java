@@ -17,8 +17,6 @@ package com.google.light.server.servlets.test;
 
 import static com.google.light.server.utils.LightPreconditions.checkIsNotEnv;
 
-import com.google.light.server.servlets.test.oauth2.TestCredentialBackupServlet;
-
 import com.google.light.server.constants.LightEnvEnum;
 import com.google.light.server.constants.OAuth2ProviderEnum;
 import com.google.light.server.constants.OAuth2ProviderService;

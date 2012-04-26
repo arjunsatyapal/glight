@@ -15,27 +15,37 @@ package com.google.light.server.servlets.path;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
-import javax.servlet.http.HttpServlet;
-
+import com.google.appengine.tools.pipeline.impl.servlets.PipelineServlet;
 import com.google.light.server.exception.unchecked.httpexception.NotFoundException;
 import com.google.light.server.servlets.LightGenericJSPServlet;
 import com.google.light.server.servlets.admin.ConfigServlet;
 import com.google.light.server.servlets.admin.OAuth2ConsumerCredentialServlet;
+import com.google.light.server.servlets.jobs.JobDetailServlet;
+import com.google.light.server.servlets.jobs.PipelineStatusServlet;
+import com.google.light.server.servlets.jobs.sample.AdditionJobServlet;
+import com.google.light.server.servlets.jobs.sample.UserIntegerInputServlet;
 import com.google.light.server.servlets.login.LoginServlet;
 import com.google.light.server.servlets.login.LogoutServlet;
+import com.google.light.server.servlets.module.ModuleServlet;
 import com.google.light.server.servlets.oauth2.google.gdoc.GoogleDocAuthCallbackServlet;
 import com.google.light.server.servlets.oauth2.google.gdoc.GoogleDocAuthServlet;
 import com.google.light.server.servlets.oauth2.google.login.GoogleLoginCallbackServlet;
 import com.google.light.server.servlets.oauth2.google.login.GoogleLoginServlet;
 import com.google.light.server.servlets.person.PersonServlet;
 import com.google.light.server.servlets.search.SearchServlet;
+import com.google.light.server.servlets.test.DeleteAllServlet;
 import com.google.light.server.servlets.test.SessionInfoServlet;
 import com.google.light.server.servlets.test.TestCleanUpDatastore;
 import com.google.light.server.servlets.test.TestHeaders;
 import com.google.light.server.servlets.test.TestLogin;
+import com.google.light.server.servlets.test.TestServlet;
 import com.google.light.server.servlets.test.oauth2.TestCredentialBackupServlet;
 import com.google.light.server.servlets.test.oauth2.TestOAuth2WorkFlowServlet;
 import com.google.light.server.servlets.test.oauth2.login.FakeLoginServlet;
+import com.google.light.server.servlets.test.thirdparty.google.gdta.gdoc.GoogleDocInfoServlet;
+import com.google.light.server.servlets.thirdparty.google.gdata.gdoc.GoogleDocImportServlet;
+import com.google.light.server.servlets.thirdparty.google.gdata.gdoc.GoogleDocListServlet;
+import javax.servlet.http.HttpServlet;
 
 /**
  * Enum to Map Servlets with their Paths and URL Patterns.
@@ -44,26 +54,48 @@ import com.google.light.server.servlets.test.oauth2.login.FakeLoginServlet;
  * 
  * @author Arjun Satyapal
  */
+@SuppressWarnings("deprecation")
 public enum ServletPathEnum {
   // TODO(arjuns): Add regex checks here.
   // TODO(arjuns) : Find a way to end URLs without /.
 
+
+  ADDITION_JOB_SERVLET(AdditionJobServlet.class, "/test/addition",
+                       false, false, false),
+
+  // DeleteQueueServlet(DeleteQueueServlet.class, "/test/delete",
+  // false, false, false),
   PERSON(PersonServlet.class, "/api/person",
          true, false, false),
   // TODO(waltercacau): Fix this hack
   PERSONME(PersonServlet.class, "/api/person/me",
              true, false, false),
-  SEARCH(SearchServlet.class, "/api/search",
-         false, false, false),
+
   LOGIN(LoginServlet.class, "/login",
         false, false, false),
   LOGOUT(LogoutServlet.class, "/logout",
          false, false, false),
 
+
+  // Third party integrations.
+  GOOGLE_DOC_LIST(GoogleDocListServlet.class, "/api/thirdparty/google/gdata/gdoc/list",
+                  true, false, false),
+  GOOGLE_DOC_IMPORT(GoogleDocImportServlet.class, "/api/thirdparty/google/gdata/gdoc/import",
+                    true, false, false),
+  IMPORT_STAGE_DETAIL_SERVLET(JobDetailServlet.class, "/api/queue/import_stage_detail",
+                              true, false, false),
+                              
+  MODULE_SERVLET(ModuleServlet.class, "/api/module/*/version/*",
+                 false, false, false),
+  SEARCH(SearchServlet.class, "/api/search",
+         false, false, false),
+
+
   // Client Side pages
   SEARCH_PAGE(LightGenericJSPServlet.class, "/search", false, false, false),
   REGISTER_PAGE(LightGenericJSPServlet.class, "/register", false, false, false),
   
+
   // OAuth2 Related Servlets.
   OAUTH2_GOOGLE_LOGIN(GoogleLoginServlet.class, "/login/google",
                       false, false, false),
@@ -77,6 +109,8 @@ public enum ServletPathEnum {
   OAUTH2_GOOGLE_DOC_AUTH_CB(GoogleDocAuthCallbackServlet.class, "/oauth2/google_doc_cb",
                             true, false, false),
 
+  PIPELINE_STATUS(PipelineStatusServlet.class, "/test/pipeline_status",
+                  false, false, true),
   // Admin Servlets
   CONFIG(ConfigServlet.class, "/admin/config",
          true, true, false),
@@ -84,13 +118,25 @@ public enum ServletPathEnum {
   OAUTH2_CONSUMER_CRENDENTIAL(OAuth2ConsumerCredentialServlet.class,
                               "/admin/oauth2_consumer_credential",
                               true, true, false),
-
+  // Pipeline Servlet
+  PIPELINE_HANDLER(PipelineServlet.class, "/_ah/pipeline/handleTask",
+                   false, false, false),
   // Some test servlets.
+  DELETE_ALL(DeleteAllServlet.class, "/test/admin/delete_all",
+            true, true, true),
   FAKE_LOGIN(FakeLoginServlet.class, "/test/fakelogin",
              false, false, true),
+
+  GOOGLE_DOC_INFO_SERVLET(GoogleDocInfoServlet.class,
+                          "/test/thirdparty/google/gdata/gdoc/information",
+                          true, false, true),
+
   TEST_CREDENTIAL_BACKUP_SERVLET(TestCredentialBackupServlet.class,
                                  "/test/admin/test_credential_backup",
                                  false, false, true),
+                                 
+  TEST_SERVLET(TestServlet.class, "/test/test", 
+               false, false, true),
   TEST_WORKFLOW_SERVLETS(TestOAuth2WorkFlowServlet.class, "/test/test_oauth2_workflow",
                          false, false, true),
   TEST_CLEAN_UP_DATASTORE(TestCleanUpDatastore.class, "/test/admin/cleanupds",
@@ -101,7 +147,10 @@ public enum ServletPathEnum {
   TEST_HEADER(TestHeaders.class, "/test/testheader",
               false, false, true),
   TEST_LOGIN(TestLogin.class, "/test/testlogin",
-             true, false, true);
+             true, false, true),
+
+  USER_INPUT(UserIntegerInputServlet.class, "/test/user_input",
+             false, false, false);
 
   private Class<? extends HttpServlet> clazz;
   private String servletPath;

@@ -15,7 +15,7 @@
  */
 package com.google.light.server.exception.unchecked.httpexception;
 
-import com.google.light.server.constants.HttpStatusCodesEnum;
+import com.google.light.server.constants.http.HttpStatusCodesEnum;
 
 /**
  * This indicates that User is not authorized to perform the requested operation.

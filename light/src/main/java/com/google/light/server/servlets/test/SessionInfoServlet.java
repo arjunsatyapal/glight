@@ -18,8 +18,9 @@ package com.google.light.server.servlets.test;
 import static com.google.light.server.utils.LightPreconditions.checkIsNotEnv;
 import static com.google.light.server.utils.LightUtils.appendSessionData;
 
-import com.google.light.server.constants.ContentTypeEnum;
 import com.google.light.server.constants.LightEnvEnum;
+import com.google.light.server.constants.http.ContentTypeEnum;
+import com.google.light.server.utils.ServletUtils;
 import java.io.IOException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -38,11 +39,11 @@ public class SessionInfoServlet extends HttpServlet {
   public SessionInfoServlet() {
     checkIsNotEnv(this, LightEnvEnum.PROD);
   }
-  
+
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    HttpSession session = request.getSession();
-    
+    HttpSession session = ServletUtils.getSession(request);
+
     StringBuilder builder = new StringBuilder();
     appendSessionData(builder, session);
 

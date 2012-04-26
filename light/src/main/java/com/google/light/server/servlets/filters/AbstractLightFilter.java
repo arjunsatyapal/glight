@@ -19,31 +19,32 @@ import static com.google.light.server.utils.GuiceUtils.getInstance;
 import static com.google.light.server.utils.GuiceUtils.seedEntityInRequestScope;
 import static com.google.light.server.utils.LightPreconditions.checkPersonIsGaeAdmin;
 
-import java.io.IOException;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.light.server.annotations.AnotHttpSession;
-import com.google.light.server.constants.HttpStatusCodesEnum;
+import com.google.light.server.annotations.AnotPerformer;
+import com.google.light.server.annotations.AnotWatcher;
+import com.google.light.server.constants.HttpHeaderEnum;
+import com.google.light.server.constants.http.HttpStatusCodesEnum;
+import com.google.light.server.dto.pojo.PersonId;
 import com.google.light.server.exception.unchecked.httpexception.LightHttpException;
 import com.google.light.server.servlets.SessionManager;
 import com.google.light.server.servlets.path.ServletPathEnum;
+import com.google.light.server.utils.GuiceUtils;
 import com.google.light.server.utils.LightUtils;
+import com.google.light.server.utils.ServletUtils;
+import java.io.IOException;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 /**
  * Servlet Filter for All Light Requests. See {@link FilterPathEnum} to see what all URLs are
@@ -51,17 +52,16 @@ import com.google.light.server.utils.LightUtils;
  * 
  * @author Arjun Satyapal
  */
-
 public abstract class AbstractLightFilter implements Filter {
   private static final Logger logger = Logger.getLogger(Filter.class.getName());
   private FilterConfig filterConfig;
-  private Injector injector;
-
   @Inject
   protected AbstractLightFilter(Injector injector) {
-    this.injector = Preconditions.checkNotNull(injector);
+    Preconditions.checkNotNull(injector);
+    GuiceUtils.setInjector(injector);
   }
 
+  
   public void validateAndDoFilter(HttpServletRequest request,
       HttpServletResponse response, FilterChain filterChain, ServletPathEnum servletPath) {
     try {
@@ -77,13 +77,29 @@ public abstract class AbstractLightFilter implements Filter {
        * additional step of Logging in and creating Session which is of no use for Servlets that
        * require Admin Privileges.
        */
+      SessionManager sessionManager = getInstance(SessionManager.class);
+
       if (servletPath.isRequiredAdminPrivilege()) {
         checkPersonIsGaeAdmin();
       } else if (servletPath.isRequiredLogin()) {
         // Ensure that user is Loggedin.
-        SessionManager sessionManager = getInstance(injector, SessionManager.class);
         sessionManager.checkPersonLoggedIn();
       }
+      
+      if (sessionManager.isPersonLoggedIn()) {
+
+        PersonId performerId = sessionManager.getPersonId();
+        seedEntityInRequestScope(request, PersonId.class, AnotPerformer.class, performerId);
+        
+        String watcherIdStr = ServletUtils.getRequestHeaderValue(request, HttpHeaderEnum.LIGHT_WATCHER_HEADER);
+        if (watcherIdStr != null) {
+          seedEntityInRequestScope(request, PersonId.class, AnotWatcher.class, new PersonId(watcherIdStr));
+        } else {
+          // Forcing both watcher and performer to be same.
+          seedEntityInRequestScope(request, PersonId.class, AnotWatcher.class, performerId);
+        }
+      }
+      
     
       // TODO(arjuns) : Add changeLog.
       filterChain.doFilter(request, response);
@@ -140,7 +156,7 @@ public abstract class AbstractLightFilter implements Filter {
      * Create a session irrespective of whether session already exists. Then make it
      * avaialable in RequestScope so that it can be injected by Guice.
      */
-    HttpSession session = request.getSession();
+    HttpSession session = ServletUtils.getSession(request);
     seedEntityInRequestScope(request, HttpSession.class, AnotHttpSession.class, session);
 
     validateAndDoFilter(request, response, filterChain, servletPath);

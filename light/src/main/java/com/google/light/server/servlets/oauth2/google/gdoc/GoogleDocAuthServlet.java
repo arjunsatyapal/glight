@@ -3,10 +3,7 @@ package com.google.light.server.servlets.oauth2.google.gdoc;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.constants.OAuth2ProviderService.GOOGLE_DOC;
 import static com.google.light.server.servlets.path.ServletPathEnum.OAUTH2_GOOGLE_DOC_AUTH_CB;
-import static com.google.light.server.utils.GuiceUtils.getInstance;
-
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 import com.google.light.server.servlets.oauth2.google.OAuth2Helper;
 import com.google.light.server.servlets.oauth2.google.OAuth2HelperFactoryInterface;
 import com.google.light.server.utils.ServletUtils;
@@ -31,9 +28,8 @@ public class GoogleDocAuthServlet extends HttpServlet {
   private OAuth2HelperFactoryInterface factory;
 
   @Inject
-  public GoogleDocAuthServlet(Injector injector) {
-    checkNotNull(injector);
-    this.factory = getInstance(injector, OAuth2HelperFactoryInterface.class);
+  public GoogleDocAuthServlet(OAuth2HelperFactoryInterface factory) {
+    this.factory = checkNotNull(factory, "factory");
   }
   
   @Override

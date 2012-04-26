@@ -108,6 +108,7 @@ public abstract class AbstractOAuth2TokenInfo<D> implements DtoInterface<D> {
    * 
    * @return
    */
+  @SuppressWarnings("unchecked")
   @Override
   public D validate() {
     checkNotBlank(issuedTo, "issuedTo");

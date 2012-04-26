@@ -15,18 +15,16 @@
  */
 package com.google.light.server.manager.implementation;
 
+import static com.google.light.server.utils.GuiceUtils.getInstance;
 import static com.google.light.testingutils.TestingUtils.getRandomString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.util.List;
-
-import com.google.light.server.constants.OAuth2ProviderEnum;
-
-import com.google.light.server.persistence.entity.admin.OAuth2ConsumerCredentialEntity;
-
 import com.google.light.server.AbstractLightServerTest;
+import com.google.light.server.constants.OAuth2ProviderEnum;
 import com.google.light.server.manager.interfaces.AdminOperationManager;
+import com.google.light.server.persistence.entity.admin.OAuth2ConsumerCredentialEntity;
+import java.util.List;
 import org.junit.Test;
 
 /**
@@ -43,7 +41,7 @@ public class AdminOperationManagerImplTest extends AbstractLightServerTest {
   @Override
   public void setUp() {
     super.setUp();
-    this.adminOperationManager = injector.getInstance(AdminOperationManager.class);
+    this.adminOperationManager = getInstance(AdminOperationManager.class);
     this.clientId = getRandomString();
     this.clientSecret = getRandomString();
   }

@@ -40,8 +40,8 @@ public class OAuth2ConsumerCredentialManagerImpl implements OAuth2ConsumerCreden
   @Inject
   public OAuth2ConsumerCredentialManagerImpl(@Assisted OAuth2ProviderEnum provider, 
       OAuth2ConsumerCredentialDao dao) {
-    checkNotNull(provider);
-    checkNotNull(dao);
+    checkNotNull(provider, "provider");
+    checkNotNull(dao, "dao");
     
     this.clientId = checkNotBlank(dao.get(provider).getClientId(),
         "clientId for provider[" + provider + "].");

@@ -15,7 +15,9 @@
  */
 package com.google.light.server.guice;
 
-import java.util.logging.Logger;
+import javax.xml.bind.Marshaller;
+
+import com.google.light.server.guice.jersey.JerseyApplication;
 
 import com.google.inject.Scopes;
 import com.google.inject.servlet.ServletModule;
@@ -24,6 +26,10 @@ import com.google.light.server.servlets.filters.CharacterEncondingFilter;
 import com.google.light.server.servlets.filters.FilterPathEnum;
 import com.google.light.server.servlets.path.ServletPathEnum;
 import com.google.light.server.utils.GaeUtils;
+import com.sun.jersey.guice.spi.container.servlet.GuiceContainer;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Guice Servlet Module to bind Servlets & Filters to corresponding URL Patterns.
@@ -48,6 +54,7 @@ public class LightServletModule extends ServletModule {
 
     // First registering the Filters.
     boolean isProduction = GaeUtils.isProductionServer();
+    initFilters(FilterPathEnum.TASK_QUEUE);
     if (isProduction) {
       initFilters(FilterPathEnum.API);
     } else {
@@ -63,6 +70,13 @@ public class LightServletModule extends ServletModule {
       }
       initServlet(currServlet);
     }
+    
+    // Initializing jersey resources.
+    final Map<String, String> params = new HashMap<String, String>();
+    params.put("com.sun.jersey.config.feature.DisableWADL", "true");
+    params.put(Marshaller.JAXB_FORMATTED_OUTPUT, "true");
+    params.put("javax.ws.rs.Application", JerseyApplication.class.getName());
+    serve("/rest/*").with(GuiceContainer.class, params);
   }
 
   /**

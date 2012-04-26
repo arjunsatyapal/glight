@@ -17,24 +17,21 @@ package com.google.light.server.servlets;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import java.io.IOException;
-import java.util.Collections;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.ProvisionException;
-import com.google.light.server.constants.ContentTypeEnum;
 import com.google.light.server.constants.SupportedLanguagesEnum;
+import com.google.light.server.constants.http.ContentTypeEnum;
 import com.google.light.server.dto.JSVariablesPreloadDto;
 import com.google.light.server.manager.interfaces.PersonManager;
 import com.google.light.server.persistence.entity.person.PersonEntity;
 import com.google.light.server.utils.ServletUtils;
+import java.io.IOException;
+import java.util.Collections;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * This servlet is responsible for generating the client side

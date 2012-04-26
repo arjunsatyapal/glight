@@ -1,5 +1,7 @@
 package com.google.light.server.manager.interfaces;
 
+import com.google.light.server.dto.pojo.PersonId;
+
 import com.google.light.server.persistence.entity.person.PersonEntity;
 
 /**
@@ -32,7 +34,7 @@ public interface PersonManager {
    * @return
    * @throws IllegalKeyTypeException
    */
-  public PersonEntity get(Long id);
+  public PersonEntity get(PersonId id);
   
   /**
    * Get details of the current logged in person or null if no user
@@ -50,7 +52,7 @@ public interface PersonManager {
    * @param email
    * @return
    */
-  public PersonEntity getByEmail(String email);
+  public PersonEntity findByEmail(String email);
 
   /**
    * Delete an existing Person.
@@ -58,5 +60,5 @@ public interface PersonManager {
    * @param id
    * @return
    */
-  public PersonEntity delete(String id);
+  public PersonEntity delete(PersonId id);
 }

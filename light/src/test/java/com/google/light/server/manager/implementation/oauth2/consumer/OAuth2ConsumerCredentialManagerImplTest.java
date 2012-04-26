@@ -20,16 +20,13 @@ import static com.google.light.server.utils.GuiceUtils.getInstance;
 import static com.google.light.testingutils.TestingUtils.getRandomString;
 import static org.junit.Assert.assertEquals;
 
-import com.google.light.server.persistence.dao.OAuth2ConsumerCredentialDao;
-
-import com.google.light.server.manager.interfaces.OAuth2ConsumerCredentialManager;
-
-import org.junit.Test;
-
 import com.google.light.server.AbstractLightServerTest;
 import com.google.light.server.constants.OAuth2ProviderEnum;
 import com.google.light.server.manager.interfaces.AdminOperationManager;
+import com.google.light.server.manager.interfaces.OAuth2ConsumerCredentialManager;
+import com.google.light.server.persistence.dao.OAuth2ConsumerCredentialDao;
 import com.google.light.server.persistence.entity.admin.OAuth2ConsumerCredentialEntity;
+import org.junit.Test;
 
 /**
  * Test for {@link OAuth2ConsumerCredentialManagerImpl}.
@@ -41,18 +38,15 @@ public class OAuth2ConsumerCredentialManagerImplTest extends AbstractLightServer
   private String clientSecret;
   private OAuth2ProviderEnum defaultProvider = OAuth2ProviderEnum.GOOGLE;
   private AdminOperationManager adminOperationManager;
-  private OAuth2ConsumerCredentialManagerFactory factory;
   private OAuth2ConsumerCredentialManager defaultCredentialManager;
   @Override
   public void setUp() {
     super.setUp();
     this.clientId = getRandomString();
     this.clientSecret = getRandomString();
-    this.adminOperationManager = getInstance(injector, AdminOperationManager.class);
+    this.adminOperationManager = getInstance(AdminOperationManager.class);
     adminOperationManager.putOAuth2ConsumerCredential(getConsumerCredentialEntityBuilder().build());
-    factory = getInstance(injector,  OAuth2ConsumerCredentialManagerFactory.class);
-    
-    OAuth2ConsumerCredentialDao dao = getInstance(injector, OAuth2ConsumerCredentialDao.class);
+    OAuth2ConsumerCredentialDao dao = getInstance(OAuth2ConsumerCredentialDao.class);
     // Usually this is injected, but for this class, manually creating this class.
     defaultCredentialManager = new OAuth2ConsumerCredentialManagerImpl(GOOGLE, dao); 
   }

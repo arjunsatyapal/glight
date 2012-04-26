@@ -1,0 +1,19 @@
+<html>
+  <body>
+    <form name="Show Google Docs Information" action="/test/thirdparty/google/gdata/gdoc/information"
+    method="post">
+      Google Docs ResourceId:
+      <input type="text" name="google_doc_untyped_resource_id" />
+      <br />
+      collection <input type="radio" name="module_type" value="collection" />
+      document <input type="radio" name="module_type" value="document" checked="yes"/>
+      spreadsheet <input type="radio" name="module_type" value="spreadsheet"/>
+      form <input type="radio" name="module_type" value="form"/>
+      presentation <input type="radio" name="module_type" value="presentation"/>
+      drawing <input type="radio" name="module_type" value="drawing"/>
+      file <input type="radio" name="module_type" value="file"/>
+      <br/>
+      <input type="submit" value="Submit" />
+    </form>
+  </body>
+</html>

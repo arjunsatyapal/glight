@@ -20,25 +20,25 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.Lists.newArrayList;
 
-import com.google.light.server.persistence.entity.person.PersonEntity;
-
-import com.googlecode.objectify.Key;
-
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.light.server.constants.LightEnvEnum;
 import com.google.light.server.constants.OAuth2ProviderService;
+import com.google.light.server.dto.pojo.PersonId;
 import com.google.light.server.exception.unchecked.BlankStringException;
 import com.google.light.server.exception.unchecked.InvalidPersonIdException;
 import com.google.light.server.exception.unchecked.InvalidSessionException;
 import com.google.light.server.exception.unchecked.ServerConfigurationException;
 import com.google.light.server.exception.unchecked.httpexception.UnauthorizedException;
+import com.google.light.server.persistence.entity.person.PersonEntity;
 import com.google.light.server.servlets.SessionManager;
+import com.googlecode.objectify.Key;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.validator.routines.EmailValidator;
+import org.apache.commons.validator.routines.IntegerValidator;
 import org.apache.commons.validator.routines.LongValidator;
 
 /**
@@ -51,6 +51,7 @@ import org.apache.commons.validator.routines.LongValidator;
 public class LightPreconditions {
   private static EmailValidator emailValidator = EmailValidator.getInstance();
   private static LongValidator longValidator = LongValidator.getInstance();
+  private static IntegerValidator integerValidator = IntegerValidator.getInstance();
 
   /**
    * Javadoc is same as for {{@link #checkNotBlank(String)}. This throws an exception with cause as
@@ -82,21 +83,23 @@ public class LightPreconditions {
   /**
    * Ensures that PersonId is valid.
    */
-  // TODO(arjuns) : Fix this validation eventually.
-  public static Long checkPersonId(Long personId) {
+  
+  public static PersonId checkPersonId(PersonId personId) {
     try {
-      return checkPositiveLong(personId, "personId");
+      checkPositiveLong(personId.get(), "Invalid PersonId[" + personId.get() + "].");
     } catch (Exception e) {
       throw new InvalidPersonIdException(e);
     }
+    
+    return personId;
   }
-  
+
   /**
    * TODO(arjuns): Add test for this.
    * Ensures that Key<PersonEntity> is valid.
    */
   public static Key<PersonEntity> checkPersonKey(Key<PersonEntity> personKey) {
-    checkPersonId(personKey.getId());
+    checkPersonId(new PersonId(personKey.getId()));
     return personKey;
   }
   
@@ -106,21 +109,28 @@ public class LightPreconditions {
    * @param list
    * @return
    */
-  public static <T> List<T> checkNonEmptyList(List<T> list) {
-    checkNotNull(list);
-    checkArgument(list.size() > 0);
+  public static <T> List<T> checkNonEmptyList(List<T> list, String message) {
+    checkNotNull(list, message);
+    checkArgument(list.size() > 0, message);
     return list;
   }
 
   /**
    * Ensures that the passed value is a valid positive long and its range is [1, Long.Max_value].
-   * 
+   * TODO(arjuns): Update test.
    * @param value
    * @return
    */
   public static Long checkPositiveLong(Long value, String message) {
     checkNotNull(value, message);
-    checkArgument(longValidator.isInRange(value, 1, Long.MAX_VALUE), message);
+    checkArgument(longValidator.isInRange(value, 1, Long.MAX_VALUE), message + "[" + value + "].");
+    return value;
+  }
+  
+  public static Integer checkIntegerIsInRage(Integer value, int min, int max, String message) {
+    String errorMessage = message + ": Range : [" + min + ":" + max + "]."; 
+    checkNotNull(value, errorMessage);
+    checkArgument(integerValidator.isInRange(value, min, max), message);
     return value;
   }
 
@@ -234,7 +244,7 @@ public class LightPreconditions {
       throw new InvalidSessionException("Invalid Session.");
     }
   }
-  
+
   // Utility class.
   private LightPreconditions() {
   }

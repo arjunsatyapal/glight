@@ -17,14 +17,13 @@ package com.google.light.server.guice.module;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 
-import com.google.light.server.utils.GaeUtils;
-
-import javax.servlet.http.HttpSession;
-
-import org.mockito.Mockito;
+import com.google.light.server.guice.provider.TestRequestScopedValuesProvider;
 
 import com.google.light.server.constants.LightEnvEnum;
+import com.google.light.server.utils.GaeUtils;
+import javax.servlet.http.HttpSession;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -60,7 +59,7 @@ public class UnitTestModuleTest extends AbstractModuleTest {
   @Override
   public void testModuleInstantiation() {
     assertTrue(GaeUtils.isUnitTestServer());
-    assertNotNull(new UnitTestModule(Mockito.mock(HttpSession.class)));
+    assertNotNull(new UnitTestModule(mock(TestRequestScopedValuesProvider.class), mock(HttpSession.class)));
   }
 
 }

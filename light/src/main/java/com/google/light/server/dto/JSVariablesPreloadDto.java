@@ -92,11 +92,13 @@ public class JSVariablesPreloadDto implements
       return this;
     }
 
+    @SuppressWarnings("synthetic-access")
     public JSVariablesPreloadDto build() {
       return new JSVariablesPreloadDto(this).validate();
     }
   }
 
+  @SuppressWarnings("synthetic-access")
   private JSVariablesPreloadDto(Builder builder) {
     this.locale = builder.locale;
     this.person = builder.person;

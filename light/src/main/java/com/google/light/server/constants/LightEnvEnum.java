@@ -42,7 +42,7 @@ public enum LightEnvEnum {
   private List<String> appIds;
   
   private LightEnvEnum(List<String> appIds) {
-    this.appIds = LightPreconditions.checkNonEmptyList(appIds);
+    this.appIds = LightPreconditions.checkNonEmptyList(appIds, "appIds");
   }
   
   public List<String> getAppIds() {

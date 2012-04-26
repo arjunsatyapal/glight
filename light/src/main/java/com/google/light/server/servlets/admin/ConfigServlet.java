@@ -15,7 +15,10 @@
  */
 package com.google.light.server.servlets.admin;
 
+import static com.google.light.server.constants.LightConstants.LIGHT_BOT_EMAIL;
+import static com.google.light.server.utils.GuiceUtils.getInstance;
 import static com.google.light.server.utils.LightPreconditions.checkPersonIsGaeAdmin;
+import static com.google.light.server.utils.LightUtils.appendAttention;
 import static com.google.light.server.utils.LightUtils.appendKeyValue;
 import static com.google.light.server.utils.LightUtils.appendSectionHeader;
 import static com.google.light.server.utils.LightUtils.appendSessionData;
@@ -24,10 +27,15 @@ import static com.google.light.server.utils.LightUtils.getPST8PDTime;
 import com.google.appengine.api.utils.SystemProperty;
 import com.google.apphosting.api.ApiProxy;
 import com.google.apphosting.api.ApiProxy.Environment;
-import com.google.light.server.constants.ContentTypeEnum;
+import com.google.light.server.constants.OAuth2ProviderEnum;
+import com.google.light.server.constants.http.ContentTypeEnum;
+import com.google.light.server.manager.implementation.oauth2.consumer.OAuth2ConsumerCredentialManagerFactory;
+import com.google.light.server.manager.interfaces.PersonManager;
+import com.google.light.server.persistence.entity.person.PersonEntity;
 import com.google.light.server.servlets.AbstractLightServlet;
 import com.google.light.server.utils.GaeUtils;
 import com.google.light.server.utils.LightPreconditions;
+import com.google.light.server.utils.ServletUtils;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -42,24 +50,31 @@ import javax.servlet.http.HttpSession;
  */
 @SuppressWarnings("serial")
 public class ConfigServlet extends AbstractLightServlet {
+  private OAuth2ConsumerCredentialManagerFactory consumerCredManagerFactory;
+  private PersonManager personManager;
   
-  /** 
+  /**
    * {@inheritDoc}
    */
   @Override
   public void service(HttpServletRequest request, HttpServletResponse response) {
-   checkPersonIsGaeAdmin();
-   super.service(request, response);
+    checkPersonIsGaeAdmin();
+
+    consumerCredManagerFactory = getInstance(OAuth2ConsumerCredentialManagerFactory.class);
+    personManager = getInstance(PersonManager.class);
+    
+    super.service(request, response);
+
   }
-  
+
   @SuppressWarnings("deprecation")
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) {
     // TODO(arjuns) : Move this check to filter or some where else as this causes Guice Injection
     // failures if put if put in constructor. Probably can be moved to filter.
-    
+
     LightPreconditions.checkPersonIsGaeAdmin();
-    
+
     try {
       StringBuilder builder = new StringBuilder();
       Environment env = ApiProxy.getCurrentEnvironment();
@@ -104,8 +119,16 @@ public class ConfigServlet extends AbstractLightServlet {
       }
 
       // Populating Session Data.
-      HttpSession session = request.getSession();
+      HttpSession session = ServletUtils.getSession(request);
       appendSessionData(builder, session);
+
+      // Populating system status.
+      populateConsumerCredentialStatus(builder);
+      
+      populateRequirePersons(builder);
+      
+      
+      // TODO(arjuns): Add things here to fetch acl from GoogleCloudStorage for Required Buckets.
 
       response.setContentType(ContentTypeEnum.TEXT_HTML.get());
       response.getWriter().println(builder.toString());
@@ -113,6 +136,36 @@ public class ConfigServlet extends AbstractLightServlet {
     } catch (Exception e) {
       // TODO(arjuns): Add exception handling.
       throw new RuntimeException(e);
+    }
+  }
+
+  /**
+   * @param builder
+   */
+  private void populateRequirePersons(StringBuilder builder) {
+    appendSectionHeader(builder, "Required Persons");
+    PersonEntity personEntity = personManager.findByEmail(LIGHT_BOT_EMAIL);
+    
+    String key = "LightBot[" + LIGHT_BOT_EMAIL + "]";
+    if (personEntity == null) {
+      appendAttention(builder, key , "Missing.");
+    } else {
+      appendKeyValue(builder, key, "ok");
+    }
+  }
+
+  /**
+   * 
+   */
+  private void populateConsumerCredentialStatus(StringBuilder builder) {
+    appendSectionHeader(builder, "Consumer Credential Status");
+    for (OAuth2ProviderEnum currProvider : OAuth2ProviderEnum.values()) {
+      try {
+            consumerCredManagerFactory.create(currProvider);
+        appendKeyValue(builder, currProvider.name(), "ok");
+      } catch (Exception e) {
+        appendAttention(builder, currProvider.name(), "Needs Attention.");
+      }
     }
   }
 

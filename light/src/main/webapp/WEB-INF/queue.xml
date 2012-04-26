@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<queue-entries>
+  <total-storage-limit>1000M</total-storage-limit>
+  <queue>
+    <name>default</name>
+    <rate>500/s</rate>
+    <bucket-size>100</bucket-size>
+    <max-concurrent-requests>1000</max-concurrent-requests>
+    <mode>push</mode>
+  </queue>
+</queue-entries>

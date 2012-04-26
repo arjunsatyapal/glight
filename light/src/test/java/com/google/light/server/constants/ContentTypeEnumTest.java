@@ -15,14 +15,11 @@
  */
 package com.google.light.server.constants;
 
-import static com.google.light.server.constants.ContentTypeEnum.APPLICATION_JSON;
-import static com.google.light.server.constants.ContentTypeEnum.APPLICATION_XML;
-import static com.google.light.server.constants.ContentTypeEnum.TEXT_HTML;
-import static com.google.light.server.constants.ContentTypeEnum.TEXT_PLAIN;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.light.server.constants.http.ContentTypeEnum;
 import com.google.light.server.exception.unchecked.httpexception.UnsupportedMediaTypeException;
 import java.util.Map;
 import org.junit.Test;
@@ -41,7 +38,7 @@ public class ContentTypeEnumTest implements EnumTestInterface {
   @Test
   @Override
   public void test_count() {
-    assertEquals("Update test_getContentTypeByString as required.", 5,
+    assertEquals("Update test_getContentTypeByString as required.", 31,
         ContentTypeEnum.values().length);
   }
 
@@ -50,13 +47,49 @@ public class ContentTypeEnumTest implements EnumTestInterface {
    */
   @Test
   public void test_getContentTypeByString() {
-    Map<String, ContentTypeEnum> map = ImmutableMap.<String, ContentTypeEnum> builder()
-        .put("application/json", APPLICATION_JSON)
-        .put("application/xml", APPLICATION_XML)
-        .put("text/html", TEXT_HTML)
-        .put("text/plain", TEXT_PLAIN)
-        .put("text/javascript", ContentTypeEnum.TEXT_JAVASCRIPT)
-        .build();
+    Map<String, ContentTypeEnum> map =
+        ImmutableMap
+            .<String, ContentTypeEnum> builder()
+            .put("application/json", ContentTypeEnum.APPLICATION_JSON)
+            .put("application/pdf", ContentTypeEnum.APPLICATION_PDF)
+            .put("application/xml", ContentTypeEnum.APPLICATION_XML)
+            .put("application/zip", ContentTypeEnum.APPLICATION_ZIP)
+
+            .put("application/vnd.ms-excel", ContentTypeEnum.MS_EXCEL)
+            .put("application/msword", ContentTypeEnum.MS_WORD)
+            .put("application/vnd.ms-powerpoint", ContentTypeEnum.MS_POWERPOINT)
+            .put("application/x-msmetafile", ContentTypeEnum.MS_DRAWING)
+
+            .put("application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                ContentTypeEnum.OPENXML_DOCUMENT)
+            .put("application/vnd.openxmlformats-officedocument.presentationml.presentation",
+                ContentTypeEnum.OPENXML_PRESENTATION)
+            .put("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                ContentTypeEnum.OPENEXML_SPREADSHEET)
+            .put("application/vnd.google-apps.document", ContentTypeEnum.GOOGLE_DOC)
+            .put("application/vnd.google-apps.spreadsheet", ContentTypeEnum.GOOGLE_SPREADSHEET)
+            .put("application/vnd.google-apps.form", ContentTypeEnum.GOOGLE_FORM)
+            .put("application/vnd.google-apps.presentation", ContentTypeEnum.GOOGLE_PRESENTATION)
+            .put("application/vnd.google-apps.drawing", ContentTypeEnum.GOOGLE_DRAWING)
+
+            .put("application/vnd.oasis.opendocument.text", ContentTypeEnum.OASIS_DOCUMENT)
+            .put("application/x-vnd.oasis.opendocument.spreadsheet",
+                ContentTypeEnum.OASIS_SPREADSHEET)
+
+            .put("image/gif", ContentTypeEnum.IMAGE_GIF)
+            .put("image/jpeg", ContentTypeEnum.IMAGE_JPEG)
+            .put("image/bmp", ContentTypeEnum.IMAGE_BMP)
+            .put("image/png", ContentTypeEnum.IMAGE_PNG)
+            .put("image/svg+xml", ContentTypeEnum.IMAGE_SVG_XML)
+            .put("application/rtf", ContentTypeEnum.RTF)
+            .put("text/html", ContentTypeEnum.TEXT_HTML)
+            .put("text/javascript", ContentTypeEnum.TEXT_JAVASCRIPT)
+            .put("text/plain", ContentTypeEnum.TEXT_PLAIN)
+            .put("text/csv", ContentTypeEnum.TEXT_CSV)
+            .put("text/tab-separated-values", ContentTypeEnum.TEXT_TSV)
+            .put("text/xml", ContentTypeEnum.TEXT_XML)
+            .put("application/vnd.sun.xml.writer", ContentTypeEnum.SUN_XML_WRITE)
+            .build();
 
     for (String curr : map.keySet()) {
       assertEquals(map.get(curr), ContentTypeEnum.getContentTypeByString(curr));
@@ -66,7 +99,8 @@ public class ContentTypeEnumTest implements EnumTestInterface {
     for (String curr : map.keySet()) {
       assertEquals(map.get(curr), ContentTypeEnum.getContentTypeByString(curr + "; charset=UTF-8"));
       assertEquals(map.get(curr), ContentTypeEnum.getContentTypeByString(curr + " ; charset=UTF-8"));
-      assertEquals(map.get(curr), ContentTypeEnum.getContentTypeByString(" " + curr + " ; charset=UTF-8"));
+      assertEquals(map.get(curr),
+          ContentTypeEnum.getContentTypeByString(" " + curr + " ; charset=UTF-8"));
       assertEquals(map.get(curr), ContentTypeEnum.getContentTypeByString(curr + " "));
       assertEquals(map.get(curr), ContentTypeEnum.getContentTypeByString(" " + curr + " "));
       assertEquals(map.get(curr), ContentTypeEnum.getContentTypeByString(" " + curr));
@@ -80,5 +114,4 @@ public class ContentTypeEnumTest implements EnumTestInterface {
       // Expected
     }
   }
-
 }

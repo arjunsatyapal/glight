@@ -18,7 +18,7 @@ package com.google.light.server.servlets.pojo;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
-import com.google.light.server.constants.ContentTypeEnum;
+import com.google.light.server.constants.http.ContentTypeEnum;
 import com.google.light.server.dto.DtoInterface;
 import com.google.light.server.exception.unchecked.httpexception.UnsupportedMediaTypeException;
 import java.io.IOException;

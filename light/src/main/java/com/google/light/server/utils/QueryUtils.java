@@ -75,7 +75,7 @@ public class QueryUtils {
 
     // Populating the fields using the query string parameters.
     // If we have more then one parameter value for the same name, just get the first one.
-    Map<String, String[]> parameterMap = (Map<String, String[]>) request.getParameterMap();
+    Map<String, String[]> parameterMap = request.getParameterMap();
     for (Entry<String, String[]> entry : parameterMap.entrySet()) {
       String property = entry.getKey();
 

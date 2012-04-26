@@ -15,6 +15,25 @@
  */
 package com.google.light.server.utils;
 
+import com.google.light.server.exception.unchecked.XmlException;
+
+import com.google.gdata.data.BaseEntry;
+
+import com.google.gdata.data.ExtensionProfile;
+import com.google.gdata.util.common.xml.XmlWriter;
+
+import com.google.gdata.data.BaseFeed;
+
+import org.jdom.JDOMException;
+
+import org.jdom.Document;
+
+import org.jdom.input.SAXBuilder;
+
+import org.jdom.output.Format;
+
+import org.jdom.output.XMLOutputter;
+
 import com.google.light.server.dto.DtoInterface;
 
 import java.io.IOException;
@@ -55,16 +74,30 @@ public class XmlUtils {
     return dto.validate();
   }
 
-  public static <T> String toXml(T object) throws JAXBException {
-    JAXBContext jaxbContext = JAXBContext.newInstance(object.getClass());
-    Marshaller marshaller = jaxbContext.createMarshaller();
-    StringWriter sw = new StringWriter();
-    marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-    marshaller.marshal(object, sw);
-    return sw.toString();
+  public static <T> String toXml(T object) {
+    try {
+      JAXBContext jaxbContext = JAXBContext.newInstance(object.getClass());
+      Marshaller marshaller = jaxbContext.createMarshaller();
+      StringWriter sw = new StringWriter();
+      marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+      marshaller.marshal(object, sw);
+      return sw.toString();
+    } catch (Exception e) {
+      throw new XmlException(e);
+    }
 
   }
 
+  /**
+   * Convert Object to XML and then validate it againsted provided XSD.
+   * 
+   * @param object
+   * @param xsdUrl
+   * @return
+   * @throws JAXBException
+   * @throws SAXException
+   * @throws IOException
+   */
   public static <T> String toValidXml(T object, URL xsdUrl) throws JAXBException, SAXException,
       IOException {
     String xml = toXml(object);
@@ -82,6 +115,53 @@ public class XmlUtils {
     Source xmlStringSource = new StreamSource(new StringReader(xml));
     validator.validate(xmlStringSource);
     return xml;
+  }
+
+  /**
+   * Takes a XML string as input and outputs a pretty-formatted XML.
+   * 
+   * TODO(arjuns): Add test for this.
+   * 
+   * @param xml
+   * @return
+   * @throws JDOMException
+   * @throws IOException
+   */
+  public static String pretyfyXml(String xml) throws JDOMException, IOException {
+    SAXBuilder builder = new SAXBuilder();
+    Document document = builder.build(new StringReader(xml));
+
+    XMLOutputter xmlOutputter = new XMLOutputter(Format.getPrettyFormat());
+
+    return xmlOutputter.outputString(document);
+  }
+
+  /**
+   * Return a pretty XML for a GData Base Entry
+   */
+  public static String getXmlFeed(@SuppressWarnings("rawtypes") BaseFeed feed) {
+    try {
+      StringWriter stringWriter = new StringWriter();
+      feed.generateAtom(new XmlWriter(stringWriter), new ExtensionProfile());
+      String xmlFeed = stringWriter.toString();
+      return pretyfyXml(xmlFeed);
+    } catch (Exception e) {
+      throw new XmlException(e);
+    }
+  }
+
+  /**
+   * Return a pretty XML for a GData Base Entry
+   */
+  public static String getXmlEntry(@SuppressWarnings("rawtypes") BaseEntry entry) {
+    try {
+      StringWriter stringWriter = new StringWriter();
+      entry.generateAtom(new XmlWriter(stringWriter), new ExtensionProfile());
+      String xmlFeed = stringWriter.toString();
+      return pretyfyXml(xmlFeed);
+    } catch (Exception e) {
+      throw new XmlException(e);
+    }
   }
 
   // Utility class.

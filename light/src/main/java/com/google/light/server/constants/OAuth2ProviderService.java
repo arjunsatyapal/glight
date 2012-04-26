@@ -85,7 +85,7 @@ public enum OAuth2ProviderService {
       this.tokenServerUrl = checkValidUri(tokenServerUrl);
       this.tokenInfoUrl = checkValidUri(tokenInfoUrl);
       this.tokenInfoClazz = checkNotNull(tokenInfoClazz);
-      this.scopes = (ArrayList<String>) checkNonEmptyList(scopes);
+      this.scopes = (ArrayList<String>) checkNonEmptyList(scopes, "scopes");
     } catch (URISyntaxException e) {
       throw new IllegalArgumentException(e);
     }
@@ -112,7 +112,7 @@ public enum OAuth2ProviderService {
     return tokenInfoUrl;
   }
 
-  @SuppressWarnings("rawtypes")
+  @SuppressWarnings({ "rawtypes", "unchecked" })
   public  Class<? extends AbstractOAuth2TokenInfo> getTokenInfoClazz() {
     return tokenInfoClazz;
   }

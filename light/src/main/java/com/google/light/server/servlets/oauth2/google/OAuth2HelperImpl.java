@@ -113,7 +113,7 @@ public class OAuth2HelperImpl implements OAuth2Helper {
    * @throws IOException
    */
   @Override
-  public <D extends AbstractOAuth2TokenInfo<D>> D getTokenInfo(String accessToken, Class<D> clazz)
+  public <D extends AbstractOAuth2TokenInfo<D>> D getTokenInfo(String accessToken)
       throws IOException {
     return ownerTokenManager.getInfoByAccessToken(accessToken);
   }

@@ -22,6 +22,10 @@ import static com.google.light.server.utils.LightPreconditions.checkPositiveLong
 import static com.google.light.server.utils.LightPreconditions.checkProviderUserId;
 import static com.google.light.server.utils.LightUtils.getCurrentTimeInMillis;
 
+import com.google.light.server.dto.pojo.PersonId;
+
+
+
 import com.google.light.server.constants.OAuth2ProviderService;
 import com.google.light.server.dto.oauth2.owner.OAuth2OwnerTokenDto;
 import com.google.light.server.persistence.PersistenceToDtoInterface;
@@ -40,44 +44,45 @@ import org.apache.commons.lang.builder.ToStringBuilder;
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
-public class OAuth2OwnerTokenEntity implements 
+public class OAuth2OwnerTokenEntity implements
     PersistenceToDtoInterface<OAuth2OwnerTokenEntity, OAuth2OwnerTokenDto> {
   @Id
   String providerServiceName;
-  @Parent Key<PersonEntity> personKey;
-  
+  @Parent
+  Key<PersonEntity> personKey;
+
   // This is used in Objectify Query.
   public static final String OFY_PROVIDER_USER_ID = "providerUserId";
   String providerUserId;
-  
+
   String accessToken;
   String refreshToken;
   long expiresInMillis;
   String tokenType;
   String tokenInfo;
 
-  /** 
+  /**
    * {@inheritDoc}
    */
   @Override
   public OAuth2OwnerTokenDto toDto() {
     return new OAuth2OwnerTokenDto.Builder()
-      .personId(personKey.getId())
-      .provider(OAuth2ProviderService.valueOf(providerServiceName))
-      .providerUserId(providerUserId)
-      .accessToken(accessToken)
-      .refreshToken(refreshToken)
-      .expiresInMillis(expiresInMillis)
-      .tokenType(tokenType)
-      .tokenInfo(tokenInfo)
-      .build();
+        .personId(new PersonId(personKey.getId()))
+        .provider(OAuth2ProviderService.valueOf(providerServiceName))
+        .providerUserId(providerUserId)
+        .accessToken(accessToken)
+        .refreshToken(refreshToken)
+        .expiresInMillis(expiresInMillis)
+        .tokenType(tokenType)
+        .tokenInfo(tokenInfo)
+        .build();
   }
-  
+
   @Override
   public boolean equals(Object obj) {
     return EqualsBuilder.reflectionEquals(this, obj);
   }
-  
+
   @Override
   public int hashCode() {
     return HashCodeBuilder.reflectionHashCode(this);
@@ -87,20 +92,21 @@ public class OAuth2OwnerTokenEntity implements
   public String toString() {
     return ToStringBuilder.reflectionToString(this);
   }
-  
+
   public Key<PersonEntity> getPersonKey() {
     return personKey;
   }
-  
+
   /**
    * TODO(arjuns): Add test for this.
+   * 
    * @return
    */
-  public long getPersonId() {
-    return getPersonKey().getId();
+  public PersonId getPersonId() {
+    return new PersonId(getPersonKey().getId());
   }
-  
-  /** 
+
+  /**
    * {@inheritDoc}
    */
   @Override
@@ -120,15 +126,15 @@ public class OAuth2OwnerTokenEntity implements
     } catch (Exception e) {
       throw new EnumConstantNotPresentException(OAuth2ProviderService.class, providerServiceName);
     }
-    
-    return new Key<OAuth2OwnerTokenEntity>(personKey, OAuth2OwnerTokenEntity.class, 
+
+    return new Key<OAuth2OwnerTokenEntity>(personKey, OAuth2OwnerTokenEntity.class,
         providerServiceName);
   }
 
   public OAuth2ProviderService getProviderService() {
     return OAuth2ProviderService.valueOf(providerServiceName);
   }
-  
+
   public String getProviderUserId() {
     return providerUserId;
   }
@@ -144,8 +150,8 @@ public class OAuth2OwnerTokenEntity implements
   public long getExpiresInMillis() {
     return expiresInMillis;
   }
-  
-//  TODO(arjuns): Add test for this.
+
+  // TODO(arjuns): Add test for this.
   public boolean hasExpired() {
     return getCurrentTimeInMillis() > expiresInMillis;
   }
@@ -158,6 +164,21 @@ public class OAuth2OwnerTokenEntity implements
     return tokenInfo;
   }
 
+  public String getAuthorizationToken() {
+    OAuth2ProviderService providerService = OAuth2ProviderService.valueOf(providerServiceName);
+
+    switch (providerService) {
+      case GOOGLE_DOC:
+        //$FALL-THROUGH$
+      case GOOGLE_LOGIN:
+        return getTokenType() + " " + getAccessToken();
+
+      default:
+        throw new UnsupportedOperationException("This method is not supported for "
+            + providerService);
+    }
+  }
+
   public static class Builder {
     private Key<PersonEntity> personKey;
     private OAuth2ProviderService providerService;
@@ -168,7 +189,7 @@ public class OAuth2OwnerTokenEntity implements
     private String tokenType;
     private String tokenInfo;
 
-    public Builder personKey(Key<PersonEntity>  personKey) {
+    public Builder personKey(Key<PersonEntity> personKey) {
       this.personKey = personKey;
       return this;
     }
@@ -182,7 +203,7 @@ public class OAuth2OwnerTokenEntity implements
       this.providerUserId = providerUserId;
       return this;
     }
-    
+
     public Builder accessToken(String accessToken) {
       this.accessToken = accessToken;
       return this;
@@ -219,7 +240,7 @@ public class OAuth2OwnerTokenEntity implements
     this.personKey = checkPersonKey(builder.personKey);
     checkNotNull(builder.providerService, "provider");
     this.providerServiceName = builder.providerService.name();
-    
+
     this.providerUserId = checkProviderUserId(builder.providerService, builder.providerUserId);
     this.accessToken = checkNotBlank(builder.accessToken, "accessToken");
     this.refreshToken = checkNotBlank(builder.refreshToken, "refreshToken");

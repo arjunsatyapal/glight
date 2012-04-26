@@ -109,7 +109,7 @@ public class LightEnvEnumTest implements EnumTestInterface {
   public void test_getAppIds() {
     // We are just testing for Prod, but others can be similar.
     List<String> appIdList = LightEnvEnum.PROD.getAppIds();
-    checkNonEmptyList(appIdList);
+    checkNonEmptyList(appIdList, "appIdList");
     assertEquals(1, appIdList.size());
     assertTrue(appIdList.contains("light-prod"));
   }

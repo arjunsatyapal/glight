@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
   version="2.5">
+
+  <listener>
+    <listener-class>com.google.light.server.guice.ServletContextListener</listener-class>
+  </listener>
+
   <filter>
     <filter-name>guiceFilter</filter-name>
     <filter-class>com.google.inject.servlet.GuiceFilter</filter-class>
@@ -8,26 +13,26 @@
 
   <filter-mapping>
     <filter-name>guiceFilter</filter-name>
-    <url-pattern>/admin/*</url-pattern>
-    <url-pattern>/api/*</url-pattern>
-    <url-pattern>/login/*</url-pattern>
-    <url-pattern>/logout/*</url-pattern>
-    <url-pattern>/oauth2/*</url-pattern>
-    <url-pattern>/preload</url-pattern>
-    <url-pattern>/register</url-pattern>
-    <url-pattern>/search</url-pattern>
-    <url-pattern>/test/*</url-pattern>
+
+    <url-pattern>/*</url-pattern>
   </filter-mapping>
 
-  <listener>
-    <listener-class>com.google.light.server.guice.ServletContextListener</listener-class>
-  </listener>
+  <servlet>
+    <servlet-name>PipelineServlet</servlet-name>
+    <servlet-class>com.google.appengine.tools.pipeline.impl.servlets.PipelineServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>PipelineServlet</servlet-name>
+    <url-pattern>/_ah/pipeline/*</url-pattern>
+  </servlet-mapping>
 
   <security-constraint>
     <web-resource-collection>
       <url-pattern>/admin/*</url-pattern>
       <url-pattern>/html/admin/*</url-pattern>
+      <url-pattern>/_ah/pipeline/*</url-pattern>
       <url-pattern>/test/admin/*</url-pattern>
+
     </web-resource-collection>
     <auth-constraint>
       <role-name>admin</role-name>

@@ -23,6 +23,8 @@ import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
  * TODO(arjuns): Move params to another class which are not used for Production.
  * TODO(arjuns): Add boolean category to show what is used for RequestParams and what is used
  * for Persistence.
+ * TODO(arjuns): Rename this class to RequestKeys.
+ *
  * 
  * @author Arjun Satyapal
  */
@@ -33,20 +35,34 @@ public enum RequestParamKeyEnum {
   DEFAULT_EMAIL("default_email", true),
 
   GOOGLE_DOC_URL("google_doc_url", true),
-
+  
+  GOOGLE_DOC_RESOURCE_ID("google_doc_resource_id", true),
+  
+  JOB_ID("job_id", true),
+  
   // TODO(arjuns): Add category to differentiate on what goes in Session and what comes in URL.
   LOGIN_PROVIDER_ID("login_provider_id", true),
   LOGIN_PROVIDER_USER_ID("login_provider_user_id", true),
 
+  MODULE_TYPE("module_type", true),
+  MODULE_ID("module_id", true),
+  MODULE_VERSION("module_version", true),
+  
   OAUTH2_PROVIDER_NAME("oauth2_provider_name", true),
 
+  
+  PAGE_NEXT("page_next", true),
+  PAGE_PREVIOUS("page_previous", true),
+  PASSWORD("password", false),
+  PERSON_ID("person_id", true),
+  PIPELINE_ID("pipeline_id", true),
+  
+  PROMISE_HANDLE("promise_handle", true),
+  PROMISE_VALUE("promise_value", true),
   EMAIL("email", false),
   FULLNAME("fullname", false),
-  PASSWORD("password", false),
 
-  REDIRECT("redirect", true),
-
-  PERSON_ID("person_id", true);
+  REDIRECT("redirect", true);
 
   private String key;
   private boolean allowedInProd;

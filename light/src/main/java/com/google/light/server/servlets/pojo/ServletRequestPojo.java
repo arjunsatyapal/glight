@@ -18,17 +18,14 @@ package com.google.light.server.servlets.pojo;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
-import com.google.light.server.constants.ContentTypeEnum;
+import com.google.light.server.constants.http.ContentTypeEnum;
 import com.google.light.server.dto.DtoInterface;
 import com.google.light.server.exception.unchecked.httpexception.UnsupportedMediaTypeException;
 import com.google.light.server.utils.JsonUtils;
 import com.google.light.server.utils.XmlUtils;
-import java.io.IOException;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.bind.JAXBException;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
 
 /**
  * Request POJO for HTTP Requests. This class wraps the Content-Type, requestString and converted
@@ -49,8 +46,7 @@ public class ServletRequestPojo<D extends DtoInterface<D>> {
   private D dto;
 
   public ServletRequestPojo(HttpServletRequest request, ContentTypeEnum contentType,
-      String requestString, Class<D> clazz) throws JsonParseException, JsonMappingException,
-      IOException, JAXBException {
+      String requestString, Class<D> clazz) throws JAXBException {
     this.request = checkNotNull(request);
     this.contentType = checkNotNull(contentType);
     logger.info("Content-Type[" + contentType + "], RequestBody = [" + requestString + "].");

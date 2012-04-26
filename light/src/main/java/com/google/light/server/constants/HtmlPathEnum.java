@@ -23,6 +23,7 @@ import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
  * @author Arjun Satyapal
  */
 public enum HtmlPathEnum {
+  GOOGLE_DOC_INFORMATION("html/test/thirdparty/google/gdata/gdoc/information.html"),
   PUT_OAUTH2_CONSUMER_CREDENTIAL("/html/admin/put_oauth2_consumer_credential.html");
 
   private String path;

@@ -119,11 +119,13 @@ public class SearchResultDto implements DtoInterface<SearchResultDto> {
       return this;
     }
 
+    @SuppressWarnings("synthetic-access")
     public SearchResultDto build() {
       return new SearchResultDto(this).validate();
     }
   }
 
+  @SuppressWarnings("synthetic-access")
   private SearchResultDto(Builder builder) {
     this.items = builder.items;
     this.hasNextPage = builder.hasNextPage;

@@ -77,6 +77,7 @@ public class SearchRequestDtoTest extends AbstractDtoTest {
 
   }
 
+  @Override
   @Test
   public void test_validate() {
     // Positive test

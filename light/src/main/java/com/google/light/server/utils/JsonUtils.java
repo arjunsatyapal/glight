@@ -15,19 +15,17 @@
  */
 package com.google.light.server.utils;
 
-import java.io.IOException;
-import java.io.StringReader;
-
-import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.AnnotationIntrospector;
-import org.codehaus.jackson.map.DeserializationConfig;
-import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.ObjectWriter;
-import org.codehaus.jackson.xc.JaxbAnnotationIntrospector;
 
 import com.google.light.server.dto.DtoInterface;
+import com.google.light.server.exception.unchecked.JsonException;
+import java.io.StringReader;
+import org.codehaus.jackson.map.AnnotationIntrospector;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.ObjectWriter;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
+
+import org.codehaus.jackson.map.DeserializationConfig;
+import org.codehaus.jackson.xc.JaxbAnnotationIntrospector;
 
 /**
  * Utility class for Json.
@@ -35,33 +33,37 @@ import com.google.light.server.dto.DtoInterface;
  * D : DTO for this Json.
  * 
  * TODO(arjuns) : Add test for this.
+ * TODO(arjuns) : Do we need this class after Jersey?
  * 
  * @author Arjun Satyapal
  */
 public class JsonUtils {
   // TODO(arjuns): Add javadocs in this class.
   // TODO(arjuns): See if this class can return object only after validation. Same for Xml Utils
-  public static <D extends DtoInterface<D>> D getDto(String jsonString, Class<D> dtoClass)
-      throws JsonParseException, JsonMappingException, IOException {
+  public static <D extends DtoInterface<D>> D getDto(String jsonString, Class<D> dtoClass) {
     ObjectMapper mapper = new ObjectMapper();
     mapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     AnnotationIntrospector introspector = new JaxbAnnotationIntrospector();
     // make serializer use JAXB annotations (only)
     mapper.getSerializationConfig().withAnnotationIntrospector(introspector);
-    D dto = mapper.readValue(new StringReader(jsonString), dtoClass);
+    D dto = null;
+    try {
+      dto = mapper.readValue(new StringReader(jsonString), dtoClass);
+    } catch (Exception e) {
+      throw new JsonException(e);
+    }
     
     return dto.validate();
   }
 
-  public static <T> String toJson(T object) throws JsonGenerationException, JsonMappingException,
-      IOException {
+  public static <T> String toJson(T object) {
     return toJson(object, true);
   }
 
-  public static <T> String toJson(T object, boolean prettyPrint) throws JsonGenerationException,
-      JsonMappingException,
-      IOException {
+  public static <T> String toJson(T object, boolean prettyPrint) {
     ObjectMapper mapper = new ObjectMapper();
+    mapper.setSerializationInclusion(JsonSerialize.Inclusion.NON_NULL);
+    
     AnnotationIntrospector introspector = new JaxbAnnotationIntrospector();
     // make serializer use JAXB annotations (only)
     mapper.getSerializationConfig().withAnnotationIntrospector(introspector);
@@ -73,7 +75,11 @@ public class JsonUtils {
     } else {
       writer = mapper.writer();
     }
-    return writer.writeValueAsString(object);
+    try {
+      return writer.writeValueAsString(object);
+    } catch (Exception e) {
+      throw new JsonException(e);
+    }
   }
 
   // Utility class.

@@ -33,6 +33,7 @@ import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
 import com.google.light.server.constants.LightEnvEnum;
 
+@Deprecated
 @SuppressWarnings("serial")
 public class TestCleanUpDatastore extends HttpServlet {
   
@@ -51,14 +52,17 @@ public class TestCleanUpDatastore extends HttpServlet {
       this.entityIter = iter;
     }
 
+    @Override
     public boolean hasNext() {
       return entityIter.hasNext();
     }
 
+    @Override
     public Key next() {
       return entityIter.next().getKey();
     }
 
+    @Override
     public void remove() {
       throw new UnsupportedOperationException();
     }

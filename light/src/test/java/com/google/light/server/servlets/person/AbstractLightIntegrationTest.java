@@ -19,6 +19,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPersonId;
 
+import com.google.light.server.dto.pojo.PersonId;
+
+
+
 import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
@@ -39,7 +43,7 @@ import org.junit.Test;
 public abstract class AbstractLightIntegrationTest {
   protected FakeLoginHelper loginProvider;
   protected OAuth2ProviderService providerService;
-  protected long personId;
+  protected PersonId personId;
   protected String providerEmail;
   protected HttpTransport HTTP_TRANSPORT = new NetHttpTransport();
   protected final JsonFactory JSON_FACTORY = new JacksonFactory();
@@ -49,7 +53,7 @@ public abstract class AbstractLightIntegrationTest {
 
   protected boolean isLocalHost = false;
 
-  protected AbstractLightIntegrationTest(OAuth2ProviderService providerService, long personId,
+  protected AbstractLightIntegrationTest(OAuth2ProviderService providerService, PersonId personId,
       String providerEmail) {
     this.providerService = checkNotNull(providerService);
     this.personId = checkPersonId(personId);

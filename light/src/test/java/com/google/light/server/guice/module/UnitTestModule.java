@@ -16,8 +16,10 @@
 package com.google.light.server.guice.module;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.light.testingutils.TestingUtils.getMockPersonIdForFailure;
 
-import javax.servlet.http.HttpSession;
+import com.google.light.server.dto.pojo.PersonId;
+import com.google.light.server.dto.pojo.RequestScopedValues;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -25,14 +27,18 @@ import com.google.inject.Module;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.servlet.ServletModule;
 import com.google.inject.util.Modules;
+import com.google.light.server.annotations.AnotActor;
 import com.google.light.server.annotations.AnotHttpSession;
+import com.google.light.server.annotations.AnotOwner;
 import com.google.light.server.exception.unchecked.ServerConfigurationException;
 import com.google.light.server.guice.modules.BaseGuiceModule;
-import com.google.light.server.guice.modules.DevServerModule;
+import com.google.light.server.guice.modules.ProdModule;
+import com.google.light.server.guice.provider.TestRequestScopedValuesProvider;
 import com.google.light.server.manager.implementation.oauth2.consumer.OAuth2ConsumerCredentialManagerFactory;
 import com.google.light.server.manager.implementation.oauth2.consumer.TestOAuth2ConsumerCredentialManagerImpl;
 import com.google.light.server.manager.interfaces.OAuth2ConsumerCredentialManager;
 import com.google.light.server.utils.GaeUtils;
+import javax.servlet.http.HttpSession;
 
 /**
  * UnitTest Guice Module for UnitTests Environment.
@@ -40,14 +46,17 @@ import com.google.light.server.utils.GaeUtils;
  * @author Arjun Satyapal
  */
 public class UnitTestModule extends BaseGuiceModule {
+  private TestRequestScopedValuesProvider testRequestScopedValueProvider;
   private HttpSession httpSession;
 
-  public UnitTestModule(HttpSession httpSession) {
+  public UnitTestModule(TestRequestScopedValuesProvider testRequestScopedValueProvider,
+      HttpSession httpSession) {
     if (!GaeUtils.isUnitTestServer()) {
       throw new ServerConfigurationException(
           "UnitTestModule should be instantiated only for UnitTest Env.");
     }
 
+    this.testRequestScopedValueProvider = checkNotNull(testRequestScopedValueProvider);
     this.httpSession = checkNotNull(httpSession);
   }
 
@@ -56,20 +65,37 @@ public class UnitTestModule extends BaseGuiceModule {
     bind(HttpSession.class)
         .annotatedWith(AnotHttpSession.class)
         .toInstance(httpSession);
-    
+
+    bind(PersonId.class)
+        .annotatedWith(AnotOwner.class)
+        .toInstance(getMockPersonIdForFailure());
+
+    bind(PersonId.class)
+        .annotatedWith(AnotActor.class)
+        .toInstance(getMockPersonIdForFailure());
+
+    bind(RequestScopedValues.class)
+        .toProvider(testRequestScopedValueProvider);
+
     bind(OAuth2ConsumerCredentialManager.class)
-      .to(TestOAuth2ConsumerCredentialManagerImpl.class);
-    
+        .to(TestOAuth2ConsumerCredentialManagerImpl.class);
+
     install(new FactoryModuleBuilder()
-    .implement(OAuth2ConsumerCredentialManager.class, TestOAuth2ConsumerCredentialManagerImpl.class)
-    .build(OAuth2ConsumerCredentialManagerFactory.class));
+        .implement(OAuth2ConsumerCredentialManager.class,
+            TestOAuth2ConsumerCredentialManagerImpl.class)
+        .build(OAuth2ConsumerCredentialManagerFactory.class));
   }
 
-  public static Module getModule(HttpSession httpSession, ServletModule servletModule) {
-    return Modules.override(new DevServerModule(), servletModule)
-        .with(new UnitTestModule(httpSession));
+  public static Module getModule(TestRequestScopedValuesProvider testRequestScopedValueProvider,
+      HttpSession httpSession, ServletModule servletModule) {
+    return Modules.override(new ProdModule(), servletModule)
+        .with(new UnitTestModule(testRequestScopedValueProvider, httpSession));
   }
-  public static Injector getTestInjector(HttpSession httpSession, ServletModule servletModule) {
-    return Guice.createInjector(getModule(httpSession, servletModule));
+
+  public static Injector getTestInjector(
+      TestRequestScopedValuesProvider testRequestScopedValueProvider,
+      HttpSession httpSession, ServletModule servletModule) {
+    return Guice.createInjector(getModule(testRequestScopedValueProvider, httpSession,
+        servletModule));
   }
 }

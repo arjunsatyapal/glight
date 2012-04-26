@@ -15,7 +15,7 @@
  */
 package com.google.light.server.exception.unchecked.httpexception;
 
-import com.google.light.server.constants.HttpStatusCodesEnum;
+import com.google.light.server.constants.http.HttpStatusCodesEnum;
 
 /**
  * This indicates that in order to perform the requested task, user has to login.

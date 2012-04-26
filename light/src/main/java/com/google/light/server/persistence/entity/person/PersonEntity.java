@@ -19,15 +19,18 @@ import static com.google.light.server.utils.LightPreconditions.checkEmail;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPersonId;
 
+
+import com.google.light.server.dto.pojo.PersonId;
+
+
+import com.google.light.server.dto.person.PersonDto;
+import com.google.light.server.persistence.PersistenceToDtoInterface;
+import com.googlecode.objectify.Key;
 import javax.persistence.Id;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
-
-import com.google.light.server.dto.person.PersonDto;
-import com.google.light.server.persistence.PersistenceToDtoInterface;
-import com.googlecode.objectify.Key;
 
 /**
  * Persistence object for {@link PersonDto}.
@@ -75,8 +78,13 @@ public class PersonEntity implements PersistenceToDtoInterface<PersonEntity, Per
 
 
   // Getters and setters.
-  public Long getId() {
-    return id;
+  
+  public PersonId getPersonId() {
+    if (id == null) {
+      return null;
+    }
+    
+    return new PersonId(id);
   }
   
   /**
@@ -84,27 +92,28 @@ public class PersonEntity implements PersistenceToDtoInterface<PersonEntity, Per
    */
   @Override
   public Key<PersonEntity> getKey() {
-    return generateKey(id);
+    return generateKey(getPersonId());
   }
 
   /**
    * Method to generate Objectify key for {@link PersonEntity}.
    */
-  public static Key<PersonEntity> generateKey(Long personId) {
+  public static Key<PersonEntity> generateKey(PersonId personId) {
     checkPersonId(personId);
-    return new Key<PersonEntity>(PersonEntity.class, personId);
+    return new Key<PersonEntity>(PersonEntity.class, personId.get());
   }
   
   // TODO(arjuns) : Add a test.
   /**
    * Id can be set only when a User is Logged In.
    */
-  public void setId(Long id) {
+  public void setPersonId(PersonId personId) {
     if (this.id != null) {
       throw new UnsupportedOperationException("Id cannot be changed once it is set.");
     }
 
-    this.id = checkPersonId(id);
+    checkPersonId(personId);
+    this.id = personId.get();
   }
 
   public String getFirstName() {
@@ -132,14 +141,14 @@ public class PersonEntity implements PersistenceToDtoInterface<PersonEntity, Per
   }
 
   public static class Builder {
-    private Long id;
+    private PersonId personId;
     private String firstName;
     private String lastName;
     private String email;
     private boolean acceptedTos = false;
 
-    public Builder id(Long id) {
-      this.id = id;
+    public Builder personId(PersonId personId) {
+      this.personId= personId;
       return this;
     }
 
@@ -171,7 +180,12 @@ public class PersonEntity implements PersistenceToDtoInterface<PersonEntity, Per
 
   @SuppressWarnings("synthetic-access")
   private PersonEntity(Builder builder) {
-    this.id = builder.id != null ? checkPersonId(builder.id) : null;
+    if (builder.personId != null) {
+      checkPersonId(builder.personId);
+      this.id = builder.personId.get();
+    } else {
+      this.id = null;
+    }
     this.firstName = checkNotBlank(builder.firstName, "firstName");
     this.lastName = checkNotBlank(builder.lastName, "lastName");
     this.email = checkEmail(builder.email);

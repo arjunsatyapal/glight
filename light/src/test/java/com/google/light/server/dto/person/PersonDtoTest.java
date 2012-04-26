@@ -17,11 +17,16 @@ package com.google.light.server.dto.person;
 
 import static com.google.light.server.constants.TestResourceMappings.CREATE_PERSON;
 import static com.google.light.testingutils.TestingUtils.getRandomEmail;
-import static com.google.light.testingutils.TestingUtils.getRandomLongNumber;
 import static com.google.light.testingutils.TestingUtils.getRandomString;
 import static com.google.light.testingutils.TestingUtils.getResourceAsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+
+import com.google.light.server.dto.pojo.PersonId;
+
+
+
+import com.google.light.testingutils.TestingUtils;
 
 import com.google.light.server.dto.AbstractDtoToPersistenceTest;
 import com.google.light.server.exception.unchecked.BlankStringException;
@@ -95,8 +100,8 @@ public class PersonDtoTest extends AbstractDtoToPersistenceTest {
     PersonDto personDto = getDtoBuilder().build();
     assertEquals(entityBuilder.build(), personDto.toPersistenceEntity(null));
 
-    Long value = getRandomLongNumber();
-    assertEquals(entityBuilder.id(value).build(), personDto.toPersistenceEntity(value));
+    PersonId value = TestingUtils.getRandomPersonId();
+    assertEquals(entityBuilder.personId(value).build(), personDto.toPersistenceEntity(value));
   }
 
   /**

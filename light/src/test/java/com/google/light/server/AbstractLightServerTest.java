@@ -17,9 +17,15 @@ import static com.google.light.server.utils.LightPreconditions.checkValidSession
 import static com.google.light.testingutils.TestingUtils.createRandomPerson;
 import static com.google.light.testingutils.TestingUtils.getInjectorByEnv;
 import static com.google.light.testingutils.TestingUtils.getMockSessionForTesting;
+import static com.google.light.testingutils.TestingUtils.getRequestScopedValueProvider;
 import static com.google.light.testingutils.TestingUtils.getRandomEmail;
 import static com.google.light.testingutils.TestingUtils.getRandomProviderUserId;
 import static com.google.light.testingutils.TestingUtils.getRandomString;
+
+import com.google.light.server.dto.pojo.PersonId;
+
+
+import com.google.light.server.guice.provider.TestRequestScopedValuesProvider;
 
 import com.google.inject.Injector;
 import com.google.light.server.constants.LightEnvEnum;
@@ -40,15 +46,16 @@ public abstract class AbstractLightServerTest extends AbstractGAETest {
   protected static LightEnvEnum defaultEnv = LightEnvEnum.UNIT_TEST;
 
   protected static OAuth2ProviderService defaultProviderService = GOOGLE_LOGIN;
+  protected TestRequestScopedValuesProvider testRequestScopedValueProvider;
   protected HttpSession testSession;
   protected PersonEntity testPerson;
-  protected long testPersonId;
+  protected PersonId testPersonId;
   protected String testProviderUserId;
   protected String testEmail;
   protected String testFirstName;
   protected String testLastName;
-
-  protected Injector injector;
+  
+  private Injector injector;
 
   @Before
   public void setUp() {
@@ -58,21 +65,29 @@ public abstract class AbstractLightServerTest extends AbstractGAETest {
     testFirstName = getRandomString();
     testLastName = getRandomString();
 
-    // Create mock session with no personId.
-    testSession = getMockSessionForTesting(defaultEnv, defaultProviderService,
-        testProviderUserId, null /*personId*/, testEmail);
-
-    testPerson = createRandomPerson(defaultEnv, testSession);
-    testPersonId = testPerson.getId();
-
-    
     // Now re-create session with PersonId using Person created in previous step.
-    
     testSession = getMockSessionForTesting(defaultEnv, defaultProviderService,
         testProviderUserId, testPersonId, testEmail);
-    injector = getInjectorByEnv(defaultEnv, testSession);
+    testRequestScopedValueProvider = getRequestScopedValueProvider(new PersonId(1L), new PersonId(1L));
     
-    SessionManager sessionManager = GuiceUtils.getInstance(injector, SessionManager.class);
+    injector = getInjectorByEnv(defaultEnv, testRequestScopedValueProvider, testSession);
+    GuiceUtils.setInjector(injector);
+    
+    // Now initializing TestRequestScope
+
+    testPerson = createRandomPerson(defaultEnv, testRequestScopedValueProvider, testSession);
+    testPersonId = testPerson.getPersonId();
+    
+    testRequestScopedValueProvider.getParticipants().updateBoth(testPersonId);
+
+    // Now reinitializing session with this personid. And updating Injector.
+    testSession = getMockSessionForTesting(defaultEnv, defaultProviderService,
+        testProviderUserId, testPersonId, testEmail);
+
+    injector = getInjectorByEnv(defaultEnv, testRequestScopedValueProvider,  testSession);
+    GuiceUtils.setInjector(injector);
+    
+    SessionManager sessionManager = GuiceUtils.getInstance(SessionManager.class);
     checkValidSession(sessionManager);
   }
 

@@ -18,8 +18,8 @@ package com.google.light.server.utils;
 import static com.google.light.server.constants.LightEnvEnum.UNIT_TEST;
 import static com.google.light.server.constants.OAuth2ProviderService.GOOGLE_DOC;
 import static com.google.light.server.constants.OAuth2ProviderService.GOOGLE_LOGIN;
-import static com.google.light.server.utils.GuiceUtils.getInstance;
 import static com.google.light.server.utils.LightPreconditions.checkEmail;
+import static com.google.light.server.utils.LightPreconditions.checkIntegerIsInRage;
 import static com.google.light.server.utils.LightPreconditions.checkIsEnv;
 import static com.google.light.server.utils.LightPreconditions.checkIsNotEnv;
 import static com.google.light.server.utils.LightPreconditions.checkNonEmptyList;
@@ -31,25 +31,28 @@ import static com.google.light.server.utils.LightPreconditions.checkPositiveLong
 import static com.google.light.server.utils.LightPreconditions.checkProviderUserId;
 import static com.google.light.server.utils.LightPreconditions.checkValidSession;
 import static com.google.light.server.utils.LightPreconditions.checkValidUri;
+import static com.google.light.server.utils.LightUtils.getUUIDString;
 import static com.google.light.testingutils.TestingUtils.gaeSetup;
-import static com.google.light.testingutils.TestingUtils.getInjectorByEnv;
 import static com.google.light.testingutils.TestingUtils.getMockSessionForTesting;
+import static com.google.light.testingutils.TestingUtils.getRequestScopedValueProvider;
 import static com.google.light.testingutils.TestingUtils.getRandomEmail;
 import static com.google.light.testingutils.TestingUtils.getRandomPersonId;
 import static com.google.light.testingutils.TestingUtils.getRandomProviderUserId;
 import static com.google.light.testingutils.TestingUtils.getRandomString;
-import static com.google.light.testingutils.TestingUtils.getUUIDString;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import com.google.common.collect.Lists;
+import com.google.inject.Injector;
 import com.google.light.server.constants.LightEnvEnum;
 import com.google.light.server.constants.OAuth2ProviderService;
+import com.google.light.server.dto.pojo.PersonId;
 import com.google.light.server.exception.unchecked.BlankStringException;
 import com.google.light.server.exception.unchecked.InvalidPersonIdException;
 import com.google.light.server.exception.unchecked.InvalidSessionException;
 import com.google.light.server.exception.unchecked.ServerConfigurationException;
 import com.google.light.server.exception.unchecked.httpexception.UnauthorizedException;
+import com.google.light.server.guice.provider.TestRequestScopedValuesProvider;
 import com.google.light.server.servlets.SessionManager;
 import com.google.light.testingutils.GaeTestingUtils;
 import com.google.light.testingutils.TestingUtils;
@@ -115,6 +118,34 @@ public class LightPreconditionsTest {
     } catch (IllegalArgumentException e) {
       // expected.
     }
+  }
+
+  /**
+   * Test for {@link LightPreconditions#checkIntegerIsInRage(Integer, int, int, String)}.
+   */
+  @Test
+  public void test_checkIntegerIsInRange() {
+    int min = -10;
+    int max = 10;
+
+    try {
+      checkIntegerIsInRage(-15, min, max, "");
+      fail("should have failed.");
+    } catch (IllegalArgumentException e) {
+      // Expected
+    }
+
+    checkIntegerIsInRage(-10, min, max, "");
+    checkIntegerIsInRage(-0, min, max, "");
+    checkIntegerIsInRage(10, min, max, "");
+
+    try {
+      checkIntegerIsInRage(15, min, max, "");
+      fail("should have failed.");
+    } catch (IllegalArgumentException e) {
+      // Expected
+    }
+
   }
 
   /**
@@ -202,18 +233,18 @@ public class LightPreconditionsTest {
    */
   @Test
   public void test_checkNonEmptyList() {
-    checkNonEmptyList(Lists.newArrayList(1L));
+    checkNonEmptyList(Lists.newArrayList(1L), "");
 
     // Negative : List = null.
     try {
-      checkNonEmptyList(null);
+      checkNonEmptyList(null, "null expected");
       fail("should have failed.");
     } catch (NullPointerException e) {
       // expected.
     }
 
     try {
-      checkNonEmptyList(Lists.newArrayList());
+      checkNonEmptyList(Lists.newArrayList(), "empty list");
       fail("should have failed.");
     } catch (IllegalArgumentException e) {
       // expected.
@@ -251,19 +282,19 @@ public class LightPreconditionsTest {
    */
   @Test
   public void test_checkPersonId() {
-    checkPersonId(1234L);
-    checkPersonId(1L);
-    checkPersonId(Long.MAX_VALUE);
+    checkPersonId(new PersonId(1234L));
+    checkPersonId(new PersonId(1L));
+    checkPersonId(new PersonId(Long.MAX_VALUE));
+
+    // try {
+    // checkPersonId(null);
+    // fail("should have failed.");
+    // } catch (InvalidPersonIdException e) {
+    // // Expected
+    // }
 
     try {
-      checkPersonId(null);
-      fail("should have failed.");
-    } catch (InvalidPersonIdException e) {
-      // Expected
-    }
-
-    try {
-      checkPersonId(0L);
+      checkPersonId(new PersonId(0L));
       fail("should have failed.");
     } catch (InvalidPersonIdException e) {
       // Expected
@@ -404,43 +435,45 @@ public class LightPreconditionsTest {
   @Test
   public void test_checkValidSession() {
     // Positive Testing : provide all parameters for session.
-    assertSession(GOOGLE_LOGIN, getRandomProviderUserId(), getRandomPersonId(),  
-        getRandomEmail(), true /*should pass*/); 
-  
+    assertSession(GOOGLE_LOGIN, getRandomProviderUserId(), getRandomPersonId(),
+        getRandomEmail(), true /* should pass */);
+
     // Negative Test : providerUserId = null
-    assertSession(GOOGLE_LOGIN, null, getRandomPersonId(),  
-        getRandomEmail(), false /*should pass*/); 
-    
+    assertSession(GOOGLE_LOGIN, null, getRandomPersonId(),
+        getRandomEmail(), false /* should pass */);
+
     // Negative Test : providerUserId = blank string
-    assertSession(GOOGLE_LOGIN, " ", getRandomPersonId(),  
-        getRandomEmail(), false /*should pass*/); 
-    
+    assertSession(GOOGLE_LOGIN, " ", getRandomPersonId(),
+        getRandomEmail(), false /* should pass */);
+
     // Negative Test : personId = null
-    assertSession(GOOGLE_LOGIN, getRandomProviderUserId(), null,  
-        getRandomEmail(), false /*should pass*/); 
-    
+    assertSession(GOOGLE_LOGIN, getRandomProviderUserId(), null,
+        getRandomEmail(), false /* should pass */);
+
     // Negative Test : personId = null
-    assertSession(GOOGLE_LOGIN, getRandomProviderUserId(), null,  
-        getRandomEmail(), false /*should pass*/); 
-    
+    assertSession(GOOGLE_LOGIN, getRandomProviderUserId(), null,
+        getRandomEmail(), false /* should pass */);
+
     // Negative Test : email = null
-    assertSession(GOOGLE_LOGIN, getRandomProviderUserId(), getRandomPersonId(),  
-        null, false /*should pass*/);
-    
+    assertSession(GOOGLE_LOGIN, getRandomProviderUserId(), getRandomPersonId(),
+        null, false /* should pass */);
+
     // Negative Test : email = blank
-    assertSession(GOOGLE_LOGIN, getRandomProviderUserId(), getRandomPersonId(),  
-        null, false /*should pass*/); 
+    assertSession(GOOGLE_LOGIN, getRandomProviderUserId(), getRandomPersonId(),
+        null, false /* should pass */);
   }
-  
+
   private void assertSession(OAuth2ProviderService providerService,
-      String providerUserId, Long personId, String email, boolean shouldPass) {
+      String providerUserId, PersonId personId, String email, boolean shouldPass) {
     GaeTestingUtils.cheapEnvSwitch(UNIT_TEST);
-    HttpSession session = getMockSessionForTesting(UNIT_TEST, providerService, providerUserId, 
+    HttpSession session = getMockSessionForTesting(UNIT_TEST, providerService, providerUserId,
         personId, email);
-    
-    SessionManager sessionManager = getInstance(getInjectorByEnv(UNIT_TEST, session), 
-        SessionManager.class);
-    
+    TestRequestScopedValuesProvider testRequestScopedValueProvider = 
+        getRequestScopedValueProvider(new PersonId(1L), new PersonId(1L));
+    Injector injector = TestingUtils.getInjectorByEnv(UNIT_TEST, testRequestScopedValueProvider, session);
+
+    SessionManager sessionManager = injector.getInstance(SessionManager.class);
+
     if (shouldPass) {
       checkValidSession(sessionManager);
     } else {
@@ -452,7 +485,7 @@ public class LightPreconditionsTest {
       }
     }
   }
-  
+
   /**
    * Test for {@link LightPreconditions#checkValidUri(String)}.
    */
@@ -467,7 +500,7 @@ public class LightPreconditionsTest {
     checkValidUri("http://light-qa.appspot.com/hello?key=value");
     checkValidUri("http://light-qa.appspot.com/hello#1234");
     checkValidUri("http://light-qa.appspot.com/hello?key=value#1234");
-    
+
     // Negative Test : uri = null
     try {
       checkValidUri(null);
@@ -475,7 +508,7 @@ public class LightPreconditionsTest {
     } catch (BlankStringException e) {
       // Expected
     }
-    
+
     // Negative Test : uri = blank string
     try {
       checkValidUri(" ");
@@ -483,7 +516,7 @@ public class LightPreconditionsTest {
     } catch (BlankStringException e) {
       // Expected
     }
-    
+
     // Negative Test : uri = blank string
     try {
       checkValidUri(" ");

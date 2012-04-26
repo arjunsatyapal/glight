@@ -15,28 +15,45 @@
  */
 package com.google.light.server.utils;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.constants.LightConstants.SESSION_MAX_INACTIVITY_PERIOD;
 import static com.google.light.server.constants.RequestParamKeyEnum.DEFAULT_EMAIL;
 import static com.google.light.server.constants.RequestParamKeyEnum.LOGIN_PROVIDER_ID;
 import static com.google.light.server.constants.RequestParamKeyEnum.LOGIN_PROVIDER_USER_ID;
 import static com.google.light.server.constants.RequestParamKeyEnum.PERSON_ID;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.Enumeration;
-import java.util.logging.Logger;
-
-import javax.servlet.http.HttpSession;
-
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
+import static com.google.light.server.utils.GuiceUtils.getInstance;
+import static com.google.light.server.utils.GuiceUtils.getProvider;
+import static com.google.light.server.utils.GuiceUtils.seedEntityInRequestScope;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;
+import com.google.light.server.annotations.AnotActor;
+import com.google.light.server.annotations.AnotOwner;
+import com.google.light.server.constants.FileExtensions;
 import com.google.light.server.constants.OAuth2ProviderService;
+import com.google.light.server.dto.pojo.PersonId;
+import com.google.light.server.dto.pojo.RequestScopedValues;
 import com.google.light.server.exception.unchecked.httpexception.LightHttpException;
+import com.google.light.server.guice.providers.InstantProvider;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.util.Enumeration;
+import java.util.UUID;
+import java.util.logging.Logger;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.joda.time.Instant;
+
 
 /**
  * General Utility methods for Light.
@@ -46,7 +63,7 @@ import com.google.light.server.exception.unchecked.httpexception.LightHttpExcept
  */
 public class LightUtils {
   private static final Logger logger = Logger.getLogger(LightUtils.class.getName());
-
+  
   public static String getInputStreamAsString(InputStream is) throws IOException {
     checkNotNull(is);
     return CharStreams.toString(new InputStreamReader(is, Charsets.UTF_8));
@@ -60,10 +77,18 @@ public class LightUtils {
     checkNotNull(builder);
     builder.append("<br>").append(key).append(" = ").append(value);
   }
-
-  public static DateTime getPST8PDTime(long instantInMillis) {
-    return new DateTime(instantInMillis, DateTimeZone.forID("PST8PDT"));
+  
+  public static void appendAttention(StringBuilder builder, String key, String value) {
+    // Source : http://www.computerhope.com/cgi-bin/htmlcolor.pl?c=FF0000
+    builder.append("<p style=\"color:#FF0000\">");
+    appendKeyValue(builder, key, value);
+    builder.append("</p>");
   }
+
+  public static void appendLine(StringBuilder builder, String text) {
+    builder.append(text).append("<br>");
+  }
+
 
   // TODO(arjuns): Abstract out common userInfo.
   // TODO(arjuns): Add token expiry time here.
@@ -71,7 +96,7 @@ public class LightUtils {
   public static void prepareSession(HttpSession session, OAuth2ProviderService loginProvider,
       Long personId, String providerUserId, String defaultEmail) {
     synchronized (session) {
-      logger.info("Prepairing session with provider[" + loginProvider 
+      logger.info("Prepairing session with provider[" + loginProvider
           + ", providerUserId[" + personId
           + "], providerUserEmail[" + defaultEmail + "].");
       session.setAttribute(LOGIN_PROVIDER_ID.get(), loginProvider.name());
@@ -82,8 +107,13 @@ public class LightUtils {
     }
   }
 
+  public static DateTime getPST8PDTime(long instantInMillis) {
+    return new DateTime(instantInMillis, DateTimeZone.forID("PST8PDT"));
+
+  }
+
   public static void appendSessionData(StringBuilder builder, HttpSession session) {
-    appendSectionHeader(builder, "Session Details : ");
+    appendSectionHeader(builder, "Session Details");
     if (session == null) {
       appendKeyValue(builder, "status", "no session found.");
       return;
@@ -110,22 +140,149 @@ public class LightUtils {
     appendKeyValue(builder, "servletContext", session.getServletContext());
   }
 
-  // TODO(arjuns): Inject clock instead of using SystemTime so that we can simulate clock
-  // forwarding when required.
-  public static long getCurrentTimeInMillis() {
-    return System.currentTimeMillis();
+  public static String getHref(String url, String text) {
+    return "<a href=" + url + ">" + text + "</a>";
   }
-  
+
+  // TODO(arjuns): Update methods to use Instant instead of Long.
+  public static long getCurrentTimeInMillis() {
+    Instant instant = GuiceUtils.getProvider(Instant.class).get();
+    return instant.getMillis();
+  }
+
+
+  public static Instant getNow() {
+    return new DateTime().toInstant();
+  }
+
+
   // Utility class.
   private LightUtils() {
   }
-  
+
   public static void wrapIntoRuntimeExceptionAndThrow(Exception e) {
     // Allowing LightHttpException to pass through so the filters can handle it properly.
-    if(LightHttpException.class.isAssignableFrom(e.getClass())) {
+    if (LightHttpException.class.isAssignableFrom(e.getClass())) {
       throw (LightHttpException) e;
     } else {
       throw new RuntimeException(e);
     }
+  }
+
+
+//  public static void enqueueParticipants(Injector injector, PersonId watcherId, PersonId performerId) {
+//    HttpServletRequest request = getInstance(injector, HttpServletRequest.class);
+//    checkNotNull(request, "request");
+//
+//    if (watcherId != null) {
+//      GuiceUtils.seedEntityInRequestScope(request, PersonId.class, AnotWatcher.class, watcherId);
+//    }
+//
+//    Preconditions.checkNotNull(performerId);
+//    GuiceUtils.seedEntityInRequestScope(request, PersonId.class, AnotPerformer.class, performerId);
+//    
+//    PersonId gotPerformerId = GuiceUtils.getInstance(PersonId.class, AnotPerformer.class);
+//
+//    Participants participants = GuiceUtils.getProvider(Participants.class).get();
+//    checkArgument(participants.isValid(), "Invalid state for Participants.");
+//}
+
+  /**
+   * TODO(arjuns): Add test for this.
+   * Reutrn url for a given String.
+   * 
+   * @param url
+   * @return
+   */
+  public static URL getURL(String url) {
+    try {
+      return new URL(url);
+    } catch (MalformedURLException e) {
+      // TODO(arjuns): Auto-generated catch block
+      throw new RuntimeException(e);
+    }
+  }
+
+  /**
+   * TODO(arjuns): Add test for this.
+   * Reutrn url for a given String.
+   * 
+   * @param url
+   * @return
+   */
+  public static URI getURI(String uri) {
+    try {
+      return new URI(uri);
+    } catch (URISyntaxException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public static void enqueueRequestScopedVariables(PersonId ownerId, PersonId actorId) {
+    
+      HttpServletRequest request = getInstance(HttpServletRequest.class);
+      checkNotNull(request, "request");
+
+      if (ownerId != null) {
+        seedEntityInRequestScope(request, PersonId.class, AnotOwner.class, ownerId);
+      }
+
+      checkNotNull(actorId, "actorId");
+      seedEntityInRequestScope(request, PersonId.class, AnotActor.class, actorId);
+      RequestScopedValues participants = getProvider(RequestScopedValues.class).get();
+      checkArgument(participants.isValid(), "Invalid state for Participants.");
+  }
+
+  public static String encodeToUrlEncodedString(String string) {
+    try {
+      return URLEncoder.encode(string, Charsets.UTF_8.displayName());
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public static String decodeFromUrlEncodedString(String encodedString) {
+    try {
+      return URLDecoder.decode(encodedString, Charsets.UTF_8.displayName());
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  /**
+   * Get UUID.
+   * 
+   * @return
+   */
+  public static UUID getUUID() {
+    return UUID.randomUUID();
+  }
+
+  /**
+   * Get UUID as String.
+   * 
+   * @return
+   */
+  public static String getUUIDString() {
+    return getUUID().toString();
+  }
+  
+  /**
+   * TODO(arjuns): Add test for this.
+   * Utility method to get a random file Name with given extension.
+   * 
+   * @return
+   */
+  public static String getRandomFileName(FileExtensions extension) {
+    InstantProvider instantProvider = GuiceUtils.getInstance(InstantProvider.class);
+    
+    StringBuilder builder = new StringBuilder(getUUIDString())
+      .append(".")
+      .append(Long.toString(instantProvider.get().getMillis()))
+      .append(".")
+      .append(extension.get());
+    
+    return builder.toString();
+    
   }
 }

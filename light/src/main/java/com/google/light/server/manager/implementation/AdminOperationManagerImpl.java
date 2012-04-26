@@ -35,7 +35,7 @@ public class AdminOperationManagerImpl implements AdminOperationManager {
 
   @Inject
   public AdminOperationManagerImpl(OAuth2ConsumerCredentialDao consumerCredentialDao) {
-    this.consumerCredentialDao = checkNotNull(consumerCredentialDao);
+    this.consumerCredentialDao = checkNotNull(consumerCredentialDao, "consumerCredentialDao");
   }
 
   /**

@@ -35,6 +35,7 @@ import static org.junit.Assert.fail;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
@@ -83,8 +84,8 @@ public class LoginITCase {
 
     System.out.println(getOwnerCredentialPasswdFileAbsPath(OAUTH2));
     ownerCredentials = loadProperties(getOwnerCredentialPasswdFileAbsPath(OAUTH2));
-    validatePropertiesFile(ownerCredentials,
-        Lists.newArrayList(FULLNAME.get(), EMAIL.get(), PASSWORD.get()));
+    validatePropertiesFile(ownerCredentials, Lists.newArrayList(
+        FULLNAME.get(), EMAIL.get(), PASSWORD.get()));
     email = ownerCredentials.getProperty(EMAIL.get());
     fullname = ownerCredentials.getProperty(FULLNAME.get());
     password = ownerCredentials.getProperty(PASSWORD.get());
@@ -121,13 +122,11 @@ public class LoginITCase {
 
   @Test
   public void test_missingThings() {
-    assertEquals(
-        "If you add any new enum, then add code for populating the credentials in testLogin.",
-        1, OAuth2ProviderEnum.values().length);
+    assertEquals("If you add any new enum, then add code for populating the credentials in " +
+        "testLogin.", 1, OAuth2ProviderEnum.values().length);
 
-    assertEquals(
-        "If you add any new enum, then add code for populating the credentials in testLogin.",
-        2, OAuth2ProviderService.values().length);
+    assertEquals("If you add any new enum, then add code for populating the credentials in " +
+        "testLogin.", 2, OAuth2ProviderService.values().length);
   }
 
   @Test
@@ -150,7 +149,7 @@ public class LoginITCase {
     driver.findElement(By.id("Passwd")).clear();
     driver.findElement(By.id("Passwd")).sendKeys(password);
     driver.findElement(By.id("signIn")).click();
-    
+
     SeleniumUtils.clickIfExists(driver, By.id("choose-account-0"));
 
     // Now revoking access

@@ -15,16 +15,18 @@
  */
 package com.google.light.server.persistence.dao;
 
-import static com.google.light.server.utils.GuiceUtils.getInstance;
-import static com.google.light.server.utils.LightPreconditions.checkValidSession;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.light.server.utils.GuiceUtils.getProvider;
+import static com.google.light.server.utils.LightPreconditions.checkPersonId;
 
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
-import com.google.inject.Injector;
+import com.google.inject.Provider;
 import com.google.light.server.constants.OAuth2ProviderService;
 import com.google.light.server.dto.oauth2.owner.OAuth2OwnerTokenDto;
+import com.google.light.server.dto.pojo.PersonId;
+import com.google.light.server.dto.pojo.RequestScopedValues;
 import com.google.light.server.persistence.entity.oauth2.owner.OAuth2OwnerTokenEntity;
-import com.google.light.server.servlets.SessionManager;
 import com.google.light.server.utils.ObjectifyUtils;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Objectify;
@@ -37,18 +39,18 @@ import java.util.List;
  * 
  * @author Arjun Satyapal
  */
-public class OAuth2OwnerTokenDao extends
-    AbstractBasicDao<OAuth2OwnerTokenDto, OAuth2OwnerTokenEntity> {
+public class OAuth2OwnerTokenDao extends AbstractBasicDao<OAuth2OwnerTokenDto, OAuth2OwnerTokenEntity> {
   static {
     ObjectifyService.register(OAuth2OwnerTokenEntity.class);
   }
 
-  private SessionManager sessionManager;
+  private Provider<RequestScopedValues> requestScopedValuesProvider;
 
   @Inject
-  public OAuth2OwnerTokenDao(Injector injector) {
+  public OAuth2OwnerTokenDao(Provider<RequestScopedValues> requestScopedValuesProvider) {
     super(OAuth2OwnerTokenEntity.class);
-    this.sessionManager = getInstance(injector, SessionManager.class);
+    requestScopedValuesProvider = checkNotNull(requestScopedValuesProvider, 
+        "requestScopedValuesProvider");
   }
 
   /**
@@ -64,7 +66,7 @@ public class OAuth2OwnerTokenDao extends
    */
   public OAuth2OwnerTokenEntity getByProviderServiceAndProviderUserId(
       OAuth2ProviderService providerService, String providerUserId) {
-    sessionManager.checkPersonLoggedIn();
+//    sessionManager.checkPersonLoggedIn();
     
     Objectify ofy = ObjectifyUtils.nonTransaction();
 
@@ -91,14 +93,16 @@ public class OAuth2OwnerTokenDao extends
      * Yahoo can reuse same providerUserId. And they can be two different persons. Light's
      * requirement is that combination of Provider & ProviderUserId is unique.
      */
-    long currPersonId = 0;
+    PersonId currPersonId = null;
     for (int index = 0; index < ownerTokens.size() - 1; index++) {
       OAuth2OwnerTokenEntity currToken = ownerTokens.get(index);
       currPersonId = currToken.getPersonId();
+      checkNotNull(currPersonId, "PerseonId is missing.");
+      checkPersonId(currPersonId);
 
       for (int futureIndex = index + 1; futureIndex < ownerTokens.size(); futureIndex++) {
         OAuth2OwnerTokenEntity otherToken = ownerTokens.get(futureIndex);
-        long otherPersonId = otherToken.getPersonId();
+        PersonId otherPersonId = otherToken.getPersonId();
 
         if (currPersonId == otherPersonId) {
           /*
@@ -154,13 +158,25 @@ public class OAuth2OwnerTokenDao extends
    * @return
    */
   public OAuth2OwnerTokenEntity getByProviderService(OAuth2ProviderService providerService) {
-    if (!providerService.isUsedForLogin()) {
-      checkValidSession(sessionManager);
-    }
-    
+    requestScopedValuesProvider = getProvider(RequestScopedValues.class);
+    RequestScopedValues participants = requestScopedValuesProvider.get();
+
     Key<OAuth2OwnerTokenEntity> fetchKey = OAuth2OwnerTokenEntity.generateKey(
-        sessionManager.getPersonKey(), providerService.name());
+        participants.getOwner().getKey(), providerService.name());
 
     return super.get(fetchKey);
+  }
+  
+  // TODO(arjuns): Add test for this.
+  /**
+   * Delete a OAuth2 Owner Tooken by ProviderService.
+   */
+  public void deleteByProviderService(OAuth2ProviderService providerService) {
+    RequestScopedValues participants = getProvider(RequestScopedValues.class).get();
+    
+    Key<OAuth2OwnerTokenEntity> fetchKey = OAuth2OwnerTokenEntity.generateKey(
+        participants.getOwner().getKey(), providerService.name());
+    
+    super.delete(fetchKey);
   }
 }

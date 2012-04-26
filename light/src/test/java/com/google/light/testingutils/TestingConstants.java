@@ -22,8 +22,6 @@ import java.util.ArrayList;
 
 import com.google.api.client.http.GenericUrl;
 import com.google.common.collect.Lists;
-import com.google.light.server.manager.implementation.SearchManagerGSSImplITCase;
-import com.google.light.server.manager.implementation.SearchManagerGSSImplTest;
 
 /**
  * Some constants for Testing Purposes.

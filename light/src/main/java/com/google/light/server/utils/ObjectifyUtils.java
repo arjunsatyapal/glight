@@ -17,19 +17,18 @@ package com.google.light.server.utils;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.Lists;
-import com.googlecode.objectify.Query;
-import java.util.List;
-
-import com.googlecode.objectify.impl.conv.joda.JodaTimeConverters;
-
-import java.util.logging.Logger;
-
 import com.google.appengine.api.datastore.QueryResultIterable;
+import com.google.common.collect.Lists;
+import com.google.light.server.persistence.entity.AbstractPersistenceEntity;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Objectify;
 import com.googlecode.objectify.ObjectifyOpts;
 import com.googlecode.objectify.ObjectifyService;
+import com.googlecode.objectify.Query;
+import com.googlecode.objectify.impl.conv.joda.JodaTimeConverters;
+import java.util.List;
+import java.util.logging.Logger;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * Utility methods related to Objectify.
@@ -140,40 +139,6 @@ public class ObjectifyUtils {
   }
 
   /**
-   * Returns all children for a Parent Entity.
-   * 
-   * @param txn Objectify Transaction.
-   * @param parentKey Key for Parent Entity.
-   * @param clazz Type of children to be returned.
-   * @return
-   */
-  public static <T, V> QueryResultIterable<T> getAllChildren(Objectify txn,
-      @SuppressWarnings("rawtypes") Key parentKey,
-      Class<T> clazz) {
-    if (parentKey == null)
-      throw new IllegalArgumentException();
-    return txn.query(clazz).ancestor(parentKey).fetch();
-  }
-
-  /**
-   * Returns an iterable for Children for a Parent Entity.
-   * 
-   * @param txn Objectify Transaction.
-   * @param parentKey Key for Parent Entity.
-   * @param clazz Type of Children.
-   * @param filter Objectify Fitler.
-   * @param filterValues values.
-   * @return
-   */
-  public static <T, V> QueryResultIterable<T> getChildren(Objectify txn,
-      @SuppressWarnings("rawtypes") Key parentKey,
-      Class<T> clazz, String filter, Object filterValues) {
-    if (parentKey == null)
-      throw new IllegalArgumentException();
-    return txn.query(clazz).ancestor(parentKey).filter(filter, filterValues).fetch();
-  }
-
-  /**
    * Utility method that will ensure that for a given Query, only one output exists, else
    * it will throw an errorMessage.
    * 
@@ -194,7 +159,45 @@ public class ObjectifyUtils {
 
     return tempList.get(0);
   }
+
+  /**
+   * Helper method to fetch all Child entities for a given parent.
+   */
+  @SuppressWarnings("rawtypes")
+  public static <T, V extends AbstractPersistenceEntity> QueryResultIterable<T> getAllChildren(
+      Objectify ofy, Key<V> parentKey, Class<T> clazz) {
+    return getChildren(ofy, parentKey, clazz, null/*filter*/, null /*value*/);
+  }
+ 
   
+  /**
+   * Helper method to fetch Child entities for a given Parent.
+   * 
+   * TODO(arjuns) : Move other getChildren use cases to use this.
+   * 
+   * @param ofy
+   * @param parent
+   * @param clazz
+   * @param filter
+   * @param value
+   * @return
+   */
+  @SuppressWarnings("rawtypes")
+  public static <T, V extends AbstractPersistenceEntity> QueryResultIterable<T> getChildren(
+      Objectify ofy, Key<V> parentKey, Class<T> clazz, String filter, Object value) {
+    if (parentKey == null)
+      throw new IllegalArgumentException();
+    
+    Query<T> query = ofy.query(clazz).ancestor(parentKey);
+    
+    if (StringUtils.isNotBlank(filter)) {
+      checkNotNull(value, "When filter is set, value cannot be none.");
+      query.filter(filter, value);
+    }
+    
+    return query.fetch();
+  }
+
   // Utility class.
   private ObjectifyUtils() {
   }

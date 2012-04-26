@@ -15,23 +15,32 @@
  */
 package com.google.light.server.utils;
 
+import static com.google.light.server.constants.RequestParamKeyEnum.DEFAULT_EMAIL;
+import static com.google.light.server.constants.RequestParamKeyEnum.LOGIN_PROVIDER_ID;
+import static com.google.light.server.constants.RequestParamKeyEnum.LOGIN_PROVIDER_USER_ID;
+import static com.google.light.server.constants.RequestParamKeyEnum.PERSON_ID;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Throwables;
 import com.google.common.io.CharStreams;
-import com.google.light.server.constants.ContentTypeEnum;
+import com.google.light.server.constants.HttpHeaderEnum;
+import com.google.light.server.constants.LightConstants;
+import com.google.light.server.constants.OAuth2ProviderService;
 import com.google.light.server.constants.RequestParamKeyEnum;
+import com.google.light.server.constants.http.ContentTypeEnum;
 import com.google.light.server.dto.DtoInterface;
+import com.google.light.server.dto.pojo.PersonId;
 import com.google.light.server.servlets.path.ServletPathEnum;
 import com.google.light.server.servlets.pojo.ServletRequestPojo;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.logging.Logger;
-
+import javax.annotation.Nullable;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import javax.xml.bind.JAXBException;
 
 /**
@@ -44,6 +53,7 @@ import javax.xml.bind.JAXBException;
 public class ServletUtils {
   private static final Logger logger = Logger.getLogger(ServletUtils.class.getName());
   
+
   /**
    * Forwards request and response to given path. Handles any
    * exceptions caused by forward target by printing them to logger.
@@ -64,6 +74,7 @@ public class ServletUtils {
       }
   }
   
+
   /**
    * Returns the URL along-with Query Parameters. Default {@link HttpServletRequest#getRequestURL()}
    * does not return query parameters.
@@ -141,10 +152,67 @@ public class ServletUtils {
   }
   
   /**
+   * TODO(arjuns): Add test for this.
    * Returns value of a RequestParam.
    */
-  public static String getRequestParameterValue(RequestParamKeyEnum key) {
-    return null;
+  public static String getRequestParameterValue(
+      HttpServletRequest request, RequestParamKeyEnum key) {
+    return request.getParameter(key.get());
+  }
+  
+  /**
+   * TODO(arjuns): Add test for this.
+   * Returns value of a Header.
+   */
+  public static String getRequestHeaderValue(HttpServletRequest request, HttpHeaderEnum key) {
+    return request.getHeader(key.get());
+  }
+  
+  /**
+   * Get session from HttpServletRequest. If session does not exist it will create a new session
+   * 
+   * TODO(arjuns): Add test for this.
+   * @param request
+   * @return
+   */
+  public static HttpSession getSession(HttpServletRequest request) {
+    HttpSession session = request.getSession(true);
+    session.setMaxInactiveInterval(LightConstants.SESSION_MAX_INACTIVITY_PERIOD);
+    return session;
+  }
+  
+  /**
+   * Invalidating existing session.
+   * TODO(arjuns): Add test for this.
+   * @param request
+   */
+  public static void invalidateSession(HttpServletRequest request) {
+    request.getSession().invalidate();
+  }
+  
+  /**
+   * Prepare Session with reuired Parameters.
+   * TODO(arjuns) : move test .
+   * @param request
+   * @param loginProvider
+   * @param personId
+   * @param providerUserId
+   * @param defaultEmail
+   */
+  public static void prepareSession(HttpServletRequest request, OAuth2ProviderService loginProvider,
+      @Nullable PersonId personId, String providerUserId, String defaultEmail) {
+    synchronized (request) {
+      // Invalidating existing sessions, and creating new session.
+      HttpSession session = getSession(request);
+    
+      logger.info("Prepairing session with provider[" + loginProvider 
+          + ", providerUserId[" + personId
+          + "], providerUserEmail[" + defaultEmail + "].");
+      session.setAttribute(LOGIN_PROVIDER_ID.get(), loginProvider.name());
+      session.setAttribute(PERSON_ID.get(), personId);
+      session.setAttribute(DEFAULT_EMAIL.get(), defaultEmail);
+      session.setAttribute(LOGIN_PROVIDER_USER_ID.get(), providerUserId);
+    }
   }
   
   // Utility Method

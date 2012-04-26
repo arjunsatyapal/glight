@@ -3,12 +3,8 @@ package com.google.light.server.manager.implementation;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.io.IOException;
 import java.io.InputStream;
 
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
-import org.jdom.JDOMException;
 import org.junit.Test;
 
 import com.google.api.client.http.HttpTransport;
@@ -45,8 +41,7 @@ public class SearchManagerGSSImplTest {
    * Test for {@link SearchManagerGSSImpl#search(SearchRequestDto)}
    */
   @Test
-  public void test_search() throws JsonParseException, JsonMappingException,
-      IOException, JDOMException {
+  public void test_search() {
 
     for (int i = 0; i < TestingConstants.SAMPLE_GSS_LIST_QUERIES.size(); i++) {
       // Building searchManager

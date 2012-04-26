@@ -23,6 +23,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
+import com.google.light.server.dto.pojo.PersonId;
+
+
+import com.google.light.server.exception.unchecked.InvalidPersonIdException;
+
+
 import com.google.light.server.constants.OAuth2ProviderService;
 import com.google.light.server.dto.AbstractDtoToPersistenceTest;
 import com.google.light.server.exception.unchecked.BlankStringException;
@@ -38,7 +44,7 @@ import org.junit.Test;
  * @author Arjun Satyapal
  */
 public class OAuth2OwnerTokenDtoTest extends AbstractDtoToPersistenceTest {
-  private long testPersonId;
+  private PersonId testPersonId;
   private String testProviderUserId;
   private String accessToken;
   private String refreshToken;
@@ -136,17 +142,17 @@ public class OAuth2OwnerTokenDtoTest extends AbstractDtoToPersistenceTest {
   public void test_validate() throws Exception {
     // Negative Test : Zero personId
     try {
-      getDtoBuilder().personId(0).build();
+      getDtoBuilder().personId(new PersonId(0L)).build();
       fail("should have failed.");
-    } catch (IllegalArgumentException e) {
+    } catch (InvalidPersonIdException e) {
       // Expected
     }
     
     // Negative Test : Negative personId
     try {
-      getDtoBuilder().personId(-3).build();
+      getDtoBuilder().personId(new PersonId(-3L)).build();
       fail("should have failed.");
-    } catch (IllegalArgumentException e) {
+    } catch (InvalidPersonIdException e) {
       // Expected
     }
     

@@ -22,6 +22,10 @@ import static com.google.light.server.utils.LightPreconditions.checkEmail;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPersonId;
 
+import com.google.light.server.dto.pojo.PersonId;
+
+
+
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpHeaders;
 import com.google.api.client.http.HttpRequest;
@@ -48,11 +52,11 @@ public class FakeLoginHelper {
 
   private String serverUrl;
   private OAuth2ProviderService providerService;
-  private long personId;
+  private PersonId personId;
   private String providerUserEmail;
   private String cookie;
 
-  public FakeLoginHelper(String serverUrl, OAuth2ProviderService providerService, long personId,
+  public FakeLoginHelper(String serverUrl, OAuth2ProviderService providerService, PersonId personId,
       String providerUserEmail) throws IOException {
     this.serverUrl = checkNotBlank(serverUrl, "serverUrl");
     this.providerService = Preconditions.checkNotNull(providerService);
@@ -70,9 +74,9 @@ public class FakeLoginHelper {
     HttpRequestFactory requestFactory = HTTP_TRANSPORT.createRequestFactory();
     GenericUrl url = new GenericUrl(serverUrl + ServletPathEnum.FAKE_LOGIN.get());
 
-    Map<String, String> map = new ImmutableMap.Builder<String, String>()
+    Map<String, Object> map = new ImmutableMap.Builder<String, Object>()
         .put(LOGIN_PROVIDER_ID.get(), providerService.name())
-        .put(PERSON_ID.get(), Long.toString(personId))
+        .put(PERSON_ID.get(), personId)
         .put(DEFAULT_EMAIL.get(), providerUserEmail)
         .build();
     
@@ -86,7 +90,7 @@ public class FakeLoginHelper {
     HttpHeaders headers = response.getHeaders();
     @SuppressWarnings("unchecked")
     ArrayList<String> cookieValues = (ArrayList<String>) headers.get("Set-Cookie");
-    LightPreconditions.checkNonEmptyList(cookieValues);
+    LightPreconditions.checkNonEmptyList(cookieValues, "cookievalues");
     return cookieValues.get(0).split(";")[0];
   }
 

@@ -119,11 +119,13 @@ public class SearchResultItemDto implements DtoInterface<SearchResultItemDto> {
       return this;
     }
 
+    @SuppressWarnings("synthetic-access")
     public SearchResultItemDto build() {
       return new SearchResultItemDto(this).validate().sanitize();
     }
   }
 
+  @SuppressWarnings("synthetic-access")
   private SearchResultItemDto(Builder builder) {
     this.title = builder.title;
     this.description = builder.description;

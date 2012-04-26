@@ -22,19 +22,21 @@ import static com.google.light.server.constants.RequestParamKeyEnum.PERSON_ID;
 import static com.google.light.server.utils.LightPreconditions.checkIsNotEnv;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPersonId;
+import static com.google.light.server.utils.ServletUtils.prepareSession;
 
 import com.google.inject.Inject;
-import com.google.light.server.constants.ContentTypeEnum;
 import com.google.light.server.constants.LightEnvEnum;
 import com.google.light.server.constants.OAuth2ProviderService;
+import com.google.light.server.constants.http.ContentTypeEnum;
+import com.google.light.server.dto.pojo.PersonId;
 import com.google.light.server.utils.LightUtils;
+import com.google.light.server.utils.ServletUtils;
 import java.io.IOException;
 import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 /**
  * Servlet to enable Fake Login for testing.
@@ -43,6 +45,7 @@ import javax.servlet.http.HttpSession;
  * 
  * @author Arjun Satyapal
  */
+@Deprecated
 @SuppressWarnings("serial")
 public class FakeLoginServlet extends HttpServlet {
   private static final Logger logger = Logger.getLogger(FakeLoginServlet.class.getName());
@@ -60,23 +63,21 @@ public class FakeLoginServlet extends HttpServlet {
 
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    HttpSession session = request.getSession();
 
     String providerNameStr = checkNotBlank(
         request.getParameter(LOGIN_PROVIDER_ID.get()), "loginProvider");
     OAuth2ProviderService providerService = OAuth2ProviderService.valueOf(providerNameStr);
 
     String personIdStr = checkNotBlank(request.getParameter(PERSON_ID.get()), "personId");
-    long personId = checkPersonId(Long.parseLong(personIdStr));
+    PersonId personId = checkPersonId(new PersonId(Long.parseLong(personIdStr)));
     String providerUserId =
         checkNotBlank(request.getParameter(LOGIN_PROVIDER_USER_ID.get()), "loginProviderUserId");
     String defaultEmail = checkNotBlank(request.getParameter(DEFAULT_EMAIL.get()), "email");
-    session.setMaxInactiveInterval(120 /* seconds */);
 
-    LightUtils.prepareSession(session, providerService, personId, providerUserId, defaultEmail);
+    prepareSession(request, providerService, personId, providerUserId, defaultEmail);
 
     StringBuilder builder = new StringBuilder();
-    LightUtils.appendSessionData(builder, session);
+    LightUtils.appendSessionData(builder, ServletUtils.getSession(request));
 
     logger.info("Session info : " + builder.toString());
     response.setContentType(ContentTypeEnum.TEXT_HTML.get());

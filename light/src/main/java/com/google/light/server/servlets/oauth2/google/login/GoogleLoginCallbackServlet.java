@@ -5,22 +5,17 @@ import static com.google.light.server.constants.OAuth2ProviderService.GOOGLE_LOG
 import static com.google.light.server.servlets.path.ServletPathEnum.OAUTH2_GOOGLE_LOGIN_CB;
 import static com.google.light.server.servlets.path.ServletPathEnum.SESSION;
 import static com.google.light.server.utils.GuiceUtils.getInstance;
-import static com.google.light.server.utils.LightUtils.prepareSession;
-
-import java.io.IOException;
-
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import static com.google.light.server.utils.LightUtils.enqueueRequestScopedVariables;
+import static com.google.light.server.utils.ServletUtils.prepareSession;
 
 import com.google.api.client.auth.oauth2.AuthorizationCodeResponseUrl;
 import com.google.api.client.auth.oauth2.TokenResponse;
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 import com.google.light.server.dto.LoginStateDto;
 import com.google.light.server.dto.oauth2.owner.OAuth2OwnerTokenDto;
 import com.google.light.server.dto.person.PersonDto;
+import com.google.light.server.dto.pojo.PersonId;
 import com.google.light.server.exception.unchecked.GoogleAuthorizationException;
 import com.google.light.server.manager.implementation.oauth2.owner.OAuth2OwnerTokenManagerFactory;
 import com.google.light.server.manager.interfaces.OAuth2OwnerTokenManager;
@@ -33,9 +28,13 @@ import com.google.light.server.servlets.oauth2.google.OAuth2HelperFactoryInterfa
 import com.google.light.server.servlets.oauth2.google.pojo.GoogleLoginTokenInfo;
 import com.google.light.server.servlets.oauth2.google.pojo.GoogleUserInfo;
 import com.google.light.server.utils.GaeUtils;
-import com.google.light.server.utils.GuiceUtils;
 import com.google.light.server.utils.JsonUtils;
+import com.google.light.server.utils.LightUtils;
 import com.google.light.server.utils.ServletUtils;
+import java.io.IOException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Servlet called by Google during Google Login flow.
@@ -48,8 +47,6 @@ import com.google.light.server.utils.ServletUtils;
  */
 @SuppressWarnings("serial")
 public class GoogleLoginCallbackServlet extends HttpServlet {
-  private Injector injector;
-
   private OAuth2HelperFactoryInterface helperFactory;
   private OAuth2Helper helperInstance;
 
@@ -59,10 +56,9 @@ public class GoogleLoginCallbackServlet extends HttpServlet {
   private String lightCbUrl = null;
 
   @Inject
-  public GoogleLoginCallbackServlet(Injector injector) {
-    this.injector = checkNotNull(injector, "injector");
-    helperFactory = getInstance(injector, OAuth2HelperFactoryInterface.class);
-    tokenManagerFactory = getInstance(injector, OAuth2OwnerTokenManagerFactory.class);
+  public GoogleLoginCallbackServlet() {
+    helperFactory = getInstance(OAuth2HelperFactoryInterface.class);
+    tokenManagerFactory = getInstance(OAuth2OwnerTokenManagerFactory.class);
   }
 
   @Override
@@ -105,7 +101,7 @@ public class GoogleLoginCallbackServlet extends HttpServlet {
       TokenResponse tokenResponse = helperInstance.getAccessToken(lightCbUrl, code);
 
       GoogleLoginTokenInfo googTokenInfo = helperInstance.getTokenInfo(
-          tokenResponse.getAccessToken(), GoogleLoginTokenInfo.class);
+          tokenResponse.getAccessToken());
       email = googTokenInfo.getEmail();
       providerUserId = googTokenInfo.getUserId();
       refreshToken = tokenResponse.getRefreshToken();
@@ -134,17 +130,19 @@ public class GoogleLoginCallbackServlet extends HttpServlet {
        * If person is still not found, then it is safe to assume that a new person needs to be
        * created.
        */
-      Long personId = null;
+      PersonId personId = null;
       if (personEntity == null) {
         personEntity = createNewPersonEntity(tokenResponse);
         updatePersistedTokenDetails = true;
-      } else {
-        personId = personEntity.getId();
       }
-
+      
       checkNotNull(personEntity, "After this point, personEntity should not be null.");
-      personId = personEntity.getId();
+      personId = personEntity.getPersonId();
 
+      enqueueRequestScopedVariables(personId, personId);
+      LightUtils.enqueueRequestScopedVariables(personId, personId);
+
+      
       // Update session with personId which is not available.
       prepareSessionAfterLogin(request, personId, providerUserId, email);
 
@@ -216,7 +214,7 @@ public class GoogleLoginCallbackServlet extends HttpServlet {
    * @return
    */
   private boolean doesTokenDetailEntityNeedsUpdate(boolean updatePersistedTokenDetails) {
-    if(updatePersistedTokenDetails)
+    if (updatePersistedTokenDetails)
       return true;
     OAuth2OwnerTokenEntity fetchedTokenEntity = googLoginTokenManager.get();
     if (fetchedTokenEntity == null) {
@@ -231,15 +229,14 @@ public class GoogleLoginCallbackServlet extends HttpServlet {
    * @param providerUserId
    * @param personEntity
    */
-  private void prepareSessionAfterLogin(HttpServletRequest request, Long personId,
+  private void prepareSessionAfterLogin(HttpServletRequest request, PersonId personId,
       String providerUserId, String email) {
     try {
-      prepareSession(request.getSession(), GOOGLE_LOGIN, personId,
-          providerUserId, email);
+      prepareSession(request, GOOGLE_LOGIN, personId, providerUserId, email);
     } catch (Exception e) {
       try {
         // TODO(arjuns): Revisit this convoluted logic again.
-        request.getSession().invalidate();
+        ServletUtils.invalidateSession(request);
       } catch (Exception e1) {
         // ignore this exception.
       }
@@ -256,10 +253,12 @@ public class GoogleLoginCallbackServlet extends HttpServlet {
    * @param expiresInMillis
    * @throws IOException
    */
-  private void updateOwnerTokenEntity(Long personId, String providerUserId, String refreshToken,
+  private void updateOwnerTokenEntity(PersonId personId, String providerUserId,
+      String refreshToken,
       TokenResponse tokenResponse) throws IOException {
     GoogleLoginTokenInfo googTokenInfo = helperInstance.getTokenInfo(
-        tokenResponse.getAccessToken(), GoogleLoginTokenInfo.class);
+
+        tokenResponse.getAccessToken());
     OAuth2OwnerTokenDto tokenDto =
         OAuth2OwnerTokenDto.getOAuth2OwnerTokenDto(
             personId, refreshToken, tokenResponse, GOOGLE_LOGIN, providerUserId,
@@ -291,7 +290,7 @@ public class GoogleLoginCallbackServlet extends HttpServlet {
         .acceptedTos(false)
         .build();
 
-    PersonManager personManager = GuiceUtils.getInstance(injector, PersonManager.class);
+    PersonManager personManager = getInstance(PersonManager.class);
     personEntity = personManager.create(dto.toPersistenceEntity(null));
     return personEntity;
   }
@@ -306,8 +305,8 @@ public class GoogleLoginCallbackServlet extends HttpServlet {
    * @return
    */
   private PersonEntity getPersonEntityIfExists(String email, String providerUserId) {
-    Long personId = null;
-    PersonManager personManager = GuiceUtils.getInstance(injector, PersonManager.class);
+    PersonId personId = null;
+    PersonManager personManager = getInstance(PersonManager.class);
 
     PersonEntity personEntity = null;
     /*
@@ -332,7 +331,7 @@ public class GoogleLoginCallbackServlet extends HttpServlet {
        * TODO(arjuns): Document the consequences when two different Persons try to share
        * defaultEmail.
        */
-      personEntity = personManager.getByEmail(email);
+      personEntity = personManager.findByEmail(email);
     }
 
     return personEntity;
@@ -350,7 +349,7 @@ public class GoogleLoginCallbackServlet extends HttpServlet {
      * Will reinitialize session once Light has refreshToken. So we dont care whether
      * request.getSession() returns existing session or new session.
      */
-    request.getSession().invalidate();
+    ServletUtils.invalidateSession(request);
     response
         .sendRedirect(helperInstance.getOAuth2RedirectUriWithPrompt(lightCbUrl, state.toJson()));
     return;

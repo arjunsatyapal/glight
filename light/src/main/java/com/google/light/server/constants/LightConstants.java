@@ -13,9 +13,11 @@
 package com.google.light.server.constants;
 
 
+import com.google.appengine.tools.pipeline.JobSetting;
+
+
 import static com.google.light.server.servlets.path.ServletPathEnum.SEARCH_PAGE;
 
-import com.google.light.server.dto.search.SearchRequestDto;
 
 /**
  * Miscellaneous constants for Light.
@@ -23,15 +25,29 @@ import com.google.light.server.dto.search.SearchRequestDto;
  * @author Arjun Satyapal
  */
 public class LightConstants {
-  public static int SESSION_MAX_INACTIVITY_PERIOD = 3600;
+  public static int SECONDS_IN_A_DAY = 24 * 60 * 60;
+  
+  public static int SESSION_MAX_INACTIVITY_PERIOD = SECONDS_IN_A_DAY;
 
   /** URL from where a Google Customer's Profile and Email can be fetched. */
   public static final String GOOGLE_USER_INFO_URL = "https://www.googleapis.com/oauth2/v1/userinfo";
   
-  
+  /** Timeout for Task Queues.*/
   public static int TASK_QUEUUE_TIMEOUT_IN_SEC = 10 * 60; // Seconds.
 
+
+  /** Number of milliseconds to wait before executing the task. */
+  public static int TASK_QUEUE_COUNTDOWN_MILLIS = 30 * 1000; // sixty seconds. 
+  
+  /** Number of recrds to be fetched in GDATA Feed */
+  public static int GDATA_MAX_RESULT = 3;
+  
+  /** HTTP Connection Timeout in milli-seconds*/
+  public static int HTTP_CONNECTION_TIMEOUT_IN_MILLIS = 10 * 1000;
+
+
   public static String REDIRECT_PATH_AFTER_LOGOUT = SEARCH_PAGE.get();
+
 
   public static final int SEARCH_RESULTS_PER_PAGE = 10;
 
@@ -41,5 +57,15 @@ public class LightConstants {
    * Note: Client side is assuming this to be 1
    */
   public static final int FIRST_SEARCH_PAGE_NUMBER = 1;
+  
+  /** EmailId for Light Bot. */
+  public static final String LIGHT_BOT_EMAIL = "light-bot@myopenedu.com";
 
+  // AppEngine pipeline Settings.
+  public static final JobSetting.BackoffFactor JOB_BACK_OFF_FACTOR = new JobSetting.BackoffFactor(2);
+  public static final JobSetting.BackoffSeconds JOB_BACK_OFF_SECONDS = new JobSetting.BackoffSeconds(1);
+  public static final JobSetting.MaxAttempts JOB_MAX_ATTEMPTES = new JobSetting.MaxAttempts(3);
+  
+  public static final int MAX_RESULTS_DEFAULT = 10;
+  public static final int MAX_RESULTS_MAX = 100;
 }

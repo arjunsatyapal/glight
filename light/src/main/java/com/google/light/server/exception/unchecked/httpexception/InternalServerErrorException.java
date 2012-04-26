@@ -15,7 +15,7 @@
  */
 package com.google.light.server.exception.unchecked.httpexception;
 
-import com.google.light.server.constants.HttpStatusCodesEnum;
+import com.google.light.server.constants.http.HttpStatusCodesEnum;
 
 /**
  * HTTP Internal Server Error.

@@ -15,14 +15,12 @@
  */
 package com.google.light.server.servlets.search;
 
-import static com.google.light.server.utils.LightUtils.wrapIntoRuntimeExceptionAndThrow;
 import static com.google.common.base.Preconditions.checkNotNull;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import static com.google.light.server.utils.LightUtils.wrapIntoRuntimeExceptionAndThrow;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import com.google.light.server.constants.ContentTypeEnum;
+import com.google.light.server.constants.http.ContentTypeEnum;
 import com.google.light.server.dto.search.SearchRequestDto;
 import com.google.light.server.dto.search.SearchResultDto;
 import com.google.light.server.exception.unchecked.httpexception.MethodNotAllowedException;
@@ -30,6 +28,8 @@ import com.google.light.server.manager.interfaces.SearchManager;
 import com.google.light.server.servlets.AbstractLightServlet;
 import com.google.light.server.servlets.pojo.ServletResponsePojo;
 import com.google.light.server.utils.QueryUtils;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Servlet to handle search requests

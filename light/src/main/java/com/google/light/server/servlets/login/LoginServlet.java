@@ -12,8 +12,8 @@
  */
 package com.google.light.server.servlets.login;
 
-import com.google.light.server.constants.ContentTypeEnum;
 import com.google.light.server.constants.OAuth2ProviderService;
+import com.google.light.server.constants.http.ContentTypeEnum;
 import com.google.light.server.servlets.AbstractLightServlet;
 import com.google.light.server.servlets.path.ServletPathEnum;
 import javax.servlet.http.HttpServletRequest;

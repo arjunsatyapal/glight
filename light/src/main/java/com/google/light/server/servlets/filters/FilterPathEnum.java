@@ -23,12 +23,14 @@ import javax.servlet.Filter;
 
 /**
  * Enum to Map Filter Implementations with URL Patterns.
- * 
+ * TODO(arjuns): Find equivalent solution for Jersey servlets. 
+ *  
  * @author Arjun Satyapal
  */
 public enum FilterPathEnum {
-  API(ProdServletFilter.class, Lists.newArrayList("/api/*", "/admin/*", "/login/*")),
-  TEST(TestServletFilter.class, Lists.newArrayList("/*"));
+  API(ProdServletFilter.class, Lists.newArrayList("/api/*", "/admin/*", "/login/*", "/oauth2/*")),
+  TASK_QUEUE(PipelineFilter.class, Lists.newArrayList("/_ah/pipeline/*")),
+  TEST(TestServletFilter.class, Lists.newArrayList("/api/*", "/admin/*", "/login/*", "/oauth2/*"));
   
   private Class<? extends Filter> clazz;
   private List<String> urlPatterns;
@@ -36,7 +38,7 @@ public enum FilterPathEnum {
   private FilterPathEnum(Class<? extends Filter> clazz, 
       List<String> urlPatterns) {
     this.clazz = clazz;
-    this.urlPatterns = checkNonEmptyList(urlPatterns);
+    this.urlPatterns = checkNonEmptyList(urlPatterns, "urlPatterns");
   }
   
   public Class<? extends Filter> getClazz() {

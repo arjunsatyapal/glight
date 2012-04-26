@@ -46,8 +46,8 @@ public class PersonServlet extends AbstractLightServlet {
    */
   @Override
   public void service(HttpServletRequest request, HttpServletResponse response) {
-    this.personManager = getInstance(getInjector(), PersonManager.class);
-    this.sessionManager = getInstance(getInjector(), SessionManager.class);
+    this.personManager = getInstance(PersonManager.class);
+    this.sessionManager = getInstance(SessionManager.class);
     sessionManager.checkPersonLoggedIn();
     super.service(request, response);
   }

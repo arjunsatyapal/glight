@@ -23,15 +23,15 @@ import static junit.framework.Assert.assertNotNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-import org.junit.Before;
-import org.junit.Test;
-
 import com.google.light.server.dto.person.PersonDto;
+import com.google.light.server.dto.pojo.PersonId;
 import com.google.light.server.exception.unchecked.BlankStringException;
 import com.google.light.server.exception.unchecked.InvalidPersonIdException;
 import com.google.light.server.persistence.entity.AbstractPersistenceEntityTest;
 import com.google.light.testingutils.TestingUtils;
 import com.googlecode.objectify.Key;
+import org.junit.Before;
+import org.junit.Test;
 
 /**
  * Test for {@link PersonEntity}.
@@ -39,10 +39,11 @@ import com.googlecode.objectify.Key;
  * @author Arjun Satyapal
  */
 public class PersonEntityTest extends AbstractPersistenceEntityTest {
-  private Long personId;
-  private String email;
-  private String firstName;
-  private String lastName;
+
+  private  PersonId personId;
+  private  String email;
+  private  String firstName;
+  private  String lastName;
 
   @Before
   public void setUp() {
@@ -68,13 +69,17 @@ public class PersonEntityTest extends AbstractPersistenceEntityTest {
     // Valid case is already tested.
 
     // Positive test : null personId should pass.
-    PersonEntity entity = getEntityBuilderWithoutId().id(null).build();
+
+    getEntityBuilderWithoutId().personId(null).build();
+
+    PersonEntity entity = getEntityBuilderWithoutId().personId(null).build();
     assertNotNull(entity);
     assertFalse("By default it should be false", entity.getAcceptedTos());
 
+
     // Negative test : zero personId
     try {
-      getEntityBuilderWithoutId().id(0L).build();
+      getEntityBuilderWithoutId().personId(new PersonId(0L)).build();
       fail("Should have failed.");
     } catch (InvalidPersonIdException e) {
       // Expected.
@@ -82,7 +87,7 @@ public class PersonEntityTest extends AbstractPersistenceEntityTest {
     
     // Negative test : negative personId
     try {
-      getEntityBuilderWithoutId().id(-3L).build();
+      getEntityBuilderWithoutId().personId(new PersonId(-3L)).build();
       fail("Should have failed.");
     } catch (InvalidPersonIdException e) {
       // Expected.
@@ -150,7 +155,7 @@ public class PersonEntityTest extends AbstractPersistenceEntityTest {
       .acceptedTos(false)
       .build();
     assertEquals(expectedDto, getEntityBuilderWithoutId().build().toDto());
-    assertEquals(expectedDto, getEntityBuilderWithoutId().id(personId).build().toDto());
+    assertEquals(expectedDto, getEntityBuilderWithoutId().personId(personId).build().toDto());
   }
 
   /**
@@ -226,11 +231,11 @@ public class PersonEntityTest extends AbstractPersistenceEntityTest {
   public void test_setId() {
     // Positive Test
     PersonEntity testPerson = getEntityBuilderWithoutId().build();
-    testPerson.setId(personId);
+    testPerson.setPersonId(personId);
 
     // Negative Test : trying changing value.
     try {
-      testPerson.setId(getRandomPersonId());
+      testPerson.setPersonId(getRandomPersonId());
       fail("should have failed");
     } catch (UnsupportedOperationException e) {
       // expected.
@@ -238,7 +243,7 @@ public class PersonEntityTest extends AbstractPersistenceEntityTest {
 
     // Negative test : id=null
     try {
-      getEntityBuilderWithoutId().build().setId(null);
+      getEntityBuilderWithoutId().build().setPersonId(null);
       fail("should have failed");
     } catch (InvalidPersonIdException e) {
       // expected.
@@ -246,7 +251,7 @@ public class PersonEntityTest extends AbstractPersistenceEntityTest {
 
     // Negative test : id = a negative value.
     try {
-      getEntityBuilderWithoutId().build().setId(-1L);
+      getEntityBuilderWithoutId().build().setPersonId(new PersonId(-1L));
       fail("should have failed");
     } catch (InvalidPersonIdException e) {
       // expected.
@@ -259,9 +264,9 @@ public class PersonEntityTest extends AbstractPersistenceEntityTest {
   @Test
   @Override
   public void test_getKey() {
-    Long randomPersonId = TestingUtils.getRandomPersonId();
-    PersonEntity entity = getEntityBuilderWithoutId().id(randomPersonId).build();
-    Key<PersonEntity> expectedKey = new Key<PersonEntity>(PersonEntity.class, randomPersonId);
+    PersonId randomPersonId = TestingUtils.getRandomPersonId();
+    PersonEntity entity = getEntityBuilderWithoutId().personId(randomPersonId).build();
+    Key<PersonEntity> expectedKey = new Key<PersonEntity>(PersonEntity.class, randomPersonId.get());
     assertEquals(expectedKey, entity.getKey());
   }
 
@@ -282,7 +287,7 @@ public class PersonEntityTest extends AbstractPersistenceEntityTest {
     
     // Negative test : persondId = 0
     try {
-      PersonEntity.generateKey(0L);
+      PersonEntity.generateKey(new PersonId(0L));
       fail("should have failed.");
     } catch (InvalidPersonIdException e) {
       // Expected
@@ -290,7 +295,7 @@ public class PersonEntityTest extends AbstractPersistenceEntityTest {
     
     // Negative test : persondId = negative
     try {
-      PersonEntity.generateKey(-3L);
+      PersonEntity.generateKey(new PersonId(-3L));
       fail("should have failed.");
     } catch (InvalidPersonIdException e) {
       // Expected

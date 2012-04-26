@@ -118,6 +118,12 @@
       <scope>test</scope>
     </dependency>
 
+    <dependency>
+      <groupId>com.google.appengine</groupId>
+      <artifactId>appengine-pipeline</artifactId>
+      <version>69</version>
+    </dependency>
+
     <!-- Apache Commons Dependencies : -->
     <dependency>
       <groupId>org.apache.directory.studio</groupId>
@@ -138,7 +144,7 @@
     </dependency>
 
     <!--
-      Google API Dependency :
+      Google Client Dependency :
     -->
     <dependency>
       <groupId>com.google.http-client</groupId>
@@ -165,13 +171,56 @@
     </dependency>
 
     <!--
+      GData Dependency.
+      Since GData is not mavenized, we use arjunsatyapal-maven repository to fetch the Jars,
+      but dependency management there is broken. So all the dependencies for GData need to be
+      explicitly mentioned.
+    -->
+
+    <dependency>
+      <groupId>com.google.gdata</groupId>
+      <artifactId>gdata-client-1.0</artifactId>
+      <version>1.46.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.gdata</groupId>
+      <artifactId>gdata-core-1.0</artifactId>
+      <version>1.46.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.gdata</groupId>
+      <artifactId>gdata-media-1.0</artifactId>
+      <version>1.46.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.gdata</groupId>
+      <artifactId>gdata-docs-3.0</artifactId>
+      <version>1.46.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.gdata</groupId>
+      <artifactId>gdata-docs-meta-3.0</artifactId>
+      <version>1.46.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.gdata</groupId>
+      <artifactId>gdata-docs-meta-3.0</artifactId>
+      <version>1.46.0</version>
+    </dependency>
+
+    <!--
       Guava Dependency :
-      TODO(arjuns) : Some of the library depend on r09. So not using r11. Update this with that culprit.
+      We are using r09 because GData dependes on r09. It doesn't work with recent releases.
     -->
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>11.0.2</version>
+      <version>r09</version>
     </dependency>
 
     <!--
@@ -214,25 +263,6 @@
       <version>1.1</version>
     </dependency>
 
-    <!--
-      Jetty Servlet Tester Dependency.
-    -->
-
-    <dependency>
-      <groupId>org.eclipse.jetty</groupId>
-      <artifactId>jetty-servlet-tester</artifactId>
-      <version>7.0.0.M2</version>
-      <scope>test</scope>
-    </dependency>
-
-    <!--
-      Joda Time Dependency :
-    -->
-    <dependency>
-      <groupId>joda-time</groupId>
-      <artifactId>joda-time</artifactId>
-      <version>2.0</version>
-    </dependency>
 
     <!--
       Json Dependency :
@@ -247,6 +277,46 @@
       <groupId>org.codehaus.jackson</groupId>
       <artifactId>jackson-xc</artifactId>
       <version>1.9.0</version>
+    </dependency>
+
+    <!--
+      Jersey Dependencies.
+    -->
+    <dependency>
+      <groupId>com.sun.jersey</groupId>
+      <artifactId>jersey-server</artifactId>
+      <version>${jersey.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.sun.jersey.contribs</groupId>
+      <artifactId>jersey-guice</artifactId>
+      <version>${jersey.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.sun.jersey</groupId>
+      <artifactId>jersey-json</artifactId>
+      <version>${jersey.version}</version>
+    </dependency>
+
+    <!--
+      Jetty Servlet Tester Dependency.
+    -->
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-servlet-tester</artifactId>
+      <version>7.0.0.M2</version>
+      <scope>test</scope>
+    </dependency>
+
+    <!--
+      Joda Time Dependency :
+    -->
+    <dependency>
+      <groupId>joda-time</groupId>
+      <artifactId>joda-time</artifactId>
+      <version>2.0</version>
     </dependency>
 
     <!--
@@ -353,13 +423,13 @@
   </dependencies>
 
   <build>
-  	<!--
-  	  Changing the build directory for java classes to the war folder makes
-  	  eclipse maven plugin build and load classes from the same directory
-  	  where the test server will be running allowing to do hot swapping of
-  	  classes during development.
-  	-->
-  	<outputDirectory>${light.wardir}/WEB-INF/classes</outputDirectory>
+    <!--
+      Changing the build directory for java classes to the war folder makes
+      eclipse maven plugin build and load classes from the same directory
+      where the test server will be running allowing to do hot swapping of
+      classes during development.
+    -->
+    <outputDirectory>${light.wardir}/WEB-INF/classes</outputDirectory>
 
     <extensions>
       <extension>
@@ -605,6 +675,19 @@
                     </goals>
                   </pluginExecutionFilter>
                   <action>
+                    <execute></execute>
+                  </action>
+                </pluginExecution>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-war-plugin</artifactId>
+                    <versionRange>[2.1-beta-1,)</versionRange>
+                    <goals>
+                      <goal>run</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
                     <ignore></ignore>
                   </action>
                 </pluginExecution>
@@ -626,11 +709,11 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-project-info-reports-plugin</artifactId>
         <version>2.4</version>
-         <configuration>
+        <configuration>
           <dependencyLocationsEnabled>false</dependencyLocationsEnabled>
           <dependencyDetailsEnabled>false</dependencyDetailsEnabled>
-          </configuration>
-        
+        </configuration>
+
       </plugin>
 
       <!--
@@ -746,45 +829,29 @@
     <dojo.build.release.location>${light.wardir}/js</dojo.build.release.location>
     <dojo.build.extraArgs></dojo.build.extraArgs>
 
+    <jersey.version>1.12</jersey.version>
+
     <!-- Selenium -->
     <selenium.version>2.20.0</selenium.version>
     <selenium.driver>org.openqa.selenium.firefox.FirefoxDriver</selenium.driver>
   </properties>
 
   <profiles>
-
     <profile>
       <id>light-dev</id>
       <activation>
         <property>
-          <name>light-dev</name>
+          <name>!light-prod</name>
         </property>
       </activation>
       <build>
         <plugins>
           <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-war-plugin</artifactId>
-            <configuration>
-              <webResources>
-                <resource>
-                  <directory>${project.basedir}/src/main/javascript/light</directory>
-                  <filtering>false</filtering>
-                  <targetPath>js/light</targetPath>
-                </resource>
-                <resource>
-                  <directory>${basedir}/src/main/javascript/external</directory>
-                  <targetPath>js/external</targetPath>
-                </resource>
-              </webResources>
-            </configuration>
-          </plugin>
-          <plugin>
             <artifactId>maven-antrun-plugin</artifactId>
             <executions>
               <execution>
                 <id>light-dev-loader</id>
-                <phase>prepare-package</phase>
+                <phase>compile</phase>
                 <goals>
                   <goal>run</goal>
                 </goals>
@@ -792,6 +859,9 @@
                   <tasks>
                     <copy file="${project.basedir}/src/main/javascript/light/loader-dev.js"
                       tofile="${dojo.build.release.location}/light/build/loader.js" />
+                    <copy todir="${dojo.build.release.location}">
+                      <fileset dir="${project.basedir}/src/main/javascript/" includes="**/*" />
+                    </copy>
                   </tasks>
                 </configuration>
               </execution>
@@ -805,7 +875,7 @@
       <id>light-prod</id>
       <activation>
         <property>
-          <name>!light-dev</name>
+          <name>light-prod</name>
         </property>
       </activation>
       <build>
@@ -849,12 +919,12 @@
 
       </build>
     </profile>
-    
+
     <profile>
       <id>light-prod-cleanup</id>
       <activation>
         <property>
-          <name>!light-dev</name>
+          <name>light-prod</name>
         </property>
       </activation>
       <build>
@@ -886,7 +956,7 @@
               </execution>
             </executions>
           </plugin>
-        
+
         </plugins>
       </build>
     </profile>
@@ -991,7 +1061,7 @@
                 We try to mimic the same structure of the project baseDir, so our
                 configurations for the dojoLoader can be the same regardless of which tool
                 we are using (jasmine:bdd, jasmine:test or JSTestDriver).
-                
+
                 Actually, only the test and core files (test enviroment and dojo loader) will be
                 loaded from ${project.basedir}/target/jasmine, because testConfig.js configures
                 dojo load to load stuff directly from ${project.basedir}. This means

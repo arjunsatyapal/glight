@@ -19,12 +19,9 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.GuiceUtils.getInstance;
 
-import com.google.light.server.constants.LightEnvEnum;
-
-import java.util.logging.Logger;
-
 import com.google.api.client.auth.oauth2.RefreshTokenRequest;
 import com.google.api.client.auth.oauth2.TokenResponse;
+import com.google.api.client.auth.oauth2.TokenResponseException;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpResponse;
@@ -34,21 +31,23 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import com.google.common.io.CharStreams;
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 import com.google.inject.assistedinject.Assisted;
+import com.google.light.server.constants.LightEnvEnum;
 import com.google.light.server.constants.OAuth2ProviderService;
 import com.google.light.server.dto.DtoInterface;
 import com.google.light.server.dto.oauth2.owner.OAuth2OwnerTokenDto;
+import com.google.light.server.exception.unchecked.httpexception.UnauthorizedException;
 import com.google.light.server.manager.implementation.oauth2.consumer.OAuth2ConsumerCredentialManagerFactory;
 import com.google.light.server.manager.interfaces.OAuth2ConsumerCredentialManager;
 import com.google.light.server.manager.interfaces.OAuth2OwnerTokenManager;
 import com.google.light.server.persistence.dao.OAuth2OwnerTokenDao;
 import com.google.light.server.persistence.entity.oauth2.owner.OAuth2OwnerTokenEntity;
-import com.google.light.server.servlets.SessionManager;
 import com.google.light.server.servlets.oauth2.google.pojo.AbstractOAuth2TokenInfo;
 import com.google.light.server.utils.JsonUtils;
 import com.google.light.server.utils.LightPreconditions;
 import java.io.InputStreamReader;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Implementation for {@link OAuth2OwnerTokenManager}.
@@ -59,7 +58,6 @@ public class OAuth2OwnerTokenManagerImpl implements OAuth2OwnerTokenManager {
   private static final Logger logger = Logger
       .getLogger(OAuth2OwnerTokenManagerImpl.class.getName());
 
-  private Injector injector;
   private OAuth2ProviderService providerService;
   private OAuth2OwnerTokenDao dao;
   private HttpTransport httpTransport;
@@ -67,20 +65,23 @@ public class OAuth2OwnerTokenManagerImpl implements OAuth2OwnerTokenManager {
   private OAuth2OwnerTokenEntity entity;
 
   @Inject
-  public <D extends AbstractOAuth2TokenInfo<D>> OAuth2OwnerTokenManagerImpl(Injector injector,
+  public <D extends AbstractOAuth2TokenInfo<D>> OAuth2OwnerTokenManagerImpl(
+      OAuth2OwnerTokenDao ownerTokenDao, HttpTransport httpTransport, JsonFactory jsonFactory,
       @Assisted OAuth2ProviderService providerService) {
-    this.injector = checkNotNull(injector, "injector");
     this.providerService = checkNotNull(providerService, "providerService");
 
-    // TODO(arjuns): Add test for this.
-    if (!providerService.isUsedForLogin()) {
-      SessionManager sessionManager = getInstance(injector, SessionManager.class);
-      LightPreconditions.checkValidSession(sessionManager);
-    }
+//    // TODO(arjuns): Add test for this.
+//    if (!providerService.isUsedForLogin()) {
+//      SessionManager sessionManager = getInstance(injector, SessionManager.class);
+//      LightPreconditions.checkValidSession(sessionManager);
+//    }
+    
+    // TODO(arjuns): Figure out if any validation is required here.
+    
 
-    this.dao = getInstance(injector, OAuth2OwnerTokenDao.class);
-    this.httpTransport = getInstance(injector, HttpTransport.class);
-    this.jsonFactory = getInstance(injector, JsonFactory.class);
+    this.dao = checkNotNull(ownerTokenDao, "ownerTokenDao");
+    this.httpTransport = checkNotNull(httpTransport, "httpTransport");
+    this.jsonFactory = checkNotNull(jsonFactory, "jsonFactory");
   }
 
   /**
@@ -107,12 +108,12 @@ public class OAuth2OwnerTokenManagerImpl implements OAuth2OwnerTokenManager {
     if (LightEnvEnum.getLightEnv() != LightEnvEnum.UNIT_TEST) {
       // TODO(arjuns): Add test for this to ensure this is called.
       // If entity hasExpired, then refresh it.
-      
+
       if (entity.hasExpired()) {
-        refresh();
+        entity = refresh();
+        // TODO(arjuns): See why this happens.
         checkNotNull(entity, "After refresh, entity should not be null.");
-        Preconditions.checkArgument(
-            entity.hasExpired(),
+        Preconditions.checkArgument(!entity.hasExpired(),
             "After refresh, entity should not be in expired state. This happened for PersonId : "
                 + entity.getPersonId() + " and ProviderService = "
                 + entity.getProviderService());
@@ -161,7 +162,7 @@ public class OAuth2OwnerTokenManagerImpl implements OAuth2OwnerTokenManager {
       checkNotNull(entity, "entity should not be null.");
 
       OAuth2ConsumerCredentialManagerFactory consumerCredFactory = getInstance(
-          injector, OAuth2ConsumerCredentialManagerFactory.class);
+          OAuth2ConsumerCredentialManagerFactory.class);
       OAuth2ConsumerCredentialManager cosumerCredManager =
           consumerCredFactory.create(providerService.getProvider());
 
@@ -172,7 +173,19 @@ public class OAuth2OwnerTokenManagerImpl implements OAuth2OwnerTokenManager {
           entity.getRefreshToken())
           .setClientAuthentication(cosumerCredManager.getClientAuthentication());
 
-      TokenResponse tokenResponse = refreshRequest.execute();
+      TokenResponse tokenResponse = null;
+      
+      try {
+        tokenResponse = refreshRequest.execute();
+      } catch (TokenResponseException e) {
+        logger.log(Level.INFO, "Failed to refresh token due to : ", e);
+        
+        // Failed to refresh token. So lets delete the token.
+        // TODO(arjuns): Once revokeToken code is there, first revoke and then delete.
+        this.delete();
+        throw new UnauthorizedException("OAuth2 token for " + providerService 
+            + " could not be refreshed. So deleting it and forcing person to authorize again.");
+      }
 
       @SuppressWarnings("unchecked")
       AbstractOAuth2TokenInfo newTokenInfo = getInfoByAccessToken(tokenResponse.getAccessToken());
@@ -222,5 +235,13 @@ public class OAuth2OwnerTokenManagerImpl implements OAuth2OwnerTokenManager {
       // TODO(arjuns): Add exception handling.
       throw new RuntimeException(e);
     }
+  }
+
+  /** 
+   * {@inheritDoc}
+   */
+  @Override
+  public void delete() {
+    dao.deleteByProviderService(providerService);
   }
 }

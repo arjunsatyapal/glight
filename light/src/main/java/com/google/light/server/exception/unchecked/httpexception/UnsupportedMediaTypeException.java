@@ -15,7 +15,7 @@
  */
 package com.google.light.server.exception.unchecked.httpexception;
 
-import com.google.light.server.constants.HttpStatusCodesEnum;
+import com.google.light.server.constants.http.HttpStatusCodesEnum;
 
 /**
  * Exceptions thrown if Server receives a request with Content-Type set to a value which is

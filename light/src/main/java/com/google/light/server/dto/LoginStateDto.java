@@ -78,11 +78,13 @@ public class LoginStateDto implements DtoInterface<LoginStateDto> {
       return this;
     }
 
+    @SuppressWarnings("synthetic-access")
     public LoginStateDto build() {
       return new LoginStateDto(this).validate();
     }
   }
 
+  @SuppressWarnings("synthetic-access")
   private LoginStateDto(Builder builder) {
     this.redirectPath = builder.redirectPath;
   }

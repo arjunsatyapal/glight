@@ -26,11 +26,14 @@ import static com.google.light.testingutils.TestingConstants.DEFAULT_TOKEN_INFO;
 import static com.google.light.testingutils.TestingConstants.DEFAULT_TOKEN_TYPE;
 import static com.google.light.testingutils.TestingUtils.createRandomPerson;
 import static com.google.light.testingutils.TestingUtils.getMockSessionForTesting;
+import static com.google.light.testingutils.TestingUtils.getRequestScopedValueProvider;
 import static com.google.light.testingutils.TestingUtils.getRandomEmail;
 import static com.google.light.testingutils.TestingUtils.getRandomString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
+import com.google.light.server.guice.provider.TestRequestScopedValuesProvider;
 
 import com.google.light.server.constants.OAuth2ProviderService;
 import com.google.light.server.dto.oauth2.owner.OAuth2OwnerTokenDto;
@@ -61,7 +64,7 @@ public class OAuth2OwnerTokenDaoTest extends
   @Before
   public void setUp() {
     super.setUp();
-    dao = getInstance(injector, OAuth2OwnerTokenDao.class);
+    dao = getInstance(OAuth2OwnerTokenDao.class);
   }
 
   private Builder getDefaultEntityBuilder(OAuth2ProviderService providerService,
@@ -212,10 +215,19 @@ public class OAuth2OwnerTokenDaoTest extends
     assertEquals(token1, fetchedToken1);
 
     // Negative Testing : Create two different people with same providerUserId.
+
     String email2 = getRandomEmail();
+    System.out.println("email2 = " + email2);
+    assertTrue(!email2.equals(testEmail));
+
+    TestRequestScopedValuesProvider testRequestScopedValueProvider =
+        getRequestScopedValueProvider(null, null);
     HttpSession session2 = getMockSessionForTesting(defaultEnv, defaultProviderService,
         testProviderUserId, null/* personId */, email2);
-    PersonEntity randomPerson2 = createRandomPerson(defaultEnv, session2);
+    PersonEntity randomPerson2 =
+        createRandomPerson(defaultEnv, testRequestScopedValueProvider, session2);
+    testRequestScopedValueProvider.getParticipants().updateBoth(randomPerson2.getPersonId());
+
     OAuth2OwnerTokenEntity token2 = getDefaultEntityBuilder(GOOGLE_LOGIN, testProviderUserId)
         .personKey(randomPerson2.getKey())
         .build();

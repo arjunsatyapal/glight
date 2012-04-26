@@ -16,11 +16,11 @@
 package com.google.light.server.constants;
 
 import static org.junit.Assert.assertEquals;
-import org.junit.Test;
-
-import java.util.List;
 
 import com.google.common.collect.Lists;
+import com.google.light.server.constants.http.HttpStatusCategoryEnum;
+import java.util.List;
+import org.junit.Test;
 
 /**
  * Test for {@link HttpStatusCodesEnum}.

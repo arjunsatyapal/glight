@@ -28,7 +28,8 @@ import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.InputStreamContent;
 import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;
-import com.google.light.server.constants.ContentTypeEnum;
+import com.google.light.server.constants.http.ContentTypeEnum;
+import com.google.light.server.dto.pojo.PersonId;
 import com.google.light.server.servlets.path.ServletPathEnum;
 import com.google.light.server.utils.LightUtils;
 import java.io.ByteArrayInputStream;
@@ -51,7 +52,7 @@ public class PersonServletITCase extends AbstractLightIntegrationTest {
   
   public PersonServletITCase() {
     // TODO(arjuns): extract 1234L into a constant, and add javadoc why it is needed.
-    super(GOOGLE_LOGIN, 1234L, email);
+    super(GOOGLE_LOGIN, new PersonId(1234L), email);
   }
   
   @Override

@@ -22,25 +22,11 @@ import static com.google.light.server.constants.RequestParamKeyEnum.LOGIN_PROVID
 import static com.google.light.server.constants.RequestParamKeyEnum.LOGIN_PROVIDER_USER_ID;
 import static com.google.light.server.constants.RequestParamKeyEnum.PERSON_ID;
 import static com.google.light.server.utils.GuiceUtils.getInstance;
+import static com.google.light.server.utils.GuiceUtils.getKeyForScopeSeed;
 import static com.google.light.server.utils.LightPreconditions.checkNull;
+import static com.google.light.server.utils.LightUtils.getUUIDString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
-import com.google.light.server.servlets.SessionManager;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.atomic.AtomicLong;
-
-import javax.annotation.Nullable;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-
-import org.mockito.Mockito;
 
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.LowLevelHttpRequest;
@@ -52,19 +38,33 @@ import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.servlet.ServletModule;
+import com.google.light.pojo.TestRequestScopedValues;
+import com.google.light.server.annotations.AnotActor;
+import com.google.light.server.annotations.AnotOwner;
 import com.google.light.server.constants.LightEnvEnum;
 import com.google.light.server.constants.OAuth2ProviderService;
+import com.google.light.server.dto.pojo.PersonId;
 import com.google.light.server.guice.LightServletModule;
 import com.google.light.server.guice.module.UnitTestModule;
-import com.google.light.server.guice.modules.DevServerModule;
 import com.google.light.server.guice.modules.ProdModule;
-import com.google.light.server.guice.modules.QaModule;
-import com.google.light.server.manager.implementation.SearchManagerGSSImplTest;
+import com.google.light.server.guice.provider.TestRequestScopedValuesProvider;
 import com.google.light.server.manager.interfaces.PersonManager;
 import com.google.light.server.persistence.entity.person.PersonEntity;
+import com.google.light.server.servlets.SessionManager;
 import com.google.light.server.utils.LightUtils;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
+import javax.annotation.Nullable;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+import org.mockito.Mockito;
 
 /**
  * 
@@ -72,24 +72,6 @@ import com.google.light.server.utils.LightUtils;
  */
 public class TestingUtils {
   private static AtomicLong atomicLong = new AtomicLong(System.currentTimeMillis());
-
-  /**
-   * Get UUID.
-   * 
-   * @return
-   */
-  public static UUID getUUID() {
-    return UUID.randomUUID();
-  }
-
-  /**
-   * Get UUID as String.
-   * 
-   * @return
-   */
-  public static String getUUIDString() {
-    return getUUID().toString();
-  }
 
   /**
    * Get a random string based on UUID.
@@ -142,8 +124,8 @@ public class TestingUtils {
    * 
    * @return
    */
-  public static Long getRandomPersonId() {
-    return getRandomLongNumber();
+  public static PersonId getRandomPersonId() {
+    return new PersonId(getRandomLongNumber());
   }
 
   /**
@@ -161,8 +143,7 @@ public class TestingUtils {
     }
   }
 
-  public static InputStream getResourceAsStream(String resourcePath)
-      throws IOException {
+  public static InputStream getResourceAsStream(String resourcePath) {
     return System.class.getResourceAsStream(resourcePath);
   }
 
@@ -175,7 +156,7 @@ public class TestingUtils {
    * @return
    */
   public static Injector getInjectorByEnv(LightEnvEnum env) {
-    return getInjectorByEnv(env, null);
+    return getInjectorByEnv(env, null, null);
   }
 
   /**
@@ -186,7 +167,9 @@ public class TestingUtils {
    * @param session Session is required only for Unit Test Env.
    * @return
    */
-  public static Injector getInjectorByEnv(LightEnvEnum env, @Nullable HttpSession session) {
+  public static Injector getInjectorByEnv(LightEnvEnum env,
+      @Nullable TestRequestScopedValuesProvider testRequestScopedValueProvider,
+      @Nullable HttpSession session) {
     if (env == LightEnvEnum.UNIT_TEST) {
       checkNotNull(session, "session should be set for UNIT_TEST env.");
     } else {
@@ -196,16 +179,15 @@ public class TestingUtils {
     ServletModule servletModule = new LightServletModule();
     switch (env) {
       case DEV_SERVER:
-        return Guice.createInjector(new DevServerModule(), servletModule);
-
       case PROD:
+      case QA:
         return Guice.createInjector(new ProdModule(), servletModule);
 
-      case QA:
-        return Guice.createInjector(new QaModule(), servletModule);
-
       case UNIT_TEST:
-        return UnitTestModule.getTestInjector(checkNotNull(session), servletModule);
+        return UnitTestModule.getTestInjector(
+            checkNotNull(testRequestScopedValueProvider, "testParticipantProvider"),
+            checkNotNull(session, "session"),
+            servletModule);
 
       default:
         throw new IllegalArgumentException("Unknown env : " + env);
@@ -232,8 +214,10 @@ public class TestingUtils {
    * @param email
    * @return
    */
-  public static HttpSession getMockSessionForTesting(LightEnvEnum env,
-      OAuth2ProviderService providerService, String providerUserId, Long personId, String email) {
+  public static HttpSession
+      getMockSessionForTesting(LightEnvEnum env,
+          OAuth2ProviderService providerService, String providerUserId, PersonId personId,
+          String email) {
     if (env != LightEnvEnum.UNIT_TEST) {
       return null;
     }
@@ -241,10 +225,25 @@ public class TestingUtils {
     HttpSession mockSession = Mockito.mock(HttpSession.class);
     when(mockSession.getAttribute(LOGIN_PROVIDER_ID.get())).thenReturn(providerService.name());
     when(mockSession.getAttribute(LOGIN_PROVIDER_USER_ID.get())).thenReturn(providerUserId);
-    when(mockSession.getAttribute(PERSON_ID.get())).thenReturn(personId);
+
+    if (personId != null) {
+      when(mockSession.getAttribute(PERSON_ID.get())).thenReturn(personId);
+    } else {
+      when(mockSession.getAttribute(PERSON_ID.get())).thenReturn(null);
+    }
     when(mockSession.getAttribute(DEFAULT_EMAIL.get())).thenReturn(email);
 
     return mockSession;
+  }
+
+  public static TestRequestScopedValuesProvider getRequestScopedValueProvider(PersonId ownerId,
+      PersonId actorId) {
+    TestRequestScopedValues testRequestScopedValueProvider =
+        new TestRequestScopedValues(ownerId, actorId);
+    TestRequestScopedValuesProvider testParticipantProvider =
+        new TestRequestScopedValuesProvider(testRequestScopedValueProvider);
+
+    return testParticipantProvider;
   }
 
   /**
@@ -298,13 +297,15 @@ public class TestingUtils {
   /**
    * Create a Random Person.
    */
-  public static PersonEntity createRandomPerson(LightEnvEnum env, HttpSession session) {
-    Injector injector = TestingUtils.getInjectorByEnv(env, session);
-    
-    SessionManager sessionManager = getInstance(injector, SessionManager.class);
+  public static PersonEntity createRandomPerson(LightEnvEnum env,
+      TestRequestScopedValuesProvider testRequestScopedValueProvider, HttpSession session) {
+    // This may need fix.
+    Injector injector = TestingUtils.getInjectorByEnv(env, testRequestScopedValueProvider, session);
+
+    SessionManager sessionManager = injector.getInstance(SessionManager.class);
     sessionManager.checkPersonLoggedIn();
-    
-    PersonManager personManager = getInstance(injector, PersonManager.class);
+
+    PersonManager personManager = getInstance(PersonManager.class);
 
     PersonEntity personEntity = new PersonEntity.Builder()
         .firstName(getRandomString())
@@ -362,5 +363,20 @@ public class TestingUtils {
         };
       }
     };
+  }
+
+  public static void enqueueParticipantsForTest(HttpServletRequest mockRequest,
+      PersonId ownerId, PersonId actorId) {
+    Key<PersonId> ownerKey = getKeyForScopeSeed(PersonId.class, AnotOwner.class);
+    when(mockRequest.getAttribute(ownerKey.toString())).thenReturn(ownerId);
+
+    Key<PersonId> performerKey = getKeyForScopeSeed(PersonId.class, AnotActor.class);
+    when(mockRequest.getAttribute(performerKey.toString())).thenReturn(actorId);
+  }
+
+  public static PersonId getMockPersonIdForFailure() {
+    PersonId personId = mock(PersonId.class);
+    Mockito.when(personId.get()).thenThrow(new RuntimeException("Should not be called"));
+    return personId;
   }
 }

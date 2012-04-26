@@ -52,7 +52,7 @@ public class OAuth2ConsumerCredentialDaoTest extends
   @Before
   public void setUp() {
     super.setUp();
-    dao = getInstance(injector, OAuth2ConsumerCredentialDao.class);
+    dao = getInstance(OAuth2ConsumerCredentialDao.class);
   }
 
   private OAuth2ConsumerCredentialEntity.Builder getDefaultEntityBuilder() {

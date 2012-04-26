@@ -19,7 +19,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import com.google.light.server.constants.LightEnvEnum;
-import com.google.light.server.guice.modules.DevServerModule;
+import com.google.light.server.guice.modules.ProdModule;
 import com.google.light.server.utils.GaeUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -56,6 +56,6 @@ public class DevServerModuleTest extends AbstractModuleTest {
   @Override
   public void testModuleInstantiation() {
     assertTrue(GaeUtils.isDevServer());
-    assertNotNull(new DevServerModule());
+    assertNotNull(new ProdModule());
   }
 }

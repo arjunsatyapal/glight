@@ -18,6 +18,7 @@ package com.google.light.server.utils;
 import static com.google.inject.Guice.createInjector;
 import static com.google.light.server.constants.OAuth2ProviderService.GOOGLE_LOGIN;
 import static com.google.light.server.utils.GuiceUtils.getInstance;
+import static com.google.light.server.utils.GuiceUtils.getKeyForScopeSeed;
 import static com.google.light.server.utils.GuiceUtils.isExpectedException;
 import static com.google.light.testingutils.GaeTestingUtils.cheapEnvSwitch;
 import static com.google.light.testingutils.TestingUtils.getInjectorByEnv;
@@ -27,6 +28,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+
+import com.google.light.server.dto.pojo.PersonId;
+
 
 import com.google.inject.AbstractModule;
 import com.google.inject.BindingAnnotation;
@@ -38,6 +42,7 @@ import com.google.light.server.constants.LightEnvEnum;
 import com.google.light.server.constants.OAuth2ProviderService;
 import com.google.light.server.exception.unchecked.EmailInUseException;
 import com.google.light.server.exception.unchecked.LightRuntimeException;
+import com.google.light.server.guice.provider.TestRequestScopedValuesProvider;
 import com.google.light.server.persistence.dao.PersonDao;
 import com.google.light.testingutils.TestingUtils;
 import java.lang.annotation.Retention;
@@ -52,9 +57,9 @@ import org.junit.Test;
  * @author Arjun Satyapal
  */
 public class GuiceUtilsTest {
-  private Injector injector;
   private HttpSession session;
-  private long personId;
+  private TestRequestScopedValuesProvider testRequestScopedValueProvider;
+  private PersonId personId;
   private String email;
   
   private OAuth2ProviderService defaultProviderService = GOOGLE_LOGIN;
@@ -66,16 +71,19 @@ public class GuiceUtilsTest {
     this.personId = TestingUtils.getRandomPersonId();
     this.email = TestingUtils.getRandomEmail();
     cheapEnvSwitch(defaultEnv);
+    
     this.session = getMockSessionForTesting(defaultEnv, defaultProviderService, providerUserId, 
         personId, email);
-    injector = getInjectorByEnv(defaultEnv, session);
+    this.testRequestScopedValueProvider = TestingUtils.getRequestScopedValueProvider(personId, personId);
+    Injector injector = getInjectorByEnv(defaultEnv, testRequestScopedValueProvider, session);
+    GuiceUtils.setInjector(injector);
   }
   /**
    * Test for {@link GuiceUtils#getInstance(Injector, Class)}.
    */
   @Test
   public void test_getInstance_class() throws Exception {
-    assertNotNull(getInstance(injector, PersonDao.class));
+    assertNotNull(getInstance(PersonDao.class));
   }
   
   /**
@@ -93,7 +101,8 @@ public class GuiceUtilsTest {
     };
     
     Injector testInjector = createInjector(module);
-    TestInterface testInstance = getInstance(testInjector, TestInterface.class, AnotTest.class);
+    TestInterface testInstance = testInjector.getInstance(
+        getKeyForScopeSeed(TestInterface.class, AnotTest.class));
     assertNotNull(testInstance);
     assertEquals(TestClass.class.getName(), testInstance.getClass().getName());
   }

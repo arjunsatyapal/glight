@@ -20,13 +20,14 @@ import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPersonIsGaeAdmin;
 
 import com.google.inject.Inject;
-import com.google.light.server.constants.ContentTypeEnum;
 import com.google.light.server.constants.OAuth2ProviderEnum;
+import com.google.light.server.constants.http.ContentTypeEnum;
 import com.google.light.server.dto.admin.OAuth2ConsumerCredentialDto;
 import com.google.light.server.manager.interfaces.AdminOperationManager;
 import com.google.light.server.persistence.entity.admin.OAuth2ConsumerCredentialEntity;
 import java.io.IOException;
 import java.util.List;
+import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -41,6 +42,8 @@ import javax.servlet.http.HttpServletResponse;
  */
 @SuppressWarnings("serial")
 public class OAuth2ConsumerCredentialServlet extends HttpServlet {
+  private static final Logger logger = Logger.getLogger(OAuth2ConsumerCredentialServlet.class.getName());
+  
   private AdminOperationManager adminOperationManager;
 
   @Inject
@@ -106,6 +109,8 @@ public class OAuth2ConsumerCredentialServlet extends HttpServlet {
   public void doPut(HttpServletRequest request, HttpServletResponse response) {
     String oauth2ProviderKey = checkNotBlank(
         request.getParameter(OAUTH2_PROVIDER_NAME.get()), "providerName");
+    logger.info("ProviderKey = " + oauth2ProviderKey);
+    
     OAuth2ProviderEnum provider = OAuth2ProviderEnum.valueOf(oauth2ProviderKey);
 
     String clientId = checkNotBlank(request.getParameter(CLIENT_ID.get()), "clientId");

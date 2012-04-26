@@ -15,6 +15,8 @@
  */
 package com.google.light.server.servlets.login;
 
+import com.google.light.server.utils.ServletUtils;
+
 import java.io.IOException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -31,7 +33,12 @@ import com.google.light.server.constants.LightConstants;
 public class LogoutServlet extends HttpServlet {
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+
+    ServletUtils.invalidateSession(request);
+    response.getWriter().println("Successfully Logged out.");
+
     request.getSession().invalidate();
     response.sendRedirect(LightConstants.REDIRECT_PATH_AFTER_LOGOUT);
+
   }
 }

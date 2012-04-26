@@ -23,6 +23,10 @@ import static com.google.light.testingutils.TestingUtils.getRandomString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import com.google.light.server.dto.pojo.PersonId;
+
+
+
 import com.google.light.server.constants.OAuth2ProviderService;
 import com.google.light.server.dto.oauth2.owner.OAuth2OwnerTokenDto;
 import com.google.light.server.exception.unchecked.BlankStringException;
@@ -40,7 +44,7 @@ import org.junit.Test;
  * @author Arjun Satyapal
  */
 public class OAuth2OwnerTokenEntityTest extends AbstractPersistenceEntityTest {
-  private long personId;
+  private PersonId personId;
   private OAuth2ProviderService defaultProviderService = OAuth2ProviderService.GOOGLE_LOGIN;
   private String providerUserId;
   private String accessToken;
@@ -80,7 +84,7 @@ public class OAuth2OwnerTokenEntityTest extends AbstractPersistenceEntityTest {
   public void test_builder_with_constructor() {
     // Negative Test : Zero personId
     try {
-      getEntityBuilder().personKey(PersonEntity.generateKey(0L)).build();
+      getEntityBuilder().personKey(PersonEntity.generateKey(new PersonId(0L))).build();
       fail("should have failed.");
     } catch (InvalidPersonIdException e) {
       // Expected
@@ -88,7 +92,7 @@ public class OAuth2OwnerTokenEntityTest extends AbstractPersistenceEntityTest {
 
     // Negative Test : Negative personId
     try {
-      getEntityBuilder().personKey(PersonEntity.generateKey(-3L)).build();
+      getEntityBuilder().personKey(PersonEntity.generateKey(new PersonId(-3L))).build();
       fail("should have failed.");
     } catch (InvalidPersonIdException e) {
       // Expected
@@ -241,7 +245,7 @@ public class OAuth2OwnerTokenEntityTest extends AbstractPersistenceEntityTest {
   @Override
   public void test_generateKey() {
     // Positive tests already done as part of test_getKey.
-    Long randomPersonId = getRandomPersonId();
+    PersonId randomPersonId = getRandomPersonId();
     Key<PersonEntity> personKey = PersonEntity.generateKey(randomPersonId);
 
     // Negative Test : Invalid ProviderService.

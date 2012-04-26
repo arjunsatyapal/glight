@@ -6,6 +6,9 @@ import static com.google.light.server.servlets.path.ServletPathEnum.OAUTH2_GOOGL
 import static com.google.light.server.utils.GuiceUtils.getInstance;
 import static com.google.light.server.utils.LightPreconditions.checkValidSession;
 
+import com.google.light.server.dto.pojo.PersonId;
+
+
 import com.google.api.client.auth.oauth2.AuthorizationCodeResponseUrl;
 import com.google.api.client.auth.oauth2.TokenResponse;
 import com.google.common.base.Strings;
@@ -39,8 +42,6 @@ import javax.servlet.http.HttpServletResponse;
  */
 @SuppressWarnings("serial")
 public class GoogleDocAuthCallbackServlet extends HttpServlet {
-  private Injector injector;
-
   private OAuth2Helper helperInstance;
   private OAuth2OwnerTokenManager googDocTokenManager;
   
@@ -51,24 +52,22 @@ public class GoogleDocAuthCallbackServlet extends HttpServlet {
   
   @Inject
   public GoogleDocAuthCallbackServlet(Injector injector) {
-    this.injector = checkNotNull(injector, "injector");
+    checkNotNull(injector, "injector");
     
   }
   
   @Override
   public void service(HttpServletRequest request, HttpServletResponse response) {
-    OAuth2HelperFactoryInterface helperFactory = getInstance(
-        injector, OAuth2HelperFactoryInterface.class);
+    OAuth2HelperFactoryInterface helperFactory = getInstance(OAuth2HelperFactoryInterface.class);
     helperInstance = helperFactory.create(GOOGLE_DOC);
 
-    OAuth2OwnerTokenManagerFactory tokenManagerFactory = getInstance(
-        injector, OAuth2OwnerTokenManagerFactory.class);
+    OAuth2OwnerTokenManagerFactory tokenManagerFactory = getInstance(OAuth2OwnerTokenManagerFactory.class);
     googDocTokenManager = tokenManagerFactory.create(GOOGLE_DOC);
     
-    sessionManager = getInstance(injector, SessionManager.class);
+    sessionManager = getInstance(SessionManager.class);
     checkValidSession(sessionManager);
     
-    personManager = getInstance(injector, PersonManager.class);
+    personManager = getInstance(PersonManager.class);
     lightCbUrl = ServletUtils.getServletUrl(request, OAUTH2_GOOGLE_DOC_AUTH_CB);
 
     try {
@@ -97,7 +96,7 @@ public class GoogleDocAuthCallbackServlet extends HttpServlet {
       // TODO(arjuns) : Break this method into more parts.
       // TODO(arjuns) : Write whole workflow as this is complex to understand.
 
-      Long personId = sessionManager.getPersonId();
+      PersonId personId = sessionManager.getPersonId();
       PersonEntity personEntity = personManager.get(personId);
       checkNotNull(personEntity, "personEntity cannot be null as person is in session.");
 
@@ -114,7 +113,7 @@ public class GoogleDocAuthCallbackServlet extends HttpServlet {
            * Google did not return refreshToken as User had given Authorization earlier. But light
            * failed to locate a record for that token. So User needs to be forced to give access.
            */
-          forceAuthFlowWithPrompt(request, response);
+          forceAuthFlowWithPrompt(response);
           return;
         } else {
           // nothing to to do.
@@ -136,10 +135,10 @@ public class GoogleDocAuthCallbackServlet extends HttpServlet {
    * @param expiresInMillis
    * @throws IOException
    */
-  private void updateOwnerTokenEntity(Long personId, String refreshToken, 
+  private void updateOwnerTokenEntity(PersonId personId, String refreshToken, 
       TokenResponse tokenResponse) throws IOException {
     GoogleOAuth2TokenInfo googTokenInfo = helperInstance.getTokenInfo(
-        tokenResponse.getAccessToken(), GoogleOAuth2TokenInfo.class);
+        tokenResponse.getAccessToken());
 
     OAuth2OwnerTokenDto tokenDto = OAuth2OwnerTokenDto.getOAuth2OwnerTokenDto(
         personId, refreshToken, tokenResponse, GOOGLE_DOC, null /*providerUserId*/,
@@ -155,8 +154,7 @@ public class GoogleDocAuthCallbackServlet extends HttpServlet {
    * @param response
    * @throws IOException
    */
-  private void forceAuthFlowWithPrompt(HttpServletRequest request,
-      HttpServletResponse response) throws IOException {
+  private void forceAuthFlowWithPrompt(HttpServletResponse response) throws IOException {
     /*
      * Will reinitialize session once Light has refreshToken. So we dont care whether
      * request.getSession() returns existing session or new session.
@@ -171,6 +169,7 @@ public class GoogleDocAuthCallbackServlet extends HttpServlet {
    * @param responseUrl
    * @throws IOException
    */
+  @SuppressWarnings("unused") 
   private void onError(HttpServletRequest request, HttpServletResponse response,
       AuthorizationCodeResponseUrl responseUrl) throws IOException {
     // TODO(arjuns): Auto-generated method stub

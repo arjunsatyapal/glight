@@ -24,6 +24,10 @@ import static com.google.light.testingutils.TestingUtils.getRandomString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import com.google.light.server.dto.pojo.PersonId;
+
+
+
 import com.google.light.server.AbstractLightServerTest;
 import com.google.light.server.constants.OAuth2ProviderService;
 import com.google.light.server.exception.unchecked.BlankStringException;
@@ -52,7 +56,7 @@ public class OAuth2OwnerTokenManagerImplTest extends AbstractLightServerTest {
   @Override
   public void setUp() {
     super.setUp();
-    randomPerson = createRandomPerson(defaultEnv, testSession);
+    randomPerson = createRandomPerson(defaultEnv, testRequestScopedValueProvider, testSession);
 
     providerUserId = getRandomString();
     accessToken = getRandomString();
@@ -62,7 +66,7 @@ public class OAuth2OwnerTokenManagerImplTest extends AbstractLightServerTest {
     tokenInfo = getRandomString();
 
     OAuth2OwnerTokenManagerFactory factory = getInstance(
-        injector, OAuth2OwnerTokenManagerFactory.class);
+        OAuth2OwnerTokenManagerFactory.class);
     googLogintokenManager = factory.create(GOOGLE_LOGIN);
     googDocTokenManager = factory.create(GOOGLE_DOC);
   }
@@ -75,7 +79,7 @@ public class OAuth2OwnerTokenManagerImplTest extends AbstractLightServerTest {
   private OAuth2OwnerTokenEntity.Builder getOwnerTokenEntiy(OAuth2ProviderService providerService,
       String providerUserId) {
     return new OAuth2OwnerTokenEntity.Builder()
-        .personKey(PersonEntity.generateKey(randomPerson.getId()))
+        .personKey(PersonEntity.generateKey(randomPerson.getPersonId()))
         .providerService(providerService)
         .providerUserId(providerUserId)
         .accessToken(accessToken)
@@ -90,7 +94,7 @@ public class OAuth2OwnerTokenManagerImplTest extends AbstractLightServerTest {
    */
   @Test
   public void test_putToken() {
-    do_test_put_get_personId(randomPerson.getId());
+    do_test_put_get_personId(randomPerson.getPersonId());
   }
 
   /**
@@ -98,7 +102,7 @@ public class OAuth2OwnerTokenManagerImplTest extends AbstractLightServerTest {
    */
   @Test
   public void test_getToken() {
-    do_test_put_get_personId(randomPerson.getId());
+    do_test_put_get_personId(randomPerson.getPersonId());
   }
   
   /**
@@ -108,7 +112,7 @@ public class OAuth2OwnerTokenManagerImplTest extends AbstractLightServerTest {
   public void test_getTokenByProviderUserId() {
     OAuth2OwnerTokenEntity expectedToken = getOwnerTokenEntiy(GOOGLE_LOGIN, providerUserId).build();
     // Now persisting token.
-    do_test_put_get_personId(randomPerson.getId());
+    do_test_put_get_personId(randomPerson.getPersonId());
     
     // Now fetch using providerUserId;
     OAuth2OwnerTokenEntity fetchedToken = 
@@ -124,7 +128,8 @@ public class OAuth2OwnerTokenManagerImplTest extends AbstractLightServerTest {
     }
   }
 
-  private void do_test_put_get_personId(long personId) {
+  // TODO(arjuns): Fix this test and see how personId was used.
+  private void do_test_put_get_personId(@SuppressWarnings("unused") PersonId personId) {
     // First put Google Login Token.
     OAuth2OwnerTokenEntity googLoginToken =
         getOwnerTokenEntiy(GOOGLE_LOGIN, providerUserId).build();

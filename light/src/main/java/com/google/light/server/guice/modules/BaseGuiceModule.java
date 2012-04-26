@@ -15,10 +15,7 @@
  */
 package com.google.light.server.guice.modules;
 
-
-import java.util.logging.Logger;
-
-import javax.servlet.http.HttpSession;
+import com.google.light.server.annotations.AnotOwner;
 
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
@@ -28,8 +25,17 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
+import com.google.inject.servlet.ServletScopes;
+import com.google.light.server.annotations.AnotActor;
 import com.google.light.server.annotations.AnotHttpSession;
+import com.google.light.server.dto.pojo.PersonId;
+import com.google.light.server.dto.pojo.RequestScopedValues;
+import com.google.light.server.guice.providers.InstantProvider;
+import com.google.light.server.guice.providers.RequestScopedValuesProvider;
 import com.google.light.server.manager.implementation.AdminOperationManagerImpl;
+import com.google.light.server.manager.implementation.ImportManagerImpl;
+import com.google.light.server.manager.implementation.JobManagerImpl;
+import com.google.light.server.manager.implementation.ModuleManagerImpl;
 import com.google.light.server.manager.implementation.PersonManagerImpl;
 import com.google.light.server.manager.implementation.SearchManagerGSSImpl;
 import com.google.light.server.manager.implementation.oauth2.consumer.OAuth2ConsumerCredentialManagerFactory;
@@ -37,6 +43,9 @@ import com.google.light.server.manager.implementation.oauth2.consumer.OAuth2Cons
 import com.google.light.server.manager.implementation.oauth2.owner.OAuth2OwnerTokenManagerFactory;
 import com.google.light.server.manager.implementation.oauth2.owner.OAuth2OwnerTokenManagerImpl;
 import com.google.light.server.manager.interfaces.AdminOperationManager;
+import com.google.light.server.manager.interfaces.ImportManager;
+import com.google.light.server.manager.interfaces.JobManager;
+import com.google.light.server.manager.interfaces.ModuleManager;
 import com.google.light.server.manager.interfaces.OAuth2ConsumerCredentialManager;
 import com.google.light.server.manager.interfaces.OAuth2OwnerTokenManager;
 import com.google.light.server.manager.interfaces.PersonManager;
@@ -45,7 +54,9 @@ import com.google.light.server.persistence.dao.OAuth2ConsumerCredentialDao;
 import com.google.light.server.servlets.oauth2.google.OAuth2Helper;
 import com.google.light.server.servlets.oauth2.google.OAuth2HelperFactoryInterface;
 import com.google.light.server.servlets.oauth2.google.OAuth2HelperImpl;
-
+import java.util.logging.Logger;
+import javax.servlet.http.HttpSession;
+import org.joda.time.Instant;
 
 /**
  * {@link BaseGuiceModule} will do two things : <br>
@@ -70,32 +81,59 @@ public abstract class BaseGuiceModule extends AbstractModule {
   protected void configure() {
     requireBinding(HttpTransport.class);
 
+    // binding to Providers.
+    bind(Instant.class)
+        .toProvider(InstantProvider.class);
+
     // TODO(arjuns): Can this be removed.
     bind(OAuth2ConsumerCredentialDao.class);
-    
-    
+
     // Guice Assisted Inject Bindings.
     install(new FactoryModuleBuilder()
-      .implement(OAuth2Helper.class, OAuth2HelperImpl.class)
-      .build(OAuth2HelperFactoryInterface.class));
-    
+        .implement(OAuth2Helper.class, OAuth2HelperImpl.class)
+        .build(OAuth2HelperFactoryInterface.class));
+
     install(new FactoryModuleBuilder()
-      .implement(OAuth2OwnerTokenManager.class, OAuth2OwnerTokenManagerImpl.class)
-      .build(OAuth2OwnerTokenManagerFactory.class));
-    
+        .implement(OAuth2OwnerTokenManager.class, OAuth2OwnerTokenManagerImpl.class)
+        .build(OAuth2OwnerTokenManagerFactory.class));
+
     install(new FactoryModuleBuilder()
-      .implement(OAuth2ConsumerCredentialManager.class, OAuth2ConsumerCredentialManagerImpl.class)
-      .build(OAuth2ConsumerCredentialManagerFactory.class));
-    
+        .implement(OAuth2ConsumerCredentialManager.class, OAuth2ConsumerCredentialManagerImpl.class)
+        .build(OAuth2ConsumerCredentialManagerFactory.class));
+
     // Binding Manager Implementations.
     bind(AdminOperationManager.class)
         .to(AdminOperationManagerImpl.class);
 
-    bind(PersonManager.class)
-    .to(PersonManagerImpl.class);
+    bind(ImportManager.class)
+        .to(ImportManagerImpl.class);
 
-    bind(SearchManager.class).to(SearchManagerGSSImpl.class);
-    
+    bind(JobManager.class)
+        .to(JobManagerImpl.class);
+
+    bind(ModuleManager.class)
+        .to(ModuleManagerImpl.class);
+
+    bind(PersonManager.class)
+        .to(PersonManagerImpl.class);
+
+    bind(SearchManager.class)
+        .to(SearchManagerGSSImpl.class);
+
+    // Binding request scoped values.
+    bind(PersonId.class)
+        .annotatedWith(AnotOwner.class)
+        .to(PersonId.class)
+        .in(ServletScopes.REQUEST);
+
+    bind(PersonId.class)
+        .annotatedWith(AnotActor.class)
+        .to(PersonId.class)
+        .in(ServletScopes.REQUEST);
+
+    bind(RequestScopedValues.class)
+        .toProvider(RequestScopedValuesProvider.class);
+
     bind(HttpSession.class)
         .annotatedWith(AnotHttpSession.class)
         .to(HttpSession.class);
@@ -103,9 +141,12 @@ public abstract class BaseGuiceModule extends AbstractModule {
     /**
      * Implementation is thread-safe, so using it as a singleton.
      * TODO(waltercacau): See if we should use UrlFetchTransport instead.
+     * 
      * @see http://code.google.com/p/google-http-java-client/wiki/GoogleAppEngine#HTTP_Transport
      */
-    bind(HttpTransport.class).to(NetHttpTransport.class).in(Singleton.class);
+    bind(HttpTransport.class)
+        .to(NetHttpTransport.class)
+        .in(Singleton.class);
   }
 
   @Provides

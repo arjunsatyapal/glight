@@ -17,9 +17,10 @@ package com.google.light.server.exception.unchecked.httpexception;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.light.server.constants.http.HttpStatusCodesEnum;
+
 import com.google.light.server.exception.unchecked.LightRuntimeException;
 
-import com.google.light.server.constants.HttpStatusCodesEnum;
 
 /**
  * Exceptions for covering HTTP Codes.

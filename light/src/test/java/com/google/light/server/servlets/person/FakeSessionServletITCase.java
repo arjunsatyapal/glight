@@ -25,6 +25,10 @@ import static com.google.light.testingutils.TestingUtils.getRandomPersonId;
 import static com.google.light.testingutils.TestingUtils.getRandomProviderUserId;
 import static org.junit.Assert.assertTrue;
 
+import com.google.light.server.dto.pojo.PersonId;
+
+
+
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpRequestFactory;
@@ -34,7 +38,6 @@ import com.google.api.client.http.UrlEncodedContent;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.common.collect.ImmutableMap;
 import com.google.light.server.servlets.path.ServletPathEnum;
-import com.google.light.server.servlets.test.SessionInfoServlet;
 import com.google.light.testingutils.FakeLoginHelper;
 import com.google.light.testingutils.TestingUtils;
 import java.util.Map;
@@ -52,7 +55,7 @@ public class FakeSessionServletITCase {
   private static String serverUrl;
   private static String providerUserId;
   private static String email;
-  private static long personId;
+  private static PersonId personId;
   private static final HttpTransport HTTP_TRANSPORT = new NetHttpTransport();
 
   @BeforeClass
@@ -87,11 +90,11 @@ public class FakeSessionServletITCase {
 
     GenericUrl fakeLoginServletUrl = new GenericUrl(serverUrl + ServletPathEnum.FAKE_LOGIN.get());
     
-    Map<String, String> map = new ImmutableMap.Builder<String, String>()
+    Map<String, Object> map = new ImmutableMap.Builder<String, Object>()
         .put(LOGIN_PROVIDER_ID.get(), GOOGLE_LOGIN.name())
         .put(LOGIN_PROVIDER_USER_ID.get(), providerUserId)
         .put(DEFAULT_EMAIL.get(), email)
-        .put(PERSON_ID.get(), Long.toString(personId))
+        .put(PERSON_ID.get(), personId)
         .build();
 
     HttpRequest request = requestFactory.buildPostRequest(

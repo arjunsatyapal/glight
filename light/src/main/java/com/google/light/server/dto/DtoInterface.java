@@ -21,7 +21,8 @@ import java.io.Serializable;
  * Interface to encapsulate methods related to DTO.
  * 
  * TODO(arjuns): Add test for this class.
- * TODO(arjuns): See if this can be converted to abstract class.
+ * TODO(arjuns): Remove this interface in favour of {@link AbstractDto}.
+ * 
  * @author Arjun Satyapal
  */
 public interface DtoInterface<D> extends Serializable {
@@ -39,28 +40,8 @@ public interface DtoInterface<D> extends Serializable {
    * Ensure that DTO is valid. <br>
    * TODO(arjuns): Throw a checked exception. <br>
    * TODO(arjuns) : Sync with Walter on refactoring. Issue : 2003.
-   * 
+   * TODO(arjuns): Change this to validate&Sanitize.
    * @return
    */
   public D validate();
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public boolean equals(Object obj);
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public int hashCode();
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @return
-   */
-  @Override
-  public String toString();
 }

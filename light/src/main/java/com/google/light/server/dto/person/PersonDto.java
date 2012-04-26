@@ -19,6 +19,16 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkEmail;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
+
+import com.google.light.server.dto.pojo.PersonId;
+
+
+
+import com.google.light.server.constants.XsdPath;
+import com.google.light.server.dto.DtoToPersistenceInterface;
+import com.google.light.server.persistence.entity.person.PersonEntity;
+import com.google.light.server.utils.JsonUtils;
+import com.google.light.server.utils.XmlUtils;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -32,12 +42,6 @@ import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
 
-import com.google.light.server.constants.XsdPath;
-import com.google.light.server.dto.DtoToPersistenceInterface;
-import com.google.light.server.persistence.entity.person.PersonEntity;
-import com.google.light.server.utils.JsonUtils;
-import com.google.light.server.utils.XmlUtils;
-
 /**
  * DTO for {@link PersonEntity}.
  * 
@@ -48,7 +52,7 @@ import com.google.light.server.utils.XmlUtils;
 @XmlType(name = "personType", propOrder = { "firstName", "lastName", "email", "acceptedTos" })
 @XmlAccessorType(XmlAccessType.FIELD)
 @JsonSerialize(include = Inclusion.NON_NULL)
-public class PersonDto implements DtoToPersistenceInterface<PersonDto, PersonEntity, Long> {
+public class PersonDto implements DtoToPersistenceInterface<PersonDto, PersonEntity, PersonId> {
   @XmlElement
   private String firstName;
 
@@ -96,9 +100,9 @@ public class PersonDto implements DtoToPersistenceInterface<PersonDto, PersonEnt
   }
 
   @Override
-  public PersonEntity toPersistenceEntity(Long id) {
+  public PersonEntity toPersistenceEntity(PersonId personId) {
     return new PersonEntity.Builder()
-        .id(id)
+        .personId(personId)
         .firstName(firstName)
         .lastName(lastName)
         .email(email)

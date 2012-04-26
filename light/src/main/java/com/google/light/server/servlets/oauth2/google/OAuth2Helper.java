@@ -55,7 +55,7 @@ public interface OAuth2Helper {
    * @return
    * @throws IOException
    */
-  public <D extends AbstractOAuth2TokenInfo<D>> D getTokenInfo(String accessToken, Class<D> clazz)
+  public <D extends AbstractOAuth2TokenInfo<D>> D getTokenInfo(String accessToken)
       throws IOException;
 
   /**

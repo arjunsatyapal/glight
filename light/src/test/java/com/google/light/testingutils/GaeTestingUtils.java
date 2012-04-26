@@ -20,7 +20,9 @@ import static com.google.light.server.utils.LightPreconditions.checkEmail;
 import static com.google.light.testingutils.TestingUtils.getInjectorByEnv;
 import static com.google.light.testingutils.TestingUtils.getMockSessionForTesting;
 
-import com.google.light.server.utils.LightPreconditions;
+import com.google.light.server.dto.pojo.PersonId;
+
+import com.google.light.server.guice.provider.TestRequestScopedValuesProvider;
 
 import com.google.appengine.api.utils.SystemProperty;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
@@ -31,6 +33,7 @@ import com.google.inject.Injector;
 import com.google.inject.servlet.GuiceFilter;
 import com.google.light.server.constants.LightEnvEnum;
 import com.google.light.server.constants.OAuth2ProviderService;
+import com.google.light.server.utils.LightPreconditions;
 import javax.servlet.http.HttpSession;
 
 /**
@@ -45,8 +48,8 @@ public class GaeTestingUtils {
   private OAuth2ProviderService providerService;
   private String providerUserId;
   private String email;
-  private long personId;
-  
+  private PersonId personId;
+
   /** See similar variables in {@link com.google.appengine.api.users.UserServiceImpl} */
   static final String USER_ID_KEY =
       "com.google.appengine.api.users.UserService.user_id_key";
@@ -62,27 +65,27 @@ public class GaeTestingUtils {
 
   private LocalServiceTestHelper gaeTestHelper;
 
-  public GaeTestingUtils(LightEnvEnum env, OAuth2ProviderService providerService, 
-      String providerUserId, String email, long personId, boolean isAdmin) {
+  public GaeTestingUtils(LightEnvEnum env, OAuth2ProviderService providerService,
+      String providerUserId, String email, PersonId personId, boolean isAdmin) {
     this.env = checkNotNull(env);
     this.providerService = checkNotNull(providerService);
     this.providerUserId = LightPreconditions.checkNotBlank(providerUserId, "providerUserId");
     this.email = checkEmail(email);
     this.personId = personId;
-    
+
     this.env = checkNotNull(env);
     basicSystemPropertySetup(env);
-    
+
     gaeTestHelper = new LocalServiceTestHelper(
-            new LocalDatastoreServiceTestConfig(),
-            new LocalTaskQueueTestConfig(),
-            new LocalUserServiceTestConfig())
-        
-    // TODO(arjuns): Fix this.
+        new LocalDatastoreServiceTestConfig(),
+        new LocalTaskQueueTestConfig(),
+        new LocalUserServiceTestConfig())
+
+        // TODO(arjuns): Fix this.
         .setEnvAuthDomain("google")
         .setEnvIsAdmin(isAdmin)
         .setEnvAppId(env.getAppIds().get(0));
-    
+
   }
 
   /**
@@ -93,7 +96,7 @@ public class GaeTestingUtils {
       case DEV_SERVER:
         SystemProperty.environment.set(SystemProperty.Environment.Value.Development);
         break;
-        
+
       case PROD:
         //$FALL-THROUGH$
       case QA:
@@ -118,9 +121,12 @@ public class GaeTestingUtils {
    * Teardown GAE testing environment.
    */
   public void tearDown() {
-    HttpSession mockSession = getMockSessionForTesting(env, providerService, providerUserId, 
+    HttpSession mockSession = getMockSessionForTesting(env, providerService, providerUserId,
         personId, email);
-    Injector injector = getInjectorByEnv(env, mockSession);
+    TestRequestScopedValuesProvider testRequestScopedValueProvider =
+        TestingUtils.getRequestScopedValueProvider(personId, personId);
+
+    Injector injector = getInjectorByEnv(env, testRequestScopedValueProvider, mockSession);
     injector.getInstance(GuiceFilter.class).destroy();
     gaeTestHelper.tearDown();
   }
@@ -146,7 +152,7 @@ public class GaeTestingUtils {
   public void setLoggedIn(boolean isLoggedIn) {
     gaeTestHelper.setEnvIsLoggedIn(isLoggedIn);
   }
-  
+
   /**
    * Set current GAE user as GAE Admin.
    * 
@@ -166,9 +172,9 @@ public class GaeTestingUtils {
   public LightEnvEnum getEnv() {
     return env;
   }
-  
+
   /**
-   * Use at your own risk. If not cleaned up after this, then env can be in inconsistent state. 
+   * Use at your own risk. If not cleaned up after this, then env can be in inconsistent state.
    */
   public static void cheapEnvSwitch(LightEnvEnum env) {
     basicSystemPropertySetup(env);

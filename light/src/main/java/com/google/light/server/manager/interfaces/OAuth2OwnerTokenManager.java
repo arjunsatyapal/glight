@@ -75,4 +75,11 @@ public interface OAuth2OwnerTokenManager {
    * @return
    */
   public OAuth2OwnerTokenEntity refresh();
+  
+  /**
+   * Delete OAuth2 Token.
+   * 
+   * TODO(arjuns): Add test for this.
+   */
+  public void delete();
 }

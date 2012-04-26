@@ -39,6 +39,7 @@ public class SearchResultItemDtoTest extends AbstractDtoTest {
         .link(SAMPLE_LINK);
   }
 
+  @Override
   @Test
   public void test_validate() {
     // Positive Test

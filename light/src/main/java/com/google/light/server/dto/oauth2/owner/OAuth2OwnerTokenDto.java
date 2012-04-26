@@ -18,8 +18,12 @@ package com.google.light.server.dto.oauth2.owner;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.servlets.oauth2.google.pojo.AbstractOAuth2TokenInfo.calculateExpireInMillis;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
+import static com.google.light.server.utils.LightPreconditions.checkPersonId;
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
 import static com.google.light.server.utils.LightPreconditions.checkProviderUserId;
+
+import com.google.light.server.dto.pojo.PersonId;
+
 
 import com.google.api.client.auth.oauth2.TokenResponse;
 import com.google.light.server.constants.OAuth2ProviderService;
@@ -38,7 +42,7 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 @SuppressWarnings("serial")
 public class OAuth2OwnerTokenDto implements
     DtoToPersistenceInterface<OAuth2OwnerTokenDto, OAuth2OwnerTokenEntity, String> {
-  private long personId;
+  private PersonId personId;
   private OAuth2ProviderService providerService;
   private String providerUserId;
   private String accessToken;
@@ -68,7 +72,7 @@ public class OAuth2OwnerTokenDto implements
    */
   @Override
   public OAuth2OwnerTokenDto validate() {
-    checkPositiveLong(personId, "personId[" + personId + "]");
+    checkPersonId(personId);
     checkNotNull(providerService, "provider");
     checkProviderUserId(providerService, providerUserId);
     checkNotBlank(accessToken, "accessToken");
@@ -115,7 +119,7 @@ public class OAuth2OwnerTokenDto implements
     return ToStringBuilder.reflectionToString(this);
   }
 
-  public long getPersonId() {
+  public PersonId getPersonId() {
     return personId;
   }
 
@@ -155,7 +159,7 @@ public class OAuth2OwnerTokenDto implements
    * @param tokenInfoInJson
    * @return
    */
-  public static OAuth2OwnerTokenDto getOAuth2OwnerTokenDto(Long personId, String refreshToken,
+  public static OAuth2OwnerTokenDto getOAuth2OwnerTokenDto(PersonId personId, String refreshToken,
       TokenResponse tokenResponse, OAuth2ProviderService providerService, String providerUserId,
       String tokenInfoInJson) {
     /*
@@ -181,7 +185,7 @@ public class OAuth2OwnerTokenDto implements
   }
 
   public static class Builder {
-    private long personId;
+    private PersonId personId;
     private OAuth2ProviderService providerService;
     private String providerUserId;
     private String accessToken;
@@ -190,7 +194,7 @@ public class OAuth2OwnerTokenDto implements
     private String tokenType;
     private String tokenInfo;
 
-    public Builder personId(long personId) {
+    public Builder personId(PersonId personId) {
       this.personId = personId;
       return this;
     }

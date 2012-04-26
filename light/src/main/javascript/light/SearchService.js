@@ -29,7 +29,8 @@ define(['dojo/_base/declare', 'dojo', 'dojo/_base/xhr', 'dojo/_base/lang',
      */
     search: function(state) {
       // Adding the clientLanguageCode to the request
-      request = new SearchRequestBuilder(state).clientLanguageCode(LanguageUtils.currentLocale);
+      request = new SearchRequestBuilder(state)
+          .clientLanguageCode(LanguageUtils.currentLocale).build();
 
       /*
        * TODO(waltercacau): Wrap the original dojo promise from the

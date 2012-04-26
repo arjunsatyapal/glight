@@ -40,6 +40,7 @@ public class SearchResultDtoTest extends AbstractDtoTest {
         .suggestion(null).suggestionQuery(null).hasNextPage(false);
   }
 
+  @Override
   @Test
   public void test_validate() {
     SearchResultItemDto item1 = Mockito.mock(SearchResultItemDto.class);

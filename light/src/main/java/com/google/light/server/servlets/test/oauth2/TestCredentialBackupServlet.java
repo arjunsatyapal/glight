@@ -21,7 +21,7 @@ import static com.google.light.server.servlets.test.CredentialStandardEnum.OAUTH
 import static com.google.light.server.servlets.test.CredentialUtils.getOwnerTokenInfoFilePath;
 import static com.google.light.server.utils.GuiceUtils.getInstance;
 import static com.google.light.server.utils.LightPreconditions.checkIsNotEnv;
-import static com.google.light.server.utils.LightUtils.prepareSession;
+import static com.google.light.server.utils.ServletUtils.prepareSession;
 
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
@@ -30,6 +30,7 @@ import com.google.light.server.constants.LightEnvEnum;
 import com.google.light.server.constants.OAuth2ProviderEnum;
 import com.google.light.server.constants.OAuth2ProviderService;
 import com.google.light.server.constants.RequestParamKeyEnum;
+import com.google.light.server.constants.http.ContentTypeEnum;
 import com.google.light.server.manager.implementation.oauth2.owner.OAuth2OwnerTokenManagerFactory;
 import com.google.light.server.manager.interfaces.OAuth2OwnerTokenManager;
 import com.google.light.server.manager.interfaces.PersonManager;
@@ -39,7 +40,7 @@ import com.google.light.server.persistence.entity.oauth2.owner.OAuth2OwnerTokenE
 import com.google.light.server.persistence.entity.person.PersonEntity;
 import com.google.light.server.servlets.test.CredentialUtils;
 import com.google.light.server.utils.JsonUtils;
-import com.google.light.server.utils.LightUtils;
+import com.google.light.server.utils.ServletUtils;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -49,8 +50,6 @@ import java.util.zip.ZipOutputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.map.JsonMappingException;
 
 /**
  * Fake Servlet to Simulate Google Login.
@@ -64,8 +63,6 @@ import org.codehaus.jackson.map.JsonMappingException;
 public class TestCredentialBackupServlet extends HttpServlet {
   private static final Logger logger = Logger.getLogger(TestCredentialBackupServlet.class.getName());
   
-  private Injector injector;
-  
   private OAuth2ConsumerCredentialDao consumerCredentialDao;
 
   private OAuth2OwnerTokenManager googLoginTokenManager;
@@ -76,7 +73,7 @@ public class TestCredentialBackupServlet extends HttpServlet {
   @Inject
   public TestCredentialBackupServlet(Injector injector) {
     checkIsNotEnv(this, LightEnvEnum.PROD);
-    this.injector = checkNotNull(injector, "injector");
+    checkNotNull(injector, "injector");
   }
 
   @Override
@@ -91,20 +88,17 @@ public class TestCredentialBackupServlet extends HttpServlet {
     }
     
     // Hack so that user does not have to login.
-    request.getSession().invalidate();
-    prepareSession(request.getSession(), GOOGLE_LOGIN, null,
-        providerUserId, email);
+    prepareSession(request, GOOGLE_LOGIN, null, providerUserId, email);
     
-    personManager = getInstance(injector, PersonManager.class);
+    personManager = getInstance(PersonManager.class);
 
-    PersonEntity person = personManager.getByEmail(email);
-    LightUtils.prepareSession(request.getSession(), GOOGLE_LOGIN, person.getId(),
-        providerUserId, email);
+    PersonEntity person = personManager.findByEmail(email);
+    prepareSession(request, GOOGLE_LOGIN, person.getPersonId(), providerUserId, email);
     
-    consumerCredentialDao = getInstance(injector, OAuth2ConsumerCredentialDao.class);
+    consumerCredentialDao = getInstance(OAuth2ConsumerCredentialDao.class);
     
     OAuth2OwnerTokenManagerFactory tokenManagerFactory = getInstance(
-        injector, OAuth2OwnerTokenManagerFactory.class);
+        OAuth2OwnerTokenManagerFactory.class);
     googLoginTokenManager = tokenManagerFactory.create(GOOGLE_LOGIN);
     googDocTokenManager = tokenManagerFactory.create(GOOGLE_DOC);
 
@@ -115,7 +109,7 @@ public class TestCredentialBackupServlet extends HttpServlet {
       throw new RuntimeException(e);
     } finally {
       // Forcing next request to create new session.
-      request.getSession().invalidate();
+      ServletUtils.invalidateSession(request);
     }
   }
   
@@ -138,14 +132,14 @@ public class TestCredentialBackupServlet extends HttpServlet {
         "If you add more providers, add code to take backup here.");
         
     try {
-      PersonEntity personEntity = personManager.getByEmail(email);
+      PersonEntity personEntity = personManager.findByEmail(email);
       checkNotNull(personEntity, "Person should have been created first.");
 
       String googConsumerCredJsonString = getConsumerCredJsonString(GOOGLE);
       String googLoginTokenJsonString = getOwnerTokenJsonString(googLoginTokenManager);
       String googDocTokenJsonString = getOwnerTokenJsonString(googDocTokenManager);
 
-      response.setContentType("application/zip");
+      response.setContentType(ContentTypeEnum.APPLICATION_ZIP.get());
       response.setHeader("Content-Disposition", "attachment; filename=credential.zip;");
       response.setStatus(HttpServletResponse.SC_OK);
 
@@ -190,8 +184,7 @@ public class TestCredentialBackupServlet extends HttpServlet {
    * 
    * TODO(arjuns): Add test for this.
    */
-  private String getOwnerTokenJsonString(OAuth2OwnerTokenManager tokenManager)
-      throws JsonGenerationException, JsonMappingException, IOException {
+  private String getOwnerTokenJsonString(OAuth2OwnerTokenManager tokenManager) {
     OAuth2OwnerTokenEntity entity = tokenManager.get();
     Preconditions.checkNotNull(entity, "entity should not be null");
     // TODO(arjuns): Use entity.toDto().toJson();

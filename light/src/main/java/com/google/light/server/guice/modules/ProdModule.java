@@ -15,10 +15,6 @@
  */
 package com.google.light.server.guice.modules;
 
-import static com.google.light.server.utils.LightPreconditions.checkIsEnv;
-
-import com.google.light.server.constants.LightEnvEnum;
-
 /**
  * Production Guice module for Production Environment.
  * 
@@ -28,7 +24,6 @@ import com.google.light.server.constants.LightEnvEnum;
  */
 public class ProdModule extends BaseGuiceModule {
   public ProdModule() {
-    checkIsEnv(this, LightEnvEnum.PROD);
   }
 
   @Override

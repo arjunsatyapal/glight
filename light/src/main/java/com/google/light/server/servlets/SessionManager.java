@@ -15,6 +15,7 @@
  */
 package com.google.light.server.servlets;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.constants.RequestParamKeyEnum.DEFAULT_EMAIL;
 import static com.google.light.server.constants.RequestParamKeyEnum.LOGIN_PROVIDER_ID;
 import static com.google.light.server.constants.RequestParamKeyEnum.LOGIN_PROVIDER_USER_ID;
@@ -28,6 +29,7 @@ import static org.apache.commons.lang.StringUtils.isBlank;
 import com.google.inject.Inject;
 import com.google.light.server.annotations.AnotHttpSession;
 import com.google.light.server.constants.OAuth2ProviderService;
+import com.google.light.server.dto.pojo.PersonId;
 import com.google.light.server.exception.unchecked.BlankStringException;
 import com.google.light.server.exception.unchecked.httpexception.PersonLoginRequiredException;
 import com.google.light.server.persistence.entity.person.PersonEntity;
@@ -41,27 +43,35 @@ import javax.servlet.http.HttpSession;
  * 
  * @author Arjun Satyapal
  */
+@Deprecated
 public class SessionManager {
   private HttpSession session;
-
+  private PersonEntity personEntity;
+  
   @Inject
   public SessionManager(@AnotHttpSession HttpSession session) {
     this.session = session;
   }
-
+  
   /**
    * Get Person's Login Provider from Session.
    * 
    * @return
    */
+  @Deprecated
   public OAuth2ProviderService getLoginProviderService() {
-    String loginProviderStr = (String) session.getAttribute(LOGIN_PROVIDER_ID.get());
-    return OAuth2ProviderService.valueOf(loginProviderStr);
+    if (session != null) {
+      String loginProviderStr = (String) session.getAttribute(LOGIN_PROVIDER_ID.get());
+      return OAuth2ProviderService.valueOf(loginProviderStr);
+    } else {
+      return null;
+    }
   }
 
   /**
    * Store Person's Login Provider in session.
    */
+  @Deprecated
   public void setLoginProviderService(OAuth2ProviderService providerService) {
     session.setAttribute(LOGIN_PROVIDER_ID.get(), providerService.name());
   }
@@ -72,15 +82,21 @@ public class SessionManager {
    * 
    * @return
    */
+  @Deprecated
   public String getLoginProviderUserId() {
-    String providerUserId = (String) session.getAttribute(LOGIN_PROVIDER_USER_ID.get());
-    return checkNotBlank(providerUserId, "providerUserId");
+    if (session != null) {
+      String providerUserId = (String) session.getAttribute(LOGIN_PROVIDER_USER_ID.get());
+      return checkNotBlank(providerUserId, "providerUserId");
+    } else {
+      return null;
+    }
   }
 
   /**
    * Store Person's Login Provider in session.
    * TODO(arjuns): Add test
    */
+  @Deprecated
   public void setLoginProviderUserId(String providerUserId) {
     session.setAttribute(LOGIN_PROVIDER_USER_ID.get(), 
         checkNotBlank(providerUserId, "providerUserId"));
@@ -91,9 +107,14 @@ public class SessionManager {
    * 
    * @return
    */
+  @Deprecated
   public String getEmail() {
-    String email = (String) session.getAttribute(DEFAULT_EMAIL.get());
-    return checkEmail(email);
+    if (session != null) {
+      String email = (String) session.getAttribute(DEFAULT_EMAIL.get());
+      return checkEmail(email);
+    } else {
+      return personEntity.getEmail();
+    }
   }
 
   /**
@@ -101,30 +122,38 @@ public class SessionManager {
    * 
    * @return
    */
+  @Deprecated
   public void setProviderUserEmail(String email) {
     session.setAttribute(DEFAULT_EMAIL.get(), checkEmail(email));
   }
 
-  /**
-   * Store Person's UserId provided by LoginProvider in session.
-   * 
-   * @return
-   */
-  public void setPersonId(Long id) {
-    session.setAttribute(PERSON_ID.get(), checkPersonId(id));
-  }
+//  /**
+//   * Store Person's UserId provided by LoginProvider in session.
+//   * 
+//   * @return
+//   */
+//  @Deprecated
+//  public void setPersonId(Long id) {
+//    session.setAttribute(PERSON_ID.get(), checkPersonId(id));
+//  }
 
   /**
    * Get PersonId from Session.
    * 
    * @return
    */
-  public Long getPersonId() {
-    checkPersonLoggedIn();
-    Long personId = (Long) session.getAttribute(PERSON_ID.get());
-    return checkPersonId(personId);
+
+  public PersonId getPersonId() {
+    if (session != null) {
+      checkPersonLoggedIn();
+      PersonId personId = (PersonId) session.getAttribute(PERSON_ID.get());
+      return checkPersonId(personId);
+    } else {
+      return personEntity.getPersonId();
+    }
   }
   
+  @Deprecated
   public Key<PersonEntity> getPersonKey() {
     Key<PersonEntity> personKey = PersonEntity.generateKey(getPersonId());
     return checkPersonKey(personKey);
@@ -137,6 +166,7 @@ public class SessionManager {
    * TODO(arjuns): Add test.
    * @return
    */
+  @Deprecated
   public boolean isPersonLoggedIn() {
     if (session == null) {
       return false;
@@ -154,6 +184,7 @@ public class SessionManager {
    * 
    * TODO(arjuns): Add test for this.
    */
+  @Deprecated
   public void checkPersonLoggedIn() {
     if (!isPersonLoggedIn()) {
       throw new PersonLoginRequiredException("");
@@ -167,12 +198,16 @@ public class SessionManager {
    * 
    * @return
    */
+  @Deprecated
   public boolean isValidSession() {
     try {
-      getLoginProviderService();
-      getLoginProviderUserId();
-      getEmail();
-      getPersonId();
+      if (session != null) {
+        checkNotNull(getLoginProviderService(), "providerService");
+        checkNotBlank(getLoginProviderUserId(), "providerUserId");
+      }
+      
+      checkNotBlank(getEmail(), "email");
+      checkNotNull(getPersonId(), "personId");
     } catch (Exception e) {
       return false;
     }

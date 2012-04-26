@@ -76,7 +76,7 @@ public abstract class AbstractBasicDao<D, P extends PersistenceToDtoInterface<P,
    * @param entity
    * @return
    */
-  public P put(Objectify ofy, P entity) {
+  protected P put(Objectify ofy, P entity) {
     if (ofy == null) {
       ofy = ObjectifyUtils.nonTransaction();
     } else {
@@ -87,14 +87,14 @@ public abstract class AbstractBasicDao<D, P extends PersistenceToDtoInterface<P,
   }
 
   /**
-   * Get Entity of Type<T> from DataStore which has Id of type <U>. If some overridden behavior
+   * Get Entity of Type<P> from DataStore which has Key of type Key<P>. If some overridden behavior
    * is required, override {@link #get(Objectify, Key)}
    * 
    * @param id Id of object to be fetched.
    * @return
    * @throws IllegalKeyTypeException
    */
-  public P get(Key<P> key) throws IllegalKeyTypeException {
+  protected final P get(Key<P> key) throws IllegalKeyTypeException {
     return get(null, key);
   }
 
@@ -117,6 +117,42 @@ public abstract class AbstractBasicDao<D, P extends PersistenceToDtoInterface<P,
     }
 
     return ofy.find(key);
+  }
+  
+  
+  /**
+   * Delete Entity of Type<P> from DataStore which has Key of type Key<P>. If some overridden 
+   * behavior is required, override {@link #delete(Objectify, Key)}
+   * 
+   * TODO(arjuns): Add test for this.
+   * @param id Id of object to be fetched.
+   * @return
+   * @throws IllegalKeyTypeException
+   */
+  protected final void delete(Key<P> key) throws IllegalKeyTypeException {
+    delete(null, key);
+  }
+
+  /**
+   * Delete an entity from Datastore for given Key. If it needs to be deleted inside a transaction,
+   * then transaction should be active.
+   * 
+   * TODO(arjuns): Add test for this.
+   * @param ofy
+   * @param key
+   * @return
+   * @throws ObjectifyTxnShouldBeRunningException
+   */
+  protected void delete(Objectify ofy, Key<P> key) {
+    if (ofy == null) {
+      ofy = ObjectifyUtils.nonTransaction();
+    } else {
+      if (!ofy.getTxn().isActive()) {
+        throw new ObjectifyTxnShouldBeRunningException();
+      }
+    }
+
+    ofy.delete(key);
   }
 
   protected static <T> T logAndReturn(Logger logger, T returnObject, String message) {

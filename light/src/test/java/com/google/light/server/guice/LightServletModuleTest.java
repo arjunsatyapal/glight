@@ -26,6 +26,7 @@ import static org.mockito.Mockito.when;
 import com.google.inject.Injector;
 import com.google.inject.servlet.GuiceFilter;
 import com.google.light.server.constants.LightEnvEnum;
+import com.google.light.server.guice.provider.TestRequestScopedValuesProvider;
 import com.google.light.testingutils.GaeTestingUtils;
 import com.google.light.testingutils.TestingUtils;
 import javax.servlet.FilterConfig;
@@ -45,12 +46,17 @@ public class LightServletModuleTest {
   @Test
   public void test_ensureBindingPossible() throws Exception {
     for (LightEnvEnum currEnv : LightEnvEnum.values()) {
-      HttpSession session = null;
-      session = getMockSessionForTesting(currEnv, GOOGLE_LOGIN, getRandomProviderUserId(), 
-          getRandomPersonId(), getRandomEmail());
+      HttpSession session =
+          getMockSessionForTesting(currEnv, GOOGLE_LOGIN, getRandomProviderUserId(),
+              getRandomPersonId(), getRandomEmail());
+      TestRequestScopedValuesProvider testRequestScopedValueProvider =
+          TestingUtils.getRequestScopedValueProvider(
+              getRandomPersonId(), getRandomPersonId());
+
       GaeTestingUtils gaeTestingUtils = TestingUtils.gaeSetup(currEnv);
       try {
-        Injector injector = TestingUtils.getInjectorByEnv(currEnv, session);
+        Injector injector =
+            TestingUtils.getInjectorByEnv(currEnv, testRequestScopedValueProvider, session);
 
         GuiceFilter filter = injector.getInstance(GuiceFilter.class);
         FilterConfig filterConfig = mock(FilterConfig.class);

@@ -17,21 +17,40 @@ package com.google.light.server.utils;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+
+import com.google.inject.Provider;
+
 import com.google.inject.Injector;
 
-import javax.servlet.http.HttpServletRequest;
+import com.google.light.server.dto.pojo.RequestScopedValues;
 
+
+
+import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.google.inject.Key;
-import java.lang.annotation.Annotation;
-
+import com.google.inject.Provider;
 import com.google.inject.ProvisionException;
+import com.google.inject.Singleton;
+import java.lang.annotation.Annotation;
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * Utility Methods related to Guice.
  * 
  * @author Arjun Satyapal
  */
+@Singleton
 public class GuiceUtils {
+  private static Injector injector;
+
+  public static void setInjector(Injector injectorFoo) {
+    injector = injectorFoo;
+  }
+
+  public static Injector getInjector() {
+    return checkNotNull(injector);
+  }
 
   /**
    * Utility method to return {@link Key} which uses {@link Key#get(Class, Annotation)}.
@@ -90,24 +109,47 @@ public class GuiceUtils {
    * @param clazz
    * @return
    */
-  public static <T> T getInstance(Injector injector, Class<T> clazz) {
-    return checkNotNull(injector.getInstance(clazz));
+  public static <T> T getInstance(Class<T> clazz) {
+    checkNotNull(injector, "injector");
+    return checkNotNull(injector.getInstance(clazz),
+        "Failed to get instance for Class[" + clazz.getName() + "].");
+  }
+  
+
+  public static <T> Provider<T> getProvider(Injector injector, Class<T> clazz) {
+    return checkNotNull(injector.getProvider(clazz));
   }
 
   /**
    * Returns instance for a class annotated with a {@link BindingAnnotation}.
+   */
+  public static <T, A extends Annotation> T getInstance(Class<T> clazz,
+      Class<A> anotClazz) {
+    Key<T> guiceKey = getKeyForScopeSeed(clazz, anotClazz);
+    return checkNotNull(injector.getInstance(guiceKey),
+        "Failed to get instance for Class[" + clazz.getName()
+        + "], AnnotationClass[" + anotClazz + "].");
+  }
+
+  /**
+   * Provides a Provider for a given class.
    * 
-   * @param injector
    * @param clazz
    * @return
    */
-  public static <T, A extends Annotation> T getInstance(Injector injector, Class<T> clazz,
-      Class<A> anotClazz) {
-    Key<T> guiceKey = getKeyForScopeSeed(clazz, anotClazz);
-    return checkNotNull(injector.getInstance(guiceKey));
+  public static <T> Provider<T> getProvider(Class<T> clazz) {
+    checkNotNull(injector, "injector");
+    return checkNotNull(injector.getProvider(clazz),
+        "Failed to get Provider for Class[" + clazz.getName() + "].");
   }
-  
+
+  public static RequestScopedValues getParticipants() {
+    Provider<RequestScopedValues> provider = getProvider(RequestScopedValues.class);
+    return provider.get();
+  }
+
   // Utility class.
+  @Inject
   private GuiceUtils() {
   }
 }

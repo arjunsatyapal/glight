@@ -17,6 +17,9 @@ package com.google.light.server.constants;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+
+import com.google.light.server.constants.http.HttpStatusCodesEnum;
+
 import org.junit.Test;
 
 /**
