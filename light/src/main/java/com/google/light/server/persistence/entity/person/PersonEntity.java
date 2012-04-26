@@ -19,18 +19,11 @@ import static com.google.light.server.utils.LightPreconditions.checkEmail;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPersonId;
 
-
-import com.google.light.server.dto.pojo.PersonId;
-
-
 import com.google.light.server.dto.person.PersonDto;
-import com.google.light.server.persistence.PersistenceToDtoInterface;
+import com.google.light.server.dto.pojo.PersonId;
+import com.google.light.server.persistence.entity.AbstractPersistenceEntity;
 import com.googlecode.objectify.Key;
 import javax.persistence.Id;
-
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.apache.commons.lang.builder.ToStringBuilder;
 
 /**
  * Persistence object for {@link PersonDto}.
@@ -38,7 +31,7 @@ import org.apache.commons.lang.builder.ToStringBuilder;
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
-public class PersonEntity implements PersistenceToDtoInterface<PersonEntity, PersonDto> {
+public class PersonEntity extends AbstractPersistenceEntity<PersonEntity, PersonDto> {
   @Id
   Long id;
   String firstName;
@@ -51,21 +44,6 @@ public class PersonEntity implements PersistenceToDtoInterface<PersonEntity, Per
   String email;
 
   @Override
-  public String toString() {
-    return ToStringBuilder.reflectionToString(this);
-  }
-
-  @Override
-  public int hashCode() {
-    return HashCodeBuilder.reflectionHashCode(this);
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    return EqualsBuilder.reflectionEquals(this, obj);
-  }
-
-  @Override
   public PersonDto toDto() {
     PersonDto dto = new PersonDto.Builder()
         .firstName(firstName)
@@ -76,9 +54,11 @@ public class PersonEntity implements PersistenceToDtoInterface<PersonEntity, Per
     return dto.validate();
   }
 
-
-  // Getters and setters.
+  protected Long getId() {
+    return id;
+  }
   
+  // Getters and setters.
   public PersonId getPersonId() {
     if (id == null) {
       return null;
@@ -140,7 +120,7 @@ public class PersonEntity implements PersistenceToDtoInterface<PersonEntity, Per
     this.acceptedTos = acceptedTos;
   }
 
-  public static class Builder {
+  public static class Builder extends AbstractPersistenceEntity.BaseBuilder<Builder> {
     private PersonId personId;
     private String firstName;
     private String lastName;
@@ -174,12 +154,13 @@ public class PersonEntity implements PersistenceToDtoInterface<PersonEntity, Per
 
     @SuppressWarnings("synthetic-access")
     public PersonEntity build() {
-      return new PersonEntity(this);
+      return new PersonEntity(this).validate();
     }
   }
 
   @SuppressWarnings("synthetic-access")
   private PersonEntity(Builder builder) {
+    super(builder, true);
     if (builder.personId != null) {
       checkPersonId(builder.personId);
       this.id = builder.personId.get();
@@ -194,5 +175,6 @@ public class PersonEntity implements PersistenceToDtoInterface<PersonEntity, Per
   
   // For Objectify.
   private PersonEntity() {
+    super(null, true);
   }
 }

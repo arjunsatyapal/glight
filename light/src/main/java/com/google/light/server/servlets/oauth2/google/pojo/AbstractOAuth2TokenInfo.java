@@ -20,13 +20,10 @@ import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
 import static com.google.light.server.utils.LightUtils.getCurrentTimeInMillis;
 
-import com.google.light.server.dto.DtoInterface;
+import com.google.light.server.dto.AbstractDto;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.apache.commons.lang.builder.ToStringBuilder;
 import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
@@ -47,7 +44,7 @@ import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
 @XmlAccessorType(XmlAccessType.PROPERTY)
 @JsonSerialize(include = Inclusion.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public abstract class AbstractOAuth2TokenInfo<D> implements DtoInterface<D> {
+public abstract class AbstractOAuth2TokenInfo<D> extends AbstractDto<D> {
   private String issuedTo;
   private String audience;
   private String scope;
@@ -133,39 +130,9 @@ public abstract class AbstractOAuth2TokenInfo<D> implements DtoInterface<D> {
     return (D) this;
   }
 
-  @Override
-  public String toString() {
-    return ToStringBuilder.reflectionToString(this);
-  }
-
-  @Override
-  public int hashCode() {
-    return HashCodeBuilder.reflectionHashCode(this);
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    return EqualsBuilder.reflectionEquals(this, obj);
-  }
-
   @JsonIgnore(value = true)
   public boolean hasAccessTokenExpired() {
     return getCurrentTimeInMillis() > expiresInMillis;
-  }
-
-  /**
-   * {@inheritDoc} TODO(arjuns) : Add test for this.
-   */
-  @Override
-  public abstract String toJson();
-
-  /**
-   * {@inheritDoc} TODO(arjuns) : Add test for this.
-   */
-  @Override
-  public String toXml() {
-    // TODO(arjuns): Auto-generated method stub
-    throw new UnsupportedOperationException();
   }
 
   /**
@@ -200,5 +167,6 @@ public abstract class AbstractOAuth2TokenInfo<D> implements DtoInterface<D> {
   // For JAXB.
   @JsonCreator
   public AbstractOAuth2TokenInfo() {
+    super(null);
   }
 }

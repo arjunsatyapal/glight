@@ -15,8 +15,6 @@
  */
 package com.google.light.server.dto;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import com.google.light.server.utils.JsonUtils;
 import com.google.light.server.utils.XmlUtils;
 import org.joda.time.Instant;
@@ -36,35 +34,22 @@ import org.joda.time.Instant;
  *         Satyapal
  */
 @SuppressWarnings("serial")
-public abstract class AbstractDto<D> extends AbstractPojo<D> implements DtoInterface<D> {
+public abstract class AbstractDto<D> extends AbstractPojo<D>  {
   protected Instant creationTime;
   protected Instant lastUpdateTime;
 
   /**
-   * {@inheritDoc}
+   *  Convert DTO to JSON String.
    */
-  @Override
   public String toJson() {
     return JsonUtils.toJson(this);
   }
 
   /**
-   * {@inheritDoc}
+   * Convert DTO to XML String.
    */
-  @Override
   public String toXml() {
     return XmlUtils.toXml(this);
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @SuppressWarnings("unchecked")
-  @Override
-  public D validate() {
-    checkNotNull(creationTime, "creationTime");
-    checkNotNull(lastUpdateTime, "lastUpdateTime");
-    return (D) this;
   }
 
   public Instant getLastUpdateTime() {
@@ -99,11 +84,13 @@ public abstract class AbstractDto<D> extends AbstractPojo<D> implements DtoInter
 
   @SuppressWarnings("synthetic-access")
   protected AbstractDto(@SuppressWarnings("rawtypes") BaseBuilder builder) {
-    this.creationTime = checkNotNull(builder.creationTime, "creationTime");
-    this.lastUpdateTime = checkNotNull(builder.lastUpdateTime, "lastUpdateTime");
+    if (builder == null) {
+      return;
+    }
+    this.creationTime = builder.creationTime;
+    this.lastUpdateTime = builder.lastUpdateTime;
   }
-
-  // For Objectify.
-  protected AbstractDto() {
-  }
+//  // For Objectify.
+//  protected AbstractDto() {
+//  }
 }

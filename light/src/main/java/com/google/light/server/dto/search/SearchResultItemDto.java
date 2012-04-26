@@ -2,12 +2,11 @@ package com.google.light.server.dto.search;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.light.server.dto.AbstractDto;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
-
-import com.google.light.server.dto.DtoInterface;
 
 /**
  * DTO for Search Result Items
@@ -16,7 +15,7 @@ import com.google.light.server.dto.DtoInterface;
  */
 @SuppressWarnings("serial")
 @JsonSerialize(include = Inclusion.NON_NULL)
-public class SearchResultItemDto implements DtoInterface<SearchResultItemDto> {
+public class SearchResultItemDto extends AbstractDto<SearchResultItemDto> {
 
   String title;
   String description;
@@ -57,16 +56,6 @@ public class SearchResultItemDto implements DtoInterface<SearchResultItemDto> {
   }
 
   @Override
-  public int hashCode() {
-    return HashCodeBuilder.reflectionHashCode(this);
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    return EqualsBuilder.reflectionEquals(this, obj);
-  }
-
-  @Override
   public String toJson() {
     throw new UnsupportedOperationException(
         "This DTO is not meant to be directly serialized."
@@ -99,7 +88,7 @@ public class SearchResultItemDto implements DtoInterface<SearchResultItemDto> {
     return this;
   }
 
-  public static class Builder {
+  public static class Builder extends AbstractDto.BaseBuilder<Builder> {
     private String title;
     private String description;
     private String link;
@@ -127,6 +116,7 @@ public class SearchResultItemDto implements DtoInterface<SearchResultItemDto> {
 
   @SuppressWarnings("synthetic-access")
   private SearchResultItemDto(Builder builder) {
+    super(builder);
     this.title = builder.title;
     this.description = builder.description;
     this.link = builder.link;

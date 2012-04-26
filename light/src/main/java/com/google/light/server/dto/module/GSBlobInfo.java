@@ -116,6 +116,6 @@ public class GSBlobInfo extends AbstractDto<GSBlobInfo> {
   
   // For JAXB
   private GSBlobInfo() {
-    super();
+    super(null);
   }
 }

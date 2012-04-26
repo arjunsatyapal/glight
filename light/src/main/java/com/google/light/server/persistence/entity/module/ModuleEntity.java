@@ -20,12 +20,11 @@ import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPersonId;
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
 
-import com.google.light.server.dto.pojo.Version;
-
 import com.google.light.server.dto.module.ModuleDto;
 import com.google.light.server.dto.module.ModuleState;
 import com.google.light.server.dto.pojo.ModuleId;
 import com.google.light.server.dto.pojo.PersonId;
+import com.google.light.server.dto.pojo.Version;
 import com.google.light.server.persistence.entity.AbstractPersistenceEntity;
 import com.googlecode.objectify.Key;
 import javax.persistence.Embedded;
@@ -50,7 +49,7 @@ public class ModuleEntity extends AbstractPersistenceEntity<ModuleEntity, Module
   String etag;
   @Embedded
   Version latestVersion;
-
+  
   /**
    * {@inheritDoc}
    */
@@ -120,10 +119,26 @@ public class ModuleEntity extends AbstractPersistenceEntity<ModuleEntity, Module
 
   public String getEtag() {
     return etag;
-  }
+  } 
 
   public void setEtag(String etag) {
     this.etag = checkNotBlank(etag, "etag");
+  }
+  
+  @Override
+  public ModuleEntity validate() {
+    super.validate();
+    checkPositiveLong(id, "id");
+    checkNotBlank(title, "title");
+    checkNotNull(state, "moduleState");
+    checkPersonId(ownerPersonId);
+    checkNotBlank(etag, "etag");
+    // Latest version can be zero when module is only reserved.
+    // TODO(arjuns): Add more checks here for version.
+
+    checkNotNull(latestVersion, "latestVersion");
+    checkNotNull(creationTime, "creationTime");
+    return this;
   }
 
   public static class Builder extends AbstractPersistenceEntity.BaseBuilder<Builder> {
@@ -163,28 +178,29 @@ public class ModuleEntity extends AbstractPersistenceEntity<ModuleEntity, Module
       this.latestVersion = latestVersion;
       return this;
     }
-
+    
     @SuppressWarnings("synthetic-access")
     public ModuleEntity build() {
-      return new ModuleEntity(this);
+      return new ModuleEntity(this).validate();
     }
   }
 
   @SuppressWarnings("synthetic-access")
   private ModuleEntity(Builder builder) {
-    super(builder);
-    this.id = builder.id != null ? checkPositiveLong(builder.id, "id") : null;
-    this.title = checkNotBlank(builder.title, "title");
-    this.state = checkNotNull(builder.state, "moduleState");
-    this.ownerPersonId = checkPersonId(builder.ownerPersonId);
-    this.etag = checkNotBlank(builder.etag, "etag");
+    super(builder, true);
+    this.id = builder.id;
+    this.title = builder.title;
+    this.state = builder.state;
+    this.ownerPersonId = builder.ownerPersonId;
+    this.etag = builder.etag;
     // Latest version can be zero when module is only reserved.
     // TODO(arjuns): Add more checks here for version.
 
-    this.latestVersion = checkNotNull(builder.latestVersion, "latestVersion");
+    this.latestVersion = builder.latestVersion;
   }
 
   // For Objectify.
   private ModuleEntity() {
+    super(null, true);
   }
 }

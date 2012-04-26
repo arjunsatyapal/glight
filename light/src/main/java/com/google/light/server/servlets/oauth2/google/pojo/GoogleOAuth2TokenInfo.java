@@ -50,33 +50,6 @@ public class GoogleOAuth2TokenInfo extends AbstractOAuth2TokenInfo<GoogleOAuth2T
     return super.validate();
   }
   
-  @Override
-  public String toString() {
-    return ToStringBuilder.reflectionToString(this);
-  }
-
-  @Override
-  public int hashCode() {
-    return HashCodeBuilder.reflectionHashCode(this);
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    return EqualsBuilder.reflectionEquals(this, obj);
-  }
-
-  /**
-   * {@inheritDoc} TODO(arjuns) : Add test for this.
-   */
-  @Override
-  public String toJson() {
-    try {
-      return JsonUtils.toJson(this);
-    } catch (Exception e) {
-      throw new JsonException("Conversion of " + getClass().getSimpleName() + " to Json failed.", e);
-    }
-  }
-  
   // For Jaxb.
   @JsonCreator
   public GoogleOAuth2TokenInfo() {

@@ -29,7 +29,7 @@ import com.google.light.server.constants.LightConstants;
 import com.google.light.server.constants.OAuth2ProviderService;
 import com.google.light.server.constants.RequestParamKeyEnum;
 import com.google.light.server.constants.http.ContentTypeEnum;
-import com.google.light.server.dto.DtoInterface;
+import com.google.light.server.dto.AbstractDto;
 import com.google.light.server.dto.pojo.PersonId;
 import com.google.light.server.servlets.path.ServletPathEnum;
 import com.google.light.server.servlets.pojo.ServletRequestPojo;
@@ -126,7 +126,7 @@ public class ServletUtils {
    * @throws IOException
    * @throws JAXBException
    */
-  public static <D extends DtoInterface<D>> ServletRequestPojo<D> getRequestPojo(
+  public static <D extends AbstractDto<D>> ServletRequestPojo<D> getRequestPojo(
       HttpServletRequest request, Class<D> clazz)
       throws IOException, JAXBException {
     String reqContentType = request.getContentType();

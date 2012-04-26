@@ -19,7 +19,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
 import com.google.light.server.constants.http.ContentTypeEnum;
-import com.google.light.server.dto.DtoInterface;
+import com.google.light.server.dto.AbstractDto;
 import com.google.light.server.exception.unchecked.httpexception.UnsupportedMediaTypeException;
 import com.google.light.server.utils.JsonUtils;
 import com.google.light.server.utils.XmlUtils;
@@ -37,7 +37,7 @@ import javax.xml.bind.JAXBException;
  * 
  * @author Arjun Satyapal
  */
-public class ServletRequestPojo<D extends DtoInterface<D>> {
+public class ServletRequestPojo<D extends AbstractDto<D>> {
   private static final Logger logger = Logger.getLogger(ServletRequestPojo.class.getName());
   
   private HttpServletRequest request;

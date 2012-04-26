@@ -149,13 +149,13 @@ public class ImportJobEntity extends AbstractPersistenceEntity<ImportJobEntity, 
 
     @SuppressWarnings("synthetic-access")
     public ImportJobEntity build() {
-      return new ImportJobEntity(this);
+      return new ImportJobEntity(this).validate();
     }
   }
 
   @SuppressWarnings("synthetic-access")
   private ImportJobEntity(Builder builder) {
-    super(builder);
+    super(builder, false);
     this.moduleType = checkNotNull(builder.moduleType, "moduleType");
     this.resourceId = checkNotBlank(builder.resourceId, "resourceId");
     this.id = computeId(moduleType, resourceId);
@@ -167,6 +167,6 @@ public class ImportJobEntity extends AbstractPersistenceEntity<ImportJobEntity, 
 
   // For Objectify.
   private ImportJobEntity() {
-    super();
+    super(null, false);
   }
 }

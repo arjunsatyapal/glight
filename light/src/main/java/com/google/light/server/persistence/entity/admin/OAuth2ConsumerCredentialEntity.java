@@ -18,6 +18,8 @@ package com.google.light.server.persistence.entity.admin;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
+import com.google.light.server.persistence.entity.AbstractPersistenceEntity;
+
 import com.google.light.server.constants.OAuth2ProviderEnum;
 import com.google.light.server.dto.admin.OAuth2ConsumerCredentialDto;
 import com.google.light.server.persistence.PersistenceToDtoInterface;
@@ -33,8 +35,8 @@ import org.apache.commons.lang.builder.ToStringBuilder;
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
-public class OAuth2ConsumerCredentialEntity implements
-    PersistenceToDtoInterface<OAuth2ConsumerCredentialEntity, OAuth2ConsumerCredentialDto> {
+public class OAuth2ConsumerCredentialEntity extends
+    AbstractPersistenceEntity<OAuth2ConsumerCredentialEntity, OAuth2ConsumerCredentialDto> {
   @Id
   private String providerName;
   private String clientId;
@@ -52,21 +54,6 @@ public class OAuth2ConsumerCredentialEntity implements
         .build();
   }
 
-  @Override
-  public String toString() {
-    return ToStringBuilder.reflectionToString(this);
-  }
-
-  @Override
-  public int hashCode() {
-    return HashCodeBuilder.reflectionHashCode(this);
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    return EqualsBuilder.reflectionEquals(this, obj);
-  }
-
   public OAuth2ProviderEnum getOAuth2Provider() {
     return OAuth2ProviderEnum.valueOf(providerName);
   }
@@ -79,7 +66,7 @@ public class OAuth2ConsumerCredentialEntity implements
     return clientSecret;
   }
 
-  public static class Builder {
+  public static class Builder extends AbstractPersistenceEntity.BaseBuilder<Builder>{
     private String providerName;
     private String clientId;
     private String clientSecret;
@@ -101,12 +88,13 @@ public class OAuth2ConsumerCredentialEntity implements
 
     @SuppressWarnings("synthetic-access")
     public OAuth2ConsumerCredentialEntity build() {
-      return new OAuth2ConsumerCredentialEntity(this);
+      return new OAuth2ConsumerCredentialEntity(this).validate();
     }
   }
 
   @SuppressWarnings("synthetic-access")
   private OAuth2ConsumerCredentialEntity(Builder builder) {
+    super(builder, false);
     // Ensures that oAuth2ProviderKey is valid.
     checkNotNull(OAuth2ProviderEnum.valueOf(builder.providerName), "invalid providerName["
         + providerName + "].");
@@ -117,6 +105,7 @@ public class OAuth2ConsumerCredentialEntity implements
   
   // For Objectify.
   private OAuth2ConsumerCredentialEntity() {
+    super(null, false);
   }
 
   /** 

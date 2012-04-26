@@ -19,9 +19,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Preconditions;
 import com.google.light.server.constants.RequestParamKeyEnum;
-import com.google.light.server.dto.DtoInterface;
+import com.google.light.server.dto.AbstractDto;
 import com.google.light.server.servlets.path.ServletPathEnum;
-import com.google.light.server.utils.JsonUtils;
 import java.util.List;
 
 /**
@@ -32,30 +31,13 @@ import java.util.List;
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
-public class PageDto implements DtoInterface<PageDto> {
+public class PageDto extends AbstractDto<PageDto> {
   private ServletPathEnum servletPath;
   private String previous;
   private String next;
   private String type;
   @SuppressWarnings("rawtypes")
-  private List<? extends DtoInterface> list;
-
-  /** 
-   * {@inheritDoc}
-   */
-  @Override
-  public String toJson() {
-    return JsonUtils.toJson(this);
-  }
-
-  /** 
-   * {@inheritDoc}
-   */
-  @Override
-  public String toXml() {
-    // TODO(arjuns): Auto-generated method stub
-    throw new UnsupportedOperationException();
-  }
+  private List<? extends AbstractDto> list;
 
   /** 
    * {@inheritDoc}
@@ -98,17 +80,17 @@ public class PageDto implements DtoInterface<PageDto> {
   }
 
   @SuppressWarnings("rawtypes")
-  public List<? extends DtoInterface> getList() {
+  public List<? extends AbstractDto> getList() {
     return list;
   }
 
-  public static class Builder {
+  public static class Builder extends AbstractDto.BaseBuilder<Builder>{
     private ServletPathEnum servletPath;
     private String previous;
     private String next;
     private String type;
     @SuppressWarnings("rawtypes")
-    private List<? extends DtoInterface> list;
+    private List<? extends AbstractDto> list;
 
     public Builder serlvetPath(ServletPathEnum servletPath) {
       this.servletPath = checkNotNull(servletPath, "servletPath");
@@ -132,7 +114,7 @@ public class PageDto implements DtoInterface<PageDto> {
     }
 
     @SuppressWarnings("rawtypes")
-    public Builder list(List<? extends DtoInterface> list) {
+    public Builder list(List<? extends AbstractDto> list) {
       this.list = list;
       return this;
     }
@@ -145,6 +127,7 @@ public class PageDto implements DtoInterface<PageDto> {
 
   @SuppressWarnings("synthetic-access")
   private PageDto(Builder builder) {
+    super(builder);
     this.servletPath = builder.servletPath;
     this.previous = builder.previous;
     this.next = builder.next;

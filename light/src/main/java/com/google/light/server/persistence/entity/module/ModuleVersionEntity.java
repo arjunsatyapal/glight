@@ -117,13 +117,13 @@ public class ModuleVersionEntity extends AbstractPersistenceEntity<ModuleVersion
 
     @SuppressWarnings("synthetic-access")
     public ModuleVersionEntity build() {
-      return new ModuleVersionEntity(this);
+      return new ModuleVersionEntity(this).validate();
     }
   }
 
   @SuppressWarnings("synthetic-access")
   private ModuleVersionEntity(Builder builder) {
-    super(builder);
+    super(builder, true);
     checkNotNull(builder.version, "version");
     this.version = builder.version.get();
     this.content= checkNotBlank(builder.content, "content");
@@ -132,5 +132,6 @@ public class ModuleVersionEntity extends AbstractPersistenceEntity<ModuleVersion
 
   // For Objectify.
   private ModuleVersionEntity() {
+    super(null, true);
   }
 }

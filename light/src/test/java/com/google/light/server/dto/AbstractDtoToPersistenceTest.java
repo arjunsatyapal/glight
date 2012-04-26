@@ -26,6 +26,5 @@ public abstract class AbstractDtoToPersistenceTest extends AbstractDtoTest {
   /**
    * Test for {@link DtoToPersistenceInterface#toPersistenceEntity()}
    */
-  @Test
   public abstract void test_toPersistenceEntity() throws Exception;
 }

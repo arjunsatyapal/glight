@@ -21,7 +21,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.light.server.exception.unchecked.IllegalKeyTypeException;
 import com.google.light.server.exception.unchecked.ObjectifyTxnShouldBeRunningException;
-import com.google.light.server.persistence.PersistenceToDtoInterface;
+import com.google.light.server.persistence.entity.AbstractPersistenceEntity;
 import com.google.light.server.utils.ObjectifyUtils;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Objectify;
@@ -38,7 +38,7 @@ import java.util.logging.Logger;
  * 
  * @author Arjun Satyapal
  */
-public abstract class AbstractBasicDao<D, P extends PersistenceToDtoInterface<P, D>> {
+public abstract class AbstractBasicDao<D, P extends AbstractPersistenceEntity<P, D>> {
   private final Class<P> entityClazz;
 
   /**

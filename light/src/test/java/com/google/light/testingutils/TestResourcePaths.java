@@ -27,6 +27,7 @@ public enum TestResourcePaths {
   SEARCH_GSS_ADDITION_QUERY_OUTPUT_JSON("/search/gss/addition_query_output.json"),
   SEARCH_GSS_ADDXITION_QUERY_INPUT_XML("/search/gss/addxition_query_input.xml"),
   SEARCH_GSS_ADDXITION_QUERY_OUTPUT_JSON("/search/gss/addxition_query_output.json"),
+
   // Values inside this file are randomly created.
   GOOGLE_TOKEN_INFO_JSON("/login/oauth2/google/google_token_info.json"),
   /*

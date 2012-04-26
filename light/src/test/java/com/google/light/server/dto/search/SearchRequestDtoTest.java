@@ -19,6 +19,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
+import org.junit.Ignore;
+
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableMapBuilder;
@@ -143,11 +145,14 @@ public class SearchRequestDtoTest extends AbstractDtoTest {
         SAMPLE_LANGUAGE_CODE);
   }
 
+  @Test
   @Override
   public void test_builder() throws Exception {
     // No validation logic in constructor. So nothing to test here.
   }
 
+  @Test
+  @Ignore(value="TODO(arjuns):FixMe.")
   @Override
   public void test_toJson() throws Exception {
     // Not used as JSON
@@ -159,6 +164,8 @@ public class SearchRequestDtoTest extends AbstractDtoTest {
     }
   }
 
+  @Test
+  @Ignore(value="TODO(arjuns):FixMe.")
   @Override
   public void test_toXml() throws Exception {
     // Not used as XML

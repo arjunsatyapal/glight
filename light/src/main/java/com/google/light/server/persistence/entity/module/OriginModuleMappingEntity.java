@@ -39,6 +39,10 @@ public class OriginModuleMappingEntity extends AbstractPersistenceEntity<OriginM
   @Embedded
   ModuleId moduleId;
 
+  public String getId() {
+    return id;
+  }
+  
   /**
    * {@inheritDoc}
    */
@@ -62,14 +66,6 @@ public class OriginModuleMappingEntity extends AbstractPersistenceEntity<OriginM
     throw new UnsupportedOperationException();
   }
 
-  // For Objectify.
-  private OriginModuleMappingEntity() {
-  }
-
-  public String getId() {
-    return id;
-  }
-
   public ModuleId getModuleId() {
     return moduleId;
   }
@@ -90,13 +86,19 @@ public class OriginModuleMappingEntity extends AbstractPersistenceEntity<OriginM
 
     @SuppressWarnings("synthetic-access")
     public OriginModuleMappingEntity build() {
-      return new OriginModuleMappingEntity(this);
+      return new OriginModuleMappingEntity(this).validate();
     }
   }
 
   @SuppressWarnings("synthetic-access")
   private OriginModuleMappingEntity(Builder builder) {
+    super(builder, true);
     this.id = checkNotBlank(builder.id, "id");
     this.moduleId = checkNotNull(builder.moduleId, "moduleId");
+  }
+  
+  // For Objectify.
+  private OriginModuleMappingEntity() {
+    super(null, true);
   }
 }

@@ -22,20 +22,14 @@ import static com.google.light.server.utils.LightPreconditions.checkPositiveLong
 import static com.google.light.server.utils.LightPreconditions.checkProviderUserId;
 import static com.google.light.server.utils.LightUtils.getCurrentTimeInMillis;
 
-import com.google.light.server.dto.pojo.PersonId;
-
-
-
 import com.google.light.server.constants.OAuth2ProviderService;
 import com.google.light.server.dto.oauth2.owner.OAuth2OwnerTokenDto;
-import com.google.light.server.persistence.PersistenceToDtoInterface;
+import com.google.light.server.dto.pojo.PersonId;
+import com.google.light.server.persistence.entity.AbstractPersistenceEntity;
 import com.google.light.server.persistence.entity.person.PersonEntity;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.Parent;
 import javax.persistence.Id;
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.apache.commons.lang.builder.ToStringBuilder;
 
 /**
  * Persistence entity for OAuth2 Tokens.
@@ -44,8 +38,8 @@ import org.apache.commons.lang.builder.ToStringBuilder;
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
-public class OAuth2OwnerTokenEntity implements
-    PersistenceToDtoInterface<OAuth2OwnerTokenEntity, OAuth2OwnerTokenDto> {
+public class OAuth2OwnerTokenEntity extends
+    AbstractPersistenceEntity<OAuth2OwnerTokenEntity, OAuth2OwnerTokenDto> {
   @Id
   String providerServiceName;
   @Parent
@@ -76,21 +70,6 @@ public class OAuth2OwnerTokenEntity implements
         .tokenType(tokenType)
         .tokenInfo(tokenInfo)
         .build();
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    return EqualsBuilder.reflectionEquals(this, obj);
-  }
-
-  @Override
-  public int hashCode() {
-    return HashCodeBuilder.reflectionHashCode(this);
-  }
-
-  @Override
-  public String toString() {
-    return ToStringBuilder.reflectionToString(this);
   }
 
   public Key<PersonEntity> getPersonKey() {
@@ -179,7 +158,7 @@ public class OAuth2OwnerTokenEntity implements
     }
   }
 
-  public static class Builder {
+  public static class Builder extends AbstractPersistenceEntity.BaseBuilder<Builder>{
     private Key<PersonEntity> personKey;
     private OAuth2ProviderService providerService;
     private String providerUserId;
@@ -231,12 +210,13 @@ public class OAuth2OwnerTokenEntity implements
 
     @SuppressWarnings("synthetic-access")
     public OAuth2OwnerTokenEntity build() {
-      return new OAuth2OwnerTokenEntity(this);
+      return new OAuth2OwnerTokenEntity(this).validate();
     }
   }
 
   @SuppressWarnings("synthetic-access")
   private OAuth2OwnerTokenEntity(Builder builder) {
+    super(builder, false);
     this.personKey = checkPersonKey(builder.personKey);
     checkNotNull(builder.providerService, "provider");
     this.providerServiceName = builder.providerService.name();
@@ -251,5 +231,6 @@ public class OAuth2OwnerTokenEntity implements
 
   // For Objectify.
   private OAuth2OwnerTokenEntity() {
+    super(null, false);
   }
 }

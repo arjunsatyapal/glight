@@ -31,8 +31,7 @@ package com.google.light.server.dto;
  *         Satyapal
  */
 @SuppressWarnings("serial")
-public abstract class AbstractDtoToPersistence<D, P, I> extends AbstractDto<D> implements
-    DtoToPersistenceInterface<D, P, I> {
+public abstract class AbstractDtoToPersistence<D, P, I> extends AbstractDto<D> {
   /**
    * Convert DTO to Persistence Entity.
    * 
@@ -41,7 +40,6 @@ public abstract class AbstractDtoToPersistence<D, P, I> extends AbstractDto<D> i
    * 
    * @return
    */
-  @Override
   public abstract P toPersistenceEntity(I id);
 
   /**

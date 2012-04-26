@@ -17,11 +17,13 @@ package com.google.light.server.persistence.entity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.light.server.persistence.PersistenceToDtoInterface;
 import com.googlecode.objectify.Key;
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.apache.commons.lang.builder.ToStringBuilder;
+
+import com.google.light.server.dto.AbstractPojo;
+import com.google.light.server.persistence.PersistenceToDtoInterface;
+import com.google.light.server.utils.LightUtils;
+import javax.persistence.PrePersist;
+import javax.persistence.Transient;
 import org.joda.time.Instant;
 
 /**
@@ -34,51 +36,45 @@ import org.joda.time.Instant;
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
-public abstract class AbstractPersistenceEntity<P, D> implements PersistenceToDtoInterface<P, D> {
-  protected Instant creationTime;
-  protected Instant lastUpdateTime;
+public abstract class AbstractPersistenceEntity<P, D> extends AbstractPojo<P> implements
+    PersistenceToDtoInterface<P, D> {
+  @Transient
+  Boolean needsCreationTime;
 
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public boolean equals(Object obj) {
-    return EqualsBuilder.reflectionEquals(this, obj);
-  }
+  protected transient Instant creationTime;
+  protected transient Instant lastUpdateTime;
 
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public int hashCode() {
-    return HashCodeBuilder.reflectionHashCode(this);
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public String toString() {
-    return ToStringBuilder.reflectionToString(this);
+  public Instant getCreationTime() {
+    return creationTime;
   }
 
   public Instant getLastUpdateTime() {
     return lastUpdateTime;
   }
 
-  public void setLastUpdateTime(Instant lastUpdateTime) {
-    this.lastUpdateTime = lastUpdateTime;
+  public boolean needsCreationTime() {
+    return needsCreationTime();
   }
 
-  public Instant getCreationTime() {
-    return creationTime;
+  @PrePersist
+  protected void prePersist() {
+    Instant now = LightUtils.getNow();
+    this.lastUpdateTime = now;
+    
+    // TODO(arjuns): Fix creationTime.
+    this.creationTime = null;
+    
+    
   }
 
   /**
    * {@inheritDoc}
    */
+  @SuppressWarnings("unchecked")
   @Override
-  public abstract Key<P> getKey();
+  public P validate() {
+    return (P) this;
+  }
 
   /**
    * {@inheritDoc}
@@ -94,23 +90,25 @@ public abstract class AbstractPersistenceEntity<P, D> implements PersistenceToDt
     @SuppressWarnings("unchecked")
     public T creationTime(Instant creationTime) {
       this.creationTime = creationTime;
-      return ((T)this);
+      return ((T) this);
     }
 
     @SuppressWarnings("unchecked")
     public T lastUpdateTime(Instant lastUpdateTime) {
       this.lastUpdateTime = lastUpdateTime;
-      return ((T)this);
+      return ((T) this);
     }
   }
 
   @SuppressWarnings("synthetic-access")
-  protected AbstractPersistenceEntity(@SuppressWarnings("rawtypes") BaseBuilder builder) {
-    this.creationTime = checkNotNull(builder.creationTime, "creationTime");
-    this.lastUpdateTime = checkNotNull(builder.lastUpdateTime, "lastUpdateTime");
-  }
-
-  // For Objectify.
-  protected AbstractPersistenceEntity() {
+  protected AbstractPersistenceEntity(@SuppressWarnings("rawtypes") BaseBuilder builder,
+      Boolean shouldHaveCreationTime) {
+    checkNotNull(shouldHaveCreationTime, "shouldHaveCreationTime");
+    this.needsCreationTime = shouldHaveCreationTime;
+    if (builder == null) {
+      return;
+    }
+    this.creationTime = builder.creationTime;
+    this.lastUpdateTime = builder.lastUpdateTime;
   }
 }

@@ -19,7 +19,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
 import com.google.light.server.constants.LightConstants;
-import com.google.light.server.dto.DtoInterface;
+import com.google.light.server.dto.AbstractDto;
 
 /**
  * Dto to hold a search request.
@@ -27,7 +27,7 @@ import com.google.light.server.dto.DtoInterface;
  * @author Walter Cacau
  */
 @SuppressWarnings("serial")
-public class SearchRequestDto implements DtoInterface<SearchRequestDto> {
+public class SearchRequestDto extends AbstractDto<SearchRequestDto> {
   /**
    * User's search query
    */
@@ -62,20 +62,11 @@ public class SearchRequestDto implements DtoInterface<SearchRequestDto> {
     return this;
   }
 
-  @Override
-  public String toJson() {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public String toXml() {
-    throw new UnsupportedOperationException();
-  }
-
   public String getQuery() {
     return query;
   }
 
+  // TODO(arjuns) : See if this is required.
   public void setQuery(String query) {
     this.query = query;
   }
@@ -96,7 +87,7 @@ public class SearchRequestDto implements DtoInterface<SearchRequestDto> {
     this.clientLanguageCode = clientLanguageCode;
   }
 
-  public static class Builder {
+  public static class Builder extends AbstractDto.BaseBuilder<Builder> {
     private String query;
     private String clientLanguageCode;
     private int page = LightConstants.FIRST_SEARCH_PAGE_NUMBER;
@@ -124,6 +115,7 @@ public class SearchRequestDto implements DtoInterface<SearchRequestDto> {
 
   @SuppressWarnings("synthetic-access")
   private SearchRequestDto(Builder builder) {
+    super(builder);
     this.query = builder.query;
     this.clientLanguageCode = builder.clientLanguageCode;
     this.page = builder.page;
@@ -133,5 +125,6 @@ public class SearchRequestDto implements DtoInterface<SearchRequestDto> {
    * Constructor necessary for {@link QueryUtils} to work.
    */
   private SearchRequestDto() {
+    super(null);
   }
 }

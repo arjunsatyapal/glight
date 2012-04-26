@@ -71,11 +71,13 @@ public class SearchResultItemDtoTest extends AbstractDtoTest {
     }
   }
   
+  @Test
   @Override
   public void test_builder() throws Exception {
     // No validation logic in constructor. So nothing to test here.
   }
   
+  @Test
   @Override
   public void test_toJson() throws Exception {
     // Not used as JSON
@@ -87,6 +89,7 @@ public class SearchResultItemDtoTest extends AbstractDtoTest {
     }
   }
 
+  @Test
   @Override
   public void test_toXml() throws Exception {
     // Not used as XML
@@ -97,5 +100,4 @@ public class SearchResultItemDtoTest extends AbstractDtoTest {
       // expected.
     }
   }
-
 }

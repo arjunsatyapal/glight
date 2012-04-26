@@ -15,18 +15,14 @@ package com.google.light.server.servlets.oauth2.google.pojo;
 import static com.google.light.server.utils.LightPreconditions.checkEmail;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
-import com.google.light.server.dto.DtoInterface;
-import com.google.light.server.exception.unchecked.JsonException;
-import com.google.light.server.utils.JsonUtils;
+import org.codehaus.jackson.annotate.JsonProperty;
+
+import com.google.light.server.dto.AbstractDto;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.apache.commons.lang.builder.ToStringBuilder;
 import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
-import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
 
@@ -40,18 +36,23 @@ import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
  */
 @SuppressWarnings("serial")
 @XmlRootElement(name = "TokenInfo")
-@XmlAccessorType(XmlAccessType.PROPERTY)
+@XmlAccessorType(XmlAccessType.FIELD)
 @JsonSerialize(include = Inclusion.NON_NULL)
-
 // TODO(arjuns): Add test for this and token info.
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class GoogleUserInfo implements DtoInterface<GoogleUserInfo> {
+public class GoogleUserInfo extends AbstractDto<GoogleUserInfo> {
   private String id;
   private String email;
+
+  @JsonProperty(value = "verified_email")
   private boolean verifiedEmail;
 
   private String name;
+
+  @JsonProperty(value = "given_name")
   private String givenName;
+  
+  @JsonProperty(value = "family_name")
   private String familyName;
   private String locale;
 
@@ -67,46 +68,20 @@ public class GoogleUserInfo implements DtoInterface<GoogleUserInfo> {
     return name;
   }
 
-  public void setName(String audience) {
-    this.name = audience;
-  }
-
-  @JsonProperty(value = "given_name")
   public String getGivenName() {
     return givenName;
   }
 
-  @JsonProperty(value = "given_name")
-  public void setGivenName(String userId) {
-    this.givenName = userId;
-  }
-
-  @JsonProperty(value = "family_name")
   public String getFamilyName() {
     return familyName;
-  }
-
-  @JsonProperty(value = "family_name")
-  public void setFamilyName(String scope) {
-    this.familyName = scope;
   }
 
   public String getEmail() {
     return email;
   }
 
-  public void setEmail(String email) {
-    this.email = email;
-  }
-
-  @JsonProperty(value = "verified_email")
   public boolean getVerifiedEmail() {
     return verifiedEmail;
-  }
-
-  @JsonProperty(value = "verified_email")
-  public void setVerifiedEmail(boolean verifiedEmail) {
-    this.verifiedEmail = verifiedEmail;
   }
 
   public String getLocale() {
@@ -115,41 +90,6 @@ public class GoogleUserInfo implements DtoInterface<GoogleUserInfo> {
 
   public void setLocale(String locale) {
     this.locale = locale;
-  }
-
-  @Override
-  public String toString() {
-    return ToStringBuilder.reflectionToString(this);
-  }
-
-  @Override
-  public int hashCode() {
-    return HashCodeBuilder.reflectionHashCode(this);
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    return EqualsBuilder.reflectionEquals(this, obj);
-  }
-
-  /**
-   * {@inheritDoc} TODO(arjuns): Add test for this.
-   */
-  @Override
-  public String toJson() {
-    try {
-      return JsonUtils.toJson(this);
-    } catch (Exception e) {
-      throw new JsonException("Failed to convert " + getClass().getSimpleName() + " to Json.", e);
-    }
-  }
-
-  /**
-   * {@inheritDoc} TODO(arjuns): Add test for this.
-   */
-  @Override
-  public String toXml() {
-    throw new UnsupportedOperationException();
   }
 
   /**
@@ -175,5 +115,68 @@ public class GoogleUserInfo implements DtoInterface<GoogleUserInfo> {
   // For JAXB.
   @JsonCreator
   public GoogleUserInfo() {
+    super(null);
+  }
+
+  public static class Builder extends AbstractDto.BaseBuilder<Builder> {
+    private String id;
+    private String email;
+    private boolean verifiedEmail;
+    private String name;
+    private String givenName;
+    private String familyName;
+    private String locale;
+
+    public Builder id(String id) {
+      this.id = id;
+      return this;
+    }
+
+    public Builder email(String email) {
+      this.email = email;
+      return this;
+    }
+
+    public Builder verifiedEmail(boolean verifiedEmail) {
+      this.verifiedEmail = verifiedEmail;
+      return this;
+    }
+
+    public Builder name(String name) {
+      this.name = name;
+      return this;
+    }
+
+    public Builder givenName(String givenName) {
+      this.givenName = givenName;
+      return this;
+    }
+
+    public Builder familyName(String familyName) {
+      this.familyName = familyName;
+      return this;
+    }
+
+    public Builder locale(String locale) {
+      this.locale = locale;
+      return this;
+    }
+
+    @SuppressWarnings("synthetic-access")
+    public GoogleUserInfo build() {
+      return new GoogleUserInfo(this).validate();
+    }
+  }
+
+  @SuppressWarnings("synthetic-access")
+  private GoogleUserInfo(Builder builder) {
+    super(builder);
+    this.id = builder.id;
+    this.email = builder.email;
+    this.verifiedEmail = builder.verifiedEmail;
+    this.name = builder.name;
+    this.givenName = builder.givenName;
+    this.familyName = builder.familyName;
+    this.locale = builder.locale;
   }
 }

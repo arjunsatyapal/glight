@@ -22,17 +22,14 @@ import static com.google.light.server.utils.LightPreconditions.checkPersonId;
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
 import static com.google.light.server.utils.LightPreconditions.checkProviderUserId;
 
-import com.google.light.server.dto.pojo.PersonId;
-
+import com.google.light.server.dto.AbstractDto;
 
 import com.google.api.client.auth.oauth2.TokenResponse;
 import com.google.light.server.constants.OAuth2ProviderService;
-import com.google.light.server.dto.DtoToPersistenceInterface;
+import com.google.light.server.dto.AbstractDtoToPersistence;
+import com.google.light.server.dto.pojo.PersonId;
 import com.google.light.server.persistence.entity.oauth2.owner.OAuth2OwnerTokenEntity;
 import com.google.light.server.persistence.entity.person.PersonEntity;
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.apache.commons.lang.builder.ToStringBuilder;
 
 /**
  * DTO for OAuth2 Tokens. Corresponding TokenEntity is {@link OAuth2OwnerTokenEntity}
@@ -40,8 +37,8 @@ import org.apache.commons.lang.builder.ToStringBuilder;
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
-public class OAuth2OwnerTokenDto implements
-    DtoToPersistenceInterface<OAuth2OwnerTokenDto, OAuth2OwnerTokenEntity, String> {
+public class OAuth2OwnerTokenDto extends
+    AbstractDtoToPersistence<OAuth2OwnerTokenDto, OAuth2OwnerTokenEntity, String> {
   private PersonId personId;
   private OAuth2ProviderService providerService;
   private String providerUserId;
@@ -50,22 +47,6 @@ public class OAuth2OwnerTokenDto implements
   private long expiresInMillis;
   private String tokenType;
   private String tokenInfo;
-
-  /**
-   * {@inheritDoc} TODO(arjuns): Implement this method.
-   */
-  @Override
-  public String toJson() {
-    throw new UnsupportedOperationException();
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public String toXml() {
-    throw new UnsupportedOperationException();
-  }
 
   /**
    * {@inheritDoc} TODO(arjuns): Update test.
@@ -102,21 +83,6 @@ public class OAuth2OwnerTokenDto implements
         .tokenType(tokenType)
         .tokenInfo(tokenInfo)
         .build();
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    return EqualsBuilder.reflectionEquals(this, obj);
-  }
-
-  @Override
-  public int hashCode() {
-    return HashCodeBuilder.reflectionHashCode(this);
-  }
-
-  @Override
-  public String toString() {
-    return ToStringBuilder.reflectionToString(this);
   }
 
   public PersonId getPersonId() {
@@ -184,7 +150,7 @@ public class OAuth2OwnerTokenDto implements
     return tokenDto;
   }
 
-  public static class Builder {
+  public static class Builder extends AbstractDto.BaseBuilder<Builder> {
     private PersonId personId;
     private OAuth2ProviderService providerService;
     private String providerUserId;
@@ -242,6 +208,7 @@ public class OAuth2OwnerTokenDto implements
 
   @SuppressWarnings("synthetic-access")
   private OAuth2OwnerTokenDto(Builder builder) {
+    super(builder);
     this.personId = builder.personId;
     this.providerService = builder.providerService;
     this.providerUserId = builder.providerUserId;

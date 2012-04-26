@@ -19,7 +19,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.junit.Assert.assertEquals;
 
 import com.google.light.server.AbstractLightServerTest;
-import com.google.light.server.persistence.PersistenceToDtoInterface;
+import com.google.light.server.persistence.entity.AbstractPersistenceEntity;
 import org.junit.Test;
 
 /**
@@ -35,7 +35,7 @@ import org.junit.Test;
  * 
  * @author Arjun Satyapal
  */
-public abstract class AbstractBasicDaoTest<D, P extends PersistenceToDtoInterface<P, D>> extends
+public abstract class AbstractBasicDaoTest<D, P extends AbstractPersistenceEntity<P, D>> extends
     AbstractLightServerTest {
   private final Class<P> entityClazz;
 

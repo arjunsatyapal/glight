@@ -67,9 +67,9 @@ public class OAuth2ConsumerCredentialDtoTest extends AbstractDtoToPersistenceTes
   /**
    * {@inheritDoc}
    */
+  @Ignore(value="TODO(arjuns): Fix me.")
   @Override
   @Test
-  @Ignore(value="TODO(arjuns): Fix me")
   public void test_toJson() throws Exception {
     try {
       getDtoBuilder().build().toJson();
@@ -162,6 +162,7 @@ public class OAuth2ConsumerCredentialDtoTest extends AbstractDtoToPersistenceTes
   /**
    * {@inheritDoc}
    */
+  @Ignore(value="TODO(arjuns): Fix me.")
   @Override
   @Test
   public void test_toXml() throws Exception {

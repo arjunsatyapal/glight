@@ -17,6 +17,8 @@ package com.google.light.server.utils;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.appengine.api.datastore.TransactionOptions;
+
 import com.google.appengine.api.datastore.QueryResultIterable;
 import com.google.common.collect.Lists;
 import com.google.light.server.persistence.entity.AbstractPersistenceEntity;
