@@ -90,7 +90,4 @@ public abstract class AbstractDto<D> extends AbstractPojo<D>  {
     this.creationTime = builder.creationTime;
     this.lastUpdateTime = builder.lastUpdateTime;
   }
-//  // For Objectify.
-//  protected AbstractDto() {
-//  }
 }

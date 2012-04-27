@@ -20,20 +20,26 @@ import static com.google.light.server.constants.RequestParamKeyEnum.DEFAULT_EMAI
 import static com.google.light.server.constants.RequestParamKeyEnum.LOGIN_PROVIDER_ID;
 import static com.google.light.server.constants.RequestParamKeyEnum.LOGIN_PROVIDER_USER_ID;
 import static com.google.light.server.constants.RequestParamKeyEnum.PERSON_ID;
+import static com.google.light.server.utils.GuiceUtils.seedEntityInRequestScope;
 import static com.google.light.server.utils.LightPreconditions.checkEmail;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPersonId;
 import static com.google.light.server.utils.LightPreconditions.checkPersonKey;
+import static com.google.light.server.utils.ServletUtils.getRequestHeaderValue;
 import static org.apache.commons.lang.StringUtils.isBlank;
 
 import com.google.inject.Inject;
+import com.google.light.server.annotations.AnotActor;
 import com.google.light.server.annotations.AnotHttpSession;
+import com.google.light.server.annotations.AnotOwner;
+import com.google.light.server.constants.HttpHeaderEnum;
 import com.google.light.server.constants.OAuth2ProviderService;
 import com.google.light.server.dto.pojo.PersonId;
 import com.google.light.server.exception.unchecked.BlankStringException;
 import com.google.light.server.exception.unchecked.httpexception.PersonLoginRequiredException;
 import com.google.light.server.persistence.entity.person.PersonEntity;
 import com.googlecode.objectify.Key;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 /**
@@ -43,7 +49,6 @@ import javax.servlet.http.HttpSession;
  * 
  * @author Arjun Satyapal
  */
-@Deprecated
 public class SessionManager {
   private HttpSession session;
   private PersonEntity personEntity;
@@ -213,5 +218,20 @@ public class SessionManager {
     }
 
     return true;
+  }
+  
+  public void seedPersonIds(HttpServletRequest request) {
+    if (isPersonLoggedIn()) {
+      PersonId performerId = getPersonId();
+      seedEntityInRequestScope(request, PersonId.class, AnotOwner.class, performerId);
+      
+      String watcherIdStr = getRequestHeaderValue(request, HttpHeaderEnum.LIGHT_WATCHER_HEADER);
+      if (watcherIdStr != null) {
+        seedEntityInRequestScope(request, PersonId.class, AnotActor.class, new PersonId(watcherIdStr));
+      } else {
+        // Forcing both watcher and performer to be same.
+        seedEntityInRequestScope(request, PersonId.class, AnotActor.class, performerId);
+      }
+    }
   }
 }

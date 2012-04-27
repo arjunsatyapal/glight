@@ -18,29 +18,26 @@ package com.google.light.server.guice.jersey;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.light.server.jersey.resources.AbstractJerseyResource;
-
+import com.google.light.server.jersey.resources.ModuleResource;
 import com.google.light.server.jersey.resources.thirdparty.google.GoogleDocIntegration;
 
-import com.google.light.server.jersey.resources.ModuleResource;
-
-
 /**
- *
+ * 
  * 
  * TODO(arjuns): Add test for this class.
- *
+ * 
  * @author Arjun Satyapal
  */
 public enum JerseyResourcesEnum {
   GOOGLE_DOC_RESOURCE(GoogleDocIntegration.class),
   MODULE_RESOURCE(ModuleResource.class);
-  
+
   private Class<? extends AbstractJerseyResource> clazz;
-  
+
   private JerseyResourcesEnum(Class<? extends AbstractJerseyResource> clazz) {
     this.clazz = checkNotNull(clazz, "clazz");
   }
-  
+
   public Class<? extends AbstractJerseyResource> getClazz() {
     return clazz;
   }

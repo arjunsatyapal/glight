@@ -207,12 +207,6 @@
       <version>1.46.0</version>
     </dependency>
 
-    <dependency>
-      <groupId>com.google.gdata</groupId>
-      <artifactId>gdata-docs-meta-3.0</artifactId>
-      <version>1.46.0</version>
-    </dependency>
-
     <!--
       Guava Dependency :
       We are using r09 because GData dependes on r09. It doesn't work with recent releases.

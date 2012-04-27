@@ -20,6 +20,8 @@ import static com.google.light.server.constants.OAuth2ProviderService.GOOGLE_DOC
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
 
+import javax.xml.bind.annotation.XmlTransient;
+
 import com.google.common.collect.Lists;
 import com.google.gdata.data.Link;
 import com.google.gdata.data.MediaContent;
@@ -35,6 +37,7 @@ import java.util.List;
 import java.util.logging.Logger;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
 import org.joda.time.DateTime;
@@ -46,9 +49,9 @@ import org.joda.time.DateTime;
  * 
  * @author Arjun Satyapal
  */
+@SuppressWarnings("serial")
 @XmlAccessorType(XmlAccessType.FIELD)
 @JsonSerialize(include = Inclusion.NON_NULL)
-@SuppressWarnings("serial")
 public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
   private static final Logger logger = Logger.getLogger(GoogleDocInfoDto.class.getName());
 
@@ -93,7 +96,8 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
   private Long sizeInBytes;
 
   private DateTime lastCommentTime;
-  private Configuration config;
+  
+  @XmlTransient private Configuration config;
 
   /**
    * {@inheritDoc}
@@ -513,11 +517,6 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
     }
   }
   
-  // For JAXB
-  private GoogleDocInfoDto() {
-    super(null);
-  }
-
   @SuppressWarnings("synthetic-access")
   private GoogleDocInfoDto(Builder builder) {
     super(builder);
@@ -543,6 +542,12 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
     this.sizeInBytes = builder.sizeInBytes;
     this.lastCommentTime = builder.lastCommentTime;
     this.config = checkNotNull(builder.config, "config");
+  }
+  
+  // For Jaxb.  
+  @JsonCreator
+  private GoogleDocInfoDto() {
+    super(null);
   }
 
   private <D> List<D> getNonEmptyList(List<D> list) {

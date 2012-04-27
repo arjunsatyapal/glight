@@ -18,6 +18,9 @@ package com.google.light.server.thirdparty.clients.google.gdata.gdoc;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.constants.LightConstants.HTTP_CONNECTION_TIMEOUT_IN_MILLIS;
 import static com.google.light.server.constants.OAuth2ProviderService.GOOGLE_DOC;
+
+import com.google.light.server.constants.JerseyConstants;
+
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.google.gdata.client.docs.DocsService;
@@ -42,7 +45,6 @@ import com.google.light.server.exception.unchecked.httpexception.NotFoundExcepti
 import com.google.light.server.manager.implementation.oauth2.owner.OAuth2OwnerTokenManagerFactory;
 import com.google.light.server.manager.interfaces.OAuth2OwnerTokenManager;
 import com.google.light.server.persistence.entity.oauth2.owner.OAuth2OwnerTokenEntity;
-import com.google.light.server.servlets.path.ServletPathEnum;
 import com.google.light.server.servlets.thirdparty.google.gdata.gdoc.GoogleDocUtils;
 import com.google.light.server.utils.XmlUtils;
 import java.io.UnsupportedEncodingException;
@@ -78,6 +80,7 @@ public class DocsServiceWrapper extends DocsService {
     DocumentListFeed docListFeed = null;
     try {
       docListFeed = getFeed(feedUrl, DocumentListFeed.class);
+      System.out.println(XmlUtils.getXmlFeed(docListFeed));
 
       // TODO(arjuns): Test this on a person who has no document.
       checkNotNull(docListFeed, "docList should not be null.");
@@ -96,7 +99,7 @@ public class DocsServiceWrapper extends DocsService {
       String next = getUriFromLink(docListFeed.getNextLink());
 
       PageDto pageDto = new PageDto.Builder()
-          .serlvetPath(ServletPathEnum.GOOGLE_DOC_LIST)
+          .lightUri(JerseyConstants.URI_GOOGLE_DOC_LIST)
           .previous(previous)
           .next(next)
           .list(listOfDocuments)

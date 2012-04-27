@@ -3,11 +3,11 @@ package com.google.light.server.jersey.resources;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
-import com.google.inject.Inject;
-
 import com.google.appengine.api.blobstore.BlobKey;
 import com.google.appengine.api.blobstore.BlobstoreService;
 import com.google.appengine.api.blobstore.BlobstoreServiceFactory;
+import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.google.light.server.constants.HttpHeaderEnum;
 import com.google.light.server.constants.JerseyConstants;
 import com.google.light.server.constants.LightStringConstants;
@@ -19,10 +19,12 @@ import com.google.light.server.exception.unchecked.httpexception.NotFoundExcepti
 import com.google.light.server.manager.interfaces.ModuleManager;
 import com.google.light.server.persistence.entity.module.ModuleVersionEntity;
 import com.google.light.server.persistence.entity.module.ModuleVersionResourceEntity;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
@@ -40,9 +42,10 @@ public class ModuleResource extends AbstractJerseyResource {
   private final BlobstoreService blobService;
 
   @Inject
-  public ModuleResource(ModuleManager moduleManager) {
-    this.moduleManager = checkNotNull(moduleManager, "moduleManager");
+  public ModuleResource(Injector injector, @Context HttpServletRequest request) {
+    super(injector, request);
     this.blobService = checkNotNull(BlobstoreServiceFactory.getBlobstoreService());
+    this.moduleManager = checkNotNull(moduleManager, "moduleManager");
   }
 
   /**
