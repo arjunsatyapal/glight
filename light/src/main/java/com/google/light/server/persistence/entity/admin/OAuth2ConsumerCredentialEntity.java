@@ -18,16 +18,11 @@ package com.google.light.server.persistence.entity.admin;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
-import com.google.light.server.persistence.entity.AbstractPersistenceEntity;
-
 import com.google.light.server.constants.OAuth2ProviderEnum;
 import com.google.light.server.dto.admin.OAuth2ConsumerCredentialDto;
-import com.google.light.server.persistence.PersistenceToDtoInterface;
+import com.google.light.server.persistence.entity.AbstractPersistenceEntity;
 import com.googlecode.objectify.Key;
 import javax.persistence.Id;
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.apache.commons.lang.builder.ToStringBuilder;
 
 /**
  * PersistenceEntity for OAuth2Consumer Credentials.

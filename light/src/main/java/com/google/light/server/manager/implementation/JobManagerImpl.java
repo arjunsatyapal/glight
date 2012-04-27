@@ -19,7 +19,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.constants.LightConstants.JOB_BACK_OFF_FACTOR;
 import static com.google.light.server.constants.LightConstants.JOB_BACK_OFF_SECONDS;
 import static com.google.light.server.constants.LightConstants.JOB_MAX_ATTEMPTES;
-import static com.google.light.server.utils.GuiceUtils.getParticipants;
+import static com.google.light.server.utils.GuiceUtils.getRequestScopedValues;
 
 import com.google.appengine.tools.pipeline.PipelineService;
 import com.google.appengine.tools.pipeline.PipelineServiceFactory;
@@ -69,7 +69,7 @@ public class JobManagerImpl implements JobManager {
           .build();
       JobEntity savedJobEntity = this.put(jobEntity);
 
-      RequestScopedValues participants = getParticipants();
+      RequestScopedValues participants = getRequestScopedValues();
 
       LightJobContextPojo context = new LightJobContextPojo.Builder()
           .ownerId(participants.getOwnerId())

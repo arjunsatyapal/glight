@@ -19,7 +19,7 @@ import static com.google.appengine.api.datastore.Entity.KEY_RESERVED_PROPERTY;
 import static com.google.light.server.constants.LightConstants.JOB_BACK_OFF_FACTOR;
 import static com.google.light.server.constants.LightConstants.JOB_BACK_OFF_SECONDS;
 import static com.google.light.server.constants.LightConstants.JOB_MAX_ATTEMPTES;
-import static com.google.light.server.utils.GuiceUtils.getParticipants;
+import static com.google.light.server.utils.GuiceUtils.getRequestScopedValues;
 
 import com.google.light.server.dto.pojo.LightJobContextPojo;
 import com.google.light.server.dto.pojo.RequestScopedValues;
@@ -89,7 +89,7 @@ public class DeleteAllServlet extends HttpServlet {
         .build();
     JobEntity savedJobEntity = jobManager.put(jobEntity);
 
-    RequestScopedValues participants = getParticipants();
+    RequestScopedValues participants = getRequestScopedValues();
 
     LightJobContextPojo context = new LightJobContextPojo.Builder()
         .ownerId(participants.getOwnerId())

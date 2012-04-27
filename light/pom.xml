@@ -798,7 +798,7 @@
       SDK version pointed to by ${gae.home} property (Typically, one used
       by your Eclipse plug-in).
     -->
-    <gae.version>1.6.3</gae.version>
+    <gae.version>1.6.4</gae.version>
     <gae.wait>false</gae.wait>
 
     <!--

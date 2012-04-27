@@ -16,8 +16,8 @@
 package com.google.light.jobs;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.light.server.utils.GuiceUtils.enqueueRequestScopedVariables;
 import static com.google.light.server.utils.GuiceUtils.getInstance;
-import static com.google.light.server.utils.LightUtils.enqueueRequestScopedVariables;
 
 import com.google.appengine.tools.pipeline.Job6;
 import com.google.appengine.tools.pipeline.Value;

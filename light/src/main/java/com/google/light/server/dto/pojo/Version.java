@@ -82,7 +82,7 @@ public class Version extends AbstractPojo<Version>{
   
   @Override
   public String toString() {
-    return "version:" + version;
+    return "version:" + version + ", State:" + state;
   }
 
   public static enum State {

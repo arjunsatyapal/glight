@@ -46,11 +46,14 @@ public abstract class AbstractJerseyResource {
   protected HttpServletResponse response;
   
   @Inject
-  public AbstractJerseyResource(Injector injector, HttpServletRequest request) {
+  public AbstractJerseyResource(Injector injector, HttpServletRequest request, 
+      HttpServletResponse response) {
     this.injector = checkNotNull(injector, "injector");
     GuiceUtils.setInjector(injector);
     this.request = checkNotNull(request, "request");
     checkNotNull(request, "request");
+    
+    this.response = checkNotNull(response);
     
     HttpSession session = request.getSession();
     seedEntityInRequestScope(request, HttpSession.class, AnotHttpSession.class, session);

@@ -43,7 +43,6 @@ import com.google.light.server.servlets.test.oauth2.TestCredentialBackupServlet;
 import com.google.light.server.servlets.test.oauth2.TestOAuth2WorkFlowServlet;
 import com.google.light.server.servlets.test.oauth2.login.FakeLoginServlet;
 import com.google.light.server.servlets.test.thirdparty.google.gdta.gdoc.GoogleDocInfoServlet;
-import com.google.light.server.servlets.thirdparty.google.gdata.gdoc.GoogleDocImportServlet;
 import javax.servlet.http.HttpServlet;
 
 /**
@@ -77,8 +76,6 @@ public enum ServletPathEnum {
 
 
   // Third party integrations.
-  GOOGLE_DOC_IMPORT(GoogleDocImportServlet.class, "/api/thirdparty/google/gdata/gdoc/import",
-                    true, false, false),
   IMPORT_STAGE_DETAIL_SERVLET(JobDetailServlet.class, "/api/queue/import_stage_detail",
                               true, false, false),
                               

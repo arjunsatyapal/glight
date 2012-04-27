@@ -41,6 +41,10 @@ public class JerseyConstants {
 
   public static final String PATH_PARAM_PERSON_ID = "person_id";
   public static final String PATH_PERSON_ID = "{" + PATH_PARAM_PERSON_ID + "}";
+  
+  public static final String PATH_PARAM_EXTERNAL_KEY = "external_key";
+  public static final String PATH_EXTERNAL_KEY = "{" + PATH_PARAM_EXTERNAL_KEY + "}";
+  
 
   // Path for Module Resources.
   public static final String RESOURCE_PATH_MODULE = "/module";
@@ -52,9 +56,12 @@ public class JerseyConstants {
 
   // Path for Gogole Doc Integration.
   public static final String RESOURCE_PATH_THIRD_PARTY_GOOGLE_DOC = "/thirdparty/google/gdoc";
+  
   public static final String PATH_GOOGLE_DOC_LIST = "/list";
   public static final String URI_GOOGLE_DOC_LIST = JERSEY_RESOURCE_PATH
       + RESOURCE_PATH_THIRD_PARTY_GOOGLE_DOC + PATH_GOOGLE_DOC_LIST;
+  
+  public static final String PATH_GOOGLE_DOC_IMPORT= "/import";////" + PATH_EXTERNAL_KEY;
 
   // Path for Person Resource.
   public static final String RESOURCE_PATH_PERSON = "/person";

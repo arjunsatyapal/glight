@@ -1,6 +1,7 @@
 package com.google.light.server.jersey.resources;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.light.server.utils.GuiceUtils.getInstance;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
 import com.google.appengine.api.blobstore.BlobKey;
@@ -20,6 +21,7 @@ import com.google.light.server.manager.interfaces.ModuleManager;
 import com.google.light.server.persistence.entity.module.ModuleVersionEntity;
 import com.google.light.server.persistence.entity.module.ModuleVersionResourceEntity;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -42,10 +44,11 @@ public class ModuleResource extends AbstractJerseyResource {
   private final BlobstoreService blobService;
 
   @Inject
-  public ModuleResource(Injector injector, @Context HttpServletRequest request) {
-    super(injector, request);
+  public ModuleResource(Injector injector, @Context HttpServletRequest request,
+      @Context HttpServletResponse response) {
+    super(injector, request, response);
     this.blobService = checkNotNull(BlobstoreServiceFactory.getBlobstoreService());
-    this.moduleManager = checkNotNull(moduleManager, "moduleManager");
+    this.moduleManager = getInstance(ModuleManager.class);
   }
 
   /**
@@ -111,8 +114,9 @@ public class ModuleResource extends AbstractJerseyResource {
           + moduleId + ":" + version);
     }
 
-    BlobKey blobKey = null; //blobService.createGsBlobKey(resourceEntity.getGSBlobInfo().getGsKey());
+    BlobKey blobKey = blobService.createGsBlobKey(resourceEntity.getGSBlobInfo().getGsKey());
     try {
+      checkNotNull(response, "response");
       blobService.serve(blobKey, response);
     } catch (Exception e) {
       throw new RuntimeException(e);

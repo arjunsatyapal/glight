@@ -20,8 +20,6 @@ import static com.google.light.server.constants.OAuth2ProviderService.GOOGLE_DOC
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
 
-import javax.xml.bind.annotation.XmlTransient;
-
 import com.google.common.collect.Lists;
 import com.google.gdata.data.Link;
 import com.google.gdata.data.MediaContent;
@@ -37,10 +35,12 @@ import java.util.List;
 import java.util.logging.Logger;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlTransient;
 import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
 import org.joda.time.DateTime;
+import org.joda.time.Instant;
 
 /**
  * DTO for Importing Google Doc.
@@ -59,7 +59,7 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
   private String resourceId;
   private String etag;
 
-  private DateTime lastEditTime;
+  private Long lastEditTimeInMillis;
 
   private ModuleType type;
   private String title;
@@ -118,7 +118,7 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
     }
 
     if (config != Configuration.DTO_FOR_IMPORT) {
-      checkNotNull(lastEditTime, "lastEditTime");
+      checkNotNull(lastEditTimeInMillis, "lastEditTime");
     }
 
     // Required for all configs.
@@ -165,8 +165,8 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
     return etag;
   }
 
-  public DateTime getLastEditTime() {
-    return lastEditTime;
+  public Long getLastEditTimeInMillis() {
+    return lastEditTimeInMillis;
   }
 
   public ModuleType getType() {
@@ -244,7 +244,7 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
     private String id;
     private String resourceId;
     private String etag;
-    private DateTime lastEditTime;
+    private Long lastEditTimeInMillis;
     private ModuleType type;
     private String title;
     private String documentLink;
@@ -287,9 +287,9 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
       return this;
     }
 
-    public Builder lastEditTime(DateTime lastEditTime) {
+    public Builder lastEditTime(Instant lastEditTime) {
       if (config != Configuration.DTO_FOR_IMPORT) {
-        this.lastEditTime = lastEditTime;
+        this.lastEditTimeInMillis = lastEditTime.getMillis();
       }
       return this;
     }
@@ -468,7 +468,7 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
 
       creationTime(new DateTime(docListEntry.getPublished().getValue()).toInstant());
       lastUpdateTime(new DateTime(docListEntry.getUpdated().getValue()).toInstant());
-      lastEditTime(new DateTime(docListEntry.getEdited().getValue()));
+      lastEditTime(new DateTime(docListEntry.getEdited().getValue()).toInstant());
 
       type(ModuleType.getByProviderServiceAndCategory(GOOGLE_DOC, docListEntry.getType()));
       title(docListEntry.getTitle().getPlainText());
@@ -523,7 +523,7 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
     this.id = builder.id;
     this.resourceId = builder.resourceId;
     this.etag = builder.etag;
-    this.lastEditTime = builder.lastEditTime;
+    this.lastEditTimeInMillis = builder.lastEditTimeInMillis;
     this.type = builder.type;
     this.title = builder.title;
     this.documentLink = builder.documentLink;

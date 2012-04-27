@@ -17,6 +17,7 @@ package com.google.light.server.dto;
 
 import com.google.light.server.utils.JsonUtils;
 import com.google.light.server.utils.XmlUtils;
+import org.codehaus.jackson.annotate.JsonCreator;
 import org.joda.time.Instant;
 
 /**
@@ -35,8 +36,8 @@ import org.joda.time.Instant;
  */
 @SuppressWarnings("serial")
 public abstract class AbstractDto<D> extends AbstractPojo<D>  {
-  protected Instant creationTime;
-  protected Instant lastUpdateTime;
+  protected final Long creationTimeInMillis = null;
+  protected Long lastUpdateTimeInMillis;
 
   /**
    *  Convert DTO to JSON String.
@@ -52,32 +53,29 @@ public abstract class AbstractDto<D> extends AbstractPojo<D>  {
     return XmlUtils.toXml(this);
   }
 
-  public Instant getLastUpdateTime() {
-    return lastUpdateTime;
+  public Long getLastUpdateTimeInMillis() {
+    return lastUpdateTimeInMillis;
   }
 
-  public void setLastUpdateTime(Instant lastUpdateTime) {
-    this.lastUpdateTime = lastUpdateTime;
-  }
-
-  public Instant getCreationTime() {
-    return creationTime;
+  public Long getCreationTimeInMillis() {
+    return creationTimeInMillis;
   }
 
   @SuppressWarnings("rawtypes")
   public static class BaseBuilder<T extends BaseBuilder> {
-    private Instant creationTime;
-    private Instant lastUpdateTime;
+    @SuppressWarnings("unused")
+    private Long creationTimeInMillis;
+    private Long lastUpdateTimeInMillis;
 
     @SuppressWarnings("unchecked")
-    public T creationTime(Instant creationTime) {
-      this.creationTime = creationTime;
+    protected T creationTime(Instant creationTime) {
+      this.creationTimeInMillis = creationTime.getMillis();
       return ((T) this);
     }
 
     @SuppressWarnings("unchecked")
-    public T lastUpdateTime(Instant lastUpdateTime) {
-      this.lastUpdateTime = lastUpdateTime;
+    protected T lastUpdateTime(Instant lastUpdateTime) {
+      this.lastUpdateTimeInMillis = lastUpdateTime.getMillis();
       return ((T) this);
     }
   }
@@ -87,7 +85,12 @@ public abstract class AbstractDto<D> extends AbstractPojo<D>  {
     if (builder == null) {
       return;
     }
-    this.creationTime = builder.creationTime;
-    this.lastUpdateTime = builder.lastUpdateTime;
+//    this.creationTime = builder.creationTime;
+    this.lastUpdateTimeInMillis = builder.lastUpdateTimeInMillis;
+  }
+  
+  @SuppressWarnings("unused")
+  @JsonCreator
+  private AbstractDto() {
   }
 }

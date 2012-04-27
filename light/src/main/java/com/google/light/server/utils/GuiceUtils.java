@@ -15,16 +15,8 @@
  */
 package com.google.light.server.utils;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-
-
-import com.google.inject.Provider;
-
-import com.google.inject.Injector;
-
-import com.google.light.server.dto.pojo.RequestScopedValues;
-
-
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -32,6 +24,10 @@ import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.ProvisionException;
 import com.google.inject.Singleton;
+import com.google.light.server.annotations.AnotActor;
+import com.google.light.server.annotations.AnotOwner;
+import com.google.light.server.dto.pojo.PersonId;
+import com.google.light.server.dto.pojo.RequestScopedValues;
 import java.lang.annotation.Annotation;
 import javax.servlet.http.HttpServletRequest;
 
@@ -114,7 +110,6 @@ public class GuiceUtils {
     return checkNotNull(injector.getInstance(clazz),
         "Failed to get instance for Class[" + clazz.getName() + "].");
   }
-  
 
   public static <T> Provider<T> getProvider(Injector injector, Class<T> clazz) {
     return checkNotNull(injector.getProvider(clazz));
@@ -128,7 +123,7 @@ public class GuiceUtils {
     Key<T> guiceKey = getKeyForScopeSeed(clazz, anotClazz);
     return checkNotNull(injector.getInstance(guiceKey),
         "Failed to get instance for Class[" + clazz.getName()
-        + "], AnnotationClass[" + anotClazz + "].");
+            + "], AnnotationClass[" + anotClazz + "].");
   }
 
   /**
@@ -143,9 +138,29 @@ public class GuiceUtils {
         "Failed to get Provider for Class[" + clazz.getName() + "].");
   }
 
-  public static RequestScopedValues getParticipants() {
+  public static RequestScopedValues getRequestScopedValues() {
     Provider<RequestScopedValues> provider = getProvider(RequestScopedValues.class);
-    return provider.get();
+    return checkNotNull(provider.get(), "requestScopedValues.");
+  }
+
+  public static void enqueueRequestScopedVariables(PersonId ownerId, PersonId actorId) {
+
+    HttpServletRequest request = getInstance(HttpServletRequest.class);
+    checkNotNull(request, "request");
+
+    if (ownerId != null) {
+      seedEntityInRequestScope(request, PersonId.class, AnotOwner.class, ownerId);
+    }
+
+    checkNotNull(actorId, "actorId");
+    seedEntityInRequestScope(request, PersonId.class, AnotActor.class, actorId);
+    RequestScopedValues participants = getProvider(RequestScopedValues.class).get();
+    checkArgument(participants.isValid(), "Invalid state for Participants.");
+  }
+  
+  public static PersonId getOwnerId() {
+    RequestScopedValues requestScopedValues = getRequestScopedValues();
+    return checkNotNull(requestScopedValues.getOwnerId(), "ownerId");
   }
 
   // Utility class.

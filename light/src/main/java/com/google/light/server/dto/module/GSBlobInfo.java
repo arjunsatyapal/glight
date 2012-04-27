@@ -20,7 +20,6 @@ import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
 import com.google.light.server.constants.http.ContentTypeEnum;
 import com.google.light.server.dto.AbstractDto;
-import org.joda.time.Instant;
 
 /**
  * DTO for Light Modules.
@@ -69,9 +68,9 @@ public class GSBlobInfo extends AbstractDto<GSBlobInfo> {
     private ContentTypeEnum contentType;
     private String fileName;
     private String gsKey;
+    @SuppressWarnings("unused")
     private String md5;
     private Long sizeInBytes;
-    private Instant creationTime;
 
     public Builder contentType(ContentTypeEnum contentType) {
       this.contentType = contentType;
@@ -111,7 +110,6 @@ public class GSBlobInfo extends AbstractDto<GSBlobInfo> {
     this.fileName = builder.fileName;
     this.gsKey = builder.gsKey;
     this.sizeInBytes = builder.sizeInBytes;
-    this.creationTime = builder.creationTime;
   }
   
   // For JAXB
