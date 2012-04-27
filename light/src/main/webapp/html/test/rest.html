@@ -1,0 +1,174 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN"
+           "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <title>Light</title>
+    <link href="/js/external/djk/dojo/resources/dojo.css" type="text/css" rel="stylesheet" media="screen">
+    <link href="/js/external/djk/dijit/themes/claro/claro.css" type="text/css" rel="stylesheet" media="screen">
+    <script>
+    dojoConfig = {
+      async: true,
+      isDebug: true,
+      waitSeconds: 2,
+      has: {
+        'light-dev': 1
+      },
+      deferredOnError: function(e) { console.log(e.message, e.stack); },
+        packages: [{
+            name: 'light',
+            location: '/js/light'
+        },
+        { name: 'dojo', location: '/js/external/djk/dojo' },
+        { name: 'dijit', location: '/js/external/djk/dijit' },
+        { name: 'dojox', location: '/js/external/djk/dojox' }
+        ],
+    };
+    </script>
+    <script src="/js/external/djk/dojo/dojo.js"></script>
+    <script>
+    require(['dojo/store/JsonRest',
+             'dojo',
+             'dijit',
+             'dojo/on',
+             'dojo/parser',
+             'dijit/form/Form',
+             'dijit/form/Button',
+             'dijit/form/TextBox',
+             'dijit/form/Select',
+             'dijit/form/Textarea',
+             'dojo/domReady!'
+             ],
+            function(
+                JsonRest,
+                dojo,
+                dijit,
+                on,
+                parser
+                ) {
+      parser.parse();
+      var answerTextarea = dijit.byId("answer");
+      var contentTextarea = dijit.byId("content");
+      var operationSelect = dijit.byId("operation");
+      var targetTextbox = dijit.byId("target");
+      var idTextbox = dijit.byId("id");
+      var sendButton = dijit.byId("send");
+      function reportError(txt) {
+        answerTextarea.set('value', 'Error:\n'+txt);
+      }
+      function isNonEmptyString(id) {
+        return typeof id == "string" && id != "";
+      }
+      sendButton.onClick = function() {
+        answerTextarea.set('value', 'Loading ...');
+        var operation = operationSelect.get('value');
+        var target = targetTextbox.get('value');
+        var id = idTextbox.get('value');
+        var content = contentTextarea.get('value');
+        if(!isNonEmptyString(target)) {
+          reportError('empty target');
+          return;
+        }
+        var store = new JsonRest({target: target});
+        var promise;
+        if(operation == 'get') {
+          if(!isNonEmptyString(id)) {
+            reportError('empty id');
+            return;
+          }
+          promise = store.get(id, {
+            'Content-Type': 'application/json'
+          });
+        } else if(operation == 'put') {
+          var options = {}
+          if(isNonEmptyString(id)) {
+            options.id = id;
+          }
+          try {
+            content = dojo.fromJson(content);
+          } catch(e) {
+            reportError('could not parse content JSON');
+            return;
+          }
+          promise = store.put(content, options);
+        } else if(operation == 'remove') {
+          if(!isNonEmptyString(id)) {
+            reportError('empty id');
+            return;
+          }
+          promise = store.remove(id);
+        } else {
+          reportError('no operation selected');
+          return;
+        }
+        
+        promise.then(function(answer) {
+          answerTextarea.set('value', dojo.toJson(answer));
+        }, function(error) {
+            var msg = 'XHR failed!\n'+error;
+            if(error.xhr)
+                msg+=' statusText:'+error.xhr.statusText;
+            reportError(msg);
+        })
+      }
+    });
+    </script>
+    
+  </head>
+  <body class="claro">
+
+    <table style="border: 1px solid #9f9f9f;" cellspacing="10">
+        <tr>
+            <td>
+                <label>Target:</label>
+            </td>
+            <td>
+                <input type="text" id="target" data-dojo-type="dijit.form.TextBox" value="/api/person/"/>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <label>Id:</label>
+            </td>
+            <td>
+                <input type="text" id="id" data-dojo-type="dijit.form.TextBox" value="me"/>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <label>Dojo JsonRest Store Operation:</label>
+            </td>
+            <td>
+                
+        <select id="operation" data-dojo-type="dijit.form.Select">
+            <option value="get" selected="selected">get</option>
+            <option value="put">put</option>
+            <option value="remove">remove</option>
+        </select>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <label>Content:</label>
+            </td>
+            <td>
+                <textarea id="content" data-dojo-type="dijit.form.Textarea" style="width:500px; height: 250px">{}</textarea>
+            </td>
+        </tr>
+    </table>
+
+    <button data-dojo-type="dijit.form.Button" id="send">Send</button>
+    
+    <table style="border: 1px solid #9f9f9f;" cellspacing="10">
+        <tr>
+            <td>
+                <label for="name">Answer:</label>
+            </td>
+            <td>
+                <textarea id="answer" data-dojo-type="dijit.form.Textarea" style="width:500px; height: 250px"></textarea>
+            </td>
+        </tr>
+    </table>
+    
+  </body>
+</html>
