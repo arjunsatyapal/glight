@@ -16,12 +16,11 @@
 package com.google.light.jobs;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.light.server.utils.LightUtils.enqueueRequestScopedVariables;
-
-import com.google.light.server.dto.pojo.LightJobContextPojo;
+import static com.google.light.server.utils.GuiceUtils.enqueueRequestScopedVariables;
 
 import com.google.appengine.tools.pipeline.Job1;
 import com.google.appengine.tools.pipeline.Value;
+import com.google.light.server.dto.pojo.LightJobContextPojo;
 import com.google.light.server.manager.interfaces.JobManager;
 import com.google.light.server.utils.GuiceUtils;
 

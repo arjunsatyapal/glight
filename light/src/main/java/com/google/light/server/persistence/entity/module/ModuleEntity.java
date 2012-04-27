@@ -81,8 +81,6 @@ public class ModuleEntity extends AbstractPersistenceEntity<ModuleEntity, Module
         .ownerPersonId(ownerPersonId)
         .etag(etag)
         .latestVersion(latestVersion)
-        .creationTime(creationTime)
-        .lastUpdateTime(lastUpdateTime)
         .build();
 
     return dto;
@@ -128,7 +126,9 @@ public class ModuleEntity extends AbstractPersistenceEntity<ModuleEntity, Module
   @Override
   public ModuleEntity validate() {
     super.validate();
-    checkPositiveLong(id, "id");
+    if (id != null) {
+      getModuleId();
+    }
     checkNotBlank(title, "title");
     checkNotNull(state, "moduleState");
     checkPersonId(ownerPersonId);
@@ -137,7 +137,6 @@ public class ModuleEntity extends AbstractPersistenceEntity<ModuleEntity, Module
     // TODO(arjuns): Add more checks here for version.
 
     checkNotNull(latestVersion, "latestVersion");
-    checkNotNull(creationTime, "creationTime");
     return this;
   }
 

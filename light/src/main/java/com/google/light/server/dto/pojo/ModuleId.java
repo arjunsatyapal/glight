@@ -59,6 +59,7 @@ public class ModuleId extends AbstractPojo<ModuleId> {
   }
   
   // For Objectify.
+  @SuppressWarnings("unused")
   private ModuleId() {
   }
 }

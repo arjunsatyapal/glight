@@ -15,6 +15,8 @@
  */
 package com.google.light.server.dto;
 
+import org.codehaus.jackson.annotate.JsonCreator;
+
 
 /**
  * Abstract DTO to accomodate all the common variables and methods for DTOs.
@@ -48,5 +50,10 @@ public abstract class AbstractDtoToPersistence<D, P, I> extends AbstractDto<D> {
   @SuppressWarnings("rawtypes")
   protected AbstractDtoToPersistence(BaseBuilder builder) {
     super(builder);
+  }
+  
+  @JsonCreator
+  private AbstractDtoToPersistence() {
+    super(null);
   }
 }

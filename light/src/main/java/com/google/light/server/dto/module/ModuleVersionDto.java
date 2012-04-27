@@ -52,8 +52,6 @@ public class ModuleVersionDto extends AbstractDtoToPersistence<ModuleVersionDto,
     ModuleVersionEntity entity = new ModuleVersionEntity.Builder()
         .version(new Version(version))
         .content(content)
-        .creationTime(creationTime)
-        .lastUpdateTime(lastUpdateTime)
         .build();
 
     return entity;

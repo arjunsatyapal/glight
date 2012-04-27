@@ -141,8 +141,6 @@ public class ModuleManagerImpl implements ModuleManager {
           .title("reserved")
           .state(ModuleState.RESERVED)
           .ownerPersonId(ownerId)
-          .creationTime(LightUtils.getNow())
-          .lastUpdateTime(LightUtils.getNow())
           .latestVersion(new Version(0L /* noVersion */, Version.State.NO_VERSION))
           .etag("etag")
           .build();
@@ -151,8 +149,6 @@ public class ModuleManagerImpl implements ModuleManager {
       OriginModuleMappingEntity mappingEntity = new OriginModuleMappingEntity.Builder()
           .id(originId)
           .moduleId(persistedEntity.getModuleId())
-          .creationTime(LightUtils.getNow())
-          .lastUpdateTime(LightUtils.getNow())
           .build();
       originModuleMappingDao.put(ofy, mappingEntity);
 
@@ -237,8 +233,10 @@ public class ModuleManagerImpl implements ModuleManager {
    * {@inheritDoc}
    */
   @Override
-  public ModuleVersionEntity getModuleVersion(ModuleId moduleId, Version moduleVersion) {
-    ModuleVersionEntity moduleVersionEntity = moduleVersionDao.get(moduleId, moduleVersion);
+  public ModuleVersionEntity getModuleVersion(ModuleId moduleId, Version version) {
+    Version requiredVersion = convertLatestToSpecificVersion(moduleId, version);
+    
+    ModuleVersionEntity moduleVersionEntity = moduleVersionDao.get(moduleId, requiredVersion);
     return moduleVersionEntity;
   }
 
@@ -248,13 +246,24 @@ public class ModuleManagerImpl implements ModuleManager {
   @Override
   public ModuleVersionResourceEntity getModuleResource(ModuleId moduleId, Version version,
       String resourceId) {
+    Version requiredVersion = convertLatestToSpecificVersion(moduleId, version);
+
     ModuleVersionResourceEntity entity =
-        moduleVersionResourceDao.get(moduleId, version, resourceId);
+        moduleVersionResourceDao.get(moduleId, requiredVersion, resourceId);
     if (entity == null) {
       throw new NotFoundException("Resource[" + resourceId + " Not found for " + moduleId + ":"
           + version);
     }
 
     return entity;
+  }
+  
+  private Version convertLatestToSpecificVersion(ModuleId moduleId, Version version) {
+    if(version.isLatest()) {
+      ModuleEntity moduleEntity = get(moduleId);
+      return moduleEntity.getLatestVersion();
+    }
+    
+    return version;
   }
 }

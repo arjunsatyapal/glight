@@ -34,10 +34,8 @@ public enum RequestParamKeyEnum {
 
   DEFAULT_EMAIL("default_email", true),
 
-  GOOGLE_DOC_URL("google_doc_url", true),
-  
+  @Deprecated
   GOOGLE_DOC_RESOURCE_ID("google_doc_resource_id", true),
-  
   JOB_ID("job_id", true),
   
   // TODO(arjuns): Add category to differentiate on what goes in Session and what comes in URL.
@@ -47,7 +45,8 @@ public enum RequestParamKeyEnum {
   MODULE_TYPE("module_type", true),
   MODULE_ID("module_id", true),
   MODULE_VERSION("module_version", true),
-  
+
+
   OAUTH2_PROVIDER_NAME("oauth2_provider_name", true),
 
   

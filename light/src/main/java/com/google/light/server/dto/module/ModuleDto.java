@@ -23,7 +23,7 @@ import com.google.light.server.dto.AbstractDtoToPersistence;
 import com.google.light.server.dto.pojo.PersonId;
 import com.google.light.server.dto.pojo.Version;
 import com.google.light.server.persistence.entity.module.ModuleEntity;
-import com.google.light.server.utils.JsonUtils;
+import org.codehaus.jackson.annotate.JsonCreator;
 
 /**
  * DTO for Light Modules.
@@ -115,5 +115,10 @@ public class ModuleDto extends AbstractDtoToPersistence<ModuleDto, ModuleEntity,
     this.ownerPersonId = builder.ownerPersonId;
     this.etag = builder.etag;
     this.latestVersion = builder.latestVersion;
+  }
+  
+  @JsonCreator
+  private ModuleDto() {
+    super(null);
   }
 }

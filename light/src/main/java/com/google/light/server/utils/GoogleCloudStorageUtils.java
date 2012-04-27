@@ -36,7 +36,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.channels.Channels;
-import org.joda.time.Instant;
 
 /**
  * 
@@ -86,24 +85,22 @@ public class GoogleCloudStorageUtils {
   }
 
   public static GSBlobInfo getGSBlobInfo(GoogleCloudStorageBuckets bucket, String filePath) {
-//    BlobstoreService blobStoreService = BlobstoreServiceFactory.getBlobstoreService();
-////    BlobKey blobKey = blobStoreService.createGsBlobKey(filePath);
-//
-//    BlobInfoFactory blobInfoFactory = new BlobInfoFactory();
-//    BlobInfo blobInfo = blobInfoFactory.loadBlobInfo(blobKey);
-//    Preconditions.checkNotNull(blobInfo, "blob not found for filePath[" + filePath + "].");
-//
-//    GSBlobInfo gsBlobInfo = new GSBlobInfo.Builder()
-//        .contentType(ContentTypeEnum.getContentTypeByString(blobInfo.getContentType()))
-//        .creationTime(new Instant(blobInfo.getCreation().getTime()))
-//        .fileName(blobInfo.getFilename())
-//        .gsKey(filePath)
-//        .md5(blobInfo.getMd5Hash())
-//        .sizeInBytes(blobInfo.getSize())
-//        .build();
+    BlobstoreService blobStoreService = BlobstoreServiceFactory.getBlobstoreService();
+    BlobKey blobKey = blobStoreService.createGsBlobKey(filePath);
 
-    return null;
-//    return gsBlobInfo;
+    BlobInfoFactory blobInfoFactory = new BlobInfoFactory();
+    BlobInfo blobInfo = blobInfoFactory.loadBlobInfo(blobKey);
+    Preconditions.checkNotNull(blobInfo, "blob not found for filePath[" + filePath + "].");
+
+    GSBlobInfo gsBlobInfo = new GSBlobInfo.Builder()
+        .contentType(ContentTypeEnum.getContentTypeByString(blobInfo.getContentType()))
+        .fileName(blobInfo.getFilename())
+        .gsKey(filePath)
+        .md5(blobInfo.getMd5Hash())
+        .sizeInBytes(blobInfo.getSize())
+        .build();
+
+    return gsBlobInfo;
 
   }
 

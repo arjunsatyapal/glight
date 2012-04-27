@@ -97,10 +97,11 @@ public class ImportGoogleDocJobs {
       GoogleDocResourceId resourceId = new GoogleDocResourceId(entity.getResourceId());
 
       DocsServiceWrapper docsService = getInstance(DocsServiceWrapper.class);
-      // GoogleDocArchivePojo pojo = docsService.archiveResource(resourceId);
+       GoogleDocArchivePojo pojo = docsService.archiveResource(resourceId);
 
-      String archiveId =
-          "vax2Nuv9Oq4VIPQEBTcxlJDkNbRFv7KVNL`55qVoitx7rtrJHru1T6ljtTjMW26L3ygWrvW1tMZHHg6ARCy3Uj1iCedCKgI-aCe_1-3S8hBATsyi7KAFDUPl9DojxAJkJY8leCmCujQQ";
+       String archiveId = pojo.getArchiveId();
+//      String archiveId =
+//          "-228jZrUfn0gAK61p1ISLpDkNbRFv7KVNL55qVoitx7rtrJHru1T6ljtTjMW26L3ygWrvW1tMZHHg6ARCy3Uj4VOMCs9wwwTC1gspoSpmoV5Aub-38c3uHnL1gUajgTqs9-2YGCqSos";
 
       System.out.println("ArchiveId = \n" + archiveId);
 
@@ -149,7 +150,6 @@ public class ImportGoogleDocJobs {
 
   @SuppressWarnings("serial")
   public static class DonwloadArchive extends LightJob3<LightJobContextPojo, String, String> {
-
     /**
      * {@inheritDoc}
      */
@@ -293,12 +293,9 @@ public class ImportGoogleDocJobs {
 
           GSBlobInfo gsBlobInfo = new GSBlobInfo.Builder()
               .contentType(contentType)
-              .creationTime(LightUtils.getNow())
               .fileName(parts[parts.length - 1])
               .gsKey(storeAbsFilePath)
               .sizeInBytes(zipEntry.getSize())
-              .creationTime(LightUtils.getNow())
-              .lastUpdateTime(LightUtils.getNow())
               .build();
           resourceMap.put(newFileName, gsBlobInfo);
 
@@ -327,6 +324,7 @@ public class ImportGoogleDocJobs {
         futureCall(new PipelineJobs.DummyJob(), immediate(getContext()), waitFor(moduleVersionFV));
 
         int htmlCount = 0;
+        @SuppressWarnings("rawtypes")
         List<FutureValue> jobsToWait = Lists.newArrayList();
         // Now moduleVersion is created. So adding resources for that.
         for (String currKey : resourceMap.keySet()) {
@@ -392,8 +390,8 @@ public class ImportGoogleDocJobs {
   }
 
   // TODO(arjuns): Move it to a better location.
-  public static void
-      updateChangeLog(ImportManager importManager, ImportJobEntity entity, String changeMessage) {
+  public static void updateChangeLog(
+      ImportManager importManager, ImportJobEntity entity, String changeMessage) {
     ChangeLogEntryPojo changeLog = new ChangeLogEntryPojo(changeMessage);
     importManager.put(entity, changeLog);
   }

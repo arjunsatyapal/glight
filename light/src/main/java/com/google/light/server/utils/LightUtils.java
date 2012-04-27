@@ -15,25 +15,17 @@
  */
 package com.google.light.server.utils;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.constants.LightConstants.SESSION_MAX_INACTIVITY_PERIOD;
 import static com.google.light.server.constants.RequestParamKeyEnum.DEFAULT_EMAIL;
 import static com.google.light.server.constants.RequestParamKeyEnum.LOGIN_PROVIDER_ID;
 import static com.google.light.server.constants.RequestParamKeyEnum.LOGIN_PROVIDER_USER_ID;
 import static com.google.light.server.constants.RequestParamKeyEnum.PERSON_ID;
-import static com.google.light.server.utils.GuiceUtils.getInstance;
-import static com.google.light.server.utils.GuiceUtils.getProvider;
-import static com.google.light.server.utils.GuiceUtils.seedEntityInRequestScope;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;
-import com.google.light.server.annotations.AnotActor;
-import com.google.light.server.annotations.AnotOwner;
 import com.google.light.server.constants.FileExtensions;
 import com.google.light.server.constants.OAuth2ProviderService;
-import com.google.light.server.dto.pojo.PersonId;
-import com.google.light.server.dto.pojo.RequestScopedValues;
 import com.google.light.server.exception.unchecked.httpexception.LightHttpException;
 import com.google.light.server.guice.providers.InstantProvider;
 import java.io.IOException;
@@ -48,7 +40,6 @@ import java.net.URLEncoder;
 import java.util.Enumeration;
 import java.util.UUID;
 import java.util.logging.Logger;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -216,21 +207,6 @@ public class LightUtils {
     } catch (URISyntaxException e) {
       throw new RuntimeException(e);
     }
-  }
-
-  public static void enqueueRequestScopedVariables(PersonId ownerId, PersonId actorId) {
-    
-      HttpServletRequest request = getInstance(HttpServletRequest.class);
-      checkNotNull(request, "request");
-
-      if (ownerId != null) {
-        seedEntityInRequestScope(request, PersonId.class, AnotOwner.class, ownerId);
-      }
-
-      checkNotNull(actorId, "actorId");
-      seedEntityInRequestScope(request, PersonId.class, AnotActor.class, actorId);
-      RequestScopedValues participants = getProvider(RequestScopedValues.class).get();
-      checkArgument(participants.isValid(), "Invalid state for Participants.");
   }
 
   public static String encodeToUrlEncodedString(String string) {

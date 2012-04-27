@@ -4,8 +4,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.constants.OAuth2ProviderService.GOOGLE_LOGIN;
 import static com.google.light.server.servlets.path.ServletPathEnum.OAUTH2_GOOGLE_LOGIN_CB;
 import static com.google.light.server.servlets.path.ServletPathEnum.SESSION;
+import static com.google.light.server.utils.GuiceUtils.enqueueRequestScopedVariables;
 import static com.google.light.server.utils.GuiceUtils.getInstance;
-import static com.google.light.server.utils.LightUtils.enqueueRequestScopedVariables;
 import static com.google.light.server.utils.ServletUtils.prepareSession;
 
 import com.google.api.client.auth.oauth2.AuthorizationCodeResponseUrl;
@@ -29,7 +29,6 @@ import com.google.light.server.servlets.oauth2.google.pojo.GoogleLoginTokenInfo;
 import com.google.light.server.servlets.oauth2.google.pojo.GoogleUserInfo;
 import com.google.light.server.utils.GaeUtils;
 import com.google.light.server.utils.JsonUtils;
-import com.google.light.server.utils.LightUtils;
 import com.google.light.server.utils.ServletUtils;
 import java.io.IOException;
 import javax.servlet.http.HttpServlet;
@@ -140,7 +139,6 @@ public class GoogleLoginCallbackServlet extends HttpServlet {
       personId = personEntity.getPersonId();
 
       enqueueRequestScopedVariables(personId, personId);
-      LightUtils.enqueueRequestScopedVariables(personId, personId);
 
       
       // Update session with personId which is not available.

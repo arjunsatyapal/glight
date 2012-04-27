@@ -41,8 +41,8 @@ public class ImportManagerImpl implements ImportManager {
 
   @Inject
   public ImportManagerImpl(ImportJobDao importJobDao, ImportStageDetailDao importStageDetailDao) {
-    importJobDao = checkNotNull(importJobDao, "importJobDao");
-    importStageDetailDao = checkNotNull(importStageDetailDao, "importStageDetailDao"); 
+    this.importJobDao = checkNotNull(importJobDao, "importJobDao");
+    this.importStageDetailDao = checkNotNull(importStageDetailDao, "importStageDetailDao"); 
   }
 
   /**

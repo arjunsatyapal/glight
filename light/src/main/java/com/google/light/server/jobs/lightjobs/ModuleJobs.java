@@ -32,7 +32,6 @@ import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocInfoDto
 import com.google.light.server.manager.interfaces.ImportManager;
 import com.google.light.server.manager.interfaces.ModuleManager;
 import com.google.light.server.persistence.entity.queue.importflow.ImportJobEntity;
-import com.google.light.server.utils.GuiceUtils;
 import com.google.light.server.utils.JsonUtils;
 
 /**
@@ -51,10 +50,10 @@ public class ModuleJobs {
     @Override
     public ImmediateValue<ModuleId> handler(String originId) {
       // TODO(arjuns): Add a check that for one Document, only one module is created.
-      ModuleManager moduleManager = GuiceUtils.getInstance(ModuleManager.class);
+      ModuleManager moduleManager = getInstance(ModuleManager.class);
 
-      ModuleId reservedModuleId =
-          moduleManager.reserveModuleIdForOriginId(originId, getContext().getOwnerId());
+      ModuleId reservedModuleId = moduleManager.reserveModuleIdForOriginId(
+          originId, getContext().getOwnerId());
 
       return immediate(reservedModuleId);
     }
@@ -95,6 +94,7 @@ public class ModuleJobs {
     }
   }
 
+  
   @SuppressWarnings("serial")
   public static class AddModuleResources extends LightJob6<Void, ModuleId, Version, String, String, GSBlobInfo> {
     /**
@@ -113,5 +113,4 @@ public class ModuleJobs {
       return null;
     }
   }
-
 }
