@@ -66,8 +66,6 @@ public class OAuth2OwnerTokenDao extends AbstractBasicDao<OAuth2OwnerTokenDto, O
    */
   public OAuth2OwnerTokenEntity getByProviderServiceAndProviderUserId(
       OAuth2ProviderService providerService, String providerUserId) {
-//    sessionManager.checkPersonLoggedIn();
-    
     Objectify ofy = ObjectifyUtils.nonTransaction();
 
     Query<OAuth2OwnerTokenEntity> query = ofy.query(OAuth2OwnerTokenEntity.class)
@@ -97,7 +95,7 @@ public class OAuth2OwnerTokenDao extends AbstractBasicDao<OAuth2OwnerTokenDto, O
     for (int index = 0; index < ownerTokens.size() - 1; index++) {
       OAuth2OwnerTokenEntity currToken = ownerTokens.get(index);
       currPersonId = currToken.getPersonId();
-      checkNotNull(currPersonId, "PerseonId is missing.");
+      checkNotNull(currPersonId, "PersonId is missing.");
       checkPersonId(currPersonId);
 
       for (int futureIndex = index + 1; futureIndex < ownerTokens.size(); futureIndex++) {
@@ -159,10 +157,10 @@ public class OAuth2OwnerTokenDao extends AbstractBasicDao<OAuth2OwnerTokenDto, O
    */
   public OAuth2OwnerTokenEntity getByProviderService(OAuth2ProviderService providerService) {
     requestScopedValuesProvider = getProvider(RequestScopedValues.class);
-    RequestScopedValues participants = requestScopedValuesProvider.get();
+    RequestScopedValues requestScopedValues = requestScopedValuesProvider.get();
 
     Key<OAuth2OwnerTokenEntity> fetchKey = OAuth2OwnerTokenEntity.generateKey(
-        participants.getOwner().getKey(), providerService.name());
+        requestScopedValues.getOwner().getKey(), providerService.name());
 
     return super.get(fetchKey);
   }

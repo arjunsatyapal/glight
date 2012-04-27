@@ -19,6 +19,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
+import org.junit.Ignore;
+
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableMapBuilder;
@@ -55,6 +57,7 @@ public class LoginStateDtoTest extends AbstractDtoTest {
     assertEquals(SAMPLE_REDIRECT_PATH, dto.getRedirectPath());
   }
 
+  @Test
   @Override
   public void test_builder() throws Exception {
     // already tested in test_validate
@@ -64,6 +67,7 @@ public class LoginStateDtoTest extends AbstractDtoTest {
     return new LoginStateDto.Builder();
   }
 
+  @Test
   @Override
   public void test_toJson() throws Exception {
     assertEquals(
@@ -71,6 +75,7 @@ public class LoginStateDtoTest extends AbstractDtoTest {
         getDefaultBuilder().redirectPath(SAMPLE_REDIRECT_PATH).build().toJson());
   }
 
+  @Test
   @Override
   public void test_validate() throws Exception {
     // Positive case: redirectPath not defined
@@ -92,6 +97,8 @@ public class LoginStateDtoTest extends AbstractDtoTest {
     }
   }
 
+  @Ignore(value="TODO(arjuns): Fix me.")
+  @Test
   @Override
   public void test_toXml() throws Exception {
     try {
@@ -101,5 +108,4 @@ public class LoginStateDtoTest extends AbstractDtoTest {
       // expected
     }
   }
-
 }

@@ -27,7 +27,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.light.server.constants.JavaDtos;
 import com.google.light.server.constants.http.ContentTypeConstants;
-import com.google.light.server.dto.DtoInterface;
+import com.google.light.server.dto.AbstractDto;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -63,7 +63,7 @@ public final class JAXBXmlContextResolver implements ContextResolver<Marshaller>
     
     
     marshallerMap = Maps.newHashMap();
-    for(Class<? extends DtoInterface> currClass : list) {
+    for(Class<? extends AbstractDto> currClass : list) {
       marshallerMap.put(currClass, generateMarshaller(currClass));
     }
   }

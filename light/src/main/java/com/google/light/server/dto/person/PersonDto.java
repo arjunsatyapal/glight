@@ -19,25 +19,15 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkEmail;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
-
+import com.google.light.server.dto.AbstractDto;
+import com.google.light.server.dto.AbstractDtoToPersistence;
 import com.google.light.server.dto.pojo.PersonId;
-
-
-
-import com.google.light.server.constants.XsdPath;
-import com.google.light.server.dto.DtoToPersistenceInterface;
 import com.google.light.server.persistence.entity.person.PersonEntity;
-import com.google.light.server.utils.JsonUtils;
-import com.google.light.server.utils.XmlUtils;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
-
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.apache.commons.lang.builder.ToStringBuilder;
 import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
@@ -52,7 +42,7 @@ import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
 @XmlType(name = "personType", propOrder = { "firstName", "lastName", "email", "acceptedTos" })
 @XmlAccessorType(XmlAccessType.FIELD)
 @JsonSerialize(include = Inclusion.NON_NULL)
-public class PersonDto implements DtoToPersistenceInterface<PersonDto, PersonEntity, PersonId> {
+public class PersonDto extends AbstractDtoToPersistence<PersonDto, PersonEntity, PersonId> {
   @XmlElement
   private String firstName;
 
@@ -75,31 +65,6 @@ public class PersonDto implements DtoToPersistenceInterface<PersonDto, PersonEnt
   }
 
   @Override
-  public boolean equals(Object obj) {
-    return EqualsBuilder.reflectionEquals(this, obj);
-  }
-  
-  @Override
-  public int hashCode() {
-    return HashCodeBuilder.reflectionHashCode(this);
-  }
-
-  @Override
-  public String toString() {
-    return ToStringBuilder.reflectionToString(this);
-  }
-
-  @Override
-  public String toJson() {
-    try {
-      return JsonUtils.toJson(this);
-    } catch (Exception e) {
-      // TODO(arjuns) : Add exception handling later.
-      throw new RuntimeException(e);
-    }
-  }
-
-  @Override
   public PersonEntity toPersistenceEntity(PersonId personId) {
     return new PersonEntity.Builder()
         .personId(personId)
@@ -108,16 +73,6 @@ public class PersonDto implements DtoToPersistenceInterface<PersonDto, PersonEnt
         .email(email)
         .acceptedTos(acceptedTos)
         .build();
-  }
-
-  @Override
-  public String toXml() {
-    try {
-      return XmlUtils.toValidXml(this, this.getClass().getResource(XsdPath.PERSON.get()));
-    } catch (Exception e) {
-      // TODO(arjuns) : Add exception handling later.
-      throw new RuntimeException(e);
-    }
   }
 
   // Getters and setters.
@@ -153,7 +108,7 @@ public class PersonDto implements DtoToPersistenceInterface<PersonDto, PersonEnt
     this.acceptedTos = acceptedTos;
   }
 
-  public static class Builder {
+  public static class Builder extends AbstractDto.BaseBuilder<Builder> {
     private String firstName;
     private String lastName;
     private String email;
@@ -187,6 +142,7 @@ public class PersonDto implements DtoToPersistenceInterface<PersonDto, PersonEnt
 
   @SuppressWarnings("synthetic-access")
   private PersonDto(Builder builder) {
+    super(builder);
     this.firstName = builder.firstName;
     this.lastName = builder.lastName;
     this.email = builder.email;
@@ -196,5 +152,6 @@ public class PersonDto implements DtoToPersistenceInterface<PersonDto, PersonEnt
   // For JAXB.
   @JsonCreator
   private PersonDto() {
+    super(null);
   }
 }

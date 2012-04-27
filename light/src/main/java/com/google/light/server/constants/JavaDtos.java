@@ -17,6 +17,12 @@ package com.google.light.server.constants;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocInfoDto;
+
+import com.google.light.server.dto.person.PersonDto;
+
+import com.google.light.server.dto.pages.PageDto;
+
 import com.google.common.collect.Lists;
 import com.google.light.server.dto.AbstractPojo;
 import com.google.light.server.dto.pojo.PersonId;
@@ -30,7 +36,10 @@ import java.util.List;
  * @author Arjun Satyapal
  */
 public enum JavaDtos {
-  PERSON_ID(PersonId.class);
+  GOOGLE_DOC_INFO_DTO(GoogleDocInfoDto.class),
+  PAGE_DTO(PageDto.class),
+  PERSON_ID(PersonId.class),
+  PERSON_DTO(PersonDto.class);
   
   @SuppressWarnings("rawtypes")
   private Class<? extends AbstractPojo> clazz;

@@ -24,11 +24,7 @@ import com.google.common.base.Throwables;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.light.server.annotations.AnotHttpSession;
-import com.google.light.server.annotations.AnotPerformer;
-import com.google.light.server.annotations.AnotWatcher;
-import com.google.light.server.constants.HttpHeaderEnum;
 import com.google.light.server.constants.http.HttpStatusCodesEnum;
-import com.google.light.server.dto.pojo.PersonId;
 import com.google.light.server.exception.unchecked.httpexception.LightHttpException;
 import com.google.light.server.servlets.SessionManager;
 import com.google.light.server.servlets.path.ServletPathEnum;
@@ -86,20 +82,7 @@ public abstract class AbstractLightFilter implements Filter {
         sessionManager.checkPersonLoggedIn();
       }
       
-      if (sessionManager.isPersonLoggedIn()) {
-
-        PersonId performerId = sessionManager.getPersonId();
-        seedEntityInRequestScope(request, PersonId.class, AnotPerformer.class, performerId);
-        
-        String watcherIdStr = ServletUtils.getRequestHeaderValue(request, HttpHeaderEnum.LIGHT_WATCHER_HEADER);
-        if (watcherIdStr != null) {
-          seedEntityInRequestScope(request, PersonId.class, AnotWatcher.class, new PersonId(watcherIdStr));
-        } else {
-          // Forcing both watcher and performer to be same.
-          seedEntityInRequestScope(request, PersonId.class, AnotWatcher.class, performerId);
-        }
-      }
-      
+      sessionManager.seedPersonIds(request);
     
       // TODO(arjuns) : Add changeLog.
       filterChain.doFilter(request, response);

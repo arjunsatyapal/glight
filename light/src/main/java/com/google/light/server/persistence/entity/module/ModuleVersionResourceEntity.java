@@ -63,15 +63,15 @@ public class ModuleVersionResourceEntity extends
     return new Key<ModuleVersionResourceEntity>(
         moduleVersionKey, ModuleVersionResourceEntity.class, id);
   }
-  
-  public static Key<ModuleVersionResourceEntity> generateKey(ModuleId moduleId, 
+
+  public static Key<ModuleVersionResourceEntity> generateKey(ModuleId moduleId,
       Version version, String id) {
     Key<ModuleEntity> moduleKey = ModuleEntity.generateKey(moduleId);
-    Key<ModuleVersionEntity> moduleVersionKey = 
+    Key<ModuleVersionEntity> moduleVersionKey =
         ModuleVersionEntity.generateKey(moduleKey, version);
     return generateKey(moduleVersionKey, id);
   }
-  
+
   /**
    * {@inheritDoc}
    */
@@ -92,11 +92,9 @@ public class ModuleVersionResourceEntity extends
     return resourceInfo;
   }
 
-  // For Objectify.
-  private ModuleVersionResourceEntity() {
-  }
 
-  public static class Builder {
+
+  public static class Builder extends AbstractPersistenceEntity.BaseBuilder<Builder> {
     private String id;
     private Key<ModuleVersionEntity> moduleVersionKey;
     private GSBlobInfo resourceInfo;
@@ -118,14 +116,20 @@ public class ModuleVersionResourceEntity extends
 
     @SuppressWarnings("synthetic-access")
     public ModuleVersionResourceEntity build() {
-      return new ModuleVersionResourceEntity(this);
+      return new ModuleVersionResourceEntity(this).validate();
     }
   }
 
   @SuppressWarnings("synthetic-access")
   private ModuleVersionResourceEntity(Builder builder) {
+    super(builder, true);
     this.id = builder.id != null ? checkNotBlank(builder.id, "id") : id;
     this.moduleVersionKey = checkNotNull(builder.moduleVersionKey, "moduleVersionKey");
     this.resourceInfo = checkNotNull(builder.resourceInfo, "resourceInfo");
+  }
+  
+  // For Objectify.
+  private ModuleVersionResourceEntity() {
+    super(null, true);
   }
 }

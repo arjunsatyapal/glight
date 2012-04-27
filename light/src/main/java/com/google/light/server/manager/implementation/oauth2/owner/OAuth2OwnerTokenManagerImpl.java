@@ -34,7 +34,7 @@ import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import com.google.light.server.constants.LightEnvEnum;
 import com.google.light.server.constants.OAuth2ProviderService;
-import com.google.light.server.dto.DtoInterface;
+import com.google.light.server.dto.AbstractDto;
 import com.google.light.server.dto.oauth2.owner.OAuth2OwnerTokenDto;
 import com.google.light.server.exception.unchecked.httpexception.UnauthorizedException;
 import com.google.light.server.manager.implementation.oauth2.consumer.OAuth2ConsumerCredentialManagerFactory;
@@ -227,7 +227,7 @@ public class OAuth2OwnerTokenManagerImpl implements OAuth2OwnerTokenManager {
       String tokenInfoStr = CharStreams.toString(new InputStreamReader(
           tokenInfoResponse.getContent(), Charsets.UTF_8));
 
-      DtoInterface<? extends AbstractOAuth2TokenInfo> tokenInfo =
+      AbstractDto<? extends AbstractOAuth2TokenInfo> tokenInfo =
           JsonUtils.getDto(tokenInfoStr, providerService.getTokenInfoClazz());
 
       return ((D) tokenInfo.validate());

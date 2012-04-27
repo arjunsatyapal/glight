@@ -15,11 +15,9 @@
  */
 package com.google.light.server.dto;
 
+import com.google.common.base.Preconditions;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
-
-import com.google.common.base.Preconditions;
-import com.google.light.server.utils.JsonUtils;
 
 /**
  * Dto to hold any state information that should be
@@ -29,7 +27,7 @@ import com.google.light.server.utils.JsonUtils;
  */
 @SuppressWarnings("serial")
 @JsonSerialize(include = Inclusion.NON_NULL)
-public class LoginStateDto implements DtoInterface<LoginStateDto> {
+public class LoginStateDto extends AbstractDto<LoginStateDto> {
   private String redirectPath;
 
   /**
@@ -47,21 +45,6 @@ public class LoginStateDto implements DtoInterface<LoginStateDto> {
   }
 
   @Override
-  public String toJson() {
-    try {
-      return JsonUtils.toJson(this);
-    } catch (Exception e) {
-      // TODO(waltercacau) : Add exception handling later.
-      throw new RuntimeException(e);
-    }
-  }
-
-  @Override
-  public String toXml() {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
   public LoginStateDto validate() {
     if (redirectPath != null) {
       Preconditions.checkState(redirectPath.startsWith("/"),
@@ -70,7 +53,7 @@ public class LoginStateDto implements DtoInterface<LoginStateDto> {
     return this;
   }
 
-  public static class Builder {
+  public static class Builder extends AbstractDto.BaseBuilder<Builder> {
     private String redirectPath;
 
     public Builder redirectPath(String redirectPath) {
@@ -86,10 +69,12 @@ public class LoginStateDto implements DtoInterface<LoginStateDto> {
 
   @SuppressWarnings("synthetic-access")
   private LoginStateDto(Builder builder) {
+    super(builder);
     this.redirectPath = builder.redirectPath;
   }
 
   // For JAXB
   private LoginStateDto() {
+    super(null);
   }
 }

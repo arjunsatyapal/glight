@@ -23,9 +23,6 @@ import com.google.light.server.utils.JsonUtils;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.apache.commons.lang.builder.ToStringBuilder;
 import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
@@ -91,33 +88,6 @@ public class GoogleLoginTokenInfo extends AbstractOAuth2TokenInfo<GoogleLoginTok
     checkEmail(email);
 
     return this;
-  }
-
-  @Override
-  public String toString() {
-    return ToStringBuilder.reflectionToString(this);
-  }
-
-  @Override
-  public int hashCode() {
-    return HashCodeBuilder.reflectionHashCode(this);
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    return EqualsBuilder.reflectionEquals(this, obj);
-  }
-
-  /**
-   * {@inheritDoc} TODO(arjuns) : Add test for this.
-   */
-  @Override
-  public String toJson() {
-    try {
-      return JsonUtils.toJson(this);
-    } catch (Exception e) {
-      throw new JsonException("Conversion of " + getClass().getSimpleName() + " to Json failed.", e);
-    }
   }
 
   // For JAXB.

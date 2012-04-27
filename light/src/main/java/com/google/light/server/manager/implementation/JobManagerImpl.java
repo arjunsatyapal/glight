@@ -85,7 +85,7 @@ public class JobManagerImpl implements JobManager {
           JOB_BACK_OFF_FACTOR, JOB_BACK_OFF_SECONDS, JOB_MAX_ATTEMPTES);
 
       logger.info("For ImportJobEntity [" + importJobEntity.getId() + "], created a PipelineId["
-          + pipelineId + "] and saved as Job[" + savedJobEntity.getJobId() + "].");
+          + pipelineId + "] and saved as Job[" + savedJobEntity.getId() + "].");
 
       return savedJobEntity;
     } catch (Exception e) {

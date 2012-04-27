@@ -51,8 +51,6 @@ public enum RequestParamKeyEnum {
   OAUTH2_PROVIDER_NAME("oauth2_provider_name", true),
 
   
-  PAGE_NEXT("page_next", true),
-  PAGE_PREVIOUS("page_previous", true),
   PASSWORD("password", false),
   PERSON_ID("person_id", true),
   PIPELINE_ID("pipeline_id", true),

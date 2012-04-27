@@ -15,20 +15,17 @@
  */
 package com.google.light.server.utils;
 
+import com.google.common.base.Throwables;
+import com.google.light.server.dto.AbstractDto;
+import com.google.light.server.exception.unchecked.httpexception.BadRequestException;
 import java.lang.reflect.Constructor;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
-
 import javax.servlet.http.HttpServletRequest;
-
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang.builder.ToStringBuilder;
-
-import com.google.common.base.Throwables;
-import com.google.light.server.dto.DtoInterface;
-import com.google.light.server.exception.unchecked.httpexception.BadRequestException;
 
 /**
  * Utility class for converting query strings parameters from an {@link HttpServletRequest} to a
@@ -49,7 +46,7 @@ public class QueryUtils {
    * @return
    */
   @SuppressWarnings("unchecked")
-  public static <D extends DtoInterface<D>> D getValidDto(HttpServletRequest request,
+  public static <D extends AbstractDto<D>> D getValidDto(HttpServletRequest request,
       Class<D> dtoClass) {
 
     // Creating a dtoClass instance

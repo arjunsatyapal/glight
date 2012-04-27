@@ -19,6 +19,8 @@ import static com.google.light.testingutils.TestingUtils.getResourceAsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import com.google.light.testingutils.TestResourcePaths;
+
 
 import com.google.light.server.utils.JsonUtils;
 import org.junit.Test;
@@ -29,15 +31,12 @@ import org.junit.Test;
  * @author Arjun Satyapal
  */
 public class GoogleUserInfoTest {
-  private static final String GOOGLE_USER_INFO_JSON_FILE_PATH = 
-      "/login/oauth2/google/google_user_info.json";
-  
   /**
    * Test to validate JSON Parsing for {@link GoogleUserInfo}.
    */
   @Test
   public void test_jsonParsing() throws Exception {
-    String jsonString = getResourceAsString(GOOGLE_USER_INFO_JSON_FILE_PATH);
+    String jsonString = getResourceAsString(TestResourcePaths.GOOGLE_USER_INFO_JSON.get());
     GoogleUserInfo userTokenInfo = JsonUtils.getDto(jsonString, GoogleUserInfo.class);
     
     assertEquals("115639870677665060321", userTokenInfo.getId());

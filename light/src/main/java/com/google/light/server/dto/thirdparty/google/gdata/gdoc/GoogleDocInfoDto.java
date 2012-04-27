@@ -20,6 +20,8 @@ import static com.google.light.server.constants.OAuth2ProviderService.GOOGLE_DOC
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
 
+import javax.xml.bind.annotation.XmlTransient;
+
 import com.google.common.collect.Lists;
 import com.google.gdata.data.Link;
 import com.google.gdata.data.MediaContent;
@@ -29,14 +31,13 @@ import com.google.gdata.data.acl.AclRole;
 import com.google.gdata.data.acl.AclScope;
 import com.google.gdata.data.acl.AdditionalRole;
 import com.google.gdata.data.docs.DocumentListEntry;
-import com.google.light.server.dto.DtoInterface;
+import com.google.light.server.dto.AbstractDto;
 import com.google.light.server.dto.module.ModuleType;
-import com.google.light.server.exception.unchecked.JsonException;
-import com.google.light.server.utils.JsonUtils;
 import java.util.List;
 import java.util.logging.Logger;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
 import org.joda.time.DateTime;
@@ -48,18 +49,16 @@ import org.joda.time.DateTime;
  * 
  * @author Arjun Satyapal
  */
+@SuppressWarnings("serial")
 @XmlAccessorType(XmlAccessType.FIELD)
 @JsonSerialize(include = Inclusion.NON_NULL)
-@SuppressWarnings("serial")
-public class GoogleDocInfoDto implements DtoInterface<GoogleDocInfoDto> {
+public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
   private static final Logger logger = Logger.getLogger(GoogleDocInfoDto.class.getName());
 
   private String id;
   private String resourceId;
   private String etag;
 
-  private DateTime creationTime;
-  private DateTime lastUpdated;
   private DateTime lastEditTime;
 
   private ModuleType type;
@@ -97,30 +96,8 @@ public class GoogleDocInfoDto implements DtoInterface<GoogleDocInfoDto> {
   private Long sizeInBytes;
 
   private DateTime lastCommentTime;
-  private Configuration config;
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public String toJson() {
-    try {
-      return JsonUtils.toJson(this);
-    } catch (Exception e) {
-      // TODO(arjuns): Add exception handling.
-      // TODO(arjuns): Update other toJson to throw this exception.
-      throw new JsonException(e);
-    }
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public String toXml() {
-    // TODO(arjuns): Auto-generated method stub
-    throw new UnsupportedOperationException();
-  }
+  
+  @XmlTransient private Configuration config;
 
   /**
    * {@inheritDoc}
@@ -141,8 +118,6 @@ public class GoogleDocInfoDto implements DtoInterface<GoogleDocInfoDto> {
     }
 
     if (config != Configuration.DTO_FOR_IMPORT) {
-      checkNotNull(creationTime, "creationTime");
-      checkNotNull(lastUpdated, "lastUpdated");
       checkNotNull(lastEditTime, "lastEditTime");
     }
 
@@ -188,14 +163,6 @@ public class GoogleDocInfoDto implements DtoInterface<GoogleDocInfoDto> {
 
   public String getEtag() {
     return etag;
-  }
-
-  public DateTime getCreationTime() {
-    return creationTime;
-  }
-
-  public DateTime getLastUpdated() {
-    return lastUpdated;
   }
 
   public DateTime getLastEditTime() {
@@ -272,14 +239,11 @@ public class GoogleDocInfoDto implements DtoInterface<GoogleDocInfoDto> {
     return config;
   }
 
-
-
-  public static class Builder {
+  @SuppressWarnings("rawtypes")
+  public static class Builder extends AbstractDto.BaseBuilder<BaseBuilder> {
     private String id;
     private String resourceId;
     private String etag;
-    private DateTime creationTime;
-    private DateTime lastUpdated;
     private DateTime lastEditTime;
     private ModuleType type;
     private String title;
@@ -319,20 +283,6 @@ public class GoogleDocInfoDto implements DtoInterface<GoogleDocInfoDto> {
     public Builder etag(String etag) {
       if (config != Configuration.DTO_FOR_IMPORT) {
         this.etag = etag;
-      }
-      return this;
-    }
-
-    public Builder creationTime(DateTime creationTime) {
-      if (config != Configuration.DTO_FOR_IMPORT) {
-        this.creationTime = creationTime;
-      }
-      return this;
-    }
-
-    public Builder lastUpdated(DateTime lastUpdated) {
-      if (config != Configuration.DTO_FOR_IMPORT) {
-        this.lastUpdated = lastUpdated;
       }
       return this;
     }
@@ -516,8 +466,8 @@ public class GoogleDocInfoDto implements DtoInterface<GoogleDocInfoDto> {
       resourceId(docListEntry.getResourceId());
       etag(docListEntry.getEtag());
 
-      creationTime(new DateTime(docListEntry.getPublished().getValue()));
-      lastUpdated(new DateTime(docListEntry.getUpdated().getValue()));
+      creationTime(new DateTime(docListEntry.getPublished().getValue()).toInstant());
+      lastUpdateTime(new DateTime(docListEntry.getUpdated().getValue()).toInstant());
       lastEditTime(new DateTime(docListEntry.getEdited().getValue()));
 
       type(ModuleType.getByProviderServiceAndCategory(GOOGLE_DOC, docListEntry.getType()));
@@ -567,17 +517,12 @@ public class GoogleDocInfoDto implements DtoInterface<GoogleDocInfoDto> {
     }
   }
   
-  // For JAXB
-  private GoogleDocInfoDto() {
-  }
-
   @SuppressWarnings("synthetic-access")
   private GoogleDocInfoDto(Builder builder) {
+    super(builder);
     this.id = builder.id;
     this.resourceId = builder.resourceId;
     this.etag = builder.etag;
-    this.creationTime = builder.creationTime;
-    this.lastUpdated = builder.lastUpdated;
     this.lastEditTime = builder.lastEditTime;
     this.type = builder.type;
     this.title = builder.title;
@@ -597,6 +542,12 @@ public class GoogleDocInfoDto implements DtoInterface<GoogleDocInfoDto> {
     this.sizeInBytes = builder.sizeInBytes;
     this.lastCommentTime = builder.lastCommentTime;
     this.config = checkNotNull(builder.config, "config");
+  }
+  
+  // For Jaxb.  
+  @JsonCreator
+  private GoogleDocInfoDto() {
+    super(null);
   }
 
   private <D> List<D> getNonEmptyList(List<D> list) {

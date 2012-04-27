@@ -15,7 +15,7 @@
  */
 package com.google.light.server.utils;
 
-import com.google.light.server.dto.DtoInterface;
+import com.google.light.server.dto.AbstractDto;
 
 @SuppressWarnings("serial")
 /**
@@ -23,16 +23,17 @@ import com.google.light.server.dto.DtoInterface;
  * 
  * This class could not be a private static class inside QueryUtilsTest because
  * Apache Commons BeanUtils does not work with such kind of class.
- * 
+ * TODO(arjuns): See if this is fine.
  * @author Walter Cacau
  */
-public class QueryUtilsTestSampleDto implements DtoInterface<QueryUtilsTestSampleDto> {
+public class QueryUtilsTestSampleDto extends AbstractDto<QueryUtilsTestSampleDto> {
 
   /**
    * Choosing private because several DTO's create private constructors to force the use of their
    * builders.
    */
   private QueryUtilsTestSampleDto() {
+    super(null);
   }
 
   String field;
@@ -52,16 +53,6 @@ public class QueryUtilsTestSampleDto implements DtoInterface<QueryUtilsTestSampl
 
   public void setSomeOtherField(int someOtherField) {
     this.someOtherField = someOtherField;
-  }
-
-  @Override
-  public String toJson() {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public String toXml() {
-    throw new UnsupportedOperationException();
   }
 
   // Used for latter assert that the DTO was validated.

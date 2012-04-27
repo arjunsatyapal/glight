@@ -17,11 +17,9 @@ package com.google.light.server.dto;
 
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
+import com.google.light.server.dto.person.PersonDto;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
-
-import com.google.light.server.dto.person.PersonDto;
-import com.google.light.server.utils.JsonUtils;
 
 /**
  * Dto to represent javascript variables that will be inject
@@ -31,26 +29,10 @@ import com.google.light.server.utils.JsonUtils;
  */
 @SuppressWarnings("serial")
 @JsonSerialize(include = Inclusion.NON_NULL)
-public class JSVariablesPreloadDto implements
-    DtoInterface<JSVariablesPreloadDto> {
+public class JSVariablesPreloadDto extends AbstractDto<JSVariablesPreloadDto> {
 
   private String locale;
   private PersonDto person;
-
-  @Override
-  public String toJson() {
-    try {
-      return JsonUtils.toJson(this);
-    } catch (Exception e) {
-      // TODO(waltercacau) : Add exception handling later.
-      throw new RuntimeException(e);
-    }
-  }
-
-  @Override
-  public String toXml() {
-    throw new UnsupportedOperationException();
-  }
 
   @Override
   public JSVariablesPreloadDto validate() {
@@ -76,9 +58,10 @@ public class JSVariablesPreloadDto implements
 
   // For JAXB
   private JSVariablesPreloadDto() {
+    super(null);
   }
 
-  public static class Builder {
+  public static class Builder extends AbstractDto.BaseBuilder<Builder> {
     private String locale;
     private PersonDto person;
 
@@ -100,6 +83,7 @@ public class JSVariablesPreloadDto implements
 
   @SuppressWarnings("synthetic-access")
   private JSVariablesPreloadDto(Builder builder) {
+    super(builder);
     this.locale = builder.locale;
     this.person = builder.person;
   }

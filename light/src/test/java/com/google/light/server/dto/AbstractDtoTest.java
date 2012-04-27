@@ -15,8 +15,6 @@
  */
 package com.google.light.server.dto;
 
-import org.junit.Test;
-
 import com.google.light.server.AbstractGAETest;
 
 /**
@@ -29,7 +27,6 @@ public abstract class AbstractDtoTest extends AbstractGAETest {
   /**
    * Test for constructor for each entity.
    */
-  @Test
   public abstract void test_builder() throws Exception;
 
   /**
@@ -38,20 +35,16 @@ public abstract class AbstractDtoTest extends AbstractGAETest {
    * 
    * @throws Exception
    */
-  @Test
   public abstract void test_toJson() throws Exception;
 
   /**
    * Test for {@link DtoToPersistenceInterface#validate()}.
    */
-  @Test
   public abstract void test_validate() throws Exception;
 
   /**
    * Test for {@link DtoToPersistenceInterface#toXml()}. For testing, we will read JSON from file,
    * convert it to DTO, then convert it to XML and then compare with a XML stored in file.
    */
-  @Test
   public abstract void test_toXml() throws Exception;
-
 }

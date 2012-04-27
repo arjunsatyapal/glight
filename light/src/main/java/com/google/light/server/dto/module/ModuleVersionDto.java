@@ -18,11 +18,9 @@ package com.google.light.server.dto.module;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
 
-import com.google.light.server.dto.pojo.Version;
-
 import com.google.light.server.dto.AbstractDtoToPersistence;
+import com.google.light.server.dto.pojo.Version;
 import com.google.light.server.persistence.entity.module.ModuleVersionEntity;
-import com.google.light.server.utils.JsonUtils;
 
 /**
  * DTO for Light Modules.
@@ -40,30 +38,7 @@ public class ModuleVersionDto extends AbstractDtoToPersistence<ModuleVersionDto,
    * {@inheritDoc}
    */
   @Override
-  public String toJson() {
-    try {
-      return JsonUtils.toJson(this);
-    } catch (Exception e) {
-      // TODO(arjuns): handle exceptions.
-      throw new RuntimeException(e);
-    }
-  }
-
-  /** 
-   * {@inheritDoc}
-   */
-  @Override
-  public String toXml() {
-    // TODO(arjuns): Auto-generated method stub
-    throw new UnsupportedOperationException();
-  }
-
-  /** 
-   * {@inheritDoc}
-   */
-  @Override
   public ModuleVersionDto validate() {
-    super.validate();
     checkPositiveLong(version, "version");
     checkNotBlank(content, "content");
     return this;
@@ -104,7 +79,7 @@ public class ModuleVersionDto extends AbstractDtoToPersistence<ModuleVersionDto,
 
     @SuppressWarnings("synthetic-access")
     public ModuleVersionDto build() {
-      return new ModuleVersionDto(this);
+      return new ModuleVersionDto(this).validate();
     }
   }
 

@@ -15,32 +15,17 @@
  */
 package com.google.light.server.utils;
 
-import com.google.light.server.exception.unchecked.XmlException;
-
 import com.google.gdata.data.BaseEntry;
-
+import com.google.gdata.data.BaseFeed;
 import com.google.gdata.data.ExtensionProfile;
 import com.google.gdata.util.common.xml.XmlWriter;
-
-import com.google.gdata.data.BaseFeed;
-
-import org.jdom.JDOMException;
-
-import org.jdom.Document;
-
-import org.jdom.input.SAXBuilder;
-
-import org.jdom.output.Format;
-
-import org.jdom.output.XMLOutputter;
-
-import com.google.light.server.dto.DtoInterface;
-
+import com.google.light.server.dto.AbstractDto;
+import com.google.light.server.dto.person.PersonDto;
+import com.google.light.server.exception.unchecked.XmlException;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.net.URL;
-
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -52,10 +37,12 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
-
+import org.jdom.Document;
+import org.jdom.JDOMException;
+import org.jdom.input.SAXBuilder;
+import org.jdom.output.Format;
+import org.jdom.output.XMLOutputter;
 import org.xml.sax.SAXException;
-
-import com.google.light.server.dto.person.PersonDto;
 
 /**
  * Utility class for Xml.
@@ -66,7 +53,7 @@ import com.google.light.server.dto.person.PersonDto;
  */
 public class XmlUtils {
   @SuppressWarnings("unchecked")
-  public static <D extends DtoInterface<D>> D getDto(String xmlString) throws JAXBException {
+  public static <D extends AbstractDto<D>> D getDto(String xmlString) throws JAXBException {
     JAXBContext jaxbContext = JAXBContext.newInstance(PersonDto.class);
     Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
 

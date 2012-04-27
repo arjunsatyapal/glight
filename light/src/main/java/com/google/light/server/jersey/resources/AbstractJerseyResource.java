@@ -15,9 +15,23 @@
  */
 package com.google.light.server.jersey.resources;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.light.server.utils.GuiceUtils.getInstance;
+import static com.google.light.server.utils.GuiceUtils.seedEntityInRequestScope;
+
+import com.google.common.base.Preconditions;
+
+import com.google.light.server.annotations.AnotOwner;
+import com.google.light.server.dto.pojo.PersonId;
+
+import com.google.inject.Inject;
+import com.google.inject.Injector;
+import com.google.light.server.annotations.AnotHttpSession;
+import com.google.light.server.servlets.SessionManager;
+import com.google.light.server.utils.GuiceUtils;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.core.Context;
+import javax.servlet.http.HttpSession;
 
 /**
  *
@@ -27,6 +41,25 @@ import javax.ws.rs.core.Context;
  * @author Arjun Satyapal
  */
 public abstract class AbstractJerseyResource {
-  @Context protected HttpServletRequest request;
-  @Context protected HttpServletResponse response;
+  @Inject Injector injector;
+  protected HttpServletRequest request;
+  protected HttpServletResponse response;
+  
+  @Inject
+  public AbstractJerseyResource(Injector injector, HttpServletRequest request) {
+    this.injector = checkNotNull(injector, "injector");
+    GuiceUtils.setInjector(injector);
+    this.request = checkNotNull(request, "request");
+    checkNotNull(request, "request");
+    
+    HttpSession session = request.getSession();
+    seedEntityInRequestScope(request, HttpSession.class, AnotHttpSession.class, session);
+    
+    SessionManager sessionManager = GuiceUtils.getInstance(SessionManager.class);
+    sessionManager.seedPersonIds(request);
+
+    PersonId foo = getInstance(PersonId.class, AnotOwner.class);
+    Preconditions.checkNotNull(foo);
+
+  }
 }

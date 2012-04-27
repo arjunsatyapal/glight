@@ -101,19 +101,21 @@ public class SearchResultDtoTest extends AbstractDtoTest {
     } catch (NullPointerException e) {
       // expected.
     }
-
   }
-
+  
+  @Test
   @Override
   public void test_builder() throws Exception {
     // No validation logic in constructor. So nothing to test here.
   }
 
+  @Test
   @Override
   public void test_toJson() throws Exception {
     // TODO(waltercacau): Implement this test
   }
 
+  @Test
   @Override
   public void test_toXml() throws Exception {
     // TODO(waltercacau): Implement this test

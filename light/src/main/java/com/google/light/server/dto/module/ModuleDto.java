@@ -45,30 +45,7 @@ public class ModuleDto extends AbstractDtoToPersistence<ModuleDto, ModuleEntity,
    * {@inheritDoc}
    */
   @Override
-  public String toJson() {
-    try {
-      return JsonUtils.toJson(this);
-    } catch (Exception e) {
-      // TODO(arjuns): handle exceptions.
-      throw new RuntimeException(e);
-    }
-  }
-
-  /** 
-   * {@inheritDoc}
-   */
-  @Override
-  public String toXml() {
-    // TODO(arjuns): Auto-generated method stub
-    throw new UnsupportedOperationException();
-  }
-
-  /** 
-   * {@inheritDoc}
-   */
-  @Override
   public ModuleDto validate() {
-    super.validate();
     checkNotBlank(title, "title");
     checkNotNull(state, "moduleState");
     checkPersonId(ownerPersonId);

@@ -15,14 +15,10 @@ package com.google.light.server.dto.admin;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
-import com.google.light.server.utils.JsonUtils;
-
 import com.google.light.server.constants.OAuth2ProviderEnum;
-import com.google.light.server.dto.DtoToPersistenceInterface;
+import com.google.light.server.dto.AbstractDto;
+import com.google.light.server.dto.AbstractDtoToPersistence;
 import com.google.light.server.persistence.entity.admin.OAuth2ConsumerCredentialEntity;
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.apache.commons.lang.builder.ToStringBuilder;
 
 /**
  * DTO for OAuth2Consumer Credentials. Corresponding Entity is
@@ -31,40 +27,27 @@ import org.apache.commons.lang.builder.ToStringBuilder;
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
-public class OAuth2ConsumerCredentialDto implements
-    DtoToPersistenceInterface<OAuth2ConsumerCredentialDto, OAuth2ConsumerCredentialEntity, String> {
+public class OAuth2ConsumerCredentialDto extends 
+    AbstractDtoToPersistence<OAuth2ConsumerCredentialDto, OAuth2ConsumerCredentialEntity, String> {
   private OAuth2ProviderEnum provider;
   private String clientId;
   private String clientSecret;
 
-  /**
-   * Constructor.
-   * 
-   * @param provider
-   * @param clientId
-   * @param clientSecret
-   */
-  protected OAuth2ConsumerCredentialDto(OAuth2ProviderEnum provider, String clientId,
-      String clientSecret) {
-    this.provider = provider;
-    this.clientId = clientId;
-    this.clientSecret = clientSecret;
-
-    this.validate();
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public String toJson() {
-    try {
-    return JsonUtils.toJson(this);
-    } catch (Exception e) {
-      // TODO(arjuns): Add exception handling.
-      throw new RuntimeException(e);
-    }
-  }
+//  /**
+//   * Constructor.
+//   * 
+//   * @param provider
+//   * @param clientId
+//   * @param clientSecret
+//   */
+//  protected OAuth2ConsumerCredentialDto(OAuth2ProviderEnum provider, String clientId,
+//      String clientSecret) {
+//    this.provider = provider;
+//    this.clientId = clientId;
+//    this.clientSecret = clientSecret;
+//
+//    this.validate();
+//  }
 
   /**
    * {@inheritDoc} This method should not be called. 
@@ -101,29 +84,6 @@ public class OAuth2ConsumerCredentialDto implements
     return this;
   }
 
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public String toXml() {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public String toString() {
-    return ToStringBuilder.reflectionToString(this);
-  }
-
-  @Override
-  public int hashCode() {
-    return HashCodeBuilder.reflectionHashCode(this);
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    return EqualsBuilder.reflectionEquals(this, obj);
-  }
-
   public OAuth2ProviderEnum getProvider() {
     return provider;
   }
@@ -136,7 +96,7 @@ public class OAuth2ConsumerCredentialDto implements
     return clientSecret;
   }
 
-  public static class Builder {
+  public static class Builder extends AbstractDto.BaseBuilder<Builder> {
     private OAuth2ProviderEnum provider;
     private String clientId;
     private String clientSecret;
@@ -164,13 +124,14 @@ public class OAuth2ConsumerCredentialDto implements
 
   @SuppressWarnings("synthetic-access")
   private OAuth2ConsumerCredentialDto(Builder builder) {
+    super(builder);
     this.provider = builder.provider;
     this.clientId = builder.clientId;
     this.clientSecret = builder.clientSecret;
   }
 
   // For JAXB
-  @SuppressWarnings("unused")
   private OAuth2ConsumerCredentialDto() {
+    super(null);
   }
 }

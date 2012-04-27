@@ -66,6 +66,7 @@ public class LightConstants {
   public static final JobSetting.BackoffSeconds JOB_BACK_OFF_SECONDS = new JobSetting.BackoffSeconds(1);
   public static final JobSetting.MaxAttempts JOB_MAX_ATTEMPTES = new JobSetting.MaxAttempts(3);
   
-  public static final int MAX_RESULTS_DEFAULT = 10;
+  public static final int MAX_RESULTS_MIN = 10;
+  public static final int MAX_RESULTS_DEFAULT = MAX_RESULTS_MIN;
   public static final int MAX_RESULTS_MAX = 100;
 }

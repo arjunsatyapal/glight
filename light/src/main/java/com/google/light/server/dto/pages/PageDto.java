@@ -17,12 +17,18 @@ package com.google.light.server.dto.pages;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Preconditions;
-import com.google.light.server.constants.RequestParamKeyEnum;
-import com.google.light.server.dto.DtoInterface;
-import com.google.light.server.servlets.path.ServletPathEnum;
-import com.google.light.server.utils.JsonUtils;
+import javax.xml.bind.annotation.XmlTransient;
+
+import com.google.light.server.constants.LightStringConstants;
+import com.google.light.server.dto.AbstractDto;
 import java.util.List;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import org.codehaus.jackson.annotate.JsonCreator;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
+import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
 
 /**
  * 
@@ -32,55 +38,38 @@ import java.util.List;
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
-public class PageDto implements DtoInterface<PageDto> {
-  private ServletPathEnum servletPath;
-  private String previous;
-  private String next;
-  private String type;
+@XmlRootElement(name = "pageDto")
+@XmlAccessorType(XmlAccessType.FIELD)
+@JsonSerialize(include = Inclusion.NON_NULL)
+public class PageDto extends AbstractDto<PageDto> {
+  @XmlTransient private String lightUri;
+  @XmlElement private String previous;
+  @XmlElement private String next;
+  @XmlElement private String type;
   @SuppressWarnings("rawtypes")
-  private List<? extends DtoInterface> list;
-
-  /** 
-   * {@inheritDoc}
-   */
-  @Override
-  public String toJson() {
-    return JsonUtils.toJson(this);
-  }
-
-  /** 
-   * {@inheritDoc}
-   */
-  @Override
-  public String toXml() {
-    // TODO(arjuns): Auto-generated method stub
-    throw new UnsupportedOperationException();
-  }
+  @XmlElement private List<? extends AbstractDto> list;
 
   /** 
    * {@inheritDoc}
    */
   @Override
   public PageDto validate() {
-    checkNotNull(servletPath, "servletPath");
+    checkNotNull(lightUri, "lightUri");
     
     // Updating previous and next Links.
     if (previous != null) {
-      previous = getUpdatedUri(servletPath, previous, RequestParamKeyEnum.PAGE_PREVIOUS);
+      previous = getUpdatedUri(lightUri, previous);
     }
     
     if (next != null) {
-      next = getUpdatedUri(servletPath, next, RequestParamKeyEnum.PAGE_NEXT);
+      next = getUpdatedUri(lightUri, next);
     }
     
     return this;
   }
   
-  private String getUpdatedUri(ServletPathEnum servletPath, String pageUri, 
-      RequestParamKeyEnum requestParam) {
-    Preconditions.checkArgument(requestParam == RequestParamKeyEnum.PAGE_NEXT
-        || requestParam == RequestParamKeyEnum.PAGE_PREVIOUS);
-    String uri = servletPath.get() + "?" + requestParam.get() + "=" + pageUri;
+  private String getUpdatedUri(String lightUri, String pageUri) {
+    String uri = lightUri + "?" + LightStringConstants.START_INDEX_STR + "=" + pageUri;
     return uri;
   }
   
@@ -98,20 +87,20 @@ public class PageDto implements DtoInterface<PageDto> {
   }
 
   @SuppressWarnings("rawtypes")
-  public List<? extends DtoInterface> getList() {
+  public List<? extends AbstractDto> getList() {
     return list;
   }
 
-  public static class Builder {
-    private ServletPathEnum servletPath;
+  public static class Builder extends AbstractDto.BaseBuilder<Builder>{
+    private String lightUri;
     private String previous;
     private String next;
     private String type;
     @SuppressWarnings("rawtypes")
-    private List<? extends DtoInterface> list;
+    private List<? extends AbstractDto> list;
 
-    public Builder serlvetPath(ServletPathEnum servletPath) {
-      this.servletPath = checkNotNull(servletPath, "servletPath");
+    public Builder lightUri(String lightUri) {
+      this.lightUri = lightUri;
       return this;
     }
     
@@ -132,7 +121,7 @@ public class PageDto implements DtoInterface<PageDto> {
     }
 
     @SuppressWarnings("rawtypes")
-    public Builder list(List<? extends DtoInterface> list) {
+    public Builder list(List<? extends AbstractDto> list) {
       this.list = list;
       return this;
     }
@@ -145,10 +134,17 @@ public class PageDto implements DtoInterface<PageDto> {
 
   @SuppressWarnings("synthetic-access")
   private PageDto(Builder builder) {
-    this.servletPath = builder.servletPath;
+    super(builder);
+    this.lightUri = builder.lightUri;
     this.previous = builder.previous;
     this.next = builder.next;
     this.type = builder.type;
     this.list = builder.list;
+  }
+  
+  // For JAXB
+  @JsonCreator
+  private PageDto() {
+    super(null);
   }
 }

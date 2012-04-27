@@ -18,10 +18,9 @@ package com.google.light.server.persistence.entity.jobs;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
-import com.google.light.server.dto.pojo.JobHandlerId;
-
 import com.google.appengine.tools.pipeline.JobInfo;
 import com.google.light.server.constants.RequestParamKeyEnum;
+import com.google.light.server.dto.pojo.JobHandlerId;
 import com.google.light.server.persistence.entity.AbstractPersistenceEntity;
 import com.google.light.server.servlets.path.ServletPathEnum;
 import com.googlecode.objectify.Key;
@@ -75,7 +74,7 @@ public class JobEntity extends AbstractPersistenceEntity<JobEntity, Object> {
     throw new UnsupportedOperationException();
   }
 
-  public Long getJobId() {
+  public Long getId() {
     return jobId;
   }
 
@@ -131,7 +130,7 @@ public class JobEntity extends AbstractPersistenceEntity<JobEntity, Object> {
     return locationUrl;
   }
 
-  public static class Builder {
+  public static class Builder extends AbstractPersistenceEntity.BaseBuilder<Builder> {
     private Long jobId;
     private JobHandlerType jobHandlerType;
     private JobHandlerId jobHandlerId;
@@ -183,12 +182,13 @@ public class JobEntity extends AbstractPersistenceEntity<JobEntity, Object> {
 
     @SuppressWarnings("synthetic-access")
     public JobEntity build() {
-      return new JobEntity(this);
+      return new JobEntity(this).validate();
     }
   }
 
   @SuppressWarnings("synthetic-access")
   private JobEntity(Builder builder) {
+    super(builder, false);
     this.jobHandlerType = checkNotNull(builder.jobHandlerType, "jobHandler");
 
     this.jobId = builder.jobId;
@@ -260,5 +260,6 @@ public class JobEntity extends AbstractPersistenceEntity<JobEntity, Object> {
 
   // For objectify.
   private JobEntity() {
+    super(null, false);
   }
 }

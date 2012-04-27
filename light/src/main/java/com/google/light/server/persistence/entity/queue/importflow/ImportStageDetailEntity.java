@@ -18,12 +18,10 @@ package com.google.light.server.persistence.entity.queue.importflow;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
 
-import com.googlecode.objectify.annotation.Parent;
-
-import javax.persistence.Id;
-
 import com.google.light.server.persistence.entity.AbstractPersistenceEntity;
 import com.googlecode.objectify.Key;
+import com.googlecode.objectify.annotation.Parent;
+import javax.persistence.Id;
 
 /**
  * Entity to store details of each individual stage.
@@ -113,7 +111,7 @@ public class ImportStageDetailEntity extends
 
   @SuppressWarnings("synthetic-access")
   private ImportStageDetailEntity(Builder builder) {
-    super(builder);
+    super(builder, false);
     this.id = id != null ? checkPositiveLong(builder.id, "id") : null;
     this.importEntityKey = checkNotNull(builder.importEntity, "importEntity");
     this.importStage = checkNotNull(builder.importStage, "importStage");
@@ -121,6 +119,6 @@ public class ImportStageDetailEntity extends
   
   // For Jaxb
   private ImportStageDetailEntity() {
-    super(null);
+    super(null, false);
   }
 }

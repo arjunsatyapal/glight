@@ -16,15 +16,14 @@
 package com.google.light.server.utils;
 
 
-import com.google.light.server.dto.DtoInterface;
+import com.google.light.server.dto.AbstractDto;
 import com.google.light.server.exception.unchecked.JsonException;
 import java.io.StringReader;
 import org.codehaus.jackson.map.AnnotationIntrospector;
+import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.ObjectWriter;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
-
-import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.xc.JaxbAnnotationIntrospector;
 
 /**
@@ -40,7 +39,7 @@ import org.codehaus.jackson.xc.JaxbAnnotationIntrospector;
 public class JsonUtils {
   // TODO(arjuns): Add javadocs in this class.
   // TODO(arjuns): See if this class can return object only after validation. Same for Xml Utils
-  public static <D extends DtoInterface<D>> D getDto(String jsonString, Class<D> dtoClass) {
+  public static <D extends AbstractDto<D>> D getDto(String jsonString, Class<D> dtoClass) {
     ObjectMapper mapper = new ObjectMapper();
     mapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     AnnotationIntrospector introspector = new JaxbAnnotationIntrospector();
