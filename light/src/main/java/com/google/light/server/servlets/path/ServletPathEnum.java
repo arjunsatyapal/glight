@@ -24,7 +24,6 @@ import com.google.light.server.servlets.jobs.JobDetailServlet;
 import com.google.light.server.servlets.jobs.PipelineStatusServlet;
 import com.google.light.server.servlets.login.LoginServlet;
 import com.google.light.server.servlets.login.LogoutServlet;
-import com.google.light.server.servlets.module.ModuleServlet;
 import com.google.light.server.servlets.oauth2.google.gdoc.GoogleDocAuthCallbackServlet;
 import com.google.light.server.servlets.oauth2.google.gdoc.GoogleDocAuthServlet;
 import com.google.light.server.servlets.oauth2.google.login.GoogleLoginCallbackServlet;
@@ -72,8 +71,6 @@ public enum ServletPathEnum {
   IMPORT_STAGE_DETAIL_SERVLET(JobDetailServlet.class, "/api/queue/import_stage_detail",
                               true, false, false),
                               
-  MODULE_SERVLET(ModuleServlet.class, "/api/module/*/version/*",
-                 false, false, false),
   SEARCH(SearchServlet.class, "/api/search",
          false, false, false),
 
