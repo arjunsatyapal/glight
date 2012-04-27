@@ -15,7 +15,6 @@
  */
 package com.google.light.server.dto;
 
-import org.junit.Test;
 
 /**
  * Test for classes which implement {@link DtoToPersistenceInterface}.

@@ -16,10 +16,11 @@
 package com.google.light.server.manager.interfaces;
 
 import com.google.light.server.dto.pojo.JobHandlerId;
-
 import com.google.light.server.persistence.entity.jobs.JobEntity;
 import com.google.light.server.persistence.entity.jobs.JobEntity.JobHandlerType;
 import com.google.light.server.persistence.entity.queue.importflow.ImportJobEntity;
+import com.googlecode.objectify.Objectify;
+import javax.annotation.Nullable;
 
 /**
  *
@@ -31,7 +32,7 @@ import com.google.light.server.persistence.entity.queue.importflow.ImportJobEnti
 public interface JobManager {
   public JobEntity enqueueImportJob(ImportJobEntity importJobEntity);
   
-  public JobEntity put(JobEntity jobEntity);
+  public JobEntity put(@Nullable Objectify ofy, JobEntity jobEntity);
   
   public JobEntity get(Long id);
   

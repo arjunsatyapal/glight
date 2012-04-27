@@ -68,7 +68,7 @@ public class ModuleJobs {
     public Value<Version> handler(ModuleId moduleId, String importEntityId, String content) {
       ImportManager importManager = getInstance(ImportManager.class);
       ImportJobEntity importEntity = importManager.get(importEntityId);
-      updateChangeLog(importManager, importEntity, "Adding new moduleVersion.");
+      updateChangeLog(importEntity, "Adding new moduleVersion.");
 
       ModuleManager moduleManager = getInstance(ModuleManager.class);
 
@@ -87,16 +87,16 @@ public class ModuleJobs {
       }
       checkNotNull(moduleVersion, "moduleVersion should be positive.");
 
-      updateChangeLog(importManager, importEntity, "Successfully added new moduleVersion["
+      updateChangeLog(importEntity, "Successfully added new moduleVersion["
           + moduleVersion + "].");
 
       return immediate(moduleVersion);
     }
   }
 
-  
   @SuppressWarnings("serial")
-  public static class AddModuleResources extends LightJob6<Void, ModuleId, Version, String, String, GSBlobInfo> {
+  public static class AddModuleResources extends
+      LightJob6<Void, ModuleId, Version, String, String, GSBlobInfo> {
     /**
      * {@inheritDoc}
      */
@@ -105,7 +105,7 @@ public class ModuleJobs {
         String resourceId, GSBlobInfo resourceInfo) {
       ImportManager importManager = getInstance(ImportManager.class);
       ImportJobEntity importEntity = importManager.get(importEntityId);
-      updateChangeLog(importManager, importEntity, "Adding new resource : "
+      updateChangeLog(importEntity, "Adding new resource : "
           + resourceInfo.getFileName() + " to Module[" + moduleId + ":" + moduleVersion + "].");
 
       ModuleManager moduleManager = getInstance(ModuleManager.class);

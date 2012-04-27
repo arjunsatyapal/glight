@@ -16,7 +16,6 @@
 package com.google.light.server.manager.implementation;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
 import com.google.inject.Inject;
 import com.google.light.server.dto.module.ModuleType;
@@ -26,6 +25,7 @@ import com.google.light.server.persistence.dao.ImportJobDao;
 import com.google.light.server.persistence.dao.ImportStageDetailDao;
 import com.google.light.server.persistence.entity.queue.importflow.ImportJobEntity;
 import com.google.light.server.persistence.entity.queue.importflow.ImportStageDetailEntity;
+import com.googlecode.objectify.Objectify;
 import java.util.List;
 
 /**
@@ -49,9 +49,8 @@ public class ImportManagerImpl implements ImportManager {
    * {@inheritDoc}
    */
   @Override
-  public ImportJobEntity put(ImportJobEntity entity, ChangeLogEntryPojo changeLog) {
+  public ImportJobEntity put(Objectify ofy, ImportJobEntity entity, ChangeLogEntryPojo changeLog) {
     checkNotNull(entity, "entity");
-    checkNotBlank(entity.getId(), "Id should be already set using computeId.");
 
     /*
      * Before persisting, check whether there is any existing ImportEntity with same Key already
@@ -66,7 +65,7 @@ public class ImportManagerImpl implements ImportManager {
     //
 
     entity.addToChangeLog(changeLog);
-    return importJobDao.put(entity);
+    return importJobDao.put(ofy, entity);
   }
 
   /**

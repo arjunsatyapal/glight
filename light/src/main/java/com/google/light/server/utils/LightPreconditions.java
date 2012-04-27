@@ -33,6 +33,7 @@ import com.google.light.server.exception.unchecked.httpexception.UnauthorizedExc
 import com.google.light.server.persistence.entity.person.PersonEntity;
 import com.google.light.server.servlets.SessionManager;
 import com.googlecode.objectify.Key;
+import com.googlecode.objectify.Objectify;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
@@ -83,14 +84,14 @@ public class LightPreconditions {
   /**
    * Ensures that PersonId is valid.
    */
-  
+
   public static PersonId checkPersonId(PersonId personId) {
     try {
       checkPositiveLong(personId.get(), "Invalid PersonId[" + personId.get() + "].");
     } catch (Exception e) {
       throw new InvalidPersonIdException(e);
     }
-    
+
     return personId;
   }
 
@@ -102,7 +103,7 @@ public class LightPreconditions {
     checkPersonId(new PersonId(personKey.getId()));
     return personKey;
   }
-  
+
   /**
    * Ensures that the list passed to the referenced method is not empty.
    * 
@@ -118,6 +119,7 @@ public class LightPreconditions {
   /**
    * Ensures that the passed value is a valid positive long and its range is [1, Long.Max_value].
    * TODO(arjuns): Update test.
+   * 
    * @param value
    * @return
    */
@@ -126,9 +128,9 @@ public class LightPreconditions {
     checkArgument(longValidator.isInRange(value, 1, Long.MAX_VALUE), message + "[" + value + "].");
     return value;
   }
-  
+
   public static Integer checkIntegerIsInRage(Integer value, int min, int max, String message) {
-    String errorMessage = message + ": Range : [" + min + ":" + max + "]."; 
+    String errorMessage = message + ": Range : [" + min + ":" + max + "].";
     checkNotNull(value, errorMessage);
     checkArgument(integerValidator.isInRange(value, min, max), message);
     return value;
@@ -172,18 +174,17 @@ public class LightPreconditions {
    * @param allowedEnvs
    * @param object
    */
-  public static void checkIsEnv(Object object, LightEnvEnum...allowedEnvs) {
+  public static void checkIsEnv(Object object, LightEnvEnum... allowedEnvs) {
     if (containsCurrEnvInVarArgs(allowedEnvs)) {
       return;
     }
 
-    
     throw new ServerConfigurationException(object.getClass().getName()
         + " should not have been instantiated in " + LightEnvEnum.getLightEnv()
-        + " because it is allowed to be instantiated only in " 
+        + " because it is allowed to be instantiated only in "
         + Iterables.toString(newArrayList(allowedEnvs)));
   }
-  
+
   /**
    * Ensures that given object was not instantiated in notAllowedEnvs.
    * 
@@ -192,7 +193,7 @@ public class LightPreconditions {
    * @param allowedEnvs
    * @param object
    */
-  public static void checkIsNotEnv(Object object, LightEnvEnum...notAllowedEnvs) {
+  public static void checkIsNotEnv(Object object, LightEnvEnum... notAllowedEnvs) {
     if (!containsCurrEnvInVarArgs(notAllowedEnvs)) {
       return;
     }
@@ -202,10 +203,10 @@ public class LightPreconditions {
         + " because it is not allowed to be instantiated in "
         + Iterables.toString(Lists.newArrayList(notAllowedEnvs)));
   }
-  
-  private static boolean containsCurrEnvInVarArgs(LightEnvEnum...varargs) {
+
+  private static boolean containsCurrEnvInVarArgs(LightEnvEnum... varargs) {
     LightEnvEnum currEnv = LightEnvEnum.getLightEnv();
-    
+
     for (LightEnvEnum currVarArg : varargs) {
       if (currVarArg == currEnv) {
         return true;
@@ -219,7 +220,7 @@ public class LightPreconditions {
    * 
    * @param providerService
    * @param providerUserId
-   * @return 
+   * @return
    */
   public static String checkProviderUserId(OAuth2ProviderService providerService,
       String providerUserId) {
@@ -229,10 +230,10 @@ public class LightPreconditions {
       checkArgument(isNullOrEmpty(providerUserId),
           "for " + providerService + ", providerUserId should be null");
     }
-    
+
     return providerUserId;
   }
-  
+
   /**
    * Ensures that Session is valid.
    * NOTE : Unlike other check functions, this does not return anything.
@@ -243,6 +244,15 @@ public class LightPreconditions {
     if (!sessionManager.isValidSession()) {
       throw new InvalidSessionException("Invalid Session.");
     }
+  }
+
+  /**
+   * Ensures that Objectify Transaction is running.
+   */
+  // TODO(arjuns): Add test for this.
+  public static void checkTxnIsRunning(Objectify ofy) {
+    checkNotNull(ofy, "txn is null.");
+    checkArgument(ofy.getTxn().isActive(), "txn is inactive.");
   }
 
   // Utility class.

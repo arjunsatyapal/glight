@@ -21,6 +21,8 @@ import static com.google.light.server.constants.LightConstants.JOB_BACK_OFF_SECO
 import static com.google.light.server.constants.LightConstants.JOB_MAX_ATTEMPTES;
 import static com.google.light.server.utils.GuiceUtils.getRequestScopedValues;
 
+import com.google.light.server.utils.ObjectifyUtils;
+
 import com.google.light.server.dto.pojo.LightJobContextPojo;
 import com.google.light.server.dto.pojo.RequestScopedValues;
 
@@ -87,7 +89,7 @@ public class DeleteAllServlet extends HttpServlet {
         .taskId("some task id")
         .jobState(JobState.PRE_START)
         .build();
-    JobEntity savedJobEntity = jobManager.put(jobEntity);
+    JobEntity savedJobEntity = jobManager.put(ObjectifyUtils.nonTransaction(), jobEntity);
 
     RequestScopedValues participants = getRequestScopedValues();
 

@@ -3,8 +3,6 @@ package com.google.light.server.dto.search;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.light.server.dto.AbstractDto;
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
 

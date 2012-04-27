@@ -76,7 +76,7 @@ public abstract class AbstractBasicDao<D, P extends AbstractPersistenceEntity<P,
    * @param entity
    * @return
    */
-  protected P put(Objectify ofy, P entity) {
+  public P put(Objectify ofy, P entity) {
     if (ofy == null) {
       ofy = ObjectifyUtils.nonTransaction();
     } else {

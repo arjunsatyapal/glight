@@ -34,8 +34,6 @@ public enum RequestParamKeyEnum {
 
   DEFAULT_EMAIL("default_email", true),
 
-  @Deprecated
-  GOOGLE_DOC_RESOURCE_ID("google_doc_resource_id", true),
   JOB_ID("job_id", true),
   
   // TODO(arjuns): Add category to differentiate on what goes in Session and what comes in URL.

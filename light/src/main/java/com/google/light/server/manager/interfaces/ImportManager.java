@@ -15,12 +15,13 @@
  */
 package com.google.light.server.manager.interfaces;
 
-import com.google.light.server.dto.pojo.ChangeLogEntryPojo;
-
 import com.google.light.server.dto.module.ModuleType;
+import com.google.light.server.dto.pojo.ChangeLogEntryPojo;
 import com.google.light.server.persistence.entity.queue.importflow.ImportJobEntity;
 import com.google.light.server.persistence.entity.queue.importflow.ImportStageDetailEntity;
+import com.googlecode.objectify.Objectify;
 import java.util.List;
+import javax.annotation.Nullable;
 
 /**
  * Manager for importing different {@link ModuleType} to Light.
@@ -33,7 +34,7 @@ public interface ImportManager {
   /**
    * Method to put Import entity on both DataStore and Queue in single transaction.
    */
-  ImportJobEntity put(ImportJobEntity entity, ChangeLogEntryPojo changeLog);
+  ImportJobEntity put(@Nullable Objectify ofy, ImportJobEntity entity, ChangeLogEntryPojo changeLog);
 
   /**
    * Get import entity from DataStore.
