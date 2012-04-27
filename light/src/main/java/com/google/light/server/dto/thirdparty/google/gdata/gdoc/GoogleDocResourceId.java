@@ -61,4 +61,8 @@ public class GoogleDocResourceId {
   public ModuleType getModuleType() {
     return moduleType;
   }
+  
+  public boolean isFolder() {
+    return moduleType == ModuleType.GOOGLE_COLLECTION;
+  }
 }

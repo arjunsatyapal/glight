@@ -19,8 +19,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.constants.LightConstants.HTTP_CONNECTION_TIMEOUT_IN_MILLIS;
 import static com.google.light.server.constants.OAuth2ProviderService.GOOGLE_DOC;
 
-import com.google.light.server.constants.JerseyConstants;
-
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.google.gdata.client.docs.DocsService;
@@ -45,7 +43,7 @@ import com.google.light.server.exception.unchecked.httpexception.NotFoundExcepti
 import com.google.light.server.manager.implementation.oauth2.owner.OAuth2OwnerTokenManagerFactory;
 import com.google.light.server.manager.interfaces.OAuth2OwnerTokenManager;
 import com.google.light.server.persistence.entity.oauth2.owner.OAuth2OwnerTokenEntity;
-import com.google.light.server.servlets.thirdparty.google.gdata.gdoc.GoogleDocUtils;
+import com.google.light.server.servlets.thirdparty.google.gdoc.GoogleDocUtils;
 import com.google.light.server.utils.XmlUtils;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
@@ -76,7 +74,13 @@ public class DocsServiceWrapper extends DocsService {
     setConnectTimeout(HTTP_CONNECTION_TIMEOUT_IN_MILLIS);
   }
 
-  public PageDto getDocumentFeedWithFolders(URL feedUrl) {
+  /**
+   * Get DocumentFeed for a user.
+   * 
+   * @param feedUrl
+   * @return
+   */
+  public PageDto getDocumentFeedWithFolders(URL feedUrl, String handlerUri) {
     DocumentListFeed docListFeed = null;
     try {
       docListFeed = getFeed(feedUrl, DocumentListFeed.class);
@@ -95,13 +99,10 @@ public class DocsServiceWrapper extends DocsService {
         listOfDocuments.add(dto);
       }
 
-      String previous = getUriFromLink(docListFeed.getPreviousLink());
-      String next = getUriFromLink(docListFeed.getNextLink());
-
+      String startIndex = getUriFromLink(docListFeed.getNextLink());
       PageDto pageDto = new PageDto.Builder()
-          .lightUri(JerseyConstants.URI_GOOGLE_DOC_LIST)
-          .previous(previous)
-          .next(next)
+          .handlerUri(handlerUri)
+          .startIndex(startIndex)
           .list(listOfDocuments)
           .build();
 
@@ -120,17 +121,23 @@ public class DocsServiceWrapper extends DocsService {
     return encodedString;
   }
 
+  /**
+   * Get Document Entry for a Google Doc.
+   * 
+   * @param resourceId
+   * @return
+   */
   public GoogleDocInfoDto getDocumentEntryWithAcl(GoogleDocResourceId resourceId) {
     DocumentListEntry entry;
     try {
-      entry =
-          getEntry(GoogleDocUtils.getResourceEntryWithAclFeedUrl(resourceId),
-              DocumentListEntry.class);
+      entry = getEntry(GoogleDocUtils.getResourceEntryWithAclFeedUrl(resourceId),
+          DocumentListEntry.class);
     } catch (ResourceNotFoundException e) {
       throw new NotFoundException("GoogleDoc resource[" + resourceId + "] not found.");
     } catch (Exception e) {
       throw new GoogleDocException(e);
     }
+    System.out.println(XmlUtils.getXmlEntry(entry));
     GoogleDocInfoDto dto =
         new GoogleDocInfoDto.Builder(GoogleDocInfoDto.Configuration.DTO_FOR_DEBUGGING)
             .withDocumentListEntry(entry)
@@ -138,7 +145,17 @@ public class DocsServiceWrapper extends DocsService {
     return dto;
   }
 
-  public GoogleDocArchivePojo archiveResource(GoogleDocResourceId resourceId) throws GoogleDocsException {
+  public PageDto getFolderContent(GoogleDocResourceId resourceId, String handlerUri) {
+    return getFolderContentWithStartIndex(GoogleDocUtils.getFolderContentUrl(resourceId),
+        handlerUri);
+  }
+
+  public PageDto getFolderContentWithStartIndex(URL startIndex, String handlerUri) {
+    return getDocumentFeedWithFolders(startIndex, handlerUri);
+  }
+
+  public GoogleDocArchivePojo archiveResource(GoogleDocResourceId resourceId)
+      throws GoogleDocsException {
     try {
       ArchiveEntry archiveEntry = new ArchiveEntry();
 
@@ -193,11 +210,14 @@ public class DocsServiceWrapper extends DocsService {
     archiveEntry.addArchiveConversion(docConversion);
   }
 
+  /**
+   * Get status of an archive.
+   */
   public GoogleDocArchivePojo getArchiveStatus(String archiveId) {
     try {
       ArchiveEntry statusEntry =
           getEntry(GoogleDocUtils.getArchiveStatusUrl(archiveId), ArchiveEntry.class);
-      
+
       System.out.println(XmlUtils.getXmlEntry(statusEntry));
       GoogleDocArchivePojo pojo =
           new GoogleDocArchivePojo.Builder().withArchiveEntry(statusEntry).build();

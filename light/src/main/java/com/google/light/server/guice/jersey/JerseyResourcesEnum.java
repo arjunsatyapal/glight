@@ -17,9 +17,11 @@ package com.google.light.server.guice.jersey;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.collect.Sets;
 import com.google.light.server.jersey.resources.AbstractJerseyResource;
 import com.google.light.server.jersey.resources.ModuleResource;
 import com.google.light.server.jersey.resources.thirdparty.google.GoogleDocIntegration;
+import java.util.Set;
 
 /**
  * 
@@ -40,5 +42,15 @@ public enum JerseyResourcesEnum {
 
   public Class<? extends AbstractJerseyResource> getClazz() {
     return clazz;
+  }
+  
+  public static Set<Class<? extends AbstractJerseyResource>> getSetOfResources() {
+    Set<Class<? extends AbstractJerseyResource>> set = Sets.newHashSet();
+    
+    for (JerseyResourcesEnum curr : JerseyResourcesEnum.values()) {
+      set.add(curr.getClazz());
+    }
+    
+    return set;
   }
 }

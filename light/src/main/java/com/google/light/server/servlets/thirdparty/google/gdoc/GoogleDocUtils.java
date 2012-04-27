@@ -13,10 +13,12 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.server.servlets.thirdparty.google.gdata.gdoc;
+package com.google.light.server.servlets.thirdparty.google.gdoc;
 
 import static com.google.light.server.constants.LightConstants.GDATA_MAX_RESULT;
 import static com.google.light.server.utils.LightUtils.getURL;
+
+import com.google.common.base.Preconditions;
 
 import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocResourceId;
 import java.net.URL;
@@ -26,7 +28,6 @@ import java.util.logging.Logger;
  * Utility class for Google Docs.
  * 
  * TODO(arjuns): Add a URL builder.
- * TODO(arjuns): Add test for this class.
  * 
  * @author Arjun Satyapal
  */
@@ -35,47 +36,79 @@ public class GoogleDocUtils {
 
   private static final String DOCUMENT_FEED_BASE_URL =
       "https://docs.google.com/feeds/default/private/full";
-  private static final String ACL_FEED_BASE_URL =
-      "https://docs.google.com/feeds/default/private/full";
   private static final String ARCHIVE_URL = "https://docs.google.com/feeds/default/private/archive";
 
   private static final String USER_ACCOUNT_INFO_URL =
       "https://docs.google.com/feeds/metadata/default";
 
-  private static String SHOW_FOLDERS = "showfolders=true";
-  private static String SHOW_ROOTS = "showroots=true";
+  private static String SHOW_FOLDERS = "showroots=true&showfolders=true";
   private static String EXPAND_ACL = "expand-acl=true";
   private static String MAX_RESULTS = "max-results=" + GDATA_MAX_RESULT;
 
+  /**
+   * Get URL for fetching User Account Information.
+   */
   public static URL getUserAccountInfoUrl() {
     return getURL(USER_ACCOUNT_INFO_URL);
   }
 
+  /**
+   * Get Document Feed for a User with both RootFolder and Folders enabled.
+   */
   public static URL getDocumentFeedWithFolderUrl() {
-    return getURL(DOCUMENT_FEED_BASE_URL + "?" + SHOW_FOLDERS + "&" + SHOW_ROOTS + "&"
-        + MAX_RESULTS);
+    return getURL(DOCUMENT_FEED_BASE_URL + "?" + SHOW_FOLDERS + "&" + MAX_RESULTS);
   }
 
+  /**
+   * Get Archive URL.
+   */
   public static URL getArchiveUrl() {
     return getURL(ARCHIVE_URL);
   }
-  
+
+  /**
+   * Get URL to fetch Status for an Archive.
+   */
   public static URL getArchiveStatusUrl(String archiveId) {
     return getURL(ARCHIVE_URL + "/" + archiveId);
   }
 
-  public static URL getResourceEntryUrl(GoogleDocResourceId resourceId) {
-    return getURL(DOCUMENT_FEED_BASE_URL + "/" + resourceId.getTypedResourceId() + "?" + SHOW_ROOTS);
+  /**
+   * Get URL for a Resource.
+   */
+  protected static URL getResourceEntryUrl(GoogleDocResourceId resourceId) {
+    return getURL(DOCUMENT_FEED_BASE_URL + "/" + resourceId.getTypedResourceId());
+  }
+  /**
+   * Get URL to fetch GData Entry for a Resource.
+   */
+  public static URL getResourceEntryWithFoldersUrl(GoogleDocResourceId resourceId) {
+    URL url = getResourceEntryUrl(resourceId);
+    return getURL(url.toString() + "?" + SHOW_FOLDERS);
   }
 
+  /**
+   * Get URL to fetch GData Entry for a resource with ACLs.
+   */
   public static URL getResourceEntryWithAclFeedUrl(GoogleDocResourceId resourceId) {
-    URL url = getResourceEntryUrl(resourceId);
+    URL url = getResourceEntryWithFoldersUrl(resourceId);
     return getURL(url.toString() + "&" + EXPAND_ACL);
   }
 
+  /**
+   * Get ACL feed for a Resource. 
+   */
   public static URL getResourceAclFeedUrl(GoogleDocResourceId resourceId) {
     logger.warning("Ideally, ACL Feed link should be fetched from the ResourceEntry. " +
         "This can break if Google Changes some logic.");
-    return getURL(ACL_FEED_BASE_URL + "/" + resourceId.getTypedResourceId() + "/acl");
+    URL url = getResourceEntryUrl(resourceId);
+    return getURL(url.toString() + "/acl");
+  }
+  
+  public static URL getFolderContentUrl(GoogleDocResourceId resourceId) {
+    Preconditions.checkArgument(resourceId.isFolder(), 
+        "Invalid GoogleResource[" + resourceId + "].");
+    URL url = getResourceEntryUrl(resourceId);
+    return getURL(url.toString() + "/contents" + "?" + MAX_RESULTS);
   }
 }

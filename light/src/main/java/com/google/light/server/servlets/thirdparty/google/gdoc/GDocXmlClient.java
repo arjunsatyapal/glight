@@ -13,11 +13,11 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.server.servlets.thirdparty.google.gdata.gdoc;
+package com.google.light.server.servlets.thirdparty.google.gdoc;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.constants.OAuth2ProviderService.GOOGLE_DOC;
-import static com.google.light.server.servlets.thirdparty.google.gdata.gdoc.GoogleDocUtils.getResourceEntryUrl;
+import static com.google.light.server.servlets.thirdparty.google.gdoc.GoogleDocUtils.getResourceEntryWithFoldersUrl;
 import static com.google.light.server.utils.GuiceUtils.getInstance;
 
 import com.google.api.client.http.GenericUrl;
@@ -38,54 +38,51 @@ import java.net.URL;
  * A simple helper client that will send requests and fetch AtomFeeds directly from Google Doc.
  * 
  * TODO(arjuns): Add test for this class.
- *
+ * 
  * @author Arjun Satyapal
  */
 public class GDocXmlClient {
   private HttpTransport httpTransport;
   private OAuth2OwnerTokenManager googDocTokenManager;
 
-  
   @Inject
   public GDocXmlClient(HttpTransport httpTransport) {
     this.httpTransport = checkNotNull(httpTransport, "httpTransport");
-    
+
     OAuth2OwnerTokenManagerFactory tokenManagerFactory = getInstance(
         OAuth2OwnerTokenManagerFactory.class);
     googDocTokenManager = tokenManagerFactory.create(GOOGLE_DOC);
   }
-  
 
   private HttpHeaders getDefaultHeaders() {
     OAuth2OwnerTokenEntity token = googDocTokenManager.get();
-    String bearerToken =  token.getTokenType() + " " + token.getAccessToken();
+    String bearerToken = token.getTokenType() + " " + token.getAccessToken();
     HttpHeaders httpHeaders = new HttpHeaders();
     httpHeaders.set("Authorization", bearerToken);
     httpHeaders.set("GData-Version", "3.0");
-    
+
     return httpHeaders;
-    
+
   }
-  
+
   public void getFullDocumentFeed() {
     String url = "https://docs.google.com/feeds/default/private/full";
-    
+
     fetchFeedFromGoogle(url);
   }
-  
+
   public String getDocumentListUserMetadata() {
     String url = "https://docs.google.com/feeds/metadata/default";
     return fetchFeedFromGoogle(url);
   }
 
-  public String getCollectionFeed(String collectionId) {
-    String url = "https://docs.google.com/feeds/default/private/full/folder%3A" + collectionId +
-        "/contents";
-    return fetchFeedFromGoogle(url);
+  public String getCollectionFeed(GoogleDocResourceId resourceId) {
+    URL url = GoogleDocUtils.getFolderContentUrl(resourceId);
+    return fetchFeedFromGoogle(url.toString());
   }
-  
+
   public String getDocumentPermissions(GoogleDocResourceId resourceId) {
-    URL url = getResourceEntryUrl(resourceId);
+    URL url = getResourceEntryWithFoldersUrl(resourceId);
     return fetchFeedFromGoogle(url.toString());
   }
 
@@ -96,12 +93,15 @@ public class GDocXmlClient {
    */
   private String fetchFeedFromGoogle(String url) {
     try {
-    HttpRequest request = httpTransport.createRequestFactory().buildGetRequest(new GenericUrl(url))
-        .setHeaders(getDefaultHeaders());
-    
-    HttpResponse response = request.execute();
-    String xml = LightUtils.getInputStreamAsString(response.getContent());
-    return XmlUtils.pretyfyXml(xml);
+      HttpRequest request =
+          httpTransport.createRequestFactory().buildGetRequest(new GenericUrl(url))
+              .setHeaders(getDefaultHeaders());
+
+      HttpResponse response = request.execute();
+      String xml = LightUtils.getInputStreamAsString(response.getContent());
+      String prettyXml = XmlUtils.pretyfyXml(xml); 
+      System.out.println(prettyXml);
+      return prettyXml;
     } catch (Exception e) {
       // TODO(arjuns): Add exception handling.
       throw new RuntimeException(e);

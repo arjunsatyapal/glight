@@ -23,6 +23,12 @@ import static com.google.light.server.utils.GoogleCloudStorageUtils.writeFileOnG
 import static com.google.light.server.utils.GuiceUtils.getInstance;
 import static com.google.light.server.utils.LightUtils.getRandomFileName;
 
+import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocInfoDto;
+
+import com.google.light.server.utils.GuiceUtils;
+
+import com.google.light.server.dto.module.ModuleType;
+
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpHeaders;
 import com.google.api.client.http.HttpRequest;
@@ -84,6 +90,23 @@ import java.util.zip.ZipInputStream;
 public class ImportGoogleDocJobs {
   static final Logger logger = Logger.getLogger(ImportGoogleDocJobs.class.getName());
 
+  @SuppressWarnings("serial")
+  public static class GetCollectionTree extends LightJob2<LightJobContextPojo, GoogleDocResourceId> {
+    /** 
+     * {@inheritDoc}
+     */
+    @Override
+    public Value<LightJobContextPojo> handler(GoogleDocResourceId googleDocResourceId) {
+      checkArgument(googleDocResourceId.getModuleType() == ModuleType.GOOGLE_COLLECTION, 
+          "Invalid ModuleType[" + googleDocResourceId.getModuleType() + "].");
+      
+      DocsServiceWrapper docsService = GuiceUtils.getInstance(DocsServiceWrapper.class);
+      GoogleDocInfoDto collectionInfo = docsService.getDocumentEntryWithAcl(googleDocResourceId);
+      
+      return immediate(getContext());
+    }
+  }
+  
   @SuppressWarnings("serial")
   public static class CreateArchive extends LightJob2<LightJobContextPojo, String> {
     /**

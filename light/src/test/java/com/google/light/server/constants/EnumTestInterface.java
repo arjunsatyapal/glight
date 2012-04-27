@@ -15,7 +15,6 @@
  */
 package com.google.light.server.constants;
 
-import org.junit.Test;
 
 /**
  * All tests for Enum classes should extend this.
@@ -28,6 +27,5 @@ public interface EnumTestInterface {
   /**
    * Test count in order to catch accidental deletions.
    */
-  @Test
-  public void test_count();
+  public void test_count() throws Exception;
 }

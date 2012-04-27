@@ -16,10 +16,12 @@
 package com.google.light.server.jersey.resources.thirdparty.google;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.light.server.servlets.thirdparty.google.gdata.gdoc.GoogleDocUtils.getDocumentFeedWithFolderUrl;
+import static com.google.light.server.servlets.thirdparty.google.gdoc.GoogleDocUtils.getDocumentFeedWithFolderUrl;
 import static com.google.light.server.utils.GuiceUtils.getInstance;
+import static com.google.light.server.utils.LightUtils.getURL;
 
 import com.google.appengine.api.log.InvalidRequestException;
+import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.light.server.constants.JerseyConstants;
@@ -101,10 +103,10 @@ public class GoogleDocIntegration extends AbstractJerseyResource {
       url = getDocumentFeedWithFolderUrl();
     }
 
-    PageDto pageDto = docsService.getDocumentFeedWithFolders(url);
+    PageDto pageDto = docsService.getDocumentFeedWithFolders(
+        url, JerseyConstants.URI_GOOGLE_DOC_LIST);
     return pageDto;
   }
-  
 
   @GET
   @Path(JerseyConstants.PATH_GOOGLE_DOC_INFO)
@@ -116,16 +118,38 @@ public class GoogleDocIntegration extends AbstractJerseyResource {
     return dto;
   }
 
+  @GET
+  @Path(JerseyConstants.PATH_GOOGLE_FOLDER_INFO)
+  @Produces({ ContentTypeConstants.APPLICATION_JSON, ContentTypeConstants.TEXT_XML })
+  public PageDto getFolderContents(
+      @PathParam(JerseyConstants.PATH_PARAM_EXTERNAL_KEY) String externalKey,
+      @QueryParam(LightStringConstants.START_INDEX_STR) String startIndex) {
+    try {
+      String handlerUri = request.getRequestURI();
+
+      if (!Strings.isNullOrEmpty(startIndex)) {
+        return docsService.getFolderContentWithStartIndex(getURL(startIndex), handlerUri);
+      }
+      GoogleDocResourceId resourceId = new GoogleDocResourceId(externalKey);
+
+      PageDto pageDto = docsService.getFolderContent(resourceId, handlerUri);
+      return pageDto;
+    } catch (Exception e) {
+      // TODO(arjuns): Add exception Handling.
+      throw new RuntimeException(e);
+    }
+  }
+
   @POST
   @Path(JerseyConstants.PATH_GOOGLE_DOC_IMPORT_POST)
   public Response importGoogleDocPost(
       @FormParam(JerseyConstants.PATH_PARAM_EXTERNAL_KEY) String externalKeyStr) {
-    return importGoogleDoc(externalKeyStr);
+    return importGoogleDocPut(externalKeyStr);
   }
 
   @PUT
   @Path(JerseyConstants.PATH_GOOGLE_DOC_IMPORT_PUT)
-  public Response importGoogleDoc(
+  public Response importGoogleDocPut(
       @PathParam(JerseyConstants.PATH_PARAM_EXTERNAL_KEY) String externalKeyStr) {
     if (StringUtils.isBlank(externalKeyStr)) {
       throw new InvalidRequestException("ExternalKeyStr should not be set.");
@@ -144,8 +168,8 @@ public class GoogleDocIntegration extends AbstractJerseyResource {
         .personId(GuiceUtils.getOwnerId())
         .additionalJsonInfo(docInfoDto.toJson())
         .build();
-//    ImportJobEntity persistedEntity = importManager.put(entity,
-//        new ChangeLogEntryPojo("Enqueuing for Import."));
+    // ImportJobEntity persistedEntity = importManager.put(entity,
+    // new ChangeLogEntryPojo("Enqueuing for Import."));
 
     JobEntity jobEntity = jobManager.enqueueImportJob(importJobEntity);
 

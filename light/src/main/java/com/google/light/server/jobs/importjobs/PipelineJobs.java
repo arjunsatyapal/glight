@@ -87,6 +87,9 @@ public class PipelineJobs {
         case GOOGLE_DOC:
           return futureCall(new ImportGoogleDocJobs.CreateArchive(),
               immediate(getContext()), immediate(importJobEntity.getId()));
+          
+        case GOOGLE_COLLECTION:
+          
 
         default:
           throw new IllegalArgumentException("ModuleType[" + importJobEntity.getModuleType()

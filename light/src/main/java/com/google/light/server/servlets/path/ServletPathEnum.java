@@ -53,8 +53,6 @@ public enum ServletPathEnum {
   // TODO(arjuns): Add regex checks here.
   // TODO(arjuns) : Find a way to end URLs without /.
 
-  // DeleteQueueServlet(DeleteQueueServlet.class, "/test/delete",
-  // false, false, false),
   PERSON(PersonServlet.class, "/api/person",
          true, false, false),
   // TODO(waltercacau): Fix this hack

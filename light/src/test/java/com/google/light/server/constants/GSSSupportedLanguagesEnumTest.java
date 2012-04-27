@@ -43,6 +43,10 @@ public class GSSSupportedLanguagesEnumTest implements EnumTestInterface {
         GSSSupportedLanguagesEnum.getClosestGSSSupportedLanguage("en-us"));
   }
 
+  /**
+   * {@inheritDoc}
+   */
+  @Test
   @Override
   public void test_count() {
     assertEquals(

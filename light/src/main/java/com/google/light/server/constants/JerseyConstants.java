@@ -15,6 +15,13 @@
  */
 package com.google.light.server.constants;
 
+import java.lang.reflect.Method;
+
+import com.google.common.base.Preconditions;
+import com.google.light.server.jersey.resources.AbstractJerseyResource;
+import com.google.light.server.jersey.resources.thirdparty.google.GoogleDocIntegration;
+import com.google.light.server.utils.LightPreconditions;
+
 /**
  * 
  * 
@@ -23,7 +30,7 @@ package com.google.light.server.constants;
  * @author Arjun Satyapal
  */
 public class JerseyConstants {
-  public static final String JERSEY_RESOURCE_PATH = "/rest";
+  public static final String JERSEY_CONTEXT_PATH = "/rest";
 
   public static final String CONSTANT_CONTENT = "content";
 
@@ -47,7 +54,7 @@ public class JerseyConstants {
 
   // Path for Module Resources.
   public static final String RESOURCE_PATH_MODULE = "/module";
-  public static final String PATH_MODULE_VERSION = PATH_MODULE_ID +  PATH_VERSION;
+  public static final String PATH_MODULE_VERSION = PATH_MODULE_ID + PATH_VERSION;
   public static final String PATH_MODULE_VERSION_CONTENT = PATH_MODULE_VERSION + "/"
       + CONSTANT_CONTENT;
   public static final String PATH_MODULE_RESOURCE = PATH_MODULE_VERSION + PATH_RESOURCE_TYPE
@@ -57,16 +64,17 @@ public class JerseyConstants {
   public static final String RESOURCE_PATH_THIRD_PARTY_GOOGLE_DOC = "/thirdparty/google/gdoc";
 
   public static final String PATH_GOOGLE_DOC_LIST = "/list";
+  public static final String URI_GOOGLE_DOC_LIST = JERSEY_CONTEXT_PATH +
+      RESOURCE_PATH_THIRD_PARTY_GOOGLE_DOC + PATH_GOOGLE_DOC_LIST;
+
   public static final String PATH_GOOGLE_DOC_INFO = "/info" + PATH_EXTERNAL_KEY;
-  public static final String URI_GOOGLE_DOC_LIST = JERSEY_RESOURCE_PATH
-      + RESOURCE_PATH_THIRD_PARTY_GOOGLE_DOC + PATH_GOOGLE_DOC_LIST;
+  public static final String PATH_GOOGLE_FOLDER_INFO = "/info/folder" + PATH_EXTERNAL_KEY;
 
   public static final String PATH_GOOGLE_DOC_IMPORT_POST = "/import";
-  public static final String PATH_GOOGLE_DOC_IMPORT_PUT = PATH_GOOGLE_DOC_IMPORT_POST 
+  public static final String PATH_GOOGLE_DOC_IMPORT_PUT = PATH_GOOGLE_DOC_IMPORT_POST
       + PATH_EXTERNAL_KEY;
 
   // Path for Person Resource.
   public static final String RESOURCE_PATH_PERSON = "/person";
   public static final String PATH_PERSON = PATH_PERSON_ID;
-
 }

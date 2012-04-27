@@ -17,14 +17,12 @@ package com.google.light.server.dto.pages;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.light.server.constants.LightStringConstants;
 import com.google.light.server.dto.AbstractDto;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
 import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
@@ -41,9 +39,12 @@ import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
 @XmlAccessorType(XmlAccessType.FIELD)
 @JsonSerialize(include = Inclusion.NON_NULL)
 public class PageDto extends AbstractDto<PageDto> {
-  @XmlTransient private String lightUri;
-  @XmlElement private String previous;
-  @XmlElement private String next;
+  @XmlElement(name="handler-uri")
+  private String handlerUri;
+  
+  @XmlElement(name="start-index")
+  private String startIndex;
+  
   @SuppressWarnings("rawtypes")
   @XmlElement private List<? extends AbstractDto> list;
 
@@ -52,32 +53,13 @@ public class PageDto extends AbstractDto<PageDto> {
    */
   @Override
   public PageDto validate() {
-    checkNotNull(lightUri, "lightUri");
-    
-    // Updating previous and next Links.
-    if (previous != null) {
-      previous = getUpdatedUri(lightUri, previous);
-    }
-    
-    if (next != null) {
-      next = getUpdatedUri(lightUri, next);
-    }
+    checkNotNull(handlerUri, "handlerUri");
     
     return this;
   }
   
-  private String getUpdatedUri(String lightUri, String pageUri) {
-    String uri = lightUri + "?" + LightStringConstants.START_INDEX_STR + "=" + pageUri;
-    return uri;
-  }
-  
-
-  public String getPrevious() {
-    return previous;
-  }
-
-  public String getNext() {
-    return next;
+  public String getStartIndex() {
+    return startIndex;
   }
 
   @SuppressWarnings("rawtypes")
@@ -86,25 +68,18 @@ public class PageDto extends AbstractDto<PageDto> {
   }
 
   public static class Builder extends AbstractDto.BaseBuilder<Builder>{
-    private String lightUri;
-    private String previous;
-    private String next;
+    private String handlerUri;
+    private String startIndex;
     @SuppressWarnings("rawtypes")
     private List<? extends AbstractDto> list;
 
-    public Builder lightUri(String lightUri) {
-      this.lightUri = lightUri;
+    public Builder handlerUri(String handlerUri) {
+      this.handlerUri = handlerUri;
       return this;
     }
     
-    
-    public Builder previous(String previous) {
-      this.previous = previous;
-      return this;
-    }
-
-    public Builder next(String next) {
-      this.next = next;
+    public Builder startIndex(String startIndex) {
+      this.startIndex = startIndex;
       return this;
     }
 
@@ -123,9 +98,8 @@ public class PageDto extends AbstractDto<PageDto> {
   @SuppressWarnings("synthetic-access")
   private PageDto(Builder builder) {
     super(builder);
-    this.lightUri = builder.lightUri;
-    this.previous = builder.previous;
-    this.next = builder.next;
+    this.handlerUri = builder.handlerUri;
+    this.startIndex = builder.startIndex;
     this.list = builder.list;
   }
   

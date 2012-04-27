@@ -39,8 +39,6 @@ public class LightConstants {
   /** Number of milliseconds to wait before executing the task. */
   public static int TASK_QUEUE_COUNTDOWN_MILLIS = 30 * 1000; // sixty seconds. 
   
-  /** Number of recrds to be fetched in GDATA Feed */
-  public static int GDATA_MAX_RESULT = 3;
   
   /** HTTP Connection Timeout in milli-seconds*/
   public static int HTTP_CONNECTION_TIMEOUT_IN_MILLIS = 10 * 1000;
@@ -66,6 +64,9 @@ public class LightConstants {
   public static final JobSetting.BackoffSeconds JOB_BACK_OFF_SECONDS = new JobSetting.BackoffSeconds(1);
   public static final JobSetting.MaxAttempts JOB_MAX_ATTEMPTES = new JobSetting.MaxAttempts(3);
   
+  /** Number of recrds to be fetched in GDATA Feed */
+  public static int GDATA_MAX_RESULT = 3;
+
   public static final int MAX_RESULTS_MIN = 10;
   public static final int MAX_RESULTS_DEFAULT = MAX_RESULTS_MIN;
   public static final int MAX_RESULTS_MAX = 100;

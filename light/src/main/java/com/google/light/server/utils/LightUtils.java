@@ -22,7 +22,9 @@ import static com.google.light.server.constants.RequestParamKeyEnum.LOGIN_PROVID
 import static com.google.light.server.constants.RequestParamKeyEnum.LOGIN_PROVIDER_USER_ID;
 import static com.google.light.server.constants.RequestParamKeyEnum.PERSON_ID;
 
+import com.google.common.collect.Lists;
 import com.google.common.base.Charsets;
+import com.google.common.collect.Iterables;
 import com.google.common.io.CharStreams;
 import com.google.light.server.constants.FileExtensions;
 import com.google.light.server.constants.OAuth2ProviderService;
@@ -38,6 +40,7 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.UUID;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpSession;
@@ -259,6 +262,11 @@ public class LightUtils {
       .append(extension.get());
     
     return builder.toString();
-    
+  }
+  
+//  TODO(arjuns): Add test for this.
+  public static <T> String arrayToString(T[] array) {
+    List<T> list = Lists.newArrayList(array);
+    return Iterables.toString(list);
   }
 }

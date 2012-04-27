@@ -61,6 +61,7 @@ public class LightEnvEnumTest implements EnumTestInterface {
   /**
    * Test for {@link LightEnvEnum#getLightEnv()}.
    */
+  @Test
   public void test_getLightEnv() {
     for (LightEnvEnum currEnv : LightEnvEnum.values()) {
       GaeTestingUtils gaeTestingUtils = TestingUtils.gaeSetup(currEnv);
