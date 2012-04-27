@@ -105,7 +105,7 @@ public class ImportGoogleDocJobs {
 
       System.out.println("ArchiveId = \n" + archiveId);
 
-      updateChangeLog(importManager, entity, "Asking Google to create an archive.");
+      updateChangeLog(entity, "Asking Google to create an archive.");
 
       return futureCall(new ImportGoogleDocJobs.WaitForArchiveToComplete(),
           immediate(getContext()), immediate(importEntityId), immediate(archiveId));
@@ -131,12 +131,12 @@ public class ImportGoogleDocJobs {
         case ARCHIVING:
           //$FALL-THROUGH$
         case FLATTENING:
-          updateChangeLog(importManager, entity,
+          updateChangeLog(entity,
               "Google is prepairing archive. Will retry after some time.");
           throw new GoogleDocArchivalWaitingException();
 
         case FINISHED:
-          updateChangeLog(importManager, entity,
+          updateChangeLog(entity,
               "Google finished prepairing archive. Handing over to downloader.");
           return futureCall(new ImportGoogleDocJobs.DonwloadArchive(),
               immediate(getContext()), immediate(importEntityId),
@@ -158,7 +158,7 @@ public class ImportGoogleDocJobs {
       ImportManager importManager = getInstance(ImportManager.class);
       ImportJobEntity entity = importManager.get(importEntityId);
 
-      updateChangeLog(importManager, entity, "Beginning Downloading.");
+      updateChangeLog(entity, "Beginning Downloading.");
 
       try {
         HttpTransport transport = getInstance(HttpTransport.class);
@@ -178,7 +178,7 @@ public class ImportGoogleDocJobs {
         HttpResponse response = request.execute();
 
         String randomFileName = getRandomFileName(FileExtensions.ZIP);
-        updateChangeLog(importManager, entity,
+        updateChangeLog(entity,
             "Finished Downloading. Now storing on GCS as [" +
                 WORKSPACE.getAbsoluteFilePath(randomFileName) + "].");
 
@@ -192,7 +192,7 @@ public class ImportGoogleDocJobs {
         String gcsFilePath = getAbsolutePathOnBucket(WORKSPACE, randomFileName);
         System.out.println(gcsFilePath);
 
-        updateChangeLog(importManager, entity,
+        updateChangeLog(entity,
             "Finished storing on Blobstore. Handing over to zipdeflater with path[" + gcsFilePath
                 + "].");
 
@@ -215,7 +215,7 @@ public class ImportGoogleDocJobs {
       try {
         ImportManager importManager = getInstance(ImportManager.class);
         ImportJobEntity entity = importManager.get(importEntityId);
-        updateChangeLog(importManager, entity, "Reserving a ModuleId.");
+        updateChangeLog(entity, "Reserving a ModuleId.");
 
         FutureValue<ModuleId> moduleId = futureCall(new ModuleJobs.ReserveModule(),
             immediate(getContext()), immediate(importEntityId));
@@ -243,10 +243,10 @@ public class ImportGoogleDocJobs {
       try {
         ImportManager importManager = getInstance(ImportManager.class);
         ImportJobEntity entity = importManager.get(importEntityId);
-        updateChangeLog(importManager, entity, "Created Module with Id[" + moduleId.get() + "]");
+        updateChangeLog(entity, "Created Module with Id[" + moduleId.get() + "]");
 
         String readFileName = getAbsolutePathOnBucket(WORKSPACE, fileName);
-        updateChangeLog(importManager, entity, "Starting unarchiving files from [" + readFileName
+        updateChangeLog(entity, "Starting unarchiving files from [" + readFileName
             + "].");
 
         AppEngineFile file = new AppEngineFile(readFileName);
@@ -299,21 +299,21 @@ public class ImportGoogleDocJobs {
               .build();
           resourceMap.put(newFileName, gsBlobInfo);
 
-          updateChangeLog(importManager, entity, "Storing [" + zipEntry.getName() + "] as [" +
+          updateChangeLog(entity, "Storing [" + zipEntry.getName() + "] as [" +
                   storeAbsFilePath + "].");
 
           GSFileOptions gsFileOptions = GoogleCloudStorageUtils.getGCSFileOptionsForCreate(
               GoogleCloudStorageBuckets.CONTENT, contentType, storeFileName);
           writeFileOnGCS(zipIn, gsFileOptions);
 
-          updateChangeLog(importManager, entity, "Successfully stored");
+          updateChangeLog(entity, "Successfully stored");
         } while (zipEntry != null);
 
         zipIn.close();
         inputStream.close();
         readChannel.close();
 
-        updateChangeLog(importManager, entity,
+        updateChangeLog(entity,
             "Finished unarchiving files from [" + fileName + "].");
 
         // Now lets add the moduleVersion. This will require adding html and resources.
@@ -371,7 +371,7 @@ public class ImportGoogleDocJobs {
       try {
         ImportManager importManager = getInstance(ImportManager.class);
         ImportJobEntity entity = importManager.get(importEntityId);
-        updateChangeLog(importManager, entity, "Adding html for moduleId[" + moduleId + "].");
+        updateChangeLog(entity, "Adding html for moduleId[" + moduleId + "].");
 
         String filePath = GoogleCloudStorageUtils.getAbsoluteModuleHtmlPath(CONTENT, moduleId);
         FileService fileService = FileServiceFactory.getFileService();
@@ -390,9 +390,9 @@ public class ImportGoogleDocJobs {
   }
 
   // TODO(arjuns): Move it to a better location.
-  public static void updateChangeLog(
-      ImportManager importManager, ImportJobEntity entity, String changeMessage) {
+  public static void updateChangeLog(ImportJobEntity entity, String changeMessage) {
+    ImportManager importManager = getInstance(ImportManager.class);
     ChangeLogEntryPojo changeLog = new ChangeLogEntryPojo(changeMessage);
-    importManager.put(entity, changeLog);
+    importManager.put(null /*txn*/, entity, changeLog);
   }
 }

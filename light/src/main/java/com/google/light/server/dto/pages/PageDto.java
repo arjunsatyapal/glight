@@ -17,8 +17,6 @@ package com.google.light.server.dto.pages;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import javax.xml.bind.annotation.XmlTransient;
-
 import com.google.light.server.constants.LightStringConstants;
 import com.google.light.server.dto.AbstractDto;
 import java.util.List;
@@ -26,6 +24,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
@@ -45,7 +44,6 @@ public class PageDto extends AbstractDto<PageDto> {
   @XmlTransient private String lightUri;
   @XmlElement private String previous;
   @XmlElement private String next;
-  @XmlElement private String type;
   @SuppressWarnings("rawtypes")
   @XmlElement private List<? extends AbstractDto> list;
 
@@ -82,10 +80,6 @@ public class PageDto extends AbstractDto<PageDto> {
     return next;
   }
 
-  public String getType() {
-    return type;
-  }
-
   @SuppressWarnings("rawtypes")
   public List<? extends AbstractDto> getList() {
     return list;
@@ -95,7 +89,6 @@ public class PageDto extends AbstractDto<PageDto> {
     private String lightUri;
     private String previous;
     private String next;
-    private String type;
     @SuppressWarnings("rawtypes")
     private List<? extends AbstractDto> list;
 
@@ -112,11 +105,6 @@ public class PageDto extends AbstractDto<PageDto> {
 
     public Builder next(String next) {
       this.next = next;
-      return this;
-    }
-
-    public Builder type(String type) {
-      this.type = type;
       return this;
     }
 
@@ -138,7 +126,6 @@ public class PageDto extends AbstractDto<PageDto> {
     this.lightUri = builder.lightUri;
     this.previous = builder.previous;
     this.next = builder.next;
-    this.type = builder.type;
     this.list = builder.list;
   }
   

@@ -17,8 +17,6 @@ package com.google.light.server.persistence.entity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.googlecode.objectify.Key;
-
 import com.google.light.server.dto.AbstractPojo;
 import com.google.light.server.persistence.PersistenceToDtoInterface;
 import com.google.light.server.utils.LightUtils;
@@ -38,9 +36,10 @@ import org.joda.time.Instant;
 @SuppressWarnings("serial")
 public abstract class AbstractPersistenceEntity<P, D> extends AbstractPojo<P> implements
     PersistenceToDtoInterface<P, D> {
-  @Transient
-  Boolean needsCreationTime;
+  // This value will not be persisted in dataStore.
+  @Transient Boolean needsCreationTime;
 
+  // Transient avoids comparison for equals.
   protected transient Instant creationTime;
   protected transient Instant lastUpdateTime;
 
@@ -56,6 +55,7 @@ public abstract class AbstractPersistenceEntity<P, D> extends AbstractPojo<P> im
     return needsCreationTime();
   }
 
+  // Before persisiting any entity, update its lastUpdateTime.
   @PrePersist
   protected void prePersist() {
     Instant now = LightUtils.getNow();

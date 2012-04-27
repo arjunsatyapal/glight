@@ -16,21 +16,7 @@
 package com.google.light.server.manager.implementation;
 
 import static com.google.light.server.utils.GuiceUtils.getInstance;
-
-import com.google.light.server.utils.LightPreconditions;
-
-import javax.servlet.http.HttpSession;
-
-import org.mockito.Mockito;
-
-import com.google.light.server.guice.provider.TestRequestScopedValuesProvider;
-
-import com.google.light.server.constants.LightEnvEnum;
-
-import com.google.light.testingutils.TestingUtils;
-
 import static com.google.light.server.utils.LightPreconditions.checkPersonId;
-
 import static com.google.light.testingutils.TestingUtils.getInjectorByEnv;
 import static com.google.light.testingutils.TestingUtils.getMockSessionForTesting;
 import static com.google.light.testingutils.TestingUtils.getRandomEmail;
@@ -40,19 +26,20 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
 
-import com.google.light.server.dto.pojo.PersonId;
-
-import org.junit.Test;
 import com.google.inject.Injector;
-
 import com.google.light.server.AbstractLightServerTest;
+import com.google.light.server.constants.LightEnvEnum;
+import com.google.light.server.dto.pojo.PersonId;
 import com.google.light.server.exception.unchecked.IdShouldNotBeSet;
 import com.google.light.server.exception.unchecked.InvalidPersonIdException;
 import com.google.light.server.exception.unchecked.httpexception.PersonLoginRequiredException;
+import com.google.light.server.guice.provider.TestRequestScopedValuesProvider;
 import com.google.light.server.manager.interfaces.PersonManager;
 import com.google.light.server.persistence.entity.person.PersonEntity;
+import javax.servlet.http.HttpSession;
+import org.junit.Test;
+import org.mockito.Mockito;
 
 /**
  * Tests for {@link PersonManagerImpl}

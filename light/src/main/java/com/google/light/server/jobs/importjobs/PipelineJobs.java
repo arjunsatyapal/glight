@@ -16,24 +16,22 @@
 package com.google.light.server.jobs.importjobs;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.light.server.jobs.importjobs.google.ImportGoogleDocJobs.updateChangeLog;
 import static com.google.light.server.utils.GuiceUtils.getInstance;
-
-import com.google.light.server.dto.pojo.ChangeLogEntryPojo;
-import com.google.light.server.dto.pojo.JobHandlerId;
-import com.google.light.server.dto.pojo.LightJobContextPojo;
-
-import com.google.light.server.utils.PipelineUtils;
 
 import com.google.appengine.tools.pipeline.FutureValue;
 import com.google.appengine.tools.pipeline.Value;
 import com.google.light.jobs.LightJob1;
 import com.google.light.jobs.LightJob2;
+import com.google.light.server.dto.pojo.JobHandlerId;
+import com.google.light.server.dto.pojo.LightJobContextPojo;
 import com.google.light.server.exception.unchecked.pipelineexceptions.pause.PipelineStopException;
 import com.google.light.server.jobs.importjobs.google.ImportGoogleDocJobs;
 import com.google.light.server.manager.interfaces.ImportManager;
 import com.google.light.server.persistence.entity.jobs.JobEntity;
 import com.google.light.server.persistence.entity.jobs.JobEntity.JobState;
 import com.google.light.server.persistence.entity.queue.importflow.ImportJobEntity;
+import com.google.light.server.utils.PipelineUtils;
 
 /**
  * 
@@ -78,15 +76,12 @@ public class PipelineJobs {
      */
     @Override
     public Value<LightJobContextPojo> handler(String importEntityId) {
-
       ImportManager importManager = getInstance(ImportManager.class);
       ImportJobEntity importJobEntity = importManager.get(importEntityId);
       checkNotNull(importJobEntity, "ImportJobEntity for Id[" + importEntityId
           + "] could not be fetched.");
 
-      ChangeLogEntryPojo changeLog =
-          new ChangeLogEntryPojo("Attaching to Pipeline[" + getPipelineId() + "].");
-      importManager.put(importJobEntity, changeLog);
+      updateChangeLog(importJobEntity, "Attaching to Pipeline[" + getPipelineId() + "].");
 
       switch (importJobEntity.getModuleType()) {
         case GOOGLE_DOC:
@@ -109,7 +104,7 @@ public class PipelineJobs {
 
       JobEntity jobEntity = getContext().getJobEntity();
       jobEntity.setJobState(JobState.COMPLETED_SUCCESSFULLY);
-      jobManager.put(jobEntity);
+      jobManager.put(null, jobEntity);
 
       return immediate(0);
     }

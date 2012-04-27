@@ -19,12 +19,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.servlets.thirdparty.google.gdata.gdoc.GoogleDocUtils.getDocumentFeedWithFolderUrl;
 import static com.google.light.server.utils.GuiceUtils.getInstance;
 
-import javax.servlet.http.HttpServletResponse;
-
 import com.google.appengine.api.log.InvalidRequestException;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-import com.google.inject.Provider;
 import com.google.light.server.constants.JerseyConstants;
 import com.google.light.server.constants.LightConstants;
 import com.google.light.server.constants.LightStringConstants;
@@ -32,11 +29,9 @@ import com.google.light.server.constants.http.ContentTypeConstants;
 import com.google.light.server.constants.http.ContentTypeEnum;
 import com.google.light.server.constants.http.HttpStatusCodesEnum;
 import com.google.light.server.dto.pages.PageDto;
-import com.google.light.server.dto.pojo.ChangeLogEntryPojo;
 import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocInfoDto;
 import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocResourceId;
 import com.google.light.server.jersey.resources.AbstractJerseyResource;
-import com.google.light.server.manager.interfaces.ImportManager;
 import com.google.light.server.manager.interfaces.JobManager;
 import com.google.light.server.persistence.entity.jobs.JobEntity;
 import com.google.light.server.persistence.entity.queue.importflow.ImportJobEntity;
@@ -47,6 +42,8 @@ import com.google.light.server.utils.LightUtils;
 import java.net.URL;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -58,7 +55,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import org.apache.commons.lang.StringUtils;
-import org.joda.time.Instant;
 
 /**
  * 
@@ -71,9 +67,7 @@ import org.joda.time.Instant;
 public class GoogleDocIntegration extends AbstractJerseyResource {
   private static final Logger logger = Logger.getLogger(GoogleDocIntegration.class.getName());
 
-  private Provider<Instant> instantProvider;
   private DocsServiceWrapper docsService;
-  private ImportManager importManager;
   private JobManager jobManager;
 
   @Inject
@@ -81,8 +75,6 @@ public class GoogleDocIntegration extends AbstractJerseyResource {
       @Context HttpServletResponse response) {
     super(injector, request, response);
     this.docsService = getInstance(DocsServiceWrapper.class);
-    this.instantProvider = GuiceUtils.getProvider(Instant.class);
-    this.importManager = getInstance(ImportManager.class);
     this.jobManager = getInstance(JobManager.class);
   }
 
@@ -112,20 +104,29 @@ public class GoogleDocIntegration extends AbstractJerseyResource {
     PageDto pageDto = docsService.getDocumentFeedWithFolders(url);
     return pageDto;
   }
+  
+
+  @GET
+  @Path(JerseyConstants.PATH_GOOGLE_DOC_INFO)
+  @Produces({ ContentTypeConstants.APPLICATION_JSON, ContentTypeConstants.TEXT_XML })
+  public GoogleDocInfoDto getDocInfo(
+      @PathParam(JerseyConstants.PATH_PARAM_EXTERNAL_KEY) String externalKey) {
+    GoogleDocResourceId resourceId = new GoogleDocResourceId(externalKey);
+    GoogleDocInfoDto dto = docsService.getDocumentEntryWithAcl(resourceId);
+    return dto;
+  }
 
   @POST
-  @Path(JerseyConstants.PATH_GOOGLE_DOC_IMPORT)
+  @Path(JerseyConstants.PATH_GOOGLE_DOC_IMPORT_POST)
   public Response importGoogleDocPost(
-      @PathParam(JerseyConstants.PATH_PARAM_EXTERNAL_KEY) String externalKeyStr) {
+      @FormParam(JerseyConstants.PATH_PARAM_EXTERNAL_KEY) String externalKeyStr) {
     return importGoogleDoc(externalKeyStr);
   }
 
   @PUT
-  @Path(JerseyConstants.PATH_GOOGLE_DOC_IMPORT)
+  @Path(JerseyConstants.PATH_GOOGLE_DOC_IMPORT_PUT)
   public Response importGoogleDoc(
       @PathParam(JerseyConstants.PATH_PARAM_EXTERNAL_KEY) String externalKeyStr) {
-    externalKeyStr = "document:1tJZGzv_2sjMpvs4jtwxg18PGuSG-6nlfmx8Hlqa-_58";
-
     if (StringUtils.isBlank(externalKeyStr)) {
       throw new InvalidRequestException("ExternalKeyStr should not be set.");
     }
@@ -137,19 +138,16 @@ public class GoogleDocIntegration extends AbstractJerseyResource {
     // TODO(arjuns): Add more logic to filter out what docs can be imported.
     logger.info(docInfoDto.toJson());
 
-    Instant now = instantProvider.get();
-    ImportJobEntity entity = new ImportJobEntity.Builder()
+    ImportJobEntity importJobEntity = new ImportJobEntity.Builder()
         .moduleType(resourceId.getModuleType())
         .resourceId(resourceId.getTypedResourceId())
         .personId(GuiceUtils.getOwnerId())
         .additionalJsonInfo(docInfoDto.toJson())
-        .creationTime(now)
-        .lastUpdateTime(now)
         .build();
-    ImportJobEntity persistedEntity = importManager.put(entity,
-        new ChangeLogEntryPojo("Enqueuing for Import."));
+//    ImportJobEntity persistedEntity = importManager.put(entity,
+//        new ChangeLogEntryPojo("Enqueuing for Import."));
 
-    JobEntity jobEntity = jobManager.enqueueImportJob(persistedEntity);
+    JobEntity jobEntity = jobManager.enqueueImportJob(importJobEntity);
 
     ResponseBuilder responseBuilder = Response.ok();
     responseBuilder.status(HttpStatusCodesEnum.CREATED.getStatusCode());

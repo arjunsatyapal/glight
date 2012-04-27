@@ -90,7 +90,7 @@ public class PipelineUtils {
     }
 
     // Updating for non-default JobState.
-    jobManager.put(jobEntity);
+    jobManager.put(null, jobEntity);
   }
 
   public static void deletePipeline(String pipelineId, boolean force) {

@@ -20,6 +20,8 @@ import static com.google.light.server.constants.OAuth2ProviderService.GOOGLE_DOC
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 import com.google.common.collect.Lists;
 import com.google.gdata.data.Link;
 import com.google.gdata.data.MediaContent;
@@ -50,6 +52,7 @@ import org.joda.time.Instant;
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
+@XmlRootElement(name = "googleDocInfo")
 @XmlAccessorType(XmlAccessType.FIELD)
 @JsonSerialize(include = Inclusion.NON_NULL)
 public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
@@ -61,7 +64,7 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
 
   private Long lastEditTimeInMillis;
 
-  private ModuleType type;
+  private ModuleType moduleType;
   private String title;
 
   private String documentLink;
@@ -122,7 +125,7 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
     }
 
     // Required for all configs.
-    checkNotNull(type, "ModuleType");
+    checkNotNull(moduleType, "ModuleType");
     checkNotBlank(title, "title");
     checkNotBlank(documentLink, "documentLink");
     
@@ -169,8 +172,8 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
     return lastEditTimeInMillis;
   }
 
-  public ModuleType getType() {
-    return type;
+  public ModuleType getModuleType() {
+    return moduleType;
   }
 
   public String getTitle() {
@@ -229,8 +232,6 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
     return lastCommentTime;
   }
   
-  
-  
   public static Logger getLogger() {
     return logger;
   }
@@ -245,7 +246,7 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
     private String resourceId;
     private String etag;
     private Long lastEditTimeInMillis;
-    private ModuleType type;
+    private ModuleType moduleType;
     private String title;
     private String documentLink;
     private String aclFeedLink;
@@ -294,8 +295,8 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
       return this;
     }
 
-    public Builder type(ModuleType type) {
-      this.type = type;
+    public Builder moduleType(ModuleType moduleType) {
+      this.moduleType = moduleType;
       return this;
     }
 
@@ -406,7 +407,7 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
         List<AdditionalRole> additionalRoles = aclEntry.getAdditionalRoles();
         if (additionalRoles.size() > 1) {
           StringBuilder errorMessageBuilder = new StringBuilder()
-              .append("For ModuleType[").append(type)
+              .append("For ModuleType[").append(moduleType)
               .append("], resourceId[").append(resourceId)
               .append("], found more then one additional roles : ");
           for (AdditionalRole currRole : additionalRoles) {
@@ -422,7 +423,7 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
             isCommenter = true;
           } else {
             String errorMessage =
-                "Unknown role : " + role.getValue() + " for moduleType[" + type
+                "Unknown role : " + role.getValue() + " for moduleType[" + moduleType
                     + "], resourceId[" + resourceId + "].";
             logger.severe(errorMessage);
             throw new RuntimeException(errorMessage);
@@ -450,7 +451,7 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
           }
         } else {
           String errorMessage =
-              "Unknown role : " + role.getValue() + " for moduleType[" + type
+              "Unknown role : " + role.getValue() + " for moduleType[" + moduleType
                   + "], resourceId[" + resourceId + "].";
           logger.severe(errorMessage);
           throw new RuntimeException(errorMessage);
@@ -470,7 +471,7 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
       lastUpdateTime(new DateTime(docListEntry.getUpdated().getValue()).toInstant());
       lastEditTime(new DateTime(docListEntry.getEdited().getValue()).toInstant());
 
-      type(ModuleType.getByProviderServiceAndCategory(GOOGLE_DOC, docListEntry.getType()));
+      moduleType(ModuleType.getByProviderServiceAndCategory(GOOGLE_DOC, docListEntry.getType()));
       title(docListEntry.getTitle().getPlainText());
 
       documentLink(docListEntry.getDocumentLink().getHref());
@@ -524,7 +525,7 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
     this.resourceId = builder.resourceId;
     this.etag = builder.etag;
     this.lastEditTimeInMillis = builder.lastEditTimeInMillis;
-    this.type = builder.type;
+    this.moduleType = builder.moduleType;
     this.title = builder.title;
     this.documentLink = builder.documentLink;
     this.aclFeedLink = builder.aclFeedLink;

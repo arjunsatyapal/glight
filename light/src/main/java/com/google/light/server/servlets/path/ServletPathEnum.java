@@ -22,11 +22,8 @@ import com.google.light.server.servlets.admin.ConfigServlet;
 import com.google.light.server.servlets.admin.OAuth2ConsumerCredentialServlet;
 import com.google.light.server.servlets.jobs.JobDetailServlet;
 import com.google.light.server.servlets.jobs.PipelineStatusServlet;
-import com.google.light.server.servlets.jobs.sample.AdditionJobServlet;
-import com.google.light.server.servlets.jobs.sample.UserIntegerInputServlet;
 import com.google.light.server.servlets.login.LoginServlet;
 import com.google.light.server.servlets.login.LogoutServlet;
-import com.google.light.server.servlets.module.ModuleServlet;
 import com.google.light.server.servlets.oauth2.google.gdoc.GoogleDocAuthCallbackServlet;
 import com.google.light.server.servlets.oauth2.google.gdoc.GoogleDocAuthServlet;
 import com.google.light.server.servlets.oauth2.google.login.GoogleLoginCallbackServlet;
@@ -42,7 +39,6 @@ import com.google.light.server.servlets.test.TestServlet;
 import com.google.light.server.servlets.test.oauth2.TestCredentialBackupServlet;
 import com.google.light.server.servlets.test.oauth2.TestOAuth2WorkFlowServlet;
 import com.google.light.server.servlets.test.oauth2.login.FakeLoginServlet;
-import com.google.light.server.servlets.test.thirdparty.google.gdta.gdoc.GoogleDocInfoServlet;
 import javax.servlet.http.HttpServlet;
 
 /**
@@ -56,10 +52,6 @@ import javax.servlet.http.HttpServlet;
 public enum ServletPathEnum {
   // TODO(arjuns): Add regex checks here.
   // TODO(arjuns) : Find a way to end URLs without /.
-
-
-  ADDITION_JOB_SERVLET(AdditionJobServlet.class, "/test/addition",
-                       false, false, false),
 
   // DeleteQueueServlet(DeleteQueueServlet.class, "/test/delete",
   // false, false, false),
@@ -79,8 +71,6 @@ public enum ServletPathEnum {
   IMPORT_STAGE_DETAIL_SERVLET(JobDetailServlet.class, "/api/queue/import_stage_detail",
                               true, false, false),
                               
-  MODULE_SERVLET(ModuleServlet.class, "/api/module/*/version/*",
-                 false, false, false),
   SEARCH(SearchServlet.class, "/api/search",
          false, false, false),
 
@@ -121,10 +111,6 @@ public enum ServletPathEnum {
   FAKE_LOGIN(FakeLoginServlet.class, "/test/fakelogin",
              false, false, true),
 
-  GOOGLE_DOC_INFO_SERVLET(GoogleDocInfoServlet.class,
-                          "/test/thirdparty/google/gdata/gdoc/information",
-                          true, false, true),
-
   TEST_CREDENTIAL_BACKUP_SERVLET(TestCredentialBackupServlet.class,
                                  "/test/admin/test_credential_backup",
                                  false, false, true),
@@ -141,10 +127,7 @@ public enum ServletPathEnum {
   TEST_HEADER(TestHeaders.class, "/test/testheader",
               false, false, true),
   TEST_LOGIN(TestLogin.class, "/test/testlogin",
-             true, false, true),
-
-  USER_INPUT(UserIntegerInputServlet.class, "/test/user_input",
-             false, false, false);
+             true, false, true);
 
   private Class<? extends HttpServlet> clazz;
   private String servletPath;

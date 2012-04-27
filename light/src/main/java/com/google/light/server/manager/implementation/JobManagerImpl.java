@@ -21,6 +21,8 @@ import static com.google.light.server.constants.LightConstants.JOB_BACK_OFF_SECO
 import static com.google.light.server.constants.LightConstants.JOB_MAX_ATTEMPTES;
 import static com.google.light.server.utils.GuiceUtils.getRequestScopedValues;
 
+import com.google.light.server.dto.pojo.ChangeLogEntryPojo;
+
 import com.google.appengine.tools.pipeline.PipelineService;
 import com.google.appengine.tools.pipeline.PipelineServiceFactory;
 import com.google.inject.Inject;
@@ -29,6 +31,7 @@ import com.google.light.server.dto.pojo.LightJobContextPojo;
 import com.google.light.server.dto.pojo.RequestScopedValues;
 import com.google.light.server.exception.unchecked.pipelineexceptions.PipelineException;
 import com.google.light.server.jobs.importjobs.PipelineJobs;
+import com.google.light.server.manager.interfaces.ImportManager;
 import com.google.light.server.manager.interfaces.JobManager;
 import com.google.light.server.persistence.dao.JobDao;
 import com.google.light.server.persistence.entity.jobs.JobEntity;
@@ -36,6 +39,8 @@ import com.google.light.server.persistence.entity.jobs.JobEntity.JobHandlerType;
 import com.google.light.server.persistence.entity.jobs.JobEntity.JobState;
 import com.google.light.server.persistence.entity.jobs.JobEntity.JobType;
 import com.google.light.server.persistence.entity.queue.importflow.ImportJobEntity;
+import com.google.light.server.utils.ObjectifyUtils;
+import com.googlecode.objectify.Objectify;
 import java.util.logging.Logger;
 
 /**
@@ -49,25 +54,32 @@ public class JobManagerImpl implements JobManager {
   private static final Logger logger = Logger.getLogger(JobManagerImpl.class.getName());
 
   private JobDao jobDao;
+  private ImportManager importManager;
 
   @Inject
-  public JobManagerImpl(JobDao jobDao) {
+  public JobManagerImpl(JobDao jobDao, ImportManager importManager) {
     this.jobDao = checkNotNull(jobDao, "jobDao");
+    this.importManager = checkNotNull(importManager, "importManager");
   }
 
   @Override
   public JobEntity enqueueImportJob(ImportJobEntity importJobEntity) {
+    Objectify ofy = ObjectifyUtils.initiateTransaction();
     try {
-      checkNotNull(importJobEntity.getId(), "Import job needs to be pre-persisted.");
-      
-      // First creating a Job from ImportJob without PipelineId.
+      // First persisting the importJob.
+      ImportJobEntity persistedEntity = importManager.put(ofy, importJobEntity,
+          new ChangeLogEntryPojo("Enqueuing for Import."));
+      checkNotNull(persistedEntity.getId(), "Import job was not persisted.");
+
+      // Now creating a Job from ImportJob without PipelineId.
       JobEntity jobEntity = new JobEntity.Builder()
           .jobHandlerType(JobHandlerType.PIPELINE)
           .jobType(JobType.IMPORT)
           .taskId(importJobEntity.getId())
           .jobState(JobState.PRE_START)
           .build();
-      JobEntity savedJobEntity = this.put(jobEntity);
+      JobEntity savedJobEntity = this.put(ofy, jobEntity);
+      ObjectifyUtils.commitTransaction(ofy);
 
       RequestScopedValues participants = getRequestScopedValues();
 
@@ -97,8 +109,8 @@ public class JobManagerImpl implements JobManager {
    * {@inheritDoc}
    */
   @Override
-  public JobEntity put(JobEntity jobEntity) {
-    return jobDao.put(jobEntity);
+  public JobEntity put(Objectify ofy, JobEntity jobEntity) {
+    return jobDao.put(ofy, jobEntity);
   }
 
   /**
@@ -109,7 +121,7 @@ public class JobManagerImpl implements JobManager {
     return jobDao.get(id);
   }
 
-  /** 
+  /**
    * {@inheritDoc}
    */
   @Override
