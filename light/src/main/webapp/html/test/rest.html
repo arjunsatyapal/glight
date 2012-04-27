@@ -31,6 +31,7 @@
              'dojo',
              'dijit',
              'dojo/on',
+             'dojo/_base/xhr',
              'dojo/parser',
              'dijit/form/Form',
              'dijit/form/Button',
@@ -44,6 +45,7 @@
                 dojo,
                 dijit,
                 on,
+                xhr,
                 parser
                 ) {
       parser.parse();
@@ -53,17 +55,28 @@
       var targetTextbox = dijit.byId("target");
       var idTextbox = dijit.byId("id");
       var sendButton = dijit.byId("send");
+      var iframe = dojo.byId("iframe");
       function reportError(txt) {
         answerTextarea.set('value', 'Error:\n'+txt);
       }
       function isNonEmptyString(id) {
         return typeof id == "string" && id != "";
       }
+      function showIframeIfHTML(something, ioArgs){
+        var frameDoc = iframe.contentDocument || iframe.contentWindow.document;
+        if(ioArgs.xhr.getResponseHeader('Content-Type').split(';')[0] == 'text/html') {
+          frameDoc.documentElement.innerHTML = ioArgs.xhr.response;
+          iframe.style.display = "block";
+        } else {
+          frameDoc.documentElement.innerHTML = "";
+          iframe.style.display = "none";
+        }
+      }
       sendButton.onClick = function() {
         answerTextarea.set('value', 'Loading ...');
         var operation = operationSelect.get('value');
         var target = targetTextbox.get('value');
-        var id = idTextbox.get('value');
+        var id = encodeURIComponent(idTextbox.get('value'));
         var content = contentTextarea.get('value');
         if(!isNonEmptyString(target)) {
           reportError('empty target');
@@ -76,8 +89,13 @@
             reportError('empty id');
             return;
           }
-          promise = store.get(id, {
-            'Content-Type': 'application/json'
+          promise = xhr("GET", {
+            url:target + id,
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            load: showIframeIfHTML,
+            error: showIframeIfHTML
           });
         } else if(operation == 'put') {
           var options = {}
@@ -103,7 +121,7 @@
         }
         
         promise.then(function(answer) {
-          answerTextarea.set('value', dojo.toJson(answer));
+          answerTextarea.set('value', answer);
         }, function(error) {
             var msg = 'XHR failed!\n'+error;
             if(error.xhr)
@@ -116,14 +134,14 @@
     
   </head>
   <body class="claro">
-
+    <form>
     <table style="border: 1px solid #9f9f9f;" cellspacing="10">
         <tr>
             <td>
                 <label>Target:</label>
             </td>
             <td>
-                <input type="text" id="target" data-dojo-type="dijit.form.TextBox" value="/api/person/"/>
+                <input type="text" id="target" name="target" autocomplete="on" data-dojo-type="dijit.form.TextBox" value="/api/search?query=asd&page=1&clientLanguageCode="/>
             </td>
         </tr>
         <tr>
@@ -131,7 +149,7 @@
                 <label>Id:</label>
             </td>
             <td>
-                <input type="text" id="id" data-dojo-type="dijit.form.TextBox" value="me"/>
+                <input type="text" id="id" name="id" autocomplete="on" data-dojo-type="dijit.form.TextBox" value="en-us"/>
             </td>
         </tr>
         <tr>
@@ -152,7 +170,7 @@
                 <label>Content:</label>
             </td>
             <td>
-                <textarea id="content" data-dojo-type="dijit.form.Textarea" style="width:500px; height: 250px">{}</textarea>
+                <textarea id="content" data-dojo-type="dijit.form.Textarea" style="width:700px">{}</textarea>
             </td>
         </tr>
     </table>
@@ -165,10 +183,11 @@
                 <label for="name">Answer:</label>
             </td>
             <td>
-                <textarea id="answer" data-dojo-type="dijit.form.Textarea" style="width:500px; height: 250px"></textarea>
+                <iframe id="iframe" src="about:blank" style="width:700px; display:none; height: 400px"></iframe>
+                <textarea id="answer" data-dojo-type="dijit.form.Textarea" style="width:700px"></textarea>
             </td>
         </tr>
     </table>
-    
+    </form>
   </body>
 </html>
