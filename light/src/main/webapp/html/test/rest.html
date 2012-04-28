@@ -4,28 +4,16 @@
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
     <title>Light</title>
-    <link href="/js/external/djk/dojo/resources/dojo.css" type="text/css" rel="stylesheet" media="screen">
-    <link href="/js/external/djk/dijit/themes/claro/claro.css" type="text/css" rel="stylesheet" media="screen">
+    <link href="http://ajax.googleapis.com/ajax/libs/dojo/1.7.2/dojo/resources/dojo.css" type="text/css" rel="stylesheet" media="screen">
+    <link href="http://ajax.googleapis.com/ajax/libs/dojo/1.7.2/dijit/themes/claro/claro.css" type="text/css" rel="stylesheet" media="screen">
     <script>
     dojoConfig = {
       async: true,
       isDebug: true,
-      waitSeconds: 2,
-      has: {
-        'light-dev': 1
-      },
-      deferredOnError: function(e) { console.log(e.message, e.stack); },
-        packages: [{
-            name: 'light',
-            location: '/js/light'
-        },
-        { name: 'dojo', location: '/js/external/djk/dojo' },
-        { name: 'dijit', location: '/js/external/djk/dijit' },
-        { name: 'dojox', location: '/js/external/djk/dojox' }
-        ],
+      waitSeconds: 2
     };
     </script>
-    <script src="/js/external/djk/dojo/dojo.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/dojo/1.7.2/dojo/dojo.js"></script>
     <script>
     require(['dojo/store/JsonRest',
              'dojo',
