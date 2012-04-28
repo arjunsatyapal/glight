@@ -13,7 +13,7 @@
 
 package com.google.light.testingutils.scripts;
 
-import static com.google.light.server.constants.HtmlPathEnum.PUT_OAUTH2_CONSUMER_CREDENTIAL;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.constants.OAuth2ProviderEnum.GOOGLE;
 import static com.google.light.server.constants.RequestParamKeyEnum.CLIENT_ID;
 import static com.google.light.server.constants.RequestParamKeyEnum.CLIENT_SECRET;
@@ -21,7 +21,6 @@ import static com.google.light.server.constants.RequestParamKeyEnum.EMAIL;
 import static com.google.light.server.constants.RequestParamKeyEnum.FULLNAME;
 import static com.google.light.server.constants.RequestParamKeyEnum.PASSWORD;
 import static com.google.light.server.servlets.path.ServletPathEnum.OAUTH2_GOOGLE_DOC_AUTH;
-import static com.google.light.server.servlets.path.ServletPathEnum.SEARCH_PAGE;
 import static com.google.light.server.servlets.path.ServletPathEnum.TEST_CREDENTIAL_BACKUP_SERVLET;
 import static com.google.light.server.servlets.test.CredentialStandardEnum.OAUTH2;
 import static com.google.light.server.servlets.test.CredentialUtils.getConsumerCredentialFileAbsPath;
@@ -32,16 +31,33 @@ import static com.google.light.testingutils.SeleniumUtils.clickAtCenter;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import com.google.api.client.http.GenericUrl;
+import com.google.api.client.http.HttpRequest;
+import com.google.api.client.http.HttpResponse;
+import com.google.api.client.http.HttpTransport;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.io.ByteStreams;
+import com.google.light.server.constants.HtmlPathEnum;
+import com.google.light.server.constants.LightEnvEnum;
+import com.google.light.server.constants.OAuth2ProviderEnum;
+import com.google.light.server.constants.OAuth2ProviderService;
+import com.google.light.server.constants.RequestParamKeyEnum;
+import com.google.light.server.servlets.path.ServletPathEnum;
+import com.google.light.server.utils.LightPreconditions;
+import com.google.light.testingutils.GaeTestingUtils;
+import com.google.light.testingutils.SeleniumUtils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
-
+import java.util.logging.Logger;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -49,32 +65,19 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 
-import com.google.api.client.http.GenericUrl;
-import com.google.api.client.http.HttpRequest;
-import com.google.api.client.http.HttpResponse;
-import com.google.api.client.http.HttpTransport;
-import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.common.collect.Lists;
-import com.google.common.io.ByteStreams;
-import com.google.light.server.constants.LightEnvEnum;
-import com.google.light.server.constants.OAuth2ProviderEnum;
-import com.google.light.server.constants.OAuth2ProviderService;
-import com.google.light.server.constants.RequestParamKeyEnum;
-import com.google.light.server.servlets.path.ServletPathEnum;
-import com.google.light.testingutils.GaeTestingUtils;
-import com.google.light.testingutils.SeleniumUtils;
-
 public class LoginITCase {
+  static final Logger logger = Logger.getLogger(LoginITCase.class.getName());
+  private static List<WebDriver> listOfDrivers = Lists.newArrayList();
+
   private static final int MAX_NUMBER_OF_TOKENS_TO_REVOKE = 2;
-  private WebDriver driver;
   private StringBuffer verificationErrors = new StringBuffer();
-  private Properties ownerCredentials;
-  private Properties consumerCredentials;
 
   private LightEnvEnum defaultEnv = LightEnvEnum.DEV_SERVER;
-  private String email;
-  private String password;
-  private String fullname;
+
+  private List<String> listOfEmails = Lists.newArrayList(
+      "func-test1@myopenedu.com",
+      "light-bot@myopenedu.com");
+  private Map<OAuth2ProviderEnum, Properties> consumerCredentialsMap = Maps.newHashMap();
 
   private final String serverUrl = "http://localhost:8080";
 
@@ -82,31 +85,19 @@ public class LoginITCase {
   public void seleniumSetup() throws Exception {
     GaeTestingUtils.cheapEnvSwitch(defaultEnv);
 
-    System.out.println(getOwnerCredentialPasswdFileAbsPath(OAUTH2));
-    ownerCredentials = loadProperties(getOwnerCredentialPasswdFileAbsPath(OAUTH2));
-    validatePropertiesFile(ownerCredentials, Lists.newArrayList(
-        FULLNAME.get(), EMAIL.get(), PASSWORD.get()));
-    email = ownerCredentials.getProperty(EMAIL.get());
-    fullname = ownerCredentials.getProperty(FULLNAME.get());
-    password = ownerCredentials.getProperty(PASSWORD.get());
+    for (OAuth2ProviderEnum currProvider : OAuth2ProviderEnum.values()) {
+      logger.info(getConsumerCredentialFileAbsPath(OAUTH2, currProvider));
+      Properties consumerCredentials = loadProperties(
+          getConsumerCredentialFileAbsPath(OAUTH2, GOOGLE));
 
-    System.out.println(getConsumerCredentialFileAbsPath(OAUTH2, GOOGLE));
-    consumerCredentials = loadProperties(getConsumerCredentialFileAbsPath(OAUTH2, GOOGLE));
-    validatePropertiesFile(consumerCredentials, Lists.newArrayList(
-        CLIENT_ID.get(), CLIENT_SECRET.get()));
+      validatePropertiesFile(consumerCredentials, Lists.newArrayList(
+          CLIENT_ID.get(), CLIENT_SECRET.get()));
+      consumerCredentialsMap.put(currProvider, consumerCredentials);
+    }
+    assertEquals(OAuth2ProviderEnum.values().length, consumerCredentialsMap.keySet().size());
   }
 
-  /**
-   * @return
-   * 
-   */
-  private WebDriver getSeleniumDriver() {
-    WebDriver driver = SeleniumUtils.getWebDriver();
-    driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
-    return driver;
-  }
-
-  private static Properties loadProperties(String filePath) throws FileNotFoundException,
+  static Properties loadProperties(String filePath) throws FileNotFoundException,
       IOException {
     Properties properties = new Properties();
     properties.load(new FileInputStream(new File(filePath)));
@@ -114,7 +105,32 @@ public class LoginITCase {
     return properties;
   }
 
-  private static void validatePropertiesFile(Properties properties, List<String> keys) {
+  static String getEmail(Properties properties) {
+    return getPropertyValue(properties, EMAIL.get());
+  }
+
+  static String getFullName(Properties properties) {
+    return getPropertyValue(properties, FULLNAME.get());
+  }
+
+  static String getPassword(Properties properties) {
+    return getPropertyValue(properties, PASSWORD.get());
+  }
+
+  static String getPropertyValue(Properties properties, String key) {
+    checkNotNull(properties, "properties");
+    return checkNotBlank((String) properties.get(key), key);
+  }
+
+  static WebDriver getSeleniumDriver() {
+    WebDriver driver = SeleniumUtils.getWebDriver();
+    driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+    
+    listOfDrivers.add(driver);
+    return driver;
+  }
+
+  static void validatePropertiesFile(Properties properties, List<String> keys) {
     for (String currKey : keys) {
       checkNotBlank(properties.getProperty(currKey), "missing : " + currKey);
     }
@@ -131,103 +147,211 @@ public class LoginITCase {
 
   @Test
   public void testLogin() throws Exception {
-    driver = getSeleniumDriver();
+    prepareServerForTest();
 
+    List<Thread> listOfThread = Lists.newArrayList();
+    for (String email : listOfEmails) {
+      logger.info("Working on email : " + email);
+      
+      Thread thread = new Thread(new ParallelTests(serverUrl, email));
+      thread.start();
+      
+      listOfThread.add(thread);
+    }
+    
+    for (Thread currThread : listOfThread) {
+      currThread.join();
+    }
+  }
+
+  private static class ParallelTests implements Runnable {
+    private String serverUrl;
+    private String email;
+    private WebDriver driver;
+    private Properties ownerCredentials;
+
+    public ParallelTests(String serverUrl, String email) throws FileNotFoundException, IOException {
+      this.serverUrl = checkNotBlank(serverUrl, "serverUrl");
+      this.driver = getSeleniumDriver();
+      this.email = LightPreconditions.checkNotBlank(email, "email");
+      logger.info(getOwnerCredentialPasswdFileAbsPath(OAUTH2, email));
+
+      ownerCredentials = loadProperties(
+          getOwnerCredentialPasswdFileAbsPath(OAUTH2, email));
+
+      validatePropertiesFile(ownerCredentials,
+          Lists.newArrayList(FULLNAME.get(), EMAIL.get(), PASSWORD.get()));
+      getEmail(ownerCredentials);
+      getFullName(ownerCredentials);
+      getPassword(ownerCredentials);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void run() {
+      try {
+        String password = getPassword(ownerCredentials);
+        String fullName = getFullName(ownerCredentials);
+
+        // Loging to Google Accounts and revoke all Access.
+        loginToGoogleAndRevokeAccess(email, password);
+
+        // Create Person on Light and finish Signup Flow.
+        completeSignupFlow(fullName);
+
+        // Now trigger the GOOGLE_DOC OAuth2 flow for Owner.
+        provideGoogleDocOAuth2OwnerToken();
+
+        // Logout from Light.
+        logoutFromLight();
+
+        // Logout from Google.
+        logoutFromGoogle();
+
+        /*
+         * Now all credentials are populated on DataStore of Dev Server. Now download the Zip file
+         * for functional tests.
+         */
+        downloadCredentialsFromServerAsZip();
+        driver.quit();
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
+    }
+
+    private void loginToGoogleAndRevokeAccess(String email, String password) {
+      driver
+          .get("https://accounts.google.com/ServiceLogin?passive=1209600&continue=https%3A%2F%2Faccounts.google.com%2FManageAccount&followup=https%3A%2F%2Faccounts.google.com%2FManageAccount");
+      driver.findElement(By.id("Email")).clear();
+      driver.findElement(By.id("Email")).sendKeys(email);
+      driver.findElement(By.id("Passwd")).clear();
+      driver.findElement(By.id("Passwd")).sendKeys(password);
+      driver.findElement(By.id("signIn")).click();
+      driver.findElement(By.id("skip")).click();
+
+      // SeleniumUtils.clickIfExists(driver, By.id("choose-account-" + accountNumber));
+
+      // Now revoking access
+      driver.findElement(By.cssSelector("#nav-security > div.IurIzb")).click();
+      driver.findElement(By.xpath("//div[5]/div[2]/a/div")).click();
+      for (int i = 0; i < MAX_NUMBER_OF_TOKENS_TO_REVOKE; i++) {
+        if (!SeleniumUtils.clickIfExists(driver, By.linkText("Revoke Access")))
+          break;
+      }
+    }
+
+    private void completeSignupFlow(String fullName) {
+      // Now trigger open a light page (eg. SEARCH_PAGE) and start GOOGLE_LOGIN OAuth2 flow for
+      // Owner.
+      driver.get(serverUrl + ServletPathEnum.SEARCH_PAGE.get());
+      clickAtCenter(driver, By.id("loginToolbar_loginButton"));
+      clickAtCenter(driver, By.id("loginToolbar_googleLoginProviderButton"));
+      // Accepting
+      driver.findElement(By.id("submit_approve_access")).click();
+
+      // Asserting the User is logged in
+      clickAtCenter(driver, By.id("registerForm_tosCheckbox"));
+      clickAtCenter(driver, By.id("registerForm_submitButton"));
+      assertEquals(fullName, driver.findElement(By.id("loginToolbar_personNameSpan")).getText());
+    }
+
+    private void logoutFromLight() {
+      driver.get(serverUrl + ServletPathEnum.SEARCH_PAGE.get());
+      clickAtCenter(driver, By.id("loginToolbar_logoutButton"));
+    }
+
+    private void logoutFromGoogle() {
+      driver.get("https://accounts.google.com");
+      clickAtCenter(driver, By.id("gbi4m1"));
+      clickAtCenter(driver, By.id("gb_71"));
+    }
+
+    private void provideGoogleDocOAuth2OwnerToken() {
+      driver.get(serverUrl + ServletPathEnum.TEST_WORKFLOW_SERVLETS.get());
+      String currElement = OAUTH2_GOOGLE_DOC_AUTH.name();
+      driver.findElement(By.id(currElement)).click();
+      driver.findElement(By.id("submit_approve_access")).click();
+    }
+
+    private void downloadCredentialsFromServerAsZip() throws IOException,
+        FileNotFoundException {
+      GenericUrl zipUrl = new GenericUrl(serverUrl + TEST_CREDENTIAL_BACKUP_SERVLET.get());
+      zipUrl.put(EMAIL.get(), email);
+      HttpTransport httpTransport = new NetHttpTransport();
+      HttpRequest request = httpTransport.createRequestFactory().buildGetRequest(zipUrl);
+      HttpResponse response = request.execute();
+
+      String outputPath = getCredentialZipFilePath(email);
+      File file = new File(outputPath);
+      if (file.exists()) {
+        file.delete();
+      }
+
+      ByteStreams.copy(response.getContent(), new FileOutputStream(new File(outputPath)));
+    }
+
+  }
+
+  private void prepareServerForTest() {
+    WebDriver driver = getSeleniumDriver();
     // First login as Admin on Dev Server.
-    driver.get(serverUrl + "/_ah/login");
-    driver.findElement(By.id("isAdmin")).click();
-    driver.findElement(By.name("action")).click();
+    loginAsAdminOnDevServer(driver);
 
     // Cleaning up the datastore
     driver.get(serverUrl + ServletPathEnum.TEST_CLEAN_UP_DATASTORE.get());
 
-    // First signin to Google Account.
-    driver
-        .get("https://accounts.google.com/ServiceLogin?passive=1209600&continue=https%3A%2F%2Faccounts.google.com%2FManageAccount&followup=https%3A%2F%2Faccounts.google.com%2FManageAccount");
-    driver.findElement(By.id("Email")).clear();
-    driver.findElement(By.id("Email")).sendKeys(email);
-    driver.findElement(By.id("Passwd")).clear();
-    driver.findElement(By.id("Passwd")).sendKeys(password);
-    driver.findElement(By.id("signIn")).click();
-
-    SeleniumUtils.clickIfExists(driver, By.id("choose-account-0"));
-
-    // Now revoking access
-    driver.findElement(By.cssSelector("#nav-security > div.IurIzb")).click();
-    driver.findElement(By.xpath("//div[5]/div[2]/a/div")).click();
-    for (int i = 0; i < MAX_NUMBER_OF_TOKENS_TO_REVOKE; i++) {
-      if (!SeleniumUtils.clickIfExists(driver, By.linkText("Revoke Access")))
-        break;
-    }
-
-    // Now Load PUT_OAUTH2_CONSUMER_CREDENTIAL Page.
-    driver.get(serverUrl + ServletPathEnum.TEST_WORKFLOW_SERVLETS.get());
-    String currElement = PUT_OAUTH2_CONSUMER_CREDENTIAL.name();
-    driver.findElement(By.id(currElement)).click();
-
     // Now Provide OAuth2 Credentials
-    currElement = RequestParamKeyEnum.OAUTH2_PROVIDER_NAME.get();
-    driver.findElement(By.name(currElement)).clear();
-    driver.findElement(By.name(currElement)).sendKeys(GOOGLE.name());
+    provideLightCredentials(driver);
+    driver.quit();
+  }
 
-    currElement = CLIENT_ID.get();
-    driver.findElement(By.name(currElement)).clear();
-    driver.findElement(By.name(currElement)).sendKeys(
-        consumerCredentials.getProperty(CLIENT_ID.get()));
+  /**
+  *
+  */
+  private void provideLightCredentials(WebDriver driver) {
+    // Now PUT_OAUTH2_CONSUMER_CREDENTIAL Page.
+    for (OAuth2ProviderEnum currProvider : OAuth2ProviderEnum.values()) {
+      Properties consumerCredentials = consumerCredentialsMap.get(currProvider);
 
-    currElement = CLIENT_SECRET.get();
-    driver.findElement(By.name(currElement)).clear();
-    driver.findElement(By.name(currElement)).sendKeys(
-        consumerCredentials.getProperty(CLIENT_SECRET.get()));
-    driver.findElement(By.cssSelector("input[type=\"submit\"]")).click();
+      driver.get(serverUrl + ServletPathEnum.TEST_WORKFLOW_SERVLETS.get());
+      String currElement = HtmlPathEnum.PUT_OAUTH2_CONSUMER_CREDENTIAL.name();
+      driver.findElement(By.id(currElement)).click();
 
-    // Google OAuth2 consumer credentials are now saved.
+      currElement = RequestParamKeyEnum.OAUTH2_PROVIDER_NAME.get();
+      driver.findElement(By.name(currElement)).clear();
+      driver.findElement(By.name(currElement)).sendKeys(GOOGLE.name());
 
-    // Now trigger open a light page (eg. SEARCH_PAGE) and start
-    // GOOGLE_LOGIN OAuth2 flow for Owner.
-    driver.get(serverUrl + SEARCH_PAGE.get());
-    clickAtCenter(driver, By.id("loginToolbar_loginButton"));
-    clickAtCenter(driver, By.id("loginToolbar_googleLoginProviderButton"));
-    // Accepting
-    driver.findElement(By.id("submit_approve_access")).click();
+      currElement = CLIENT_ID.get();
+      driver.findElement(By.name(currElement)).clear();
+      driver.findElement(By.name(currElement)).sendKeys(
+          consumerCredentials.getProperty(CLIENT_ID.get()));
 
-    // Asserting the User is logged in
-    clickAtCenter(driver, By.id("registerForm_tosCheckbox"));
-    clickAtCenter(driver, By.id("registerForm_submitButton"));
-    assertEquals(fullname, driver.findElement(By.id("loginToolbar_personNameSpan")).getText());
-
-    // Now trigger the GOOGLE_DOC OAuth2 flow for Owner.
-    driver.get(serverUrl + ServletPathEnum.TEST_WORKFLOW_SERVLETS.get());
-    currElement = OAUTH2_GOOGLE_DOC_AUTH.name();
-    driver.findElement(By.id(currElement)).click();
-    driver.findElement(By.id("submit_approve_access")).click();
-
-    /*
-     * Now all credentials are populated on DataStore of Dev Server. Now download the Zip file
-     * for functional tests.
-     */
-    GenericUrl zipUrl = new GenericUrl(serverUrl + TEST_CREDENTIAL_BACKUP_SERVLET.get());
-    zipUrl.put(EMAIL.get(), email);
-    HttpTransport httpTransport = new NetHttpTransport();
-    HttpRequest request = httpTransport.createRequestFactory().buildGetRequest(zipUrl);
-    HttpResponse response = request.execute();
-
-    String outputPath = getCredentialZipFilePath();
-    File file = new File(outputPath);
-    if (file.exists()) {
-      file.delete();
+      currElement = CLIENT_SECRET.get();
+      driver.findElement(By.name(currElement)).clear();
+      driver.findElement(By.name(currElement)).sendKeys(
+          consumerCredentials.getProperty(CLIENT_SECRET.get()));
+      driver.findElement(By.cssSelector("input[type=\"submit\"]")).click();
     }
+  }
 
-    ByteStreams.copy(response.getContent(), new FileOutputStream(new File(outputPath)));
+  private void loginAsAdminOnDevServer(WebDriver driver) {
+    driver.get(serverUrl + "/_ah/login");
+    driver.findElement(By.id("isAdmin")).click();
+    driver.findElement(By.name("action")).click();
   }
 
   @After
   public void tearDown() throws Exception {
-    if (driver == null) {
-      return;
+    for (WebDriver currDriver : listOfDrivers) {
+      try {
+      currDriver.quit();
+      } catch (Exception e) {
+        // If fails, ignore exception and try to quit others.
+      }
     }
-
-    driver.quit();
+    
     String verificationErrorString = verificationErrors.toString();
     if (!"".equals(verificationErrorString)) {
       fail(verificationErrorString);
@@ -235,7 +359,7 @@ public class LoginITCase {
   }
 
   @SuppressWarnings("unused")
-  private boolean isElementPresent(By by) {
+  private boolean isElementPresent(WebDriver driver, By by) {
     try {
       driver.findElement(by);
       return true;
