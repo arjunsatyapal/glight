@@ -500,14 +500,6 @@
           <serverId>appengine.google.com</serverId>
           <appDir>${light.wardir}</appDir>
         </configuration>
-        <dependencies>
-          <dependency>
-            <groupId>net.kindleit</groupId>
-            <artifactId>gae-runtime</artifactId>
-            <version>${gae.version}</version>
-            <type>pom</type>
-          </dependency>
-        </dependencies>
         <executions>
           <execution>
             <id />
@@ -798,7 +790,7 @@
       SDK version pointed to by ${gae.home} property (Typically, one used
       by your Eclipse plug-in).
     -->
-    <gae.version>1.6.4</gae.version>
+    <gae.version>1.6.5</gae.version>
     <gae.wait>false</gae.wait>
 
     <!--

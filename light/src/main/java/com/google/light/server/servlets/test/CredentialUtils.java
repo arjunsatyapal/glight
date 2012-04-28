@@ -83,8 +83,8 @@ public class CredentialUtils {
    * e.g. light-credentials/OAUTH2/owner/unit-test1@gmail.com/passwd 
    * @return
    */
-  public static String getOwnerCredentialPasswdFileAbsPath(CredentialStandardEnum standard) {
-    return getHomeDir() + "/" + getOwnerCredentialDir(standard) + "/credential";
+  public static String getOwnerCredentialPasswdFileAbsPath(CredentialStandardEnum standard, String email) {
+    return getHomeDir() + "/" + getOwnerCredentialDir(standard) + "/" + email;
   }
   
   /**
@@ -137,8 +137,8 @@ public class CredentialUtils {
    * 
    * @return
    */
-  public static String getCredentialZipFilePath() {
-    return getHomeDir() + "/" + getCredentialDir() + "/credential.zip";
+  public static String getCredentialZipFilePath(String email) {
+    return getHomeDir() + "/" + getCredentialDir() + "/backup/" + email + ".zip";
   }
 
   // Utility class.

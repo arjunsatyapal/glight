@@ -49,7 +49,7 @@ public class TestOAuth2ConsumerCredentialManagerImpl implements OAuth2ConsumerCr
   @Inject
   public TestOAuth2ConsumerCredentialManagerImpl() throws ZipException, IOException {
     // Ensure that zip file exists.
-    File file = new File(CredentialUtils.getCredentialZipFilePath());
+    File file = new File(CredentialUtils.getCredentialZipFilePath("func-test1@myopenedu.com"));
     checkArgument(file.exists(), "Run " + LoginITCase.class.getName());
     ZipFile zipFile = new ZipFile(file);
     
