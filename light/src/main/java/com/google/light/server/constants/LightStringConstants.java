@@ -23,6 +23,8 @@ package com.google.light.server.constants;
  * @author Arjun Satyapal
  */
 public class LightStringConstants {
+  public static final String CONTENT = "content";
+  
   public static final String VERSION_LATEST_STR = "latest";
   public static final String START_INDEX_STR = "start-index";
   public static final String MAX_RESULTS_STR = "max-results";

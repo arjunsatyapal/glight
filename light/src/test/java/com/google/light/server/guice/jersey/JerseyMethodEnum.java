@@ -22,6 +22,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.light.server.jersey.resources.AbstractJerseyResource;
 import com.google.light.server.jersey.resources.ModuleResource;
+import com.google.light.server.jersey.resources.admin.gae.GAEAdminResources;
+import com.google.light.server.jersey.resources.admin.gae.GAEPipelineResource;
 import com.google.light.server.jersey.resources.thirdparty.google.GoogleDocIntegration;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -29,6 +31,7 @@ import java.util.Set;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
+import javax.ws.rs.core.Response;
 
 /**
  * 
@@ -39,13 +42,31 @@ import javax.ws.rs.PUT;
  */
 @SuppressWarnings("rawtypes")
 public enum JerseyMethodEnum {
+  // GAEPipeline Resource Jersey Methods.
+  GAE_PIPELINE_RESOURCE_STATUS_GET(
+                                   GAEPipelineResource.class,
+                                   "getGAEPipelineStatus",
+                                   new Class[] { String.class },
+                                   GET.class,
+                                   "/rest/gaeadmin/gae_pipeline/{pipeline_id}",
+                                   new String[] { "text/plain" }),
+  // GAEAdmin Resource Jersey Methods.
+  GAE_ADMIN_RESOURCE_GET_CONFIG(
+                                GAEAdminResources.class,
+                                "getConfig",
+                                new Class[] {},
+                                GET.class,
+                                "/rest/gaeadmin/config",
+                                new String[] { "text/html" }),
+
+  // Module Resource Jersey Methods.
   MODULE_RESOURCE_GET_MODULE(
                              ModuleResource.class,
                              "getModule",
                              new Class[] { String.class },
                              GET.class,
                              "/rest/module/{module_id}",
-                             new String[]{"application/json", "text/xml"}),
+                             new String[] { "application/json", "text/xml" }),
 
   MODULE_RESOURCE_GET_MODULE_VERSION(
                                      ModuleResource.class,
@@ -53,7 +74,7 @@ public enum JerseyMethodEnum {
                                      new Class[] { String.class, String.class },
                                      GET.class,
                                      "/rest/module/{module_id}/{version}",
-                                     new String[]{"application/json", "text/xml"}),
+                                     new String[] { "application/json", "text/xml" }),
 
   MODULE_RESOURCE_GET_MODULE_VERSION_CONTENT(
                                              ModuleResource.class,
@@ -61,7 +82,7 @@ public enum JerseyMethodEnum {
                                              new Class[] { String.class, String.class },
                                              GET.class,
                                              "/rest/module/{module_id}/{version}/content",
-                                             new String[]{"text/html"}),
+                                             new String[] { "text/html" }),
 
   MODULE_RESOURCE_GET_MODULE_VERSION_RESOURCES(
                                                ModuleResource.class,
@@ -70,22 +91,23 @@ public enum JerseyMethodEnum {
                                                        String.class, String.class },
                                                GET.class,
                                                "/rest/module/{module_id}/{version}/{resource_type}/{resource}",
-                                               new String[]{"application/json", "text/xml"}),
+                                               new String[] { "application/json", "text/xml" }),
 
+  // Google Doc Integration Jersey Methods.
   GOOGLE_DOC_GET_DOC_LIST(
                           GoogleDocIntegration.class,
                           "getDocList",
                           new Class[] { String.class, String.class },
                           GET.class,
                           "/rest/thirdparty/google/gdoc/list",
-                          new String[]{"application/json", "text/xml"}),
+                          new String[] { "application/json", "text/xml" }),
   GOOGLE_DOC_GET_DOC_INFO(
                           GoogleDocIntegration.class,
                           "getDocInfo",
                           new Class[] { String.class },
                           GET.class,
                           "/rest/thirdparty/google/gdoc/info/{external_key}",
-                          new String[]{"application/json", "text/xml"}),
+                          new String[] { "application/json", "text/xml" }),
 
   GOOGLE_DOC_IMPORT_GOOGLE_DOC_POST(
                                     GoogleDocIntegration.class,
@@ -93,22 +115,22 @@ public enum JerseyMethodEnum {
                                     new Class[] { String.class },
                                     POST.class,
                                     "/rest/thirdparty/google/gdoc/import",
-                                    new String[]{"application/json", "text/xml"}),
+                                    new String[] { "application/json", "text/xml" }),
 
   GOOGLE_DOC_IMPORT_GOOGLE_DOC_PUT(
-                                    GoogleDocIntegration.class,
-                                    "importGoogleDocPut",
-                                    new Class[] { String.class },
-                                    PUT.class,
-                                    "/rest/thirdparty/google/gdoc/import/{external_key}",
-                                    new String[]{"application/json", "text/xml"}),
+                                   GoogleDocIntegration.class,
+                                   "importGoogleDocPut",
+                                   new Class[] { String.class },
+                                   PUT.class,
+                                   "/rest/thirdparty/google/gdoc/import/{external_key}",
+                                   new String[] { "application/json", "text/xml" }),
   GOOGLE_DOC_GET_FOLDER_CONTENTS(
                                  GoogleDocIntegration.class,
                                  "getFolderContents",
                                  new Class[] { String.class, String.class },
                                  GET.class,
                                  "/rest/thirdparty/google/gdoc/info/folder/{external_key}",
-                                 new String[]{"application/json", "text/xml"});
+                                 new String[] { "application/json", "text/xml" });
 
   private Class<? extends AbstractJerseyResource> clazz;
   private String methodName;
@@ -133,7 +155,7 @@ public enum JerseyMethodEnum {
     return clazz.getMethod(getMethodName(), parameterTypes);
   }
 
-  public static Set<Class<? extends AbstractJerseyResource>> getSetOfResources() {
+  public static Set<Class<? extends AbstractJerseyResource>> getSetOfJerseyResources() {
     Set<Class<? extends AbstractJerseyResource>> set = Sets.newHashSet();
 
     for (JerseyMethodEnum curr : JerseyMethodEnum.values()) {

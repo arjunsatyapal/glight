@@ -15,6 +15,7 @@
  */
 package com.google.light.server.constants;
 
+import static com.google.light.server.constants.LightStringConstants.CONTENT;
 
 /**
  * 
@@ -24,41 +25,48 @@ package com.google.light.server.constants;
  * @author Arjun Satyapal
  */
 public class JerseyConstants {
-  public static final String JERSEY_CONTEXT_PATH = "/rest";
-
-  public static final String CONSTANT_CONTENT = "content";
-
-  public static final String PATH_PARAM_MODULE_ID = "module_id";
-  public static final String PATH_MODULE_ID = "/{" + PATH_PARAM_MODULE_ID + "}";
-
-  public static final String PATH_PARAM_VERSION = "version";
-  public static final String PATH_VERSION = "/{" + PATH_PARAM_VERSION + "}";
-
-  public static final String PATH_PARAM_RESOURCE_TYPE = "resource_type";
-  public static final String PATH_RESOURCE_TYPE = "/{" + PATH_PARAM_RESOURCE_TYPE + "}";
-
-  public static final String PATH_PARAM_RESOURCE = "resource";
-  public static final String PATH_RESOURCE = "/{" + PATH_PARAM_RESOURCE + "}";
-
-  public static final String PATH_PARAM_PERSON_ID = "person_id";
-  public static final String PATH_PERSON_ID = "/{" + PATH_PARAM_PERSON_ID + "}";
+  private static final String JERSEY_CONTEXT = "/rest";
+  private static final String GAE_ADMIN_CONTEXT= "/gaeadmin"; 
 
   public static final String PATH_PARAM_EXTERNAL_KEY = "external_key";
   public static final String PATH_EXTERNAL_KEY = "/{" + PATH_PARAM_EXTERNAL_KEY + "}";
 
-  // Path for Module Resources.
-  public static final String RESOURCE_PATH_MODULE = "/module";
-  public static final String PATH_MODULE_VERSION = PATH_MODULE_ID + PATH_VERSION;
-  public static final String PATH_MODULE_VERSION_CONTENT = PATH_MODULE_VERSION + "/"
-      + CONSTANT_CONTENT;
-  public static final String PATH_MODULE_RESOURCE = PATH_MODULE_VERSION + PATH_RESOURCE_TYPE
-      + PATH_RESOURCE;
+  public static final String PATH_PARAM_MODULE_ID = "module_id";
+  public static final String PATH_MODULE_ID = "/{" + PATH_PARAM_MODULE_ID + "}";
 
+  public static final String PATH_PARAM_PERSON_ID = "person_id";
+  public static final String PATH_PERSON_ID = "/{" + PATH_PARAM_PERSON_ID + "}";
+  
+  public static final String PATH_PARAM_PIPELINE_ID = "pipeline_id";
+  public static final String PATH_PIPELINE_ID = "/{" + PATH_PARAM_PIPELINE_ID + "}";
+
+  public static final String PATH_PARAM_RESOURCE = "resource";
+  public static final String PATH_RESOURCE = "/{" + PATH_PARAM_RESOURCE + "}";
+
+  public static final String PATH_PARAM_RESOURCE_TYPE = "resource_type";
+  public static final String PATH_RESOURCE_TYPE = "/{" + PATH_PARAM_RESOURCE_TYPE + "}";
+
+  public static final String PATH_PARAM_VERSION = "version";
+  public static final String PATH_VERSION = "/{" + PATH_PARAM_VERSION + "}";
+
+  /* 
+   * *********************************
+   * Now Path for Different Resources.
+   * *********************************
+   */
+
+  // Path for Miscallaneous Admin Resource.
+  public static final String RESOURCE_PATH_MISC_ADMIN = GAE_ADMIN_CONTEXT;
+  public static final String PATH_CONFIG = "/config";
+  
+  // Path for GAE Pipeline Resource.
+  public static final String RESOURCE_PATH_GAE_PIPELINE = GAE_ADMIN_CONTEXT + "/gae_pipeline";
+  
   // Path for Gogole Doc Integration.
   public static final String RESOURCE_PATH_THIRD_PARTY_GOOGLE_DOC = "/thirdparty/google/gdoc";
 
   public static final String PATH_GOOGLE_DOC_LIST = "/list";
-  public static final String URI_GOOGLE_DOC_LIST = JERSEY_CONTEXT_PATH +
+  public static final String URI_GOOGLE_DOC_LIST = JERSEY_CONTEXT +
       RESOURCE_PATH_THIRD_PARTY_GOOGLE_DOC + PATH_GOOGLE_DOC_LIST;
 
   public static final String PATH_GOOGLE_DOC_INFO = "/info" + PATH_EXTERNAL_KEY;
@@ -68,7 +76,27 @@ public class JerseyConstants {
   public static final String PATH_GOOGLE_DOC_IMPORT_PUT = PATH_GOOGLE_DOC_IMPORT_POST
       + PATH_EXTERNAL_KEY;
 
+  // Path for Module Resources.
+  public static final String RESOURCE_PATH_MODULE = "/module";
+  public static final String PATH_MODULE_VERSION = PATH_MODULE_ID + PATH_VERSION;
+  public static final String PATH_MODULE_VERSION_CONTENT = PATH_MODULE_VERSION + "/"
+      + CONTENT;
+  public static final String PATH_MODULE_RESOURCE = PATH_MODULE_VERSION + PATH_RESOURCE_TYPE
+      + PATH_RESOURCE;
+
+
   // Path for Person Resource.
   public static final String RESOURCE_PATH_PERSON = "/person";
   public static final String PATH_PERSON = PATH_PERSON_ID;
+  
+
+
+  // Some getter methods.
+  public static String getJerseyContext() {
+    return JERSEY_CONTEXT;
+  }
+  
+  public static String getAdminContext() {
+    return GAE_ADMIN_CONTEXT;
+  }
 }

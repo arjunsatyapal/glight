@@ -146,6 +146,7 @@ public class OAuth2ConsumerCredentialEntityTest extends AbstractPersistenceEntit
   /**
    * {@inheritDoc}
    */
+  @Test
   @Override
   public void test_generateKey() {
     // Positive tests done already as part of test_getKey. Doing negative testing.

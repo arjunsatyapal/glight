@@ -3,6 +3,8 @@ package com.google.light.server.manager.implementation;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import org.junit.Ignore;
+
 import java.io.InputStream;
 
 import org.junit.Test;
@@ -30,6 +32,7 @@ public class SearchManagerGSSImplTest {
    * 
    * @see https://developers.google.com/custom-search/docs/xml_results#numsp
    */
+  @Test
   public void test_SEARCH_RESULTS_PER_PAGE_config() {
     assertTrue("LightConstants.SEARCH_RESULTS_PER_PAGE should be greater then 0",
         LightConstants.SEARCH_RESULTS_PER_PAGE > 0);
@@ -75,7 +78,8 @@ public class SearchManagerGSSImplTest {
    * CSE output is not passing Google's DTD validation. Deactivating this test for now.
    * TODO(waltercacau): Follow up with CSE team to check if the problem was resolved.
    */
-  // @Test
+  @Ignore(value = "TODO(waltercacau):Fix this.")
+  @Test
   public void test_sampleInputsConformToPublicDTD() throws Exception {
     for (String inputPath : TestingConstants.SAMPLE_GSS_LIST_INPUTS) {
       XmlTestingUtils.assertValidXmlAccordingToDTD(

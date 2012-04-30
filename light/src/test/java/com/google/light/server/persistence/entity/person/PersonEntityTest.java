@@ -273,6 +273,7 @@ public class PersonEntityTest extends AbstractPersistenceEntityTest {
   /** 
    * {@inheritDoc}
    */
+  @Test
   @Override
   public void test_generateKey() {
     // Positive tests are done as part of test_getKey

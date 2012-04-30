@@ -15,16 +15,11 @@
  */
 package com.google.light.server.guice.provider;
 
-import com.google.light.server.dto.pojo.RequestScopedValues;
-
-import com.google.light.pojo.TestRequestScopedValues;
-
-
-import com.google.common.base.Preconditions;
-
-
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.inject.Provider;
+import com.google.light.pojo.TestRequestScopedValues;
+import com.google.light.server.dto.pojo.RequestScopedValues;
 
 /**
  *
@@ -34,20 +29,25 @@ import com.google.inject.Provider;
  * @author Arjun Satyapal
  */
 public class TestRequestScopedValuesProvider implements Provider<RequestScopedValues>{
-  private TestRequestScopedValues testParticipants;
-  public TestRequestScopedValuesProvider(TestRequestScopedValues testParticipants) {
-    this.testParticipants = Preconditions.checkNotNull(testParticipants);
+  private TestRequestScopedValues testRequestScopedValues;
+  
+  public static TestRequestScopedValuesProvider getInstanceForNonLogin() {
+    return new TestRequestScopedValuesProvider(new TestRequestScopedValues(null,  null));
+  }
+  
+  public TestRequestScopedValuesProvider(TestRequestScopedValues testRequestScopedValues) {
+    this.testRequestScopedValues = checkNotNull(testRequestScopedValues, "testRequestScopedValues");
   }
   
   
-  public TestRequestScopedValues getParticipants() {
-    return testParticipants;
+  public TestRequestScopedValues getRequestScopedValues() {
+    return testRequestScopedValues;
   }
   /** 
    * {@inheritDoc}
    */
   @Override
   public RequestScopedValues get() {
-    return testParticipants;
+    return testRequestScopedValues;
   }
 }

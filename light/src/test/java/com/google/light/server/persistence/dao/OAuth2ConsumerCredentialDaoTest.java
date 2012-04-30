@@ -65,6 +65,7 @@ public class OAuth2ConsumerCredentialDaoTest extends
   /**
    * {@inheritDoc}
    */
+  @Test
   @Override
   public void test_get_by_key_in_txn() {
     OAuth2ConsumerCredentialEntity testEntity = getDefaultEntityBuilder().build();

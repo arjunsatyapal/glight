@@ -15,23 +15,14 @@ package com.google.light.server.servlets.path;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
-import com.google.light.server.constants.LightEnvEnum;
-
-import com.google.common.collect.Lists;
-
-import com.google.light.server.utils.LightPreconditions;
-
-import java.util.List;
-
-import com.google.light.server.servlets.filters.FilterPathEnum;
-
 import com.google.appengine.tools.pipeline.impl.servlets.PipelineServlet;
+import com.google.common.collect.Lists;
+import com.google.light.server.constants.LightEnvEnum;
 import com.google.light.server.exception.unchecked.httpexception.NotFoundException;
 import com.google.light.server.servlets.LightGenericJSPServlet;
-import com.google.light.server.servlets.admin.ConfigServlet;
 import com.google.light.server.servlets.admin.OAuth2ConsumerCredentialServlet;
+import com.google.light.server.servlets.filters.FilterPathEnum;
 import com.google.light.server.servlets.jobs.JobDetailServlet;
-import com.google.light.server.servlets.jobs.PipelineStatusServlet;
 import com.google.light.server.servlets.login.LoginServlet;
 import com.google.light.server.servlets.login.LogoutServlet;
 import com.google.light.server.servlets.oauth2.google.gdoc.GoogleDocAuthCallbackServlet;
@@ -49,6 +40,8 @@ import com.google.light.server.servlets.test.TestServlet;
 import com.google.light.server.servlets.test.oauth2.TestCredentialBackupServlet;
 import com.google.light.server.servlets.test.oauth2.TestOAuth2WorkFlowServlet;
 import com.google.light.server.servlets.test.oauth2.login.FakeLoginServlet;
+import com.google.light.server.utils.LightPreconditions;
+import java.util.List;
 import javax.servlet.http.HttpServlet;
 
 /**
@@ -111,16 +104,6 @@ public enum ServletPathEnum {
   OAUTH2_GOOGLE_DOC_AUTH_CB(GoogleDocAuthCallbackServlet.class, "/oauth2/google_doc_cb",
                             true, false, true, true,
                             Lists.newArrayList(FilterPathEnum.API, FilterPathEnum.TEST)),
-  // TODO(arjuns): Move this to jersey resource.
-  PIPELINE_STATUS(PipelineStatusServlet.class, "/test/pipeline_status",
-                  false, false, true, true,
-                  Lists.newArrayList(FilterPathEnum.API, FilterPathEnum.TEST)),
-
-  // TODO(arjuns): Move this to jersey resource.
-  // Admin Servlets
-  CONFIG(ConfigServlet.class, "/admin/config",
-         true, true, true, true,
-         Lists.newArrayList(FilterPathEnum.API, FilterPathEnum.TEST)),
 
   // TODO(arjuns): Move this to jersey resource.
   OAUTH2_CONSUMER_CRENDENTIAL(OAuth2ConsumerCredentialServlet.class,

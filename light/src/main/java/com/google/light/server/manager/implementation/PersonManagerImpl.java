@@ -22,12 +22,12 @@ import static com.google.light.server.utils.LightPreconditions.checkValidSession
 
 import com.google.inject.Inject;
 import com.google.light.server.dto.pojo.PersonId;
+import com.google.light.server.dto.pojo.RequestScopedValues;
 import com.google.light.server.exception.unchecked.IdShouldNotBeSet;
 import com.google.light.server.manager.interfaces.PersonManager;
 import com.google.light.server.persistence.dao.PersonDao;
 import com.google.light.server.persistence.entity.person.PersonEntity;
 import com.google.light.server.servlets.SessionManager;
-import com.google.light.server.utils.GuiceUtils;
 
 /**
  * Implementation class for {@link PersonManager}. Unlike other managers, we do not check for
@@ -40,11 +40,14 @@ import com.google.light.server.utils.GuiceUtils;
 public class PersonManagerImpl implements PersonManager {
   private PersonDao personDao;
   private SessionManager sessionManager;
+  private RequestScopedValues requestScopedValues;
 
   @Inject
-  public PersonManagerImpl(PersonDao personDao, SessionManager sessionManager) {
+  public PersonManagerImpl(PersonDao personDao, SessionManager sessionManager,
+      RequestScopedValues requestScopedValues) {
     this.personDao = checkNotNull(personDao, "personDao");
     this.sessionManager = checkNotNull(sessionManager, "sessionManager");
+    this.requestScopedValues = checkNotNull(requestScopedValues, "requestScopedValues");
   }
 
   /**
@@ -133,7 +136,7 @@ public class PersonManagerImpl implements PersonManager {
    */
   @Override
   public PersonEntity getCurrent() {
-    PersonId personId = GuiceUtils.getOwnerId();
+    PersonId personId = requestScopedValues.getOwnerId();
     
     if (personId == null) {
       return null;

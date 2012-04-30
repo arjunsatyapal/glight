@@ -80,6 +80,7 @@ public class OAuth2OwnerTokenEntityTest extends AbstractPersistenceEntityTest {
   /**
    * {@inheritDoc}
    */
+  @Test
   @Override
   public void test_builder_with_constructor() {
     // Negative Test : Zero personId
@@ -242,6 +243,7 @@ public class OAuth2OwnerTokenEntityTest extends AbstractPersistenceEntityTest {
   /**
    * {@inheritDoc}
    */
+  @Test
   @Override
   public void test_generateKey() {
     // Positive tests already done as part of test_getKey.

@@ -34,7 +34,7 @@ public class JerseyUtils {
       throws SecurityException, NoSuchMethodException {
     checkNotNull(jerseyMethodEnum, "jerseyMetthodEnum");
 
-    String contextPath = JerseyConstants.JERSEY_CONTEXT_PATH;
+    String contextPath = JerseyConstants.getJerseyContext();
     
     Class<? extends AbstractJerseyResource> clazz = jerseyMethodEnum.getClazz();
     Path path = clazz.getAnnotation(Path.class);

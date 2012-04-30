@@ -118,8 +118,9 @@ public class ObjectifyUtilsTest extends AbstractLightServerTest {
   }
   
   /**
-   * 
+   * Test for {@link ObjectifyUtils#rollbackTransaction(Objectify)}
    */
+  @Test
   public void test_rollbackTransaction() {
     Objectify txn = initiateTransaction();
     rollbackTransaction(txn);

@@ -29,6 +29,20 @@ import static com.google.light.server.utils.LightUtils.getUUIDString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.google.common.collect.Lists;
+
+import java.lang.annotation.Annotation;
+
+import com.google.common.base.Preconditions;
+
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.TreeSet;
+import java.util.regex.Pattern;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.LowLevelHttpRequest;
 import com.google.api.client.http.LowLevelHttpResponse;
@@ -173,6 +187,8 @@ public class TestingUtils {
       @Nullable HttpSession session) {
     if (env == LightEnvEnum.UNIT_TEST) {
       checkNotNull(session, "session should be set for UNIT_TEST env.");
+      checkNotNull(testRequestScopedValueProvider,
+          "testRequestScopedValueProvider should be set for UNIT_TEST env.");
     } else {
       checkNull(session, "Session should not be set for non UNIT-TEST env.");
     }
@@ -305,7 +321,7 @@ public class TestingUtils {
 
     SessionManager sessionManager = injector.getInstance(SessionManager.class);
     checkPersonLoggedIn(sessionManager);
-    
+
     PersonManager personManager = getInstance(PersonManager.class);
 
     PersonEntity personEntity = new PersonEntity.Builder()
@@ -379,5 +395,110 @@ public class TestingUtils {
     PersonId personId = mock(PersonId.class);
     Mockito.when(personId.get()).thenThrow(new RuntimeException("Should not be called"));
     return personId;
+  }
+
+  /**
+   * Scans all classes accessible from the context class loader which belong to the given package
+   * and subpackages.
+   * Borrowed from http://snippets.dzone.com/posts/show/4831.
+   * 
+   * @param packageName The base package
+   * @param regexFilter an optional class name pattern.
+   * @return The classes
+   */
+  @SuppressWarnings("rawtypes")
+  public static List<Class> getClassesInPackage(String packageName, String regexFilter) {
+    Pattern regex = null;
+    if (regexFilter != null)
+      regex = Pattern.compile(regexFilter);
+
+    try {
+      ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+      Preconditions.checkNotNull(classLoader, "classLoader");
+      String path = packageName.replace('.', '/');
+      Enumeration<URL> resources = classLoader.getResources(path);
+      List<String> dirs = new ArrayList<String>();
+      while (resources.hasMoreElements()) {
+        URL resource = resources.nextElement();
+        dirs.add(resource.getFile());
+      }
+      TreeSet<String> classes = new TreeSet<String>();
+      for (String directory : dirs) {
+        classes.addAll(findClasses(directory, packageName, regex));
+      }
+      List<Class> classList = Lists.newArrayList();
+      for (String clazz : classes) {
+        classList.add(Class.forName(clazz));
+      }
+      return classList;
+    } catch (Exception e) {
+      e.printStackTrace();
+      return null;
+    }
+  }
+
+  /**
+   * Recursive method used to find all classes in a given path (directory or zip file url).
+   * Directories
+   * are searched recursively. (zip files are
+   * Borrowed from http://snippets.dzone.com/posts/show/4831.
+   * 
+   * @param path The base directory or url from which to search.
+   * @param packageName The package name for classes found inside the base directory
+   * @param regex an optional class name pattern. e.g. .*Test
+   * @return The classes
+   */
+  private static TreeSet<String> findClasses(String path, String packageName, Pattern regex)
+      throws Exception {
+    TreeSet<String> classes = new TreeSet<String>();
+    if (path.startsWith("file:") && path.contains("!")) {
+      String[] split = path.split("!");
+      URL jar = new URL(split[0]);
+      ZipInputStream zip = new ZipInputStream(jar.openStream());
+      ZipEntry entry;
+      while ((entry = zip.getNextEntry()) != null) {
+        if (entry.getName().endsWith(".class")) {
+          String className =
+              entry.getName().replaceAll("[$].*", "").replaceAll("[.]class", "").replace('/', '.');
+          if (className.startsWith(packageName)
+              && (regex == null || regex.matcher(className).matches()))
+            classes.add(className);
+        }
+      }
+    }
+    File dir = new File(path);
+    if (!dir.exists()) {
+      return classes;
+    }
+    File[] files = dir.listFiles();
+    for (File file : files) {
+      if (file.isDirectory()) {
+        assert !file.getName().contains(".");
+        classes.addAll(findClasses(file.getAbsolutePath(), packageName + "." + file.getName(),
+            regex));
+      } else if (file.getName().endsWith(".class")) {
+        String className =
+            packageName + '.' + file.getName().substring(0, file.getName().length() - 6);
+        if (regex == null || regex.matcher(className).matches())
+          classes.add(className);
+      }
+    }
+    return classes;
+  }
+
+  @SuppressWarnings("rawtypes")
+  public static boolean containsAnnotation(Class requiredAnnotation, Annotation[] annotations) {
+    if (annotations.length == 0) {
+      return false;
+    }
+
+    for (Annotation currAnnotation : annotations) {
+      String currAnnotationClassName = currAnnotation.annotationType().getCanonicalName();
+      if (currAnnotationClassName.equals(requiredAnnotation.getName())) {
+        return true;
+      }
+    }
+
+    return false;
   }
 }
