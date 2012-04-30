@@ -56,8 +56,13 @@ public class RequestScopedValues extends AbstractPojo<RequestScopedValues> {
   }
 
   public RequestScopedValues(PersonId ownerId, PersonId actorId) {
-    this.ownerId = ownerId;
-    this.actorId = actorId;
+    if (ownerId.isValid()) {
+      this.ownerId = ownerId;
+    }
+    
+    if (actorId.isValid()) {
+      this.actorId = actorId;
+    }
   }
 
   public PersonId getOwnerId() {

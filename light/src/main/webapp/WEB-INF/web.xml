@@ -32,7 +32,8 @@
       <url-pattern>/html/admin/*</url-pattern>
       <url-pattern>/_ah/pipeline/*</url-pattern>
       <url-pattern>/test/admin/*</url-pattern>
-
+      <url-pattern>/rest/gaeadmin/*</url-pattern>
+      <url-pattern>/rest/tenatadmin/*</url-pattern>
     </web-resource-collection>
     <auth-constraint>
       <role-name>admin</role-name>

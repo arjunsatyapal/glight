@@ -28,6 +28,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import com.google.inject.Injector;
+import com.google.light.pojo.TestRequestScopedValues;
 import com.google.light.server.AbstractLightServerTest;
 import com.google.light.server.constants.LightEnvEnum;
 import com.google.light.server.dto.pojo.PersonId;
@@ -114,7 +115,7 @@ public class PersonManagerImplTest extends AbstractLightServerTest {
 
     // Negative testing for non-login.
     Injector nonLoginInjector = getInjectorByEnv(LightEnvEnum.UNIT_TEST,
-        Mockito.mock(TestRequestScopedValuesProvider.class),
+        TestRequestScopedValuesProvider.getInstanceForNonLogin(),
         Mockito.mock(HttpSession.class));
     PersonManager personManager = nonLoginInjector.getInstance(PersonManager.class);
     assertNotNull(personManager);
@@ -258,18 +259,18 @@ public class PersonManagerImplTest extends AbstractLightServerTest {
   /**
    * Test for {@link PersonManagerImpl#getCurrent()}
    */
+  @Test
   public void test_getCurrent() {
-
     // If the logged person was created in the datastore
-    assertEquals(testPerson, personManager.getCurrent());
+     assertEquals(testPerson, personManager.getCurrent());
 
-    // If not:
+    // If user is not logged in.
     testSession = getMockSessionForTesting(defaultEnv, defaultProviderService,
         testProviderUserId, null /* personId */, testEmail);
-    Injector tempInjector =
-        getInjectorByEnv(defaultEnv, testRequestScopedValueProvider, testSession);
-    PersonManager tempPersonManager = tempInjector.getInstance(PersonManager.class);
+    Injector nonLoginInjector = getInjectorByEnv(defaultEnv,
+        TestRequestScopedValuesProvider.getInstanceForNonLogin(),
+        testSession);
+    PersonManager tempPersonManager = nonLoginInjector.getInstance(PersonManager.class);
     assertEquals(null, tempPersonManager.getCurrent());
-
   }
 }

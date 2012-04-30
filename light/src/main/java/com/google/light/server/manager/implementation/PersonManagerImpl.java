@@ -17,10 +17,12 @@ package com.google.light.server.manager.implementation;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkPersonId;
+import static com.google.light.server.utils.LightPreconditions.checkPersonLoggedIn;
 import static com.google.light.server.utils.LightPreconditions.checkValidSession;
 
 import com.google.inject.Inject;
 import com.google.light.server.dto.pojo.PersonId;
+import com.google.light.server.dto.pojo.RequestScopedValues;
 import com.google.light.server.exception.unchecked.IdShouldNotBeSet;
 import com.google.light.server.manager.interfaces.PersonManager;
 import com.google.light.server.persistence.dao.PersonDao;
@@ -28,9 +30,9 @@ import com.google.light.server.persistence.entity.person.PersonEntity;
 import com.google.light.server.servlets.SessionManager;
 
 /**
- * Implementation class for {@link PersonManager}. Unlike other managers, we do not check for 
+ * Implementation class for {@link PersonManager}. Unlike other managers, we do not check for
  * Person is logged in because this Implementation is called under various scenarios where
- * a user may/may not be logged in. So instead of validating inside a constructor, we will do 
+ * a user may/may not be logged in. So instead of validating inside a constructor, we will do
  * different validations inside different methods.
  * 
  * @author Arjun Satyapal
@@ -38,11 +40,14 @@ import com.google.light.server.servlets.SessionManager;
 public class PersonManagerImpl implements PersonManager {
   private PersonDao personDao;
   private SessionManager sessionManager;
+  private RequestScopedValues requestScopedValues;
 
   @Inject
-  public PersonManagerImpl(PersonDao personDao, SessionManager sessionManager) {
+  public PersonManagerImpl(PersonDao personDao, SessionManager sessionManager,
+      RequestScopedValues requestScopedValues) {
     this.personDao = checkNotNull(personDao, "personDao");
     this.sessionManager = checkNotNull(sessionManager, "sessionManager");
+    this.requestScopedValues = checkNotNull(requestScopedValues, "requestScopedValues");
   }
 
   /**
@@ -50,8 +55,7 @@ public class PersonManagerImpl implements PersonManager {
    */
   @Override
   public PersonEntity create(PersonEntity entity) {
-    sessionManager.checkPersonLoggedIn();
-    
+    checkPersonLoggedIn(sessionManager);
     /*
      * We don't trust client to provide PersonId at time of Creation. So it has to be set
      * on the server side.
@@ -62,7 +66,7 @@ public class PersonManagerImpl implements PersonManager {
 
     // This is a heavy operation, so perform this validation just before persisting.
     PersonEntity personByEmail = findByEmail(entity.getEmail());
-    
+
     if (personByEmail != null) {
       return personByEmail;
     }
@@ -75,22 +79,22 @@ public class PersonManagerImpl implements PersonManager {
    */
   @Override
   public PersonEntity update(PersonEntity updatedEntity) {
-   checkValidSession(sessionManager);
-    
+    checkValidSession(sessionManager);
+
     // TODO(arjuns & waltercacau): How to check if an email can be associated with the account?
     // right now it is protected relying a person only can put on /api/person/me, but as soon
     // as we allow admins to change person's data we might start a security issue.
-    
+
     // For now, let's not even consider a client side provided ID.
     if (updatedEntity.getPersonId() != null) {
       throw new IdShouldNotBeSet();
     }
-    
+
     updatedEntity.setPersonId(sessionManager.getPersonId());
-    
+
     // Overriding client side provided email
     updatedEntity.setEmail(sessionManager.getEmail());
-    
+
     return personDao.put(updatedEntity);
   }
 
@@ -105,7 +109,7 @@ public class PersonManagerImpl implements PersonManager {
      */
     return personDao.get(checkPersonId(personId));
   }
-  
+
   /**
    * {@inheritDoc}
    */
@@ -127,14 +131,16 @@ public class PersonManagerImpl implements PersonManager {
     throw new UnsupportedOperationException();
   }
 
-  /** 
+  /**
    * {@inheritDoc}
    */
-  @SuppressWarnings("deprecation")
   @Override
   public PersonEntity getCurrent() {
-    if (!sessionManager.isValidSession())
+    PersonId personId = requestScopedValues.getOwnerId();
+    
+    if (personId == null) {
       return null;
-    return personDao.get(sessionManager.getPersonId());
+    }
+    return personDao.get(personId);
   }
 }

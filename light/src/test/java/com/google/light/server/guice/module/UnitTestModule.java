@@ -56,7 +56,8 @@ public class UnitTestModule extends BaseGuiceModule {
           "UnitTestModule should be instantiated only for UnitTest Env.");
     }
 
-    this.testRequestScopedValueProvider = checkNotNull(testRequestScopedValueProvider);
+    this.testRequestScopedValueProvider = checkNotNull(testRequestScopedValueProvider, 
+        "testRequestScopedValueProvider");
     this.httpSession = checkNotNull(httpSession);
   }
 

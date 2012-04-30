@@ -1,5 +1,5 @@
 /*
- * Copyright (C) Google Inc.
+ * Copyright 2012 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.server.servlets.admin;
+package com.google.light.server.jersey.resources.admin.gae;
 
 import static com.google.light.server.constants.LightConstants.LIGHT_BOT_EMAIL;
 import static com.google.light.server.utils.GuiceUtils.getInstance;
@@ -27,12 +27,15 @@ import static com.google.light.server.utils.LightUtils.getPST8PDTime;
 import com.google.appengine.api.utils.SystemProperty;
 import com.google.apphosting.api.ApiProxy;
 import com.google.apphosting.api.ApiProxy.Environment;
+import com.google.inject.Inject;
+import com.google.inject.Injector;
+import com.google.light.server.constants.JerseyConstants;
 import com.google.light.server.constants.OAuth2ProviderEnum;
-import com.google.light.server.constants.http.ContentTypeEnum;
+import com.google.light.server.constants.http.ContentTypeConstants;
+import com.google.light.server.jersey.resources.AbstractJerseyResource;
 import com.google.light.server.manager.implementation.oauth2.consumer.OAuth2ConsumerCredentialManagerFactory;
 import com.google.light.server.manager.interfaces.PersonManager;
 import com.google.light.server.persistence.entity.person.PersonEntity;
-import com.google.light.server.servlets.AbstractLightServlet;
 import com.google.light.server.utils.GaeUtils;
 import com.google.light.server.utils.LightPreconditions;
 import com.google.light.server.utils.ServletUtils;
@@ -40,39 +43,38 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Response;
 
 /**
- * Servlet to handle configuration for Light.
  * 
- * TODO(arjuns) : Add test for this.
+ * 
+ * TODO(arjuns): Add test for this class.
  * 
  * @author Arjun Satyapal
  */
-@SuppressWarnings("serial")
-public class ConfigServlet extends AbstractLightServlet {
+@Path(JerseyConstants.RESOURCE_PATH_MISC_ADMIN)
+public class GAEAdminResources extends AbstractJerseyResource {
   private OAuth2ConsumerCredentialManagerFactory consumerCredManagerFactory;
   private PersonManager personManager;
-  
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public void service(HttpServletRequest request, HttpServletResponse response) {
+
+  @Inject
+  public GAEAdminResources(Injector injector, HttpServletRequest request,
+      HttpServletResponse response) {
+    super(injector, request, response);
+
     checkPersonIsGaeAdmin();
 
     consumerCredManagerFactory = getInstance(OAuth2ConsumerCredentialManagerFactory.class);
     personManager = getInstance(PersonManager.class);
-    
-    super.service(request, response);
-
   }
 
-  @SuppressWarnings("deprecation")
-  @Override
-  public void doGet(HttpServletRequest request, HttpServletResponse response) {
-    // TODO(arjuns) : Move this check to filter or some where else as this causes Guice Injection
-    // failures if put if put in constructor. Probably can be moved to filter.
-
+  @GET
+  @Produces(ContentTypeConstants.TEXT_HTML)
+  @Path(JerseyConstants.PATH_CONFIG)
+  public Response getConfig() {
     LightPreconditions.checkPersonIsGaeAdmin();
 
     try {
@@ -124,15 +126,12 @@ public class ConfigServlet extends AbstractLightServlet {
 
       // Populating system status.
       populateConsumerCredentialStatus(builder);
-      
+
       populateRequirePersons(builder);
-      
-      
+
       // TODO(arjuns): Add things here to fetch acl from GoogleCloudStorage for Required Buckets.
 
-      response.setContentType(ContentTypeEnum.TEXT_HTML.get());
-      response.getWriter().println(builder.toString());
-
+      return Response.ok().entity(builder.toString()).build();
     } catch (Exception e) {
       // TODO(arjuns): Add exception handling.
       throw new RuntimeException(e);
@@ -145,72 +144,27 @@ public class ConfigServlet extends AbstractLightServlet {
   private void populateRequirePersons(StringBuilder builder) {
     appendSectionHeader(builder, "Required Persons");
     PersonEntity personEntity = personManager.findByEmail(LIGHT_BOT_EMAIL);
-    
+
     String key = "LightBot[" + LIGHT_BOT_EMAIL + "]";
     if (personEntity == null) {
-      appendAttention(builder, key , "Missing.");
+      appendAttention(builder, key, "Missing.");
     } else {
       appendKeyValue(builder, key, "ok");
     }
   }
 
   /**
-   * 
-   */
+     * 
+     */
   private void populateConsumerCredentialStatus(StringBuilder builder) {
     appendSectionHeader(builder, "Consumer Credential Status");
     for (OAuth2ProviderEnum currProvider : OAuth2ProviderEnum.values()) {
       try {
-            consumerCredManagerFactory.create(currProvider);
+        consumerCredManagerFactory.create(currProvider);
         appendKeyValue(builder, currProvider.name(), "ok");
       } catch (Exception e) {
         appendAttention(builder, currProvider.name(), "Needs Attention.");
       }
     }
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public void doDelete(HttpServletRequest request, HttpServletResponse response) {
-    // TODO(arjuns): Auto-generated method stub
-    throw new UnsupportedOperationException();
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public void doHead(HttpServletRequest request, HttpServletResponse response) {
-    // TODO(arjuns): Auto-generated method stub
-    throw new UnsupportedOperationException();
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public void doOptions(HttpServletRequest request, HttpServletResponse response) {
-    // TODO(arjuns): Auto-generated method stub
-    throw new UnsupportedOperationException();
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public void doPost(HttpServletRequest request, HttpServletResponse response) {
-    // TODO(arjuns): Auto-generated method stub
-    throw new UnsupportedOperationException();
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public void doPut(HttpServletRequest request, HttpServletResponse response) {
-    // TODO(arjuns): Auto-generated method stub
-    throw new UnsupportedOperationException();
   }
 }

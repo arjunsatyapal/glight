@@ -17,6 +17,12 @@ package com.google.light.server.guice.jersey;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.light.server.jersey.resources.admin.gae.GAEAdminResources;
+import com.google.light.server.jersey.resources.admin.gae.GAEPipelineResource;
+
+
+
+
 import com.google.common.collect.Sets;
 import com.google.light.server.jersey.resources.AbstractJerseyResource;
 import com.google.light.server.jersey.resources.ModuleResource;
@@ -31,7 +37,9 @@ import java.util.Set;
  * @author Arjun Satyapal
  */
 public enum JerseyResourcesEnum {
+  GAE_PIPELINE_RESOURCE(GAEPipelineResource.class),
   GOOGLE_DOC_RESOURCE(GoogleDocIntegration.class),
+  MISC_ADMIN_RESOURCES(GAEAdminResources.class),
   MODULE_RESOURCE(ModuleResource.class);
 
   private Class<? extends AbstractJerseyResource> clazz;

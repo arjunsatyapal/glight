@@ -15,10 +15,7 @@
  */
 package com.google.light.server.servlets.filters;
 
-import static com.google.light.server.utils.LightPreconditions.checkNonEmptyList;
-
-import com.google.common.collect.Lists;
-import java.util.List;
+import com.google.light.server.constants.LightEnvEnum;
 import javax.servlet.Filter;
 
 /**
@@ -28,24 +25,40 @@ import javax.servlet.Filter;
  * @author Arjun Satyapal
  */
 public enum FilterPathEnum {
-  API(ProdServletFilter.class, Lists.newArrayList("/api/*", "/admin/*", "/login/*", "/oauth2/*")),
-  TASK_QUEUE(PipelineFilter.class, Lists.newArrayList("/_ah/pipeline/*")),
-  TEST(TestServletFilter.class, Lists.newArrayList("/api/*", "/admin/*", "/login/*", "/oauth2/*"));
+  API(ProdServletFilter.class, true, false),
+  TASK_QUEUE(PipelineFilter.class, true, true),
+  TEST(TestServletFilter.class, false, true);
   
   private Class<? extends Filter> clazz;
-  private List<String> urlPatterns;
+  private boolean allowedInProd;
+  private boolean allowedInNonProd;
   
-  private FilterPathEnum(Class<? extends Filter> clazz, 
-      List<String> urlPatterns) {
+  private FilterPathEnum(Class<? extends Filter> clazz, boolean allowedInProd,
+      boolean allowedInNonProd) {
     this.clazz = clazz;
-    this.urlPatterns = checkNonEmptyList(urlPatterns, "urlPatterns");
+    this.allowedInProd = allowedInProd;
+    this.allowedInNonProd = allowedInNonProd;
   }
   
   public Class<? extends Filter> getClazz() {
     return clazz;
   }
   
-  public List<String> getUrlPatterns() {
-    return urlPatterns;
+  public boolean isAllowedInCurrentEnv() {
+    LightEnvEnum env = LightEnvEnum.getLightEnv();
+    
+    switch (env) {
+      case PROD : return allowedInProd;
+      
+      case DEV_SERVER:
+        //$FALL-THROUGH$
+      case QA: 
+        //$FALL-THROUGH$
+      case UNIT_TEST :
+        return allowedInNonProd;
+        
+      default :
+        throw new IllegalStateException("unknown env : " + env);
+    }
   }
 }

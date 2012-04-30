@@ -25,6 +25,7 @@ import static com.google.light.server.utils.LightPreconditions.checkEmail;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPersonId;
 import static com.google.light.server.utils.LightPreconditions.checkPersonKey;
+import static com.google.light.server.utils.LightPreconditions.checkPersonLoggedIn;
 import static com.google.light.server.utils.ServletUtils.getRequestHeaderValue;
 import static org.apache.commons.lang.StringUtils.isBlank;
 
@@ -36,7 +37,6 @@ import com.google.light.server.constants.HttpHeaderEnum;
 import com.google.light.server.constants.OAuth2ProviderService;
 import com.google.light.server.dto.pojo.PersonId;
 import com.google.light.server.exception.unchecked.BlankStringException;
-import com.google.light.server.exception.unchecked.httpexception.PersonLoginRequiredException;
 import com.google.light.server.persistence.entity.person.PersonEntity;
 import com.googlecode.objectify.Key;
 import javax.servlet.http.HttpServletRequest;
@@ -112,7 +112,6 @@ public class SessionManager {
    * 
    * @return
    */
-  @Deprecated
   public String getEmail() {
     if (session != null) {
       String email = (String) session.getAttribute(DEFAULT_EMAIL.get());
@@ -123,34 +122,13 @@ public class SessionManager {
   }
 
   /**
-   * Store Person's email in sessin.
-   * 
-   * @return
-   */
-  @Deprecated
-  public void setProviderUserEmail(String email) {
-    session.setAttribute(DEFAULT_EMAIL.get(), checkEmail(email));
-  }
-
-//  /**
-//   * Store Person's UserId provided by LoginProvider in session.
-//   * 
-//   * @return
-//   */
-//  @Deprecated
-//  public void setPersonId(Long id) {
-//    session.setAttribute(PERSON_ID.get(), checkPersonId(id));
-//  }
-
-  /**
    * Get PersonId from Session.
    * 
    * @return
    */
-
   public PersonId getPersonId() {
     if (session != null) {
-      checkPersonLoggedIn();
+      checkPersonLoggedIn(this);
       PersonId personId = (PersonId) session.getAttribute(PERSON_ID.get());
       return checkPersonId(personId);
     } else {
@@ -171,7 +149,6 @@ public class SessionManager {
    * TODO(arjuns): Add test.
    * @return
    */
-  @Deprecated
   public boolean isPersonLoggedIn() {
     if (session == null) {
       return false;
@@ -184,26 +161,12 @@ public class SessionManager {
     }
   }
 
-  /**
-   * Ensures that Person is Logged In.
-   * 
-   * TODO(arjuns): Add test for this.
-   */
-  @Deprecated
-  public void checkPersonLoggedIn() {
-    if (!isPersonLoggedIn()) {
-      throw new PersonLoginRequiredException("");
-    }
-  }
-  
-
   // TODO(arjuns): Add tests.
   /**
    * Returns true if session is valid.
    * 
    * @return
    */
-  @Deprecated
   public boolean isValidSession() {
     try {
       if (session != null) {
@@ -220,17 +183,18 @@ public class SessionManager {
     return true;
   }
   
+//  TODO(arjuns): Add test for this.
   public void seedPersonIds(HttpServletRequest request) {
     if (isPersonLoggedIn()) {
-      PersonId performerId = getPersonId();
-      seedEntityInRequestScope(request, PersonId.class, AnotOwner.class, performerId);
+      PersonId ownerId = getPersonId();
+      seedEntityInRequestScope(request, PersonId.class, AnotOwner.class, ownerId);
       
-      String watcherIdStr = getRequestHeaderValue(request, HttpHeaderEnum.LIGHT_WATCHER_HEADER);
-      if (watcherIdStr != null) {
-        seedEntityInRequestScope(request, PersonId.class, AnotActor.class, new PersonId(watcherIdStr));
+      String actorIdStr = getRequestHeaderValue(request, HttpHeaderEnum.LIGHT_ACTOR_HEADER);
+      if (actorIdStr != null) {
+        seedEntityInRequestScope(request, PersonId.class, AnotActor.class, new PersonId(actorIdStr));
       } else {
-        // Forcing both watcher and performer to be same.
-        seedEntityInRequestScope(request, PersonId.class, AnotActor.class, performerId);
+        // Forcing both Owner and Actor to be same.
+        seedEntityInRequestScope(request, PersonId.class, AnotActor.class, ownerId);
       }
     }
   }

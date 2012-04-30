@@ -160,7 +160,7 @@ public class GuiceUtils {
   
   public static PersonId getOwnerId() {
     RequestScopedValues requestScopedValues = getRequestScopedValues();
-    return checkNotNull(requestScopedValues.getOwnerId(), "ownerId");
+    return requestScopedValues.getOwnerId();
   }
 
   // Utility class.

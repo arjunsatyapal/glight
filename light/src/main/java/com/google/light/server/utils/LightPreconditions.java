@@ -29,6 +29,7 @@ import com.google.light.server.exception.unchecked.BlankStringException;
 import com.google.light.server.exception.unchecked.InvalidPersonIdException;
 import com.google.light.server.exception.unchecked.InvalidSessionException;
 import com.google.light.server.exception.unchecked.ServerConfigurationException;
+import com.google.light.server.exception.unchecked.httpexception.PersonLoginRequiredException;
 import com.google.light.server.exception.unchecked.httpexception.UnauthorizedException;
 import com.google.light.server.persistence.entity.person.PersonEntity;
 import com.google.light.server.servlets.SessionManager;
@@ -232,6 +233,13 @@ public class LightPreconditions {
     }
 
     return providerUserId;
+  }
+
+  // TODO(arjuns): Add test for this.
+  public static void checkPersonLoggedIn(SessionManager sessionManager) {
+    if (!sessionManager.isPersonLoggedIn()) {
+      throw new PersonLoginRequiredException("");
+    }
   }
 
   /**

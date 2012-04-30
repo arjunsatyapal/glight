@@ -15,22 +15,15 @@
  */
 package com.google.light.server.utils;
 
-import com.google.appengine.api.blobstore.BlobInfo;
-import com.google.appengine.api.blobstore.BlobInfoFactory;
-import com.google.appengine.api.blobstore.BlobKey;
-import com.google.appengine.api.blobstore.BlobstoreService;
-import com.google.appengine.api.blobstore.BlobstoreServiceFactory;
 import com.google.appengine.api.files.AppEngineFile;
 import com.google.appengine.api.files.FileService;
 import com.google.appengine.api.files.FileServiceFactory;
 import com.google.appengine.api.files.FileWriteChannel;
 import com.google.appengine.api.files.GSFileOptions;
 import com.google.appengine.api.files.GSFileOptions.GSFileOptionsBuilder;
-import com.google.common.base.Preconditions;
 import com.google.common.io.ByteStreams;
 import com.google.light.server.constants.google.cloudstorage.GoogleCloudStorageBuckets;
 import com.google.light.server.constants.http.ContentTypeEnum;
-import com.google.light.server.dto.module.GSBlobInfo;
 import com.google.light.server.dto.pojo.ModuleId;
 import java.io.IOException;
 import java.io.InputStream;
@@ -71,37 +64,13 @@ public class GoogleCloudStorageUtils {
     FileService fileService = FileServiceFactory.getFileService();
     AppEngineFile appengineFile = fileService.createNewGSFile(gsFileOptions);
 
-    System.out.println("Full path = " + appengineFile.getFullPath());
-    System.out.println("Name = " + appengineFile.getNamePart());
-    System.out.println("FileSystem = " + appengineFile.getFileSystem());
-    FileWriteChannel writeChannel =
-        fileService.openWriteChannel(appengineFile, true /* lock */);
+    FileWriteChannel writeChannel = fileService.openWriteChannel(appengineFile, true /* lock */);
     OutputStream outputStream = Channels.newOutputStream(writeChannel);
     ByteStreams.copy(inputStream, outputStream);
     outputStream.close();
     writeChannel.closeFinally();
 
     return appengineFile.getFullPath();
-  }
-
-  public static GSBlobInfo getGSBlobInfo(GoogleCloudStorageBuckets bucket, String filePath) {
-    BlobstoreService blobStoreService = BlobstoreServiceFactory.getBlobstoreService();
-    BlobKey blobKey = blobStoreService.createGsBlobKey(filePath);
-
-    BlobInfoFactory blobInfoFactory = new BlobInfoFactory();
-    BlobInfo blobInfo = blobInfoFactory.loadBlobInfo(blobKey);
-    Preconditions.checkNotNull(blobInfo, "blob not found for filePath[" + filePath + "].");
-
-    GSBlobInfo gsBlobInfo = new GSBlobInfo.Builder()
-        .contentType(ContentTypeEnum.getContentTypeByString(blobInfo.getContentType()))
-        .fileName(blobInfo.getFilename())
-        .gsKey(filePath)
-        .md5(blobInfo.getMd5Hash())
-        .sizeInBytes(blobInfo.getSize())
-        .build();
-
-    return gsBlobInfo;
-
   }
 
   // Utility class.

@@ -226,7 +226,7 @@ public class OAuth2OwnerTokenDaoTest extends
         testProviderUserId, null/* personId */, email2);
     PersonEntity randomPerson2 =
         createRandomPerson(defaultEnv, testRequestScopedValueProvider, session2);
-    testRequestScopedValueProvider.getParticipants().updateBoth(randomPerson2.getPersonId());
+    testRequestScopedValueProvider.getRequestScopedValues().updateBoth(randomPerson2.getPersonId());
 
     OAuth2OwnerTokenEntity token2 = getDefaultEntityBuilder(GOOGLE_LOGIN, testProviderUserId)
         .personKey(randomPerson2.getKey())

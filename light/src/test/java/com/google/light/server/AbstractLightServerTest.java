@@ -78,7 +78,7 @@ public abstract class AbstractLightServerTest extends AbstractGAETest {
     testPerson = createRandomPerson(defaultEnv, testRequestScopedValueProvider, testSession);
     testPersonId = testPerson.getPersonId();
     
-    testRequestScopedValueProvider.getParticipants().updateBoth(testPersonId);
+    testRequestScopedValueProvider.getRequestScopedValues().updateBoth(testPersonId);
 
     // Now reinitializing session with this personid. And updating Injector.
     testSession = getMockSessionForTesting(defaultEnv, defaultProviderService,

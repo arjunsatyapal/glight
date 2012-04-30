@@ -359,6 +359,7 @@ public class GoogleLoginCallbackServlet extends HttpServlet {
    * @param responseUrl
    * @throws IOException
    */
+  @SuppressWarnings("unused")
   private void onError(HttpServletRequest request, HttpServletResponse response,
       AuthorizationCodeResponseUrl responseUrl) throws IOException {
     // TODO(arjuns): Auto-generated method stub
