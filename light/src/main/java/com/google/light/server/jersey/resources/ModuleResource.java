@@ -104,7 +104,7 @@ public class ModuleResource extends AbstractJerseyResource {
 
     ModuleId moduleId = new ModuleId(moduleIdStr);
     Version version = Version.createVersion(versionStr);
-    String resourceId = resourceTypeStr + "/" + resourceStr;
+    String resourceId = resourceType.name() + "/" + resourceStr;
 
     ModuleVersionResourceEntity resourceEntity = moduleManager.getModuleResource(
         moduleId, version, resourceId);

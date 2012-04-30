@@ -15,12 +15,6 @@
  */
 package com.google.light.server.constants;
 
-import java.lang.reflect.Method;
-
-import com.google.common.base.Preconditions;
-import com.google.light.server.jersey.resources.AbstractJerseyResource;
-import com.google.light.server.jersey.resources.thirdparty.google.GoogleDocIntegration;
-import com.google.light.server.utils.LightPreconditions;
 
 /**
  * 

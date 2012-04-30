@@ -46,6 +46,7 @@ public class DeleteJobs {
     /**
      * {@inheritDoc}
      */
+    @SuppressWarnings("deprecation")
     @Override
     public Value<Integer> handler() {
       // Start with unrestricted kind query
@@ -59,7 +60,8 @@ public class DeleteJobs {
       // Print query results
       for (Entity e : datastore.prepare(q).asIterable()) {
         String kindName = e.getKey().getName();
-        if (kindName.startsWith("__") || kindName.startsWith("pipeline")|| ignoreEntities.contains(kindName)) {
+        if (kindName.startsWith("__") || kindName.startsWith("pipeline")
+            || ignoreEntities.contains(kindName)) {
           continue;
         } else {
           logger.info("Adding " + kindName + " for deletion.");
@@ -81,18 +83,22 @@ public class DeleteJobs {
     @Override
     public Value<Integer> handler(String entityName) {
       logger.info("Received entity : " + entityName);
-      Query query = new Query(entityName)
-          .addFilter(KEY_RESERVED_PROPERTY, Query.FilterOperator.GREATER_THAN_OR_EQUAL, makeKindKey("a"))
-          .setKeysOnly();
+      Query query =
+          new Query(entityName)
+              .addFilter(KEY_RESERVED_PROPERTY, Query.FilterOperator.GREATER_THAN_OR_EQUAL,
+                  makeKindKey("a"))
+              .setKeysOnly();
       // Print query results
       for (Entity e : datastore.prepare(query).asIterable()) {
         logger.info("Deleting " + e.getKey());
         datastore.delete(e.getKey());
       }
 
-      query = new Query(entityName)
-          .addFilter(Entity.KEY_RESERVED_PROPERTY, Query.FilterOperator.NOT_EQUAL, makeKindKey("a"))
-          .setKeysOnly();
+      query =
+          new Query(entityName)
+              .addFilter(Entity.KEY_RESERVED_PROPERTY, Query.FilterOperator.NOT_EQUAL,
+                  makeKindKey("a"))
+              .setKeysOnly();
       // Print query results
       for (Entity e : datastore.prepare(query).asIterable()) {
         logger.info("Deleting " + e.getKey());
@@ -115,7 +121,8 @@ public class DeleteJobs {
   }
 
   // Helper function to make key from kind name
- public static Key makeKindKey(String kind) {
+  @SuppressWarnings("deprecation")
+  public static Key makeKindKey(String kind) {
     return KeyFactory.createKey(Query.KIND_METADATA_KIND, kind);
   }
 }

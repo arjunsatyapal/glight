@@ -16,6 +16,7 @@
 package com.google.light.server.guice;
 
 import static com.google.light.server.constants.OAuth2ProviderService.GOOGLE_LOGIN;
+import static com.google.light.testingutils.TestingUtils.getInjectorByEnv;
 import static com.google.light.testingutils.TestingUtils.getMockSessionForTesting;
 import static com.google.light.testingutils.TestingUtils.getRandomEmail;
 import static com.google.light.testingutils.TestingUtils.getRandomPersonId;
@@ -55,8 +56,7 @@ public class LightServletModuleTest {
 
       GaeTestingUtils gaeTestingUtils = TestingUtils.gaeSetup(currEnv);
       try {
-        Injector injector =
-            TestingUtils.getInjectorByEnv(currEnv, testRequestScopedValueProvider, session);
+        Injector injector = getInjectorByEnv(currEnv, testRequestScopedValueProvider, session);
 
         GuiceFilter filter = injector.getInstance(GuiceFilter.class);
         FilterConfig filterConfig = mock(FilterConfig.class);

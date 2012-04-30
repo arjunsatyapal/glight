@@ -48,6 +48,15 @@ public class PersonId extends AbstractPojo<PersonId> {
   public Long get() {
     return id;
   }
+  
+  public boolean isValid() {
+    return id != null;
+  }
+  
+  @Override
+  public String toString() {
+    return "PersonId:" + get();
+  }
 
   /** 
    * {@inheritDoc}

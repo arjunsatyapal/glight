@@ -24,6 +24,7 @@ import static com.google.light.server.constants.RequestParamKeyEnum.PERSON_ID;
 import static com.google.light.server.utils.GuiceUtils.getInstance;
 import static com.google.light.server.utils.GuiceUtils.getKeyForScopeSeed;
 import static com.google.light.server.utils.LightPreconditions.checkNull;
+import static com.google.light.server.utils.LightPreconditions.checkPersonLoggedIn;
 import static com.google.light.server.utils.LightUtils.getUUIDString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -303,8 +304,8 @@ public class TestingUtils {
     Injector injector = TestingUtils.getInjectorByEnv(env, testRequestScopedValueProvider, session);
 
     SessionManager sessionManager = injector.getInstance(SessionManager.class);
-    sessionManager.checkPersonLoggedIn();
-
+    checkPersonLoggedIn(sessionManager);
+    
     PersonManager personManager = getInstance(PersonManager.class);
 
     PersonEntity personEntity = new PersonEntity.Builder()

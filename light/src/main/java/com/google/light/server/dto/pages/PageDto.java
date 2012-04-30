@@ -61,6 +61,10 @@ public class PageDto extends AbstractDto<PageDto> {
   public String getStartIndex() {
     return startIndex;
   }
+  
+  public boolean hasNextPage() {
+    return startIndex == null;
+  }
 
   @SuppressWarnings("rawtypes")
   public List<? extends AbstractDto> getList() {

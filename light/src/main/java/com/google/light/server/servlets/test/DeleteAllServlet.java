@@ -89,6 +89,7 @@ public class DeleteAllServlet extends HttpServlet {
         .taskId("some task id")
         .jobState(JobState.PRE_START)
         .build();
+    @SuppressWarnings("unused")
     JobEntity savedJobEntity = jobManager.put(ObjectifyUtils.nonTransaction(), jobEntity);
 
     RequestScopedValues participants = getRequestScopedValues();

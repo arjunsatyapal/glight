@@ -20,6 +20,8 @@ import static com.google.light.server.constants.OAuth2ProviderService.GOOGLE_DOC
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
+
 import javax.xml.bind.annotation.XmlRootElement;
 
 import com.google.common.collect.Lists;
@@ -100,7 +102,9 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
 
   private DateTime lastCommentTime;
   
-  @XmlTransient private Configuration config;
+  @JsonIgnore
+  @XmlTransient
+  private Configuration config;
 
   /**
    * {@inheritDoc}

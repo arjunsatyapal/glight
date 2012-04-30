@@ -111,7 +111,7 @@ public enum HttpHeaderEnum {
 
 // TODO(arjuns) : See what this does.
 
-  LIGHT_WATCHER_HEADER("light-watcher");
+  LIGHT_ACTOR_HEADER("light-actor");
 
   private String name;
 

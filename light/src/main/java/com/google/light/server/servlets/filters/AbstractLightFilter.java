@@ -18,6 +18,7 @@ package com.google.light.server.servlets.filters;
 import static com.google.light.server.utils.GuiceUtils.getInstance;
 import static com.google.light.server.utils.GuiceUtils.seedEntityInRequestScope;
 import static com.google.light.server.utils.LightPreconditions.checkPersonIsGaeAdmin;
+import static com.google.light.server.utils.LightPreconditions.checkPersonLoggedIn;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
@@ -79,7 +80,7 @@ public abstract class AbstractLightFilter implements Filter {
         checkPersonIsGaeAdmin();
       } else if (servletPath.isRequiredLogin()) {
         // Ensure that user is Loggedin.
-        sessionManager.checkPersonLoggedIn();
+        checkPersonLoggedIn(sessionManager);
       }
       
       sessionManager.seedPersonIds(request);

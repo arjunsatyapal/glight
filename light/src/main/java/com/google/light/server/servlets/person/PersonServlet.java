@@ -17,6 +17,7 @@ package com.google.light.server.servlets.person;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.GuiceUtils.getInstance;
+import static com.google.light.server.utils.LightPreconditions.checkPersonLoggedIn;
 import static com.google.light.server.utils.ServletUtils.getRequestPojo;
 
 import com.google.common.base.Throwables;
@@ -48,7 +49,7 @@ public class PersonServlet extends AbstractLightServlet {
   public void service(HttpServletRequest request, HttpServletResponse response) {
     this.personManager = getInstance(PersonManager.class);
     this.sessionManager = getInstance(SessionManager.class);
-    sessionManager.checkPersonLoggedIn();
+    checkPersonLoggedIn(sessionManager);
     super.service(request, response);
   }
 

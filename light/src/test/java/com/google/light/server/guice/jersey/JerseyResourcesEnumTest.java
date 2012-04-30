@@ -19,25 +19,17 @@ import static com.google.light.server.utils.LightUtils.arrayToString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import com.google.light.server.utils.LightUtils;
-
-import java.util.ArrayList;
-
-import com.google.common.collect.Maps;
-
-import java.util.Map;
-
-import javax.ws.rs.Produces;
-
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.light.server.constants.EnumTestInterface;
 import com.google.light.server.jersey.resources.AbstractJerseyResource;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.List;
-import java.util.logging.Logger;
+import java.util.Map;
+import javax.ws.rs.Produces;
 import org.junit.Test;
 
 /**
@@ -46,8 +38,6 @@ import org.junit.Test;
  * @author Arjun Satyapal
  */
 public class JerseyResourcesEnumTest implements EnumTestInterface {
-  private static final Logger logger = Logger.getLogger(JerseyResourcesEnumTest.class.getName());
-  
   /** 
    * {@inheritDoc}
    */
