@@ -15,6 +15,16 @@ package com.google.light.server.servlets.path;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
+import com.google.light.server.constants.LightEnvEnum;
+
+import com.google.common.collect.Lists;
+
+import com.google.light.server.utils.LightPreconditions;
+
+import java.util.List;
+
+import com.google.light.server.servlets.filters.FilterPathEnum;
+
 import com.google.appengine.tools.pipeline.impl.servlets.PipelineServlet;
 import com.google.light.server.exception.unchecked.httpexception.NotFoundException;
 import com.google.light.server.servlets.LightGenericJSPServlet;
@@ -54,78 +64,105 @@ public enum ServletPathEnum {
   // TODO(arjuns) : Find a way to end URLs without /.
 
   PERSON(PersonServlet.class, "/api/person",
-         true, false, false),
+         true, false, true, true,
+         Lists.newArrayList(FilterPathEnum.API, FilterPathEnum.TEST)),
   // TODO(waltercacau): Fix this hack
   PERSONME(PersonServlet.class, "/api/person/me",
-             true, false, false),
+           true, false, true, true,
+           Lists.newArrayList(FilterPathEnum.API, FilterPathEnum.TEST)),
 
   LOGIN(LoginServlet.class, "/login",
-        false, false, false),
+        false, false, true, true,
+        Lists.newArrayList(FilterPathEnum.API, FilterPathEnum.TEST)),
   LOGOUT(LogoutServlet.class, "/logout",
-         false, false, false),
-
+         false, false, true, true,
+         Lists.newArrayList(FilterPathEnum.API, FilterPathEnum.TEST)),
 
   // Third party integrations.
   IMPORT_STAGE_DETAIL_SERVLET(JobDetailServlet.class, "/api/queue/import_stage_detail",
-                              true, false, false),
-                              
-  SEARCH(SearchServlet.class, "/api/search",
-         false, false, false),
+                              true, false, true, true,
+                              Lists.newArrayList(FilterPathEnum.API, FilterPathEnum.TEST)),
 
+  SEARCH(SearchServlet.class, "/api/search",
+         false, false, true, true,
+         Lists.newArrayList(FilterPathEnum.API, FilterPathEnum.TEST)),
 
   // Client Side pages
-  SEARCH_PAGE(LightGenericJSPServlet.class, "/search", false, false, false),
-  REGISTER_PAGE(LightGenericJSPServlet.class, "/register", false, false, false),
-  
+  SEARCH_PAGE(LightGenericJSPServlet.class, "/search",
+              false, false, true, true,
+              Lists.newArrayList(FilterPathEnum.API, FilterPathEnum.TEST)),
+  REGISTER_PAGE(LightGenericJSPServlet.class, "/register",
+                false, false, true, true,
+                Lists.newArrayList(FilterPathEnum.API, FilterPathEnum.TEST)),
 
   // OAuth2 Related Servlets.
   OAUTH2_GOOGLE_LOGIN(GoogleLoginServlet.class, "/login/google",
-                      false, false, false),
+                      false, false, true, true,
+                      Lists.newArrayList(FilterPathEnum.API, FilterPathEnum.TEST)),
 
   OAUTH2_GOOGLE_LOGIN_CB(GoogleLoginCallbackServlet.class, "/login/google_login_callback",
-                         false, false, false),
+                         false, false, true, true,
+                         Lists.newArrayList(FilterPathEnum.API, FilterPathEnum.TEST)),
 
   OAUTH2_GOOGLE_DOC_AUTH(GoogleDocAuthServlet.class, "/oauth2/google_doc",
-                         true, false, false),
+                         true, false, true, true,
+                         Lists.newArrayList(FilterPathEnum.API, FilterPathEnum.TEST)),
 
   OAUTH2_GOOGLE_DOC_AUTH_CB(GoogleDocAuthCallbackServlet.class, "/oauth2/google_doc_cb",
-                            true, false, false),
-
+                            true, false, true, true,
+                            Lists.newArrayList(FilterPathEnum.API, FilterPathEnum.TEST)),
+  // TODO(arjuns): Move this to jersey resource.
   PIPELINE_STATUS(PipelineStatusServlet.class, "/test/pipeline_status",
-                  false, false, true),
+                  false, false, true, true,
+                  Lists.newArrayList(FilterPathEnum.API, FilterPathEnum.TEST)),
+
+  // TODO(arjuns): Move this to jersey resource.
   // Admin Servlets
   CONFIG(ConfigServlet.class, "/admin/config",
-         true, true, false),
+         true, true, true, true,
+         Lists.newArrayList(FilterPathEnum.API, FilterPathEnum.TEST)),
 
+  // TODO(arjuns): Move this to jersey resource.
   OAUTH2_CONSUMER_CRENDENTIAL(OAuth2ConsumerCredentialServlet.class,
                               "/admin/oauth2_consumer_credential",
-                              true, true, false),
+                              true, true, true, true,
+                              Lists.newArrayList(FilterPathEnum.API, FilterPathEnum.TEST)),
   // Pipeline Servlet
   PIPELINE_HANDLER(PipelineServlet.class, "/_ah/pipeline/handleTask",
-                   false, false, false),
+                   false, false, true, true,
+                   Lists.newArrayList(FilterPathEnum.TASK_QUEUE)),
   // Some test servlets.
   DELETE_ALL(DeleteAllServlet.class, "/test/admin/delete_all",
-            true, true, true),
+             true, true, false, true,
+             Lists.newArrayList(FilterPathEnum.API, FilterPathEnum.TEST)),
   FAKE_LOGIN(FakeLoginServlet.class, "/test/fakelogin",
-             false, false, true),
+             false, false, false, true,
+             Lists.newArrayList(FilterPathEnum.API, FilterPathEnum.TEST)),
 
   TEST_CREDENTIAL_BACKUP_SERVLET(TestCredentialBackupServlet.class,
                                  "/test/admin/test_credential_backup",
-                                 false, false, true),
-                                 
-  TEST_SERVLET(TestServlet.class, "/test/test", 
-               false, false, true),
+                                 false, false, false, true,
+                                 Lists.newArrayList(FilterPathEnum.API, FilterPathEnum.TEST)),
+
+  TEST_SERVLET(TestServlet.class, "/test/test",
+               false, false, false, true,
+               Lists.newArrayList(FilterPathEnum.API, FilterPathEnum.TEST)),
   TEST_WORKFLOW_SERVLETS(TestOAuth2WorkFlowServlet.class, "/test/test_oauth2_workflow",
-                         false, false, true),
+                         false, false, false, true,
+                         Lists.newArrayList(FilterPathEnum.API, FilterPathEnum.TEST)),
   TEST_CLEAN_UP_DATASTORE(TestCleanUpDatastore.class, "/test/admin/cleanupds",
-                         true, true, true),
+                          true, true, false, true,
+                          Lists.newArrayList(FilterPathEnum.API, FilterPathEnum.TEST)),
 
   SESSION(SessionInfoServlet.class, "/test/session",
-          true, false, true),
+          true, false, false, true,
+          Lists.newArrayList(FilterPathEnum.API, FilterPathEnum.TEST)),
   TEST_HEADER(TestHeaders.class, "/test/testheader",
-              false, false, true),
+              false, false, false, true,
+              Lists.newArrayList(FilterPathEnum.API, FilterPathEnum.TEST)),
   TEST_LOGIN(TestLogin.class, "/test/testlogin",
-             true, false, true);
+             true, false, false, true,
+             Lists.newArrayList(FilterPathEnum.API, FilterPathEnum.TEST));
 
   private Class<? extends HttpServlet> clazz;
   private String servletPath;
@@ -134,10 +171,13 @@ public enum ServletPathEnum {
 
   private boolean requiresLogin;
   private boolean requiresAdminPrivilege;
-  private boolean onlyForTest;
+  private boolean allowedInProd;
+  private boolean allowedInNonProd;
+  private List<FilterPathEnum> listOfFilters;
 
   private ServletPathEnum(Class<? extends HttpServlet> clazz, String servletPath,
-      boolean requireLogin, boolean requireAdminPrivilege, boolean onlyForTest) {
+      boolean requireLogin, boolean requireAdminPrivilege, boolean allowedInProd,
+      boolean allowedInNonProd, List<FilterPathEnum> listOfFilters) {
     this.clazz = clazz;
     this.servletPath = checkNotBlank(servletPath, "servletPath");
     checkArgument(!servletPath.endsWith("/"));
@@ -149,7 +189,9 @@ public enum ServletPathEnum {
     }
     this.requiresAdminPrivilege = requireAdminPrivilege;
 
-    this.onlyForTest = onlyForTest;
+    this.allowedInProd = allowedInProd;
+    this.allowedInNonProd = allowedInNonProd;
+    this.listOfFilters = LightPreconditions.checkNonEmptyList(listOfFilters, "listOfFilters.");
   }
 
   public Class<? extends HttpServlet> getClazz() {
@@ -164,8 +206,23 @@ public enum ServletPathEnum {
     return requiresAdminPrivilege;
   }
 
-  public boolean isOnlyForTest() {
-    return onlyForTest;
+  public boolean isAllowedInCurrEnv() {
+    LightEnvEnum env = LightEnvEnum.getLightEnv();
+
+    switch (env) {
+      case PROD: return allowedInProd;
+      
+      case DEV_SERVER:
+        //$FALL-THROUGH$
+      case QA:
+        //$FALL-THROUGH$
+      case UNIT_TEST:
+        return allowedInNonProd;
+
+      default:
+        throw new IllegalStateException("Unsupported env : " + env);
+    }
+
   }
 
   public String get() {
@@ -174,6 +231,10 @@ public enum ServletPathEnum {
 
   public String getRoot() {
     return servletRoot;
+  }
+
+  public List<FilterPathEnum> getListOfFilters() {
+    return listOfFilters;
   }
 
   // TODO(arjuns): Add test for this.

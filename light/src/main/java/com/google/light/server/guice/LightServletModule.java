@@ -50,25 +50,13 @@ public class LightServletModule extends ServletModule {
       throw new ServerConfigurationException("Unknown AppId : " + GaeUtils.getAppId());
     }
 
-    // First registering the Filters.
-    boolean isProduction = GaeUtils.isProductionServer();
-    initFilters(FilterPathEnum.TASK_QUEUE);
-    if (isProduction) {
-      initFilters(FilterPathEnum.API);
-    } else {
-      initFilters(FilterPathEnum.TEST);
+    // Now registering the Servlets.
+    for (ServletPathEnum currServlet : ServletPathEnum.values()) {
+      if (currServlet.isAllowedInCurrEnv()) {
+        initServlet(currServlet);
+      }
     }
 
-    // Now registering the Servlets.
-    // TODO(arjuns) : Do special handling for TestServlet.
-    for (ServletPathEnum currServlet : ServletPathEnum.values()) {
-      // Will skip Servlets which are only for test.
-      if (isProduction && currServlet.isOnlyForTest()) {
-        continue;
-      }
-      initServlet(currServlet);
-    }
-    
     // Initializing jersey resources.
     final Map<String, String> params = new HashMap<String, String>();
     params.put("com.sun.jersey.config.feature.DisableWADL", "true");
@@ -80,20 +68,20 @@ public class LightServletModule extends ServletModule {
   /**
    * Method to initialize Servlet Filters.
    */
-  private void initFilters(FilterPathEnum filter) {
+  private void initFilters(FilterPathEnum filter, String urlPattern) {
     /*
      * Binding the CharacterEncondingFilter here to be sure no other filter
      * will be called before it.
-     * 
      * TODO(waltercacau): Remove this filter and set charset in a better place.
      * Eg. the servlet's or while generating the response pojos.
      */
     filter("*").through(CharacterEncondingFilter.class);
 
-    bind(filter.getClazz()).in(Scopes.SINGLETON);
-    for (String currPattern : filter.getUrlPatterns()) {
-      logger.finest("Binding [" + currPattern + "] to filter [" + filter.getClazz() + "].");
-      filter(currPattern).through(filter.getClazz());
+    if (filter.isAllowedInCurrentEnv()) {
+      bind(filter.getClazz()).in(Scopes.SINGLETON);
+      logger.finest("Binding [" + urlPattern + "] to filter [" + filter.getClazz() + "].");
+
+      filter(urlPattern).through(filter.getClazz());
     }
   }
 
@@ -102,6 +90,14 @@ public class LightServletModule extends ServletModule {
    */
   private void initServlet(ServletPathEnum servletPath) {
     bind(servletPath.getClazz()).in(Scopes.SINGLETON);
+    
+    // First registering filters for current Servlet Path.
+    for (FilterPathEnum currFilter : servletPath.getListOfFilters()) {
+      initFilters(currFilter, servletPath.get());
+      initFilters(currFilter, servletPath.getRoot());
+    }
+
+    // Now binding Servlet to correct Path.
     logger.finest("Binding [" + servletPath.get() + "] to Servlet [" + servletPath.getClazz()
         + "].");
     serve(servletPath.get()).with(servletPath.getClazz());
