@@ -32,5 +32,6 @@ define({
    * 
    * @const
    */
-  SEARCH_STATE_CHANGED: '/light/search/searchStateChanged'
+  SEARCH_STATE_CHANGED: '/light/search/searchStateChanged',
+  BROWSE_CONTEXT_STATE_CHANGED: '/light/mydash/browseContextStateChanged'
 });

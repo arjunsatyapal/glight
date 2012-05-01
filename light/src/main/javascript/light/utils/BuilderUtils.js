@@ -45,9 +45,6 @@ define(['dojo/_base/declare', 'dojo/_base/lang',
         if (!params.defaults) {
           params.defaults = {};
         }
-        if (!params.normalize) {
-          params.defaults = {};
-        }
         if (!params.validate) {
           params.validate = {};
         }
@@ -77,7 +74,9 @@ define(['dojo/_base/declare', 'dojo/_base/lang',
           },
 
           build: function() {
-            
+            if(params.normalize) {
+              params.normalize.apply(this._data, []);
+            }
             if (has('light-dev') && params.schema) {
               var validationData = jsonSchema.validate(this._data, params.schema);
               if (!validationData.valid) {
@@ -96,6 +95,8 @@ define(['dojo/_base/declare', 'dojo/_base/lang',
             params.normalize.apply(this._data, []);
             return this;
           };
+        } else {
+          proto.normalize = function() {}
         }
 
         // Creating getter/setter

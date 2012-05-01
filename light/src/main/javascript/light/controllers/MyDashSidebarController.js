@@ -15,55 +15,42 @@
  */
 define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
         'light/enums/EventsEnum', 'dojo/_base/connect',
-        'light/builders/SearchStateBuilder',
-        'light/enums/BrowseContextsEnum'],
+        'light/builders/BrowseContextStateBuilder'],
         function(declare, AbstractLightController, EventsEnum,
-                 connect, SearchStateBuilder, BrowseContextsEnum) {
+                 connect, BrowseContextStateBuilder) {
   /**
    * @class
-   * @name light.controllers.SearchBarController
+   * @name light.controllers.MyDashSidebarController
    */
-  return declare('light.controllers.SearchBarController',
+  return declare('light.controllers.MyDashSidebarController',
           AbstractLightController, {
 
-    /** @lends light.controllers.SearchBarController# */
+    /** @lends light.controllers.MyDashSidebarController# */
 
     /**
      * Wire's this object to the dojo event system so it can
-     * watch for search state changes.
+     * watch for state changes.
      */
     watch: function() {
-      connect.subscribe(EventsEnum.SEARCH_STATE_CHANGED, this,
-              this._onSearchStateChange);
       connect.subscribe(EventsEnum.BROWSE_CONTEXT_STATE_CHANGED, this,
               this._onBrowseContextStateChange);
     },
-    
-    /**
-     * Handler for search state change events.
-     */
-    _onSearchStateChange: function(searchState, source) {
-      if (source != this)
-        this._view.setQuery(searchState.query);
-    },
-    
+
     /**
      * Handler for browse context state change events.
      */
     _onBrowseContextStateChange: function(browseContextState, source) {
-      if(browseContextState.context != BrowseContextsEnum.ALL)
-        this._view.disable();
-      else
-        this._view.enable();
+      if (source != this)
+        this._view.setContext(browseContextState);
     },
 
     /**
-     * Handler for submit events in the search form.
+     * Fire's the proper event to change the context.
      */
-    onSubmit: function() {
-      connect.publish(EventsEnum.SEARCH_STATE_CHANGED, [
-        new SearchStateBuilder().query(this._view.getQuery()).build(), this]);
-    }
-
+    changeContextTo: function(browseContextState) {
+      connect.publish(EventsEnum.BROWSE_CONTEXT_STATE_CHANGED,
+          [browseContextState, this]);
+    },
+    
   });
 });

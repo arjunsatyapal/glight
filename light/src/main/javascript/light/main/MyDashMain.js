@@ -19,7 +19,8 @@ define(['light/views/SearchBarView',
         'light/views/SearchResultListView', 'light/SearchService',
         'light/views/LoginToolbarView',
         'light/controllers/LoginToolbarController',
-        'light/views/LearningPathEditorSidebarView',
+        'light/views/MyDashSidebarView',
+        'light/controllers/MyDashSidebarController',
         'light/utils/PersonUtils',
         'light/utils/URLUtils',
         'light/enums/PagesEnum',
@@ -27,8 +28,8 @@ define(['light/views/SearchBarView',
         function(SearchBarView, SearchBarController,
                  SearchResultListController, SearchResultListView,
                  SearchService, LoginToolbarView, LoginToolbarController,
-                 LearningPathEditorSidebarView, PersonUtils, URLUtils,
-                 PagesEnum) {
+                 MyDashSidebarView, MyDashSidebarController,
+                 PersonUtils, URLUtils, PagesEnum) {
 
   // Going to the anonymous search page
   if (!PersonUtils.isLogged()) {
@@ -55,7 +56,10 @@ define(['light/views/SearchBarView',
   loginToolbarView.setController(loginToolbarController);
   loginToolbarController.setup();
 
-  learningPathEditorSidebarView =
-      new LearningPathEditorSidebarView({}, 'sidebar');
+  var myDashSidebarView = new MyDashSidebarView({}, 'sidebar');
+  var myDashSidebarController = new MyDashSidebarController();
+  myDashSidebarController.setView(myDashSidebarView);
+  myDashSidebarView.setController(myDashSidebarController);
+  myDashSidebarController.watch();
 
 });

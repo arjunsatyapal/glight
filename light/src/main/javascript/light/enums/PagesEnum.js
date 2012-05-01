@@ -20,8 +20,9 @@
  * @name light.enums.PagesEnum
  */
 define(['light/enums/EventsEnum',
-        'light/builders/SearchStateBuilder'],
-        function(EventsEnum, SearchStateBuilder) {
+        'light/builders/SearchStateBuilder',
+        'light/builders/BrowseContextStateBuilder'],
+        function(EventsEnum, SearchStateBuilder, BrowseContextStateBuilder) {
     return {
     /** @lends light.enums.PagesEnum */
 
@@ -48,6 +49,10 @@ define(['light/enums/EventsEnum',
       path: '/mydash',
       states: [
         {
+          changeEvent: EventsEnum.BROWSE_CONTEXT_STATE_CHANGED,
+          Builder: BrowseContextStateBuilder
+        },
+        {
           changeEvent: EventsEnum.SEARCH_STATE_CHANGED,
           Builder: SearchStateBuilder
         }
@@ -57,8 +62,9 @@ define(['light/enums/EventsEnum',
     /**
      * Get's the page for a given path.
      *
-     * @param path
-     * @return
+     * @param {string} path Path.
+     * @return {light.enums.PagesEnum|null} The enum value for
+     *    the page or null if not found.
      */
     getByPath: function(path) {
       // For now relying on the pattern applied

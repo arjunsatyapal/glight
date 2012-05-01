@@ -64,6 +64,7 @@ public enum ServletPathEnum {
   MYDASH_PAGE(LightGenericJSPServlet.class, "/mydash", false, false, false),
   SEARCH_PAGE(LightGenericJSPServlet.class, "/search", false, false, false),
   REGISTER_PAGE(LightGenericJSPServlet.class, "/register", false, false, false),
+  TEST_PAGE(LightGenericJSPServlet.class, "/test", false, false, false),
   
   // OAuth2 Related Servlets.
   OAUTH2_GOOGLE_LOGIN(GoogleLoginServlet.class, "/login/google",

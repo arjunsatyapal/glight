@@ -29,6 +29,7 @@
     }
     #loginToolbar {
         position: absolute;
+        top: 10px;
         right: 10px;
     }
     body[dir="rtl"] #loginToolbar {
@@ -53,8 +54,6 @@
         text-align: center;
         padding: 5px;
     }
-    
-    
     body {
         font-size: 20px;
     }
@@ -64,8 +63,8 @@
   </head>
   <body>
     <div id="searchHeader">
-        <div id="loginToolbar"></div>
         <div id="searchBar"></div>
+        <div id="loginToolbar"></div>
     </div>
     <div id="searchResults"></div>
   </body>

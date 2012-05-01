@@ -24,14 +24,26 @@ define(['dojo/_base/declare', 'light/views/AbstractLightView',
         'light/builders/SearchStateBuilder',
         'light/utils/RouterManager',
         'light/enums/EventsEnum',
-        'dojo/dnd/Source',
-        'dojo/i18n!light/nls/SearchPageMessages'],
+        'dojo/i18n!light/nls/SearchPageMessages',
+        'light/widgets/ListWidget'],
         function(declare, AbstractLightView, itemTemplate, TemplateUtils,
                  htmlEntities, lang, string,
                  domConstruct, LanguageUtils, SearchStateBuilder, RouterManager,
-                 EventsEnum, dndSource, messages) {
+                 EventsEnum, messages, ListWidget) {
   return declare('light.views.SearchResultListView', AbstractLightView, {
+    _searchResultList: null,
+    destroy: function() {
+      if (this._searchResultList) {
+        this._searchResultList.destroy();
+        this._searchResultList = null;
+      }
+      this.inherited(arguments);
+    },
     clear: function() {
+      if (this._searchResultList) {
+        this._searchResultList.destroy();
+        this._searchResultList = null;
+      }
       domConstruct.empty(this.domNode);
     },
     show: function(request, data) {
@@ -63,24 +75,29 @@ define(['dojo/_base/declare', 'light/views/AbstractLightView',
         this.domNode.appendChild(TemplateUtils.toDom(
                 '<div class="searchInfo">${noResults}</div>', messages));
       } else {
-
         // Showing items
         var searchResultListDomNode = domConstruct.toDom('<div></div>');
         this.domNode.appendChild(searchResultListDomNode);
-        var searchResultList = new dndSource(searchResultListDomNode, {
+
+        this._searchResultList = new ListWidget(searchResultListDomNode, {
           accept: [],
+          type: 'searchResultDndSource',
           selfAccept: false,
           copyOnly: true,
           selfCopy: false,
-          creator: function(item) {
+          rawCreator: function(item) {
+            var node = TemplateUtils.toDom(itemTemplate, item);
             return {
-              node: TemplateUtils.toDom(itemTemplate, item),
+              node: node,
               data: item,
+              focusNode: dojo.query('a', node)[0],
               type: ['searchResult']
             };
           }
         });
-        searchResultList.insertNodes(false /* addSelected */, items);
+
+        this._searchResultList.insertNodes(false /* addSelected */, items);
+        this._searchResultList.focusFirstItem();
 
         var pageInfo = domConstruct.toDom('<div class="searchInfo"></div>');
 
@@ -117,6 +134,9 @@ define(['dojo/_base/declare', 'light/views/AbstractLightView',
         }
 
         this.domNode.appendChild(pageInfo);
+        
+        
+        
       }
     }
   });

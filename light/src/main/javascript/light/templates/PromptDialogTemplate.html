@@ -1,0 +1,14 @@
+<div>
+    <div data-dojo-type="dijit.Dialog" data-dojo-attach-point="_dialog" title="${title}">
+        <table class="dijitDialogPaneContentArea">
+            <tr>
+                <td><label for="${id}_value">${label}</label></td>
+                <td><input data-dojo-type="dijit.form.TextBox" data-dojo-attach-point="_value" name="${id}_value" value="${value}"></td>
+            </tr>
+        </table>
+        <div class="dijitDialogPaneActionBar">
+            <button data-dojo-type="dijit.form.Button" data-dojo-attach-point="_okButton" id="${id}_okButton" data-dojo-attach-event="onClick:_onClickOk">${okLabel}</button>
+            <button data-dojo-type="dijit.form.Button" data-dojo-attach-point="_cancelButton" id="${id}_cancelButton" data-dojo-attach-event="onClick:_onClickCancel">${cancelLabel}</button>
+        </div>
+    </div>
+</div>
