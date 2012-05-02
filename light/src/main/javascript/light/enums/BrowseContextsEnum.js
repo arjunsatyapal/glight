@@ -13,24 +13,10 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-define(['light/utils/BuilderUtils',
-        'dojo/has!light-dev?light/schemas/SearchRequestSchema'],
-        function(BuilderUtils, schema) {
-  /**
-   * Builder for the Search State
-   *
-   * @class
-   * @name light.builders.SearchRequestBuilder
-   */
-  return BuilderUtils.createBuilderClass(
-      'light.builders.SearchRequestBuilder',
-      ['query', 'page', 'clientLanguageCode'],
-      {
-        defaults: {
-          query: '',
-          page: 1
-        },
-        schema: schema
-      }
-  );
+define({
+  ALL: 'all',
+  PUBLISHED_BY_ME: 'publishedbyme',
+  IMPORT: 'import',
+  MY_COLLECTIONS: 'mycollections',
+  COLLECTION: 'collection'
 });

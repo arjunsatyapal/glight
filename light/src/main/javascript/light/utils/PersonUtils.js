@@ -13,14 +13,12 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-define(['dojo/_base/declare', 'light/utils/URLUtils',
-        'light/enums/PagesEnum', 'dojo'],
-        function(declare, URLUtils, PagesEnum, dojo) {
+define(['dojo/_base/declare', 'light/utils/URLUtils', 'light/enums/PagesEnum',
+    'dojo'], function(declare, URLUtils, PagesEnum, dojo) {
   /**
-   * Utilities for handling with the logged person.
-   *
-   * TODO(waltercacau): add test for this class
-   *
+   * Utilities for handling with the logged person. TODO(waltercacau): add test
+   * for this class
+   * 
    * @class
    * @name light.utils.PersonUtils
    */
@@ -28,39 +26,48 @@ define(['dojo/_base/declare', 'light/utils/URLUtils',
     /** @lends light.utils.PersonUtils */
 
     /**
-     * Return's the current logged person or null if there is
-     * no person logged in.
+     * Return's the current logged person or null if there is no person logged
+     * in.
      * 
      * @returns Current hash
      */
     getCurrent: function() {
       return lightPreload.person ? lightPreload.person : null;
     },
-    
+
     /**
-     * Check's whetever the person has accepted the term's and conditions.
-     * 
-     * If he didn't, he will be redirected to the register page if he isn't
-     * already there.
-     * 
+     * Check's whetever the person has accepted the term's and conditions. If he
+     * didn't, he will be redirected to the register page if he isn't already
+     * there.
      * <p>
      * This function is supposed to be called in the beginning of
      * {@link light.main.LoaderMain}.
      * 
-     * @param {light.enums.PagesEnum} currentPage The page we are currently in.
+     * @param {light.enums.PagesEnum}
+     *          currentPage The page we are currently in.
      * @returns
      */
     tosCheck: function(currentPage) {
-      if(currentPage == PagesEnum.REGISTER) {
+      if (currentPage == PagesEnum.REGISTER) {
         return;
       }
-      
+
       var person = this.getCurrent();
-      if(person && !person.acceptedTos) {
-        URLUtils.redirect(PagesEnum.REGISTER.path + "#" + dojo.objectToQuery({
+      if (person && !person.acceptedTos) {
+        URLUtils.replace(PagesEnum.REGISTER.path + "#" + dojo.objectToQuery({
           "redirectPath": URLUtils.getPathWithHash()
         }));
       }
+    },
+
+    /**
+     * Return's true if there is a person logged in.
+     * 
+     * TODO(waltercacau): add test for this.
+     * @returns
+     */
+    isLogged: function() {
+      return this.getCurrent() ? true : false;
     }
 
   };

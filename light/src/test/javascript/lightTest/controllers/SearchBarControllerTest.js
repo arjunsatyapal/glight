@@ -15,11 +15,11 @@
  */
 define(['light/controllers/SearchBarController',
         'light/views/SearchBarView', 'lightTest/TestUtils',
-        'dojo/_base/connect', 'light/enums/SearchEventsEnum',
+        'dojo/_base/connect', 'light/enums/EventsEnum',
         'light/schemas/SearchStateSchema'],
         function(SearchBarController,
                  SearchBarView,
-                 TestUtils, connect, SearchEventsEnum, SearchStateSchema) {
+                 TestUtils, connect, EventsEnum, SearchStateSchema) {
 
   var ADDITION_QUERY = 'addition';
   var ADDITION_QUERY_REQUEST = {
@@ -51,7 +51,7 @@ define(['light/controllers/SearchBarController',
         controller.watch();
 
         expect(subscribeStub).toHaveBeenCalledWith(
-          SearchEventsEnum.SEARCH_STATE_CHANGED,
+          EventsEnum.SEARCH_STATE_CHANGED,
           controller, controller._onSearchStateChange
         );
 
@@ -86,7 +86,7 @@ define(['light/controllers/SearchBarController',
         controller.onSubmit();
 
         expect(publishStub)
-            .toHaveBeenCalledWith(SearchEventsEnum.SEARCH_STATE_CHANGED, [{
+            .toHaveBeenCalledWith(EventsEnum.SEARCH_STATE_CHANGED, [{
               query: ADDITION_QUERY,
               page: 1 // important to be 1!
             }, controller]);

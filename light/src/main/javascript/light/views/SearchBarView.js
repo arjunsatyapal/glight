@@ -36,6 +36,14 @@ define(['dojo/_base/declare', 'light/views/TemplatedLightView',
         },
         setQuery: function(value) {
           return this._textBox.set('value', value);
+        },
+        disable: function() {
+          this._textBox.set('disabled', true);
+          this._button.set('disabled', true);
+        },
+        enable: function() {
+          this._textBox.set('disabled', false);
+          this._button.set('disabled', false);
         }
     });
 

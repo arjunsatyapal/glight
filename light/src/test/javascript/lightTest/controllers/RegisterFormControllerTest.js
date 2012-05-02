@@ -69,7 +69,6 @@ define(['light/controllers/RegisterFormController', 'light/stores/PersonStore',
             lastName: 'lastName'
           };
           var SAMPLE_STORED_DATA = {
-            id: 'me',
             firstName: 'firstName',
             lastName: 'lastName',
             someOtherField: 'someOtherField'
@@ -77,27 +76,29 @@ define(['light/controllers/RegisterFormController', 'light/stores/PersonStore',
           controller._person = {
             someOtherField: 'someOtherField'
           };
+          var stubPromise = TestUtils.createStubPromise()
 
           view.validate.withArgs().returns(true);
           view.getData.withArgs().returns(SAMPLE_FORM_DATA);
+          personStore.put.withArgs(SAMPLE_STORED_DATA,
+                  { id: 'me' }).returns(stubPromise);
 
           controller.onSubmit();
 
           expect(view.disable).toHaveBeenCalled();
-          expect(personStore.newItem).toHaveBeenCalledWith(SAMPLE_STORED_DATA);
-          expect(personStore.save).toHaveBeenCalled();
+          expect(personStore.put).toHaveBeenCalledWith(SAMPLE_STORED_DATA,
+                  { id: 'me' });
 
           // Testing the callbacks
-          var callbacks = personStore.save.args[0][0];
 
           // onComplete
           this.stub(URLUtils, 'redirect');
-          callbacks.onComplete();
+          stubPromise.onComplete();
           expect(URLUtils.redirect)
               .toHaveBeenCalledWith(controller._redirectPath);
 
           // onError
-          callbacks.onError();
+          stubPromise.onError();
           expect(view.warnError).toHaveBeenCalled();
           expect(view.enable).toHaveBeenCalled();
 
@@ -112,8 +113,7 @@ define(['light/controllers/RegisterFormController', 'light/stores/PersonStore',
           controller.onSubmit();
 
           expect(view.disable).not.toHaveBeenCalled();
-          expect(personStore.newItem).not.toHaveBeenCalled();
-          expect(personStore.save).not.toHaveBeenCalled();
+          expect(personStore.put).not.toHaveBeenCalled();
 
         });
 

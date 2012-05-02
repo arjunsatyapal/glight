@@ -25,7 +25,7 @@ dojoConfig = {
   has: {
     'light-dev': 1
   },
-  deferredOnError: function(e) { console.log(e.message, e.stack); },
+  //deferredOnError: function(e) { console.log(e.message, e.stack); },
     packages: [{
         name: 'light',
         location: '/js/light'

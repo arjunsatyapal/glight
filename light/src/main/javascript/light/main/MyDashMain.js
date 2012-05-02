@@ -15,23 +15,30 @@
  */
 define(['light/views/SearchBarView',
         'light/controllers/SearchBarController',
+        'light/views/ImportModuleView',
+        'light/controllers/ImportModuleController',
+        'light/views/SearchResultListView',
         'light/controllers/SearchResultListController',
-        'light/views/SearchResultListView', 'light/SearchService',
+        'light/SearchService',
         'light/views/LoginToolbarView',
         'light/controllers/LoginToolbarController',
+        'light/views/MyDashSidebarView',
+        'light/controllers/MyDashSidebarController',
         'light/utils/PersonUtils',
         'light/utils/URLUtils',
         'light/enums/PagesEnum',
         'dojo/domReady!'],
         function(SearchBarView, SearchBarController,
-                 SearchResultListController, SearchResultListView,
-                 SearchService, LoginToolbarView, LoginToolbarController,
+                 ImportModuleView, ImportModuleController,
+                 SearchResultListView, SearchResultListController,
+                 SearchService,
+                 LoginToolbarView, LoginToolbarController,
+                 MyDashSidebarView, MyDashSidebarController,
                  PersonUtils, URLUtils, PagesEnum) {
 
   // Going to the anonymous search page
-  // TODO(waltercacau): optimize the login somehow to go directly to MYDASH.
-  if (PersonUtils.isLogged()) {
-    URLUtils.replace(PagesEnum.MYDASH.path);
+  if (!PersonUtils.isLogged()) {
+    URLUtils.replace(PagesEnum.SEARCH.path);
   }
 
   var searchResultListView = new SearchResultListView({}, 'searchResults');
@@ -53,5 +60,16 @@ define(['light/views/SearchBarView',
   loginToolbarController.setView(loginToolbarView);
   loginToolbarView.setController(loginToolbarController);
   loginToolbarController.setup();
+
+  var myDashSidebarView = new MyDashSidebarView({}, 'sidebar');
+  var myDashSidebarController = new MyDashSidebarController();
+  myDashSidebarController.setView(myDashSidebarView);
+  myDashSidebarView.setController(myDashSidebarController);
+  myDashSidebarController.watch();
+  
+  var importModuleView = new ImportModuleView({}, 'importModule');
+  var importModuleController = new ImportModuleController();
+  importModuleController.setView(importModuleView);
+  importModuleView.setController(importModuleController);
 
 });

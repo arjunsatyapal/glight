@@ -14,15 +14,19 @@
  * the License.
  */
 define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
-        'light/enums/SearchEventsEnum', 'dojo/_base/connect',
-        'light/RegexCommon'],
-        function(declare, AbstractLightController, SearchEventsEnum,
-                 connect, RegexCommon) {
+        'light/enums/EventsEnum', 'dojo/_base/connect',
+        'light/RegexCommon',
+        'light/enums/BrowseContextsEnum'],
+        function(declare, AbstractLightController, EventsEnum,
+                 connect, RegexCommon, BrowseContextsEnum) {
 
   return declare('light.controller.SearchResultListController',
           AbstractLightController, {
     /** @lends light.controller.SearchResultListController# */
 
+    lastSearchState: null,
+    enabled: true,
+    
     /**
      * @extends light.controllers.AbstractLightController
      * @constructs
@@ -36,8 +40,10 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
      * watch for search state changes.
      */
     watch: function() {
-      connect.subscribe(SearchEventsEnum.SEARCH_STATE_CHANGED, this,
+      connect.subscribe(EventsEnum.SEARCH_STATE_CHANGED, this,
               this._onSearchStateChange);
+      connect.subscribe(EventsEnum.BROWSE_CONTEXT_STATE_CHANGED, this,
+              this._onBrowseContextStateChange);
     },
 
     /**
@@ -47,6 +53,10 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
 
       // Canceling last search
       this.searchService.cancelLastSearch();
+      this.lastSearchState = searchState;
+      
+      if(!this.enabled)
+        return;
 
       var view = this._view;
       if (searchState.query.match(RegexCommon.SPACES_ONLY)) {
@@ -58,6 +68,21 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
             });
       }
 
+    },
+    
+    /**
+     * Handler for browse context state change events.
+     */
+    _onBrowseContextStateChange: function(browseContextState, source) {
+      if(browseContextState.context == BrowseContextsEnum.ALL) {
+        this.enabled = true;
+        if(this.lastSearchState)
+          this._onSearchStateChange(this.lastSearchState);
+      } else {
+        this.enabled = false;
+        this.searchService.cancelLastSearch();
+        this._view.clear();
+      }
     }
   });
 });

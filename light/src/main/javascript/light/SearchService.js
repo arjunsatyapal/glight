@@ -29,12 +29,14 @@ define(['dojo/_base/declare', 'dojo', 'dojo/_base/xhr', 'dojo/_base/lang',
      */
     search: function(state) {
       // Adding the clientLanguageCode to the request
-      request = new SearchRequestBuilder(state)
-          .clientLanguageCode(LanguageUtils.currentLocale).build();
+      request = new SearchRequestBuilder(state, true /* may have extra keys */)
+          .clientLanguageCode(LanguageUtils.currentLocale)
+          .build();
 
       /*
        * TODO(waltercacau): Wrap the original dojo promise from the
        * xhr.get into a more friendly interface
+       * TODO(waltercacau): Add custom LightHeaders
        */
       return this._lastXhr = xhr.get({
         url: '/api/search?' + dojo.objectToQuery(request),

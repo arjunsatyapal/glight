@@ -28,10 +28,27 @@ import static com.google.light.server.servlets.test.CredentialUtils.getCredentia
 import static com.google.light.server.servlets.test.CredentialUtils.getOwnerCredentialPasswdFileAbsPath;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.testingutils.SeleniumUtils.clickAtCenter;
+import static junit.framework.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-import org.openqa.selenium.WebElement;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebDriver;
 
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpRequest;
@@ -51,22 +68,6 @@ import com.google.light.server.servlets.path.ServletPathEnum;
 import com.google.light.server.utils.LightPreconditions;
 import com.google.light.testingutils.GaeTestingUtils;
 import com.google.light.testingutils.SeleniumUtils;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.concurrent.TimeUnit;
-import java.util.logging.Logger;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.openqa.selenium.By;
-import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.WebDriver;
 
 public class LoginITCase {
   static final Logger logger = Logger.getLogger(LoginITCase.class.getName());
@@ -128,7 +129,7 @@ public class LoginITCase {
   static WebDriver getSeleniumDriver() {
     WebDriver driver = SeleniumUtils.getWebDriver();
     driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
-    
+
     listOfDrivers.add(driver);
     return driver;
   }
@@ -155,16 +156,17 @@ public class LoginITCase {
     List<Thread> listOfThread = Lists.newArrayList();
     for (String email : listOfEmails) {
       logger.info("Working on email : " + email);
-      
+
       Thread thread = new Thread(new ParallelTests(serverUrl, email));
       thread.start();
-      
+      //thread.join();
       listOfThread.add(thread);
     }
-    
+
     for (Thread currThread : listOfThread) {
       currThread.join();
     }
+    System.out.println("Done!");
   }
 
   private static class ParallelTests implements Runnable {
@@ -220,6 +222,7 @@ public class LoginITCase {
         downloadCredentialsFromServerAsZip();
         driver.quit();
       } catch (Exception e) {
+        e.printStackTrace();
         throw new RuntimeException(e);
       }
     }
@@ -232,7 +235,7 @@ public class LoginITCase {
       driver.findElement(By.id("Passwd")).clear();
       driver.findElement(By.id("Passwd")).sendKeys(password);
       driver.findElement(By.id("signIn")).click();
-      
+
       if (driver.getPageSource().contains("skip")) {
         driver.findElement(By.id("skip")).click();
       }
@@ -242,13 +245,16 @@ public class LoginITCase {
       // Now revoking access
       driver.findElement(By.cssSelector("#nav-security > div.IurIzb")).click();
       driver.findElement(By.xpath("//div[5]/div[2]/a/div")).click();
-      for (int i = 0; i < MAX_NUMBER_OF_TOKENS_TO_REVOKE; i++) {
-        if (!SeleniumUtils.clickIfExists(driver, By.linkText("Revoke Access")))
-          break;
+      
+      while(driver.getPageSource().contains("Revoke Access")) {
+        SeleniumUtils.clickIfExists(driver, By.linkText("Revoke Access"));
       }
+      /*while(SeleniumUtils.clickIfExists(driver, By.linkText("Revoke Access"))) {
+        ;
+      }*/
     }
 
-    private void completeSignupFlow(String fullName) {
+    private void completeSignupFlow(String fullName) throws InterruptedException {
       // Now trigger open a light page (eg. SEARCH_PAGE) and start GOOGLE_LOGIN OAuth2 flow for
       // Owner.
       driver.get(serverUrl + ServletPathEnum.SEARCH_PAGE.get());
@@ -258,8 +264,15 @@ public class LoginITCase {
       driver.findElement(By.id("submit_approve_access")).click();
 
       // Asserting the User is logged in
+      assertTrue(driver.getCurrentUrl().startsWith(serverUrl + ServletPathEnum.REGISTER_PAGE.get()));
       clickAtCenter(driver, By.id("registerForm_tosCheckbox"));
       clickAtCenter(driver, By.id("registerForm_submitButton"));
+
+      // javascript redirects are making selenium to have some race conditions internally.
+      // for now correcting it with a simple sleep
+      // TODO(waltercacau):
+      Thread.sleep(2000);
+      assertTrue(driver.getCurrentUrl().startsWith(serverUrl + ServletPathEnum.MYDASH_PAGE.get()));
       assertEquals(fullName, driver.findElement(By.id("loginToolbar_personNameSpan")).getText());
     }
 
@@ -352,12 +365,12 @@ public class LoginITCase {
   public void tearDown() throws Exception {
     for (WebDriver currDriver : listOfDrivers) {
       try {
-      currDriver.quit();
+        currDriver.quit();
       } catch (Exception e) {
         // If fails, ignore exception and try to quit others.
       }
     }
-    
+
     String verificationErrorString = verificationErrors.toString();
     if (!"".equals(verificationErrorString)) {
       fail(verificationErrorString);

@@ -13,8 +13,9 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-define(['light/views/AbstractLightView', 'dojox/json/schema', 'dojo'],
-        function(AbstractLightView, jsonSchema, dojo) {
+define(['light/views/AbstractLightView', 'dojox/json/schema', 'dojo',
+        'dojo/_base/xhr'],
+        function(AbstractLightView, jsonSchema, dojo, xhr) {
   /**
    * Utility Methods for testing.
    * @class
@@ -67,7 +68,31 @@ define(['light/views/AbstractLightView', 'dojox/json/schema', 'dojo'],
           names.push(name);
       }
       return names;
-    }
+    },
+    
+    expectModuleToExist: function(moduleId) {
+      var url = require.toUrl(moduleId+'.js');
+      var loaded = false;
+      var error = undefined;
+      xhr.get({
+        url:url,
+        sync: true,
+        load: function() {
+          loaded = true;
+        }
+      });
+      if(!loaded)
+        throw new Error('Contents of module '+moduleId+' could not be loaded');
+    },
+    
+    createStubPromise: function() {
+      return {
+        then: function(callback, errback) {
+          this.onComplete = callback;
+          this.onError = errback;
+        },
+      }
+    },
 
   };
 

@@ -20,7 +20,7 @@ define({
    * <p>Example of publish call (connect is 'dojo/_base/connect'):
    * 
    * <pre>
-   * connect.publish(SearchEventsEnum.SEARCH_STATE_CHANGED, [{
+   * connect.publish(EventsEnum.SEARCH_STATE_CHANGED, [{
    *    query: 'myquery', // the query value
    *    page: 1 // The page
    *  }, source // the source of this event
@@ -32,5 +32,6 @@ define({
    * 
    * @const
    */
-  SEARCH_STATE_CHANGED: '/light/search/searchStateChanged'
+  SEARCH_STATE_CHANGED: '/light/search/searchStateChanged',
+  BROWSE_CONTEXT_STATE_CHANGED: '/light/mydash/browseContextStateChanged'
 });

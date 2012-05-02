@@ -16,22 +16,19 @@
 define(['dojo/_base/declare', 'light/stores/AbstractLightStore'],
         function(declare, AbstractLightStore) {
 
+  /**
+   * Store object for Person resource.
+   *
+   * TODO(waltercacau): add test for this class
+   *
+   * @class
+   * @extends light.stores.AbstractLightStore
+   * @name light.stores.PersonStore
+   */
   return declare('light.stores.PersonStore', AbstractLightStore, {
     /** @lends light.stores.PersonStore# */
 
-    lightTarget: '/api/person',
-
-    /**
-     * Store object for Person resource.
-     * 
-     * TODO(waltercacau): add test for this class
-     * 
-     * @extends light.stores.AbstractLightStore
-     * @constructs
-     */
-    constructor: function(options) {
-      this.inherited(arguments);
-    }
+    lightTarget: '/api/person'
 
   });
 });

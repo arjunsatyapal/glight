@@ -15,55 +15,39 @@
  */
 define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
         'light/enums/EventsEnum', 'dojo/_base/connect',
-        'light/builders/SearchStateBuilder',
         'light/enums/BrowseContextsEnum'],
         function(declare, AbstractLightController, EventsEnum,
-                 connect, SearchStateBuilder, BrowseContextsEnum) {
-  /**
-   * @class
-   * @name light.controllers.SearchBarController
-   */
-  return declare('light.controllers.SearchBarController',
-          AbstractLightController, {
+                 connect, BrowseContextsEnum) {
 
-    /** @lends light.controllers.SearchBarController# */
+  return declare('light.controller.ImportModuleController',
+          AbstractLightController, {
+    /** @lends light.controller.ImportModuleController# */
+
+    /**
+     * @extends light.controllers.AbstractLightController
+     * @constructs
+     */
+    constructor: function() {
+    },
 
     /**
      * Wire's this object to the dojo event system so it can
-     * watch for search state changes.
+     * watch for browser context state changes.
      */
     watch: function() {
-      connect.subscribe(EventsEnum.SEARCH_STATE_CHANGED, this,
-              this._onSearchStateChange);
       connect.subscribe(EventsEnum.BROWSE_CONTEXT_STATE_CHANGED, this,
               this._onBrowseContextStateChange);
     },
-    
-    /**
-     * Handler for search state change events.
-     */
-    _onSearchStateChange: function(searchState, source) {
-      if (source != this)
-        this._view.setQuery(searchState.query);
-    },
-    
+
     /**
      * Handler for browse context state change events.
      */
     _onBrowseContextStateChange: function(browseContextState, source) {
-      if(browseContextState.context != BrowseContextsEnum.ALL)
-        this._view.disable();
-      else
-        this._view.enable();
-    },
-
-    /**
-     * Handler for submit events in the search form.
-     */
-    onSubmit: function() {
-      connect.publish(EventsEnum.SEARCH_STATE_CHANGED, [
-        new SearchStateBuilder().query(this._view.getQuery()).build(), this]);
+      if(browseContextState.context == BrowseContextsEnum.IMPORT) {
+        this.view.showFirstForm();
+      } else {
+        this.view.hide();
+      }
     }
-
   });
 });

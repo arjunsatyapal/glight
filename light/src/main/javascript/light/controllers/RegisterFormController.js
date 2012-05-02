@@ -51,22 +51,21 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
     onSubmit: function() {
       if (!this._view.validate())
         return;
-      var updatedPerson = {id: 'me'};
+      var updatedPerson = {};
       lang.mixin(updatedPerson, this._person);
       lang.mixin(updatedPerson, this._view.getData());
       this._view.disable();
-      this._personStore.newItem(updatedPerson);
       var self = this;
-      this._personStore.save({
-        onComplete: function() {
-          URLUtils.redirect(self._redirectPath);
-        },
-        onError: function() {
-          // TODO(waltercacau): Show friendly error.
-          self._view.warnError();
-          self._view.enable();
-        }
-      });
+      this._personStore.put(updatedPerson, {id: 'me'}).then(
+          function() {
+            URLUtils.redirect(self._redirectPath);
+          },
+          function() {
+            // TODO(waltercacau): Show friendly error.
+            self._view.warnError();
+            self._view.enable();
+          }
+      )
     }
   });
 });
