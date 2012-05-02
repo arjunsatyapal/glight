@@ -15,8 +15,11 @@
  */
 define(['light/views/SearchBarView',
         'light/controllers/SearchBarController',
+        'light/views/ImportModuleView',
+        'light/controllers/ImportModuleController',
+        'light/views/SearchResultListView',
         'light/controllers/SearchResultListController',
-        'light/views/SearchResultListView', 'light/SearchService',
+        'light/SearchService',
         'light/views/LoginToolbarView',
         'light/controllers/LoginToolbarController',
         'light/views/MyDashSidebarView',
@@ -26,8 +29,10 @@ define(['light/views/SearchBarView',
         'light/enums/PagesEnum',
         'dojo/domReady!'],
         function(SearchBarView, SearchBarController,
-                 SearchResultListController, SearchResultListView,
-                 SearchService, LoginToolbarView, LoginToolbarController,
+                 ImportModuleView, ImportModuleController,
+                 SearchResultListView, SearchResultListController,
+                 SearchService,
+                 LoginToolbarView, LoginToolbarController,
                  MyDashSidebarView, MyDashSidebarController,
                  PersonUtils, URLUtils, PagesEnum) {
 
@@ -61,5 +66,10 @@ define(['light/views/SearchBarView',
   myDashSidebarController.setView(myDashSidebarView);
   myDashSidebarView.setController(myDashSidebarController);
   myDashSidebarController.watch();
+  
+  var importModuleView = new ImportModuleView({}, 'importModule');
+  var importModuleController = new ImportModuleController();
+  importModuleController.setView(importModuleView);
+  importModuleView.setController(importModuleController);
 
 });

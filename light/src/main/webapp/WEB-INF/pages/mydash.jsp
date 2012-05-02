@@ -128,6 +128,14 @@
         float: right;
     }
     
+    #importModule {
+        padding: 10px;
+    }
+    #importModule .firstForm {
+        padding: 10px;
+        text-align: center;
+    }
+    
     </style>
     <!--<link rel="stylesheet/less" type="text/css" href="/css/search.less">
     <script src="/js/external/less-1.3.0.min.js" type="text/javascript"></script>-->
@@ -140,6 +148,7 @@
     </div>
     <div id="content">
         <div id="searchResults"></div>
+        <div id="importModule"></div>
     </div>
   </body>
 </html>
