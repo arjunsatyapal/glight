@@ -18,6 +18,10 @@ package com.google.light.server.manager.implementation.oauth2.consumer;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
+import com.google.light.server.exception.unchecked.MissingConsumerCredentialExecption;
+
+import com.google.light.server.persistence.entity.admin.OAuth2ConsumerCredentialEntity;
+
 import com.google.api.client.auth.oauth2.ClientParametersAuthentication;
 
 import com.google.inject.Inject;
@@ -43,10 +47,17 @@ public class OAuth2ConsumerCredentialManagerImpl implements OAuth2ConsumerCreden
     checkNotNull(provider, "provider");
     checkNotNull(dao, "dao");
     
-    this.clientId = checkNotBlank(dao.get(provider).getClientId(),
+    
+    OAuth2ConsumerCredentialEntity consumerCredentials = dao.get(provider);
+    
+    if (consumerCredentials == null) {
+      throw new MissingConsumerCredentialExecption(provider);
+    }
+    
+    this.clientId = checkNotBlank(consumerCredentials.getClientId(),
         "clientId for provider[" + provider + "].");
     
-    this.clientSecret = checkNotBlank(dao.get(provider).getClientSecret(),
+    this.clientSecret = checkNotBlank(consumerCredentials.getClientSecret(),
         "clientSecret for provider[" + provider + "].");
   }
 

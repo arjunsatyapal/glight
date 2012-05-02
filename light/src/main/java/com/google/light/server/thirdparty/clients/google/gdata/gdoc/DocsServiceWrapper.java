@@ -21,6 +21,10 @@ import static com.google.light.server.constants.LightConstants.HTTP_CONNECTION_T
 import static com.google.light.server.constants.OAuth2ProviderService.GOOGLE_DOC;
 import static com.google.light.server.utils.LightUtils.getURL;
 
+import com.google.light.server.utils.GuiceUtils;
+
+import com.google.light.server.exception.unchecked.MissingOwnerCredentialException;
+
 import com.google.light.server.utils.LightUtils;
 
 import com.google.common.base.Charsets;
@@ -71,7 +75,6 @@ public class DocsServiceWrapper extends DocsService {
         ownerTokenManagerFactory, "ownerTokenManagerFactory");
     OAuth2OwnerTokenManager googDocTokenManager = tokenManagerFactory.create(GOOGLE_DOC);
     OAuth2OwnerTokenEntity token = googDocTokenManager.get();
-    checkNotNull(token, "token not found.");
 
     setUserToken(token.getAuthorizationToken());
     getRequestFactory().setHeader("Authorization", token.getAuthorizationToken());

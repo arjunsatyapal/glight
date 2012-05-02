@@ -31,8 +31,6 @@ import static com.google.light.testingutils.SeleniumUtils.clickAtCenter;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-import org.openqa.selenium.WebElement;
-
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpResponse;

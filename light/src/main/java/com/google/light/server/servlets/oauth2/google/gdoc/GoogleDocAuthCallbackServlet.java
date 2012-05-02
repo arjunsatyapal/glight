@@ -6,6 +6,8 @@ import static com.google.light.server.servlets.path.ServletPathEnum.OAUTH2_GOOGL
 import static com.google.light.server.utils.GuiceUtils.getInstance;
 import static com.google.light.server.utils.LightPreconditions.checkValidSession;
 
+import com.google.light.server.exception.unchecked.MissingOwnerCredentialException;
+
 import com.google.light.server.dto.pojo.longwrapper.PersonId;
 
 
@@ -107,7 +109,13 @@ public class GoogleDocAuthCallbackServlet extends HttpServlet {
       if(newRefreshToken) {
         updateOwnerTokenEntity(personId, tokenResponse.getRefreshToken(), tokenResponse);
       } else {
-        OAuth2OwnerTokenEntity tokenEntity = googDocTokenManager.get();
+        OAuth2OwnerTokenEntity tokenEntity = null;
+        
+        try {
+          tokenEntity = googDocTokenManager.get();
+        } catch (MissingOwnerCredentialException e) {
+          // Eat this exception.
+        }
         
         if (tokenEntity == null) {
           /*
