@@ -1,7 +1,7 @@
 package com.google.light.server.jersey.resources;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.light.server.utils.GuiceUtils.getInstance;
+import static com.google.light.server.constants.LightStringConstants.VERSION_LATEST_STR;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
 import com.google.appengine.api.blobstore.BlobKey;
@@ -11,15 +11,15 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.light.server.constants.HttpHeaderEnum;
 import com.google.light.server.constants.JerseyConstants;
-import com.google.light.server.constants.LightStringConstants;
 import com.google.light.server.constants.ResourceTypes;
 import com.google.light.server.constants.http.ContentTypeConstants;
-import com.google.light.server.dto.pojo.ModuleId;
-import com.google.light.server.dto.pojo.Version;
+import com.google.light.server.dto.pojo.longwrapper.ModuleId;
+import com.google.light.server.dto.pojo.longwrapper.Version;
 import com.google.light.server.exception.unchecked.httpexception.NotFoundException;
 import com.google.light.server.manager.interfaces.ModuleManager;
 import com.google.light.server.persistence.entity.module.ModuleVersionEntity;
 import com.google.light.server.persistence.entity.module.ModuleVersionResourceEntity;
+import com.google.light.server.utils.LightUtils;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.GET;
@@ -40,29 +40,28 @@ import javax.ws.rs.core.Response.ResponseBuilder;
  */
 @Path(JerseyConstants.RESOURCE_PATH_MODULE)
 public class ModuleResource extends AbstractJerseyResource {
-  private ModuleManager moduleManager;
+  private final ModuleManager moduleManager;
   private final BlobstoreService blobService;
 
   @Inject
   public ModuleResource(Injector injector, @Context HttpServletRequest request,
-      @Context HttpServletResponse response) {
+      @Context HttpServletResponse response, ModuleManager moduleManager) {
     super(injector, request, response);
     this.blobService = checkNotNull(BlobstoreServiceFactory.getBlobstoreService());
-    this.moduleManager = getInstance(ModuleManager.class);
+    this.moduleManager = checkNotNull(moduleManager, "moduleManager");
   }
 
   /**
-   * Get on a ModuleId will default to Latest Version.
+   * Get on a ModuleId will redirect to Latest Version for that ModuleId.
    * 
    * @param moduleId
    * @return
    */
   @GET
   @Path(JerseyConstants.PATH_MODULE_ID)
-  @Produces({ ContentTypeConstants.APPLICATION_JSON, ContentTypeConstants.TEXT_XML })
-  public String getModule(
-      @PathParam(JerseyConstants.PATH_PARAM_MODULE_ID) String moduleIdStr) {
-    return getModuleVersion(moduleIdStr, LightStringConstants.VERSION_LATEST_STR);
+  public Response getModule() {
+    String uri = request.getRequestURI() + "/" + VERSION_LATEST_STR;
+    return Response.seeOther(LightUtils.getURI(uri)).build();
   }
 
   @GET
@@ -75,9 +74,9 @@ public class ModuleResource extends AbstractJerseyResource {
     ModuleId moduleId = new ModuleId(moduleIdStr);
     Version version = Version.createVersion(versionStr);
 
-    ModuleVersionEntity moduleEntity = moduleManager.getModuleVersion(moduleId, version);
+    ModuleVersionEntity moduleVersionEntity = moduleManager.getModuleVersion(moduleId, version);
 
-    return moduleEntity.getContent();
+    return moduleVersionEntity.getContent();
   }
 
   @GET

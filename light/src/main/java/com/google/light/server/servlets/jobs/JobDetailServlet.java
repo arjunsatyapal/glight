@@ -91,7 +91,7 @@ public class JobDetailServlet extends AbstractLightServlet {
     Long jobId = Long.parseLong(jobIdStr);
     LightPreconditions.checkPositiveLong(jobId, "jobId");
 
-    JobEntity jobEntity = jobManager.get(jobId);
+    JobEntity jobEntity = jobManager.get(null, jobId);
     if (jobEntity == null) {
       throw new NotFoundException("ImportEntity[" + jobId + "], not found.");
     }
@@ -108,7 +108,7 @@ public class JobDetailServlet extends AbstractLightServlet {
         break;
 
       case STOPPED_BY_ERROR:
-        appendKeyValue(strBuilder, "Error", jobEntity.getError());
+        appendKeyValue(strBuilder, "Error", jobEntity.getStopReason());
         break;
 
       case STOPPED_BY_REQUEST:
@@ -122,12 +122,12 @@ public class JobDetailServlet extends AbstractLightServlet {
         // do nothing.
     }
 
-    switch (jobEntity.getJobType()) {
+    switch (jobEntity.getTaskType()) {
       case IMPORT:
         createReportForImport(jobEntity, strBuilder);
         break;
       default:
-        throw new IllegalArgumentException("Invalid jobType[" + jobEntity.getJobType() + "].");
+        throw new IllegalArgumentException("Invalid jobType[" + jobEntity.getTaskType() + "].");
     }
 
     try {
@@ -151,8 +151,8 @@ public class JobDetailServlet extends AbstractLightServlet {
           + importEntity.getPersonId() + "] but found [" + sessionManager.getPersonId() + "].");
     }
 
-    LightUtils.appendSectionHeader(strBuilder, "Import Entity Details");
-    List<ChangeLogEntryPojo> listOfChanges = importEntity.getChangeLogs();
+    LightUtils.appendSectionHeader(strBuilder, "Job Details");
+    List<ChangeLogEntryPojo> listOfChanges = jobEntity.getChangeLogs();
 
     for (int counter = listOfChanges.size() - 1; counter >= 0; counter--) {
       ChangeLogEntryPojo currEntry = listOfChanges.get(counter);

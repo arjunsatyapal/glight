@@ -29,6 +29,8 @@ import static com.google.light.server.utils.LightUtils.getUUIDString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.google.light.server.dto.pojo.longwrapper.PersonId;
+
 import com.google.common.collect.Lists;
 
 import java.lang.annotation.Annotation;
@@ -61,7 +63,6 @@ import com.google.light.server.annotations.AnotActor;
 import com.google.light.server.annotations.AnotOwner;
 import com.google.light.server.constants.LightEnvEnum;
 import com.google.light.server.constants.OAuth2ProviderService;
-import com.google.light.server.dto.pojo.PersonId;
 import com.google.light.server.guice.LightServletModule;
 import com.google.light.server.guice.module.UnitTestModule;
 import com.google.light.server.guice.modules.ProdModule;

@@ -6,7 +6,8 @@ import static com.google.light.server.servlets.path.ServletPathEnum.OAUTH2_GOOGL
 import static com.google.light.server.utils.GuiceUtils.getInstance;
 import static com.google.light.server.utils.LightPreconditions.checkValidSession;
 
-import com.google.light.server.dto.pojo.PersonId;
+import com.google.light.server.dto.pojo.longwrapper.PersonId;
+
 
 
 import com.google.api.client.auth.oauth2.AuthorizationCodeResponseUrl;

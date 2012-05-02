@@ -29,13 +29,14 @@ import static com.google.light.server.utils.LightPreconditions.checkPersonLogged
 import static com.google.light.server.utils.ServletUtils.getRequestHeaderValue;
 import static org.apache.commons.lang.StringUtils.isBlank;
 
+import com.google.light.server.dto.pojo.longwrapper.PersonId;
+
 import com.google.inject.Inject;
 import com.google.light.server.annotations.AnotActor;
 import com.google.light.server.annotations.AnotHttpSession;
 import com.google.light.server.annotations.AnotOwner;
 import com.google.light.server.constants.HttpHeaderEnum;
 import com.google.light.server.constants.OAuth2ProviderService;
-import com.google.light.server.dto.pojo.PersonId;
 import com.google.light.server.exception.unchecked.BlankStringException;
 import com.google.light.server.persistence.entity.person.PersonEntity;
 import com.googlecode.objectify.Key;
@@ -56,6 +57,10 @@ public class SessionManager {
   @Inject
   public SessionManager(@AnotHttpSession HttpSession session) {
     this.session = session;
+  }
+  
+  public HttpSession getSession() {
+    return session;
   }
   
   /**

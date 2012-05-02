@@ -19,16 +19,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPersonId;
 
-import com.google.light.server.dto.pojo.ChangeLogEntryPojo;
-import com.google.light.server.dto.pojo.PersonId;
+import com.google.light.server.dto.pojo.longwrapper.PersonId;
 
-import com.google.common.collect.Lists;
 import com.google.light.server.dto.module.ModuleType;
 import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocInfoDto;
 import com.google.light.server.persistence.entity.AbstractPersistenceEntity;
 import com.googlecode.objectify.Key;
-import java.util.List;
-import javax.persistence.Embedded;
 import javax.persistence.Id;
 
 /**
@@ -47,9 +43,6 @@ public class ImportJobEntity extends AbstractPersistenceEntity<ImportJobEntity, 
   private String resourceId;
   private Long personId;
   private String additionalJsonInfo;
-
-  @Embedded
-  private List<ChangeLogEntryPojo> changeLogs;
 
   protected static String computeId(ModuleType moduleType, String resourceId) {
     checkNotNull(moduleType, "moduleType");
@@ -109,14 +102,6 @@ public class ImportJobEntity extends AbstractPersistenceEntity<ImportJobEntity, 
     return new PersonId(personId);
   }
 
-  public List<ChangeLogEntryPojo> getChangeLogs() {
-    return changeLogs;
-  }
-  
-  public void addToChangeLog(ChangeLogEntryPojo changeLog) {
-    changeLogs.add(changeLog);
-  }
-  
   public String getAdditionalJsonInfo() {
     return additionalJsonInfo;
   }
@@ -161,7 +146,6 @@ public class ImportJobEntity extends AbstractPersistenceEntity<ImportJobEntity, 
     this.id = computeId(moduleType, resourceId);
     checkPersonId(builder.personId);
     this.personId = builder.personId.get();
-    this.changeLogs = Lists.newArrayList();
     this.additionalJsonInfo = checkNotBlank(builder.additionalJsonInfo, "additionalJsonInfo");
   }
 

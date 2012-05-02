@@ -16,7 +16,6 @@
 package com.google.light.server.persistence.entity;
 
 import com.google.light.server.AbstractGAETest;
-import org.junit.Test;
 
 /**
  * Test for Entities of type {@link PersistenceToDtoInterface}

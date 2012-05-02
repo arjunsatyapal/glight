@@ -500,6 +500,14 @@
           <serverId>appengine.google.com</serverId>
           <appDir>${light.wardir}</appDir>
         </configuration>
+        <dependencies>
+          <dependency>
+            <groupId>net.kindleit</groupId>
+            <artifactId>gae-runtime</artifactId>
+            <version>${gae.version}</version>
+            <type>pom</type>
+          </dependency>
+        </dependencies>
         <executions>
           <execution>
             <id />

@@ -1,9 +1,9 @@
 package com.google.light.server.manager.interfaces;
 
 import com.google.light.server.dto.module.GSBlobInfo;
-import com.google.light.server.dto.pojo.ModuleId;
-import com.google.light.server.dto.pojo.PersonId;
-import com.google.light.server.dto.pojo.Version;
+import com.google.light.server.dto.pojo.longwrapper.ModuleId;
+import com.google.light.server.dto.pojo.longwrapper.PersonId;
+import com.google.light.server.dto.pojo.longwrapper.Version;
 import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocInfoDto;
 import com.google.light.server.persistence.entity.module.ModuleEntity;
 import com.google.light.server.persistence.entity.module.ModuleVersionEntity;
@@ -75,7 +75,7 @@ public interface ModuleManager {
    * @param docInfoDto
    * @return
    */
-  public Version addModuleVersionForGoogleDoc(ModuleId moduleId, String content,
+  public ModuleVersionEntity addModuleVersionForGoogleDoc(ModuleId moduleId, String content,
       GoogleDocInfoDto docInfoDto);
 
   /**

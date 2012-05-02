@@ -71,6 +71,7 @@ public class GAEAdminResources extends AbstractJerseyResource {
     personManager = getInstance(PersonManager.class);
   }
 
+  @SuppressWarnings("deprecation")
   @GET
   @Produces(ContentTypeConstants.TEXT_HTML)
   @Path(JerseyConstants.PATH_CONFIG)

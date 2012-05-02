@@ -18,7 +18,8 @@ package com.google.light.server.guice.module;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.testingutils.TestingUtils.getMockPersonIdForFailure;
 
-import com.google.light.server.dto.pojo.PersonId;
+import com.google.light.server.dto.pojo.longwrapper.PersonId;
+
 import com.google.light.server.dto.pojo.RequestScopedValues;
 
 import com.google.inject.Guice;

@@ -15,7 +15,7 @@
  */
 package com.google.light.server.jersey.resources.thirdparty.google;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.light.server.jersey.resources.thirdparty.google.GoogleDocIntegrationUtils.importGDocResource;
 import static com.google.light.server.servlets.thirdparty.google.gdoc.GoogleDocUtils.getDocumentFeedWithFolderUrl;
 import static com.google.light.server.utils.GuiceUtils.getInstance;
 import static com.google.light.server.utils.LightUtils.getURL;
@@ -34,15 +34,11 @@ import com.google.light.server.dto.pages.PageDto;
 import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocInfoDto;
 import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocResourceId;
 import com.google.light.server.jersey.resources.AbstractJerseyResource;
-import com.google.light.server.manager.interfaces.JobManager;
 import com.google.light.server.persistence.entity.jobs.JobEntity;
-import com.google.light.server.persistence.entity.queue.importflow.ImportJobEntity;
 import com.google.light.server.thirdparty.clients.google.gdata.gdoc.DocsServiceWrapper;
-import com.google.light.server.utils.GuiceUtils;
 import com.google.light.server.utils.LightPreconditions;
 import com.google.light.server.utils.LightUtils;
 import java.net.URL;
-import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.FormParam;
@@ -67,17 +63,13 @@ import org.apache.commons.lang.StringUtils;
  */
 @Path(JerseyConstants.RESOURCE_PATH_THIRD_PARTY_GOOGLE_DOC)
 public class GoogleDocIntegration extends AbstractJerseyResource {
-  private static final Logger logger = Logger.getLogger(GoogleDocIntegration.class.getName());
-
   private DocsServiceWrapper docsService;
-  private JobManager jobManager;
 
   @Inject
   public GoogleDocIntegration(Injector injector, @Context HttpServletRequest request,
       @Context HttpServletResponse response) {
     super(injector, request, response);
     this.docsService = getInstance(DocsServiceWrapper.class);
-    this.jobManager = getInstance(JobManager.class);
   }
 
   @GET
@@ -131,8 +123,7 @@ public class GoogleDocIntegration extends AbstractJerseyResource {
         return docsService.getFolderContentWithStartIndex(getURL(startIndex), handlerUri);
       }
       GoogleDocResourceId resourceId = new GoogleDocResourceId(externalKey);
-
-      PageDto pageDto = docsService.getFolderContent(resourceId, handlerUri);
+      PageDto pageDto = docsService.getFolderContentPageWise(resourceId, handlerUri);
       return pageDto;
     } catch (Exception e) {
       // TODO(arjuns): Add exception Handling.
@@ -156,22 +147,8 @@ public class GoogleDocIntegration extends AbstractJerseyResource {
     }
 
     GoogleDocResourceId resourceId = new GoogleDocResourceId(externalKeyStr);
-    GoogleDocInfoDto docInfoDto = docsService.getDocumentEntryWithAcl(resourceId);
-    checkNotNull(docInfoDto, "DocInfoDto for ResourceId[" + resourceId + "] was null.");
-
-    // TODO(arjuns): Add more logic to filter out what docs can be imported.
-    logger.info(docInfoDto.toJson());
-
-    ImportJobEntity importJobEntity = new ImportJobEntity.Builder()
-        .moduleType(resourceId.getModuleType())
-        .resourceId(resourceId.getTypedResourceId())
-        .personId(GuiceUtils.getOwnerId())
-        .additionalJsonInfo(docInfoDto.toJson())
-        .build();
-    // ImportJobEntity persistedEntity = importManager.put(entity,
-    // new ChangeLogEntryPojo("Enqueuing for Import."));
-
-    JobEntity jobEntity = jobManager.enqueueImportJob(importJobEntity);
+    JobEntity jobEntity = importGDocResource(resourceId, docsService, null /* parentJobId */, 
+        null /* rootJobId */, null /*promiseHandle*/);
 
     ResponseBuilder responseBuilder = Response.ok();
     responseBuilder.status(HttpStatusCodesEnum.CREATED.getStatusCode());

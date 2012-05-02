@@ -15,10 +15,10 @@
  */
 package com.google.light.server.dto.pojo;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
 
 import com.google.light.server.dto.AbstractPojo;
-import com.google.light.server.persistence.entity.jobs.JobEntity;
+import com.google.light.server.dto.pojo.longwrapper.PersonId;
 
 /**
  * 
@@ -31,7 +31,10 @@ import com.google.light.server.persistence.entity.jobs.JobEntity;
 public class LightJobContextPojo extends AbstractPojo<LightJobContextPojo> {
   private PersonId ownerId;
   private PersonId actorId;
-  private JobEntity jobEntity;
+  private Long jobId;
+  private Long parentJobId;
+  private Long rootJobId;
+  private String promiseHandle;
 
   public PersonId getOwnerId() {
     return ownerId;
@@ -41,14 +44,29 @@ public class LightJobContextPojo extends AbstractPojo<LightJobContextPojo> {
     return actorId;
   }
 
-  public JobEntity getJobEntity() {
-    return jobEntity;
+  public Long getJobId() {
+    return jobId;
+  }
+  
+  public Long getParentJobId() {
+    return parentJobId;
+  }
+  
+  public Long getRootJobId() {
+    return rootJobId;
+  }
+  
+  public String getPromiseHandle() {
+    return promiseHandle;
   }
   
   public static class Builder {
     private PersonId ownerId;
     private PersonId actorId;
-    private JobEntity jobEntity;
+    private Long jobId;
+    private Long parentJobId;
+    private Long rootJobId;
+    private String promiseHandle;
 
     public Builder ownerId(PersonId ownerId) {
       this.ownerId = ownerId;
@@ -60,11 +78,26 @@ public class LightJobContextPojo extends AbstractPojo<LightJobContextPojo> {
       return this;
     }
 
-    public Builder jobEntity(JobEntity jobEntity) {
-      this.jobEntity = jobEntity;
+    public Builder jobId(Long jobId) {
+      this.jobId = jobId;
       return this;
     }
-
+    
+    public Builder parentJobId(Long parentJobId) {
+      this.parentJobId = parentJobId;
+      return this;
+    }
+    
+    public Builder rootJobId(Long rootJobId) {
+      this.rootJobId = rootJobId;
+      return this;
+    }
+    
+    public Builder promiseHandle(String promiseHandle) {
+      this.promiseHandle = promiseHandle;
+      return this;
+    }
+    
     @SuppressWarnings("synthetic-access")
     public LightJobContextPojo build() {
       return new LightJobContextPojo(this).validate();
@@ -75,7 +108,10 @@ public class LightJobContextPojo extends AbstractPojo<LightJobContextPojo> {
   private LightJobContextPojo(Builder builder) {
     this.ownerId = builder.ownerId;
     this.actorId = builder.actorId;
-    this.jobEntity = builder.jobEntity;
+    this.jobId = builder.jobId;
+    this.parentJobId = builder.parentJobId;
+    this.rootJobId = builder.rootJobId;
+    this.promiseHandle = builder.promiseHandle;
   }
 
   /** 
@@ -83,7 +119,8 @@ public class LightJobContextPojo extends AbstractPojo<LightJobContextPojo> {
    */
   @Override
   public LightJobContextPojo validate() {
-    checkNotNull(jobEntity, "jobEntity");
+    checkPositiveLong(jobId, "jobId");
+    checkPositiveLong(rootJobId, "rootJobId");
     return this;
   }
 }

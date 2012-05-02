@@ -16,21 +16,21 @@
 package com.google.light.server.jobs.lightjobs;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.light.server.jobs.importjobs.google.ImportGoogleDocJobs.updateChangeLog;
+import static com.google.light.server.jobs.JobUtils.updateChangeLog;
 import static com.google.light.server.utils.GuiceUtils.getInstance;
 
 import com.google.appengine.tools.pipeline.ImmediateValue;
 import com.google.appengine.tools.pipeline.Value;
 import com.google.light.jobs.LightJob2;
 import com.google.light.jobs.LightJob4;
-import com.google.light.jobs.LightJob6;
+import com.google.light.jobs.LightJob5;
 import com.google.light.server.dto.module.GSBlobInfo;
 import com.google.light.server.dto.module.ModuleType;
-import com.google.light.server.dto.pojo.ModuleId;
-import com.google.light.server.dto.pojo.Version;
+import com.google.light.server.dto.pojo.longwrapper.ModuleId;
 import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocInfoDto;
 import com.google.light.server.manager.interfaces.ImportManager;
 import com.google.light.server.manager.interfaces.ModuleManager;
+import com.google.light.server.persistence.entity.module.ModuleVersionEntity;
 import com.google.light.server.persistence.entity.queue.importflow.ImportJobEntity;
 import com.google.light.server.utils.JsonUtils;
 
@@ -60,56 +60,60 @@ public class ModuleJobs {
   }
 
   @SuppressWarnings("serial")
-  public static class AddModuleVersion extends LightJob4<Version, ModuleId, String, String> {
+  public static class AddModuleVersion extends
+      LightJob4<ModuleVersionEntity, ModuleId, String, String> {
     /**
      * {@inheritDoc}
      */
     @Override
-    public Value<Version> handler(ModuleId moduleId, String importEntityId, String content) {
+    public Value<ModuleVersionEntity> handler(ModuleId moduleId, String importEntityId,
+        String content) {
       ImportManager importManager = getInstance(ImportManager.class);
       ImportJobEntity importEntity = importManager.get(importEntityId);
-      updateChangeLog(importEntity, "Adding new moduleVersion.");
+      updateChangeLog(null, getContext().getJobId(), "Adding new moduleVersion.");
 
       ModuleManager moduleManager = getInstance(ModuleManager.class);
 
       ModuleType moduleType = importEntity.getModuleType();
-      Version moduleVersion = null;
+      ModuleVersionEntity moduleVersionEntity = null;
       switch (moduleType) {
         case GOOGLE_DOC:
           GoogleDocInfoDto docInfoDto = JsonUtils.getDto(
               importEntity.getAdditionalJsonInfo(), GoogleDocInfoDto.class);
-          moduleVersion = moduleManager.addModuleVersionForGoogleDoc(moduleId, content, docInfoDto);
+
+          moduleVersionEntity =
+              moduleManager.addModuleVersionForGoogleDoc(moduleId, content, docInfoDto);
           break;
 
         default:
           throw new IllegalArgumentException(
               "ModuleType[" + moduleType + "] is not supported.");
       }
-      checkNotNull(moduleVersion, "moduleVersion should be positive.");
+      checkNotNull(moduleVersionEntity, "moduleVersionEntity should not be null.");
 
-      updateChangeLog(importEntity, "Successfully added new moduleVersion["
-          + moduleVersion + "].");
+      updateChangeLog(null, getContext().getJobId(), "Successfully added new moduleVersion["
+          + moduleVersionEntity.getVersion() + "].");
 
-      return immediate(moduleVersion);
+      return immediate(moduleVersionEntity);
     }
   }
 
   @SuppressWarnings("serial")
   public static class AddModuleResources extends
-      LightJob6<Void, ModuleId, Version, String, String, GSBlobInfo> {
+      LightJob5<Void, ModuleVersionEntity, String, String, GSBlobInfo> {
     /**
      * {@inheritDoc}
      */
     @Override
-    public Value<Void> handler(ModuleId moduleId, Version moduleVersion, String importEntityId,
+    public Value<Void> handler(ModuleVersionEntity moduleVersionEntity, String importEntityId,
         String resourceId, GSBlobInfo resourceInfo) {
-      ImportManager importManager = getInstance(ImportManager.class);
-      ImportJobEntity importEntity = importManager.get(importEntityId);
-      updateChangeLog(importEntity, "Adding new resource : "
-          + resourceInfo.getFileName() + " to Module[" + moduleId + ":" + moduleVersion + "].");
+      updateChangeLog(null, getContext().getJobId(), "Adding new resource : "
+          + resourceInfo.getFileName() + " to Module[" + moduleVersionEntity.getModuleId() + ":"
+          + moduleVersionEntity.getVersion() + "].");
 
       ModuleManager moduleManager = getInstance(ModuleManager.class);
-      immediate(moduleManager.addModuleResource(moduleId, moduleVersion, resourceId, resourceInfo));
+      immediate(moduleManager.addModuleResource(moduleVersionEntity.getModuleId(), 
+          moduleVersionEntity.getVersion(), resourceId, resourceInfo));
       return null;
     }
   }

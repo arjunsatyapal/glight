@@ -22,7 +22,8 @@ import static com.google.light.testingutils.TestingUtils.getResourceAsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-import com.google.light.server.dto.pojo.PersonId;
+import com.google.light.server.dto.pojo.longwrapper.PersonId;
+
 
 
 

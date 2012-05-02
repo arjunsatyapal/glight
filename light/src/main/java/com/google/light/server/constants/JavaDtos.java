@@ -17,6 +17,8 @@ package com.google.light.server.constants;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.light.server.dto.pojo.longwrapper.PersonId;
+
 import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocInfoDto;
 
 import com.google.light.server.dto.person.PersonDto;
@@ -25,7 +27,6 @@ import com.google.light.server.dto.pages.PageDto;
 
 import com.google.common.collect.Lists;
 import com.google.light.server.dto.AbstractPojo;
-import com.google.light.server.dto.pojo.PersonId;
 import java.util.List;
 
 /**

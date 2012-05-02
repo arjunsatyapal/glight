@@ -20,11 +20,13 @@ import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPersonId;
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
 
+import com.google.light.server.dto.pojo.longwrapper.Version;
+
+import com.google.light.server.dto.pojo.longwrapper.ModuleId;
+import com.google.light.server.dto.pojo.longwrapper.PersonId;
+
 import com.google.light.server.dto.module.ModuleDto;
 import com.google.light.server.dto.module.ModuleState;
-import com.google.light.server.dto.pojo.ModuleId;
-import com.google.light.server.dto.pojo.PersonId;
-import com.google.light.server.dto.pojo.Version;
 import com.google.light.server.persistence.entity.AbstractPersistenceEntity;
 import com.googlecode.objectify.Key;
 import javax.persistence.Embedded;
@@ -58,6 +60,7 @@ public class ModuleEntity extends AbstractPersistenceEntity<ModuleEntity, Module
     return generateKey(id);
   }
 
+  // TODO(arjuns): Change Long to ModuleId
   private static Key<ModuleEntity> generateKey(Long id) {
     checkPositiveLong(id, "moduleId");
     return new Key<ModuleEntity>(ModuleEntity.class, id);
@@ -67,7 +70,7 @@ public class ModuleEntity extends AbstractPersistenceEntity<ModuleEntity, Module
    * Method to generate Objectify key for {@link ModuleEntity}.
    */
   public static Key<ModuleEntity> generateKey(ModuleId moduleId) {
-    return generateKey(moduleId.get());
+    return generateKey(moduleId.getValue());
   }
 
   /**

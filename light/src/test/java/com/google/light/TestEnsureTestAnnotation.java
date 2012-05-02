@@ -47,6 +47,7 @@ public class TestEnsureTestAnnotation extends AbstractLightServerTest {
     StringBuilder builder = new StringBuilder();
     // Now ensure that all the methods that start with test are annotated with @Test.
     for (Class currClass : setOfTestClasses) {
+      // TODO(arjuns): Change this to getDeclaredMethods.
       for (Method currMethod : currClass.getMethods()) {
         validateMethodAnnotation(currMethod, builder);
       }

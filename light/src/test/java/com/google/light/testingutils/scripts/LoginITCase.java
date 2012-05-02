@@ -31,6 +31,8 @@ import static com.google.light.testingutils.SeleniumUtils.clickAtCenter;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import org.openqa.selenium.WebElement;
+
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpResponse;
@@ -40,6 +42,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.io.ByteStreams;
 import com.google.light.server.constants.HtmlPathEnum;
+import com.google.light.server.constants.JerseyConstants;
 import com.google.light.server.constants.LightEnvEnum;
 import com.google.light.server.constants.OAuth2ProviderEnum;
 import com.google.light.server.constants.OAuth2ProviderService;
@@ -229,7 +232,10 @@ public class LoginITCase {
       driver.findElement(By.id("Passwd")).clear();
       driver.findElement(By.id("Passwd")).sendKeys(password);
       driver.findElement(By.id("signIn")).click();
-      driver.findElement(By.id("skip")).click();
+      
+      if (driver.getPageSource().contains("skip")) {
+        driver.findElement(By.id("skip")).click();
+      }
 
       // SeleniumUtils.clickIfExists(driver, By.id("choose-account-" + accountNumber));
 
@@ -269,7 +275,7 @@ public class LoginITCase {
     }
 
     private void provideGoogleDocOAuth2OwnerToken() {
-      driver.get(serverUrl + ServletPathEnum.TEST_WORKFLOW_SERVLETS.get());
+      driver.get(serverUrl + JerseyConstants.URI_TEST_LINKS);
       String currElement = OAUTH2_GOOGLE_DOC_AUTH.name();
       driver.findElement(By.id(currElement)).click();
       driver.findElement(By.id("submit_approve_access")).click();
@@ -315,7 +321,7 @@ public class LoginITCase {
     for (OAuth2ProviderEnum currProvider : OAuth2ProviderEnum.values()) {
       Properties consumerCredentials = consumerCredentialsMap.get(currProvider);
 
-      driver.get(serverUrl + ServletPathEnum.TEST_WORKFLOW_SERVLETS.get());
+      driver.get(serverUrl + JerseyConstants.URI_TEST_LINKS);
       String currElement = HtmlPathEnum.PUT_OAUTH2_CONSUMER_CREDENTIAL.name();
       driver.findElement(By.id(currElement)).click();
 

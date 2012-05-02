@@ -18,10 +18,12 @@ package com.google.light.server.persistence.entity.module;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
+import com.google.light.server.dto.pojo.longwrapper.Version;
+
+import com.google.light.server.dto.pojo.longwrapper.ModuleId;
+
 import com.google.light.server.dto.module.GSBlobInfo;
 import com.google.light.server.dto.module.ModuleVersionDto;
-import com.google.light.server.dto.pojo.ModuleId;
-import com.google.light.server.dto.pojo.Version;
 import com.google.light.server.persistence.entity.AbstractPersistenceEntity;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.Parent;

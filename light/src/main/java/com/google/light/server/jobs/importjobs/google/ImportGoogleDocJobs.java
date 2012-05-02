@@ -18,16 +18,11 @@ package com.google.light.server.jobs.importjobs.google;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.light.server.constants.google.cloudstorage.GoogleCloudStorageBuckets.CONTENT;
 import static com.google.light.server.constants.google.cloudstorage.GoogleCloudStorageBuckets.WORKSPACE;
+import static com.google.light.server.jobs.JobUtils.updateChangeLog;
 import static com.google.light.server.utils.GoogleCloudStorageUtils.getAbsolutePathOnBucket;
 import static com.google.light.server.utils.GoogleCloudStorageUtils.writeFileOnGCS;
 import static com.google.light.server.utils.GuiceUtils.getInstance;
 import static com.google.light.server.utils.LightUtils.getRandomFileName;
-
-import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocInfoDto;
-
-import com.google.light.server.utils.GuiceUtils;
-
-import com.google.light.server.dto.module.ModuleType;
 
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpHeaders;
@@ -53,11 +48,9 @@ import com.google.light.server.constants.OAuth2ProviderService;
 import com.google.light.server.constants.google.cloudstorage.GoogleCloudStorageBuckets;
 import com.google.light.server.constants.http.ContentTypeEnum;
 import com.google.light.server.dto.module.GSBlobInfo;
-import com.google.light.server.dto.pojo.ChangeLogEntryPojo;
 import com.google.light.server.dto.pojo.GoogleDocArchivePojo;
 import com.google.light.server.dto.pojo.LightJobContextPojo;
-import com.google.light.server.dto.pojo.ModuleId;
-import com.google.light.server.dto.pojo.Version;
+import com.google.light.server.dto.pojo.longwrapper.ModuleId;
 import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocResourceId;
 import com.google.light.server.exception.unchecked.GoogleDocException;
 import com.google.light.server.exception.unchecked.pipelineexceptions.ignore.GoogleDocArchivalWaitingException;
@@ -66,6 +59,7 @@ import com.google.light.server.jobs.lightjobs.ModuleJobs;
 import com.google.light.server.manager.implementation.oauth2.owner.OAuth2OwnerTokenManagerFactory;
 import com.google.light.server.manager.interfaces.ImportManager;
 import com.google.light.server.manager.interfaces.OAuth2OwnerTokenManager;
+import com.google.light.server.persistence.entity.module.ModuleVersionEntity;
 import com.google.light.server.persistence.entity.oauth2.owner.OAuth2OwnerTokenEntity;
 import com.google.light.server.persistence.entity.queue.importflow.ImportJobEntity;
 import com.google.light.server.thirdparty.clients.google.gdata.gdoc.DocsServiceWrapper;
@@ -91,24 +85,7 @@ public class ImportGoogleDocJobs {
   static final Logger logger = Logger.getLogger(ImportGoogleDocJobs.class.getName());
 
   @SuppressWarnings("serial")
-  public static class GetCollectionTree extends LightJob2<LightJobContextPojo, GoogleDocResourceId> {
-    /** 
-     * {@inheritDoc}
-     */
-    @Override
-    public Value<LightJobContextPojo> handler(GoogleDocResourceId googleDocResourceId) {
-      checkArgument(googleDocResourceId.getModuleType() == ModuleType.GOOGLE_COLLECTION, 
-          "Invalid ModuleType[" + googleDocResourceId.getModuleType() + "].");
-      
-      DocsServiceWrapper docsService = GuiceUtils.getInstance(DocsServiceWrapper.class);
-      GoogleDocInfoDto collectionInfo = docsService.getDocumentEntryWithAcl(googleDocResourceId);
-      
-      return immediate(getContext());
-    }
-  }
-  
-  @SuppressWarnings("serial")
-  public static class CreateArchive extends LightJob2<LightJobContextPojo, String> {
+  public static class InitiateGoogleDocImport extends LightJob2<LightJobContextPojo, String> {
     /**
      * {@inheritDoc}
      */
@@ -120,15 +97,14 @@ public class ImportGoogleDocJobs {
       GoogleDocResourceId resourceId = new GoogleDocResourceId(entity.getResourceId());
 
       DocsServiceWrapper docsService = getInstance(DocsServiceWrapper.class);
-       GoogleDocArchivePojo pojo = docsService.archiveResource(resourceId);
-
-       String archiveId = pojo.getArchiveId();
+      GoogleDocArchivePojo pojo = docsService.archiveResource(resourceId);
+      String archiveId = pojo.getArchiveId();
 //      String archiveId =
-//          "-228jZrUfn0gAK61p1ISLpDkNbRFv7KVNL55qVoitx7rtrJHru1T6ljtTjMW26L3ygWrvW1tMZHHg6ARCy3Uj4VOMCs9wwwTC1gspoSpmoV5Aub-38c3uHnL1gUajgTqs9-2YGCqSos";
+//          "nTSZLtpDRSP5IP11Sol04pDkNbRFv7KVNL55qVoitx7rtrJHru1T6ljtTjMW26L3ygWrvW1tMZHHg6ARCy3Uj8iS9OgenD9AGEcBiAILa8GTlFmB04xyrJ1fG9XKMXdClcXNrOqXmSE";
 
       System.out.println("ArchiveId = \n" + archiveId);
 
-      updateChangeLog(entity, "Asking Google to create an archive.");
+      updateChangeLog(null, getContext().getJobId(), "Asking Google to create an archive.");
 
       return futureCall(new ImportGoogleDocJobs.WaitForArchiveToComplete(),
           immediate(getContext()), immediate(importEntityId), immediate(archiveId));
@@ -143,9 +119,6 @@ public class ImportGoogleDocJobs {
      */
     @Override
     public Value<LightJobContextPojo> handler(String importEntityId, String archiveId) {
-      ImportManager importManager = getInstance(ImportManager.class);
-      ImportJobEntity entity = importManager.get(importEntityId);
-
       DocsServiceWrapper docsService = getInstance(DocsServiceWrapper.class);
       GoogleDocArchivePojo pojo = docsService.getArchiveStatus(archiveId);
       System.out.println(JsonUtils.toJson(pojo));
@@ -154,12 +127,12 @@ public class ImportGoogleDocJobs {
         case ARCHIVING:
           //$FALL-THROUGH$
         case FLATTENING:
-          updateChangeLog(entity,
+          updateChangeLog(null, getContext().getJobId(),
               "Google is prepairing archive. Will retry after some time.");
           throw new GoogleDocArchivalWaitingException();
 
         case FINISHED:
-          updateChangeLog(entity,
+          updateChangeLog(null, getContext().getJobId(),
               "Google finished prepairing archive. Handing over to downloader.");
           return futureCall(new ImportGoogleDocJobs.DonwloadArchive(),
               immediate(getContext()), immediate(importEntityId),
@@ -178,10 +151,7 @@ public class ImportGoogleDocJobs {
      */
     @Override
     public Value<LightJobContextPojo> handler(String importEntityId, String downloadUrl) {
-      ImportManager importManager = getInstance(ImportManager.class);
-      ImportJobEntity entity = importManager.get(importEntityId);
-
-      updateChangeLog(entity, "Beginning Downloading.");
+      updateChangeLog(null, getContext().getJobId(), "Beginning Downloading.");
 
       try {
         HttpTransport transport = getInstance(HttpTransport.class);
@@ -201,7 +171,7 @@ public class ImportGoogleDocJobs {
         HttpResponse response = request.execute();
 
         String randomFileName = getRandomFileName(FileExtensions.ZIP);
-        updateChangeLog(entity,
+        updateChangeLog(null, getContext().getJobId(),
             "Finished Downloading. Now storing on GCS as [" +
                 WORKSPACE.getAbsoluteFilePath(randomFileName) + "].");
 
@@ -215,7 +185,7 @@ public class ImportGoogleDocJobs {
         String gcsFilePath = getAbsolutePathOnBucket(WORKSPACE, randomFileName);
         System.out.println(gcsFilePath);
 
-        updateChangeLog(entity,
+        updateChangeLog(null, getContext().getJobId(),
             "Finished storing on Blobstore. Handing over to zipdeflater with path[" + gcsFilePath
                 + "].");
 
@@ -236,9 +206,8 @@ public class ImportGoogleDocJobs {
     @Override
     public Value<LightJobContextPojo> handler(String importEntityId, String fileName) {
       try {
-        ImportManager importManager = getInstance(ImportManager.class);
-        ImportJobEntity entity = importManager.get(importEntityId);
-        updateChangeLog(entity, "Reserving a ModuleId.");
+
+        updateChangeLog(null, getContext().getJobId(), "Reserving a ModuleId.");
 
         FutureValue<ModuleId> moduleId = futureCall(new ModuleJobs.ReserveModule(),
             immediate(getContext()), immediate(importEntityId));
@@ -264,12 +233,13 @@ public class ImportGoogleDocJobs {
       Map<String, GSBlobInfo> resourceMap = Maps.newConcurrentMap();
 
       try {
-        ImportManager importManager = getInstance(ImportManager.class);
-        ImportJobEntity entity = importManager.get(importEntityId);
-        updateChangeLog(entity, "Created Module with Id[" + moduleId.get() + "]");
+        updateChangeLog(null, getContext().getJobId(),
+            "Created Module with Id[" + moduleId.getValue()
+                + "]");
 
         String readFileName = getAbsolutePathOnBucket(WORKSPACE, fileName);
-        updateChangeLog(entity, "Starting unarchiving files from [" + readFileName
+        updateChangeLog(null, getContext().getJobId(), "Starting unarchiving files from ["
+            + readFileName
             + "].");
 
         AppEngineFile file = new AppEngineFile(readFileName);
@@ -307,12 +277,13 @@ public class ImportGoogleDocJobs {
           }
 
           if (newFileName.endsWith(FileExtensions.HTML.get())) {
-            newFileName = moduleId.get() + "." + FileExtensions.HTML.get();
+            newFileName = moduleId.getValue() + "." + FileExtensions.HTML.get();
           }
 
-          ContentTypeEnum contentType = FileExtensions.getFileExtension(newFileName).getContentType();
-          String storeFileName = moduleId.get() + "/" + newFileName;
-          String storeAbsFilePath = CONTENT.getAbsoluteFilePath(storeFileName); 
+          ContentTypeEnum contentType =
+              FileExtensions.getFileExtension(newFileName).getContentType();
+          String storeFileName = moduleId.getValue() + "/" + newFileName;
+          String storeAbsFilePath = CONTENT.getAbsoluteFilePath(storeFileName);
 
           GSBlobInfo gsBlobInfo = new GSBlobInfo.Builder()
               .contentType(contentType)
@@ -322,29 +293,32 @@ public class ImportGoogleDocJobs {
               .build();
           resourceMap.put(newFileName, gsBlobInfo);
 
-          updateChangeLog(entity, "Storing [" + zipEntry.getName() + "] as [" +
-                  storeAbsFilePath + "].");
+          updateChangeLog(null, getContext().getJobId(), "Storing [" + zipEntry.getName()
+              + "] as [" +
+              storeAbsFilePath + "].");
 
           GSFileOptions gsFileOptions = GoogleCloudStorageUtils.getGCSFileOptionsForCreate(
               GoogleCloudStorageBuckets.CONTENT, contentType, storeFileName);
           writeFileOnGCS(zipIn, gsFileOptions);
 
-          updateChangeLog(entity, "Successfully stored");
+          updateChangeLog(null, getContext().getJobId(), "Successfully stored");
         } while (zipEntry != null);
 
         zipIn.close();
         inputStream.close();
         readChannel.close();
 
-        updateChangeLog(entity,
+        updateChangeLog(null, getContext().getJobId(),
             "Finished unarchiving files from [" + fileName + "].");
 
         // Now lets add the moduleVersion. This will require adding html and resources.
         // First adding Html.
-        FutureValue<Version> moduleVersionFV = futureCall(new AddContent(),
+        FutureValue<ModuleVersionEntity> moduleVersionEntityFV = futureCall(new AddContent(),
             immediate(getContext()), immediate(importEntityId), immediate(moduleId));
 
-        futureCall(new PipelineJobs.DummyJob(), immediate(getContext()), waitFor(moduleVersionFV));
+        futureCall(new PipelineJobs.DummyJob(), immediate(getContext()),
+            immediate("module version created"),
+            waitFor(moduleVersionEntityFV));
 
         int htmlCount = 0;
         @SuppressWarnings("rawtypes")
@@ -365,19 +339,23 @@ public class ImportGoogleDocJobs {
           FutureValue<Void> fv = futureCall(
               new ModuleJobs.AddModuleResources(),
               immediate(getContext()),
-              immediate(moduleId),
-              moduleVersionFV,
+              moduleVersionEntityFV,
               immediate(importEntityId),
               immediate(currKey),
               immediate(gsBlobInfo));
           jobsToWait.add(fv);
         }
 
+        // Hacky way so that we wait for all the resources to be created before returning.
+        // TODO(arjuns): Find a better way to do this.
+        FutureValue<LightJobContextPojo> context = null;
         for (FutureValue<Long> curr : jobsToWait) {
-          futureCall(new PipelineJobs.DummyJob(), immediate(getContext()), waitFor(curr));
+          context =
+              futureCall(new PipelineJobs.DummyJob(), immediate(getContext()), immediate(""),
+                  waitFor(curr));
         }
 
-        return immediate(getContext());
+        return context;
       } catch (Exception e) {
         throw new GoogleDocException(e);
       }
@@ -385,16 +363,15 @@ public class ImportGoogleDocJobs {
   }
 
   @SuppressWarnings("serial")
-  public static class AddContent extends LightJob3<Version, String, ModuleId> {
+  public static class AddContent extends LightJob3<ModuleVersionEntity, String, ModuleId> {
     /**
      * {@inheritDoc}
      */
     @Override
-    public Value<Version> handler(String importEntityId, ModuleId moduleId) {
+    public Value<ModuleVersionEntity> handler(String importEntityId, ModuleId moduleId) {
       try {
-        ImportManager importManager = getInstance(ImportManager.class);
-        ImportJobEntity entity = importManager.get(importEntityId);
-        updateChangeLog(entity, "Adding html for moduleId[" + moduleId + "].");
+        updateChangeLog(null, getContext().getJobId(), "Adding html for moduleId[" + moduleId
+            + "].");
 
         String filePath = GoogleCloudStorageUtils.getAbsoluteModuleHtmlPath(CONTENT, moduleId);
         FileService fileService = FileServiceFactory.getFileService();
@@ -409,13 +386,5 @@ public class ImportGoogleDocJobs {
         throw new GoogleDocException(e);
       }
     }
-
-  }
-
-  // TODO(arjuns): Move it to a better location.
-  public static void updateChangeLog(ImportJobEntity entity, String changeMessage) {
-    ImportManager importManager = getInstance(ImportManager.class);
-    ChangeLogEntryPojo changeLog = new ChangeLogEntryPojo(changeMessage);
-    importManager.put(null /*txn*/, entity, changeLog);
   }
 }

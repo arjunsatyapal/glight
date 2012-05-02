@@ -24,11 +24,12 @@ import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPersonId;
 import static com.google.light.server.utils.ServletUtils.prepareSession;
 
+import com.google.light.server.dto.pojo.longwrapper.PersonId;
+
 import com.google.inject.Inject;
 import com.google.light.server.constants.LightEnvEnum;
 import com.google.light.server.constants.OAuth2ProviderService;
 import com.google.light.server.constants.http.ContentTypeEnum;
-import com.google.light.server.dto.pojo.PersonId;
 import com.google.light.server.utils.LightUtils;
 import com.google.light.server.utils.ServletUtils;
 import java.io.IOException;

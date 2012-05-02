@@ -27,11 +27,11 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import com.google.light.server.dto.pojo.longwrapper.PersonId;
+
 import com.google.inject.Injector;
-import com.google.light.pojo.TestRequestScopedValues;
 import com.google.light.server.AbstractLightServerTest;
 import com.google.light.server.constants.LightEnvEnum;
-import com.google.light.server.dto.pojo.PersonId;
 import com.google.light.server.exception.unchecked.IdShouldNotBeSet;
 import com.google.light.server.exception.unchecked.InvalidPersonIdException;
 import com.google.light.server.exception.unchecked.httpexception.PersonLoginRequiredException;

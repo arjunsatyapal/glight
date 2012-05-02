@@ -19,6 +19,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.GuiceUtils.getInstance;
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
 
+import com.google.light.server.dto.pojo.longwrapper.PersonId;
+
 import com.google.light.server.dto.AbstractPojo;
 
 import com.google.common.base.Preconditions;

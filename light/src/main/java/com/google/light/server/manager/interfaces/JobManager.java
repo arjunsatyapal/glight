@@ -15,6 +15,7 @@
  */
 package com.google.light.server.manager.interfaces;
 
+import com.google.light.server.dto.pojo.ChangeLogEntryPojo;
 import com.google.light.server.dto.pojo.JobHandlerId;
 import com.google.light.server.persistence.entity.jobs.JobEntity;
 import com.google.light.server.persistence.entity.jobs.JobEntity.JobHandlerType;
@@ -30,11 +31,12 @@ import javax.annotation.Nullable;
  * @author Arjun Satyapal
  */
 public interface JobManager {
-  public JobEntity enqueueImportJob(ImportJobEntity importJobEntity);
+  public JobEntity enqueueImportJob(ImportJobEntity importJobEntity, Long parentJobId, 
+      Long rootJobId, String promiseHandle);
   
-  public JobEntity put(@Nullable Objectify ofy, JobEntity jobEntity);
+  public JobEntity put(@Nullable Objectify ofy, JobEntity jobEntity, ChangeLogEntryPojo changeLog);
   
-  public JobEntity get(Long id);
+  public JobEntity get(Objectify ofy, Long id);
   
   public JobEntity findByJobHandlerId(JobHandlerType jobHandlerType, JobHandlerId jobHandlerId);
 }

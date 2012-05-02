@@ -15,9 +15,13 @@
  */
 package com.google.light.server.thirdparty.clients.google.gdata.gdoc;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.constants.LightConstants.HTTP_CONNECTION_TIMEOUT_IN_MILLIS;
 import static com.google.light.server.constants.OAuth2ProviderService.GOOGLE_DOC;
+import static com.google.light.server.utils.LightUtils.getURL;
+
+import com.google.light.server.utils.LightUtils;
 
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
@@ -33,6 +37,7 @@ import com.google.gdata.data.docs.DocumentListFeed;
 import com.google.gdata.util.ResourceNotFoundException;
 import com.google.inject.Inject;
 import com.google.light.server.constants.http.ContentTypeEnum;
+import com.google.light.server.dto.AbstractDto;
 import com.google.light.server.dto.pages.PageDto;
 import com.google.light.server.dto.pojo.GoogleDocArchivePojo;
 import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocInfoDto;
@@ -145,7 +150,32 @@ public class DocsServiceWrapper extends DocsService {
     return dto;
   }
 
-  public PageDto getFolderContent(GoogleDocResourceId resourceId, String handlerUri) {
+  @SuppressWarnings("rawtypes")
+  public List<GoogleDocInfoDto> getFolderContentAll(GoogleDocResourceId resourceId) {
+    String randomString = LightUtils.getUUIDString();
+
+    List<GoogleDocInfoDto> list = Lists.newArrayList();
+    PageDto pageDto = null;
+
+    do {
+      if (pageDto == null) {
+        pageDto = getFolderContentPageWise(resourceId, randomString);
+      } else {
+        String decodedStartIndex = LightUtils.decodeFromUrlEncodedString(pageDto.getStartIndex());
+        pageDto = getFolderContentWithStartIndex(getURL(decodedStartIndex), randomString);
+      }
+      
+      for (AbstractDto currDto : pageDto.getList()) {
+        checkArgument(currDto instanceof GoogleDocInfoDto);
+        GoogleDocInfoDto currDocInfo = (GoogleDocInfoDto) currDto;
+        list.add(currDocInfo);
+      }
+    } while (pageDto.getStartIndex() != null);
+
+    return list;
+  }
+
+  public PageDto getFolderContentPageWise(GoogleDocResourceId resourceId, String handlerUri) {
     return getFolderContentWithStartIndex(GoogleDocUtils.getFolderContentUrl(resourceId),
         handlerUri);
   }
@@ -161,30 +191,7 @@ public class DocsServiceWrapper extends DocsService {
 
       ArchiveResourceId archiveResourceId = new ArchiveResourceId(resourceId.getTypedResourceId());
       archiveEntry.addArchiveResourceId(archiveResourceId);
-      //
-      // ArchiveResourceId docResourceId = new
-      // ArchiveResourceId("document%3A1tJZGzv_2sjMpvs4jtwxg18PGuSG-6nlfmx8Hlqa-_58");
-      // archiveEntry.addArchiveResourceId(docResourceId);
-      //
-      // ArchiveResourceId drawingResrouceId = new
-      // ArchiveResourceId("drawing:1tw4KMrNIv75260iR90i6wuGd31OabSAGYiwmqIkRQoY");
-      // archiveEntry.addArchiveResourceId(drawingResrouceId);
-      //
-      // ArchiveResourceId formResourceId = new
-      // ArchiveResourceId("form:0Al5KDir5QLAcdDhoSmVlV2JoV20yNXRIY0VfTGhDSnc");
-      // archiveEntry.addArchiveResourceId(formResourceId);
-      //
-      // ArchiveResourceId presentationResourceId = new
-      // ArchiveResourceId("presentation:1SII0J1EBCA-4PUdtZ9ZVi4Xp3JOgVN6pQPRecZCpyds");
-      // archiveEntry.addArchiveResourceId(presentationResourceId);
-      //
-      // ArchiveResourceId spreadsheetResourceId = new
-      // ArchiveResourceId("spreadsheet:0Al5KDir5QLAcdGE1Q0g1NUhndXRDSmRxdXBuVW0yYWc");
-      // archiveEntry.addArchiveResourceId(spreadsheetResourceId);
 
-      // ArchiveResourceId collectionResourceId = new
-      // ArchiveResourceId("folder:0B15KDir5QLAcQlpiM1hVS25RUUdxcVAwQlNYcXZDQQ");
-      // archiveEntry.addArchiveResourceId(collectionResourceId);
 
       // TODO(arjuns) : Update this email.
       ArchiveNotify archiveNotify = new ArchiveNotify("unit-test1@myopenedu.com");
@@ -230,12 +237,6 @@ public class DocsServiceWrapper extends DocsService {
 
   public void getUserAccountInformation() {
     try {
-      // HttpRequest request = httpTransport.createRequestFactory().buildGetRequest(
-      // new GenericUrl(GoogleDocUtils.getUserAccountInfoUrl().toString()));
-      //
-      // HttpResponse response = request.execute();
-      //
-      // System.out.println(LightUtils.getInputStreamAsString(response.getContent()));
       Entry entry = getEntry(GoogleDocUtils.getUserAccountInfoUrl(), Entry.class);
       System.out.println(XmlUtils.getXmlEntry(entry));
     } catch (Exception e) {

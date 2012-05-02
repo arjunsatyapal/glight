@@ -54,8 +54,7 @@ public final class JAXBJsonContextResolver implements ContextResolver<JAXBContex
     NaturalBuilder configBuilder = JSONConfiguration.natural();
     configBuilder.humanReadableFormatting(true);
     
-    this.context =
-        new JSONJAXBContext(configBuilder.build(), JavaDtos.getArrayOfDtoClasses());
+    this.context = new JSONJAXBContext(configBuilder.build(), JavaDtos.getArrayOfDtoClasses());
   }
 
   @Override

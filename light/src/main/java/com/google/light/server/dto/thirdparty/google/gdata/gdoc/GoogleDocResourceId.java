@@ -16,12 +16,13 @@
 package com.google.light.server.dto.thirdparty.google.gdata.gdoc;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.constants.OAuth2ProviderService.GOOGLE_DOC;
 import static com.google.light.server.dto.module.ModuleType.getByProviderServiceAndCategory;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightUtils.decodeFromUrlEncodedString;
 
-import com.google.common.base.Preconditions;
+import com.google.light.server.dto.AbstractDto;
 import com.google.light.server.dto.module.ModuleType;
 
 /**
@@ -31,11 +32,13 @@ import com.google.light.server.dto.module.ModuleType;
  *
  * @author Arjun Satyapal
  */
-public class GoogleDocResourceId {
+@SuppressWarnings("serial")
+public class GoogleDocResourceId extends AbstractDto<GoogleDocResourceId>{
   private ModuleType moduleType;
   private String typedResourceId;
 
   public GoogleDocResourceId(String typedResourceId) {
+    super(null);
     this.typedResourceId = checkNotBlank(typedResourceId, "typedResourceId");
     
     String decodedString = decodeFromUrlEncodedString(typedResourceId);
@@ -46,7 +49,18 @@ public class GoogleDocResourceId {
     checkArgument(parts.length == 2, errMsg);
     
     moduleType = getByProviderServiceAndCategory(GOOGLE_DOC, parts[0]);
-    Preconditions.checkNotNull(moduleType, errMsg);
+    validate();
+  }
+  
+  /** 
+   * {@inheritDoc}
+   */
+  @Override
+  public GoogleDocResourceId validate() {
+    checkNotBlank(typedResourceId, "typedResourceId");
+    checkNotNull(moduleType, "moduleType");
+    
+    return this;
   }
 
   @Override
@@ -64,5 +78,10 @@ public class GoogleDocResourceId {
   
   public boolean isFolder() {
     return moduleType == ModuleType.GOOGLE_COLLECTION;
+  }
+
+  // For JAXB and Pipeline and Guice.
+  private GoogleDocResourceId() {
+    super(null);
   }
 }

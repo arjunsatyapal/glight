@@ -19,7 +19,6 @@ import com.google.inject.Scopes;
 import com.google.inject.servlet.ServletModule;
 import com.google.light.server.exception.unchecked.ServerConfigurationException;
 import com.google.light.server.guice.jersey.JerseyApplication;
-import com.google.light.server.servlets.filters.CharacterEncondingFilter;
 import com.google.light.server.servlets.filters.FilterPathEnum;
 import com.google.light.server.servlets.path.ServletPathEnum;
 import com.google.light.server.utils.GaeUtils;
@@ -75,7 +74,7 @@ public class LightServletModule extends ServletModule {
      * TODO(waltercacau): Remove this filter and set charset in a better place.
      * Eg. the servlet's or while generating the response pojos.
      */
-    filter("*").through(CharacterEncondingFilter.class);
+//    filter("*").through(CharacterEncondingFilter.class);
 
     if (filter.isAllowedInCurrentEnv()) {
       bind(filter.getClazz()).in(Scopes.SINGLETON);

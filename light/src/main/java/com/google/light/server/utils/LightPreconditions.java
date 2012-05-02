@@ -20,11 +20,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.Lists.newArrayList;
 
+import com.google.light.server.dto.pojo.longwrapper.PersonId;
+
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.light.server.constants.LightEnvEnum;
 import com.google.light.server.constants.OAuth2ProviderService;
-import com.google.light.server.dto.pojo.PersonId;
 import com.google.light.server.exception.unchecked.BlankStringException;
 import com.google.light.server.exception.unchecked.InvalidPersonIdException;
 import com.google.light.server.exception.unchecked.InvalidSessionException;

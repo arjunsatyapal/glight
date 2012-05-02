@@ -18,6 +18,7 @@ package com.google.light.server.guice.jersey;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightUtils.arrayToString;
 import static com.google.light.testingutils.TestingUtils.containsAnnotation;
+import static com.google.light.testingutils.TestingUtils.getClassesInPackage;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -29,7 +30,6 @@ import com.google.common.collect.Sets.SetView;
 import com.google.inject.Inject;
 import com.google.light.server.constants.EnumTestInterface;
 import com.google.light.server.jersey.resources.AbstractJerseyResource;
-import com.google.light.testingutils.TestingUtils;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -52,7 +52,7 @@ public class JerseyResourcesEnumTest implements EnumTestInterface {
   @Override
   @Test
   public void test_count() throws Exception {
-    assertEquals(4, JerseyResourcesEnum.values().length);
+    assertEquals(6, JerseyResourcesEnum.values().length);
 
     Set<Class<? extends AbstractJerseyResource>> existingSet =
         JerseyMethodEnum.getSetOfJerseyResources();
@@ -84,7 +84,7 @@ public class JerseyResourcesEnumTest implements EnumTestInterface {
             currMethod.getName(), currMethod.getParameterTypes());
 
         checkNotNull(myenum, "Did not find mapping for : "
-            + "\nclass[" + clazz + "], " 
+            + "\nclass[" + clazz + "], "
             + "\nmethod[" + currMethod + "], "
             + "\nParameterTypes[" + Iterables.toString(Lists.newArrayList(
                 currMethod.getParameterTypes())) + "].");
@@ -102,6 +102,10 @@ public class JerseyResourcesEnumTest implements EnumTestInterface {
           assertEquals("Failed for enum : " + myenum,
               arrayToString(myenum.getProduces()),
               arrayToString(produces.value()));
+        } else {
+          assertEquals("If method does not have any produces Annotation, then it should have "
+                + "Response as a ReturnType.", javax.ws.rs.core.Response.class, currMethod.getReturnType());
+          // 
         }
       }
     }
@@ -120,19 +124,47 @@ public class JerseyResourcesEnumTest implements EnumTestInterface {
   @Test
   public void test_jerseyResourceAnnotations() throws Exception {
     String packageName = AbstractJerseyResource.class.getPackage().getName();
-    List<Class> classes = TestingUtils.getClassesInPackage(packageName, null);
-
     Set<String> ignoreSet = Sets.newHashSet(
         AbstractJerseyResource.class.getName());
 
-    for (Class currClass : classes) {
+    List<Class> classes = getClassesInPackage(packageName, null);
+    List<Class> filteredClass = getJerseyResources(classes, ignoreSet);
+
+    
+    for (Class currClass : filteredClass) {
       if (ignoreSet.contains(currClass.getName())) {
         continue;
       }
 
-      validateResourcePathAnnotation(currClass);
       validateInjectibleConstructor(currClass);
     }
+  }
+
+  /**
+   * @return
+   */
+  @SuppressWarnings({ "rawtypes", "unchecked" })
+  private List<Class> getJerseyResources(List<Class> classes, Set<String> ignoreSet) {
+    List<Class> filteredList = Lists.newArrayList();
+    
+    for (Class currClass : classes) {
+      if (ignoreSet.contains(currClass.getName())) {
+        continue;
+      }
+      
+      if (containsAnnotation(Path.class, currClass.getDeclaredAnnotations())) {
+        assertTrue(currClass.getSimpleName() + " should extend " + AbstractJerseyResource.class,
+            AbstractJerseyResource.class.isAssignableFrom(currClass));
+        filteredList.add(currClass);
+        continue;
+      }
+      
+      if (currClass.isAssignableFrom(AbstractJerseyResource.class)) {
+        validateResourcePathAnnotation(currClass);
+      }
+    }
+    
+    return filteredList;
   }
 
   /**

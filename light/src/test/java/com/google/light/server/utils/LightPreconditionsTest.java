@@ -42,11 +42,12 @@ import static com.google.light.testingutils.TestingUtils.getRandomString;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import com.google.light.server.dto.pojo.longwrapper.PersonId;
+
 import com.google.common.collect.Lists;
 import com.google.inject.Injector;
 import com.google.light.server.constants.LightEnvEnum;
 import com.google.light.server.constants.OAuth2ProviderService;
-import com.google.light.server.dto.pojo.PersonId;
 import com.google.light.server.exception.unchecked.BlankStringException;
 import com.google.light.server.exception.unchecked.InvalidPersonIdException;
 import com.google.light.server.exception.unchecked.InvalidSessionException;

@@ -19,7 +19,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.inject.Inject;
 import com.google.light.server.dto.module.ModuleType;
-import com.google.light.server.dto.pojo.ChangeLogEntryPojo;
 import com.google.light.server.manager.interfaces.ImportManager;
 import com.google.light.server.persistence.dao.ImportJobDao;
 import com.google.light.server.persistence.dao.ImportStageDetailDao;
@@ -49,7 +48,7 @@ public class ImportManagerImpl implements ImportManager {
    * {@inheritDoc}
    */
   @Override
-  public ImportJobEntity put(Objectify ofy, ImportJobEntity entity, ChangeLogEntryPojo changeLog) {
+  public ImportJobEntity put(Objectify ofy, ImportJobEntity entity) {
     checkNotNull(entity, "entity");
 
     /*
@@ -64,7 +63,6 @@ public class ImportManagerImpl implements ImportManager {
     // }
     //
 
-    entity.addToChangeLog(changeLog);
     return importJobDao.put(ofy, entity);
   }
 

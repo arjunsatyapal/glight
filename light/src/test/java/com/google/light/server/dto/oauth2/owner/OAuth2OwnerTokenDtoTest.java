@@ -23,9 +23,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
+import com.google.light.server.dto.pojo.longwrapper.PersonId;
+
 import com.google.light.server.constants.OAuth2ProviderService;
 import com.google.light.server.dto.AbstractDtoToPersistenceTest;
-import com.google.light.server.dto.pojo.PersonId;
 import com.google.light.server.exception.unchecked.BlankStringException;
 import com.google.light.server.exception.unchecked.InvalidPersonIdException;
 import com.google.light.server.persistence.entity.oauth2.owner.OAuth2OwnerTokenEntity;

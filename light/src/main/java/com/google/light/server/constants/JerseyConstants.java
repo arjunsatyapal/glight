@@ -26,17 +26,20 @@ import static com.google.light.server.constants.LightStringConstants.CONTENT;
  */
 public class JerseyConstants {
   private static final String JERSEY_CONTEXT = "/rest";
-  private static final String GAE_ADMIN_CONTEXT= "/gaeadmin"; 
+  private static final String GAE_ADMIN_CONTEXT = "/gaeadmin";
 
   public static final String PATH_PARAM_EXTERNAL_KEY = "external_key";
   public static final String PATH_EXTERNAL_KEY = "/{" + PATH_PARAM_EXTERNAL_KEY + "}";
 
+  public static final String PATH_PARAM_COLLECTION_ID = "collection_id";
+  public static final String PATH_COLLECTION_ID = "/{" + PATH_PARAM_COLLECTION_ID + "}";
+  
   public static final String PATH_PARAM_MODULE_ID = "module_id";
   public static final String PATH_MODULE_ID = "/{" + PATH_PARAM_MODULE_ID + "}";
 
   public static final String PATH_PARAM_PERSON_ID = "person_id";
   public static final String PATH_PERSON_ID = "/{" + PATH_PARAM_PERSON_ID + "}";
-  
+
   public static final String PATH_PARAM_PIPELINE_ID = "pipeline_id";
   public static final String PATH_PIPELINE_ID = "/{" + PATH_PARAM_PIPELINE_ID + "}";
 
@@ -49,21 +52,39 @@ public class JerseyConstants {
   public static final String PATH_PARAM_VERSION = "version";
   public static final String PATH_VERSION = "/{" + PATH_PARAM_VERSION + "}";
 
-  /* 
+  /*
    * *********************************
    * Now Path for Different Resources.
    * *********************************
    */
 
+  // Path for Collection Resource
+  public static final String RESOURCE_PATH_COLLECTION = "/collection";
+  public static final String URI_RESOURCE_PATH_COLLECTION = JERSEY_CONTEXT
+      + RESOURCE_PATH_COLLECTION;
+
+  public static final String PATH_MODULE_VERSION = PATH_MODULE_ID + PATH_VERSION;
+  public static final String PATH_MODULE_VERSION_CONTENT = PATH_MODULE_VERSION + "/"
+      + CONTENT;
+  public static final String PATH_MODULE_RESOURCE = PATH_MODULE_VERSION + PATH_RESOURCE_TYPE
+      + PATH_RESOURCE;
+
   // Path for Miscallaneous Admin Resource.
   public static final String RESOURCE_PATH_MISC_ADMIN = GAE_ADMIN_CONTEXT;
+  public static final String URI_RESOURCE_PATH_MISC_ADMIN = JERSEY_CONTEXT
+      + RESOURCE_PATH_MISC_ADMIN;
   public static final String PATH_CONFIG = "/config";
-  
+  public static final String URI_MISC_ADMIN_CONFIG = URI_RESOURCE_PATH_MISC_ADMIN + PATH_CONFIG;
+
   // Path for GAE Pipeline Resource.
   public static final String RESOURCE_PATH_GAE_PIPELINE = GAE_ADMIN_CONTEXT + "/gae_pipeline";
-  
+  public static final String URI_RESOURCE_PATH_GAE_PIPELINE = JERSEY_CONTEXT
+      + RESOURCE_PATH_GAE_PIPELINE;
+
   // Path for Gogole Doc Integration.
   public static final String RESOURCE_PATH_THIRD_PARTY_GOOGLE_DOC = "/thirdparty/google/gdoc";
+  public static final String URI_RESOURCE_PATH_THIRD_PARTH_GOOGLE_DOC = JERSEY_CONTEXT
+      + RESOURCE_PATH_THIRD_PARTY_GOOGLE_DOC;
 
   public static final String PATH_GOOGLE_DOC_LIST = "/list";
   public static final String URI_GOOGLE_DOC_LIST = JERSEY_CONTEXT +
@@ -78,24 +99,31 @@ public class JerseyConstants {
 
   // Path for Module Resources.
   public static final String RESOURCE_PATH_MODULE = "/module";
-  public static final String PATH_MODULE_VERSION = PATH_MODULE_ID + PATH_VERSION;
-  public static final String PATH_MODULE_VERSION_CONTENT = PATH_MODULE_VERSION + "/"
-      + CONTENT;
-  public static final String PATH_MODULE_RESOURCE = PATH_MODULE_VERSION + PATH_RESOURCE_TYPE
-      + PATH_RESOURCE;
+  public static final String URI_RESOURCE_PATH_MODULE = JERSEY_CONTEXT + RESOURCE_PATH_COLLECTION;
 
+  public static final String PATH_COLLECTION_VERSION = PATH_COLLECTION_ID + PATH_VERSION;
+  public static final String PATH_COLLECTION_VERSION_CONTENT = PATH_COLLECTION_VERSION + "/"
+      + CONTENT;
 
   // Path for Person Resource.
   public static final String RESOURCE_PATH_PERSON = "/person";
   public static final String PATH_PERSON = PATH_PERSON_ID;
-  
 
+  // Path for Test Resource
+  public static final String RESOURCE_PATH_TEST = "/test";
+  public static final String URI_RESOURCE_PATH_TEST = JERSEY_CONTEXT + RESOURCE_PATH_TEST;
+
+  public static final String PATH_SESSION = "/session";
+  public static final String URI_TEST_SESSION = URI_RESOURCE_PATH_TEST + PATH_SESSION;
+  
+  public static final String PATH_TEST_LINKS = "/links";
+  public static final String URI_TEST_LINKS = URI_RESOURCE_PATH_TEST + PATH_TEST_LINKS;
 
   // Some getter methods.
   public static String getJerseyContext() {
     return JERSEY_CONTEXT;
   }
-  
+
   public static String getAdminContext() {
     return GAE_ADMIN_CONTEXT;
   }

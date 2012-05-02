@@ -48,9 +48,9 @@ public class JobDao extends AbstractBasicDao<Object, JobEntity> {
     super(JobEntity.class);
   }
 
-  public JobEntity get(Long id) {
+  public JobEntity get(Objectify ofy, Long id) {
     Key<JobEntity> key = JobEntity.generateKey(id);
-    return super.get(key);
+    return super.get(ofy, key);
   }
 
   public JobEntity findByJobHandlerId(JobHandlerType jobHandlerType, JobHandlerId jobHandlerId) {

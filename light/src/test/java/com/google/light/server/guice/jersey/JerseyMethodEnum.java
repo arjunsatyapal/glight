@@ -18,6 +18,10 @@ package com.google.light.server.guice.jersey;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
+import com.google.light.server.jersey.resources.CollectionResource;
+
+import com.google.light.server.jersey.resources.test.TestResources;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.light.server.jersey.resources.AbstractJerseyResource;
@@ -31,7 +35,6 @@ import java.util.Set;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
-import javax.ws.rs.core.Response;
 
 /**
  * 
@@ -42,6 +45,31 @@ import javax.ws.rs.core.Response;
  */
 @SuppressWarnings("rawtypes")
 public enum JerseyMethodEnum {
+  // Collection Resource Jersey Methods.
+  COLLECTION_RESOURCE_GET_COLLECTION(
+                                     CollectionResource.class,
+                                     "getCollection",
+                                     new Class[] {},
+                                     GET.class,
+                                     "/rest/collection/{collection_id}",
+                                     new String[] {}),
+
+  COLLECTION_RESOURCE_GET_COLLECTION_VERSION(
+                                             CollectionResource.class,
+                                             "getCollectionVersion",
+                                             new Class[] { String.class, String.class },
+                                             GET.class,
+                                             "/rest/collection/{collection_id}/{version}",
+                                             new String[] { "application/json", "text/xml" }),
+
+  COLLECTION_RESOURCE_GET_COLLECTION_VERSION_CONTENT(
+                                                     CollectionResource.class,
+                                                     "getCollectionVersionContent",
+                                                     new Class[] { String.class, String.class },
+                                                     GET.class,
+                                                     "/rest/collection/{collection_id}/{version}/content",
+                                                     new String[] { "text/html" }),
+
   // GAEPipeline Resource Jersey Methods.
   GAE_PIPELINE_RESOURCE_STATUS_GET(
                                    GAEPipelineResource.class,
@@ -63,7 +91,7 @@ public enum JerseyMethodEnum {
   MODULE_RESOURCE_GET_MODULE(
                              ModuleResource.class,
                              "getModule",
-                             new Class[] { String.class },
+                             new Class[] {},
                              GET.class,
                              "/rest/module/{module_id}",
                              new String[] { "application/json", "text/xml" }),
@@ -130,7 +158,25 @@ public enum JerseyMethodEnum {
                                  new Class[] { String.class, String.class },
                                  GET.class,
                                  "/rest/thirdparty/google/gdoc/info/folder/{external_key}",
-                                 new String[] { "application/json", "text/xml" });
+                                 new String[] { "application/json", "text/xml" }),
+
+  // Test Resource Jersey Methods.
+  TEST_RESOURCE_SESSION(
+                        TestResources.class,
+                        "getSessionDetails",
+                        new Class[] {},
+                        GET.class,
+                        "/rest/test/session",
+                        new String[] { "text/html" }),
+  TEST_RESOURCE_LINKS(
+                      TestResources.class,
+                      "getTestLinks",
+                      new Class[] {},
+                      GET.class,
+                      "/rest/test/links",
+                      new String[] { "text/html" }),
+
+  ;
 
   private Class<? extends AbstractJerseyResource> clazz;
   private String methodName;

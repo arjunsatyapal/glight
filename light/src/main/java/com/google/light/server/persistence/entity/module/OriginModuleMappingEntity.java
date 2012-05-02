@@ -18,10 +18,11 @@ package com.google.light.server.persistence.entity.module;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
+import com.google.light.server.dto.pojo.longwrapper.ModuleId;
+
 import javax.persistence.Embedded;
 
 import com.google.light.server.dto.module.ModuleDto;
-import com.google.light.server.dto.pojo.ModuleId;
 import com.google.light.server.persistence.entity.AbstractPersistenceEntity;
 import com.googlecode.objectify.Key;
 import javax.persistence.Id;

@@ -16,22 +16,34 @@
 package com.google.light.server.jobs.importjobs;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.light.server.jobs.importjobs.google.ImportGoogleDocJobs.updateChangeLog;
+import static com.google.light.server.jobs.JobUtils.updateChangeLog;
 import static com.google.light.server.utils.GuiceUtils.getInstance;
 
+import com.google.appengine.tools.pipeline.PipelineService;
+
+import com.google.appengine.tools.pipeline.PipelineServiceFactory;
+
 import com.google.appengine.tools.pipeline.FutureValue;
+import com.google.appengine.tools.pipeline.ImmediateValue;
 import com.google.appengine.tools.pipeline.Value;
 import com.google.light.jobs.LightJob1;
 import com.google.light.jobs.LightJob2;
+import com.google.light.server.dto.pojo.ChangeLogEntryPojo;
 import com.google.light.server.dto.pojo.JobHandlerId;
 import com.google.light.server.dto.pojo.LightJobContextPojo;
+import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocResourceId;
+import com.google.light.server.exception.unchecked.pipelineexceptions.PipelineException;
 import com.google.light.server.exception.unchecked.pipelineexceptions.pause.PipelineStopException;
 import com.google.light.server.jobs.importjobs.google.ImportGoogleDocJobs;
+import com.google.light.server.jobs.importjobs.google.ImportGoogleFolderJobs;
 import com.google.light.server.manager.interfaces.ImportManager;
+import com.google.light.server.manager.interfaces.JobManager;
 import com.google.light.server.persistence.entity.jobs.JobEntity;
 import com.google.light.server.persistence.entity.jobs.JobEntity.JobState;
 import com.google.light.server.persistence.entity.queue.importflow.ImportJobEntity;
+import com.google.light.server.utils.GuiceUtils;
 import com.google.light.server.utils.PipelineUtils;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * 
@@ -49,12 +61,14 @@ public class PipelineJobs {
     @SuppressWarnings("synthetic-access")
     @Override
     public FutureValue<Integer> handler() {
-      JobEntity jobEntity = getContext().getJobEntity();
+      JobManager jobManager = GuiceUtils.getInstance(JobManager.class);
+      JobEntity jobEntity = jobManager.get(null, getContext().getJobId());
+
       jobEntity.setJobHandlerId(new JobHandlerId(getPipelineId()));
       PipelineUtils.updateJobDetails(getPipelineId(), jobEntity);
 
       FutureValue<LightJobContextPojo> lastJobContext = null;
-      switch (jobEntity.getJobType()) {
+      switch (jobEntity.getTaskType()) {
         case IMPORT:
           lastJobContext = futureCall(new ImportJob(),
               immediate(getContext()), immediate(jobEntity.getTaskId()));
@@ -62,10 +76,11 @@ public class PipelineJobs {
 
         default:
           throw new PipelineStopException(getPipelineId(), "Invalid JobType : "
-              + jobEntity.getJobType());
+              + jobEntity.getTaskType());
       }
 
-      FutureValue<Integer> returnValue = futureCall(new EndJob(), lastJobContext);
+      FutureValue<Integer> returnValue =
+          futureCall(new EndJob(), immediate(getContext()), waitFor(lastJobContext));
       return returnValue;
     }
   }
@@ -81,15 +96,18 @@ public class PipelineJobs {
       checkNotNull(importJobEntity, "ImportJobEntity for Id[" + importEntityId
           + "] could not be fetched.");
 
-      updateChangeLog(importJobEntity, "Attaching to Pipeline[" + getPipelineId() + "].");
+      updateChangeLog(null, getContext().getJobId(),
+          "Attaching to Pipeline[" + getPipelineId() + "].");
 
       switch (importJobEntity.getModuleType()) {
         case GOOGLE_DOC:
-          return futureCall(new ImportGoogleDocJobs.CreateArchive(),
+          return futureCall(new ImportGoogleDocJobs.InitiateGoogleDocImport(),
               immediate(getContext()), immediate(importJobEntity.getId()));
-          
+
         case GOOGLE_COLLECTION:
-          
+          return futureCall(new ImportGoogleFolderJobs.InitiateGoogleCollectionImport(),
+              immediate(getContext()),
+              immediate(new GoogleDocResourceId(importJobEntity.getResourceId())));
 
         default:
           throw new IllegalArgumentException("ModuleType[" + importJobEntity.getModuleType()
@@ -104,22 +122,35 @@ public class PipelineJobs {
      */
     @Override
     public Value<Integer> handler() {
+      try {
+        JobManager jobManager = GuiceUtils.getInstance(JobManager.class);
+        JobEntity jobEntity = jobManager.get(null, getContext().getJobId());
 
-      JobEntity jobEntity = getContext().getJobEntity();
-      jobEntity.setJobState(JobState.COMPLETED_SUCCESSFULLY);
-      jobManager.put(null, jobEntity);
-
-      return immediate(0);
+        jobEntity.setJobState(JobState.COMPLETED_SUCCESSFULLY);
+        jobManager.put(null, jobEntity, new ChangeLogEntryPojo("Finishing Job."));
+        
+        if (getContext().getPromiseHandle() != null) {
+          PipelineService service = PipelineServiceFactory.newPipelineService();
+          service.submitPromisedValue(getContext().getPromiseHandle(), new Boolean("true"));
+        }
+        
+        return immediate(0);
+      } catch (Exception e) {
+        throw new PipelineException(e);
+      }
     }
   }
 
-  public static class DummyJob extends LightJob1<Integer> {
+  public static class DummyJob extends LightJob2<LightJobContextPojo, String> {
     /**
      * {@inheritDoc}
      */
     @Override
-    public Value<Integer> handler() {
-      return immediate(1);
+    public ImmediateValue<LightJobContextPojo> handler(String message) {
+      if (!StringUtils.isBlank(message)) {
+        updateChangeLog(null, getContext().getJobId(), message);
+      }
+      return immediate(getContext());
     }
   }
 }

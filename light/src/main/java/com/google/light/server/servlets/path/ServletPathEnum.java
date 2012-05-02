@@ -32,13 +32,11 @@ import com.google.light.server.servlets.oauth2.google.login.GoogleLoginServlet;
 import com.google.light.server.servlets.person.PersonServlet;
 import com.google.light.server.servlets.search.SearchServlet;
 import com.google.light.server.servlets.test.DeleteAllServlet;
-import com.google.light.server.servlets.test.SessionInfoServlet;
 import com.google.light.server.servlets.test.TestCleanUpDatastore;
 import com.google.light.server.servlets.test.TestHeaders;
 import com.google.light.server.servlets.test.TestLogin;
 import com.google.light.server.servlets.test.TestServlet;
 import com.google.light.server.servlets.test.oauth2.TestCredentialBackupServlet;
-import com.google.light.server.servlets.test.oauth2.TestOAuth2WorkFlowServlet;
 import com.google.light.server.servlets.test.oauth2.login.FakeLoginServlet;
 import com.google.light.server.utils.LightPreconditions;
 import java.util.List;
@@ -64,8 +62,8 @@ public enum ServletPathEnum {
            true, false, true, true,
            Lists.newArrayList(FilterPathEnum.API, FilterPathEnum.TEST)),
 
-  LOGIN(LoginServlet.class, "/login",
-        false, false, true, true,
+  LOGIN(LoginServlet.class, "/login", 
+      false, false, true, true,
         Lists.newArrayList(FilterPathEnum.API, FilterPathEnum.TEST)),
   LOGOUT(LogoutServlet.class, "/logout",
          false, false, true, true,
@@ -130,16 +128,10 @@ public enum ServletPathEnum {
   TEST_SERVLET(TestServlet.class, "/test/test",
                false, false, false, true,
                Lists.newArrayList(FilterPathEnum.API, FilterPathEnum.TEST)),
-  TEST_WORKFLOW_SERVLETS(TestOAuth2WorkFlowServlet.class, "/test/test_oauth2_workflow",
-                         false, false, false, true,
-                         Lists.newArrayList(FilterPathEnum.API, FilterPathEnum.TEST)),
   TEST_CLEAN_UP_DATASTORE(TestCleanUpDatastore.class, "/test/admin/cleanupds",
                           true, true, false, true,
                           Lists.newArrayList(FilterPathEnum.API, FilterPathEnum.TEST)),
 
-  SESSION(SessionInfoServlet.class, "/test/session",
-          true, false, false, true,
-          Lists.newArrayList(FilterPathEnum.API, FilterPathEnum.TEST)),
   TEST_HEADER(TestHeaders.class, "/test/testheader",
               false, false, false, true,
               Lists.newArrayList(FilterPathEnum.API, FilterPathEnum.TEST)),

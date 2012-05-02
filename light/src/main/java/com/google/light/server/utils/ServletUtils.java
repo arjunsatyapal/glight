@@ -21,6 +21,8 @@ import static com.google.light.server.constants.RequestParamKeyEnum.LOGIN_PROVID
 import static com.google.light.server.constants.RequestParamKeyEnum.PERSON_ID;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
+import com.google.light.server.dto.pojo.longwrapper.PersonId;
+
 import com.google.common.base.Charsets;
 import com.google.common.base.Throwables;
 import com.google.common.io.CharStreams;
@@ -30,7 +32,6 @@ import com.google.light.server.constants.OAuth2ProviderService;
 import com.google.light.server.constants.RequestParamKeyEnum;
 import com.google.light.server.constants.http.ContentTypeEnum;
 import com.google.light.server.dto.AbstractDto;
-import com.google.light.server.dto.pojo.PersonId;
 import com.google.light.server.servlets.path.ServletPathEnum;
 import com.google.light.server.servlets.pojo.ServletRequestPojo;
 import java.io.IOException;

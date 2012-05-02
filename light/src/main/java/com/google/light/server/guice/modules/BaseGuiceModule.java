@@ -15,8 +15,6 @@
  */
 package com.google.light.server.guice.modules;
 
-import com.google.light.server.annotations.AnotOwner;
-
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
@@ -28,11 +26,13 @@ import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.servlet.ServletScopes;
 import com.google.light.server.annotations.AnotActor;
 import com.google.light.server.annotations.AnotHttpSession;
-import com.google.light.server.dto.pojo.PersonId;
+import com.google.light.server.annotations.AnotOwner;
 import com.google.light.server.dto.pojo.RequestScopedValues;
+import com.google.light.server.dto.pojo.longwrapper.PersonId;
 import com.google.light.server.guice.providers.InstantProvider;
 import com.google.light.server.guice.providers.RequestScopedValuesProvider;
 import com.google.light.server.manager.implementation.AdminOperationManagerImpl;
+import com.google.light.server.manager.implementation.CollectionManagerImpl;
 import com.google.light.server.manager.implementation.ImportManagerImpl;
 import com.google.light.server.manager.implementation.JobManagerImpl;
 import com.google.light.server.manager.implementation.ModuleManagerImpl;
@@ -43,6 +43,7 @@ import com.google.light.server.manager.implementation.oauth2.consumer.OAuth2Cons
 import com.google.light.server.manager.implementation.oauth2.owner.OAuth2OwnerTokenManagerFactory;
 import com.google.light.server.manager.implementation.oauth2.owner.OAuth2OwnerTokenManagerImpl;
 import com.google.light.server.manager.interfaces.AdminOperationManager;
+import com.google.light.server.manager.interfaces.CollectionManager;
 import com.google.light.server.manager.interfaces.ImportManager;
 import com.google.light.server.manager.interfaces.JobManager;
 import com.google.light.server.manager.interfaces.ModuleManager;
@@ -104,6 +105,9 @@ public abstract class BaseGuiceModule extends AbstractModule {
     // Binding Manager Implementations.
     bind(AdminOperationManager.class)
         .to(AdminOperationManagerImpl.class);
+
+    bind(CollectionManager.class)
+      .to(CollectionManagerImpl.class);
 
     bind(ImportManager.class)
         .to(ImportManagerImpl.class);

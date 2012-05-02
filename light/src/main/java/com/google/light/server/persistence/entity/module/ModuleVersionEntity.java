@@ -19,8 +19,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
 import com.google.light.server.dto.module.ModuleVersionDto;
-import com.google.light.server.dto.pojo.ModuleId;
-import com.google.light.server.dto.pojo.Version;
+import com.google.light.server.dto.pojo.longwrapper.ModuleId;
+import com.google.light.server.dto.pojo.longwrapper.Version;
 import com.google.light.server.persistence.entity.AbstractPersistenceEntity;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.Parent;
@@ -93,6 +93,12 @@ public class ModuleVersionEntity extends AbstractPersistenceEntity<ModuleVersion
   
   public Key<ModuleEntity> getModuleKey() {
     return moduleKey;
+  }
+  
+  public ModuleId getModuleId() {
+    checkNotNull(getModuleKey(), "moduleKey");
+    Long id = getModuleKey().getId();
+    return new ModuleId(id);
   }
 
   public static class Builder extends AbstractPersistenceEntity.BaseBuilder<Builder> {

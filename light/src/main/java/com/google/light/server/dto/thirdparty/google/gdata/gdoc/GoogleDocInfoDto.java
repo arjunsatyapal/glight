@@ -20,10 +20,6 @@ import static com.google.light.server.constants.OAuth2ProviderService.GOOGLE_DOC
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
 
-import org.codehaus.jackson.annotate.JsonIgnore;
-
-import javax.xml.bind.annotation.XmlRootElement;
-
 import com.google.common.collect.Lists;
 import com.google.gdata.data.Link;
 import com.google.gdata.data.MediaContent;
@@ -39,7 +35,7 @@ import java.util.List;
 import java.util.logging.Logger;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.XmlRootElement;
 import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
@@ -101,9 +97,6 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
   private Long sizeInBytes;
 
   private DateTime lastCommentTime;
-  
-  @JsonIgnore
-  @XmlTransient
   private Configuration config;
 
   /**
@@ -166,6 +159,11 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
 
   public String getResourceId() {
     return resourceId;
+  }
+  
+  public GoogleDocResourceId getGoogleDocsResourceId() {
+    checkNotBlank(resourceId, "resourceId");
+    return new GoogleDocResourceId(resourceId);
   }
 
   public String getEtag() {

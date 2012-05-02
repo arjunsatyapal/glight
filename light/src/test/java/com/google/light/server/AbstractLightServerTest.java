@@ -22,7 +22,8 @@ import static com.google.light.testingutils.TestingUtils.getRandomEmail;
 import static com.google.light.testingutils.TestingUtils.getRandomProviderUserId;
 import static com.google.light.testingutils.TestingUtils.getRandomString;
 
-import com.google.light.server.dto.pojo.PersonId;
+import com.google.light.server.dto.pojo.longwrapper.PersonId;
+
 
 
 import com.google.light.server.guice.provider.TestRequestScopedValuesProvider;

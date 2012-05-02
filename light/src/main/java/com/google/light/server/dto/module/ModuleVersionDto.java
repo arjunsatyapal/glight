@@ -18,8 +18,9 @@ package com.google.light.server.dto.module;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
 
+import com.google.light.server.dto.pojo.longwrapper.Version;
+
 import com.google.light.server.dto.AbstractDtoToPersistence;
-import com.google.light.server.dto.pojo.Version;
 import com.google.light.server.persistence.entity.module.ModuleVersionEntity;
 
 /**

@@ -19,6 +19,7 @@ package com.google.light.server.utils;
 import com.google.light.server.dto.AbstractDto;
 import com.google.light.server.exception.unchecked.JsonException;
 import java.io.StringReader;
+import org.codehaus.jackson.annotate.JsonAutoDetect;
 import org.codehaus.jackson.map.AnnotationIntrospector;
 import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -45,6 +46,13 @@ public class JsonUtils {
     AnnotationIntrospector introspector = new JaxbAnnotationIntrospector();
     // make serializer use JAXB annotations (only)
     mapper.getSerializationConfig().withAnnotationIntrospector(introspector);
+    mapper.setVisibilityChecker(mapper.getSerializationConfig().getDefaultVisibilityChecker()
+        .withFieldVisibility(JsonAutoDetect.Visibility.ANY)
+        .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
+        .withSetterVisibility(JsonAutoDetect.Visibility.NONE)
+        .withIsGetterVisibility(JsonAutoDetect.Visibility.NONE)
+        .withCreatorVisibility(JsonAutoDetect.Visibility.NONE));
+
     D dto = null;
     try {
       dto = mapper.readValue(new StringReader(jsonString), dtoClass);
@@ -66,7 +74,13 @@ public class JsonUtils {
     AnnotationIntrospector introspector = new JaxbAnnotationIntrospector();
     // make serializer use JAXB annotations (only)
     mapper.getSerializationConfig().withAnnotationIntrospector(introspector);
-
+    mapper.setVisibilityChecker(mapper.getSerializationConfig().getDefaultVisibilityChecker()
+        .withFieldVisibility(JsonAutoDetect.Visibility.ANY)
+        .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
+        .withSetterVisibility(JsonAutoDetect.Visibility.NONE)
+        .withIsGetterVisibility(JsonAutoDetect.Visibility.NONE)
+        .withCreatorVisibility(JsonAutoDetect.Visibility.NONE));
+    
     ObjectWriter writer = null;
 
     if (prettyPrint) {

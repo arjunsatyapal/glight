@@ -19,6 +19,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.GuiceUtils.getInstance;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
+import com.google.light.server.dto.pojo.ChangeLogEntryPojo;
+
 import com.google.appengine.tools.pipeline.JobInfo;
 import com.google.appengine.tools.pipeline.PipelineService;
 import com.google.appengine.tools.pipeline.PipelineServiceFactory;
@@ -68,6 +70,7 @@ public class PipelineUtils {
     JobState jobState = JobState.fromPipelineJobState(jobInfo.getJobState());
     jobEntity.setJobState(jobState);
 
+    StringBuilder builder = new StringBuilder("Updating JobState to : " + jobState);
     switch (jobState) {
       case COMPLETED_SUCCESSFULLY:
         break;
@@ -90,7 +93,7 @@ public class PipelineUtils {
     }
 
     // Updating for non-default JobState.
-    jobManager.put(null, jobEntity);
+    jobManager.put(null, jobEntity, new ChangeLogEntryPojo(builder.toString()));
   }
 
   public static void deletePipeline(String pipelineId, boolean force) {

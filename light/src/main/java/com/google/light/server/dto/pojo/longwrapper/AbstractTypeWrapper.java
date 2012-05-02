@@ -13,53 +13,39 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.server.dto.pojo;
+package com.google.light.server.dto.pojo.longwrapper;
 
-import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
+import javax.xml.bind.annotation.XmlElement;
 
 import com.google.light.server.dto.AbstractPojo;
 
 /**
- * 
- * 
- * TODO(arjuns): Add test for this class.
+ * TODO(arjuns) : Move other Long Wrappers to use this.
+ * TODO(arjuns): Add test for this.
  * 
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
-public class ModuleId extends AbstractPojo<ModuleId> {
-  private Long id;
-  
-  public ModuleId(Long moduleId) {
-    this.id = moduleId;
-    validate();
+public abstract class AbstractTypeWrapper<I, T> extends AbstractPojo<T> {
+  @XmlElement private I value;
+
+  protected AbstractTypeWrapper(I value) {
+    this.value = value;
   }
-  
-  public ModuleId(String moduleId) {
-    this(Long.parseLong(moduleId));
+
+  public I getValue() {
+    return value;
   }
-  
-  public Long get() {
-    return id;
+
+  public boolean isValid() {
+    return value != null;
   }
 
   @Override
   public String toString() {
-    return "moduleId:" + id;
+    return getClass().getSimpleName() + ":" + getValue();
   }
-  
-  /**
-   * {@inheritDoc}
-   */
+
   @Override
-  public ModuleId validate() {
-    checkPositiveLong(id, "id");
-    
-    return this;
-  }
-  
-  // For Objectify.
-  @SuppressWarnings("unused")
-  private ModuleId() {
-  }
+  public abstract T validate();
 }

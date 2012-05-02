@@ -15,6 +15,8 @@
  */
 package com.google.light.server.utils;
 
+import com.google.light.server.dto.pojo.longwrapper.ModuleId;
+
 import com.google.appengine.api.files.AppEngineFile;
 import com.google.appengine.api.files.FileService;
 import com.google.appengine.api.files.FileServiceFactory;
@@ -24,7 +26,6 @@ import com.google.appengine.api.files.GSFileOptions.GSFileOptionsBuilder;
 import com.google.common.io.ByteStreams;
 import com.google.light.server.constants.google.cloudstorage.GoogleCloudStorageBuckets;
 import com.google.light.server.constants.http.ContentTypeEnum;
-import com.google.light.server.dto.pojo.ModuleId;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -56,7 +57,7 @@ public class GoogleCloudStorageUtils {
   public static String getAbsoluteModuleHtmlPath(GoogleCloudStorageBuckets bucket,
       ModuleId moduleId) {
 
-    return bucket.getAbsoluteFilePath("" + moduleId.get() + "/" + moduleId.get() + ".html");
+    return bucket.getAbsoluteFilePath("" + moduleId.getValue() + "/" + moduleId.getValue() + ".html");
   }
 
   public static String writeFileOnGCS(InputStream inputStream, GSFileOptions gsFileOptions)

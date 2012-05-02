@@ -48,7 +48,6 @@ import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Instant;
 
-
 /**
  * General Utility methods for Light.
  * TOOD(arjuns): Fix tests.
@@ -57,7 +56,7 @@ import org.joda.time.Instant;
  */
 public class LightUtils {
   private static final Logger logger = Logger.getLogger(LightUtils.class.getName());
-  
+
   public static String getInputStreamAsString(InputStream is) throws IOException {
     checkNotNull(is);
     return CharStreams.toString(new InputStreamReader(is, Charsets.UTF_8));
@@ -71,7 +70,7 @@ public class LightUtils {
     checkNotNull(builder);
     builder.append("<br>").append(key).append(" = ").append(value);
   }
-  
+
   public static void appendAttention(StringBuilder builder, String key, String value) {
     // Source : http://www.computerhope.com/cgi-bin/htmlcolor.pl?c=FF0000
     builder.append("<p style=\"color:#FF0000\">");
@@ -82,7 +81,6 @@ public class LightUtils {
   public static void appendLine(StringBuilder builder, String text) {
     builder.append(text).append("<br>");
   }
-
 
   // TODO(arjuns): Abstract out common userInfo.
   // TODO(arjuns): Add token expiry time here.
@@ -144,11 +142,9 @@ public class LightUtils {
     return instant.getMillis();
   }
 
-
   public static Instant getNow() {
     return new DateTime().toInstant();
   }
-
 
   // Utility class.
   private LightUtils() {
@@ -163,23 +159,23 @@ public class LightUtils {
     }
   }
 
-
-//  public static void enqueueParticipants(Injector injector, PersonId watcherId, PersonId performerId) {
-//    HttpServletRequest request = getInstance(injector, HttpServletRequest.class);
-//    checkNotNull(request, "request");
-//
-//    if (watcherId != null) {
-//      GuiceUtils.seedEntityInRequestScope(request, PersonId.class, AnotWatcher.class, watcherId);
-//    }
-//
-//    Preconditions.checkNotNull(performerId);
-//    GuiceUtils.seedEntityInRequestScope(request, PersonId.class, AnotPerformer.class, performerId);
-//    
-//    PersonId gotPerformerId = GuiceUtils.getInstance(PersonId.class, AnotPerformer.class);
-//
-//    Participants participants = GuiceUtils.getProvider(Participants.class).get();
-//    checkArgument(participants.isValid(), "Invalid state for Participants.");
-//}
+  // public static void enqueueParticipants(Injector injector, PersonId watcherId, PersonId
+  // performerId) {
+  // HttpServletRequest request = getInstance(injector, HttpServletRequest.class);
+  // checkNotNull(request, "request");
+  //
+  // if (watcherId != null) {
+  // GuiceUtils.seedEntityInRequestScope(request, PersonId.class, AnotWatcher.class, watcherId);
+  // }
+  //
+  // Preconditions.checkNotNull(performerId);
+  // GuiceUtils.seedEntityInRequestScope(request, PersonId.class, AnotPerformer.class, performerId);
+  //
+  // PersonId gotPerformerId = GuiceUtils.getInstance(PersonId.class, AnotPerformer.class);
+  //
+  // Participants participants = GuiceUtils.getProvider(Participants.class).get();
+  // checkArgument(participants.isValid(), "Invalid state for Participants.");
+  // }
 
   /**
    * TODO(arjuns): Add test for this.
@@ -245,7 +241,7 @@ public class LightUtils {
   public static String getUUIDString() {
     return getUUID().toString();
   }
-  
+
   /**
    * TODO(arjuns): Add test for this.
    * Utility method to get a random file Name with given extension.
@@ -254,17 +250,17 @@ public class LightUtils {
    */
   public static String getRandomFileName(FileExtensions extension) {
     InstantProvider instantProvider = GuiceUtils.getInstance(InstantProvider.class);
-    
+
     StringBuilder builder = new StringBuilder(getUUIDString())
-      .append(".")
-      .append(Long.toString(instantProvider.get().getMillis()))
-      .append(".")
-      .append(extension.get());
-    
+        .append(".")
+        .append(Long.toString(instantProvider.get().getMillis()))
+        .append(".")
+        .append(extension.get());
+
     return builder.toString();
   }
-  
-//  TODO(arjuns): Add test for this.
+
+  // TODO(arjuns): Add test for this.
   public static <T> String arrayToString(T[] array) {
     List<T> list = Lists.newArrayList(array);
     return Iterables.toString(list);

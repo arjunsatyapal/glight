@@ -15,7 +15,7 @@
  */
 package com.google.light.server.persistence.dao;
 
-import com.google.light.server.dto.pojo.ModuleId;
+import com.google.light.server.dto.pojo.longwrapper.ModuleId;
 
 import com.google.inject.Inject;
 import com.google.light.server.dto.module.ModuleDto;

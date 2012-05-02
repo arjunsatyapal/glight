@@ -3,7 +3,6 @@ package com.google.light.server.servlets.oauth2.google.login;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.constants.OAuth2ProviderService.GOOGLE_LOGIN;
 import static com.google.light.server.servlets.path.ServletPathEnum.OAUTH2_GOOGLE_LOGIN_CB;
-import static com.google.light.server.servlets.path.ServletPathEnum.SESSION;
 import static com.google.light.server.utils.GuiceUtils.enqueueRequestScopedVariables;
 import static com.google.light.server.utils.GuiceUtils.getInstance;
 import static com.google.light.server.utils.ServletUtils.prepareSession;
@@ -12,10 +11,11 @@ import com.google.api.client.auth.oauth2.AuthorizationCodeResponseUrl;
 import com.google.api.client.auth.oauth2.TokenResponse;
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
+import com.google.light.server.constants.JerseyConstants;
 import com.google.light.server.dto.LoginStateDto;
 import com.google.light.server.dto.oauth2.owner.OAuth2OwnerTokenDto;
 import com.google.light.server.dto.person.PersonDto;
-import com.google.light.server.dto.pojo.PersonId;
+import com.google.light.server.dto.pojo.longwrapper.PersonId;
 import com.google.light.server.exception.unchecked.GoogleAuthorizationException;
 import com.google.light.server.manager.implementation.oauth2.owner.OAuth2OwnerTokenManagerFactory;
 import com.google.light.server.manager.interfaces.OAuth2OwnerTokenManager;
@@ -194,7 +194,7 @@ public class GoogleLoginCallbackServlet extends HttpServlet {
       String redirectPath = state.getRedirectPath();
       if (redirectPath == null) {
         if (!GaeUtils.isProductionServer()) {
-          response.sendRedirect(SESSION.get());
+          response.sendRedirect(JerseyConstants.URI_TEST_SESSION);
         } else {
           // TODO(waltercacau): Eliminate this and redirect to Light's main page
           response.getWriter().println("success");

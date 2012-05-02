@@ -21,32 +21,31 @@ import static com.google.light.server.constants.LightConstants.JOB_BACK_OFF_SECO
 import static com.google.light.server.constants.LightConstants.JOB_MAX_ATTEMPTES;
 import static com.google.light.server.utils.GuiceUtils.getRequestScopedValues;
 
-import com.google.light.server.utils.ObjectifyUtils;
+import com.google.light.server.persistence.entity.person.PersonEntity;
 
-import com.google.light.server.dto.pojo.LightJobContextPojo;
-import com.google.light.server.dto.pojo.RequestScopedValues;
+import com.google.light.server.manager.interfaces.PersonManager;
 
-import java.util.List;
-
-import com.google.common.collect.Lists;
-
-import com.google.appengine.api.datastore.Entity;
+import com.google.light.server.persistence.entity.jobs.JobEntity.JobType;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
-
+import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Query;
-
 import com.google.appengine.tools.pipeline.PipelineService;
 import com.google.appengine.tools.pipeline.PipelineServiceFactory;
+import com.google.common.collect.Lists;
+import com.google.light.server.dto.pojo.ChangeLogEntryPojo;
+import com.google.light.server.dto.pojo.LightJobContextPojo;
+import com.google.light.server.dto.pojo.RequestScopedValues;
 import com.google.light.server.manager.interfaces.JobManager;
 import com.google.light.server.persistence.entity.jobs.JobEntity;
 import com.google.light.server.persistence.entity.jobs.JobEntity.JobHandlerType;
 import com.google.light.server.persistence.entity.jobs.JobEntity.JobState;
-import com.google.light.server.persistence.entity.jobs.JobEntity.JobType;
+import com.google.light.server.persistence.entity.jobs.JobEntity.TaskType;
 import com.google.light.server.servlets.test.jobs.DeleteJobs;
 import com.google.light.server.utils.GuiceUtils;
 import java.io.IOException;
+import java.util.List;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -66,6 +65,8 @@ public class DeleteAllServlet extends HttpServlet {
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     // First deleting all the existing Pipelines.
 
+    PersonManager personManager = GuiceUtils.getInstance(PersonManager.class);
+    PersonEntity person = personManager.findByEmail("light-bot@myopenedu.com");
     List<String> list = Lists.newArrayList("pipeline-job", "pipeline-barrier",
         "pipeline-fanoutTask", "pipeline-jobInstanceRecord", "pipeline-slot");
 
@@ -85,19 +86,19 @@ public class DeleteAllServlet extends HttpServlet {
     // First creating a Job from ImportJob without PipelineId.
     JobEntity jobEntity = new JobEntity.Builder()
         .jobHandlerType(JobHandlerType.PIPELINE)
-        .jobType(JobType.DELETE)
+        .taskType(TaskType.DELETE)
         .taskId("some task id")
         .jobState(JobState.PRE_START)
+        .jobType(JobType.ROOT_JOB)
         .build();
     @SuppressWarnings("unused")
-    JobEntity savedJobEntity = jobManager.put(ObjectifyUtils.nonTransaction(), jobEntity);
-
-    RequestScopedValues participants = getRequestScopedValues();
+    JobEntity savedJobEntity = jobManager.put(null, jobEntity, new ChangeLogEntryPojo("Creating JobEntity."));
 
     LightJobContextPojo context = new LightJobContextPojo.Builder()
-        .ownerId(participants.getOwnerId())
-        .actorId(participants.getActorId())
-        .jobEntity(jobEntity)
+        .ownerId(person.getPersonId())
+        .actorId(person.getPersonId())
+        .jobId(jobEntity.getId())
+        .rootJobId(jobEntity.getRootJobId())
         .build();
 
     PipelineService service = PipelineServiceFactory.newPipelineService();

@@ -1,6 +1,6 @@
 package com.google.light.server.manager.interfaces;
 
-import com.google.light.server.dto.pojo.PersonId;
+import com.google.light.server.dto.pojo.longwrapper.PersonId;
 
 import com.google.light.server.persistence.entity.person.PersonEntity;
 

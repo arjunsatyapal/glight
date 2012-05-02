@@ -20,6 +20,8 @@ import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
 import static com.google.light.server.utils.LightUtils.getCurrentTimeInMillis;
 
+import javax.xml.bind.annotation.XmlElement;
+
 import com.google.light.server.dto.AbstractDto;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -41,7 +43,7 @@ import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
  */
 @SuppressWarnings("serial")
 @XmlRootElement(name = "TokenInfo")
-@XmlAccessorType(XmlAccessType.PROPERTY)
+@XmlAccessorType(XmlAccessType.FIELD)
 @JsonSerialize(include = Inclusion.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class AbstractOAuth2TokenInfo<D> extends AbstractDto<D> {
@@ -49,11 +51,16 @@ public abstract class AbstractOAuth2TokenInfo<D> extends AbstractDto<D> {
   private String audience;
   private String scope;
   // This value is not of much use as it is in seconds.
+  @XmlElement(name = "expires_in")
+  @JsonProperty(value = "expires_in")
   private long expiresIn;
   // Hack to tell that value has not been set and then validate method updates this.
   private long expiresInMillis = 0;
+  @XmlElement(name = "access_type")
+  @JsonProperty(value = "access_type")
   private String accessType;
 
+  @XmlElement(name = "issued_to")
   @JsonProperty(value = "issued_to")
   public String getIssuedTo() {
     return issuedTo;
@@ -80,22 +87,22 @@ public abstract class AbstractOAuth2TokenInfo<D> extends AbstractDto<D> {
     this.scope = scope;
   }
 
-  @JsonProperty(value = "expires_in")
+//  @JsonProperty(value = "expires_in")
   public long getExpiresIn() {
     return expiresIn;
   }
 
-  @JsonProperty(value = "expires_in")
+//  @JsonProperty(value = "expires_in")
   public void setExpiresIn(long expiresInMillis) {
     this.expiresIn = expiresInMillis;
   }
 
-  @JsonProperty(value = "access_type")
+//  @JsonProperty(value = "access_type")
   public String getAccessType() {
     return accessType;
   }
 
-  @JsonProperty(value = "access_type")
+//  @JsonProperty(value = "access_type")
   public void setAccessType(String accessType) {
     this.accessType = accessType;
   }

@@ -17,12 +17,14 @@ package com.google.light.server.manager.implementation;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.light.server.dto.pojo.longwrapper.Version;
+
+import com.google.light.server.dto.pojo.longwrapper.ModuleId;
+import com.google.light.server.dto.pojo.longwrapper.PersonId;
+
 import com.google.inject.Inject;
 import com.google.light.server.dto.module.GSBlobInfo;
 import com.google.light.server.dto.module.ModuleState;
-import com.google.light.server.dto.pojo.ModuleId;
-import com.google.light.server.dto.pojo.PersonId;
-import com.google.light.server.dto.pojo.Version;
 import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocInfoDto;
 import com.google.light.server.exception.unchecked.IdShouldNotBeSet;
 import com.google.light.server.exception.unchecked.httpexception.NotFoundException;
@@ -166,7 +168,7 @@ public class ModuleManagerImpl implements ModuleManager {
    * {@inheritDoc} TODO(arjuns): Make this better once we have other Docs.
    */
   @Override
-  public Version addModuleVersionForGoogleDoc(ModuleId moduleId, String content,
+  public ModuleVersionEntity addModuleVersionForGoogleDoc(ModuleId moduleId, String content,
       GoogleDocInfoDto docInfoDto) {
     // TODO(arjuns): Handle ofy txn.
     Objectify ofy = ObjectifyUtils.initiateTransaction();
@@ -192,7 +194,7 @@ public class ModuleManagerImpl implements ModuleManager {
       moduleDao.put(ofy, moduleEntity);
 
       ObjectifyUtils.commitTransaction(ofy);
-      return moduleVersion;
+      return moduleVersionEntity;
     } finally {
       if (ofy.getTxn().isActive()) {
         ObjectifyUtils.rollbackTransaction(ofy);

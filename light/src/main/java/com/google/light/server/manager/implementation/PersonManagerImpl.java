@@ -20,8 +20,9 @@ import static com.google.light.server.utils.LightPreconditions.checkPersonId;
 import static com.google.light.server.utils.LightPreconditions.checkPersonLoggedIn;
 import static com.google.light.server.utils.LightPreconditions.checkValidSession;
 
+import com.google.light.server.dto.pojo.longwrapper.PersonId;
+
 import com.google.inject.Inject;
-import com.google.light.server.dto.pojo.PersonId;
 import com.google.light.server.dto.pojo.RequestScopedValues;
 import com.google.light.server.exception.unchecked.IdShouldNotBeSet;
 import com.google.light.server.manager.interfaces.PersonManager;

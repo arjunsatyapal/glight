@@ -23,8 +23,9 @@ import static junit.framework.Assert.assertNotNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import com.google.light.server.dto.pojo.longwrapper.PersonId;
+
 import com.google.light.server.dto.person.PersonDto;
-import com.google.light.server.dto.pojo.PersonId;
 import com.google.light.server.exception.unchecked.BlankStringException;
 import com.google.light.server.exception.unchecked.InvalidPersonIdException;
 import com.google.light.server.persistence.entity.AbstractPersistenceEntityTest;

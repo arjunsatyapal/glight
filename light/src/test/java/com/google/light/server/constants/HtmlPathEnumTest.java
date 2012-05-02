@@ -31,6 +31,7 @@ public class HtmlPathEnumTest implements EnumTestInterface {
   @Test
   @Override
   public void test_count() {
-    assertEquals("Add more tests as required.", 2, HtmlPathEnum.values().length);
+    // TODO(arjuns): Add tests to ensure all htmls are covered.
+    assertEquals("Add more tests as required.", 3, HtmlPathEnum.values().length);
   }
 }

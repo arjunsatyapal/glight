@@ -19,10 +19,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.GuiceUtils.getInstance;
 import static com.google.light.server.utils.GuiceUtils.seedEntityInRequestScope;
 
+import com.google.light.server.dto.pojo.longwrapper.PersonId;
+
 import com.google.common.base.Preconditions;
 
 import com.google.light.server.annotations.AnotOwner;
-import com.google.light.server.dto.pojo.PersonId;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
