@@ -96,7 +96,6 @@ public class TestResources extends AbstractJerseyResource {
       // TODO(arjuns): Add exception handling.
       throw new RuntimeException(e);
     }
-    
   }
   
   private void appendHtmlPath(StringBuilder builder, HtmlPathEnum htmlPath) {

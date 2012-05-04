@@ -19,6 +19,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.GuiceUtils.getProvider;
 import static com.google.light.server.utils.LightPreconditions.checkPersonId;
 
+import com.google.light.server.exception.unchecked.httpexception.PersonLoginRequiredException;
+
+import com.google.light.server.persistence.entity.person.PersonEntity;
+
 import com.google.light.server.dto.pojo.longwrapper.PersonId;
 
 import com.google.common.collect.Lists;
@@ -160,8 +164,15 @@ public class OAuth2OwnerTokenDao extends AbstractBasicDao<OAuth2OwnerTokenDto, O
     requestScopedValuesProvider = getProvider(RequestScopedValues.class);
     RequestScopedValues requestScopedValues = requestScopedValuesProvider.get();
 
+    PersonEntity owner = requestScopedValues.getOwner();
+    
+    if (owner == null) {
+      throw new PersonLoginRequiredException("Owner is not logged in.");
+    }
+    
+    
     Key<OAuth2OwnerTokenEntity> fetchKey = OAuth2OwnerTokenEntity.generateKey(
-        requestScopedValues.getOwner().getKey(), providerService.name());
+        owner.getKey(), providerService.name());
 
     return super.get(fetchKey);
   }

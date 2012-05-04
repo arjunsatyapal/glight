@@ -19,6 +19,10 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.GuiceUtils.getInstance;
 
+import com.google.light.server.utils.GuiceUtils;
+
+import com.google.light.server.exception.unchecked.MissingOwnerCredentialException;
+
 import com.google.api.client.auth.oauth2.RefreshTokenRequest;
 import com.google.api.client.auth.oauth2.TokenResponse;
 import com.google.api.client.auth.oauth2.TokenResponseException;
@@ -70,14 +74,13 @@ public class OAuth2OwnerTokenManagerImpl implements OAuth2OwnerTokenManager {
       @Assisted OAuth2ProviderService providerService) {
     this.providerService = checkNotNull(providerService, "providerService");
 
-//    // TODO(arjuns): Add test for this.
-//    if (!providerService.isUsedForLogin()) {
-//      SessionManager sessionManager = getInstance(injector, SessionManager.class);
-//      LightPreconditions.checkValidSession(sessionManager);
-//    }
-    
+    // // TODO(arjuns): Add test for this.
+    // if (!providerService.isUsedForLogin()) {
+    // SessionManager sessionManager = getInstance(injector, SessionManager.class);
+    // LightPreconditions.checkValidSession(sessionManager);
+    // }
+
     // TODO(arjuns): Figure out if any validation is required here.
-    
 
     this.dao = checkNotNull(ownerTokenDao, "ownerTokenDao");
     this.httpTransport = checkNotNull(httpTransport, "httpTransport");
@@ -95,7 +98,7 @@ public class OAuth2OwnerTokenManagerImpl implements OAuth2OwnerTokenManager {
 
       // If it is still null, then return.
       if (this.entity == null) {
-        return null;
+        throw new MissingOwnerCredentialException(GuiceUtils.getOwnerId(), providerService);
       }
     }
 
@@ -174,16 +177,16 @@ public class OAuth2OwnerTokenManagerImpl implements OAuth2OwnerTokenManager {
           .setClientAuthentication(cosumerCredManager.getClientAuthentication());
 
       TokenResponse tokenResponse = null;
-      
+
       try {
         tokenResponse = refreshRequest.execute();
       } catch (TokenResponseException e) {
         logger.log(Level.INFO, "Failed to refresh token due to : ", e);
-        
+
         // Failed to refresh token. So lets delete the token.
         // TODO(arjuns): Once revokeToken code is there, first revoke and then delete.
         this.delete();
-        throw new UnauthorizedException("OAuth2 token for " + providerService 
+        throw new UnauthorizedException("OAuth2 token for " + providerService
             + " could not be refreshed. So deleting it and forcing person to authorize again.");
       }
 
@@ -237,7 +240,7 @@ public class OAuth2OwnerTokenManagerImpl implements OAuth2OwnerTokenManager {
     }
   }
 
-  /** 
+  /**
    * {@inheritDoc}
    */
   @Override

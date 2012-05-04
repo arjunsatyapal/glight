@@ -81,6 +81,10 @@ public class LightUtils {
   public static void appendLine(StringBuilder builder, String text) {
     builder.append(text).append("<br>");
   }
+  
+  public static void appendHref(StringBuilder builder, String id, String href, String name) {
+    builder.append("<a " + id + " href=\"").append(href).append("\">").append(name).append("</a><br>");
+  }
 
   // TODO(arjuns): Abstract out common userInfo.
   // TODO(arjuns): Add token expiry time here.
