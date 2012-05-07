@@ -8,6 +8,8 @@ import static com.google.light.server.utils.LightPreconditions.checkValidSession
 
 import com.google.light.server.exception.unchecked.MissingOwnerCredentialException;
 
+import com.google.light.server.constants.JerseyConstants;
+import com.google.light.server.dto.RedirectDto;
 import com.google.light.server.dto.pojo.longwrapper.PersonId;
 
 
@@ -28,6 +30,8 @@ import com.google.light.server.servlets.SessionManager;
 import com.google.light.server.servlets.oauth2.google.OAuth2Helper;
 import com.google.light.server.servlets.oauth2.google.OAuth2HelperFactoryInterface;
 import com.google.light.server.servlets.oauth2.google.pojo.GoogleOAuth2TokenInfo;
+import com.google.light.server.utils.GaeUtils;
+import com.google.light.server.utils.JsonUtils;
 import com.google.light.server.utils.ServletUtils;
 import java.io.IOException;
 import javax.servlet.http.HttpServlet;
@@ -87,6 +91,8 @@ public class GoogleDocAuthCallbackServlet extends HttpServlet {
     AuthorizationCodeResponseUrl authorizationCodeResponseUrl =
         new AuthorizationCodeResponseUrl(ServletUtils.getRequestUriWithQueryParams(request));
     String code = authorizationCodeResponseUrl.getCode();
+    RedirectDto state =
+        JsonUtils.getDto(authorizationCodeResponseUrl.getState(), RedirectDto.class).validate();
 
     // TODO(arjun): Move error before the code == null.
     if (code == null) {
@@ -122,17 +128,19 @@ public class GoogleDocAuthCallbackServlet extends HttpServlet {
            * Google did not return refreshToken as User had given Authorization earlier. But light
            * failed to locate a record for that token. So User needs to be forced to give access.
            */
-          forceAuthFlowWithPrompt(response);
-          return;
-        } else {
-          // nothing to to do.
-          // TODO(arjuns): Eventually redirect to the callback URI.
+          forceAuthFlowWithPrompt(response, state);
           return;
         }
       }
     }
     
-    response.getWriter().println("Done");
+    String redirectPath = state.getRedirectPath();
+    if (redirectPath == null) {
+      response.getWriter().println("Done");
+    } else {
+      // TODO(waltercacau): Add a integration test that covers this flow.
+      response.sendRedirect(redirectPath);
+    }
   }
 
 
@@ -163,12 +171,12 @@ public class GoogleDocAuthCallbackServlet extends HttpServlet {
    * @param response
    * @throws IOException
    */
-  private void forceAuthFlowWithPrompt(HttpServletResponse response) throws IOException {
+  private void forceAuthFlowWithPrompt(HttpServletResponse response, RedirectDto state) throws IOException {
     /*
      * Will reinitialize session once Light has refreshToken. So we dont care whether
      * request.getSession() returns existing session or new session.
      */
-    response.sendRedirect(helperInstance.getOAuth2RedirectUriWithPrompt(lightCbUrl, null));
+    response.sendRedirect(helperInstance.getOAuth2RedirectUriWithPrompt(lightCbUrl, state.toJson()));
     return;
   }
 

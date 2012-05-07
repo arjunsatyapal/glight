@@ -16,6 +16,14 @@
 define({
   root: {
     selectOneSource: 'Import from',
-    gdocSource: 'Google Docs'
+    gdocSource: 'Google Docs',
+    authRequired: 'Before importing, you need to authorize Light to access your Google Docs.',
+    authInstruction: 'Click the button bellow to start the authorization process.',
+    authButton: 'Authorize',
+    selectOneOrMoreToImport: 'Select one or more items to import.',
+    pageInfo: 'Page ${page}',
+    next: 'Next',
+    previous: 'Previous',
+    gdocEmptyList: 'No google documents found.'
   }
 });

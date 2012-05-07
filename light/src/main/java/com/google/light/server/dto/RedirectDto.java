@@ -27,7 +27,7 @@ import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
  */
 @SuppressWarnings("serial")
 @JsonSerialize(include = Inclusion.NON_NULL)
-public class LoginStateDto extends AbstractDto<LoginStateDto> {
+public class RedirectDto extends AbstractDto<RedirectDto> {
   private String redirectPath;
 
   /**
@@ -45,7 +45,7 @@ public class LoginStateDto extends AbstractDto<LoginStateDto> {
   }
 
   @Override
-  public LoginStateDto validate() {
+  public RedirectDto validate() {
     if (redirectPath != null) {
       Preconditions.checkState(redirectPath.startsWith("/"),
           "redirectPath should start with a slash (/)");
@@ -62,19 +62,19 @@ public class LoginStateDto extends AbstractDto<LoginStateDto> {
     }
 
     @SuppressWarnings("synthetic-access")
-    public LoginStateDto build() {
-      return new LoginStateDto(this).validate();
+    public RedirectDto build() {
+      return new RedirectDto(this).validate();
     }
   }
 
   @SuppressWarnings("synthetic-access")
-  private LoginStateDto(Builder builder) {
+  private RedirectDto(Builder builder) {
     super(builder);
     this.redirectPath = builder.redirectPath;
   }
 
   // For JAXB
-  private LoginStateDto() {
+  private RedirectDto() {
     super(null);
   }
 }

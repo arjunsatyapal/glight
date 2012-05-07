@@ -14,8 +14,10 @@
  * the License.
  */
 define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
-        'light/utils/URLUtils', 'light/utils/PersonUtils'],
-        function(declare, AbstractLightController, URLUtils, PersonUtils) {
+        'light/utils/URLUtils', 'light/utils/PersonUtils',
+        'light/enums/PagesEnum'],
+        function(declare, AbstractLightController, URLUtils, PersonUtils,
+                 PagesEnum) {
   /**
    * Controller for the LoginToolbar
    *
@@ -41,10 +43,15 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
 
     /**
      * Redirects to the login servlet for the given provider.
+     * TODO(waltercacau): update test
      */
     login: function(provider) {
+      var redirectPath = URLUtils.getPathWithHash();
+      if(PagesEnum.getByPath(URLUtils.getPath()) == PagesEnum.SEARCH) {
+        redirectPath = PagesEnum.MYDASH.path + '#' + URLUtils.getHash();
+      }
       URLUtils.redirect('/login/' + provider + '?' + dojo.objectToQuery({
-        'redirectPath': URLUtils.getPathWithHash()
+        'redirectPath': redirectPath
       }));
     },
 

@@ -17,8 +17,9 @@ define(['dojo/_base/declare',
         'dojo/dnd/Source',
         'dijit/focus',
         'dojo/_base/event',
-        'dojo/on'],
-        function(declare, dndSource, focusUtil, event, on) {
+        'dojo/on',
+        'dojo'],
+        function(declare, dndSource, focusUtil, event, on, dojo) {
 
   return declare('light.widgets.ListWidget', dndSource, {
     /** @lends light.widgets.ListWidget */

@@ -4,8 +4,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.constants.OAuth2ProviderService.GOOGLE_DOC;
 import static com.google.light.server.servlets.path.ServletPathEnum.OAUTH2_GOOGLE_DOC_AUTH_CB;
 import com.google.inject.Inject;
+import com.google.light.server.dto.RedirectDto;
 import com.google.light.server.servlets.oauth2.google.OAuth2Helper;
 import com.google.light.server.servlets.oauth2.google.OAuth2HelperFactoryInterface;
+import com.google.light.server.utils.QueryUtils;
 import com.google.light.server.utils.ServletUtils;
 import java.io.IOException;
 import java.util.logging.Logger;
@@ -47,10 +49,11 @@ public class GoogleDocAuthServlet extends HttpServlet {
   protected void doGet(HttpServletRequest request, HttpServletResponse response)
       throws IOException {
     String callbackUrl = ServletUtils.getServletUrl(request, OAUTH2_GOOGLE_DOC_AUTH_CB);
+    String state = QueryUtils.getValidDto(request, RedirectDto.class).toJson();
     
     OAuth2Helper instance = factory.create(GOOGLE_DOC);
 
-    String actualRedirectUrl = instance.getOAuth2RedirectUri(callbackUrl, null);
+    String actualRedirectUrl = instance.getOAuth2RedirectUri(callbackUrl, state);
     logger.info("Redirecting to : " + actualRedirectUrl);
     response.sendRedirect(actualRedirectUrl);
   }

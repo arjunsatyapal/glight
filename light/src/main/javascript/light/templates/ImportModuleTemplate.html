@@ -1,6 +1,21 @@
 <div>
   <div class="firstForm" data-dojo-attach-point="_firstFormDiv">
     <div>${messages.selectOneSource}</div>
-    <button data-dojo-type="dijit.form.Button" data-dojo-attach-event="onClick:_gdocImport">${messages.gdocSource}</button>
+    <button data-dojo-type="dijit.form.Button" data-dojo-attach-event="onClick:_gdocAsSource">${messages.gdocSource}</button>
+  </div>
+  <div class="gdocAuthRequiredForm" data-dojo-attach-point="_gdocAuthRequiredFormDiv">
+    <div>${messages.authRequired}</div>
+    <div>${messages.authInstruction}</div>
+    <button data-dojo-type="dijit.form.Button" data-dojo-attach-event="onClick:_gdocAuthorize">${messages.authButton}</button>
+  </div>
+  <div class="gdocEmptyListForm" data-dojo-attach-point="_gdocEmptyListFormDiv">${messages.gdocEmptyList}</div>
+  <div class="gdocListForm" data-dojo-attach-point="_gdocListFormDiv">
+    <div>${messages.selectOneOrMoreToImport}</div>
+    <div data-dojo-attach-point="_gdocListWidgetDiv"></div>
+    <div class="searchInfo">
+        <button data-dojo-type="dijit.form.Button" data-dojo-attach-point="_getPreviousPageButton" data-dojo-attach-event="onClick:_getGdocListPreviousPage">${messages.previous}</button>
+        <span data-dojo-attach-point="_gdocPageInfoSpan"></span>
+        <button data-dojo-type="dijit.form.Button" data-dojo-attach-point="_getNextPageButton" data-dojo-attach-event="onClick:_getGdocListNextPage">${messages.next}</button>
+    </div>
   </div>
 </div>

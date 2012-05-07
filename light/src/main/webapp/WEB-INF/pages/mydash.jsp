@@ -49,11 +49,11 @@
         right: auto;
     }
     
-    .searchResult:hover {
+    .searchResult:hover, .gdocListItem:hover {
         background-color: #F1F1F1;
     }
     
-    .searchResult {
+    .searchResult, .gdocListItem {
         margin: 2px;
         padding: 8px;
         border-bottom: 2px solid #F1F1F1;
@@ -97,6 +97,10 @@
     #content > *, #header {
         min-width: 700px;
     }
+    .gdocListItem img {
+        margin-right: 5px;
+    }
+    #importModule .dojoDndItemSelected, #importModule .dojoDndItemAnchor,
     #searchResults .dojoDndItemSelected, #searchResults .dojoDndItemAnchor {
       background-repeat: repeat-x;
       background-color: #cfe5fa;

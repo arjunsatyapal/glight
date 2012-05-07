@@ -5,7 +5,7 @@ import static com.google.light.server.constants.OAuth2ProviderService.GOOGLE_LOG
 import static com.google.light.server.servlets.path.ServletPathEnum.OAUTH2_GOOGLE_LOGIN_CB;
 
 import com.google.inject.Inject;
-import com.google.light.server.dto.LoginStateDto;
+import com.google.light.server.dto.RedirectDto;
 import com.google.light.server.servlets.oauth2.google.OAuth2Helper;
 import com.google.light.server.servlets.oauth2.google.OAuth2HelperFactoryInterface;
 import com.google.light.server.utils.QueryUtils;
@@ -51,7 +51,7 @@ public class GoogleLoginServlet extends HttpServlet {
 
     ServletUtils.invalidateSession(request);
     String callbackUrl = ServletUtils.getServletUrl(request, OAUTH2_GOOGLE_LOGIN_CB);
-    String state = QueryUtils.getValidDto(request, LoginStateDto.class).toJson();
+    String state = QueryUtils.getValidDto(request, RedirectDto.class).toJson();
     
     OAuth2Helper instance = factory.create(GOOGLE_LOGIN);
     

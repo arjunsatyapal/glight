@@ -12,7 +12,7 @@ import com.google.api.client.auth.oauth2.TokenResponse;
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.light.server.constants.JerseyConstants;
-import com.google.light.server.dto.LoginStateDto;
+import com.google.light.server.dto.RedirectDto;
 import com.google.light.server.dto.oauth2.owner.OAuth2OwnerTokenDto;
 import com.google.light.server.dto.person.PersonDto;
 import com.google.light.server.dto.pojo.longwrapper.PersonId;
@@ -79,8 +79,8 @@ public class GoogleLoginCallbackServlet extends HttpServlet {
     AuthorizationCodeResponseUrl authorizationCodeResponseUrl =
         new AuthorizationCodeResponseUrl(ServletUtils.getRequestUriWithQueryParams(request));
     String code = authorizationCodeResponseUrl.getCode();
-    LoginStateDto state =
-        JsonUtils.getDto(authorizationCodeResponseUrl.getState(), LoginStateDto.class).validate();
+    RedirectDto state =
+        JsonUtils.getDto(authorizationCodeResponseUrl.getState(), RedirectDto.class).validate();
 
     // TODO(arjun): Move error before the code == null.
     if (code == null) {
@@ -342,7 +342,7 @@ public class GoogleLoginCallbackServlet extends HttpServlet {
    * @throws IOException
    */
   private void forceLoginWithPrompt(HttpServletRequest request,
-      HttpServletResponse response, LoginStateDto state) throws IOException {
+      HttpServletResponse response, RedirectDto state) throws IOException {
     /*
      * Will reinitialize session once Light has refreshToken. So we dont care whether
      * request.getSession() returns existing session or new session.

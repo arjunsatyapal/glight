@@ -14,8 +14,8 @@
  * the License.
  */
 define(['dojo/_base/declare', 'dojo/number',
-        'dojo/dom-construct', 'dojo/dom-style'],
-        function(declare, numberUtils, domConstruct, domStyle) {
+        'dojo/dom-construct', 'dojo/dom-class'],
+        function(declare, numberUtils, domConstruct, domClass) {
   /**
    * Some utilities for dealing with DOM and style.
    *
@@ -58,7 +58,7 @@ define(['dojo/_base/declare', 'dojo/number',
      * @param {Node} node Node.
      */
     hide: function(node) {
-      domStyle.set(node, 'display', 'none');
+      domClass.add(node, 'hiddenNode');
     },
 
     /**
@@ -67,7 +67,7 @@ define(['dojo/_base/declare', 'dojo/number',
      * @param {Node} node Node.
      */
     show: function(node) {
-      domStyle.set(node, 'display', 'block');
+      domClass.remove(node, 'hiddenNode');
     }
   };
 });

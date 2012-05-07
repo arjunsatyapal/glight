@@ -36,28 +36,31 @@ define(['dojo/_base/declare', 'light/utils/URLUtils', 'light/enums/PagesEnum',
     },
 
     /**
-     * Check's whetever the person has accepted the term's and conditions. If he
-     * didn't, he will be redirected to the register page if he isn't already
-     * there.
+     * Check's whetever the person has accepted the term's and conditions. If
+     * he didn't, he will be redirected to the register page if he isn't
+     * already there.
      * <p>
      * This function is supposed to be called in the beginning of
      * {@link light.main.LoaderMain}.
      * 
      * @param {light.enums.PagesEnum}
      *          currentPage The page we are currently in.
-     * @returns
+     * @return {boolean} true if the user passes the tosCheck or if we 
+     *          are in the register page.
      */
     tosCheck: function(currentPage) {
       if (currentPage == PagesEnum.REGISTER) {
-        return;
+        return true;
       }
 
       var person = this.getCurrent();
       if (person && !person.acceptedTos) {
-        URLUtils.replace(PagesEnum.REGISTER.path + "#" + dojo.objectToQuery({
+        URLUtils.redirect(PagesEnum.REGISTER.path + "#" + dojo.objectToQuery({
           "redirectPath": URLUtils.getPathWithHash()
         }));
+        return false;
       }
+      return true;
     },
 
     /**

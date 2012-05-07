@@ -25,7 +25,7 @@ define(['light/utils/BuilderUtils',
    */
   return BuilderUtils.createBuilderClass(
       'light.builders.BrowseContextStateBuilder',
-      ['context', 'id'],
+      ['context', 'subcontext'],
       {
         defaults: {
           context: BrowseContextsEnum.ALL
@@ -35,9 +35,9 @@ define(['light/utils/BuilderUtils',
             // we require a string because of a dojo limitation for now
             // in getNodesByItem
             // TODO(waltercacau): check if we can remove this limitation
-            if (typeof this.id != 'string')
-              throw new Error('id for COLLECTION context must be ' +
-                      'an integer or a number!');
+            if (typeof this.subcontext != 'string') {
+              throw new Error('subcontext should be specified for collection');
+            }
           }
           // Assuring that we were given a valid context
           for (var context in BrowseContextsEnum) {

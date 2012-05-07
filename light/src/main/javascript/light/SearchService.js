@@ -13,9 +13,9 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-define(['dojo/_base/declare', 'dojo', 'dojo/_base/xhr', 'dojo/_base/lang',
+define(['dojo/_base/declare', 'dojo', 'light/utils/XHRUtils', 'dojo/_base/lang',
         'light/utils/LanguageUtils', 'light/builders/SearchRequestBuilder'],
-        function(declare, dojo, xhr, lang, LanguageUtils,
+        function(declare, dojo, XHRUtils, lang, LanguageUtils,
                  SearchRequestBuilder) {
   return declare('light.SearchService', null, {
 
@@ -33,15 +33,8 @@ define(['dojo/_base/declare', 'dojo', 'dojo/_base/xhr', 'dojo/_base/lang',
           .clientLanguageCode(LanguageUtils.currentLocale)
           .build();
 
-      /*
-       * TODO(waltercacau): Wrap the original dojo promise from the
-       * xhr.get into a more friendly interface
-       * TODO(waltercacau): Add custom LightHeaders
-       */
-      return this._lastXhr = xhr.get({
+      return this._lastXhr = XHRUtils.get({
         url: '/api/search?' + dojo.objectToQuery(request),
-        contentType: 'application/json',
-        handleAs: 'json'
       }).then(null, function() {
         this._lastXhr = null;
       });

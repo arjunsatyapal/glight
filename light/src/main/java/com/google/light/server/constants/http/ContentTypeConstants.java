@@ -16,17 +16,16 @@
 package com.google.light.server.constants.http;
 
 /**
- *
- * 
+ * Used in Jersey to set the output content type.
  * TODO(arjuns): Add test for this class.
  *
  * @author Arjun Satyapal
  */
 public class ContentTypeConstants {
-  public static final String APPLICATION_JSON = "application/json";
+  public static final String APPLICATION_JSON = "application/json; charset=UTF-8";
 
-  public static final String TEXT_HTML = "text/html";
-  public static final String TEXT_PLAIN = "text/plain";
-  public static final String TEXT_XML = "text/xml";
+  public static final String TEXT_HTML = "text/html; charset=UTF-8";
+  public static final String TEXT_PLAIN = "text/plain; charset=UTF-8";
+  public static final String TEXT_XML = "text/xml; charset=UTF-8";
 
 }

@@ -14,8 +14,8 @@
  * the License.
  */
 define(['light/utils/DOMUtils',
-        'dojo/dom-construct', 'dojo/dom-style'],
-        function(DOMUtils, domConstruct, domStyle) {
+        'dojo/dom-construct', 'dojo/dom-class'],
+        function(DOMUtils, domConstruct, domClass) {
   describe('light.utils.DOMUtils', function() {
     var node;
     beforeEach(function() {
@@ -27,7 +27,7 @@ define(['light/utils/DOMUtils',
 
         DOMUtils.hide(node);
 
-        expect(domStyle.get(node, 'display')).toBe('none');
+        expect(domClass.contains(node, 'hiddenNode')).toBeTruthy();
 
       });
     });
@@ -37,7 +37,7 @@ define(['light/utils/DOMUtils',
 
         DOMUtils.show(node);
 
-        expect(domStyle.get(node, 'display')).toBe('block');
+        expect(domClass.contains(node, 'hiddenNode')).toBeFalsy();
 
       });
     });

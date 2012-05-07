@@ -36,7 +36,8 @@ define(['dojo/has', 'dojo/query', 'dojo/dom-construct', 'dojo',
   if (page) {
     
     // Checking if the Person has accepted the Terms of Service.
-    PersonUtils.tosCheck(page);
+    if(!PersonUtils.tosCheck(page))
+      return;
 
     /*
      * If we are in development, we should not load code through layers. this
@@ -75,6 +76,7 @@ define(['dojo/has', 'dojo/query', 'dojo/dom-construct', 'dojo',
   require(['dojo/domReady!'], function() {
 
     // Loading CSS
+    load_css('/css/base.css');
     load_css(require.toUrl('dijit/themes/claro/claro.css'));
     load_css(require.toUrl('dojo/resources/dojo.css'));
 

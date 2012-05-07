@@ -25,18 +25,18 @@ import org.junit.Test;
 
 import com.google.common.collect.ImmutableMapBuilder;
 import com.google.light.server.dto.AbstractDtoTest;
-import com.google.light.server.dto.LoginStateDto;
-import com.google.light.server.dto.LoginStateDto.Builder;
+import com.google.light.server.dto.RedirectDto;
+import com.google.light.server.dto.RedirectDto.Builder;
 import com.google.light.server.utils.QueryUtils;
 import com.google.light.testingutils.TestResourcePaths;
 import com.google.light.testingutils.TestingUtils;
 
 /**
- * Test for {@link LoginStateDto}
+ * Test for {@link RedirectDto}
  * 
  * @author Walter Cacau
  */
-public class LoginStateDtoTest extends AbstractDtoTest {
+public class RedirectDtoTest extends AbstractDtoTest {
 
   private static final String SAMPLE_REDIRECT_PATH = "/page.html#bla";
 
@@ -47,11 +47,11 @@ public class LoginStateDtoTest extends AbstractDtoTest {
   public void testConstructThroughQueryUtils() {
     // Just positive tests. We can count with enough negative tests in QueryUtilsTest
 
-    LoginStateDto dto =
+    RedirectDto dto =
         QueryUtils.getValidDto(TestingUtils
             .getMockedRequestWithParameterMap(new ImmutableMapBuilder<String, String[]>()
                 .put("redirectPath", new String[] { SAMPLE_REDIRECT_PATH })
-                .getMap()), LoginStateDto.class);
+                .getMap()), RedirectDto.class);
 
     assertNotNull(dto);
     assertEquals(SAMPLE_REDIRECT_PATH, dto.getRedirectPath());
@@ -64,7 +64,7 @@ public class LoginStateDtoTest extends AbstractDtoTest {
   }
 
   private Builder getDefaultBuilder() {
-    return new LoginStateDto.Builder();
+    return new RedirectDto.Builder();
   }
 
   @Test
@@ -79,7 +79,7 @@ public class LoginStateDtoTest extends AbstractDtoTest {
   @Override
   public void test_validate() throws Exception {
     // Positive case: redirectPath not defined
-    LoginStateDto dto = getDefaultBuilder().build();
+    RedirectDto dto = getDefaultBuilder().build();
     assertNotNull(dto);
     assertEquals(null, dto.getRedirectPath());
 

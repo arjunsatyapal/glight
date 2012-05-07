@@ -27,7 +27,7 @@ import com.google.light.server.exception.unchecked.httpexception.UnsupportedMedi
  * @author Arjun Satyapal
  */
 public enum ContentTypeEnum {
-  APPLICATION_JSON(ContentTypeConstants.APPLICATION_JSON),
+  APPLICATION_JSON("application/json"),
   APPLICATION_PDF("application/pdf"),
   APPLICATION_XML("application/xml"),
   APPLICATION_ZIP("application/zip"),
@@ -75,10 +75,10 @@ public enum ContentTypeEnum {
 
   TEXT_HTML("text/html"),
   TEXT_JAVASCRIPT("text/javascript"),
-  TEXT_PLAIN(ContentTypeConstants.TEXT_PLAIN),
+  TEXT_PLAIN("text/plain"),
   TEXT_CSV("text/csv"),
   TEXT_TSV("text/tab-separated-values"),
-  TEXT_XML(ContentTypeConstants.TEXT_XML),
+  TEXT_XML("text/xml"),
 
   /*
    * Format for SUN.

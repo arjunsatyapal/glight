@@ -7,16 +7,16 @@ define(['dojo/_base/declare', 'dojo/_base/array',
         'dojo/data/ItemFileReadStore',
         'dijit/tree/TreeStoreModel',
         'dijit/tree/ForestStoreModel', 'dojo/_base/lang',
-        'dijit', 'light/enums/BrowseContextsEnum',
+        'dojo', 'dijit', 'light/enums/BrowseContextsEnum',
         'light/builders/BrowseContextStateBuilder',
         'light/utils/TemplateUtils',
         'dojo/_base/event',
-        'light/utils/DialogUtils'
+        'light/utils/DialogUtils',
         ],
         function(declare, array, TemplatedLightView, _WidgetsInTemplateMixin,
                 DOMUtils, Tree, TreeDndSource, TreeDndSelector,
                 ItemFileWriteStore, ItemFileReadStore, TreeStoreModel,
-                ForestStoreModel, lang, dijit, BrowseContextsEnum,
+                ForestStoreModel, lang, dojo, dijit, BrowseContextsEnum,
                 BrowseContextStateBuilder, TemplateUtils, eventUtil,
                 DialogUtils) {
   var TREE_NODE_TYPE = 'treeNode';
@@ -97,7 +97,7 @@ define(['dojo/_base/declare', 'dojo/_base/array',
               self._controller.changeContextTo(
                       new BrowseContextStateBuilder()
                           .context(BrowseContextsEnum.COLLECTION)
-                          .id(newSelection[0].item.id)
+                          .subcontext(newSelection[0].item.id)
                           .build());
             }
           }
@@ -235,10 +235,14 @@ define(['dojo/_base/declare', 'dojo/_base/array',
 
       // Adding custom button to My Collections
       this._addCollectionButton = TemplateUtils.toDom(
-              '<img src="${_blankGif}" class="addCollectionButton" />', this);
+              '<img src="${_blankGif}" class="addCollectionButton" ' +
+              'role="button" tabindex="0" aria-label="Add a collection" />',
+              this);
 
       this.connect(this._addCollectionButton, 'onclick',
               this._onAddCollection);
+      this.connect(this._addCollectionButton, 'onkeypress',
+              this._onAddCollectionByKey);
 
       var myCollectionsTreeNode = this._collectionTree
           .getNodesByItem(this._collectionTreeModel.root)[0];
@@ -248,8 +252,12 @@ define(['dojo/_base/declare', 'dojo/_base/array',
       // Initial selection
       // this.setContext(BrowseContextsEnum.COLLECTION);
     },
-
-    _onAddCollection: function(evt) {
+    _onAddCollectionByKey: function(evt) {
+      if(evt.charOrCode == dojo.keys.ENTER) {
+        this._onAddCollection();
+      }
+    },
+    _onAddCollection: function() {
       // TODO(waltercacau): Implement this
       // Just a mock implementation for now
       var self = this;

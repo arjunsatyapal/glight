@@ -71,5 +71,5 @@ define(['light/views/SearchBarView',
   var importModuleController = new ImportModuleController();
   importModuleController.setView(importModuleView);
   importModuleView.setController(importModuleController);
-
+  importModuleController.watch();
 });

@@ -60,7 +60,7 @@ public class GoogleDocUtilsTest {
   @Test
   public void test_getDocumentFeedWithFolderUrl() throws Exception {
     String expected = "https://docs.google.com/feeds/default/private/full" + 
-        "?showroots=true&showfolders=true&max-results=3";
+        "?showroots=true&showfolders=true&max-results=10";
     URL expectedUrl = new URL(expected);
     assertEquals(expectedUrl, GoogleDocUtils.getDocumentFeedWithFolderUrl());
   }
@@ -127,7 +127,7 @@ public class GoogleDocUtilsTest {
   @Test
   public void test_getFolderContentUrl() throws Exception {
     GoogleDocResourceId resourceId = new GoogleDocResourceId("folder:1234");
-    String expected = "https://docs.google.com/feeds/default/private/full/folder:1234/contents?max-results=3";
+    String expected = "https://docs.google.com/feeds/default/private/full/folder:1234/contents?max-results=10";
     URL expectedUrl = new URL(expected);
     assertEquals(expectedUrl, GoogleDocUtils.getFolderContentUrl(resourceId));
   }

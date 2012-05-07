@@ -63,11 +63,11 @@ public class LightConstants {
   public static final JobSetting.BackoffFactor JOB_BACK_OFF_FACTOR = new JobSetting.BackoffFactor(2);
   public static final JobSetting.BackoffSeconds JOB_BACK_OFF_SECONDS = new JobSetting.BackoffSeconds(1);
   public static final JobSetting.MaxAttempts JOB_MAX_ATTEMPTES = new JobSetting.MaxAttempts(3);
-  
-  /** Number of recrds to be fetched in GDATA Feed */
-  public static int GDATA_MAX_RESULT = 3;
 
   public static final int MAX_RESULTS_MIN = 10;
   public static final int MAX_RESULTS_DEFAULT = MAX_RESULTS_MIN;
   public static final int MAX_RESULTS_MAX = 100;
+  
+  /** Number of recrds to be fetched in GDATA Feed */
+  public static int GDATA_MAX_RESULT = MAX_RESULTS_DEFAULT;
 }

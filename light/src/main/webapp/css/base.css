@@ -1,0 +1,6 @@
+/*
+ * Used by DOMUtils to hide nodes.
+ */
+.hiddenNode {
+	display: none;
+}

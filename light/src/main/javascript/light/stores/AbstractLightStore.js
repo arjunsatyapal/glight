@@ -13,8 +13,8 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-define(['dojo/_base/xhr', 'dojo/json', 'dojo/_base/declare', 'dojo/store/util/QueryResults'],
-        function(xhr, JSON, declare, QueryResults) {
+define(['light/utils/XHRUtils', 'dojo/json', 'dojo/_base/declare', 'dojo/store/util/QueryResults'],
+        function(XHRUtils, JSON, declare, QueryResults) {
   return declare('light.stores.AbstractLightStore', null, {
     /** @lends light.stores.AbstractLightStore# */
 
@@ -39,23 +39,10 @@ define(['dojo/_base/xhr', 'dojo/json', 'dojo/_base/declare', 'dojo/store/util/Qu
       declare.safeMixin(this, options);
     },
 
-    lightAPIVersion: '1.0',
-
-    addLightHeaders: function(headers) {
-      // TODO(waltercacau): Add CSFR protection here
-      headers['X-Light-API-Version'] = this.lightAPIVersion;
-      return headers;
-    },
-
     /*
      * The rest of this class was borrowed from dojo.store.JsonRest with a few
-     * modifications to add custom headers.
-     *
-     * TODO(waltercacau): File a bug in dojo track about this.
-     *
-     * Unfortunately we have the requirement of adding custom headers to all
-     * our JSON Rest based calls, and dojo.store.JsonRest didn't gave the options we needed
-     * for all methods.
+     * modifications to use {@link light.utils.XHRUtils} so we could
+     * add custom headers and some error handling behavior.
      */
     // target: String
     //    The target base URL to use for all requests to the server. This string will be
@@ -81,10 +68,10 @@ define(['dojo/_base/xhr', 'dojo/json', 'dojo/_base/declare', 'dojo/store/util/Qu
       //    The object in the store that matches the given id.
       var headers = options || {};
       headers.Accept = this.accepts;
-      return xhr('GET', {
+      return XHRUtils.send('GET', {
         url: this.target + id,
         handleAs: 'json',
-        headers: this.addLightHeaders(headers)
+        headers: headers
       });
     },
     // accepts: String
@@ -111,16 +98,16 @@ define(['dojo/_base/xhr', 'dojo/json', 'dojo/_base/declare', 'dojo/store/util/Qu
       options = options || {};
       var id = ('id' in options) ? options.id : this.getIdentity(object);
       var hasId = typeof id != 'undefined';
-      return xhr(hasId && !options.incremental ? 'PUT' : 'POST', {
+      return XHRUtils.send(hasId && !options.incremental ? 'PUT' : 'POST', {
           url: hasId ? this.target + id : this.target,
           postData: JSON.stringify(object),
           handleAs: 'json',
-          headers: this.addLightHeaders({
+          headers: {
             'Content-Type': 'application/json',
             Accept: this.accepts,
             'If-Match': options.overwrite === true ? '*' : null,
             'If-None-Match': options.overwrite === false ? '*' : null
-          })
+          }
         });
     },
     add: function(object, options) {
@@ -141,9 +128,8 @@ define(['dojo/_base/xhr', 'dojo/json', 'dojo/_base/declare', 'dojo/store/util/Qu
       //    Deletes an object by its identity. This will trigger a DELETE request to the server.
       // id: Number
       //    The identity to use to delete the object
-      return xhr('DELETE', {
-        url: this.target + id,
-        headers: this.addLightHeaders({})
+      return XHRUtils.send('DELETE', {
+        url: this.target + id
       });
     },
     query: function(query, options) {
@@ -179,10 +165,10 @@ define(['dojo/_base/xhr', 'dojo/json', 'dojo/_base/declare', 'dojo/store/util/Qu
           query += ')';
         }
       }
-      var results = xhr('GET', {
+      var results = XHRUtils.send('GET', {
         url: this.target + (query || ''),
         handleAs: 'json',
-        headers: this.addLightHeaders(headers)
+        headers: headers
       });
       results.total = results.then(function() {
         var range = results.ioArgs.xhr.getResponseHeader('Content-Range');
