@@ -44,7 +44,7 @@ public class AdminOperationManagerImpl implements AdminOperationManager {
   @Override
   public OAuth2ConsumerCredentialEntity putOAuth2ConsumerCredential(
       OAuth2ConsumerCredentialEntity entity) {
-    return consumerCredentialDao.put(entity);
+    return consumerCredentialDao.put(null, entity);
   }
 
   /**

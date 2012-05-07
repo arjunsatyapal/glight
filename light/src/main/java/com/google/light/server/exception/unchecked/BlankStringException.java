@@ -15,6 +15,10 @@
  */
 package com.google.light.server.exception.unchecked;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import com.google.light.server.exception.ExceptionType;
+
 /**
  * Exception thrown by {@link LightPreconditions#checkNotBlank(String)} when 
  * <br> String is null.
@@ -25,32 +29,18 @@ package com.google.light.server.exception.unchecked;
  */
 @SuppressWarnings("serial")
 public class BlankStringException extends RuntimeException {
-  /**
-   * {@inheritDoc}
-   */
-  public BlankStringException() {
-      super();
-  }
-
+  private ExceptionType type;
+  
   /**
    * {@inheritDoc}
    * @param message
    */
-  public BlankStringException(String message) {
+  public BlankStringException(String message, ExceptionType type) {
       super(message);
+      this.type = checkNotNull(type);
   }
-
-  /**
-   * {@inheritDoc}
-   */
-  public BlankStringException(String message, Throwable cause) {
-      super(message, cause);
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  public BlankStringException(Throwable cause) {
-      super(cause);
+  
+  public ExceptionType getType() {
+    return type;
   }
 }

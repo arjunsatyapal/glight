@@ -18,6 +18,15 @@ package com.google.light.server.dto.search;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+
+import org.codehaus.jackson.annotate.JsonProperty;
+
+import javax.xml.bind.annotation.XmlElement;
+
+import javax.xml.bind.annotation.XmlRootElement;
+
 import com.google.light.server.constants.LightConstants;
 import com.google.light.server.dto.AbstractDto;
 
@@ -27,15 +36,20 @@ import com.google.light.server.dto.AbstractDto;
  * @author Walter Cacau
  */
 @SuppressWarnings("serial")
+@XmlRootElement(name="search_request")
+@XmlAccessorType(XmlAccessType.FIELD)
 public class SearchRequestDto extends AbstractDto<SearchRequestDto> {
   /**
    * User's search query
    */
+  @XmlElement
   private String query;
 
   /**
    * User's languageCode
    */
+  @XmlElement(name = "client_language_code")
+  @JsonProperty(value = "client_language_code")
   private String clientLanguageCode;
 
   /**
@@ -52,6 +66,7 @@ public class SearchRequestDto extends AbstractDto<SearchRequestDto> {
    * TODO(waltercacau) : move search under third_party.
    */
   // TODO(waltercacau): Check with arjun about renaming this variable (issue 39002)
+  @XmlElement
   private int page = LightConstants.FIRST_SEARCH_PAGE_NUMBER;
 
   @Override

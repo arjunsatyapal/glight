@@ -22,8 +22,6 @@ import static com.google.light.testingutils.TestingUtils.getResourceAsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-
-
 import com.google.light.server.constants.LightEnvEnum;
 import com.google.light.server.utils.JsonUtils;
 import com.google.light.testingutils.GaeTestingUtils;
@@ -42,19 +40,42 @@ public class GoogleLoginTokenInfoTest {
   @Test
   public void test_jsonToGoogleTokenInfo_Parsing() throws Exception {
     GaeTestingUtils.cheapEnvSwitch(LightEnvEnum.UNIT_TEST);
+
     String jsonString = getResourceAsString(GOOGLE_TOKEN_INFO_JSON.get());
-    GoogleLoginTokenInfo tokenInfo = JsonUtils.getDto(jsonString, GoogleLoginTokenInfo.class);
+    System.out.println(jsonString);
+    GoogleLoginTokenInfo tokenInfo = JsonUtils.getPojo(jsonString, GoogleLoginTokenInfo.class);
     tokenInfo.validate();
-    
+
     assertEquals("160638920188.apps.googleusercontent.com", tokenInfo.getIssuedTo());
     assertEquals("160638920188.apps.googleusercontent.com", tokenInfo.getAudience());
     assertEquals("115639870677665060321", tokenInfo.getUserId());
     assertTrue(compareScopes(GOOGLE_LOGIN.getScopes(), tokenInfo.getScope()));
-    
+
     // TODO(arjuns): Fix this.
-//    checkPositiveLong(tokenInfo.getExpiresInMillis(), "expiresInMillis");
+    // checkPositiveLong(tokenInfo.getExpiresInMillis(), "expiresInMillis");
     assertEquals("unit-test1@myopenedu.com", tokenInfo.getEmail());
     assertTrue(tokenInfo.getVerifiedEmail());
     assertEquals("offline", tokenInfo.getAccessType());
+  }
+
+  // TODO(arjuns): Make this test mandatory for all DTOs.
+  @Test
+  public void test_toJsonAndXml() throws Exception {
+    GoogleLoginTokenInfo googleLoginTokenInfo = new GoogleLoginTokenInfo.Builder()
+        .userId("115639870677665060321")
+        .email("unit-test1@myopenedu.com")
+        .verifiedEmail(true)
+        .issuedTo("160638920188.apps.googleusercontent.com")
+        .audience("160638920188.apps.googleusercontent.com")
+        .scope("https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email")
+        .expiresIn(3600)
+        .expiresInMillis(1332491059527L)
+        .accessType("offline")
+        .build();
+
+    String json = JsonUtils.toJson(googleLoginTokenInfo);
+    System.out.println(json);
+    GoogleLoginTokenInfo foo1 = JsonUtils.getPojo(json, GoogleLoginTokenInfo.class);
+    assertEquals(googleLoginTokenInfo, foo1);
   }
 }

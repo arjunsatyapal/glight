@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <person>
-    <firstName>first name</firstName>
-    <lastName>last name</lastName>
-    <acceptedTos>true</acceptedTos>
+    <first_name>first name</first_name>
+    <last_name>last name</last_name>
+    <accepted_tos>true</accepted_tos>
 </person>

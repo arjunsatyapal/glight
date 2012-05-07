@@ -13,23 +13,19 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.server.exception.unchecked.pipelineexceptions.ignore;
-
-
-
+package com.google.light.server.exception.unchecked.taskqueue;
 
 /**
- * This happens when incorrect KeyType is passed. e.g. Instead of String Id, a Long Id was passed.
- * Most probably this is going to be a server side issue.
- *  
+ * This indicates that there was some JSON exception while serializing/de-serializing.
+ * 
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
-public class GoogleDocArchivalWaitingException extends PipelineIgnoreException {
+public class TaskQueueException extends RuntimeException {
   /**
    * {@inheritDoc}
    */
-  public GoogleDocArchivalWaitingException() {
+  public TaskQueueException() {
       super();
   }
 
@@ -37,21 +33,21 @@ public class GoogleDocArchivalWaitingException extends PipelineIgnoreException {
    * {@inheritDoc}
    * @param message
    */
-  public GoogleDocArchivalWaitingException(String message) {
+  public TaskQueueException(String message) {
       super(message);
   }
 
   /**
    * {@inheritDoc}
    */
-  public GoogleDocArchivalWaitingException(String message, Throwable cause) {
+  public TaskQueueException(String message, Throwable cause) {
       super(message, cause);
   }
 
   /**
    * {@inheritDoc}
    */
-  public GoogleDocArchivalWaitingException(Throwable cause) {
+  public TaskQueueException(Throwable cause) {
       super(cause);
   }
 }

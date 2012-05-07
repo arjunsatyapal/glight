@@ -19,8 +19,6 @@ import static com.google.appengine.api.datastore.Entity.KEY_RESERVED_PROPERTY;
 import static com.google.light.server.constants.LightConstants.JOB_BACK_OFF_FACTOR;
 import static com.google.light.server.constants.LightConstants.JOB_BACK_OFF_SECONDS;
 import static com.google.light.server.constants.LightConstants.JOB_MAX_ATTEMPTES;
-import static com.google.light.server.utils.GuiceUtils.getRequestScopedValues;
-
 import com.google.light.server.persistence.entity.person.PersonEntity;
 
 import com.google.light.server.manager.interfaces.PersonManager;
@@ -36,7 +34,6 @@ import com.google.appengine.tools.pipeline.PipelineServiceFactory;
 import com.google.common.collect.Lists;
 import com.google.light.server.dto.pojo.ChangeLogEntryPojo;
 import com.google.light.server.dto.pojo.LightJobContextPojo;
-import com.google.light.server.dto.pojo.RequestScopedValues;
 import com.google.light.server.manager.interfaces.JobManager;
 import com.google.light.server.persistence.entity.jobs.JobEntity;
 import com.google.light.server.persistence.entity.jobs.JobEntity.JobHandlerType;
@@ -61,6 +58,7 @@ import javax.servlet.http.HttpServletResponse;
 public class DeleteAllServlet extends HttpServlet {
   private static final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
+  @Deprecated
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
     // First deleting all the existing Pipelines.

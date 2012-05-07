@@ -41,10 +41,10 @@ import org.junit.Test;
  */
 public class PersonEntityTest extends AbstractPersistenceEntityTest {
 
-  private  PersonId personId;
-  private  String email;
-  private  String firstName;
-  private  String lastName;
+  private PersonId personId;
+  private String email;
+  private String firstName;
+  private String lastName;
 
   @Before
   public void setUp() {
@@ -53,7 +53,7 @@ public class PersonEntityTest extends AbstractPersistenceEntityTest {
     firstName = getRandomString();
     lastName = getRandomString();
   }
-  
+
   private PersonEntity.Builder getEntityBuilderWithoutId() {
     return new PersonEntity.Builder()
         .email(email)
@@ -77,7 +77,6 @@ public class PersonEntityTest extends AbstractPersistenceEntityTest {
     assertNotNull(entity);
     assertFalse("By default it should be false", entity.getAcceptedTos());
 
-
     // Negative test : zero personId
     try {
       getEntityBuilderWithoutId().personId(new PersonId(0L)).build();
@@ -85,7 +84,7 @@ public class PersonEntityTest extends AbstractPersistenceEntityTest {
     } catch (InvalidPersonIdException e) {
       // Expected.
     }
-    
+
     // Negative test : negative personId
     try {
       getEntityBuilderWithoutId().personId(new PersonId(-3L)).build();
@@ -94,7 +93,6 @@ public class PersonEntityTest extends AbstractPersistenceEntityTest {
       // Expected.
     }
 
-    
     // Negative test : First Name=null
     try {
       getEntityBuilderWithoutId().firstName(null).build();
@@ -123,7 +121,7 @@ public class PersonEntityTest extends AbstractPersistenceEntityTest {
     try {
       getEntityBuilderWithoutId().lastName(" ").build();
       fail("Should have failed.");
-    } catch (BlankStringException  e) {
+    } catch (BlankStringException e) {
       // Expected.
     }
 
@@ -133,7 +131,7 @@ public class PersonEntityTest extends AbstractPersistenceEntityTest {
      */
 
     // Email == null is allowed. so no negative test for that.
-    
+
     // Negative test : email=""
     try {
       getEntityBuilderWithoutId().email(" ").build();
@@ -150,11 +148,11 @@ public class PersonEntityTest extends AbstractPersistenceEntityTest {
   @Override
   public void test_toDto() {
     PersonDto expectedDto = new PersonDto.Builder()
-      .firstName(firstName)
-      .lastName(lastName)
-      .email(email)
-      .acceptedTos(false)
-      .build();
+        .firstName(firstName)
+        .lastName(lastName)
+        .email(email)
+        .acceptedTos(false)
+        .build();
     assertEquals(expectedDto, getEntityBuilderWithoutId().build().toDto());
     assertEquals(expectedDto, getEntityBuilderWithoutId().personId(personId).build().toDto());
   }
@@ -259,7 +257,7 @@ public class PersonEntityTest extends AbstractPersistenceEntityTest {
     }
   }
 
-  /** 
+  /**
    * {@inheritDoc}
    */
   @Test
@@ -267,18 +265,19 @@ public class PersonEntityTest extends AbstractPersistenceEntityTest {
   public void test_getKey() {
     PersonId randomPersonId = TestingUtils.getRandomPersonId();
     PersonEntity entity = getEntityBuilderWithoutId().personId(randomPersonId).build();
-    Key<PersonEntity> expectedKey = new Key<PersonEntity>(PersonEntity.class, randomPersonId.get());
+    Key<PersonEntity> expectedKey =
+        new Key<PersonEntity>(PersonEntity.class, randomPersonId.getValue());
     assertEquals(expectedKey, entity.getKey());
   }
 
-  /** 
+  /**
    * {@inheritDoc}
    */
   @Test
   @Override
   public void test_generateKey() {
     // Positive tests are done as part of test_getKey
-    
+
     // Negative test : persondId = null
     try {
       PersonEntity.generateKey(null);
@@ -286,7 +285,7 @@ public class PersonEntityTest extends AbstractPersistenceEntityTest {
     } catch (InvalidPersonIdException e) {
       // Expected
     }
-    
+
     // Negative test : persondId = 0
     try {
       PersonEntity.generateKey(new PersonId(0L));
@@ -294,7 +293,7 @@ public class PersonEntityTest extends AbstractPersistenceEntityTest {
     } catch (InvalidPersonIdException e) {
       // Expected
     }
-    
+
     // Negative test : persondId = negative
     try {
       PersonEntity.generateKey(new PersonId(-3L));
@@ -302,6 +301,6 @@ public class PersonEntityTest extends AbstractPersistenceEntityTest {
     } catch (InvalidPersonIdException e) {
       // Expected
     }
-    
+
   }
 }

@@ -13,29 +13,30 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.jobs;
+package com.google.light.pipeline_jobs;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.GuiceUtils.enqueueRequestScopedVariables;
+import static com.google.light.server.utils.GuiceUtils.getInstance;
 
-import com.google.appengine.tools.pipeline.Job1;
+import com.google.appengine.tools.pipeline.Job6;
 import com.google.appengine.tools.pipeline.Value;
 import com.google.light.server.dto.pojo.LightJobContextPojo;
 import com.google.light.server.manager.interfaces.JobManager;
-import com.google.light.server.utils.GuiceUtils;
 
 /**
- *
+ * 
  * 
  * TODO(arjuns): Add test for this class.
- *
+ * 
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
-public abstract class LightJob1<T> extends Job1<T, LightJobContextPojo> implements BasicJobMethods {
+public abstract class LightJob6<T, T2, T3, T4, T5, T6> extends Job6<T, LightJobContextPojo, T2, T3, T4, T5, T6> implements
+    BasicJobMethods {
   private LightJobContextPojo context;
   protected JobManager jobManager;
-  
+
   @Override
   public LightJobContextPojo getContext() {
     return context;
@@ -48,23 +49,22 @@ public abstract class LightJob1<T> extends Job1<T, LightJobContextPojo> implemen
 
   @Override
   public void bootStrapGuice() {
-    enqueueRequestScopedVariables(context.getOwnerId(), context.getActorId()); 
-    
-    jobManager = GuiceUtils.getInstance(JobManager.class);
+    enqueueRequestScopedVariables(context.getOwnerId(), context.getActorId());
+    jobManager = getInstance(JobManager.class);
   }
-  
+
   @Override
-  public Value<T> run(LightJobContextPojo context) {
+  public Value<T> run(LightJobContextPojo context, T2 param2, T3 param3, T4 param4, T5 param5, T6 param6) {
     this.context = checkNotNull(context);
-    
+
     bootStrapGuice();
-    
-    return handler();
+
+    return handler(param2, param3, param4, param5, param6);
   }
 
   /**
    * @param param3
    * @return
    */
-  public abstract Value<T> handler();
+  public abstract Value<T> handler(T2 param2, T3 param3, T4 param4, T5 param5, T6 param6);
 }

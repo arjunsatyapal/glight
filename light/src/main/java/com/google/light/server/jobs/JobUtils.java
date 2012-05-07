@@ -18,6 +18,7 @@ package com.google.light.server.jobs;
 import static com.google.light.server.utils.GuiceUtils.getInstance;
 
 import com.google.light.server.dto.pojo.ChangeLogEntryPojo;
+import com.google.light.server.dto.pojo.longwrapper.JobId;
 import com.google.light.server.manager.interfaces.JobManager;
 import com.google.light.server.persistence.entity.jobs.JobEntity;
 import com.googlecode.objectify.Objectify;
@@ -30,7 +31,7 @@ import com.googlecode.objectify.Objectify;
  * @author Arjun Satyapal
  */
 public class JobUtils {
-  public static void updateChangeLog(Objectify ofy, Long jobId, String changeMessage) {
+  public static void updateChangeLog(Objectify ofy, JobId jobId, String changeMessage) {
     JobManager jobManager = getInstance(JobManager.class);
     JobEntity jobEntity = jobManager.get(ofy, jobId);
 

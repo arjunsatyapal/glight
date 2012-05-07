@@ -58,7 +58,7 @@ public class ModuleDao extends AbstractBasicDao<ModuleDto, ModuleEntity> {
    * TODO(arjuns): Add test for this.
    * Fetch Module via ModuleId.
    */
-  public ModuleEntity get(ModuleId moduleId) {
-    return super.get(ModuleEntity.generateKey(moduleId));
+  public ModuleEntity get(Objectify ofy, ModuleId moduleId) {
+    return super.get(ofy, ModuleEntity.generateKey(moduleId));
   }
 }

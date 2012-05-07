@@ -15,7 +15,7 @@
  */
 package com.google.light.server.utils;
 
-import com.google.light.server.dto.AbstractDto;
+import com.google.light.server.dto.TestAbstractDto;
 
 @SuppressWarnings("serial")
 /**
@@ -26,7 +26,7 @@ import com.google.light.server.dto.AbstractDto;
  * TODO(arjuns): See if this is fine.
  * @author Walter Cacau
  */
-public class QueryUtilsTestSampleDto extends AbstractDto<QueryUtilsTestSampleDto> {
+public class QueryUtilsTestSampleDto extends TestAbstractDto<QueryUtilsTestSampleDto> {
 
   /**
    * Choosing private because several DTO's create private constructors to force the use of their

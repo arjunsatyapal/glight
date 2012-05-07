@@ -25,7 +25,7 @@ import com.google.light.server.constants.JerseyConstants;
 import com.google.light.server.constants.http.ContentTypeConstants;
 import com.google.light.server.dto.pojo.longwrapper.CollectionId;
 import com.google.light.server.dto.pojo.longwrapper.Version;
-import com.google.light.server.dto.pojo.tree.CollectionTreeNode;
+import com.google.light.server.dto.pojo.tree.CollectionTreeNodeDto;
 import com.google.light.server.exception.unchecked.httpexception.NotFoundException;
 import com.google.light.server.manager.interfaces.CollectionManager;
 import com.google.light.server.persistence.entity.collection.CollectionVersionEntity;
@@ -69,8 +69,8 @@ public class CollectionResource extends AbstractJerseyResource {
 
   @GET
   @Path(JerseyConstants.PATH_COLLECTION_VERSION)
-  @Produces({ ContentTypeConstants.APPLICATION_JSON, ContentTypeConstants.TEXT_XML })
-  public CollectionTreeNode getCollectionVersion(
+  @Produces({ ContentTypeConstants.APPLICATION_JSON, ContentTypeConstants.APPLICATION_XML })
+  public CollectionTreeNodeDto getCollectionVersion(
       @PathParam(JerseyConstants.PATH_PARAM_COLLECTION_ID) String collectionIdStr,
       @PathParam(JerseyConstants.PATH_PARAM_VERSION) String versionStr) {
     CollectionVersionEntity collectionVersionEntity = getCollectionVersionEntity(
@@ -87,7 +87,7 @@ public class CollectionResource extends AbstractJerseyResource {
     CollectionVersionEntity collectionVersionEntity = getCollectionVersionEntity(
         collectionIdStr, versionStr);
     
-    CollectionTreeNode tree = collectionVersionEntity.getCollectionTree();
+    CollectionTreeNodeDto tree = collectionVersionEntity.getCollectionTree();
     StringBuilder builder = new StringBuilder();
     
     appendCurrNode(tree, builder, 2);
@@ -99,7 +99,7 @@ public class CollectionResource extends AbstractJerseyResource {
    * @param tree
    * @param builder
    */
-  private void appendCurrNode(CollectionTreeNode node, StringBuilder builder, int space) {
+  private void appendCurrNode(CollectionTreeNodeDto node, StringBuilder builder, int space) {
     builder.append("<br>");
     
     builder.append("<pre>");
@@ -113,7 +113,7 @@ public class CollectionResource extends AbstractJerseyResource {
     } else {
       builder.append("<b>").append(node.getTitle()).append("</b>");
       if (node.hasChildren()) {
-        for (CollectionTreeNode currChild : node.getChildren()) {
+        for (CollectionTreeNodeDto currChild : node.getChildren()) {
           appendCurrNode(currChild, builder, space * 2);
         }
       }

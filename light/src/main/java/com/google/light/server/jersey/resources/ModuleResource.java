@@ -66,7 +66,7 @@ public class ModuleResource extends AbstractJerseyResource {
 
   @GET
   @Path(JerseyConstants.PATH_MODULE_VERSION)
-  @Produces({ ContentTypeConstants.APPLICATION_JSON, ContentTypeConstants.TEXT_XML })
+  @Produces({ ContentTypeConstants.APPLICATION_JSON, ContentTypeConstants.APPLICATION_XML })
   public String getModuleVersion(
       @PathParam(JerseyConstants.PATH_PARAM_MODULE_ID) String moduleIdStr,
       @PathParam(JerseyConstants.PATH_PARAM_VERSION) String versionStr) {
@@ -74,7 +74,8 @@ public class ModuleResource extends AbstractJerseyResource {
     ModuleId moduleId = new ModuleId(moduleIdStr);
     Version version = Version.createVersion(versionStr);
 
-    ModuleVersionEntity moduleVersionEntity = moduleManager.getModuleVersion(moduleId, version);
+    ModuleVersionEntity moduleVersionEntity = moduleManager.getModuleVersion(
+        null /* ofy */, moduleId, version);
 
     return moduleVersionEntity.getContent();
   }
@@ -105,7 +106,7 @@ public class ModuleResource extends AbstractJerseyResource {
     Version version = Version.createVersion(versionStr);
     String resourceId = resourceType.name() + "/" + resourceStr;
 
-    ModuleVersionResourceEntity resourceEntity = moduleManager.getModuleResource(
+    ModuleVersionResourceEntity resourceEntity = moduleManager.getModuleResource(null /* ofy */,
         moduleId, version, resourceId);
 
     if (resourceEntity == null) {
@@ -133,7 +134,8 @@ public class ModuleResource extends AbstractJerseyResource {
     ModuleId moduleId = new ModuleId(moduleIdStr);
     Version version = Version.createVersion(versionStr);
 
-    ModuleVersionEntity moduleEntity = moduleManager.getModuleVersion(moduleId, version);
+    ModuleVersionEntity moduleEntity = moduleManager.getModuleVersion(
+        null /* ofy */, moduleId, version);
 
     if (moduleEntity == null) {
       throw new NotFoundException("Could not find " + moduleId + ":" + version);

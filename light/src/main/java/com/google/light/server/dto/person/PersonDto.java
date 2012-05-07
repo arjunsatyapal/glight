@@ -19,19 +19,19 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkEmail;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
-import com.google.light.server.dto.pojo.longwrapper.PersonId;
+import javax.xml.bind.annotation.XmlAccessType;
+
+import javax.xml.bind.annotation.XmlAccessorType;
 
 import com.google.light.server.dto.AbstractDto;
 import com.google.light.server.dto.AbstractDtoToPersistence;
+import com.google.light.server.dto.pojo.longwrapper.PersonId;
 import com.google.light.server.persistence.entity.person.PersonEntity;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import org.codehaus.jackson.annotate.JsonCreator;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
-import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
+import org.codehaus.jackson.annotate.JsonProperty;
 
 /**
  * DTO for {@link PersonEntity}.
@@ -40,20 +40,23 @@ import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
  */
 @SuppressWarnings("serial")
 @XmlRootElement(name = "person")
-@XmlType(name = "personType", propOrder = { "firstName", "lastName", "email", "acceptedTos" })
 @XmlAccessorType(XmlAccessType.FIELD)
-@JsonSerialize(include = Inclusion.NON_NULL)
+@XmlType(name = "personType", propOrder = { "firstName", "lastName", "email", "acceptedTos" })
 public class PersonDto extends AbstractDtoToPersistence<PersonDto, PersonEntity, PersonId> {
-  @XmlElement
+  @XmlElement(name = "first_name")
+  @JsonProperty(value = "first_name")
   private String firstName;
 
-  @XmlElement
+  @XmlElement(name = "last_name")
+  @JsonProperty(value = "last_name")
   private String lastName;
 
-  @XmlElement
+  @XmlElement(name = "email")
+  @JsonProperty(value = "email")
   private String email;
   
-  @XmlElement
+  @XmlElement(name = "accepted_tos")
+  @JsonProperty(value = "accepted_tos")
   private boolean acceptedTos;
 
   @Override

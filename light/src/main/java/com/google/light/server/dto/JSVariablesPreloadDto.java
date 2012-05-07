@@ -17,21 +17,27 @@ package com.google.light.server.dto;
 
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+
 import com.google.light.server.dto.person.PersonDto;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
-import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * Dto to represent javascript variables that will be inject
  * in the page before the actual client side code is loaded.
- * 
+ * TODO(arjuns): See if this gets affected.
  * @author Walter Cacau
  */
 @SuppressWarnings("serial")
-@JsonSerialize(include = Inclusion.NON_NULL)
+@XmlRootElement(name = "js_variables_preload")
+@XmlAccessorType(XmlAccessType.FIELD)
 public class JSVariablesPreloadDto extends AbstractDto<JSVariablesPreloadDto> {
-
+  @XmlElement
   private String locale;
+  
+  @XmlElement
   private PersonDto person;
 
   @Override

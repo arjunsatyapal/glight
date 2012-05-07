@@ -15,8 +15,15 @@
  */
 package com.google.light.server.manager.interfaces;
 
+import java.util.Map;
+
+import java.util.List;
+
 import com.google.light.server.dto.pojo.ChangeLogEntryPojo;
 import com.google.light.server.dto.pojo.JobHandlerId;
+import com.google.light.server.dto.pojo.longwrapper.JobId;
+import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocImportBatchJobContext;
+import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocImportJobContext;
 import com.google.light.server.persistence.entity.jobs.JobEntity;
 import com.google.light.server.persistence.entity.jobs.JobEntity.JobHandlerType;
 import com.google.light.server.persistence.entity.queue.importflow.ImportJobEntity;
@@ -31,12 +38,54 @@ import javax.annotation.Nullable;
  * @author Arjun Satyapal
  */
 public interface JobManager {
-  public JobEntity enqueueImportJob(ImportJobEntity importJobEntity, Long parentJobId, 
-      Long rootJobId, String promiseHandle);
+  @Deprecated
+  public JobEntity enqueueImportJob(ImportJobEntity importJobEntity, JobId parentJobId, 
+      JobId rootJobId, String promiseHandle);
+  
+  /**
+   * Enqueues a Batch job for importing Multiple Google Docs.
+   */
+  public JobEntity enqueueGoogleDocImportBatchJob(
+      GoogleDocImportBatchJobContext docImportBatchJobRequest);
+  
+  /**
+   * This is enqueued by a Batch Job for each google doc that needs to be downloaded and published.
+   */
+  public JobEntity enqueueGoogleDocImportChildJob(Objectify ofy, 
+      GoogleDocImportJobContext docImportJobRequest, JobId parentJobId, JobId rootJobId);
+  
+  /**
+   * This is used for complete Job. This will do two things
+   * <br> 1. Mark the job Pointed by JobId as Finalized.
+   * <br> 2. If it was a child Job, it will try to notify Parent Once. If it is successful, ok else
+   * parents are expected to poll for their Child Job Status.
+   * @param jobId
+   * @return
+   */
+  public JobEntity enqueueCompleteJob(JobId jobId);
+  
+  /**
+   * This will enqueue a Job in {@link com.google.light.server.constants.QueueEnum#LIGHT_POLLING}
+   * queue for polling for different resources.
+   * 
+   * @param jobId
+   * @return
+   */
+  public void enqueueJobForPolling(Objectify ofy, JobId jobId);
+  
+  public void enqueueLightJob(Objectify ofy, JobId jobId);
+  
+  
+  public void enqueueGoogleDocInteractionJob(Objectify ofy, JobId jobId);
   
   public JobEntity put(@Nullable Objectify ofy, JobEntity jobEntity, ChangeLogEntryPojo changeLog);
   
-  public JobEntity get(Objectify ofy, Long id);
+  public JobEntity get(Objectify ofy, JobId jobId);
   
+  @Deprecated
   public JobEntity findByJobHandlerId(JobHandlerType jobHandlerType, JobHandlerId jobHandlerId);
+  
+  public void handleJob(JobId jobId);
+  
+  public Map<JobId, JobEntity> findListOfJobs(List<JobId> listOfJobIds);
 }

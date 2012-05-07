@@ -23,7 +23,7 @@ import com.google.light.server.dto.collection.CollectionState;
 import com.google.light.server.dto.pojo.longwrapper.CollectionId;
 import com.google.light.server.dto.pojo.longwrapper.PersonId;
 import com.google.light.server.dto.pojo.longwrapper.Version;
-import com.google.light.server.dto.pojo.tree.CollectionTreeNode;
+import com.google.light.server.dto.pojo.tree.CollectionTreeNodeDto;
 import com.google.light.server.exception.unchecked.IdShouldNotBeSet;
 import com.google.light.server.manager.interfaces.CollectionManager;
 import com.google.light.server.persistence.dao.CollectionDao;
@@ -142,7 +142,7 @@ public class CollectionManagerImpl implements CollectionManager {
    */
   @Override
   public CollectionVersionEntity addCollectionVersionForGoogleDoc(Objectify ofy,
-      CollectionEntity collectionEntity, CollectionTreeNode collectionTree) {
+      CollectionEntity collectionEntity, CollectionTreeNodeDto collectionTree) {
     checkNotNull(collectionEntity, "collectionEntity");
     Version collectionVersion = collectionEntity.getLatestVersion().getNextVersion();
 

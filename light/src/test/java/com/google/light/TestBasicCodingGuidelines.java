@@ -16,15 +16,18 @@
 package com.google.light;
 
 import static com.google.light.testingutils.TestingUtils.containsAnnotation;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import com.google.common.collect.Sets;
-import com.google.light.server.AbstractLightServerTest;
+import com.google.light.server.constants.LightEnvEnum;
+import com.google.light.testingutils.GaeTestingUtils;
 import com.google.light.testingutils.TestingUtils;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.Set;
+import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -34,67 +37,64 @@ import org.junit.Test;
  * 
  * @author Arjun Satyapal
  */
-public class TestEnsureTestAnnotation extends AbstractLightServerTest {
+public class TestBasicCodingGuidelines {// extends AbstractLightServerTest {
+
+  @Before
+  public void setUp() {
+    GaeTestingUtils.cheapEnvSwitch(LightEnvEnum.UNIT_TEST);
+  }
+
   @SuppressWarnings("rawtypes")
+  /**
+   * This test will ensure following things :
+   * 1. All files which match Maven's File selection pattern for testing are included.
+   * 2. All the methods in these selected files which start with test are annotated with @Test
+   * and vice versa.
+   * @throws Exception
+   */
   @Test
   public void test_ensureTestAnnotation() throws Exception {
     // String testPackage = "com.google.light";
-    String testPackage = "com.google.light.server.implementation";
+    String testPackage = "com.google.light";
     List<Class> classes = TestingUtils.getClassesInPackage(testPackage, null);
 
     Set<Class> setOfTestClasses = getSetOfTestClasses(classes);
 
-    StringBuilder builder = new StringBuilder();
     // Now ensure that all the methods that start with test are annotated with @Test.
     for (Class currClass : setOfTestClasses) {
       // TODO(arjuns): Change this to getDeclaredMethods.
       for (Method currMethod : currClass.getMethods()) {
-        validateMethodAnnotation(currMethod, builder);
+        validateMethodAnnotation(currMethod);
+        validateMethodName(currMethod);
       }
     }
-    assertEquals(builder.toString(), 0, builder.toString().length());
-    
-    for (Class currClass : setOfTestClasses) {
-      for (Method currMethod : currClass.getMethods()) {
-        validateMethodName(currMethod, builder);
-      }
-    }
-    assertEquals(builder.toString(), 0, builder.toString().length());
   }
 
-  private void validateMethodName(Method currMethod, StringBuilder builder) {
-    String errorMessage = currMethod.getDeclaringClass().getSimpleName() + "#" 
-        + currMethod.getName() + " is tagged with " + Test.class.getName() + 
+  private void validateMethodName(Method currMethod) {
+    String errorMessage = currMethod.getDeclaringClass().getSimpleName() + "#"
+        + currMethod.getName() + " is tagged with " + Test.class.getName() +
         " annotation, but it does not start with test_";
+    
     if (containsAnnotation(Test.class, currMethod.getAnnotations())) {
-      if (currMethod.getName().startsWith("test_")) {
-        return;
-      } else {
-        builder.append("\n").append(errorMessage);
-      }
+      assertTrue(errorMessage, currMethod.getName().startsWith("test_"));
     }
   }
 
   /**
    * @param currMethod
    */
-  private void validateMethodAnnotation(Method currMethod, StringBuilder builder) {
+  private void validateMethodAnnotation(Method currMethod) {
     if (currMethod.getName().startsWith("test")) {
       String errorMessage =
           currMethod.getDeclaringClass().getSimpleName() + "#" + currMethod.getName()
               + " is not tagged with "
               + Test.class.getName() + " annotation.";
-      
-      if (!containsAnnotation(Test.class, currMethod.getAnnotations())) {
-        builder.append("\n").append(errorMessage);
-      }
+
+      boolean result = TestingUtils.containsAnnotation(Test.class, currMethod.getAnnotations());
+      Assert.assertTrue(errorMessage, result);
     }
   }
 
-  /**
-   * @param classes
-   * @return
-   */
   @SuppressWarnings("rawtypes")
   private Set<Class> getSetOfTestClasses(List<Class> classes) {
     Set<Class> set = Sets.newHashSet();

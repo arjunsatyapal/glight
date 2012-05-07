@@ -21,7 +21,6 @@ import static com.google.light.server.utils.LightPreconditions.checkNull;
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
 
 import com.google.light.server.constants.LightStringConstants;
-import com.google.light.server.dto.AbstractPojo;
 
 /**
  * Wrapper for Version.
@@ -31,11 +30,7 @@ import com.google.light.server.dto.AbstractPojo;
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
-public class Version extends AbstractPojo<Version>{
-  /**
-   * Version should be either null, or a positive value.
-   */
-  private Long version;
+public class Version extends AbstractTypeWrapper<Long, Version> {
   private State state;
 
   public Version(Long version) {
@@ -51,17 +46,13 @@ public class Version extends AbstractPojo<Version>{
   }
 
   public Version(Long version, State state) {
-    this.version = version;
+    super(version);
     this.state = state;
     validate();
   }
 
-  public Long get() {
-    return version;
-  }
-  
   public Version getNextVersion() {
-    return new Version(version + 1);
+    return new Version(getValue() + 1);
   }
 
   public State getState() {
@@ -82,7 +73,7 @@ public class Version extends AbstractPojo<Version>{
   
   @Override
   public String toString() {
-    return "version:" + version + ", State:" + state;
+    return "version:" + getValue() + ", State:" + state;
   }
 
   public static enum State {
@@ -102,15 +93,15 @@ public class Version extends AbstractPojo<Version>{
     checkNotNull(state, "state cannot be null.");
     switch (state) {
       case LATEST:
-        checkNull(version, "For LatestState, Version should be null.");
+        checkNull(getValue(), "For LatestState, Version should be null.");
         break;
 
       case NO_VERSION:
-        checkArgument(0 == version, "For State=NO_VERSION, version should be zero.");
+        checkArgument(0 == getValue(), "For State=NO_VERSION, version should be zero.");
         break;
 
       case SPECIFIC:
-        checkPositiveLong(version, "Invalid version.");
+        checkPositiveLong(getValue(), "Invalid version.");
         break;
 
       default:
@@ -119,8 +110,8 @@ public class Version extends AbstractPojo<Version>{
     return this;
   }
 
-  // For JAXB and Objectify.
-  @SuppressWarnings("unused")
+  // For Objectify and JAXB.
   private Version() {
+    super(null);
   }
 }

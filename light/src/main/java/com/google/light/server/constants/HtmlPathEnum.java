@@ -17,23 +17,41 @@ package com.google.light.server.constants;
 
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
+import com.google.common.annotations.VisibleForTesting;
+
+import com.google.common.base.Preconditions;
+
 /**
  * Path to HTML files.
  * 
  * @author Arjun Satyapal
  */
 public enum HtmlPathEnum {
-  GOOGLE_DOC_IMPORT("html/test/thirdparty/google/gdoc/import.html"),
-  GOOGLE_DOC_INFORMATION("html/test/thirdparty/google/gdoc/information.html"),
-  PUT_OAUTH2_CONSUMER_CREDENTIAL("/html/admin/put_oauth2_consumer_credential.html");
+  GOOGLE_DOC_IMPORT("/html/test/thirdparty/google/gdoc/import.html"),
+  GOOGLE_DOC_INFORMATION("/html/test/thirdparty/google/gdoc/information.html"),
+  PUT_OAUTH2_CONSUMER_CREDENTIAL("/html/admin/put_oauth2_consumer_credential.html"),
+  REST_CLIENT("/html/test/rest.html"),
+  TEST("/test.html");
 
   private String path;
 
   private HtmlPathEnum(String path) {
+    Preconditions.checkArgument(path.startsWith("/"), "Path should start with /.");
     this.path = checkNotBlank(path, "path");
   }
 
   public String get() {
     return path;
+  }
+  
+  @VisibleForTesting
+  static boolean contains(String path) {
+    for (HtmlPathEnum curr : HtmlPathEnum.values()) {
+      if (curr.path.equals(path)) {
+        return true;
+      }
+    }
+    
+    return false;
   }
 }

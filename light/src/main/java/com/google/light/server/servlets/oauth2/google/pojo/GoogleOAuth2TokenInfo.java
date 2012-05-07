@@ -15,13 +15,7 @@
  */
 package com.google.light.server.servlets.oauth2.google.pojo;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
 import org.codehaus.jackson.annotate.JsonCreator;
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
-import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
 
 /**
  * Java representation for the JSON object returned by Google as a response to
@@ -32,10 +26,6 @@ import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
-@XmlRootElement(name = "TokenInfo")
-@XmlAccessorType(XmlAccessType.PROPERTY)
-@JsonSerialize(include = Inclusion.NON_NULL)
-@JsonIgnoreProperties(ignoreUnknown = true)
 public class GoogleOAuth2TokenInfo extends AbstractOAuth2TokenInfo<GoogleOAuth2TokenInfo> {
   /**
    * {@inheritDoc}
@@ -48,5 +38,6 @@ public class GoogleOAuth2TokenInfo extends AbstractOAuth2TokenInfo<GoogleOAuth2T
   // For Jaxb.
   @JsonCreator
   public GoogleOAuth2TokenInfo() {
+    super(null);
   }
 }

@@ -13,29 +13,30 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.jobs;
+package com.google.light.pipeline_jobs;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.GuiceUtils.enqueueRequestScopedVariables;
 import static com.google.light.server.utils.GuiceUtils.getInstance;
 
-import com.google.appengine.tools.pipeline.Job2;
+import com.google.appengine.tools.pipeline.Job4;
 import com.google.appengine.tools.pipeline.Value;
 import com.google.light.server.dto.pojo.LightJobContextPojo;
 import com.google.light.server.manager.interfaces.JobManager;
 
 /**
- *
+ * 
  * 
  * TODO(arjuns): Add test for this class.
- *
+ * 
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
-public abstract class LightJob2<T, T2> extends Job2<T, LightJobContextPojo, T2> implements BasicJobMethods {
+public abstract class LightJob4<T, T2, T3, T4> extends Job4<T, LightJobContextPojo, T2, T3, T4> implements
+    BasicJobMethods {
   private LightJobContextPojo context;
   protected JobManager jobManager;
-  
+
   @Override
   public LightJobContextPojo getContext() {
     return context;
@@ -51,19 +52,19 @@ public abstract class LightJob2<T, T2> extends Job2<T, LightJobContextPojo, T2> 
     enqueueRequestScopedVariables(context.getOwnerId(), context.getActorId());
     jobManager = getInstance(JobManager.class);
   }
-  
+
   @Override
-  public Value<T> run(LightJobContextPojo context, T2 param2) {
+  public Value<T> run(LightJobContextPojo context, T2 param2, T3 param3, T4 param4) {
     this.context = checkNotNull(context);
-    
+
     bootStrapGuice();
-    
-    return handler(param2);
+
+    return handler(param2, param3, param4);
   }
 
   /**
    * @param param3
    * @return
    */
-  public abstract Value<T> handler(T2 param2);
+  public abstract Value<T> handler(T2 param2, T3 param3, T4 param4);
 }

@@ -30,7 +30,7 @@ import org.junit.Test;
  * @author Arjun Satyapal
  */
 public class ContentTypeEnumTest implements EnumTestInterface {
-
+  private int expectedCount = 30;
   /**
    * {@inheritDoc} When you change {@link ContentTypeEnum} update
    * {@link #test_getContentTypeByString}.
@@ -38,7 +38,7 @@ public class ContentTypeEnumTest implements EnumTestInterface {
   @Test
   @Override
   public void test_count() {
-    assertEquals("Update test_getContentTypeByString as required.", 31,
+    assertEquals("Update test_getContentTypeByString as required.", expectedCount,
         ContentTypeEnum.values().length);
   }
 
@@ -87,10 +87,11 @@ public class ContentTypeEnumTest implements EnumTestInterface {
             .put("text/plain", ContentTypeEnum.TEXT_PLAIN)
             .put("text/csv", ContentTypeEnum.TEXT_CSV)
             .put("text/tab-separated-values", ContentTypeEnum.TEXT_TSV)
-            .put("text/xml", ContentTypeEnum.TEXT_XML)
             .put("application/vnd.sun.xml.writer", ContentTypeEnum.SUN_XML_WRITE)
             .build();
 
+    assertEquals(expectedCount, map.keySet().size());
+    
     for (String curr : map.keySet()) {
       assertEquals(map.get(curr), ContentTypeEnum.getContentTypeByString(curr));
     }

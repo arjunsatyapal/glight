@@ -15,9 +15,8 @@
  */
 package com.google.light.server.dto.pojo;
 
-import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
-
 import com.google.light.server.dto.AbstractPojo;
+import com.google.light.server.dto.pojo.longwrapper.JobId;
 import com.google.light.server.dto.pojo.longwrapper.PersonId;
 
 /**
@@ -31,9 +30,9 @@ import com.google.light.server.dto.pojo.longwrapper.PersonId;
 public class LightJobContextPojo extends AbstractPojo<LightJobContextPojo> {
   private PersonId ownerId;
   private PersonId actorId;
-  private Long jobId;
-  private Long parentJobId;
-  private Long rootJobId;
+  private JobId jobId;
+  private JobId parentJobId;
+  private JobId rootJobId;
   private String promiseHandle;
 
   public PersonId getOwnerId() {
@@ -44,15 +43,15 @@ public class LightJobContextPojo extends AbstractPojo<LightJobContextPojo> {
     return actorId;
   }
 
-  public Long getJobId() {
+  public JobId getJobId() {
     return jobId;
   }
   
-  public Long getParentJobId() {
+  public JobId getParentJobId() {
     return parentJobId;
   }
   
-  public Long getRootJobId() {
+  public JobId getRootJobId() {
     return rootJobId;
   }
   
@@ -63,9 +62,9 @@ public class LightJobContextPojo extends AbstractPojo<LightJobContextPojo> {
   public static class Builder {
     private PersonId ownerId;
     private PersonId actorId;
-    private Long jobId;
-    private Long parentJobId;
-    private Long rootJobId;
+    private JobId jobId;
+    private JobId parentJobId;
+    private JobId rootJobId;
     private String promiseHandle;
 
     public Builder ownerId(PersonId ownerId) {
@@ -78,17 +77,17 @@ public class LightJobContextPojo extends AbstractPojo<LightJobContextPojo> {
       return this;
     }
 
-    public Builder jobId(Long jobId) {
+    public Builder jobId(JobId jobId) {
       this.jobId = jobId;
       return this;
     }
     
-    public Builder parentJobId(Long parentJobId) {
+    public Builder parentJobId(JobId parentJobId) {
       this.parentJobId = parentJobId;
       return this;
     }
     
-    public Builder rootJobId(Long rootJobId) {
+    public Builder rootJobId(JobId rootJobId) {
       this.rootJobId = rootJobId;
       return this;
     }
@@ -119,8 +118,8 @@ public class LightJobContextPojo extends AbstractPojo<LightJobContextPojo> {
    */
   @Override
   public LightJobContextPojo validate() {
-    checkPositiveLong(jobId, "jobId");
-    checkPositiveLong(rootJobId, "rootJobId");
+    jobId.validate();
+    rootJobId.validate();
     return this;
   }
 }

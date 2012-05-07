@@ -21,6 +21,7 @@ import com.google.light.server.utils.LightPreconditions;
  * Enum to encapsulate HTTP Headers.
  * 
  * TODO(arjuns): Add test for this class.
+ * 
  * @author Arjun Satyapal
  */
 public enum HttpHeaderEnum {
@@ -38,7 +39,7 @@ public enum HttpHeaderEnum {
   AGE("Age"),
   ALLOW("Allow"),
   AUTHORIZATION("Authorization"),
-  
+
   CACHE_CONTROL("Cache-Control"),
   CONNECTION("Connection"),
   COOKIE("Cookie"),
@@ -56,46 +57,46 @@ public enum HttpHeaderEnum {
   ETAG("ETag"),
   EXPECT("Expect"),
   EXPIRES("Expires"),
-  
+
   FROM("From"),
-  
+
   HOST("Host"),
-  
+
   IF_MATCh("If-Match"),
   IF_MODIFIED_SINCE("If-Modified-Since"),
   IF_NONE_MATCH("If-None-Match"),
   IF_RANGE("If-Range"),
   IF_UNMODIFIED_SINCE("If-Unmodified-Since"),
-  
+
   LAST_MODIFIED("Last-Modified"),
   LINK("Link"),
   LOCATION("Location"),
-  
+
   MAX_FORWARDS("Max-Forwards"),
 
   P3P("P3P"),
   PRAGMA("Pragma"),
   PROXY_AUTHORIZATION("Proxy-Authorization"),
-  
+
   RANGE("Range"),
   REFERER("Referer"),
   REFRESH("Refresh"),
   RETRY_AFTER("Retry-After"),
-  
+
   SERVER("Server"),
   SET_COOKIE("Set-Cookie"),
   STRICT_TRANSPORT_SECURITY("Strict-Transport-Security"),
-  
+
   TE("TE"),
   TRAILER("Trailer"),
   TRANSFER_ENCODING("Transfer-Encoding"),
-  
+
   UPGRADE("Upgrade"),
   USER_AGENT("User-Agent"),
-  
+
   VARY("Vary"),
   VIA("Via"),
-  
+
   WARNING("Warning"),
   WWW_AUTHENTICATE("WWW-Authenticate"),
 
@@ -109,9 +110,11 @@ public enum HttpHeaderEnum {
   GAE_FAILFAST("X-AppEngine-FailFast"),
   GAE_TASK_ETA("X-AppEngine-TaskETA"),
 
-// TODO(arjuns) : See what this does.
-
-  LIGHT_ACTOR_HEADER("light-actor");
+  // TODO(arjuns) : See what this does.
+  // Headers set by Light.
+  LIGHT_ACTOR_HEADER("light-actor"),
+  LIGHT_OWNER_HEADER("x-light-owner"),
+  LIGHT_NOTIIFCATION_TYPE("x-light-notification-type");
 
   private String name;
 

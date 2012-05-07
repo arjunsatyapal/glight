@@ -22,7 +22,18 @@ import static com.google.light.server.dto.module.ModuleType.getByProviderService
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightUtils.decodeFromUrlEncodedString;
 
+import org.codehaus.jackson.annotate.JsonProperty;
+
+import javax.xml.bind.annotation.XmlElement;
+
+import javax.xml.bind.annotation.XmlAccessType;
+
+import javax.xml.bind.annotation.XmlAccessorType;
+
+import javax.xml.bind.annotation.XmlRootElement;
+
 import com.google.light.server.dto.AbstractDto;
+
 import com.google.light.server.dto.module.ModuleType;
 
 /**
@@ -33,8 +44,15 @@ import com.google.light.server.dto.module.ModuleType;
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
+@XmlRootElement(name = "google_doc_resource_id")
+@XmlAccessorType(XmlAccessType.FIELD)
 public class GoogleDocResourceId extends AbstractDto<GoogleDocResourceId>{
+  @XmlElement(name = "module_type")
+  @JsonProperty(value = "module_type")
   private ModuleType moduleType;
+  
+  @XmlElement(name = "typed_resource_id")
+  @JsonProperty(value = "typed_resource_id")
   private String typedResourceId;
 
   public GoogleDocResourceId(String typedResourceId) {
@@ -70,6 +88,10 @@ public class GoogleDocResourceId extends AbstractDto<GoogleDocResourceId>{
   
   public String getTypedResourceId() {
     return typedResourceId;
+  }
+  
+  public String getExternalId() {
+    return moduleType + ":" + getTypedResourceId();
   }
   
   public ModuleType getModuleType() {

@@ -17,6 +17,7 @@ package com.google.light.server.utils;
 
 
 import com.google.light.server.dto.AbstractDto;
+import com.google.light.server.dto.AbstractPojo;
 import com.google.light.server.exception.unchecked.JsonException;
 import java.io.StringReader;
 import org.codehaus.jackson.annotate.JsonAutoDetect;
@@ -40,7 +41,12 @@ import org.codehaus.jackson.xc.JaxbAnnotationIntrospector;
 public class JsonUtils {
   // TODO(arjuns): Add javadocs in this class.
   // TODO(arjuns): See if this class can return object only after validation. Same for Xml Utils
+  
   public static <D extends AbstractDto<D>> D getDto(String jsonString, Class<D> dtoClass) {
+    return getPojo(jsonString, dtoClass).validate();
+  }
+  
+  public static <D extends AbstractPojo<D>> D getPojo(String jsonString, Class<D> dtoClass) {
     ObjectMapper mapper = new ObjectMapper();
     mapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     AnnotationIntrospector introspector = new JaxbAnnotationIntrospector();
@@ -53,14 +59,14 @@ public class JsonUtils {
         .withIsGetterVisibility(JsonAutoDetect.Visibility.NONE)
         .withCreatorVisibility(JsonAutoDetect.Visibility.NONE));
 
-    D dto = null;
+    D pojo = null;
     try {
-      dto = mapper.readValue(new StringReader(jsonString), dtoClass);
+      pojo = mapper.readValue(new StringReader(jsonString), dtoClass);
     } catch (Exception e) {
       throw new JsonException(e);
     }
     
-    return dto.validate();
+    return pojo.validate();
   }
 
   public static <T> String toJson(T object) {
@@ -71,9 +77,9 @@ public class JsonUtils {
     ObjectMapper mapper = new ObjectMapper();
     mapper.setSerializationInclusion(JsonSerialize.Inclusion.NON_NULL);
     
-    AnnotationIntrospector introspector = new JaxbAnnotationIntrospector();
+    AnnotationIntrospector jaxbAnnoIntrospector = new JaxbAnnotationIntrospector();
     // make serializer use JAXB annotations (only)
-    mapper.getSerializationConfig().withAnnotationIntrospector(introspector);
+    mapper.getSerializationConfig().withAnnotationIntrospector(jaxbAnnoIntrospector);
     mapper.setVisibilityChecker(mapper.getSerializationConfig().getDefaultVisibilityChecker()
         .withFieldVisibility(JsonAutoDetect.Visibility.ANY)
         .withGetterVisibility(JsonAutoDetect.Visibility.NONE)

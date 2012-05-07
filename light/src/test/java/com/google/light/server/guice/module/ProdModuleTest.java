@@ -55,7 +55,7 @@ public class ProdModuleTest extends AbstractModuleTest {
    */
   @Test
   @Override
-  public void testModuleInstantiation() {
+  public void test_ModuleInstantiation() {
     assertTrue(GaeUtils.isProductionServer());
     assertNotNull(new ProdModule());
   }

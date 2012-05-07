@@ -18,10 +18,16 @@ package com.google.light.server.dto.collection;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
 
+import javax.xml.bind.annotation.XmlAccessType;
+
 import com.google.light.server.dto.AbstractDtoToPersistence;
 import com.google.light.server.dto.pojo.longwrapper.Version;
-import com.google.light.server.dto.pojo.tree.CollectionTreeNode;
+import com.google.light.server.dto.pojo.tree.CollectionTreeNodeDto;
 import com.google.light.server.persistence.entity.collection.CollectionVersionEntity;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import org.codehaus.jackson.annotate.JsonProperty;
 
 /**
  * DTO for Light Collection Version.
@@ -31,9 +37,15 @@ import com.google.light.server.persistence.entity.collection.CollectionVersionEn
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
+@XmlRootElement(name = "collection_version")
+@XmlAccessorType(XmlAccessType.FIELD)
 public class CollectionVersionDto extends AbstractDtoToPersistence<CollectionVersionDto, CollectionVersionEntity, Long> {
+  @XmlElement
   private Long version;
-  private CollectionTreeNode collectionTree;
+  
+  @XmlElement(name = "collection_tree")
+  @JsonProperty(value = "collection_tree")
+  private CollectionTreeNodeDto collectionTree;
 
   /** 
    * {@inheritDoc}
@@ -58,20 +70,20 @@ public class CollectionVersionDto extends AbstractDtoToPersistence<CollectionVer
     return entity;
   }
 
-  public CollectionTreeNode getCollectionTree() {
+  public CollectionTreeNodeDto getCollectionTree() {
     return collectionTree;
   }
 
   public static class Builder extends AbstractDtoToPersistence.BaseBuilder<Builder> {
     private Long version;
-    private CollectionTreeNode collectionTree;
+    private CollectionTreeNodeDto collectionTree;
 
     public Builder version(Long version) {
       this.version = version;
       return this;
     }
 
-    public Builder collectionTree(CollectionTreeNode collectionTree) {
+    public Builder collectionTree(CollectionTreeNodeDto collectionTree) {
       this.collectionTree = collectionTree;
       return this;
     }
@@ -87,5 +99,10 @@ public class CollectionVersionDto extends AbstractDtoToPersistence<CollectionVer
     super(builder);
     this.version = builder.version;
     this.collectionTree = builder.collectionTree;
+  }
+
+  // For JAXB.
+  private CollectionVersionDto() {
+    super(null);
   }
 }

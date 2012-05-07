@@ -1,5 +1,11 @@
 package com.google.light.server.manager.interfaces;
 
+import org.joda.time.Instant;
+
+import java.util.List;
+
+import com.google.light.server.dto.module.ModuleType;
+
 import com.google.light.server.dto.module.GSBlobInfo;
 import com.google.light.server.dto.pojo.longwrapper.ModuleId;
 import com.google.light.server.dto.pojo.longwrapper.PersonId;
@@ -40,7 +46,7 @@ public interface ModuleManager {
    * @return
    * @throws IllegalKeyTypeException
    */
-  public ModuleEntity get(ModuleId moduleId);
+  public ModuleEntity get(Objectify ofy, ModuleId moduleId);
 
   /**
    * Delete an existing Module.
@@ -60,12 +66,12 @@ public interface ModuleManager {
 
   /**
    * Reserve a ModuleId for a OriginId.
-   * 
-   * @param originId
-   * @param ownerId
-   * @return
    */
-  public ModuleId reserveModuleIdForOriginId(String originId, PersonId ownerId);
+  public ModuleId reserveModuleIdForExternalId(ModuleType moduleType, String externalId, 
+      List<PersonId> owners);
+
+  public Version reserveModuleVersionForImport(
+      ModuleId moduleId, String etag, Instant lastEditTime);
 
   /**
    * Add ModuleVersion for GoogleDoc.
@@ -96,8 +102,8 @@ public interface ModuleManager {
    * @param moduleVersion
    * @return
    */
-  public ModuleVersionEntity getModuleVersion(ModuleId moduleId, Version version);
-  
+  public ModuleVersionEntity getModuleVersion(Objectify ofy, ModuleId moduleId, Version version);
+
   /**
    * Serve ModuleResource.
    * 
@@ -105,6 +111,6 @@ public interface ModuleManager {
    * @param version
    * @param resourceKey
    */
-  public ModuleVersionResourceEntity getModuleResource(ModuleId moduleId, Version version,
+  public ModuleVersionResourceEntity getModuleResource(Objectify ofy, ModuleId moduleId, Version version,
       String resourceId);
 }

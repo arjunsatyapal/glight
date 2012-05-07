@@ -18,7 +18,7 @@ package com.google.light.server.utils;
 import static com.google.light.server.utils.ObjectifyUtils.commitTransaction;
 import static com.google.light.server.utils.ObjectifyUtils.getKey;
 import static com.google.light.server.utils.ObjectifyUtils.initiateTransaction;
-import static com.google.light.server.utils.ObjectifyUtils.rollbackTransaction;
+import static com.google.light.server.utils.ObjectifyUtils.rollbackTransactionIfStillActive;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -123,7 +123,7 @@ public class ObjectifyUtilsTest extends AbstractLightServerTest {
   @Test
   public void test_rollbackTransaction() {
     Objectify txn = initiateTransaction();
-    rollbackTransaction(txn);
+    rollbackTransactionIfStillActive(txn);
     assertNotNull(txn.getTxn());
     assertFalse(txn.getTxn().isActive());
   }

@@ -18,6 +18,10 @@ package com.google.light.server.dto.module;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
+import com.google.light.server.dto.AbstractPojo;
+
+import javax.xml.bind.annotation.XmlRootElement;
+
 import com.google.light.server.constants.http.ContentTypeEnum;
 import com.google.light.server.dto.AbstractDto;
 
@@ -29,7 +33,8 @@ import com.google.light.server.dto.AbstractDto;
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
-public class GSBlobInfo extends AbstractDto<GSBlobInfo> {
+@XmlRootElement(name = "")
+public class GSBlobInfo extends AbstractPojo<GSBlobInfo> {
   private ContentTypeEnum contentType;
   private String fileName;
   private String gsKey;
@@ -105,7 +110,6 @@ public class GSBlobInfo extends AbstractDto<GSBlobInfo> {
 
   @SuppressWarnings("synthetic-access")
   private GSBlobInfo(Builder builder) {
-    super(builder);
     this.contentType = builder.contentType;
     this.fileName = builder.fileName;
     this.gsKey = builder.gsKey;
@@ -114,6 +118,5 @@ public class GSBlobInfo extends AbstractDto<GSBlobInfo> {
   
   // For JAXB
   private GSBlobInfo() {
-    super(null);
   }
 }

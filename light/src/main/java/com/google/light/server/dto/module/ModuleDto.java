@@ -17,14 +17,19 @@ package com.google.light.server.dto.module;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
-import static com.google.light.server.utils.LightPreconditions.checkPersonId;
 
-import com.google.light.server.dto.pojo.longwrapper.Version;
+import javax.xml.bind.annotation.XmlAccessType;
 
-import com.google.light.server.dto.pojo.longwrapper.PersonId;
+import javax.xml.bind.annotation.XmlAccessorType;
 
 import com.google.light.server.dto.AbstractDtoToPersistence;
+import com.google.light.server.dto.pojo.longwrapper.PersonId;
+import com.google.light.server.dto.pojo.longwrapper.Version;
 import com.google.light.server.persistence.entity.module.ModuleEntity;
+import com.google.light.server.utils.LightPreconditions;
+import java.util.List;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 import org.codehaus.jackson.annotate.JsonCreator;
 
 /**
@@ -35,13 +40,21 @@ import org.codehaus.jackson.annotate.JsonCreator;
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
+@XmlRootElement(name="module")
+@XmlAccessorType(XmlAccessType.FIELD)
 public class ModuleDto extends AbstractDtoToPersistence<ModuleDto, ModuleEntity, Long> {
+  @XmlElement 
   private String title;
+  
+  @XmlElement
   private ModuleState state;
   // PersonId for owner of this module.
-  private PersonId ownerPersonId;
-  private String etag;
-  private Version latestVersion;
+  
+  @XmlElement(name = "publisher_ids")
+  private List<PersonId> owners;
+
+  @XmlElement
+  private Version version;
 
   /** 
    * {@inheritDoc}
@@ -50,10 +63,9 @@ public class ModuleDto extends AbstractDtoToPersistence<ModuleDto, ModuleEntity,
   public ModuleDto validate() {
     checkNotBlank(title, "title");
     checkNotNull(state, "moduleState");
-    checkPersonId(ownerPersonId);
-    checkNotBlank(etag, "etag");
+    LightPreconditions.checkNonEmptyList(owners, "owner list cannot be empty");
     // Version can be zero when module is in process of import.
-    checkNotNull(latestVersion, "latestVersion");
+    checkNotNull(version, "version");
     return this;
   }
 
@@ -74,9 +86,8 @@ public class ModuleDto extends AbstractDtoToPersistence<ModuleDto, ModuleEntity,
   public static class Builder extends AbstractDtoToPersistence.BaseBuilder<Builder> {
     private String title;
     private ModuleState state;
-    private PersonId ownerPersonId;
-    private String etag;
-    private Version latestVersion;
+    private List<PersonId> owners;
+    private Version version;
 
     public Builder title(String title) {
       this.title = title;
@@ -88,18 +99,13 @@ public class ModuleDto extends AbstractDtoToPersistence<ModuleDto, ModuleEntity,
       return this;
     }
     
-    public Builder ownerPersonId(PersonId ownerPersonId) {
-      this.ownerPersonId  = ownerPersonId;
+    public Builder owners(List<PersonId> owners) {
+      this.owners = owners;
       return this;
     }
     
-    public Builder etag(String etag) {
-      this.etag = etag;
-      return this;
-    }
-    
-    public Builder latestVersion(Version latestVersion) {
-      this.latestVersion = latestVersion;
+    public Builder latestVersion(Version version) {
+      this.version = version;
       return this;
     }
 
@@ -114,9 +120,8 @@ public class ModuleDto extends AbstractDtoToPersistence<ModuleDto, ModuleEntity,
     super(builder);
     this.title = builder.title;
     this.state = builder.state;
-    this.ownerPersonId = builder.ownerPersonId;
-    this.etag = builder.etag;
-    this.latestVersion = builder.latestVersion;
+    this.owners = builder.owners;
+    this.version = builder.version;
   }
   
   @JsonCreator

@@ -20,7 +20,6 @@ import static com.google.light.server.constants.RequestParamKeyEnum.CLIENT_SECRE
 import static com.google.light.server.constants.RequestParamKeyEnum.EMAIL;
 import static com.google.light.server.constants.RequestParamKeyEnum.FULLNAME;
 import static com.google.light.server.constants.RequestParamKeyEnum.PASSWORD;
-import static com.google.light.server.servlets.path.ServletPathEnum.OAUTH2_GOOGLE_DOC_AUTH;
 import static com.google.light.server.servlets.path.ServletPathEnum.TEST_CREDENTIAL_BACKUP_SERVLET;
 import static com.google.light.server.servlets.test.CredentialStandardEnum.OAUTH2;
 import static com.google.light.server.servlets.test.CredentialUtils.getConsumerCredentialFileAbsPath;
@@ -40,7 +39,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.io.ByteStreams;
 import com.google.light.server.constants.HtmlPathEnum;
-import com.google.light.server.constants.JerseyConstants;
 import com.google.light.server.constants.LightEnvEnum;
 import com.google.light.server.constants.OAuth2ProviderEnum;
 import com.google.light.server.constants.OAuth2ProviderService;
@@ -49,6 +47,7 @@ import com.google.light.server.servlets.path.ServletPathEnum;
 import com.google.light.server.utils.LightPreconditions;
 import com.google.light.testingutils.GaeTestingUtils;
 import com.google.light.testingutils.SeleniumUtils;
+import com.google.light.testingutils.TestingConstants;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -70,7 +69,6 @@ public class LoginITCase {
   static final Logger logger = Logger.getLogger(LoginITCase.class.getName());
   private static List<WebDriver> listOfDrivers = Lists.newArrayList();
 
-  private static final int MAX_NUMBER_OF_TOKENS_TO_REVOKE = 2;
   private StringBuffer verificationErrors = new StringBuffer();
 
   private LightEnvEnum defaultEnv = LightEnvEnum.DEV_SERVER;
@@ -80,7 +78,7 @@ public class LoginITCase {
       "light-bot@myopenedu.com");
   private Map<OAuth2ProviderEnum, Properties> consumerCredentialsMap = Maps.newHashMap();
 
-  private final String serverUrl = "http://localhost:8080";
+  private final String serverUrl = TestingConstants.SERVER_URL;
 
   @Before
   public void seleniumSetup() throws Exception {
@@ -98,7 +96,7 @@ public class LoginITCase {
     assertEquals(OAuth2ProviderEnum.values().length, consumerCredentialsMap.keySet().size());
   }
 
-  static Properties loadProperties(String filePath) throws FileNotFoundException,
+  public static Properties loadProperties(String filePath) throws FileNotFoundException,
       IOException {
     Properties properties = new Properties();
     properties.load(new FileInputStream(new File(filePath)));
@@ -106,15 +104,15 @@ public class LoginITCase {
     return properties;
   }
 
-  static String getEmail(Properties properties) {
+  public static String getEmail(Properties properties) {
     return getPropertyValue(properties, EMAIL.get());
   }
 
-  static String getFullName(Properties properties) {
+  public static String getFullName(Properties properties) {
     return getPropertyValue(properties, FULLNAME.get());
   }
 
-  static String getPassword(Properties properties) {
+  public static String getPassword(Properties properties) {
     return getPropertyValue(properties, PASSWORD.get());
   }
 
@@ -131,7 +129,7 @@ public class LoginITCase {
     return driver;
   }
 
-  static void validatePropertiesFile(Properties properties, List<String> keys) {
+  public static void validatePropertiesFile(Properties properties, List<String> keys) {
     for (String currKey : keys) {
       checkNotBlank(properties.getProperty(currKey), "missing : " + currKey);
     }
@@ -147,7 +145,7 @@ public class LoginITCase {
   }
 
   @Test
-  public void testLogin() throws Exception {
+  public void test_Login() throws Exception {
     prepareServerForTest();
 
     List<Thread> listOfThread = Lists.newArrayList();
@@ -165,11 +163,15 @@ public class LoginITCase {
     }
   }
 
-  private static class ParallelTests implements Runnable {
+  public static class ParallelTests implements Runnable {
     private String serverUrl;
     private String email;
     private WebDriver driver;
     private Properties ownerCredentials;
+    
+    public WebDriver getDriver() {
+      return driver;
+    }
 
     public ParallelTests(String serverUrl, String email) throws FileNotFoundException, IOException {
       this.serverUrl = checkNotBlank(serverUrl, "serverUrl");
@@ -193,14 +195,11 @@ public class LoginITCase {
     @Override
     public void run() {
       try {
-        String password = getPassword(ownerCredentials);
-        String fullName = getFullName(ownerCredentials);
-
         // Loging to Google Accounts and revoke all Access.
-        loginToGoogleAndRevokeAccess(email, password);
+        loginToGoogleAndRevokeAccess();
 
         // Create Person on Light and finish Signup Flow.
-        completeSignupFlow(fullName);
+        completeSignupFlow();
 
         // Now trigger the GOOGLE_DOC OAuth2 flow for Owner.
         provideGoogleDocOAuth2OwnerToken();
@@ -222,7 +221,24 @@ public class LoginITCase {
       }
     }
 
-    private void loginToGoogleAndRevokeAccess(String email, String password) {
+    public void loginToGoogleAndRevokeAccess() {
+      loginToGoogle();
+
+      // SeleniumUtils.clickIfExists(driver, By.id("choose-account-" + accountNumber));
+
+      // Now revoking access
+      driver.get("https://accounts.google.com/b/0/IssuedAuthSubTokens?hl=en");
+//      driver.findElement(By.cssSelector("#nav-security > div.IurIzb")).click();
+//      driver.findElement(By.xpath("//div[5]/div[2]/a/div")).click();
+      while(driver.getPageSource().contains("Revoke Access")) {
+        if (!SeleniumUtils.clickIfExists(driver, By.linkText("Revoke Access")))
+          break;
+      }
+    }
+
+    public void loginToGoogle() {
+      String password = getPassword(ownerCredentials);
+      
       driver
           .get("https://accounts.google.com/ServiceLogin?passive=1209600&continue=https%3A%2F%2Faccounts.google.com%2FManageAccount&followup=https%3A%2F%2Faccounts.google.com%2FManageAccount");
       driver.findElement(By.id("Email")).clear();
@@ -234,26 +250,18 @@ public class LoginITCase {
       if (driver.getPageSource().contains("skip")) {
         driver.findElement(By.id("skip")).click();
       }
-
-      // SeleniumUtils.clickIfExists(driver, By.id("choose-account-" + accountNumber));
-
-      // Now revoking access
-      driver.findElement(By.cssSelector("#nav-security > div.IurIzb")).click();
-      driver.findElement(By.xpath("//div[5]/div[2]/a/div")).click();
-      for (int i = 0; i < MAX_NUMBER_OF_TOKENS_TO_REVOKE; i++) {
-        if (!SeleniumUtils.clickIfExists(driver, By.linkText("Revoke Access")))
-          break;
-      }
     }
 
-    private void completeSignupFlow(String fullName) {
+    public void completeSignupFlow() {
+      String fullName = getFullName(ownerCredentials);
+      
       // Now trigger open a light page (eg. SEARCH_PAGE) and start GOOGLE_LOGIN OAuth2 flow for
       // Owner.
       driver.get(serverUrl + ServletPathEnum.SEARCH_PAGE.get());
       clickAtCenter(driver, By.id("loginToolbar_loginButton"));
       clickAtCenter(driver, By.id("loginToolbar_googleLoginProviderButton"));
       // Accepting
-      driver.findElement(By.id("submit_approve_access")).click();
+      approveAccess();
 
       // Asserting the User is logged in
       clickAtCenter(driver, By.id("registerForm_tosCheckbox"));
@@ -261,22 +269,24 @@ public class LoginITCase {
       assertEquals(fullName, driver.findElement(By.id("loginToolbar_personNameSpan")).getText());
     }
 
-    private void logoutFromLight() {
+    public void approveAccess() {
+      driver.findElement(By.id("submit_approve_access")).click();
+    }
+    
+    public void logoutFromLight() {
       driver.get(serverUrl + ServletPathEnum.SEARCH_PAGE.get());
       clickAtCenter(driver, By.id("loginToolbar_logoutButton"));
     }
 
-    private void logoutFromGoogle() {
+    public void logoutFromGoogle() {
       driver.get("https://accounts.google.com");
       clickAtCenter(driver, By.id("gbi4m1"));
       clickAtCenter(driver, By.id("gb_71"));
     }
 
-    private void provideGoogleDocOAuth2OwnerToken() {
-      driver.get(serverUrl + JerseyConstants.URI_TEST_LINKS);
-      String currElement = OAUTH2_GOOGLE_DOC_AUTH.name();
-      driver.findElement(By.id(currElement)).click();
-      driver.findElement(By.id("submit_approve_access")).click();
+    public void provideGoogleDocOAuth2OwnerToken() {
+      driver.get(serverUrl + ServletPathEnum.OAUTH2_GOOGLE_DOC_AUTH.get());
+      approveAccess();
     }
 
     private void downloadCredentialsFromServerAsZip() throws IOException,
@@ -319,11 +329,9 @@ public class LoginITCase {
     for (OAuth2ProviderEnum currProvider : OAuth2ProviderEnum.values()) {
       Properties consumerCredentials = consumerCredentialsMap.get(currProvider);
 
-      driver.get(serverUrl + JerseyConstants.URI_TEST_LINKS);
-      String currElement = HtmlPathEnum.PUT_OAUTH2_CONSUMER_CREDENTIAL.name();
-      driver.findElement(By.id(currElement)).click();
+      driver.get(serverUrl + HtmlPathEnum.PUT_OAUTH2_CONSUMER_CREDENTIAL.get());
 
-      currElement = RequestParamKeyEnum.OAUTH2_PROVIDER_NAME.get();
+      String currElement = RequestParamKeyEnum.OAUTH2_PROVIDER_NAME.get();
       driver.findElement(By.name(currElement)).clear();
       driver.findElement(By.name(currElement)).sendKeys(GOOGLE.name());
 

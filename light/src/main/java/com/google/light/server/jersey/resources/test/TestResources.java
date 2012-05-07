@@ -38,10 +38,10 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 
 /**
- *
+ * 
  * 
  * TODO(arjuns): Add test for this class.
- *
+ * 
  * @author Arjun Satyapal
  */
 @Path(JerseyConstants.RESOURCE_PATH_TEST)
@@ -52,24 +52,23 @@ public class TestResources extends AbstractJerseyResource {
     super(injector, request, response);
     checkIsNotEnv(this, LightEnvEnum.PROD);
   }
-  
+
   @GET
   @Path(JerseyConstants.PATH_SESSION)
   @Produces(ContentTypeConstants.TEXT_HTML)
   public Response getSessionDetails() {
     SessionManager sessionManager = GuiceUtils.getInstance(SessionManager.class);
-    
-    
+
     if (!sessionManager.isPersonLoggedIn()) {
       throw new PersonLoginRequiredException("Login required.");
     }
-    
+
     StringBuilder builder = new StringBuilder();
     appendSessionData(builder, sessionManager.getSession());
 
     return Response.ok(builder.toString()).build();
   }
-  
+
   @GET
   @Path(JerseyConstants.PATH_TEST_LINKS)
   @Produces(ContentTypeConstants.TEXT_HTML)
@@ -85,11 +84,14 @@ public class TestResources extends AbstractJerseyResource {
       appendSectionHeader(builder, "Owner OAuth2 Workflow :");
       appendServletPath(builder, ServletPathEnum.OAUTH2_GOOGLE_LOGIN);
       appendServletPath(builder, ServletPathEnum.OAUTH2_GOOGLE_DOC_AUTH);
-      
+
       appendSectionHeader(builder, "Google Doc Integration");
       appendHref(builder, JerseyConstants.URI_GOOGLE_DOC_LIST, "Google Doc List");
       appendHtmlPath(builder, HtmlPathEnum.GOOGLE_DOC_INFORMATION);
       appendHtmlPath(builder, HtmlPathEnum.GOOGLE_DOC_IMPORT);
+
+      appendSectionHeader(builder, "Some helper Utils.");
+      appendHtmlPath(builder, HtmlPathEnum.REST_CLIENT);
 
       return Response.ok(builder.toString()).build();
     } catch (Exception e) {
@@ -97,7 +99,7 @@ public class TestResources extends AbstractJerseyResource {
       throw new RuntimeException(e);
     }
   }
-  
+
   private void appendHtmlPath(StringBuilder builder, HtmlPathEnum htmlPath) {
     appendHref(builder, htmlPath.get(), htmlPath.name());
   }
@@ -108,6 +110,7 @@ public class TestResources extends AbstractJerseyResource {
 
   private void appendHref(StringBuilder builder, String href, String name) {
     String idStr = "id=" + name;
-    builder.append("<a " + idStr + " href=\"").append(href).append("\">").append(name).append("</a><br>");
+    builder.append("<a " + idStr + " target=_blank href=\"").append(href).append("\">")
+        .append(name).append("</a><br>");
   }
 }

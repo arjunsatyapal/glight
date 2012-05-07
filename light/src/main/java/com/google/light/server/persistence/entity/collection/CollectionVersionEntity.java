@@ -22,7 +22,7 @@ import com.google.appengine.api.datastore.Text;
 import com.google.light.server.dto.collection.CollectionVersionDto;
 import com.google.light.server.dto.pojo.longwrapper.CollectionId;
 import com.google.light.server.dto.pojo.longwrapper.Version;
-import com.google.light.server.dto.pojo.tree.CollectionTreeNode;
+import com.google.light.server.dto.pojo.tree.CollectionTreeNodeDto;
 import com.google.light.server.persistence.entity.AbstractPersistenceEntity;
 import com.google.light.server.utils.JsonUtils;
 import com.googlecode.objectify.Key;
@@ -48,21 +48,22 @@ public class CollectionVersionEntity extends AbstractPersistenceEntity<Collectio
    */
   @Override
   public Key<CollectionVersionEntity> getKey() {
-    return generateKey(collectionKey, version);
+    return generateKey(collectionKey, new Version(version));
   }
 
-  private static Key<CollectionVersionEntity> generateKey(Key<CollectionEntity> collectionKey, Long version) {
+  public static Key<CollectionVersionEntity> generateKey(Key<CollectionEntity> collectionKey, Version version) {
     checkNotNull(collectionKey, "collectionKey cannot be null");
     checkNotNull(version, "version");
-    return new Key<CollectionVersionEntity>(collectionKey, CollectionVersionEntity.class, version);
+    return new Key<CollectionVersionEntity>(collectionKey, CollectionVersionEntity.class, version.getValue());
     
   }
-  /**
-   * Method to generate Objectify key for {@link CollectionEntity}.
-   */
-  public static Key<CollectionVersionEntity> generateKey(Key<CollectionEntity> collectionKey, Version version) {
-    return generateKey(collectionKey, version.get());
-  }
+  
+//  /**
+//   * Method to generate Objectify key for {@link CollectionEntity}.
+//   */
+//  public static Key<CollectionVersionEntity> generateKey(Key<CollectionEntity> collectionKey, Version version) {
+//    return generateKey(collectionKey, version);
+//  }
   
   public static Key<CollectionVersionEntity> generateKey(CollectionId collectionId, Version version) {
     return generateKey(CollectionEntity.generateKey(collectionId), version);
@@ -89,9 +90,9 @@ public class CollectionVersionEntity extends AbstractPersistenceEntity<Collectio
     return new Version(version);
   }
 
-  public CollectionTreeNode getCollectionTree() {
+  public CollectionTreeNodeDto getCollectionTree() {
     checkNotNull(collectionTreeJson, "collectionTreeJson");
-    return JsonUtils.getDto(collectionTreeJson.getValue(), CollectionTreeNode.class);
+    return JsonUtils.getDto(collectionTreeJson.getValue(), CollectionTreeNodeDto.class);
   }
   
   public Key<CollectionEntity> getCollectionKey() {
@@ -108,7 +109,7 @@ public class CollectionVersionEntity extends AbstractPersistenceEntity<Collectio
 
   public static class Builder extends AbstractPersistenceEntity.BaseBuilder<Builder> {
     private Version version;
-    private CollectionTreeNode collectionTree;
+    private CollectionTreeNodeDto collectionTree;
     private Key<CollectionEntity> collectionKey;
 
     public Builder collectionKey(Key<CollectionEntity> collectionKey) {
@@ -121,7 +122,7 @@ public class CollectionVersionEntity extends AbstractPersistenceEntity<Collectio
       return this;
     }
 
-    public Builder collectionTree(CollectionTreeNode collectionTree) {
+    public Builder collectionTree(CollectionTreeNodeDto collectionTree) {
       this.collectionTree = collectionTree;
       return this;
     }
@@ -137,7 +138,7 @@ public class CollectionVersionEntity extends AbstractPersistenceEntity<Collectio
     super(builder, true);
     
     checkNotNull(builder.version, "version");
-    this.version = builder.version.get();
+    this.version = builder.version.getValue();
     
     checkNotNull(builder.collectionTree, "collectionTree");
     this.collectionTreeJson = new Text(builder.collectionTree.toJson());

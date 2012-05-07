@@ -20,6 +20,15 @@ import static com.google.light.server.constants.OAuth2ProviderService.GOOGLE_DOC
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+
+import org.codehaus.jackson.annotate.JsonProperty;
+
+import javax.xml.bind.annotation.XmlElement;
+
+import javax.xml.bind.annotation.XmlRootElement;
+
 import com.google.common.collect.Lists;
 import com.google.gdata.data.Link;
 import com.google.gdata.data.MediaContent;
@@ -33,12 +42,7 @@ import com.google.light.server.dto.AbstractDto;
 import com.google.light.server.dto.module.ModuleType;
 import java.util.List;
 import java.util.logging.Logger;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
 import org.codehaus.jackson.annotate.JsonCreator;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
-import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
 import org.joda.time.DateTime;
 import org.joda.time.Instant;
 
@@ -50,24 +54,41 @@ import org.joda.time.Instant;
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
-@XmlRootElement(name = "googleDocInfo")
+@XmlRootElement(name = "google_doc_info")
 @XmlAccessorType(XmlAccessType.FIELD)
-@JsonSerialize(include = Inclusion.NON_NULL)
 public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
   private static final Logger logger = Logger.getLogger(GoogleDocInfoDto.class.getName());
-
+  @XmlElement
   private String id;
+  
+  @XmlElement(name = "resource_id")
+  @JsonProperty(value = "resource_id")
   private String resourceId;
-  private String etag;
-
+  
+  @XmlElement(name = "last_edit_time_in_millis")
+  @JsonProperty(value = "last_edit_time_in_millis")
   private Long lastEditTimeInMillis;
-
-  private ModuleType moduleType;
+  
+  @XmlElement
+  private ModuleType type;
+  
+  @XmlElement
   private String title;
-
+  
+  @XmlElement(name = "document_link")
+  @JsonProperty(value = "document_link")
   private String documentLink;
+  
+  @XmlElement(name = "acl_feed_link")
+  @JsonProperty(value = "acl_feed_link")
   private String aclFeedLink;
+  
+  @XmlElement(name = "html_export_url")
+  @JsonProperty(value = "html_export_url")
   private String htmlExportUrl;
+  
+  @XmlElement(name = "parent_collection_urls")
+  @JsonProperty(value = "parent_collection_urls")
   private List<String> parentCollectionUrls;
 
   /*
@@ -79,24 +100,49 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
    * retrieving_the_acl_for_a_document_file_or_collection}.
    * See roles at : {@link AclRole}.
    */
+  @XmlElement
   private List<String> owners;
+  
+  @XmlElement
   private List<String> writers;
+
+  @XmlElement
   private List<String> commenters;
+  
+  @XmlElement
   private List<String> readers;
 
   // TODO(arjuns): See what happesn when access is via group.
 
   // Optional Fields which are present only with Files.
   // File name is set on Google Side only when its a non-converted file. e.g. PDF.
+  @XmlElement(name = "file_name")
+  @JsonProperty(value = "file_name")
   private String fileName;
+  
   // File name suggested by Google to download.
+  @XmlElement(name = "suggested_file_name")
+  @JsonProperty(value = "suggested_file_name")
   private String suggestedFileName;
+  
+  @XmlElement
+  private String etag;
+  
   // MD5 checksum for file.
+  @XmlElement(name = "md5_sum")
+  @JsonProperty(value = "md5_sum")
   private String md5sum;
+  
   // Size of file in bytes.
+  @XmlElement(name = "size_in_bytes")
+  @JsonProperty(value = "size_in_bytes")
   private Long sizeInBytes;
 
-  private DateTime lastCommentTime;
+  @XmlElement(name = "last_comment_time")
+  @JsonProperty(value = "last_comment_time")
+  private Instant lastCommentTime;
+  
+  @XmlElement
   private Configuration config;
 
   /**
@@ -105,14 +151,14 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
   @Override
   public GoogleDocInfoDto validate() {
     checkNotNull(config, "config");
-    
+
     if (config != Configuration.DTO_FOR_IMPORT) {
       checkNotBlank(id, "id");
     }
-    
+
     // Required for all configs.
     checkNotBlank(resourceId, "resourceId");
-    
+
     if (config != Configuration.DTO_FOR_IMPORT) {
       checkNotBlank(etag, "etag");
     }
@@ -122,10 +168,10 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
     }
 
     // Required for all configs.
-    checkNotNull(moduleType, "ModuleType");
+    checkNotNull(type, "ModuleType");
     checkNotBlank(title, "title");
     checkNotBlank(documentLink, "documentLink");
-    
+
     if (config != Configuration.DTO_FOR_IMPORT) {
 
       checkNotBlank(aclFeedLink, "aclFeedLink");
@@ -134,9 +180,9 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
 
       checkNotNull(owners);
       // We dont do any validation for writers, commenters and readers.
-//      checkNotNull(writers);
-//      checkNotNull(commenters);
-//      checkNotNull(readers);
+      // checkNotNull(writers);
+      // checkNotNull(commenters);
+      // checkNotNull(readers);
 
       if (fileName != null) {
         // Current Entry is for a file which is not converted to Google Docs.
@@ -160,7 +206,7 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
   public String getResourceId() {
     return resourceId;
   }
-  
+
   public GoogleDocResourceId getGoogleDocsResourceId() {
     checkNotBlank(resourceId, "resourceId");
     return new GoogleDocResourceId(resourceId);
@@ -170,12 +216,16 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
     return etag;
   }
 
+  public Instant getLastEditTime() {
+    return new Instant(getLastEditTimeInMillis());
+  }
+  
   public Long getLastEditTimeInMillis() {
     return lastEditTimeInMillis;
   }
 
-  public ModuleType getModuleType() {
-    return moduleType;
+  public ModuleType getType() {
+    return type;
   }
 
   public String getTitle() {
@@ -230,10 +280,10 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
     return sizeInBytes;
   }
 
-  public DateTime getLastCommentTime() {
+  public Instant getLastCommentTime() {
     return lastCommentTime;
   }
-  
+
   public static Logger getLogger() {
     return logger;
   }
@@ -242,8 +292,7 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
     return config;
   }
 
-  @SuppressWarnings("rawtypes")
-  public static class Builder extends AbstractDto.BaseBuilder<BaseBuilder> {
+  public static class Builder extends AbstractDto.BaseBuilder<Builder> {
     private String id;
     private String resourceId;
     private String etag;
@@ -262,7 +311,7 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
     private String suggestedFileName;
     private String md5sum;
     private Long sizeInBytes;
-    private DateTime lastCommentTime;
+    private Instant lastCommentTime;
 
     // Builder configuration.
     private Configuration config;
@@ -388,7 +437,7 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
       return this;
     }
 
-    public Builder lastCommentTime(DateTime lastCommentTime) {
+    public Builder lastCommentTime(Instant lastCommentTime) {
       if (config != Configuration.DTO_FOR_IMPORT) {
         this.lastCommentTime = lastCommentTime;
       }
@@ -509,7 +558,7 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
       // Most of the time this is not set.
       com.google.gdata.data.DateTime lastCommentGdataTime = docListEntry.getLastCommented();
       if (lastCommentGdataTime != null) {
-        lastCommentTime(new DateTime(docListEntry.getLastCommented().getValue()));
+        lastCommentTime(new DateTime(docListEntry.getLastCommented().getValue()).toInstant());
       }
 
       if (config != Configuration.DTO_FOR_IMPORT) {
@@ -519,7 +568,7 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
       return this;
     }
   }
-  
+
   @SuppressWarnings("synthetic-access")
   private GoogleDocInfoDto(Builder builder) {
     super(builder);
@@ -527,7 +576,7 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
     this.resourceId = builder.resourceId;
     this.etag = builder.etag;
     this.lastEditTimeInMillis = builder.lastEditTimeInMillis;
-    this.moduleType = builder.moduleType;
+    this.type = builder.moduleType;
     this.title = builder.title;
     this.documentLink = builder.documentLink;
     this.aclFeedLink = builder.aclFeedLink;
@@ -546,8 +595,8 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
     this.lastCommentTime = builder.lastCommentTime;
     this.config = checkNotNull(builder.config, "config");
   }
-  
-  // For Jaxb.  
+
+  // For Jaxb.
   @JsonCreator
   private GoogleDocInfoDto() {
     super(null);

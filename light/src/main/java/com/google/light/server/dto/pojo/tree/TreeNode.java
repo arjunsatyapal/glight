@@ -18,14 +18,14 @@ package com.google.light.server.dto.pojo.tree;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNull;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-
 import com.google.common.collect.Lists;
 import com.google.light.server.dto.AbstractDto;
 import java.util.List;
 import javax.persistence.Embedded;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * 
@@ -35,14 +35,19 @@ import javax.persistence.Embedded;
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
+@XmlRootElement(name = "tree_node")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class TreeNode<T extends TreeNode<T>> extends AbstractDto<T> {
   @XmlElement
   private String title;
+  
   @XmlElement
   private TreeNodeType type;
 
+  // TODO(arjuns): See if this embedded can be removed. At present both Dto and persistence are using this.
+  // This is bad.
   @Embedded
+  @XmlElement
   private List<T> children;
 
   /**
@@ -95,13 +100,30 @@ public class TreeNode<T extends TreeNode<T>> extends AbstractDto<T> {
   public List<T> getChildren() {
     return children;
   }
-
+  
   public boolean hasChildren() {
     if (children == null || children.size() == 0) {
       return false;
     }
-
+    
     return true;
+  }
+  
+  @SuppressWarnings("unchecked")
+  public List<T> getInOrderTraversalOfLeafNodes() {
+    if (getType() == TreeNodeType.LEAF_NODE) {
+      return ((List<T>) Lists.newArrayList(this));
+    }
+    
+    List<T> list = Lists.newArrayList();
+    
+    if (hasChildren()) {
+      for (T currChild : getChildren()) {
+        list.addAll(currChild.getInOrderTraversalOfLeafNodes());
+      }
+    }
+    
+    return list;
   }
 
   @SuppressWarnings({ "unchecked", "rawtypes" })

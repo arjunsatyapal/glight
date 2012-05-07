@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <person>
-    <firstName>first name</firstName>
-    <lastName>last name</lastName>
+    <first_name>first name</first_name>
+    <last_name>last name</last_name>
     <email>unit-test@myopenedu.com</email>
-    <acceptedTos>true</acceptedTos>
+    <accepted_tos>true</accepted_tos>
 </person>

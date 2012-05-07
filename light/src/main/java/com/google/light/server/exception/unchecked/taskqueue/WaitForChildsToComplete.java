@@ -13,41 +13,32 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.server.exception.unchecked;
+package com.google.light.server.exception.unchecked.taskqueue;
+
+import com.google.light.server.dto.pojo.longwrapper.JobId;
+import com.google.light.server.exception.unchecked.pipelineexceptions.ignore.PipelineIgnoreException;
+
+
+
 
 /**
- * This indicates that there was some JSON exception while serializing/de-serializing.
- * 
+ * This happens when incorrect KeyType is passed. e.g. Instead of String Id, a Long Id was passed.
+ * Most probably this is going to be a server side issue.
+ *  
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
-public class GoogleDocsException extends RuntimeException {
+public class WaitForChildsToComplete extends PipelineIgnoreException {
+  private JobId jobId;
+  
   /**
    * {@inheritDoc}
    */
-  public GoogleDocsException() {
-      super();
+  public WaitForChildsToComplete(JobId jobId) {
+      super("Waiting for : " + jobId);
   }
-
-  /**
-   * {@inheritDoc}
-   * @param message
-   */
-  public GoogleDocsException(String message) {
-      super(message);
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  public GoogleDocsException(String message, Throwable cause) {
-      super(message, cause);
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  public GoogleDocsException(Throwable cause) {
-      super(cause);
+  
+  public JobId getJobId() {
+    return jobId;
   }
 }

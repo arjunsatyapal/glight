@@ -72,7 +72,7 @@ public class PersonManagerImpl implements PersonManager {
       return personByEmail;
     }
 
-    return personDao.put(entity);
+    return personDao.put(null, entity);
   }
 
   /**
@@ -95,8 +95,8 @@ public class PersonManagerImpl implements PersonManager {
 
     // Overriding client side provided email
     updatedEntity.setEmail(sessionManager.getEmail());
-
-    return personDao.put(updatedEntity);
+    
+    return personDao.put(null, updatedEntity);
   }
 
   /**

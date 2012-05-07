@@ -15,6 +15,14 @@
  */
 package com.google.light.server.guice.modules;
 
+import com.google.light.server.manager.implementation.NotificationManagerImpl;
+
+import com.google.light.server.manager.interfaces.NotificationManager;
+
+import com.google.light.server.manager.implementation.QueueManagerImpl;
+
+import com.google.light.server.manager.interfaces.QueueManager;
+
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
@@ -117,9 +125,14 @@ public abstract class BaseGuiceModule extends AbstractModule {
 
     bind(ModuleManager.class)
         .to(ModuleManagerImpl.class);
+    
+    bind(NotificationManager.class)
+      .to(NotificationManagerImpl.class);
 
     bind(PersonManager.class)
         .to(PersonManagerImpl.class);
+    bind(QueueManager.class)
+        .to(QueueManagerImpl.class);
 
     bind(SearchManager.class)
         .to(SearchManagerGSSImpl.class);

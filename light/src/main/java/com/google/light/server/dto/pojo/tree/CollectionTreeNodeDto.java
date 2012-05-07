@@ -15,63 +15,63 @@
  */
 package com.google.light.server.dto.pojo.tree;
 
-import javax.xml.bind.annotation.XmlElement;
-
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
+import org.codehaus.jackson.annotate.JsonProperty;
 
 import com.google.light.server.dto.pojo.longwrapper.ModuleId;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
- *
+ * 
  * 
  * TODO(arjuns): Add test for this class.
- *
+ * 
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
 @XmlRootElement(name = "collection_tree")
-@XmlAccessorType(XmlAccessType.FIELD)
-public class CollectionTreeNode extends TreeNode<CollectionTreeNode> {
-  @XmlElement private ModuleId moduleId;
-  
-//  @Override
-//  public CollectionTreeNode validate() {
-//    super.validate();
-//    
-//    if (getType() == TreeNodeType.LEAF_NODE) {
-//      checkNotNull(moduleId, "moduleId");
-//    }
-//    return this;
-//  }
-  
+public class CollectionTreeNodeDto extends TreeNode<CollectionTreeNodeDto> {
+  @XmlElement(name = "module_id")
+  @JsonProperty(value = "module_id")
+  private ModuleId moduleId;
+
+  // TODO(arjuns): Add validation logic here.
+  // @Override
+  // public CollectionTreeNode validate() {
+  // super.validate();
+  //
+  // if (getType() == TreeNodeType.LEAF_NODE) {
+  // checkNotNull(moduleId, "moduleId");
+  // }
+  // return this;
+  // }
+
   public ModuleId getModuleId() {
     return moduleId;
   }
-  
-  public static class Builder extends TreeNode.Builder<CollectionTreeNode, Builder> {
+
+  public static class Builder extends TreeNode.Builder<CollectionTreeNodeDto, Builder> {
     private ModuleId moduleId;
-    
+
     public Builder moduleId(ModuleId moduleId) {
       this.moduleId = moduleId;
       return this;
     }
-    
+
     @SuppressWarnings("synthetic-access")
-    public CollectionTreeNode build() {
-      return new CollectionTreeNode(this).validate();
+    public CollectionTreeNodeDto build() {
+      return new CollectionTreeNodeDto(this).validate();
     }
   }
-  
+
   @SuppressWarnings("synthetic-access")
-  private CollectionTreeNode(Builder builder) {
+  private CollectionTreeNodeDto(Builder builder) {
     super(builder);
     this.moduleId = builder.moduleId;
   }
-  
+
   // For Objectify and GAEPi
-  private CollectionTreeNode() {
+  private CollectionTreeNodeDto() {
     super(null);
   }
 }

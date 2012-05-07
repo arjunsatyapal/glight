@@ -52,5 +52,5 @@ public abstract class AbstractModuleTest {
    * defined.
    */
   @Test
-  public abstract void testModuleInstantiation();
+  public abstract void test_ModuleInstantiation();
 }

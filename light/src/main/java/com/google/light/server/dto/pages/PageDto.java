@@ -17,15 +17,15 @@ package com.google.light.server.dto.pages;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.light.server.dto.AbstractDto;
-import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+
+import org.codehaus.jackson.annotate.JsonProperty;
+
+import com.google.light.server.dto.AbstractDto;
+import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import org.codehaus.jackson.annotate.JsonCreator;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
-import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
 
 /**
  * 
@@ -35,33 +35,35 @@ import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
-@XmlRootElement(name = "pageDto")
+@XmlRootElement(name = "page")
 @XmlAccessorType(XmlAccessType.FIELD)
-@JsonSerialize(include = Inclusion.NON_NULL)
 public class PageDto extends AbstractDto<PageDto> {
-  @XmlElement(name="handler-uri")
+  @XmlElement(name = "handler_uri")
+  @JsonProperty(value = "handler_uri")
   private String handlerUri;
-  
-  @XmlElement(name="start-index")
-  private String startIndex;
-  
-  @SuppressWarnings("rawtypes")
-  @XmlElement private List<? extends AbstractDto> list;
 
-  /** 
+  @XmlElement(name = "start_index")
+  @JsonProperty(value = "start_index")
+  private String startIndex;
+
+  @SuppressWarnings("rawtypes")
+  @XmlElement(name = "list")
+  private List<? extends AbstractDto> list;
+
+  /**
    * {@inheritDoc}
    */
   @Override
   public PageDto validate() {
     checkNotNull(handlerUri, "handlerUri");
-    
+
     return this;
   }
-  
+
   public String getStartIndex() {
     return startIndex;
   }
-  
+
   public boolean hasNextPage() {
     return startIndex == null;
   }
@@ -71,7 +73,7 @@ public class PageDto extends AbstractDto<PageDto> {
     return list;
   }
 
-  public static class Builder extends AbstractDto.BaseBuilder<Builder>{
+  public static class Builder extends AbstractDto.BaseBuilder<Builder> {
     private String handlerUri;
     private String startIndex;
     @SuppressWarnings("rawtypes")
@@ -81,7 +83,7 @@ public class PageDto extends AbstractDto<PageDto> {
       this.handlerUri = handlerUri;
       return this;
     }
-    
+
     public Builder startIndex(String startIndex) {
       this.startIndex = startIndex;
       return this;
@@ -106,9 +108,8 @@ public class PageDto extends AbstractDto<PageDto> {
     this.startIndex = builder.startIndex;
     this.list = builder.list;
   }
-  
+
   // For JAXB
-  @JsonCreator
   private PageDto() {
     super(null);
   }

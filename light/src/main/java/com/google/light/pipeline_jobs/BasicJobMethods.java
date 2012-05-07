@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.jobs;
+package com.google.light.pipeline_jobs;
 
 import com.google.light.server.dto.pojo.LightJobContextPojo;
 

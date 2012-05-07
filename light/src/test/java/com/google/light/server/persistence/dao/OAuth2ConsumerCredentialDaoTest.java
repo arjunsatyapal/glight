@@ -76,7 +76,7 @@ public class OAuth2ConsumerCredentialDaoTest extends
       OAuth2ConsumerCredentialEntity getEntity = dao.get(ofy, savedEntity.getKey());
       assertEquals(savedEntity, getEntity);
     } catch (Exception e) {
-      ObjectifyUtils.rollbackTransaction(ofy);
+      ObjectifyUtils.rollbackTransactionIfStillActive(ofy);
     }
   }
 

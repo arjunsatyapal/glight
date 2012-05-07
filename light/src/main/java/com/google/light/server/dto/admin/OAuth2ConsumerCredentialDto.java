@@ -15,6 +15,15 @@ package com.google.light.server.dto.admin;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+
+import org.codehaus.jackson.annotate.JsonProperty;
+
+import javax.xml.bind.annotation.XmlElement;
+
+import javax.xml.bind.annotation.XmlRootElement;
+
 import com.google.light.server.constants.OAuth2ProviderEnum;
 import com.google.light.server.dto.AbstractDto;
 import com.google.light.server.dto.AbstractDtoToPersistence;
@@ -27,30 +36,39 @@ import com.google.light.server.persistence.entity.admin.OAuth2ConsumerCredential
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
-public class OAuth2ConsumerCredentialDto extends 
+@XmlRootElement(name = "consumer_credential")
+@XmlAccessorType(XmlAccessType.FIELD)
+public class OAuth2ConsumerCredentialDto extends
     AbstractDtoToPersistence<OAuth2ConsumerCredentialDto, OAuth2ConsumerCredentialEntity, String> {
+  @XmlElement
   private OAuth2ProviderEnum provider;
+  
+  @XmlElement(name = "client_id")
+  @JsonProperty(value = "client_id")
   private String clientId;
+  @XmlElement(name = "client_secret")
+  @JsonProperty(value = "client_secret")
   private String clientSecret;
 
-//  /**
-//   * Constructor.
-//   * 
-//   * @param provider
-//   * @param clientId
-//   * @param clientSecret
-//   */
-//  protected OAuth2ConsumerCredentialDto(OAuth2ProviderEnum provider, String clientId,
-//      String clientSecret) {
-//    this.provider = provider;
-//    this.clientId = clientId;
-//    this.clientSecret = clientSecret;
-//
-//    this.validate();
-//  }
+  // /**
+  // * Constructor.
+  // *
+  // * @param provider
+  // * @param clientId
+  // * @param clientSecret
+  // */
+  // protected OAuth2ConsumerCredentialDto(OAuth2ProviderEnum provider, String clientId,
+  // String clientSecret) {
+  // this.provider = provider;
+  // this.clientId = clientId;
+  // this.clientSecret = clientSecret;
+  //
+  // this.validate();
+  // }
 
   /**
-   * {@inheritDoc} This method should not be called. 
+   * {@inheritDoc} This method should not be called.
+   * 
    * @deprecated call {@link #toPersistenceEntity()}.
    */
   @Deprecated

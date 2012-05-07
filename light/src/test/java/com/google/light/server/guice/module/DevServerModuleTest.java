@@ -54,7 +54,7 @@ public class DevServerModuleTest extends AbstractModuleTest {
    */
   @Test
   @Override
-  public void testModuleInstantiation() {
+  public void test_ModuleInstantiation() {
     assertTrue(GaeUtils.isDevServer());
     assertNotNull(new ProdModule());
   }

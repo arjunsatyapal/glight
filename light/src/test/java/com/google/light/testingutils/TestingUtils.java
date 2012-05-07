@@ -29,22 +29,6 @@ import static com.google.light.server.utils.LightUtils.getUUIDString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.google.light.server.dto.pojo.longwrapper.PersonId;
-
-import com.google.common.collect.Lists;
-
-import java.lang.annotation.Annotation;
-
-import com.google.common.base.Preconditions;
-
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.TreeSet;
-import java.util.regex.Pattern;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.LowLevelHttpRequest;
 import com.google.api.client.http.LowLevelHttpResponse;
@@ -52,6 +36,9 @@ import com.google.api.client.testing.http.MockHttpTransport;
 import com.google.api.client.testing.http.MockLowLevelHttpRequest;
 import com.google.api.client.testing.http.MockLowLevelHttpResponse;
 import com.google.common.base.Charsets;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.common.io.Files;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -63,6 +50,7 @@ import com.google.light.server.annotations.AnotActor;
 import com.google.light.server.annotations.AnotOwner;
 import com.google.light.server.constants.LightEnvEnum;
 import com.google.light.server.constants.OAuth2ProviderService;
+import com.google.light.server.dto.pojo.longwrapper.PersonId;
 import com.google.light.server.guice.LightServletModule;
 import com.google.light.server.guice.module.UnitTestModule;
 import com.google.light.server.guice.modules.ProdModule;
@@ -74,9 +62,18 @@ import com.google.light.server.utils.LightUtils;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.annotation.Annotation;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.regex.Pattern;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -394,7 +391,7 @@ public class TestingUtils {
 
   public static PersonId getMockPersonIdForFailure() {
     PersonId personId = mock(PersonId.class);
-    Mockito.when(personId.get()).thenThrow(new RuntimeException("Should not be called"));
+    Mockito.when(personId.getValue()).thenThrow(new RuntimeException("Should not be called"));
     return personId;
   }
 
@@ -488,18 +485,54 @@ public class TestingUtils {
   }
 
   @SuppressWarnings("rawtypes")
+  public static boolean isSameAnnotation(Annotation annotation, Class annotationClass) {
+    return annotation.annotationType().getName().equals(annotationClass.getName());
+  }
+  
+  @SuppressWarnings("rawtypes")
   public static boolean containsAnnotation(Class requiredAnnotation, Annotation[] annotations) {
     if (annotations.length == 0) {
       return false;
     }
 
     for (Annotation currAnnotation : annotations) {
-      String currAnnotationClassName = currAnnotation.annotationType().getCanonicalName();
-      if (currAnnotationClassName.equals(requiredAnnotation.getName())) {
+      if (isSameAnnotation(currAnnotation, requiredAnnotation)) {
         return true;
       }
     }
 
     return false;
+  }
+
+  public static Set<String> findAllFilesUnderLight() {
+    String list = System.getProperty("java.class.path");
+
+    Set<String> setOfFiles = Sets.newHashSet();
+    for (final String path : list.split(":")) {
+      if (path.contains("light")) {
+        File object = new File(path);
+
+        addFilesToList(object.getParentFile().getParentFile(), setOfFiles);
+      }
+    }
+
+    return setOfFiles;
+  }
+
+  public static void addFilesToList(File self, Set<String> setOfFiles) {
+    if (self.isDirectory()) {
+
+      for (String child : self.list()) {
+        File childFile = new File(self.getAbsolutePath() + "/" + child);
+
+        if (childFile.isDirectory()) {
+          addFilesToList(childFile, setOfFiles);
+        } else {
+          setOfFiles.add(childFile.getAbsolutePath());
+        }
+      }
+    } else {
+      setOfFiles.add(self.getAbsolutePath());
+    }
   }
 }

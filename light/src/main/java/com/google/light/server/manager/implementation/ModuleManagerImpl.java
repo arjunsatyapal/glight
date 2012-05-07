@@ -17,14 +17,15 @@ package com.google.light.server.manager.implementation;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.light.server.dto.pojo.longwrapper.Version;
-
-import com.google.light.server.dto.pojo.longwrapper.ModuleId;
-import com.google.light.server.dto.pojo.longwrapper.PersonId;
-
+import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.light.server.dto.module.GSBlobInfo;
 import com.google.light.server.dto.module.ModuleState;
+import com.google.light.server.dto.module.ModuleType;
+import com.google.light.server.dto.module.ModuleVersionState;
+import com.google.light.server.dto.pojo.longwrapper.ModuleId;
+import com.google.light.server.dto.pojo.longwrapper.PersonId;
+import com.google.light.server.dto.pojo.longwrapper.Version;
 import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocInfoDto;
 import com.google.light.server.exception.unchecked.IdShouldNotBeSet;
 import com.google.light.server.exception.unchecked.httpexception.NotFoundException;
@@ -41,6 +42,9 @@ import com.google.light.server.utils.LightUtils;
 import com.google.light.server.utils.ObjectifyUtils;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Objectify;
+import java.util.List;
+import java.util.logging.Logger;
+import org.joda.time.Instant;
 
 /**
  * Implementation class for {@link ModuleManager}.
@@ -50,6 +54,8 @@ import com.googlecode.objectify.Objectify;
  * @author Arjun Satyapal
  */
 public class ModuleManagerImpl implements ModuleManager {
+  private static final Logger logger = Logger.getLogger(ModuleManagerImpl.class.getName());
+
   private final ModuleDao moduleDao;
   private final ModuleVersionDao moduleVersionDao;
   private final ModuleVersionResourceDao moduleVersionResourceDao;
@@ -57,12 +63,12 @@ public class ModuleManagerImpl implements ModuleManager {
   private final OriginModuleMappingDao originModuleMappingDao;
 
   @Inject
-  public ModuleManagerImpl(ModuleDao moduleDao, ModuleVersionDao moduleVersionDao, 
-      ModuleVersionResourceDao moduleVersionResourceDao, 
+  public ModuleManagerImpl(ModuleDao moduleDao, ModuleVersionDao moduleVersionDao,
+      ModuleVersionResourceDao moduleVersionResourceDao,
       OriginModuleMappingDao originModuleMappingDao) {
     this.moduleDao = checkNotNull(moduleDao, "moduleDao");
     this.moduleVersionDao = checkNotNull(moduleVersionDao, "moduleVersionDao");
-    this.moduleVersionResourceDao = checkNotNull(moduleVersionResourceDao, 
+    this.moduleVersionResourceDao = checkNotNull(moduleVersionResourceDao,
         "moduleVersionResourceDao");
     this.originModuleMappingDao = checkNotNull(originModuleMappingDao, "originModuleMappingDao");
   }
@@ -96,8 +102,8 @@ public class ModuleManagerImpl implements ModuleManager {
    * {@inheritDoc}
    */
   @Override
-  public ModuleEntity get(ModuleId moduleId) {
-    return moduleDao.get(moduleId);
+  public ModuleEntity get(Objectify ofy, ModuleId moduleId) {
+    return moduleDao.get(ofy, moduleId);
   }
 
   /**
@@ -126,11 +132,12 @@ public class ModuleManagerImpl implements ModuleManager {
    * {@inheritDoc}
    */
   @Override
-  public ModuleId reserveModuleIdForOriginId(String originId, PersonId ownerId) {
+  public ModuleId reserveModuleIdForExternalId(ModuleType moduleType, String externalId,
+      List<PersonId> owners) {
     Objectify ofy = ObjectifyUtils.initiateTransaction();
 
     try {
-      ModuleId existingModuleId = findModuleIdByOriginId(ofy, originId);
+      ModuleId existingModuleId = findModuleIdByOriginId(ofy, externalId);
       if (existingModuleId != null) {
         return existingModuleId;
       }
@@ -142,14 +149,16 @@ public class ModuleManagerImpl implements ModuleManager {
       ModuleEntity moduleEntity = new ModuleEntity.Builder()
           .title("reserved")
           .state(ModuleState.RESERVED)
-          .ownerPersonId(ownerId)
+          .type(moduleType)
+          .owners(owners)
           .latestVersion(new Version(0L /* noVersion */, Version.State.NO_VERSION))
+          .lastEditTime(new Instant(0L))
           .etag("etag")
           .build();
       ModuleEntity persistedEntity = this.create(ofy, moduleEntity);
 
       OriginModuleMappingEntity mappingEntity = new OriginModuleMappingEntity.Builder()
-          .id(originId)
+          .id(externalId)
           .moduleId(persistedEntity.getModuleId())
           .build();
       originModuleMappingDao.put(ofy, mappingEntity);
@@ -157,9 +166,12 @@ public class ModuleManagerImpl implements ModuleManager {
       ObjectifyUtils.commitTransaction(ofy);
 
       return persistedEntity.getModuleId();
+    } catch (Exception e) {
+      e.printStackTrace();
+      throw new RuntimeException(e);
     } finally {
       if (ofy.getTxn().isActive()) {
-        ObjectifyUtils.rollbackTransaction(ofy);
+        ObjectifyUtils.rollbackTransactionIfStillActive(ofy);
       }
     }
   }
@@ -197,7 +209,7 @@ public class ModuleManagerImpl implements ModuleManager {
       return moduleVersionEntity;
     } finally {
       if (ofy.getTxn().isActive()) {
-        ObjectifyUtils.rollbackTransaction(ofy);
+        ObjectifyUtils.rollbackTransactionIfStillActive(ofy);
       }
     }
   }
@@ -226,7 +238,7 @@ public class ModuleManagerImpl implements ModuleManager {
       return savedEntity;
     } finally {
       if (ofy.getTxn().isActive()) {
-        ObjectifyUtils.rollbackTransaction(ofy);
+        ObjectifyUtils.rollbackTransactionIfStillActive(ofy);
       }
     }
   }
@@ -235,10 +247,10 @@ public class ModuleManagerImpl implements ModuleManager {
    * {@inheritDoc}
    */
   @Override
-  public ModuleVersionEntity getModuleVersion(ModuleId moduleId, Version version) {
-    Version requiredVersion = convertLatestToSpecificVersion(moduleId, version);
-    
-    ModuleVersionEntity moduleVersionEntity = moduleVersionDao.get(moduleId, requiredVersion);
+  public ModuleVersionEntity getModuleVersion(Objectify ofy, ModuleId moduleId, Version version) {
+    Version requiredVersion = convertLatestToSpecificVersion(ofy, moduleId, version);
+
+    ModuleVersionEntity moduleVersionEntity = moduleVersionDao.get(ofy, moduleId, requiredVersion);
     return moduleVersionEntity;
   }
 
@@ -246,9 +258,10 @@ public class ModuleManagerImpl implements ModuleManager {
    * {@inheritDoc}
    */
   @Override
-  public ModuleVersionResourceEntity getModuleResource(ModuleId moduleId, Version version,
+  public ModuleVersionResourceEntity getModuleResource(Objectify ofy, ModuleId moduleId,
+      Version version,
       String resourceId) {
-    Version requiredVersion = convertLatestToSpecificVersion(moduleId, version);
+    Version requiredVersion = convertLatestToSpecificVersion(ofy, moduleId, version);
 
     ModuleVersionResourceEntity entity =
         moduleVersionResourceDao.get(moduleId, requiredVersion, resourceId);
@@ -259,13 +272,60 @@ public class ModuleManagerImpl implements ModuleManager {
 
     return entity;
   }
-  
-  private Version convertLatestToSpecificVersion(ModuleId moduleId, Version version) {
-    if(version.isLatest()) {
-      ModuleEntity moduleEntity = get(moduleId);
+
+  private Version convertLatestToSpecificVersion(Objectify ofy, ModuleId moduleId,
+      Version version) {
+    if (version.isLatest()) {
+      ModuleEntity moduleEntity = get(ofy, moduleId);
       return moduleEntity.getLatestVersion();
     }
-    
+
     return version;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public Version reserveModuleVersionForImport(
+      ModuleId moduleId, String etag, Instant lastEditTime) {
+    Objectify ofy = ObjectifyUtils.initiateTransaction();
+    try {
+      ModuleEntity moduleEntity = this.get(ofy, moduleId);
+      Preconditions.checkNotNull(moduleEntity, "moduleEntity");
+
+      System.out.println("Module update time : " + moduleEntity.getLastEditTime());
+      System.out.println("Google update time : " + lastEditTime);
+      if (moduleEntity.getLastEditTime().isEqual(lastEditTime) 
+          ||moduleEntity.getLastEditTime().isAfter(lastEditTime)) {
+        // No need to import new version.
+        logger.info("Skipping creating version because for [" + moduleEntity.getModuleId()
+            + "], lastEditTime[" + moduleEntity.getLastEditTime()
+            + "] is equal/after lastEditTime[" + lastEditTime + "] given by Google.");
+        return null;
+      }
+
+      Version version = moduleEntity.getLatestVersion().getNextVersion();
+      
+      // TODO(arjuns): differentiate latest and published version.
+      moduleEntity.setLatestVersion(version);
+//      moduleEntity.setLastEditTime(lastEditTime);
+      moduleDao.put(ofy, moduleEntity);
+
+      ModuleVersionEntity moduleVersionEntity = new ModuleVersionEntity.Builder()
+          .version(version)
+          .moduleKey(moduleEntity.getKey())
+          .state(ModuleVersionState.RESERVED)
+          .etag(etag)
+          .lastEditTime(lastEditTime)
+          .build();
+
+      moduleVersionDao.put(ofy, moduleVersionEntity);
+
+      ObjectifyUtils.commitTransaction(ofy);
+      return moduleVersionEntity.getVersion();
+    } finally {
+      ObjectifyUtils.rollbackTransactionIfStillActive(ofy);
+    }
   }
 }
