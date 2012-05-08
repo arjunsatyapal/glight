@@ -623,7 +623,7 @@ public class JobManagerImpl implements JobManager {
     LightPreconditions.checkTxnIsRunning(ofy);
 
     CollectionVersionEntity cvEntity = collectionManager.getCollectionVersion(
-        ofy, collectionEntity.getCollectionId(), collectionEntity.getLatestVersion());
+        ofy, collectionEntity.getId(), collectionEntity.getLatestVersion());
 
     GoogleDocTree gdocTreeRoot = gdocImportBatchContext.getTreeRoot();
     CollectionTreeNodeDto collectionRoot = cvEntity.getCollectionTree();
@@ -727,11 +727,11 @@ public class JobManagerImpl implements JobManager {
     try {
       CollectionEntity collectionEntity = collectionManager.reserveCollectionId(
           ofy, GuiceUtils.getOwnerId(), gdocImportBatchContext.getCollectionTitle());
-      gdocImportBatchContext.setCollectionId(collectionEntity.getCollectionId());
+      gdocImportBatchContext.setCollectionId(collectionEntity.getId());
 
       Text context = new Text(gdocImportBatchContext.toJson());
       updateJobContext(ofy, jobEntity.getJobState(), context, jobEntity,
-          "assigning new CollectionId :" + collectionEntity.getCollectionId());
+          "assigning new CollectionId :" + collectionEntity.getId());
 
       CollectionVersionEntity cvEntity = createFirstCollectionVersion(
           ofy, gdocImportBatchContext, collectionEntity);

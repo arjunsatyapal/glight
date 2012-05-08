@@ -201,9 +201,9 @@ public class ImportGoogleFolderJobs {
       checkNotNull(collectionEntity, "At this point collectionEntity should not be null");
 
       updateChangeLog(null, getContext().getJobId(),
-          "Created collection : " + collectionEntity.getCollectionId());
+          "Created collection : " + collectionEntity.getId());
 
-      return immediate(collectionEntity.getCollectionId());
+      return immediate(collectionEntity.getId());
     }
 
     /**

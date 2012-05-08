@@ -18,12 +18,14 @@ package com.google.light.server.persistence.entity.collection;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNonEmptyList;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
+import static com.google.light.server.utils.LightPreconditions.checkNotNull;
 
 import com.google.light.server.dto.collection.CollectionDto;
 import com.google.light.server.dto.collection.CollectionState;
 import com.google.light.server.dto.pojo.longwrapper.CollectionId;
 import com.google.light.server.dto.pojo.longwrapper.PersonId;
 import com.google.light.server.dto.pojo.longwrapper.Version;
+import com.google.light.server.exception.ExceptionType;
 import com.google.light.server.persistence.entity.AbstractPersistenceEntity;
 import com.googlecode.objectify.Key;
 import java.util.List;
@@ -72,11 +74,11 @@ public class CollectionEntity extends AbstractPersistenceEntity<CollectionEntity
    */
   @Override
   public Key<CollectionEntity> getKey() {
-    return generateKey(getCollectionId());
+    return generateKey(getId());
   }
   
 
-  public CollectionId getCollectionId() {
+  public CollectionId getId() {
     if (id == null) {
       return null;
     }
@@ -90,6 +92,10 @@ public class CollectionEntity extends AbstractPersistenceEntity<CollectionEntity
 
   public CollectionState getState() {
     return state;
+  }
+  
+  public void setState(CollectionState state) {
+    this.state = checkNotNull(state, ExceptionType.SERVER, "state");
   }
 
   public List<PersonId> getOwners() {
@@ -114,6 +120,7 @@ public class CollectionEntity extends AbstractPersistenceEntity<CollectionEntity
   @Override
   public CollectionDto toDto() {
     return new CollectionDto.Builder()
+      .id(getId())
       .title(title)
       .state(state)
       .owners(owners)

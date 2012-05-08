@@ -18,6 +18,8 @@ package com.google.light.server.dto.collection;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
+import com.google.light.server.dto.pojo.longwrapper.CollectionId;
+
 import org.codehaus.jackson.annotate.JsonProperty;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -46,7 +48,10 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class CollectionDto extends
     AbstractDtoToPersistence<CollectionDto, CollectionEntity, String> {
-
+  @XmlElement(name = "id")
+  @JsonProperty(value = "id")
+  private CollectionId id;
+  
   @XmlElement(name = "title")
   @JsonProperty(value = "title")
   private String title;
@@ -114,12 +119,18 @@ public class CollectionDto extends
   }
 
   public static class Builder extends AbstractDto.BaseBuilder<Builder> {
+    private CollectionId id;
     private String title;
     private CollectionState state;
     private List<PersonId> owners;
     private Version version;
     private CollectionTreeNodeDto root;
 
+    public Builder id(CollectionId id) {
+      this.id = id;
+      return this;
+    }
+    
     public Builder title(String title) {
       this.title = title;
       return this;
@@ -154,6 +165,7 @@ public class CollectionDto extends
   @SuppressWarnings("synthetic-access")
   private CollectionDto(Builder builder) {
     super(builder);
+    this.id = builder.id;
     this.title = builder.title;
     this.state = builder.state;
     this.owners = builder.owners;

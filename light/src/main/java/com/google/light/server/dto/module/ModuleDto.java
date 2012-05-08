@@ -16,7 +16,10 @@
 package com.google.light.server.dto.module;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.light.server.utils.LightPreconditions.checkNonEmptyList;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
+
+import com.google.light.server.dto.pojo.longwrapper.ModuleId;
 
 import org.codehaus.jackson.annotate.JsonProperty;
 
@@ -45,6 +48,10 @@ import org.codehaus.jackson.annotate.JsonCreator;
 @XmlRootElement(name="module")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class ModuleDto extends AbstractDtoToPersistence<ModuleDto, ModuleEntity, Long> {
+  @XmlElement(name = "id")
+  @JsonProperty(value = "id")
+  private ModuleId id;
+  
   @XmlElement(name = "title")
   @JsonProperty(value = "title")
   private String title;
@@ -68,7 +75,7 @@ public class ModuleDto extends AbstractDtoToPersistence<ModuleDto, ModuleEntity,
   public ModuleDto validate() {
     checkNotBlank(title, "title");
     checkNotNull(state, "moduleState");
-    LightPreconditions.checkNonEmptyList(owners, "owner list cannot be empty");
+    checkNonEmptyList(owners, "owner list cannot be empty");
     // Version can be zero when module is in process of import.
     checkNotNull(version, "version");
     return this;
@@ -89,10 +96,16 @@ public class ModuleDto extends AbstractDtoToPersistence<ModuleDto, ModuleEntity,
   }
 
   public static class Builder extends AbstractDtoToPersistence.BaseBuilder<Builder> {
+    private ModuleId id;
     private String title;
     private ModuleState state;
     private List<PersonId> owners;
     private Version version;
+    
+    public Builder id(ModuleId id) {
+      this.id = id;
+      return this;
+    }
 
     public Builder title(String title) {
       this.title = title;
@@ -123,6 +136,7 @@ public class ModuleDto extends AbstractDtoToPersistence<ModuleDto, ModuleEntity,
   @SuppressWarnings("synthetic-access")
   private ModuleDto(Builder builder) {
     super(builder);
+    this.id = builder.id;
     this.title = builder.title;
     this.state = builder.state;
     this.owners = builder.owners;

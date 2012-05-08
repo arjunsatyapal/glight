@@ -86,6 +86,7 @@ public class ModuleEntity extends AbstractPersistenceEntity<ModuleEntity, Module
   @Override
   public ModuleDto toDto() {
     ModuleDto dto = new ModuleDto.Builder()
+        .id(new ModuleId(id))
         .title(title)
         .state(state)
         .owners(owners)

@@ -65,7 +65,7 @@ public class CollectionManagerImpl implements CollectionManager {
    */
   @Override
   public CollectionEntity create(Objectify ofy, CollectionEntity entity) {
-    if (entity.getCollectionId() != null) {
+    if (entity.getId() != null) {
       throw new IdShouldNotBeSet();
     }
 
@@ -77,8 +77,8 @@ public class CollectionManagerImpl implements CollectionManager {
    */
   @Override
   public CollectionEntity update(Objectify ofy, CollectionEntity updatedEntity) {
-    Preconditions.checkArgument(updatedEntity.getCollectionId().isValid(),
-        "Invalid CollectionId : " + updatedEntity.getCollectionId());
+    Preconditions.checkArgument(updatedEntity.getId().isValid(),
+        "Invalid CollectionId : " + updatedEntity.getId());
     return collectionDao.put(ofy, updatedEntity);
   }
 
@@ -185,6 +185,7 @@ public class CollectionManagerImpl implements CollectionManager {
     
     // TODO(arjuns): Add support for etag.
     collectionEntity.setLatestVersion(collectionVersion);
+    collectionEntity.setState(CollectionState.PUBLISHED);
     collectionDao.put(ofy, collectionEntity);
 
     return collectionVersionEntity;

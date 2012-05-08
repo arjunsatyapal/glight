@@ -23,6 +23,6 @@ package com.google.light.server.dto.collection;
  * @author Arjun Satyapal
  */
 public enum CollectionState {
-  ADDED,
+  PUBLISHED,
   RESERVED;
 }

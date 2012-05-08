@@ -59,7 +59,7 @@ private static final Logger logger = Logger.getLogger(CollectionDao.class.getNam
   @Override
   public CollectionEntity put(Objectify ofy, CollectionEntity entity) {
     CollectionEntity returnEntity = super.put(ofy, entity);
-    String returnMsg = "Created/Updated [" + returnEntity.getCollectionId() + "].";
+    String returnMsg = "Created/Updated [" + returnEntity.getId() + "].";
 
     return logAndReturn(logger, returnEntity, returnMsg);
   }
