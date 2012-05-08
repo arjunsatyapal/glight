@@ -31,7 +31,7 @@ import java.util.List;
  */
 public enum LightEnvEnum {
   PROD(newArrayList("light-prod")),
-  QA(newArrayList("light-qa", "google.com:arjuns-corp")),
+  QA(newArrayList("light-qa", "light-qa1")),
  
   // TODO(arjuns) : Create separate appengine-web.xml files for Prod, QA.
   // DevServer picks the value from appengine-web.xml. So it will be always same as QA. But

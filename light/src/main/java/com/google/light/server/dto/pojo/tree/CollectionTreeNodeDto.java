@@ -15,15 +15,16 @@
  */
 package com.google.light.server.dto.pojo.tree;
 
-import javax.xml.bind.annotation.XmlAccessType;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
-import javax.xml.bind.annotation.XmlAccessorType;
-
-import org.codehaus.jackson.annotate.JsonProperty;
-
+import com.google.light.server.dto.module.ModuleType;
 import com.google.light.server.dto.pojo.longwrapper.ModuleId;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import org.codehaus.jackson.annotate.JsonProperty;
 
 /**
  * 
@@ -40,26 +41,117 @@ public class CollectionTreeNodeDto extends AbstractTreeNode<CollectionTreeNodeDt
   @JsonProperty(value = "moduleId")
   private ModuleId moduleId;
 
-  // TODO(arjuns): Add validation logic here.
-  // @Override
-  // public CollectionTreeNode validate() {
-  // super.validate();
-  //
-  // if (getType() == TreeNodeType.LEAF_NODE) {
-  // checkNotNull(moduleId, "moduleId");
-  // }
-  // return this;
-  // }
+  @XmlElement(name = "moduleType")
+  @JsonProperty(value = "moduleType")
+  private ModuleType moduleType;
+
+  @XmlElement(name = "externalId")
+  @JsonProperty(value = "externalId")
+  private String externalId;
+
+  @Override
+  public CollectionTreeNodeDto validate() {
+    super.validate();
+
+    switch (getType()) {
+      case LEAF_NODE:
+        checkNotNull(moduleId, "moduleId");
+        moduleId.validate();
+        break;
+
+      default:
+        // do nothing.
+    }
+
+    checkNotNull(moduleType, "moduleType");
+    checkNotBlank(externalId, "externalId");
+
+    return this;
+  }
 
   public ModuleId getModuleId() {
     return moduleId;
   }
 
+  public void setModuleId(ModuleId moduleId) {
+    this.moduleId = moduleId;
+  }
+
+  public ModuleType getModuleType() {
+    return moduleType;
+  }
+
+  public String getExternalId() {
+    return externalId;
+  }
+
+  public boolean containsModuleIdAsChildren(ModuleId moduleId) {
+    return findChildWithModuleId(moduleId) != null;
+  }
+
+  public CollectionTreeNodeDto findChildWithModuleId(ModuleId moduleId) {
+    switch (getType()) {
+      case LEAF_NODE:
+        break;
+
+      case ROOT_NODE:
+      case INTERMEDIATE_NODE:
+        for (CollectionTreeNodeDto currChild : getChildren()) {
+          if (currChild.getModuleId().equals(moduleId)) {
+            return currChild;
+          }
+        }
+
+        break;
+      default:
+        throw new IllegalStateException("Unsupported type : " + getType());
+    }
+
+    return null;
+  }
+
+  public boolean containsExternalIdAsChildren(String externalId) {
+    return findChildByExternalId(externalId) != null;
+  }
+
+  public CollectionTreeNodeDto findChildByExternalId(String externalId) {
+    switch (getType()) {
+      case LEAF_NODE:
+        break;
+
+      case ROOT_NODE:
+      case INTERMEDIATE_NODE:
+        for (CollectionTreeNodeDto currChild : getChildren()) {
+          if (currChild.getExternalId().equals(externalId)) {
+            return currChild;
+          }
+        }
+        break;
+
+      default:
+        throw new IllegalStateException("Unsupported type : " + getType());
+    }
+
+    return null;
+  }
+
   public static class Builder extends AbstractTreeNode.Builder<CollectionTreeNodeDto, Builder> {
     private ModuleId moduleId;
+    private ModuleType moduleType;
+    private String externalId;
 
     public Builder moduleId(ModuleId moduleId) {
       this.moduleId = moduleId;
+      return this;
+    }
+
+    public Builder moduleType(ModuleType moduleType) {
+      this.moduleType = moduleType;
+      return this;
+    }
+
+    public Builder externalId(String externalId) {
+      this.externalId = externalId;
       return this;
     }
 
@@ -73,6 +165,8 @@ public class CollectionTreeNodeDto extends AbstractTreeNode<CollectionTreeNodeDt
   private CollectionTreeNodeDto(Builder builder) {
     super(builder);
     this.moduleId = builder.moduleId;
+    this.moduleType = builder.moduleType;
+    this.externalId = builder.externalId;
   }
 
   // For Objectify and GAEPi

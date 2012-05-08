@@ -15,7 +15,9 @@
  */
 package com.google.light.server.jersey.resources.thirdparty.google;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.light.server.constants.LightConstants.GOOGLE_DOC_IMPORT_BATCH_SIZE_MAX;
+import static com.google.light.server.exception.ExceptionType.SERVER_GUICE_INJECTION;
 import static com.google.light.server.jersey.resources.thirdparty.google.GoogleDocIntegrationUtils.importGDocResource;
 import static com.google.light.server.servlets.thirdparty.google.gdoc.GoogleDocUtils.getDocumentFeedWithFolderUrl;
 import static com.google.light.server.utils.LightPreconditions.checkIntegerIsInRage;
@@ -23,7 +25,7 @@ import static com.google.light.server.utils.LightPreconditions.checkNonEmptyList
 import static com.google.light.server.utils.LightPreconditions.checkNotNull;
 import static com.google.light.server.utils.LightUtils.getURL;
 
-import com.google.light.server.utils.GuiceUtils;
+import com.google.light.server.exception.unchecked.httpexception.BadRequestException;
 
 import com.google.appengine.api.log.InvalidRequestException;
 import com.google.common.base.Strings;
@@ -43,9 +45,12 @@ import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocResourc
 import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocResourceIdListWrapperDto;
 import com.google.light.server.exception.ExceptionType;
 import com.google.light.server.jersey.resources.AbstractJerseyResource;
+import com.google.light.server.manager.interfaces.CollectionManager;
 import com.google.light.server.manager.interfaces.JobManager;
+import com.google.light.server.persistence.entity.collection.CollectionEntity;
 import com.google.light.server.persistence.entity.jobs.JobEntity;
 import com.google.light.server.thirdparty.clients.google.gdata.gdoc.DocsServiceWrapper;
+import com.google.light.server.utils.GuiceUtils;
 import com.google.light.server.utils.HtmlBuilder;
 import com.google.light.server.utils.JsonUtils;
 import com.google.light.server.utils.LightPreconditions;
@@ -80,19 +85,23 @@ import org.apache.commons.lang.StringUtils;
  */
 @Path(JerseyConstants.RESOURCE_PATH_THIRD_PARTY_GOOGLE_DOC)
 public class GoogleDocIntegration extends AbstractJerseyResource {
+  private CollectionManager collectionManager;
   private Provider<DocsServiceWrapper> docsServiceProvider;
   private JobManager jobManager;
 
   @Inject
   public GoogleDocIntegration(Injector injector, @Context HttpServletRequest request,
-      @Context HttpServletResponse response, Provider<DocsServiceWrapper> docsServiceProvider,
+      @Context HttpServletResponse response, CollectionManager collectionManager,
+      Provider<DocsServiceWrapper> docsServiceProvider,
       JobManager jobManager) {
     super(injector, request, response);
     // Since Doc Service depends on currently logged in person, so its required that parent class
     // is constructed first. Therefore, instead of injecting DocsService directly,
+    this.collectionManager = checkNotNull(collectionManager,
+        SERVER_GUICE_INJECTION, "collectionManager");
     this.docsServiceProvider = checkNotNull(docsServiceProvider,
-        ExceptionType.SERVER_GUICE_INJECTION, "docsServiceProvider");
-    this.jobManager = checkNotNull(jobManager, ExceptionType.SERVER_GUICE_INJECTION, "jobManager");
+        SERVER_GUICE_INJECTION, "docsServiceProvider");
+    this.jobManager = checkNotNull(jobManager, SERVER_GUICE_INJECTION, "jobManager");
   }
 
   @GET
@@ -190,21 +199,44 @@ public class GoogleDocIntegration extends AbstractJerseyResource {
         "Number of docuements that can be downloaded in a batch should be between 1 & " +
             GOOGLE_DOC_IMPORT_BATCH_SIZE_MAX + ".");
 
+    if (resourceIdListWrapper.isCreateCollection()) {
+      checkArgument(StringUtils.isNotBlank(resourceIdListWrapper.getCollectionTitle()),
+          "For creating new collection title should not be blank.");
+    } else if (resourceIdListWrapper.isEditCollection()) {
+      checkNotNull(resourceIdListWrapper.getCollectionId(), ExceptionType.CLIENT_PARAMETER,
+          "For editCollection, collectionId should not be null");
+      CollectionEntity collectionEntity = collectionManager.get(null,
+          resourceIdListWrapper.getCollectionId());
+      checkNotNull(collectionEntity, ExceptionType.CLIENT_PARAMETER,
+          "For editCollection, collectionId should not be null");
+    }
+
     List<GoogleDocInfoDto> docInfoList = docsServiceProvider.get().getGoogleDocInfoInBatch(
         resourceIdListWrapper.get());
-    System.out.println("etag = " + docInfoList.get(0).getEtag());
-    GoogleDocImportBatchJobContext docInfoListWrapper = new GoogleDocImportBatchJobContext.Builder()
-        .ownerId(GuiceUtils.getOwnerId())
-        .state(GoogleDocImportBatchJobContext.GoogleDocImportBatchJobState.BUILDING)
-        .build();
+    
+    
+    GoogleDocImportBatchJobContext gdocImportBatchJobContext =
+        new GoogleDocImportBatchJobContext.Builder()
+            .ownerId(GuiceUtils.getOwnerId())
+            .state(GoogleDocImportBatchJobContext.GoogleDocImportBatchJobState.BUILDING)
+            .build();
 
     for (GoogleDocInfoDto currInfo : docInfoList) {
-      docInfoListWrapper.addGoogleDocResource(currInfo);
+      if (currInfo.getGoogleDocsResourceId().getModuleType().isSupported()) {
+        gdocImportBatchJobContext.addGoogleDocResource(currInfo);
+      }
     }
     
-    docInfoListWrapper.setState(GoogleDocImportBatchJobContext.GoogleDocImportBatchJobState.ENQUEUED);
+    if (LightUtils.isListEmpty(gdocImportBatchJobContext.get())) {
+      throw new BadRequestException("Did not find any supported GDoc to import");
+    }
 
-    JobEntity jobEntity = jobManager.enqueueGoogleDocImportBatchJob(docInfoListWrapper);
+    gdocImportBatchJobContext.setState(
+        GoogleDocImportBatchJobContext.GoogleDocImportBatchJobState.ENQUEUED);
+    gdocImportBatchJobContext.setCollectionTitle(resourceIdListWrapper.getCollectionTitle());
+    gdocImportBatchJobContext.setCollectionId(resourceIdListWrapper.getCollectionId());
+
+    JobEntity jobEntity = jobManager.enqueueGoogleDocImportBatchJob(gdocImportBatchJobContext);
 
     URI jobLocationUri = LocationHeaderUtils.getJobLocation(jobEntity.getId());
     HtmlBuilder htmlBuilder = new HtmlBuilder();

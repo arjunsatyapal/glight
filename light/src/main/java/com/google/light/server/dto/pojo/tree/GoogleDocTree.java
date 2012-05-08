@@ -54,7 +54,7 @@ public class GoogleDocTree extends AbstractTreeNode<GoogleDocTree> {
   public GoogleDocInfoDto getResourceInfo() {
     return resourceInfo;
   }
-  
+
   @Override
   public GoogleDocTree validate() {
     if (getType() != TreeNodeType.ROOT_NODE) {

@@ -80,7 +80,7 @@ public class ImportGoogleFolderJobs {
 
       updateChangeLog(null, getContext().getJobId(), "Fetching Folder Tree from Google.");
       DocsServiceWrapper docsService = GuiceUtils.getInstance(DocsServiceWrapper.class);
-      List<GoogleDocInfoDto> folderContents = docsService.getFolderContentAll(gdocFolderResourceId);
+      List<GoogleDocInfoDto> folderContents = docsService.getFolderContentWhichAreSupported(gdocFolderResourceId);
       Map<PromisedValue<Boolean>, JobId> mapOfPvs = Maps.newHashMap();
 
       Map<GoogleDocResourceId, JobId> mapOfResourceToJob = Maps.newHashMap();
@@ -173,7 +173,7 @@ public class ImportGoogleFolderJobs {
       DocsServiceWrapper docsService = getInstance(DocsServiceWrapper.class);
 
       GoogleDocInfoDto folderInfo = docsService.getGoogleDocInfo(gdocFolderResourceId);
-      List<GoogleDocInfoDto> folderContents = docsService.getFolderContentAll(gdocFolderResourceId);
+      List<GoogleDocInfoDto> folderContents = docsService.getFolderContentWhichAreSupported(gdocFolderResourceId);
 
       CollectionTreeNodeDto root = new CollectionTreeNodeDto.Builder()
           .type(TreeNodeType.ROOT_NODE)
@@ -218,15 +218,17 @@ public class ImportGoogleFolderJobs {
         ModuleManager moduleManager, DocsServiceWrapper docsService) {
 
       for (GoogleDocInfoDto currResource : listOfGoogleDocResources) {
+        String externalId = currResource.getGoogleDocsResourceId().getExternalId();
         switch (currResource.getType()) {
           case GOOGLE_DOC:
-            String originId = currResource.getType() + ":" + currResource.getResourceId();
-            ModuleId moduleId = moduleManager.findModuleIdByOriginId(null, originId);
+            ModuleId moduleId = moduleManager.findModuleIdByOriginId(null, externalId);
 
             CollectionTreeNodeDto node = new CollectionTreeNodeDto.Builder()
                 .moduleId(moduleId)
                 .title(currResource.getTitle())
                 .type(TreeNodeType.LEAF_NODE)
+                .moduleType(currResource.getType())
+                .externalId(externalId)
                 .build();
 
             parent.addChildren(node);
@@ -236,9 +238,11 @@ public class ImportGoogleFolderJobs {
             CollectionTreeNodeDto interMediate = new CollectionTreeNodeDto.Builder()
                 .type(TreeNodeType.INTERMEDIATE_NODE)
                 .title(currResource.getTitle())
+                .moduleType(currResource.getType())
+                .externalId(externalId)
                 .build();
             List<GoogleDocInfoDto> listOfChilds =
-                docsService.getFolderContentAll(currResource.getGoogleDocsResourceId());
+                docsService.getFolderContentWhichAreSupported(currResource.getGoogleDocsResourceId());
             createLightCollection(interMediate, listOfChilds, moduleManager, docsService);
 
             parent.addChildren(interMediate);

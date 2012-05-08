@@ -22,7 +22,6 @@ import static com.google.light.server.constants.LightConstants.JOB_BACK_OFF_SECO
 import static com.google.light.server.constants.LightConstants.JOB_MAX_ATTEMPTES;
 import static com.google.light.server.constants.google.cloudstorage.GoogleCloudStorageBuckets.CONTENT;
 import static com.google.light.server.exception.ExceptionType.SERVER_GUICE_INJECTION;
-import static com.google.light.server.jobs.JobUtils.updateChangeLog;
 import static com.google.light.server.utils.GoogleCloudStorageUtils.writeFileOnGCS;
 import static com.google.light.server.utils.GuiceUtils.getInstance;
 import static com.google.light.server.utils.GuiceUtils.getRequestScopedValues;
@@ -31,31 +30,12 @@ import static com.google.light.server.utils.LightPreconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkTxnIsRunning;
 import static com.google.light.server.utils.LightUtils.isListEmpty;
 
-import com.google.appengine.tools.pipeline.FutureValue;
-
-import com.google.light.server.dto.module.ModuleType;
-import com.google.light.server.persistence.entity.module.ModuleVersionEntity;
-
-import com.google.light.server.jobs.lightjobs.ModuleJobs;
-import com.google.light.server.utils.LightUtils;
-
-import com.google.appengine.api.files.GSFileOptions;
-
-import com.google.light.server.dto.module.GSBlobInfo;
-
-import com.google.light.server.constants.google.cloudstorage.GoogleCloudStorageBuckets;
-
-import com.google.light.server.constants.http.ContentTypeEnum;
-
-import com.google.light.server.constants.FileExtensions;
-
-import com.google.common.base.Preconditions;
-
 import com.google.appengine.api.datastore.Text;
 import com.google.appengine.api.files.AppEngineFile;
 import com.google.appengine.api.files.FileReadChannel;
 import com.google.appengine.api.files.FileService;
 import com.google.appengine.api.files.FileServiceFactory;
+import com.google.appengine.api.files.GSFileOptions;
 import com.google.appengine.tools.pipeline.PipelineService;
 import com.google.appengine.tools.pipeline.PipelineServiceFactory;
 import com.google.common.collect.Lists;
@@ -63,19 +43,26 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.google.light.server.constants.FileExtensions;
+import com.google.light.server.constants.google.cloudstorage.GoogleCloudStorageBuckets;
+import com.google.light.server.constants.http.ContentTypeEnum;
+import com.google.light.server.dto.module.GSBlobInfo;
 import com.google.light.server.dto.module.ImportDestinationDto;
+import com.google.light.server.dto.module.ModuleType;
 import com.google.light.server.dto.pojo.ChangeLogEntryPojo;
 import com.google.light.server.dto.pojo.GoogleDocArchivePojo;
 import com.google.light.server.dto.pojo.GoogleDocArchivePojo.LightGDocArchiveStatus;
 import com.google.light.server.dto.pojo.JobHandlerId;
 import com.google.light.server.dto.pojo.LightJobContextPojo;
 import com.google.light.server.dto.pojo.RequestScopedValues;
+import com.google.light.server.dto.pojo.longwrapper.CollectionId;
 import com.google.light.server.dto.pojo.longwrapper.JobId;
 import com.google.light.server.dto.pojo.longwrapper.ModuleId;
 import com.google.light.server.dto.pojo.longwrapper.PersonId;
 import com.google.light.server.dto.pojo.longwrapper.Version;
-import com.google.light.server.dto.pojo.tree.GoogleDocTree;
 import com.google.light.server.dto.pojo.tree.AbstractTreeNode.TreeNodeType;
+import com.google.light.server.dto.pojo.tree.CollectionTreeNodeDto;
+import com.google.light.server.dto.pojo.tree.GoogleDocTree;
 import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocImportBatchJobContext;
 import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocImportBatchJobContext.GoogleDocImportBatchJobState;
 import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocImportJobContext;
@@ -88,22 +75,28 @@ import com.google.light.server.exception.unchecked.taskqueue.GoogleDocArchivalWa
 import com.google.light.server.exception.unchecked.taskqueue.WaitForChildsToComplete;
 import com.google.light.server.jobs.google.gdoc.GoogleDocJobs;
 import com.google.light.server.jobs.importjobs.PipelineJobs;
+import com.google.light.server.manager.interfaces.CollectionManager;
 import com.google.light.server.manager.interfaces.ImportManager;
 import com.google.light.server.manager.interfaces.JobManager;
 import com.google.light.server.manager.interfaces.ModuleManager;
 import com.google.light.server.manager.interfaces.NotificationManager;
 import com.google.light.server.manager.interfaces.QueueManager;
 import com.google.light.server.persistence.dao.JobDao;
+import com.google.light.server.persistence.entity.collection.CollectionEntity;
+import com.google.light.server.persistence.entity.collection.CollectionVersionEntity;
 import com.google.light.server.persistence.entity.jobs.JobEntity;
 import com.google.light.server.persistence.entity.jobs.JobEntity.JobHandlerType;
 import com.google.light.server.persistence.entity.jobs.JobEntity.JobState;
 import com.google.light.server.persistence.entity.jobs.JobEntity.JobType;
 import com.google.light.server.persistence.entity.jobs.JobEntity.TaskType;
+import com.google.light.server.persistence.entity.module.ModuleVersionEntity;
 import com.google.light.server.persistence.entity.queue.importflow.ImportJobEntity;
 import com.google.light.server.thirdparty.clients.google.gdata.gdoc.DocsServiceWrapper;
 import com.google.light.server.utils.GoogleCloudStorageUtils;
 import com.google.light.server.utils.GuiceUtils;
 import com.google.light.server.utils.JsonUtils;
+import com.google.light.server.utils.LightPreconditions;
+import com.google.light.server.utils.LightUtils;
 import com.google.light.server.utils.ObjectifyUtils;
 import com.googlecode.objectify.Objectify;
 import java.io.InputStream;
@@ -114,6 +107,8 @@ import java.util.Set;
 import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import org.apache.commons.lang.StringUtils;
+import org.joda.time.DateTime;
 
 /**
  * 
@@ -126,6 +121,7 @@ public class JobManagerImpl implements JobManager {
   private static final Logger logger = Logger.getLogger(JobManagerImpl.class.getName());
 
   private JobDao jobDao;
+  private CollectionManager collectionManager;
   private ImportManager importManager;
   private ModuleManager moduleManager;
   private NotificationManager notificationManager;
@@ -134,11 +130,14 @@ public class JobManagerImpl implements JobManager {
   private Provider<DocsServiceWrapper> docsServiceProvider;
 
   @Inject
-  public JobManagerImpl(JobDao jobDao, ImportManager importManager, ModuleManager moduleManager,
+  public JobManagerImpl(JobDao jobDao, ImportManager importManager,
+      CollectionManager collectionManager, ModuleManager moduleManager,
       NotificationManager notificationManager,
       QueueManager queueManager, GoogleDocJobs googleDocJobs,
       Provider<DocsServiceWrapper> docsServiceProvider) {
     this.jobDao = checkNotNull(jobDao, "jobDao");
+    this.collectionManager =
+        checkNotNull(collectionManager, SERVER_GUICE_INJECTION, "collectionManager");
     this.importManager = checkNotNull(importManager, SERVER_GUICE_INJECTION, "importManager");
     this.moduleManager = checkNotNull(moduleManager, SERVER_GUICE_INJECTION, "moduleManager");
     this.notificationManager = checkNotNull(notificationManager, SERVER_GUICE_INJECTION,
@@ -340,7 +339,7 @@ public class JobManagerImpl implements JobManager {
         break;
 
       case COMPLETE:
-        this.enqueueCompleteJob(jobEntity.getId());
+        this.enqueueCompleteJob(jobEntity.getId(), "Successfully completed Google Doc Job.");
         break;
 
       default:
@@ -506,13 +505,13 @@ public class JobManagerImpl implements JobManager {
   private void startArchivingGoogleDoc(GoogleDocImportJobContext gdocImportContext,
       JobEntity jobEntity) {
     GoogleDocInfoDto resourceInfo = gdocImportContext.getResourceInfo();
-    GoogleDocArchivePojo archiveInfo = docsServiceProvider.get().archiveResource(
-        resourceInfo.getGoogleDocsResourceId());
-    gdocImportContext.setArchiveId(archiveInfo.getArchiveId());
+    // GoogleDocArchivePojo archiveInfo = docsServiceProvider.get().archiveResource(
+    // resourceInfo.getGoogleDocsResourceId());
+    // gdocImportContext.setArchiveId(archiveInfo.getArchiveId());
 
-    // String archiveId =
-    // "vax2Nuv9Oq4VIPQEBTcxlJDkNbRFv7KVNL55qVoitx7rtrJHru1T6ljtTjMW26L3ygWrvW1tMZHHg6ARCy3Uj_n3moSCE8uDDX6WKaTD-0nw0zcwfBiiFEufFSITnTO06n0TsXIIHSQ";
-    // gdocImportContext.setArchiveId(archiveId);
+    String archiveId =
+        "vax2Nuv9Oq4VIPQEBTcxlJDkNbRFv7KVNL55qVoitx7rtrJHru1T6ljtTjMW26L3ygWrvW1tMZHHg6ARCy3Uj2yisT1mrH5gSGOwR4aPv4ZY86T6L4_M-8kg97Ll_3a3satbRaEsmug";
+    gdocImportContext.setArchiveId(archiveId);
 
     gdocImportContext
         .setState(GoogleDocImportJobContext.GoogleDocImportJobState.WAITING_FOR_ARCHIVE);
@@ -565,103 +564,276 @@ public class JobManagerImpl implements JobManager {
         System.out.println("All complete now.");
         break;
       default:
-        finishJob(jobEntity);
-        break;
-
-    // default:
-    // throw new IllegalStateException("Unsupported state : " + state);
+        throw new IllegalStateException("Unsupported state : " + jobEntity.getJobState());
     }
   }
 
   /**
    * 
    */
-  private void publishCollectionIfRequired(
-      GoogleDocImportBatchJobContext gdocImportBatchContext, JobEntity jobEntity) {
-    System.out.println("Eventually add collection. Right now do nothing.");
-    this.enqueueCompleteJob(jobEntity.getId());
+  private void publishCollectionIfRequired(GoogleDocImportBatchJobContext gdocImportBatchContext,
+      JobEntity jobEntity) {
+    CollectionVersionEntity cvEntity = null;
+    if (gdocImportBatchContext.isEditCollection()) {
+      cvEntity = appendChildsToCollectionIfRequired(gdocImportBatchContext, jobEntity);
+    } else if (gdocImportBatchContext.isCreateCollection()) {
+      cvEntity = createNewCollection(gdocImportBatchContext, jobEntity);
+    }
+
+    if (cvEntity != null) {
+      System.out.println(cvEntity.getCollectionKey().getId() + ":"
+          + cvEntity.getVersion().getValue() + "was published successfully");
+    }
+
+    this.enqueueCompleteJob(jobEntity.getId(), 
+        "Successfully pulished collection. Now marking as done.");
   }
 
-  //
-  // /**
-  // * @param jobEntity
-  // */
-  // private void publishGoogleDocs(GoogleDocBatchImportJobContext gdocImportContext, JobEntity
-  // jobEntity) {
-  //
-  // FileService fileService = FileServiceFactory.getFileService();
-  // Map<String, GSBlobInfo> resourceMap = Maps.newConcurrentMap();
-  //
-  // try {
-  // String readFileName = gdocImportContext.getGCSArchiveLocation();
-  //
-  // AppEngineFile file = new AppEngineFile(readFileName);
-  // FileReadChannel readChannel = fileService.openReadChannel(file, true /* lock */);
-  //
-  // InputStream inputStream = Channels.newInputStream(readChannel);
-  // ZipInputStream zipIn = new ZipInputStream(inputStream);
-  //
-  // ZipEntry zipEntry = null;
-  // do {
-  // zipEntry = zipIn.getNextEntry();
-  // if (zipEntry == null) {
-  // continue;
-  // }
-  // System.out.println(zipEntry.getName());
-  //
-  // // // TODO(arjuns): Get contentType from File extension.
-  // // // Storing file on Cloud Storage.
-  // // String nameFromGoogleDoc = zipEntry.getName();
-  // //
-  // // checkArgument(nameFromGoogleDoc.contains("/"), "Unexpected name from GoogleDoc : "
-  // // + nameFromGoogleDoc);
-  // // String parts[] = nameFromGoogleDoc.split("/");
-  // //
-  // // String newFileName = "";
-  // // // Parts[0] is always the folder whose name is same as prettified title for a GoogleDoc.
-  // // if (parts.length == 2) {
-  // // // This will be true for HTML file.
-  // // newFileName = parts[1];
-  // // } else {
-  // // Preconditions.checkArgument(parts.length == 3, "Google Docs will return files " +
-  // // "name of format <pretty title/images/image names>");
-  // // // This will be true for images/resources.
-  // // newFileName = parts[1] + "/" + parts[2];
-  // // }
-  // //
-  // // if (newFileName.endsWith(FileExtensions.HTML.get())) {
-  // // newFileName = moduleId.getValue() + "." + FileExtensions.HTML.get();
-  // // }
-  // //
-  // // ContentTypeEnum contentType =
-  // // FileExtensions.getFileExtension(newFileName).getContentType();
-  // // String storeFileName = moduleId.getValue() + "/" + newFileName;
-  // // String storeAbsFilePath = CONTENT.getAbsoluteFilePath(storeFileName);
-  // //
-  // // GSBlobInfo gsBlobInfo = new GSBlobInfo.Builder()
-  // // .contentType(contentType)
-  // // .fileName(parts[parts.length - 1])
-  // // .gsKey(storeAbsFilePath)
-  // // .sizeInBytes(zipEntry.getSize())
-  // // .build();
-  // // resourceMap.put(newFileName, gsBlobInfo);
-  // //
-  // // updateChangeLog(null, getContext().getJobId(), "Storing [" + zipEntry.getName()
-  // // + "] as [" +
-  // // storeAbsFilePath + "].");
-  // //
-  // // GSFileOptions gsFileOptions = GoogleCloudStorageUtils.getGCSFileOptionsForCreate(
-  // // GoogleCloudStorageBuckets.CONTENT, contentType, storeFileName);
-  // // writeFileOnGCS(zipIn, gsFileOptions);
-  // } while (zipEntry != null);
-  //
-  // zipIn.close();
-  // inputStream.close();
-  // readChannel.close();
-  // } catch (Exception e) {
-  // throw new GoogleDocException(e);
-  // }
-  // }
+  private CollectionVersionEntity appendChildsToCollectionIfRequired(
+      GoogleDocImportBatchJobContext gdocImportBatchContext, JobEntity jobEntity) {
+    CollectionId collectionId = gdocImportBatchContext.getCollectionId();
+
+    Objectify ofy = ObjectifyUtils.initiateTransaction();
+    try {
+      CollectionEntity collectionEntity = collectionManager.get(ofy, collectionId);
+      Version version = collectionEntity.getLatestVersion();
+
+      CollectionVersionEntity cvEntity = null;
+
+      if (version.getValue() == 0) {
+        cvEntity = createFirstCollectionVersion(ofy, gdocImportBatchContext, collectionEntity);
+      } else {
+        cvEntity = appendChildAndCreateNewVersionIfRequired(ofy, gdocImportBatchContext,
+            collectionEntity);
+      }
+      ObjectifyUtils.commitTransaction(ofy);
+
+      return cvEntity;
+    } finally {
+      ObjectifyUtils.rollbackTransactionIfStillActive(ofy);
+    }
+  }
+
+  /**
+   * @param ofy
+   * @param gdocImportBatchContext
+   * @param collectionEntity
+   * @return
+   */
+  private CollectionVersionEntity appendChildAndCreateNewVersionIfRequired(Objectify ofy,
+      GoogleDocImportBatchJobContext gdocImportBatchContext, CollectionEntity collectionEntity) {
+    // This should be called in same transaction where collectionEntity was fetched."
+    LightPreconditions.checkTxnIsRunning(ofy);
+
+    CollectionVersionEntity cvEntity = collectionManager.getCollectionVersion(
+        ofy, collectionEntity.getCollectionId(), collectionEntity.getLatestVersion());
+
+    GoogleDocTree gdocTreeRoot = gdocImportBatchContext.getTreeRoot();
+    CollectionTreeNodeDto collectionRoot = cvEntity.getCollectionTree();
+
+    boolean isModified = appendChildsFromGDocTreeIfNotAlreadyPresent(gdocImportBatchContext,
+        gdocTreeRoot, collectionRoot);
+
+    if (isModified) {
+      cvEntity = collectionManager.addCollectionVersionForGoogleDoc(
+          ofy, collectionEntity, collectionRoot);
+    }
+
+    return cvEntity;
+  }
+
+  /**
+   * @param possibleNewNode
+   * @param collectionRoot
+   */
+  private boolean appendChildsFromGDocTreeIfNotAlreadyPresent(
+      GoogleDocImportBatchJobContext gdocImportBatchContext, GoogleDocTree gdocTreeParent,
+      CollectionTreeNodeDto collectionParent) {
+    boolean isModified = false;
+    System.out.println("GdocTree title : " + gdocTreeParent.getTitle());
+    checkNotNull(gdocTreeParent, "gdocTreeParent");
+    checkNotNull(collectionParent, "collectionParent");
+    for (GoogleDocTree currGDocTreeNode : gdocTreeParent.getChildren()) {
+      String externalId = currGDocTreeNode.getResourceInfo()
+          .getGoogleDocsResourceId().getExternalId();
+
+      CollectionTreeNodeDto.Builder newCollectionTreeNodeBuilder =
+          new CollectionTreeNodeDto.Builder()
+              .title(currGDocTreeNode.getTitle())
+              .type(currGDocTreeNode.getType())
+              .moduleType(currGDocTreeNode.getResourceInfo().getType())
+              .externalId(externalId);
+
+      switch (currGDocTreeNode.getType()) {
+        case ROOT_NODE:
+          throw new IllegalStateException("This should not be called for root node.");
+
+        case LEAF_NODE:
+          if (collectionParent.containsExternalIdAsChildren(externalId)) {
+            /*
+             * Since it already exists as one of the children for current parent, so no need to
+             * add it again.
+             */
+            break;
+          }
+          appendLeafNodeToCollectionTree(gdocImportBatchContext, newCollectionTreeNodeBuilder,
+              collectionParent, externalId);
+          isModified = true;
+          break;
+
+        case INTERMEDIATE_NODE:
+          CollectionTreeNodeDto newCollectionParent = null;
+          if (collectionParent.containsExternalIdAsChildren(externalId)) {
+            /*
+             * Current sub collection already exists. So now we have to check all the childs to see
+             * if there were any new modifications.
+             */
+            newCollectionParent =
+                collectionParent.findChildByExternalId(externalId);
+            isModified |= appendChildsFromGDocTreeIfNotAlreadyPresent(gdocImportBatchContext,
+                currGDocTreeNode, newCollectionParent);
+          } else {
+            newCollectionParent = newCollectionTreeNodeBuilder.build();
+            collectionParent.addChildren(newCollectionParent);
+            handOverChilds(gdocImportBatchContext, currGDocTreeNode, newCollectionParent);
+            isModified = true;
+          }
+          
+          checkNotNull(newCollectionParent, "newCollectionParent");
+
+          break;
+      }
+    }
+
+    return isModified;
+  }
+
+  /**
+   * @param possibleNewNode
+   * @param collectionParentNode
+   * @param externalId
+   */
+  private void appendLeafNodeToCollectionTree(
+      GoogleDocImportBatchJobContext gdocImportBatchContext,
+      CollectionTreeNodeDto.Builder newLeafNodeBuilder,
+      CollectionTreeNodeDto collectionParentNode, String externalId) {
+    ModuleId moduleId = gdocImportBatchContext.getModuleIdForExternalId(externalId);
+    checkNotNull(moduleId, "This should not happen. "
+        + "Could not find moduleId for externalId : " + externalId);
+    CollectionTreeNodeDto newLeafNode = newLeafNodeBuilder.moduleId(moduleId).build();
+    collectionParentNode.addChildren(newLeafNode);
+  }
+
+  private CollectionVersionEntity createNewCollection(
+      GoogleDocImportBatchJobContext gdocImportBatchContext, JobEntity jobEntity) {
+
+    Objectify ofy = ObjectifyUtils.initiateTransaction();
+    try {
+      CollectionEntity collectionEntity = collectionManager.reserveCollectionId(
+          ofy, GuiceUtils.getOwnerId());
+      gdocImportBatchContext.setCollectionId(collectionEntity.getCollectionId());
+
+      Text context = new Text(gdocImportBatchContext.toJson());
+      updateJobContext(ofy, jobEntity.getJobState(), context, jobEntity,
+          "assigning new CollectionId :" + collectionEntity.getCollectionId());
+
+      CollectionVersionEntity cvEntity = createFirstCollectionVersion(
+          ofy, gdocImportBatchContext, collectionEntity);
+      ObjectifyUtils.commitTransaction(ofy);
+
+      return cvEntity;
+    } finally {
+      ObjectifyUtils.rollbackTransactionIfStillActive(ofy);
+    }
+  }
+
+  /**
+   * @param gdocImportBatchContext
+   * @param ofy
+   * @param collectionEntity
+   * @return
+   */
+  private CollectionVersionEntity createFirstCollectionVersion(Objectify ofy,
+      GoogleDocImportBatchJobContext gdocImportBatchContext,
+      CollectionEntity collectionEntity) {
+    CollectionTreeNodeDto collectionTree = createCollectionTree(gdocImportBatchContext);
+    CollectionVersionEntity cvEntity = collectionManager.addCollectionVersionForGoogleDoc(
+        ofy, collectionEntity, collectionTree);
+    return cvEntity;
+  }
+
+  /**
+   * @param gdocImportBatchContext
+   * @return
+   */
+  private CollectionTreeNodeDto createCollectionTree(
+      GoogleDocImportBatchJobContext gdocImportBatchContext) {
+    String title = gdocImportBatchContext.getCollectionTitle();
+
+    if (StringUtils.isEmpty(title)) {
+      title = "Untitled : " + new DateTime(LightUtils.getNow());
+    }
+
+    CollectionTreeNodeDto collectionTreeRoot = new CollectionTreeNodeDto.Builder()
+        .type(TreeNodeType.ROOT_NODE)
+        .title(title)
+        .moduleType(ModuleType.LIGHT_COLLECTION)
+        .externalId("null")
+        .build();
+
+    handOverChilds(gdocImportBatchContext, gdocImportBatchContext.getTreeRoot(), collectionTreeRoot);
+
+    return collectionTreeRoot;
+  }
+
+  /**
+   * @param treeRoot
+   * @param collectionRoot
+   */
+  private void handOverChilds(GoogleDocImportBatchJobContext gdocImportBatchContext,
+      GoogleDocTree gdocTreeParent, CollectionTreeNodeDto collectionParent) {
+    if (!gdocTreeParent.hasChildren()) {
+      return;
+    }
+
+    for (GoogleDocTree currGDocTreeChild : gdocTreeParent.getChildren()) {
+      CollectionTreeNodeDto.Builder treeNodeBuilder = new CollectionTreeNodeDto.Builder()
+          .title(currGDocTreeChild.getTitle())
+          .type(currGDocTreeChild.getType())
+          .moduleType(currGDocTreeChild.getGoogleDocResourceId().getModuleType())
+          .externalId(currGDocTreeChild.getGoogleDocResourceId().getExternalId());
+
+      CollectionTreeNodeDto treeNode = null;
+
+      switch (currGDocTreeChild.getType()) {
+        case ROOT_NODE:
+          throw new IllegalStateException("Found a child with type = ROOT_NODE");
+
+        case INTERMEDIATE_NODE:
+          treeNode = treeNodeBuilder.build();
+          handOverChilds(gdocImportBatchContext, currGDocTreeChild, treeNode);
+          break;
+
+        case LEAF_NODE:
+          if (currGDocTreeChild.getGoogleDocResourceId().getModuleType().isSupported()) {
+            ModuleId moduleId = gdocImportBatchContext.getModuleIdForExternalId(
+                currGDocTreeChild.getGoogleDocResourceId().getExternalId());
+            System.out.println(moduleId);
+            treeNode = treeNodeBuilder.moduleId(moduleId).build();
+          } else {
+            // Ignoring unsupported types.
+            continue;
+          }
+          break;
+
+        default:
+          throw new IllegalStateException("Unsupporetd type : " + currGDocTreeChild.getType());
+      }
+
+      checkNotNull(treeNode, "treeNode should have been created by now.");
+      collectionParent.addChildren(treeNode);
+    }
+  }
 
   /**
    * @param jobEntity
@@ -705,19 +877,21 @@ public class JobManagerImpl implements JobManager {
     }
   }
 
-  /**
-   * @param jobEntity
-   */
-  private void finishJob(JobEntity jobEntity) {
-    jobEntity.setJobState(JobState.COMPLETE);
-    this.put(null, jobEntity, new ChangeLogEntryPojo("Finished successfully."));
-  }
-
   private void createChildJobs(GoogleDocImportBatchJobContext gdocBatchImportContext,
       JobEntity jobEntity) {
     switch (jobEntity.getJobState()) {
       case ENQUEUED:
         updateRootNode(jobEntity, gdocBatchImportContext);
+        
+        if(!gdocBatchImportContext.getTreeRoot().hasChildren()) {
+          // There is no child that needs to be worked on. So marking as complete.
+          logger.info("Since there is no child which needs to be imported, "
+              + "so marking job as complete.");
+          enqueueCompleteJob(jobEntity.getId(), "no work needs to be done, so marking as done.");
+          break;
+        }
+        
+        // else continue creating childs.
         //$FALL-THROUGH$
 
       case CREATING_CHILDS:
@@ -797,25 +971,14 @@ public class JobManagerImpl implements JobManager {
       }
     }
 
-    Objectify ofy = ObjectifyUtils.initiateTransaction();
-    try {
-      ChangeLogEntryPojo changeLog = null;
-      if (isListEmpty(listOfGDocsToImport)) {
-        jobEntity.setJobState(JobState.COMPLETE);
-        changeLog = new ChangeLogEntryPojo("Marking job as complete.");
-      } else {
-        jobEntity.setJobState(JobState.WAITING_FOR_CHILD_COMPLETE_NOTIFICATION);
-        changeLog = new ChangeLogEntryPojo("Marking job as Waiting for ChildJobs.");
-      }
-
-      System.out.println("*** State = " + jobEntity.getJobState());
-      System.out.println(changeLog.getDetail());
-      this.put(ofy, jobEntity, changeLog);
-
-      ObjectifyUtils.commitTransaction(ofy);
-    } finally {
-      ObjectifyUtils.rollbackTransactionIfStillActive(ofy);
+    Text context = new Text(gdocBatchImportBatchContext.toJson());
+    if (isListEmpty(listOfGDocsToImport)) {
+      updateJobContext(null, JobState.COMPLETE, context, jobEntity, "Marking job as complete.");
+    } else {
+      updateJobContext(null, JobState.WAITING_FOR_CHILD_COMPLETE_NOTIFICATION, context,
+          jobEntity, "Marking job as Waiting for ChildJobs.");
     }
+
   }
 
   /**
@@ -830,9 +993,9 @@ public class JobManagerImpl implements JobManager {
     googleDocJobs.addChildTreeToParent(rootNode, gdocBatchImportContext.get());
     gdocBatchImportContext.setTreeRoot(rootNode);
 
-    jobEntity.setJobState(JobState.CREATING_CHILDS);
-    this.put(null, jobEntity,
-        new ChangeLogEntryPojo("Updating root and setting state to CreateChilds."));
+    Text context = new Text(gdocBatchImportContext.toJson());
+    updateJobContext(null, JobState.CREATING_CHILDS, context, jobEntity,
+        "Updating root and setting state to CreateChilds.");
   }
 
   /**
@@ -857,12 +1020,13 @@ public class JobManagerImpl implements JobManager {
    * {@inheritDoc}
    */
   @Override
-  public JobEntity enqueueCompleteJob(JobId jobId) {
+  public JobEntity enqueueCompleteJob(JobId jobId, String message) {
+    LightPreconditions.checkNotBlank(message, "message cannot be null");
     Objectify ofy = ObjectifyUtils.initiateTransaction();
     try {
       JobEntity jobEntity = this.get(ofy, jobId);
       jobEntity.setJobState(JobState.COMPLETE);
-      this.put(ofy, jobEntity, new ChangeLogEntryPojo("Marking job as complete"));
+      this.put(ofy, jobEntity, new ChangeLogEntryPojo(message));
 
       if (!jobEntity.isRootJob()) {
         notificationManager.notifyChildCompletionEvent(ofy, jobEntity.getParentJobId(),

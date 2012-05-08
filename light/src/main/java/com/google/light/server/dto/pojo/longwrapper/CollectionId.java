@@ -17,6 +17,10 @@ package com.google.light.server.dto.pojo.longwrapper;
 
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
+
 /**
  * 
  * 
@@ -25,6 +29,8 @@ import static com.google.light.server.utils.LightPreconditions.checkPositiveLong
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
+@XmlRootElement(name = "module_id")
+@XmlAccessorType(XmlAccessType.FIELD)
 public class CollectionId extends AbstractTypeWrapper<Long, CollectionId> {
   /**
    * @param value
@@ -44,5 +50,10 @@ public class CollectionId extends AbstractTypeWrapper<Long, CollectionId> {
   public CollectionId validate() {
     checkPositiveLong(getValue(), "Invalid CollectionId");
     return this;
+  }
+  
+  // For JAXB.
+  private CollectionId() {
+    super(null);
   }
 }

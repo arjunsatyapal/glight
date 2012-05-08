@@ -82,7 +82,7 @@ import java.util.List;
  */
 public class DocsServiceWrapper extends DocsService {
   private String authorizationToken;
-  
+
   @Inject
   public DocsServiceWrapper(OAuth2OwnerTokenManagerFactory ownerTokenManagerFactory) {
     // TODO(arjuns): Inject application Name.
@@ -92,7 +92,7 @@ public class DocsServiceWrapper extends DocsService {
     OAuth2OwnerTokenManager googDocTokenManager = tokenManagerFactory.create(GOOGLE_DOC);
     OAuth2OwnerTokenEntity token = googDocTokenManager.get();
 
-    authorizationToken = token.getAuthorizationToken(); 
+    authorizationToken = token.getAuthorizationToken();
     setUserToken(token.getAuthorizationToken());
     getRequestFactory().setHeader("Authorization", authorizationToken);
     getRequestFactory().setHeader("GData-Version", "3.0");
@@ -162,7 +162,6 @@ public class DocsServiceWrapper extends DocsService {
     } catch (Exception e) {
       throw new GoogleDocException(e);
     }
-    System.out.println(XmlUtils.getXmlEntry(entry));
     GoogleDocInfoDto dto =
         new GoogleDocInfoDto.Builder(GoogleDocInfoDto.Configuration.DTO_FOR_DEBUGGING)
             .withDocumentListEntry(entry)
@@ -187,7 +186,7 @@ public class DocsServiceWrapper extends DocsService {
   }
 
   @SuppressWarnings("rawtypes")
-  public List<GoogleDocInfoDto> getFolderContentAll(GoogleDocResourceId resourceId) {
+  public List<GoogleDocInfoDto> getFolderContentWhichAreSupported(GoogleDocResourceId resourceId) {
     String randomString = LightUtils.getUUIDString();
 
     List<GoogleDocInfoDto> list = Lists.newArrayList();
@@ -204,7 +203,10 @@ public class DocsServiceWrapper extends DocsService {
       for (AbstractDto currDto : pageDto.getList()) {
         checkArgument(currDto instanceof GoogleDocInfoDto);
         GoogleDocInfoDto currDocInfo = (GoogleDocInfoDto) currDto;
-        list.add(currDocInfo);
+        
+        if (currDocInfo.getGoogleDocsResourceId().getModuleType().isSupported()) {
+          list.add(currDocInfo);
+        }
       }
     } while (pageDto.getStartIndex() != null);
 
@@ -268,39 +270,38 @@ public class DocsServiceWrapper extends DocsService {
       ArchiveEntry statusEntry =
           getEntry(GoogleDocUtils.getArchiveStatusUrl(archiveId), ArchiveEntry.class);
 
-      System.out.println(XmlUtils.getXmlEntry(statusEntry));
-      GoogleDocArchivePojo pojo =
-          new GoogleDocArchivePojo.Builder().withArchiveEntry(statusEntry).build();
+      GoogleDocArchivePojo pojo = new GoogleDocArchivePojo.Builder()
+          .withArchiveEntry(statusEntry).build();
 
       return pojo;
     } catch (Exception e) {
       throw new GoogleDocException(e);
     }
   }
-  
+
   public String downloadArchive(String archiveLocation, String destinationFileName) {
     try {
-    // Download Archive to Google Cloud Storage.
-    HttpTransport transport = getInstance(HttpTransport.class);
-    HttpRequest request = transport.createRequestFactory().buildGetRequest(
-        new GenericUrl(archiveLocation));
+      // Download Archive to Google Cloud Storage.
+      HttpTransport transport = getInstance(HttpTransport.class);
+      HttpRequest request = transport.createRequestFactory().buildGetRequest(
+          new GenericUrl(archiveLocation));
 
-    HttpHeaders httpHeaders = new HttpHeaders();
-    httpHeaders.set(HttpHeaderEnum.AUTHORIZATION.get(), authorizationToken);
-    request.setHeaders(httpHeaders);
+      HttpHeaders httpHeaders = new HttpHeaders();
+      httpHeaders.set(HttpHeaderEnum.AUTHORIZATION.get(), authorizationToken);
+      request.setHeaders(httpHeaders);
 
-    HttpResponse response = request.execute();
+      HttpResponse response = request.execute();
 
-    GSFileOptions gsFileOptions = GoogleCloudStorageUtils.getGCSFileOptionsForCreate(
-        GoogleCloudStorageBuckets.WORKSPACE,
-        ContentTypeEnum.APPLICATION_ZIP, destinationFileName);
+      GSFileOptions gsFileOptions = GoogleCloudStorageUtils.getGCSFileOptionsForCreate(
+          GoogleCloudStorageBuckets.WORKSPACE,
+          ContentTypeEnum.APPLICATION_ZIP, destinationFileName);
 
-    // TODO(arjuns): Ensure that file does not exist.
-    writeFileOnGCS(response.getContent(), gsFileOptions);
+      // TODO(arjuns): Ensure that file does not exist.
+      writeFileOnGCS(response.getContent(), gsFileOptions);
 
-    String gcsFilePath = getAbsolutePathOnBucket(WORKSPACE, destinationFileName);
-    System.out.println(gcsFilePath);
-    return gcsFilePath;
+      String gcsFilePath = getAbsolutePathOnBucket(WORKSPACE, destinationFileName);
+      System.out.println(gcsFilePath);
+      return gcsFilePath;
     } catch (Exception e) {
       throw new GoogleDocException(e);
     }

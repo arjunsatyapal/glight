@@ -15,6 +15,10 @@
  */
 package com.google.light.server.dto.thirdparty.google.gdata.gdoc;
 
+import org.apache.commons.lang.StringUtils;
+
+import com.google.light.server.dto.pojo.longwrapper.CollectionId;
+
 import org.codehaus.jackson.annotate.JsonProperty;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -42,6 +46,38 @@ public class GoogleDocResourceIdListWrapperDto extends AbstractDto<GoogleDocReso
   @JsonProperty(value = "list")
   private List<String> list;
 
+  @XmlElement(name = "collectionTitle")
+  @JsonProperty(value = "collectionTitle")
+  private String collectionTitle;
+
+  @XmlElement(name = "collectionId")
+  @JsonProperty(value = "collectionId")
+  private CollectionId collectionId; 
+  
+  public String getCollectionTitle() {
+    return collectionTitle;
+  }
+
+  public CollectionId getCollectionId() {
+    return collectionId;
+  }
+
+  public void setCollectionTitle(String collectionTitle) {
+    this.collectionTitle = collectionTitle;
+  }
+
+  public void setCollectionId(CollectionId collectionId) {
+    this.collectionId = collectionId;
+  }
+  
+  
+  public boolean isEditCollection() {
+    return collectionId != null;
+  }
+  
+  public boolean isCreateCollection() {
+    return !isEditCollection() && !StringUtils.isEmpty(collectionTitle);
+  }
   /** 
    * {@inheritDoc}
    */

@@ -55,10 +55,6 @@ private static final Logger logger = Logger.getLogger(CollectionDao.class.getNam
     return logAndReturn(logger, returnEntity, returnMsg);
   }
   
-  public CollectionEntity get(CollectionId collectionId) {
-    return get(null, collectionId);
-  }
-  
   public CollectionEntity get(Objectify ofy, CollectionId collectionId) {
     return super.get(ofy, CollectionEntity.generateKey(collectionId));
   }

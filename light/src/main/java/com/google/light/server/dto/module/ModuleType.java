@@ -67,7 +67,13 @@ public enum ModuleType {
               "file",
               // TODO(arjuns): See what should be the content type.
               ContentTypeEnum.GOOGLE_DOC,
-              false);
+              false),
+  
+  // To be used at places where ModuleType is not known.
+  LIGHT_COLLECTION(OAuth2ProviderService.GOOGLE_DOC,
+         "root",
+         ContentTypeEnum.OASIS_DOCUMENT,
+         false);
 
   private OAuth2ProviderService providerService;
   /*

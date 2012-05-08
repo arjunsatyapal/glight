@@ -16,8 +16,8 @@
 package com.google.light.server.persistence.entity.collection;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.light.server.utils.LightPreconditions.checkNonEmptyList;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
-import static com.google.light.server.utils.LightPreconditions.checkPersonId;
 
 import com.google.light.server.dto.collection.CollectionDto;
 import com.google.light.server.dto.collection.CollectionState;
@@ -26,6 +26,7 @@ import com.google.light.server.dto.pojo.longwrapper.PersonId;
 import com.google.light.server.dto.pojo.longwrapper.Version;
 import com.google.light.server.persistence.entity.AbstractPersistenceEntity;
 import com.googlecode.objectify.Key;
+import java.util.List;
 import javax.persistence.Embedded;
 import javax.persistence.Id;
 
@@ -43,7 +44,7 @@ public class CollectionEntity extends AbstractPersistenceEntity<CollectionEntity
   String title;
   CollectionState collectionState;
   @Embedded
-  PersonId ownerPersonId;
+  List<PersonId> owners;
 
   String etag;
   @Embedded
@@ -54,7 +55,7 @@ public class CollectionEntity extends AbstractPersistenceEntity<CollectionEntity
     super.validate();
     checkNotBlank(title, "title");
     checkNotNull(collectionState, "collectionState");
-    checkPersonId(ownerPersonId);
+    checkNonEmptyList(owners, "owners");
 
     // TODO(arjuns): Add validation for etag.
     checkNotNull(latestVersion, "latestVersion");
@@ -91,8 +92,8 @@ public class CollectionEntity extends AbstractPersistenceEntity<CollectionEntity
     return collectionState;
   }
 
-  public PersonId getOwnerPersonId() {
-    return ownerPersonId;
+  public List<PersonId> getOwners() {
+    return owners;
   }
 
   public String getEtag() {
@@ -120,7 +121,7 @@ public class CollectionEntity extends AbstractPersistenceEntity<CollectionEntity
     private Long id;
     private String title;
     private CollectionState collectionState;
-    private PersonId ownerPersonId;
+    private List<PersonId> owners;
     private String etag;
     private Version latestVersion;
 
@@ -139,8 +140,8 @@ public class CollectionEntity extends AbstractPersistenceEntity<CollectionEntity
       return this;
     }
 
-    public Builder ownerPersonId(PersonId ownerPersonId) {
-      this.ownerPersonId = ownerPersonId;
+    public Builder owners(List<PersonId> owners) {
+      this.owners = owners;
       return this;
     }
 
@@ -166,7 +167,7 @@ public class CollectionEntity extends AbstractPersistenceEntity<CollectionEntity
     this.id = builder.id;
     this.title = builder.title;
     this.collectionState = builder.collectionState;
-    this.ownerPersonId = builder.ownerPersonId;
+    this.owners = builder.owners;
     this.etag = builder.etag;
     this.latestVersion = builder.latestVersion;
   }

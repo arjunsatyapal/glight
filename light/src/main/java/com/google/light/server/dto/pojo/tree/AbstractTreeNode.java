@@ -40,18 +40,18 @@ import javax.xml.bind.annotation.XmlRootElement;
 public abstract class AbstractTreeNode<T extends AbstractTreeNode<T>> extends AbstractDto<T> {
   @XmlElement(name = "title")
   @JsonProperty(value = "title")
-  private String title;
+  protected String title;
   
   @XmlElement(name = "type")
   @JsonProperty(value = "type")
-  private TreeNodeType type;
+  protected TreeNodeType type;
 
   // TODO(arjuns): See if this embedded can be removed. At present both Dto and persistence are using this.
   // This is bad.
   @Embedded
   @XmlElement(name = "children")
   @JsonProperty(value = "children")
-  private List<T> children;
+  protected List<T> children;
 
   /**
    * {@inheritDoc}

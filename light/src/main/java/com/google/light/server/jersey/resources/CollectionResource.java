@@ -107,6 +107,7 @@ public class CollectionResource extends AbstractJerseyResource {
       builder.append(" ");
     }
 
+    System.out.println("\n\n\n****" + node.toJson());
     if (node.isLeafNode()) {
       String uri = "/rest/module/" + node.getModuleId().getValue() + "/latest/content";
       builder.append("<a href=").append(uri).append(">").append(node.getTitle()).append("</a>");
@@ -128,13 +129,13 @@ public class CollectionResource extends AbstractJerseyResource {
     CollectionId collectionId = new CollectionId(collectionIdStr);
     Version version = Version.createVersion(versionStr);
 
-    CollectionVersionEntity moduleEntity =
-        collectionManager.getCollectionVersion(collectionId, version);
+    CollectionVersionEntity cvEntity = collectionManager.getCollectionVersion(
+        null, collectionId, version);
 
-    if (moduleEntity == null) {
+    if (cvEntity == null) {
       throw new NotFoundException("Could not find " + collectionId + ":" + version);
     }
 
-    return moduleEntity;
+    return cvEntity;
   }
 }

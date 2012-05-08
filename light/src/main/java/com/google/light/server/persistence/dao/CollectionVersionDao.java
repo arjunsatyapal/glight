@@ -15,9 +15,6 @@
  */
 package com.google.light.server.persistence.dao;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import com.google.inject.Inject;
 import com.google.light.server.dto.collection.CollectionVersionDto;
 import com.google.light.server.dto.pojo.longwrapper.CollectionId;
@@ -53,9 +50,6 @@ public class CollectionVersionDao extends AbstractBasicDao<CollectionVersionDto,
    */
   @Override
   public CollectionVersionEntity put(Objectify ofy, CollectionVersionEntity entity) {
-    checkNotNull(ofy, "ofy should not be null");
-    checkArgument(ofy.getTxn().isActive(), "Txn should be active for CollectionVersionEntity.");
-
     CollectionVersionEntity returnEntity = super.put(ofy, entity);
     String returnMsg = "Created/Updated CollectionVersionEntity[" + returnEntity.getVersion() 
         + "], for Collection[" + returnEntity.getKey().getId() + "].";
@@ -63,11 +57,12 @@ public class CollectionVersionDao extends AbstractBasicDao<CollectionVersionDto,
     return logAndReturn(logger, returnEntity, returnMsg);
   }
 
-  public CollectionVersionEntity get(CollectionId collectionId, Version version) {
-    return get(CollectionEntity.generateKey(collectionId), version);
+  public CollectionVersionEntity get(Objectify ofy, CollectionId collectionId, Version version) {
+    return get(ofy, CollectionEntity.generateKey(collectionId), version);
   }
   
-  public CollectionVersionEntity get(Key<CollectionEntity> collectionKey, Version version) {
-    return super.get(CollectionVersionEntity.generateKey(collectionKey, version));
+  public CollectionVersionEntity get(Objectify ofy, Key<CollectionEntity> collectionKey, 
+      Version version) {
+    return super.get(ofy, CollectionVersionEntity.generateKey(collectionKey, version));
   }
 }

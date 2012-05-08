@@ -17,6 +17,10 @@ package com.google.light.testingutils;
 
 import static org.junit.Assert.assertEquals;
 
+import com.google.light.server.dto.module.ModuleType;
+
+import com.google.light.server.dto.pojo.longwrapper.CollectionId;
+
 import com.google.common.collect.Lists;
 import com.google.light.server.dto.AbstractPojo;
 import com.google.light.server.dto.pojo.longwrapper.ModuleId;
@@ -57,18 +61,24 @@ public class DummyTest {
     CollectionTreeNodeDto root = new CollectionTreeNodeDto.Builder()
         .title("title")
         .type(TreeNodeType.ROOT_NODE)
+        .moduleType(ModuleType.LIGHT_COLLECTION)
+        .externalId("null")
         .build();
 
     CollectionTreeNodeDto child0 = new CollectionTreeNodeDto.Builder()
         .title("child0")
         .type(TreeNodeType.LEAF_NODE)
         .moduleId(new ModuleId(1234L))
+        .moduleType(ModuleType.GOOGLE_DOC)
+        .externalId("1234")
         .build();
     root.addChildren(child0);
 
     CollectionTreeNodeDto child1 = new CollectionTreeNodeDto.Builder()
         .title("child1")
         .type(TreeNodeType.INTERMEDIATE_NODE)
+        .moduleType(ModuleType.GOOGLE_COLLECTION)
+        .externalId("1234")
         .build();
 
     root.addChildren(child1);
@@ -81,11 +91,13 @@ public class DummyTest {
   @Test
   public void test_GoogleDocResourceIdList() throws Exception {
     List<GoogleDocResourceId> list = Lists.newArrayList();
-    list.add(new GoogleDocResourceId("document:1tJZGzv_2sjMpvs4jtwxg18PGuSG-6nlfmx8Hlqa-_58"));
+    list.add(new GoogleDocResourceId("document:1mXX53OtXIhq2XbdQkk-utxO9pHdQ_dQsSsPE_HNtN_s"));
     list.add(new GoogleDocResourceId("folder:0B15KDir5QLAcQlpiM1hVS25RUUdxcVAwQlNYcXZDQQ"));
 
     GoogleDocResourceIdListWrapperDto resourceList1 = new GoogleDocResourceIdListWrapperDto();
     resourceList1.setGoogleDocResourceList(list);
+    resourceList1.setCollectionTitle("Title");
+    resourceList1.setCollectionId(new CollectionId(103L));
     
     String json = JsonUtils.toJson(resourceList1);
     System.out.println(json);

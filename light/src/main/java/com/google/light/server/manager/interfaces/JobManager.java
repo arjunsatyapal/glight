@@ -62,7 +62,7 @@ public interface JobManager {
    * @param jobId
    * @return
    */
-  public JobEntity enqueueCompleteJob(JobId jobId);
+  public JobEntity enqueueCompleteJob(JobId jobId, String message);
   
   /**
    * This will enqueue a Job in {@link com.google.light.server.constants.QueueEnum#LIGHT_POLLING}

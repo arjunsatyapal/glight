@@ -38,7 +38,7 @@ public interface CollectionManager {
    * @return
    * @throws IllegalKeyTypeException
    */
-  public CollectionEntity get(CollectionId collectionId);
+  public CollectionEntity get(Objectify ofy, CollectionId collectionId);
 
   /**
    * Delete an existing Collection.
@@ -64,12 +64,21 @@ public interface CollectionManager {
    * @return
    */
   public CollectionEntity reserveCollectionIdForOriginId(Objectify ofy, String originId, PersonId ownerId);
+  
+  /**
+   * Reserve a CollectionId.
+   * 
+   * @param originId
+   * @param ownerId
+   * @return
+   */
+  public CollectionEntity reserveCollectionId(Objectify ofy, PersonId ownerId);
 
   /**
    * Add CollectionVersion for GoogleDoc.
    */
   public CollectionVersionEntity addCollectionVersionForGoogleDoc(Objectify ofy, 
-      CollectionEntity collectionEntity, CollectionTreeNodeDto collectionTree);
+      CollectionEntity collectionEntity, CollectionTreeNodeDto collectionRoot);
 
   /**
    * Get Collection-Version.
@@ -78,5 +87,6 @@ public interface CollectionManager {
    * @param collectionVersion
    * @return
    */
-  public CollectionVersionEntity getCollectionVersion(CollectionId collectionId, Version version);
+  public CollectionVersionEntity getCollectionVersion(Objectify ofy, CollectionId collectionId,
+      Version version);
 }

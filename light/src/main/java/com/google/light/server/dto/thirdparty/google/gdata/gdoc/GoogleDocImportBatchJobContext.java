@@ -20,25 +20,24 @@ import static com.google.light.server.utils.LightPreconditions.checkNonEmptyList
 import static com.google.light.server.utils.LightPreconditions.checkPersonId;
 import static com.google.light.server.utils.LightUtils.isListEmpty;
 
-import javax.xml.bind.annotation.XmlElement;
-import org.codehaus.jackson.annotate.JsonProperty;
-
-import javax.xml.bind.annotation.XmlAccessType;
-
-import javax.xml.bind.annotation.XmlAccessorType;
-
-import javax.xml.bind.annotation.XmlRootElement;
+import org.apache.commons.lang.StringUtils;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.light.server.dto.AbstractDto;
 import com.google.light.server.dto.module.ImportDestinationDto;
+import com.google.light.server.dto.pojo.longwrapper.CollectionId;
 import com.google.light.server.dto.pojo.longwrapper.ModuleId;
 import com.google.light.server.dto.pojo.longwrapper.PersonId;
-import com.google.light.server.dto.pojo.tree.GoogleDocTree;
 import com.google.light.server.dto.pojo.tree.AbstractTreeNode.TreeNodeType;
+import com.google.light.server.dto.pojo.tree.GoogleDocTree;
 import com.google.light.server.utils.LightUtils;
 import java.util.List;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import org.codehaus.jackson.annotate.JsonProperty;
 
 /**
  * 
@@ -70,6 +69,14 @@ public class GoogleDocImportBatchJobContext extends AbstractDto<GoogleDocImportB
   @XmlElement(name = "state")
   @JsonProperty(value = "state")
   private GoogleDocImportBatchJobState state;
+  
+  @XmlElement(name = "collectionTitle")
+  @JsonProperty(value = "collectionTitle")
+  private String collectionTitle;
+
+  @XmlElement(name = "collectionId")
+  @JsonProperty(value = "collectionId")
+  private CollectionId collectionId; 
 
   /**
    * {@inheritDoc}
@@ -147,6 +154,31 @@ public class GoogleDocImportBatchJobContext extends AbstractDto<GoogleDocImportB
     this.state = Preconditions.checkNotNull(state, "state");
   }
 
+  public String getCollectionTitle() {
+    return collectionTitle;
+  }
+
+  public CollectionId getCollectionId() {
+    return collectionId;
+  }
+
+  public void setCollectionTitle(String collectionTitle) {
+    this.collectionTitle = collectionTitle;
+  }
+
+  public void setCollectionId(CollectionId collectionId) {
+    this.collectionId = collectionId;
+  }
+  
+  
+  public boolean isEditCollection() {
+    return collectionId != null;
+  }
+  
+  public boolean isCreateCollection() {
+    return !isEditCollection() && !StringUtils.isEmpty(collectionTitle);
+  }
+
   public boolean isChildJobCreated(String externalId, ModuleId moduleId) {
     if (isListEmpty(listOfImportDestinations)) {
       return false;
@@ -161,6 +193,20 @@ public class GoogleDocImportBatchJobContext extends AbstractDto<GoogleDocImportB
 
     return false;
   }
+  
+  public ModuleId getModuleIdForExternalId(String externalId) {
+    if (LightUtils.isListEmpty(listOfImportDestinations)) {
+      return null;
+    }
+    
+    for (ImportDestinationDto currDest : listOfImportDestinations) {
+      if (currDest.getExternalId().equals(externalId)) {
+        return currDest.getModuleId();
+      }
+    }
+    
+    return null;
+  }
 
   public static class Builder extends AbstractDto.BaseBuilder<Builder> {
     private PersonId ownerId;
@@ -168,6 +214,8 @@ public class GoogleDocImportBatchJobContext extends AbstractDto<GoogleDocImportB
     private GoogleDocTree root;
     private List<ImportDestinationDto> listOfImportDestinations;
     private GoogleDocImportBatchJobState state;
+    private String collectionTitle;
+    private CollectionId collectionId; 
 
     public Builder ownerId(PersonId ownerId) {
       this.ownerId = ownerId;
@@ -193,6 +241,16 @@ public class GoogleDocImportBatchJobContext extends AbstractDto<GoogleDocImportB
       this.state = state;
       return this;
     }
+    
+    public Builder collectionTitle(String collectionTitle) {
+      this.collectionTitle = collectionTitle;
+      return this;
+    }
+    
+    public Builder collectionId(CollectionId collectionId) {
+      this.collectionId = collectionId;
+      return this;
+    }
 
     @SuppressWarnings("synthetic-access")
     public GoogleDocImportBatchJobContext build() {
@@ -208,6 +266,8 @@ public class GoogleDocImportBatchJobContext extends AbstractDto<GoogleDocImportB
     this.root = builder.root;
     this.listOfImportDestinations = builder.listOfImportDestinations;
     this.state = builder.state;
+    this.collectionTitle = builder.collectionTitle;
+    this.collectionId = builder.collectionId;
   }
 
   // For JAXB

@@ -67,11 +67,11 @@ public interface ModuleManager {
   /**
    * Reserve a ModuleId for a OriginId.
    */
-  public ModuleId reserveModuleIdForExternalId(ModuleType moduleType, String externalId, 
+  public ModuleId reserveModuleIdForExternalId(ModuleType moduleType, String externalId,
       List<PersonId> owners);
-
-  public Version reserveModuleVersionForImport(
-      ModuleId moduleId, String etag, Instant lastEditTime);
+  
+  public Version reserveModuleVersionForImport(ModuleId moduleId, String etag, 
+      Instant lastEditTime);
 
   /**
    * Add ModuleVersion for GoogleDoc.
@@ -84,8 +84,8 @@ public interface ModuleManager {
   @Deprecated
   public ModuleVersionEntity addModuleVersionForGoogleDoc(ModuleId moduleId, String content,
       GoogleDocInfoDto docInfoDto);
-  
-  public ModuleVersionEntity publishModuleVersion(ModuleId moduleId, Version version, 
+
+  public ModuleVersionEntity publishModuleVersion(ModuleId moduleId, Version version,
       String content, GoogleDocInfoDto docInfo);
 
   /**
@@ -115,6 +115,7 @@ public interface ModuleManager {
    * @param version
    * @param resourceKey
    */
-  public ModuleVersionResourceEntity getModuleResource(Objectify ofy, ModuleId moduleId, Version version,
+  public ModuleVersionResourceEntity getModuleResource(Objectify ofy, ModuleId moduleId,
+      Version version,
       String resourceId);
 }

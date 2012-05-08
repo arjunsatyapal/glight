@@ -17,6 +17,12 @@ package com.google.light.server.jobs.google.gdoc;
 
 import static com.google.light.server.utils.LightPreconditions.checkNotNull;
 
+import com.google.light.server.utils.LightUtils;
+
+import com.google.common.collect.Lists;
+
+import java.util.logging.Logger;
+
 import com.google.inject.Inject;
 
 import com.google.inject.Provider;
@@ -34,6 +40,8 @@ import java.util.List;
  * @author Arjun Satyapal
  */
 public class GoogleDocJobs {
+  private static final Logger logger = Logger.getLogger(GoogleDocJobs.class.getName());
+  
   private Provider<DocsServiceWrapper> docsServiceProvider;
 
   @Inject
@@ -47,7 +55,11 @@ public class GoogleDocJobs {
     checkNotNull(parentNode, ExceptionType.SERVER, "parentNode cannot be null");
 
     for (GoogleDocInfoDto currChild : listOfChilds) {
-      parentNode.addChildren(getTreeNode(currChild));
+      GoogleDocTree gdocTreeNode = getTreeNode(currChild);
+      
+      if (gdocTreeNode != null) {
+        parentNode.addChildren(gdocTreeNode);
+      }
     }
     
     return parentNode;
@@ -63,8 +75,12 @@ public class GoogleDocJobs {
         .title(resourceInfo.getTitle())
         .resourceId(resourceId)
         .resourceInfo(resourceInfo);
-    
 
+    if (!resourceId.getModuleType().isSupported()) {
+      // Since this type is not supported, so ignoring.
+      logger.info("Ignoring  " + resourceId);
+      return null;
+    }
     
     if (!resourceId.isFolder()) {
       nodeBuilder.type(TreeNodeType.LEAF_NODE);
@@ -73,8 +89,22 @@ public class GoogleDocJobs {
     
     // This is a folder. So adding child Tree into current node.
     nodeBuilder.type(TreeNodeType.INTERMEDIATE_NODE);
-    List<GoogleDocInfoDto> listOfChilds = docsServiceProvider.get().getFolderContentAll(resourceId);
+    List<GoogleDocInfoDto> listOfChilds = docsServiceProvider.get().getFolderContentWhichAreSupported(resourceId);
+
+    List<GoogleDocInfoDto> listOfSupportedChilds = Lists.newArrayList();
+    for (GoogleDocInfoDto currChild : listOfChilds) {
+      System.out.println(currChild.getTitle());
+      if (currChild.getGoogleDocsResourceId().getModuleType().isSupported()) {
+        listOfSupportedChilds.add(currChild);
+      }
+    }
     
-    return addChildTreeToParent(nodeBuilder.build(), listOfChilds);
+    
+    if (LightUtils.isListEmpty(listOfSupportedChilds)) {
+      return null;
+    }
+    
+    
+    return addChildTreeToParent(nodeBuilder.build(), listOfSupportedChilds);
   }
 }

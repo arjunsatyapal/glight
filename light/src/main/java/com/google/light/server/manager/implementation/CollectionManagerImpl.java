@@ -18,6 +18,7 @@ package com.google.light.server.manager.implementation;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.light.server.dto.collection.CollectionState;
 import com.google.light.server.dto.pojo.longwrapper.CollectionId;
@@ -77,8 +78,8 @@ public class CollectionManagerImpl implements CollectionManager {
    * {@inheritDoc}
    */
   @Override
-  public CollectionEntity get(CollectionId collectionId) {
-    return collectionDao.get(collectionId);
+  public CollectionEntity get(Objectify ofy, CollectionId collectionId) {
+    return collectionDao.get(ofy, collectionId);
   }
 
   /**
@@ -122,7 +123,7 @@ public class CollectionManagerImpl implements CollectionManager {
     CollectionEntity collectionEntity = new CollectionEntity.Builder()
         .title("reserved")
         .collectionState(CollectionState.RESERVED)
-        .ownerPersonId(ownerId)
+        .owners(Lists.newArrayList(ownerId))
         .latestVersion(new Version(0L /* noVersion */, Version.State.NO_VERSION))
         .etag("etag")
         .build();
@@ -133,6 +134,24 @@ public class CollectionManagerImpl implements CollectionManager {
     // .moduleId(persistedEntity.getModuleId())
     // .build();
     // originModuleMappingDao.put(ofy, mappingEntity);
+
+    return persistedEntity;
+  }
+  
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public CollectionEntity reserveCollectionId(Objectify ofy, PersonId ownerId) {
+    // Now create a new Collection.
+    CollectionEntity collectionEntity = new CollectionEntity.Builder()
+        .title("reserved")
+        .collectionState(CollectionState.RESERVED)
+        .owners(Lists.newArrayList(ownerId))
+        .latestVersion(new Version(0L /* noVersion */, Version.State.NO_VERSION))
+        .etag("etag")
+        .build();
+    CollectionEntity persistedEntity = this.create(ofy, collectionEntity);
 
     return persistedEntity;
   }
@@ -166,17 +185,17 @@ public class CollectionManagerImpl implements CollectionManager {
    * {@inheritDoc}
    */
   @Override
-  public CollectionVersionEntity getCollectionVersion(CollectionId collectionId, Version version) {
+  public CollectionVersionEntity getCollectionVersion(Objectify ofy, CollectionId collectionId,
+      Version version) {
     Version requiredVersion = convertLatestToSpecificVersion(collectionId, version);
 
-    CollectionVersionEntity moduleVersionEntity =
-        collectionVersionDao.get(collectionId, requiredVersion);
-    return moduleVersionEntity;
+    CollectionVersionEntity cvEntity = collectionVersionDao.get(ofy, collectionId, requiredVersion);
+    return cvEntity;
   }
 
   private Version convertLatestToSpecificVersion(CollectionId collectionId, Version version) {
     if (version.isLatest()) {
-      CollectionEntity entity = get(collectionId);
+      CollectionEntity entity = get(null, collectionId);
       return entity.getLatestVersion();
     }
 
