@@ -18,12 +18,10 @@ package com.google.light.server.persistence.dao;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.light.server.dto.pojo.longwrapper.Version;
-
-import com.google.light.server.dto.pojo.longwrapper.ModuleId;
-
 import com.google.inject.Inject;
 import com.google.light.server.dto.module.ModuleVersionDto;
+import com.google.light.server.dto.pojo.longwrapper.ModuleId;
+import com.google.light.server.dto.pojo.longwrapper.Version;
 import com.google.light.server.persistence.entity.module.ModuleEntity;
 import com.google.light.server.persistence.entity.module.ModuleVersionEntity;
 import com.googlecode.objectify.Key;
@@ -69,11 +67,32 @@ public class ModuleVersionDao extends AbstractBasicDao<ModuleVersionDto, ModuleV
    * TODO(arjuns): Add test for this.
    * Fetch Module via ModuleId.
    */
-  public ModuleVersionEntity get(ModuleId moduleId, Version version) {
-    return get(ModuleEntity.generateKey(moduleId), version);
+  public ModuleVersionEntity get(Objectify ofy, ModuleId moduleId, Version version) {
+    return get(ofy, ModuleEntity.generateKey(moduleId), version);
   }
   
-  public ModuleVersionEntity get(Key<ModuleEntity> moduleKey, Version version) {
-    return super.get(ModuleVersionEntity.generateKey(moduleKey, version));
+  public ModuleVersionEntity get(Objectify ofy, Key<ModuleEntity> moduleKey, Version version) {
+    return super.get(ofy, ModuleVersionEntity.generateKey(moduleKey, version));
   }
+  
+//  public ModuleVersionEntity findByModuleIdAndLastEditTime(Objectify ofy, ModuleId moduleId, 
+//      Instant lastEditTime ) {
+//    
+//    // No record was found with etag filter. So now searching on all childs.
+//    QueryResultIterable<ModuleVersionEntity> versionsIterable = ObjectifyUtils.getAllChildren(
+//        ofy, ModuleEntity.generateKey(moduleId), ModuleVersionEntity.class);
+//    QueryResultIterator<ModuleVersionEntity> iterator = versionsIterable.iterator();
+//    
+//    while(iterator.hasNext()) {
+//      ModuleVersionEntity moduleVersion = iterator.next();
+//      
+//      
+//      if (moduleVersion.getEtag().equals(etag)) {
+//        return moduleVersion;
+//      }
+//    }
+//    
+//    // No version was found with given Etag.
+//    return null;
+//  }
 }

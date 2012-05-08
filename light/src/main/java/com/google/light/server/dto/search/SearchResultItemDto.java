@@ -2,9 +2,16 @@ package com.google.light.server.dto.search;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import org.codehaus.jackson.annotate.JsonProperty;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+
+import javax.xml.bind.annotation.XmlElement;
+
+import javax.xml.bind.annotation.XmlRootElement;
+
 import com.google.light.server.dto.AbstractDto;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
-import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
 
 /**
  * DTO for Search Result Items
@@ -12,11 +19,19 @@ import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
  * @author Walter Cacau
  */
 @SuppressWarnings("serial")
-@JsonSerialize(include = Inclusion.NON_NULL)
+@XmlRootElement(name = "searchResultItem")
+@XmlAccessorType(XmlAccessType.FIELD)
 public class SearchResultItemDto extends AbstractDto<SearchResultItemDto> {
-
+  @XmlElement(name = "title")
+  @JsonProperty(value = "title")
   String title;
+  
+  @XmlElement(name = "description")
+  @JsonProperty(value = "description")
   String description;
+  
+  @XmlElement(name = "link")
+  @JsonProperty(value = "link")
   String link;
 
   /**
@@ -75,7 +90,7 @@ public class SearchResultItemDto extends AbstractDto<SearchResultItemDto> {
     checkNotNull(link);
     return this;
   }
-  
+
   /**
    * Sanitizes the HTML content in this Dto.
    * TODO(waltercacau): Implement this method.
@@ -118,5 +133,10 @@ public class SearchResultItemDto extends AbstractDto<SearchResultItemDto> {
     this.title = builder.title;
     this.description = builder.description;
     this.link = builder.link;
+  }
+
+  // For Jaxb.
+  private SearchResultItemDto() {
+    super(null);
   }
 }

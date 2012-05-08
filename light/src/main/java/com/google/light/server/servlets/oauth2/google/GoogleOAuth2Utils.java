@@ -53,6 +53,6 @@ public class GoogleOAuth2Utils {
     HttpResponse userInfoResponse = userInfoRequest.execute();
     String userInfoString = CharStreams.toString(
         new InputStreamReader(userInfoResponse.getContent(), Charsets.UTF_8));
-    return JsonUtils.getDto(userInfoString, GoogleUserInfo.class).validate();
+    return JsonUtils.getPojo(userInfoString, GoogleUserInfo.class);
   }
 }

@@ -15,9 +15,16 @@
  */
 package com.google.light.server.dto;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+
+import org.codehaus.jackson.annotate.JsonProperty;
+
+import javax.xml.bind.annotation.XmlElement;
+
+import javax.xml.bind.annotation.XmlRootElement;
+
 import com.google.common.base.Preconditions;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
-import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
 
 /**
  * Dto to hold any state information that should be
@@ -26,8 +33,11 @@ import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
  * @author Walter Cacau
  */
 @SuppressWarnings("serial")
-@JsonSerialize(include = Inclusion.NON_NULL)
+@XmlRootElement(name = "redirect")
+@XmlAccessorType(XmlAccessType.FIELD)
 public class RedirectDto extends AbstractDto<RedirectDto> {
+  @XmlElement(name = "redirect_path")
+  @JsonProperty(value = "redirect_path")
   private String redirectPath;
 
   /**

@@ -16,6 +16,7 @@
 package com.google.light.server.dto.pojo;
 
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
+import static com.google.light.server.utils.LightUtils.getInstantInMillis;
 
 import com.google.common.collect.Lists;
 import com.google.gdata.data.Content;
@@ -49,9 +50,9 @@ import org.joda.time.Instant;
 public class GoogleDocArchivePojo extends AbstractPojo<GoogleDocArchivePojo>{
   private String id;
   private String archiveId;
-  private Instant published;
-  private Instant updated;
-  private Instant edited;
+  private Long publishedInMillis;
+  private Long updatedInMillis;
+  private Long editedInMillis;
   private String title;
   private ContentTypeEnum contentType;
   private String contentLocation;
@@ -65,7 +66,7 @@ public class GoogleDocArchivePojo extends AbstractPojo<GoogleDocArchivePojo>{
   
   // TODO(arjuns): Replicate this enum locally.
   private LightGDocArchiveNotifyStatus notifyStatus;
-  private Instant archiveCompleteTime;
+  private Long archiveCompleteTimeInMillis;
 
   private int archiveTotal;
   private int archiveTotalCompleted;
@@ -83,15 +84,15 @@ public class GoogleDocArchivePojo extends AbstractPojo<GoogleDocArchivePojo>{
   }
 
   public Instant getPublished() {
-    return published;
+    return new Instant(publishedInMillis);
   }
 
   public Instant getUpdated() {
-    return updated;
+    return new Instant(updatedInMillis);
   }
 
   public Instant getEdited() {
-    return edited;
+    return new Instant(editedInMillis);
   }
 
   public String getTitle() {
@@ -127,7 +128,7 @@ public class GoogleDocArchivePojo extends AbstractPojo<GoogleDocArchivePojo>{
   }
 
   public Instant getArchiveCompleteTime() {
-    return archiveCompleteTime;
+    return new Instant(archiveCompleteTimeInMillis);
   }
 
   public int getArchiveTotal() {
@@ -337,10 +338,11 @@ public class GoogleDocArchivePojo extends AbstractPojo<GoogleDocArchivePojo>{
   @SuppressWarnings("synthetic-access")
   private GoogleDocArchivePojo(Builder builder) {
     this.id = checkNotBlank(builder.id, "id");
-    this.archiveId = id.replace("https://docs.google.com/feeds/archive/", ""); 
-    this.published = builder.published;
-    this.updated = builder.updated;
-    this.edited = builder.edited;
+    this.archiveId = id.replace("https://docs.google.com/feeds/archive/", "");
+    
+    this.publishedInMillis = getInstantInMillis(builder.published);
+    this.updatedInMillis = getInstantInMillis(builder.updated);
+    this.editedInMillis = getInstantInMillis(builder.edited);
     this.title = builder.title;
     this.contentType = builder.contentType;
     this.contentLocation = builder.contentLocation;
@@ -349,7 +351,7 @@ public class GoogleDocArchivePojo extends AbstractPojo<GoogleDocArchivePojo>{
     this.archiveStatus = builder.archiveStatus;
     this.sizeInBytes = builder.sizeInBytes;
     this.notifyStatus = builder.notifyStatus;
-    this.archiveCompleteTime = builder.archiveCompleteTime;
+    this.archiveCompleteTimeInMillis = getInstantInMillis(builder.archiveCompleteTime);
 
     this.archiveTotal = builder.archiveTotal;
     this.archiveTotalCompleted = builder.archiveTotalComplete;

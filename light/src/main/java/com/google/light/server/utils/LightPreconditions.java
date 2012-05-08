@@ -16,20 +16,28 @@
 package com.google.light.server.utils;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.light.server.utils.ServletUtils.getRequestHeaderValue;
 
-import com.google.light.server.dto.pojo.longwrapper.PersonId;
+import com.google.light.server.exception.unchecked.InvalidJobIdException;
 
+import com.google.light.server.dto.pojo.longwrapper.JobId;
+
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.light.server.constants.HttpHeaderEnum;
 import com.google.light.server.constants.LightEnvEnum;
 import com.google.light.server.constants.OAuth2ProviderService;
+import com.google.light.server.dto.pojo.longwrapper.PersonId;
+import com.google.light.server.exception.ExceptionType;
 import com.google.light.server.exception.unchecked.BlankStringException;
 import com.google.light.server.exception.unchecked.InvalidPersonIdException;
 import com.google.light.server.exception.unchecked.InvalidSessionException;
 import com.google.light.server.exception.unchecked.ServerConfigurationException;
+import com.google.light.server.exception.unchecked.httpexception.InternalServerError;
+import com.google.light.server.exception.unchecked.httpexception.NotFoundException;
 import com.google.light.server.exception.unchecked.httpexception.PersonLoginRequiredException;
 import com.google.light.server.exception.unchecked.httpexception.UnauthorizedException;
 import com.google.light.server.persistence.entity.person.PersonEntity;
@@ -39,6 +47,7 @@ import com.googlecode.objectify.Objectify;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.apache.commons.validator.routines.IntegerValidator;
@@ -56,21 +65,6 @@ public class LightPreconditions {
   private static LongValidator longValidator = LongValidator.getInstance();
   private static IntegerValidator integerValidator = IntegerValidator.getInstance();
 
-  /**
-   * Javadoc is same as for {{@link #checkNotBlank(String)}. This throws an exception with cause as
-   * errorString.
-   * 
-   * @param reference
-   * @param errorString
-   * @return
-   */
-  public static String checkNotBlank(String reference, String errorString) {
-    if (StringUtils.isBlank(reference)) {
-      throw new BlankStringException(errorString);
-    }
-
-    return reference;
-  }
 
   /**
    * Ensures that the Email passed to the referenced method is valid.
@@ -86,15 +80,28 @@ public class LightPreconditions {
   /**
    * Ensures that PersonId is valid.
    */
-
   public static PersonId checkPersonId(PersonId personId) {
     try {
-      checkPositiveLong(personId.get(), "Invalid PersonId[" + personId.get() + "].");
+      checkPositiveLong(personId.getValue(), "Invalid [" + personId.getValue() + "].");
     } catch (Exception e) {
       throw new InvalidPersonIdException(e);
     }
 
     return personId;
+  }
+  
+  /**
+   * Ensures that PersonId is valid.
+   */
+  public static JobId checkJobId(JobId jobId) {
+    try {
+      Preconditions.checkNotNull(jobId, "jobId");
+      checkPositiveLong(jobId.getValue(), "Invalid [" + jobId.getValue() + "].");
+    } catch (Exception e) {
+      throw new InvalidJobIdException(e);
+    }
+
+    return jobId;
   }
 
   /**
@@ -113,7 +120,7 @@ public class LightPreconditions {
    * @return
    */
   public static <T> List<T> checkNonEmptyList(List<T> list, String message) {
-    checkNotNull(list, message);
+    Preconditions.checkNotNull(list, message);
     checkArgument(list.size() > 0, message);
     return list;
   }
@@ -126,14 +133,14 @@ public class LightPreconditions {
    * @return
    */
   public static Long checkPositiveLong(Long value, String message) {
-    checkNotNull(value, message);
+    Preconditions.checkNotNull(value, message);
     checkArgument(longValidator.isInRange(value, 1, Long.MAX_VALUE), message + "[" + value + "].");
     return value;
   }
 
   public static Integer checkIntegerIsInRage(Integer value, int min, int max, String message) {
     String errorMessage = message + ": Range : [" + min + ":" + max + "].";
-    checkNotNull(value, errorMessage);
+    Preconditions.checkNotNull(value, errorMessage);
     checkArgument(integerValidator.isInRange(value, min, max), message);
     return value;
   }
@@ -260,10 +267,71 @@ public class LightPreconditions {
    */
   // TODO(arjuns): Add test for this.
   public static void checkTxnIsRunning(Objectify ofy) {
-    checkNotNull(ofy, "txn is null.");
+    Preconditions.checkNotNull(ofy, "txn is null.");
     checkArgument(ofy.getTxn().isActive(), "txn is inactive.");
   }
+  
+  public static void checkIsRunningUnderQueue(HttpServletRequest request) {
+    String queueName = getRequestHeaderValue(request, HttpHeaderEnum.GAE_QUEUE_NAME);
+    Preconditions.checkNotNull(queueName, "Currently request is not running under queue.");
+  }
+  
+  public static<T> T checkNotNull(T object, ExceptionType type, String message) {
+    try {
+      return Preconditions.checkNotNull(object);
+    } catch (Exception e) {
+      handleError(type, message);
+    }
+    
+    throw new IllegalStateException("Code should not reach here.");
+  }
+  
+  /**
+   * Javadoc is same as for {{@link #checkNotBlank(String)}. This throws an exception with cause as
+   * errorString.
+   * 
+   * @param reference
+   * @param errorString
+   * @return
+   */
+  public static String checkNotBlank(String reference, String errorString) {
+    if (StringUtils.isBlank(reference)) {
+      throw new BlankStringException(errorString, ExceptionType.SERVER);
+    }
 
+    return reference;
+  }
+  
+  /**
+   * Javadoc is same as for {{@link #checkNotBlank(String)}. This throws an exception with cause as
+   * errorString.
+   * 
+   * @param reference
+   * @param errorString
+   * @return
+   */
+  public static String checkNotBlank(String reference, ExceptionType type, 
+      String errorString) {
+    if (StringUtils.isBlank(reference)) {
+      throw new BlankStringException(errorString, type);
+    }
+
+    return reference;
+  }
+  
+  private static void handleError(ExceptionType exceptionType, String message) {
+    switch (exceptionType) {
+      case CLIENT_PARAMETER :
+        throw new NotFoundException(message);
+        
+      case SERVER :
+        throw new InternalServerError(message);
+        
+      default :
+        throw new IllegalArgumentException("Unsupported type : " + exceptionType);
+    }
+  }
+  
   // Utility class.
   private LightPreconditions() {
   }

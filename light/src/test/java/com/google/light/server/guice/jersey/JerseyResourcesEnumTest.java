@@ -43,6 +43,8 @@ import org.junit.Test;
 /**
  * Test for {@link JerseyResourcesEnum}.
  * 
+ * TODO(arjuns): Ensure that method exist in original class.
+ * 
  * @author Arjun Satyapal
  */
 public class JerseyResourcesEnumTest implements EnumTestInterface {
@@ -52,7 +54,7 @@ public class JerseyResourcesEnumTest implements EnumTestInterface {
   @Override
   @Test
   public void test_count() throws Exception {
-    assertEquals(6, JerseyResourcesEnum.values().length);
+    assertEquals(8, JerseyResourcesEnum.values().length);
 
     Set<Class<? extends AbstractJerseyResource>> existingSet =
         JerseyMethodEnum.getSetOfJerseyResources();

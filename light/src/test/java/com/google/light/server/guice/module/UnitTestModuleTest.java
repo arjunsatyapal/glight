@@ -57,7 +57,7 @@ public class UnitTestModuleTest extends AbstractModuleTest {
    */
   @Test
   @Override
-  public void testModuleInstantiation() {
+  public void test_ModuleInstantiation() {
     assertTrue(GaeUtils.isUnitTestServer());
     assertNotNull(new UnitTestModule(mock(TestRequestScopedValuesProvider.class), mock(HttpSession.class)));
   }

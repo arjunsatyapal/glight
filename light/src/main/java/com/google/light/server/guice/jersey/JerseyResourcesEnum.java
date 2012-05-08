@@ -19,9 +19,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.constants.JerseyConstants.URI_RESOURCE_PATH_GAE_PIPELINE;
 import static com.google.light.server.constants.JerseyConstants.URI_RESOURCE_PATH_MISC_ADMIN;
 import static com.google.light.server.constants.JerseyConstants.URI_RESOURCE_PATH_MODULE;
+import static com.google.light.server.constants.JerseyConstants.URI_RESOURCE_PATH_NOTIFICATION;
 import static com.google.light.server.constants.JerseyConstants.URI_RESOURCE_PATH_TEST;
 import static com.google.light.server.constants.JerseyConstants.URI_RESOURCE_PATH_THIRD_PARTH_GOOGLE_DOC;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
+
+import com.google.light.server.jersey.resources.notifications.NotificationResource;
+
+import com.google.light.server.jersey.resources.job.JobResource;
 
 import com.google.light.server.constants.JerseyConstants;
 
@@ -47,8 +52,10 @@ public enum JerseyResourcesEnum {
   COLLECTION_RESOURCE(CollectionResource.class, JerseyConstants.URI_RESOURCE_PATH_COLLECTION),
   GAE_PIPELINE_RESOURCE(GAEPipelineResource.class, URI_RESOURCE_PATH_GAE_PIPELINE),
   GOOGLE_DOC_RESOURCE(GoogleDocIntegration.class, URI_RESOURCE_PATH_THIRD_PARTH_GOOGLE_DOC),
+  JOB_RESOURCE(JobResource.class, JerseyConstants.URI_RESOURCE_JOB),
   MISC_ADMIN_RESOURCES(GAEAdminResources.class, URI_RESOURCE_PATH_MISC_ADMIN),
   MODULE_RESOURCE(ModuleResource.class, URI_RESOURCE_PATH_MODULE),
+  NOTIFICATION_RESOURCE(NotificationResource.class, URI_RESOURCE_PATH_NOTIFICATION),
   TEST_RESOURCES(TestResources.class, URI_RESOURCE_PATH_TEST);
 
   

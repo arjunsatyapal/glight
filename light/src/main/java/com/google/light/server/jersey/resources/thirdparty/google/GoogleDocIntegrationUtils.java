@@ -17,6 +17,7 @@ package com.google.light.server.jersey.resources.thirdparty.google;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.light.server.dto.pojo.longwrapper.JobId;
 import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocInfoDto;
 import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocResourceId;
 import com.google.light.server.manager.interfaces.JobManager;
@@ -24,6 +25,7 @@ import com.google.light.server.persistence.entity.jobs.JobEntity;
 import com.google.light.server.persistence.entity.queue.importflow.ImportJobEntity;
 import com.google.light.server.thirdparty.clients.google.gdata.gdoc.DocsServiceWrapper;
 import com.google.light.server.utils.GuiceUtils;
+import com.google.light.server.utils.JsonUtils;
 import java.util.logging.Logger;
 
 /**
@@ -37,18 +39,18 @@ public class GoogleDocIntegrationUtils {
   private static final Logger logger = Logger.getLogger(GoogleDocIntegrationUtils.class.getName());
   
   public static JobEntity importGDocResource(GoogleDocResourceId resourceId, 
-      DocsServiceWrapper docsService, Long parentJobId, Long rootJobId, String promiseHandle) {
-    GoogleDocInfoDto docInfoDto = docsService.getDocumentEntryWithAcl(resourceId);
+      DocsServiceWrapper docsService, JobId parentJobId, JobId rootJobId, String promiseHandle) {
+    GoogleDocInfoDto docInfoDto = docsService.getGoogleDocInfo(resourceId);
     checkNotNull(docInfoDto, "DocInfoDto for ResourceId[" + resourceId + "] was null.");
 
     // TODO(arjuns): Add more logic to filter out what docs can be imported.
-    logger.info(docInfoDto.toJson());
+    logger.info(JsonUtils.toJson(docInfoDto));
 
     ImportJobEntity importJobEntity = new ImportJobEntity.Builder()
         .moduleType(resourceId.getModuleType())
         .resourceId(resourceId.getTypedResourceId())
         .personId(GuiceUtils.getOwnerId())
-        .additionalJsonInfo(docInfoDto.toJson())
+        .additionalJsonInfo(JsonUtils.toJson(docInfoDto))
         .build();
 
     JobManager jobManager = GuiceUtils.getInstance(JobManager.class);

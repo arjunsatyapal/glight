@@ -54,7 +54,7 @@ public class QaModuleTest extends AbstractModuleTest {
    */
   @Test
   @Override
-  public void testModuleInstantiation() {
+  public void test_ModuleInstantiation() {
     assertTrue(GaeUtils.isQaServer());
     assertNotNull(new ProdModule());
   }

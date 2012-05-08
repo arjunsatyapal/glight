@@ -23,12 +23,8 @@ package com.google.light.server.guice.jersey;
  * @author Arjun Satyapal
  */
 
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-import com.google.light.server.constants.JavaDtos;
+import com.google.light.server.constants.LightDtos;
 import com.google.light.server.constants.http.ContentTypeConstants;
-import com.google.light.server.dto.AbstractDto;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.ws.rs.Produces;
@@ -47,34 +43,38 @@ import javax.xml.bind.PropertyException;
  *
  * @author arjuns@google.com (Arjun Satyapal)
  */
-@Produces(ContentTypeConstants.TEXT_XML)
+@Produces(ContentTypeConstants.APPLICATION_XML)
 @Provider
 public final class JAXBXmlContextResolver implements ContextResolver<Marshaller> {
   @SuppressWarnings("rawtypes")
   Map<Class, Marshaller> marshallerMap;
+  Marshaller marshaller;
   
   @SuppressWarnings("rawtypes")
-  private final Set<Class> types;
+  Set<Class> types;
 
   @SuppressWarnings("rawtypes")
   public JAXBXmlContextResolver() throws Exception {
-    List<Class> list = JavaDtos.getListOfDtoClasses();
-    this.types = Sets.newHashSet(list);
+    Class[] list = LightDtos.getArrayOfDtoClasses();
+//    this.types = Sets.newHashSet(list);
+//    
+//    
+//    marshallerMap = Maps.newHashMap();
+//    for(Class<? extends AbstractDto> currClass : list) {
+//      marshallerMap.put(currClass, generateMarshaller(currClass));
+//    }
     
-    
-    marshallerMap = Maps.newHashMap();
-    for(Class<? extends AbstractDto> currClass : list) {
-      marshallerMap.put(currClass, generateMarshaller(currClass));
-    }
+    marshaller = generateMarshaller(list);
   }
 
   @Override
   public Marshaller getContext(Class<?> objectType) {
-    if (types.contains(objectType)) {
-      return marshallerMap.get(objectType);
-    }
+//    if (types.contains(objectType)) {
+//      return marshallerMap.get(objectType);
+//    }
 
-    return null;
+    return marshaller;
+//    return null;
   }
 
   /**
@@ -83,9 +83,10 @@ public final class JAXBXmlContextResolver implements ContextResolver<Marshaller>
    * @throws JAXBException
    * @throws PropertyException
    */
-  private Marshaller generateMarshaller(Class<?> objectType) throws JAXBException,
+  @SuppressWarnings("rawtypes")
+  private Marshaller generateMarshaller(Class[] list) throws JAXBException,
       PropertyException {
-    JAXBContext context = JAXBContext.newInstance(objectType);
+    JAXBContext context = JAXBContext.newInstance(list);
     Marshaller marshaller = context.createMarshaller();
     marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
     return marshaller;

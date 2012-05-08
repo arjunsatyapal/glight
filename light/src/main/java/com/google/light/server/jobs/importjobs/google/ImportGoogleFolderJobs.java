@@ -21,24 +21,22 @@ import static com.google.light.server.jersey.resources.thirdparty.google.GoogleD
 import static com.google.light.server.jobs.JobUtils.updateChangeLog;
 import static com.google.light.server.utils.GuiceUtils.getInstance;
 
-import java.util.ArrayList;
-
-import com.google.common.collect.Lists;
-
 import com.google.appengine.tools.pipeline.FutureValue;
 import com.google.appengine.tools.pipeline.PromisedValue;
 import com.google.appengine.tools.pipeline.Value;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.light.jobs.LightJob2;
-import com.google.light.jobs.LightJob3;
+import com.google.light.pipeline_jobs.LightJob2;
+import com.google.light.pipeline_jobs.LightJob3;
 import com.google.light.server.dto.module.ModuleType;
 import com.google.light.server.dto.pojo.LightJobContextPojo;
 import com.google.light.server.dto.pojo.longwrapper.CollectionId;
+import com.google.light.server.dto.pojo.longwrapper.JobId;
 import com.google.light.server.dto.pojo.longwrapper.ModuleId;
 import com.google.light.server.dto.pojo.longwrapper.PersonId;
-import com.google.light.server.dto.pojo.tree.CollectionTreeNode;
-import com.google.light.server.dto.pojo.tree.TreeNode.TreeNodeType;
+import com.google.light.server.dto.pojo.tree.CollectionTreeNodeDto;
+import com.google.light.server.dto.pojo.tree.AbstractTreeNode.TreeNodeType;
 import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocInfoDto;
 import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocResourceId;
 import com.google.light.server.jobs.importjobs.PipelineJobs;
@@ -53,6 +51,7 @@ import com.google.light.server.utils.GuiceUtils;
 import com.google.light.server.utils.JsonUtils;
 import com.google.light.server.utils.ObjectifyUtils;
 import com.googlecode.objectify.Objectify;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -82,9 +81,9 @@ public class ImportGoogleFolderJobs {
       updateChangeLog(null, getContext().getJobId(), "Fetching Folder Tree from Google.");
       DocsServiceWrapper docsService = GuiceUtils.getInstance(DocsServiceWrapper.class);
       List<GoogleDocInfoDto> folderContents = docsService.getFolderContentAll(gdocFolderResourceId);
-      Map<PromisedValue<Boolean>, Long> mapOfPvs = Maps.newHashMap();
+      Map<PromisedValue<Boolean>, JobId> mapOfPvs = Maps.newHashMap();
 
-      Map<GoogleDocResourceId, Long> mapOfResourceToJob = Maps.newHashMap();
+      Map<GoogleDocResourceId, JobId> mapOfResourceToJob = Maps.newHashMap();
 
       // Now creating Child Jobs for each of the nodes.
       for (GoogleDocInfoDto curr : folderContents) {
@@ -92,7 +91,7 @@ public class ImportGoogleFolderJobs {
 
         JobEntity jobEntity = null;
         PromisedValue<Boolean> pv = null;
-        switch (curr.getModuleType()) {
+        switch (curr.getType()) {
           case GOOGLE_DOC:
             pv = newPromise(Boolean.class);
             jobEntity = importGDocResource(resourceId, docsService,
@@ -156,14 +155,14 @@ public class ImportGoogleFolderJobs {
 
   @SuppressWarnings("serial")
   public static class CreateCollectionJob extends
-      LightJob3<CollectionId, GoogleDocResourceId, Map<GoogleDocResourceId, Long>> {
+      LightJob3<CollectionId, GoogleDocResourceId, Map<GoogleDocResourceId, JobId>> {
 
     @Override
     public Value<CollectionId> handler(GoogleDocResourceId gdocFolderResourceId,
-        Map<GoogleDocResourceId, Long> map) {
+        Map<GoogleDocResourceId, JobId> map) {
       JobManager jobManager = getInstance(JobManager.class);
       
-      for (Long currJobId : map.values()) {
+      for (JobId currJobId : map.values()) {
         JobEntity jobEntity = jobManager.get(null, currJobId);
         if (jobEntity.getJobState() != JobState.COMPLETED_SUCCESSFULLY) {
           throw new RuntimeException("Waiting for jobs to complete."); 
@@ -173,10 +172,10 @@ public class ImportGoogleFolderJobs {
       ModuleManager moduleManager = getInstance(ModuleManager.class);
       DocsServiceWrapper docsService = getInstance(DocsServiceWrapper.class);
 
-      GoogleDocInfoDto folderInfo = docsService.getDocumentEntryWithAcl(gdocFolderResourceId);
+      GoogleDocInfoDto folderInfo = docsService.getGoogleDocInfo(gdocFolderResourceId);
       List<GoogleDocInfoDto> folderContents = docsService.getFolderContentAll(gdocFolderResourceId);
 
-      CollectionTreeNode root = new CollectionTreeNode.Builder()
+      CollectionTreeNodeDto root = new CollectionTreeNodeDto.Builder()
           .type(TreeNodeType.ROOT_NODE)
           .title(folderInfo.getTitle())
           .build();
@@ -199,7 +198,7 @@ public class ImportGoogleFolderJobs {
         ObjectifyUtils.commitTransaction(ofy);
       } finally {
         if (ofy.getTxn().isActive()) {
-          ObjectifyUtils.rollbackTransaction(ofy);
+          ObjectifyUtils.rollbackTransactionIfStillActive(ofy);
         }
       }
 
@@ -214,17 +213,17 @@ public class ImportGoogleFolderJobs {
     /**
      * @param listOfGoogleDocResources
      */
-    private void createLightCollection(CollectionTreeNode parent,
+    private void createLightCollection(CollectionTreeNodeDto parent,
         List<GoogleDocInfoDto> listOfGoogleDocResources,
         ModuleManager moduleManager, DocsServiceWrapper docsService) {
 
       for (GoogleDocInfoDto currResource : listOfGoogleDocResources) {
-        switch (currResource.getModuleType()) {
+        switch (currResource.getType()) {
           case GOOGLE_DOC:
-            String originId = currResource.getModuleType() + ":" + currResource.getResourceId();
+            String originId = currResource.getType() + ":" + currResource.getResourceId();
             ModuleId moduleId = moduleManager.findModuleIdByOriginId(null, originId);
 
-            CollectionTreeNode node = new CollectionTreeNode.Builder()
+            CollectionTreeNodeDto node = new CollectionTreeNodeDto.Builder()
                 .moduleId(moduleId)
                 .title(currResource.getTitle())
                 .type(TreeNodeType.LEAF_NODE)
@@ -234,7 +233,7 @@ public class ImportGoogleFolderJobs {
             break;
 
           case GOOGLE_COLLECTION:
-            CollectionTreeNode interMediate = new CollectionTreeNode.Builder()
+            CollectionTreeNodeDto interMediate = new CollectionTreeNodeDto.Builder()
                 .type(TreeNodeType.INTERMEDIATE_NODE)
                 .title(currResource.getTitle())
                 .build();

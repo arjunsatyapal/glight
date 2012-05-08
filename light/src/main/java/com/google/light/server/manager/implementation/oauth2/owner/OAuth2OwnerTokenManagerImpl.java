@@ -19,6 +19,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.GuiceUtils.getInstance;
 
+import com.google.light.server.dto.AbstractPojo;
+
 import com.google.light.server.utils.GuiceUtils;
 
 import com.google.light.server.exception.unchecked.MissingOwnerCredentialException;
@@ -38,7 +40,6 @@ import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import com.google.light.server.constants.LightEnvEnum;
 import com.google.light.server.constants.OAuth2ProviderService;
-import com.google.light.server.dto.AbstractDto;
 import com.google.light.server.dto.oauth2.owner.OAuth2OwnerTokenDto;
 import com.google.light.server.exception.unchecked.httpexception.UnauthorizedException;
 import com.google.light.server.manager.implementation.oauth2.consumer.OAuth2ConsumerCredentialManagerFactory;
@@ -120,7 +121,6 @@ public class OAuth2OwnerTokenManagerImpl implements OAuth2OwnerTokenManager {
             "After refresh, entity should not be in expired state. This happened for PersonId : "
                 + entity.getPersonId() + " and ProviderService = "
                 + entity.getProviderService());
-
       }
     }
 
@@ -134,7 +134,7 @@ public class OAuth2OwnerTokenManagerImpl implements OAuth2OwnerTokenManager {
   public OAuth2OwnerTokenEntity put(OAuth2OwnerTokenEntity entity) {
     checkArgument(providerService == entity.getProviderService(), "TokenManager for "
         + providerService + " was used to persist Token of type " + entity.getProviderService());
-    this.entity = dao.put(entity);
+    this.entity = dao.put(null, entity);
     return this.entity;
   }
 
@@ -195,7 +195,7 @@ public class OAuth2OwnerTokenManagerImpl implements OAuth2OwnerTokenManager {
 
       OAuth2OwnerTokenDto newDto = OAuth2OwnerTokenDto.getOAuth2OwnerTokenDto(
           entity.getPersonId(), entity.getRefreshToken(), tokenResponse,
-          providerService, entity.getProviderUserId(), newTokenInfo.toJson());
+          providerService, entity.getProviderUserId(), JsonUtils.toJson(newTokenInfo));
 
       return put(newDto.toPersistenceEntity());
     } catch (Exception e) {
@@ -230,8 +230,8 @@ public class OAuth2OwnerTokenManagerImpl implements OAuth2OwnerTokenManager {
       String tokenInfoStr = CharStreams.toString(new InputStreamReader(
           tokenInfoResponse.getContent(), Charsets.UTF_8));
 
-      AbstractDto<? extends AbstractOAuth2TokenInfo> tokenInfo =
-          JsonUtils.getDto(tokenInfoStr, providerService.getTokenInfoClazz());
+      AbstractPojo<? extends AbstractOAuth2TokenInfo> tokenInfo =
+          JsonUtils.getPojo(tokenInfoStr, providerService.getTokenInfoClazz());
 
       return ((D) tokenInfo.validate());
     } catch (Exception e) {

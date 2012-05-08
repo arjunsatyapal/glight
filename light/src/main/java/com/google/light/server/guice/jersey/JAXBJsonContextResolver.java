@@ -16,8 +16,9 @@
 package com.google.light.server.guice.jersey;
 
 import com.google.common.collect.Sets;
-import com.google.light.server.constants.JavaDtos;
+import com.google.light.server.constants.LightDtos;
 import com.google.light.server.constants.http.ContentTypeConstants;
+import com.google.light.server.dto.AbstractDto;
 import com.sun.jersey.api.json.JSONConfiguration;
 import com.sun.jersey.api.json.JSONConfiguration.NaturalBuilder;
 import com.sun.jersey.api.json.JSONJAXBContext;
@@ -44,17 +45,17 @@ public final class JAXBJsonContextResolver implements ContextResolver<JAXBContex
   private final JAXBContext context;
 
   @SuppressWarnings("rawtypes")
-  private final Set<Class> types;
+  private final Set<Class<? extends AbstractDto>> types;
 
   @SuppressWarnings("rawtypes")
   public JAXBJsonContextResolver() throws Exception {
-    List<Class> list = JavaDtos.getListOfDtoClasses();
+    List<Class<? extends AbstractDto>> list = LightDtos.getListOfDtoClasses();
     this.types = Sets.newHashSet(list);
     
     NaturalBuilder configBuilder = JSONConfiguration.natural();
     configBuilder.humanReadableFormatting(true);
     
-    this.context = new JSONJAXBContext(configBuilder.build(), JavaDtos.getArrayOfDtoClasses());
+    this.context = new JSONJAXBContext(configBuilder.build(), LightDtos.getArrayOfDtoClasses());
   }
 
   @Override

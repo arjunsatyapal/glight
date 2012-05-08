@@ -21,9 +21,10 @@ import static com.google.light.server.utils.GuiceUtils.getInstance;
 
 import com.google.appengine.tools.pipeline.ImmediateValue;
 import com.google.appengine.tools.pipeline.Value;
-import com.google.light.jobs.LightJob2;
-import com.google.light.jobs.LightJob4;
-import com.google.light.jobs.LightJob5;
+import com.google.common.collect.Lists;
+import com.google.light.pipeline_jobs.LightJob2;
+import com.google.light.pipeline_jobs.LightJob4;
+import com.google.light.pipeline_jobs.LightJob5;
 import com.google.light.server.dto.module.GSBlobInfo;
 import com.google.light.server.dto.module.ModuleType;
 import com.google.light.server.dto.pojo.longwrapper.ModuleId;
@@ -52,8 +53,8 @@ public class ModuleJobs {
       // TODO(arjuns): Add a check that for one Document, only one module is created.
       ModuleManager moduleManager = getInstance(ModuleManager.class);
 
-      ModuleId reservedModuleId = moduleManager.reserveModuleIdForOriginId(
-          originId, getContext().getOwnerId());
+      ModuleId reservedModuleId = moduleManager.reserveModuleIdForExternalId(ModuleType.GOOGLE_DOC,
+          originId, Lists.newArrayList(getContext().getOwnerId()));
 
       return immediate(reservedModuleId);
     }

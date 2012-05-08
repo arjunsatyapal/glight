@@ -15,9 +15,11 @@
  */
 package com.google.light.server.dto;
 
+import org.codehaus.jackson.annotate.JsonProperty;
+
 import com.google.light.server.utils.JsonUtils;
 import com.google.light.server.utils.XmlUtils;
-import org.codehaus.jackson.annotate.JsonCreator;
+import javax.xml.bind.annotation.XmlElement;
 import org.joda.time.Instant;
 
 /**
@@ -36,7 +38,12 @@ import org.joda.time.Instant;
  */
 @SuppressWarnings("serial")
 public abstract class AbstractDto<D> extends AbstractPojo<D>  {
+  @XmlElement(name = "creation_time_in_millis")
+  @JsonProperty(value = "creation_time_in_millis")
   protected final Long creationTimeInMillis = null;
+  
+  @XmlElement(name = "last_update_time_in_millis")
+  @JsonProperty(value = "last_update_time_in_millis")
   protected Long lastUpdateTimeInMillis;
 
   /**
@@ -64,18 +71,18 @@ public abstract class AbstractDto<D> extends AbstractPojo<D>  {
   @SuppressWarnings("rawtypes")
   public static class BaseBuilder<T extends BaseBuilder> {
     @SuppressWarnings("unused")
-    private Long creationTimeInMillis;
-    private Long lastUpdateTimeInMillis;
+    private Long creationTimeMillis;
+    private Long lastUpdateTimeMillis;
 
     @SuppressWarnings("unchecked")
     protected T creationTime(Instant creationTime) {
-      this.creationTimeInMillis = creationTime.getMillis();
+      this.creationTimeMillis = creationTime.getMillis();
       return ((T) this);
     }
 
     @SuppressWarnings("unchecked")
     protected T lastUpdateTime(Instant lastUpdateTime) {
-      this.lastUpdateTimeInMillis = lastUpdateTime.getMillis();
+      this.lastUpdateTimeMillis = lastUpdateTime.getMillis();
       return ((T) this);
     }
   }
@@ -86,11 +93,11 @@ public abstract class AbstractDto<D> extends AbstractPojo<D>  {
       return;
     }
 //    this.creationTime = builder.creationTime;
-    this.lastUpdateTimeInMillis = builder.lastUpdateTimeInMillis;
+    this.lastUpdateTimeInMillis = builder.lastUpdateTimeMillis;
   }
-  
+
+  // For JAXB
   @SuppressWarnings("unused")
-  @JsonCreator
   private AbstractDto() {
   }
 }

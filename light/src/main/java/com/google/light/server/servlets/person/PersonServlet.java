@@ -101,7 +101,7 @@ public class PersonServlet extends AbstractLightServlet {
       ServletRequestPojo<PersonDto> requestPojo = checkNotNull(getRequestPojo(
           request, PersonDto.class));
       PersonDto dto = requestPojo.getValidDto();
-
+      
       PersonEntity personEntity = personManager.update(
           dto.toPersistenceEntity(null/* personId */));
 

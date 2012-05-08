@@ -28,6 +28,7 @@ import com.google.inject.Injector;
 import com.google.light.server.constants.RequestParamKeyEnum;
 import com.google.light.server.constants.http.ContentTypeEnum;
 import com.google.light.server.dto.pojo.ChangeLogEntryPojo;
+import com.google.light.server.dto.pojo.longwrapper.JobId;
 import com.google.light.server.exception.unchecked.httpexception.NotFoundException;
 import com.google.light.server.manager.interfaces.ImportManager;
 import com.google.light.server.manager.interfaces.JobManager;
@@ -35,7 +36,6 @@ import com.google.light.server.persistence.entity.jobs.JobEntity;
 import com.google.light.server.persistence.entity.queue.importflow.ImportJobEntity;
 import com.google.light.server.servlets.AbstractLightServlet;
 import com.google.light.server.servlets.SessionManager;
-import com.google.light.server.utils.LightPreconditions;
 import com.google.light.server.utils.LightUtils;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
@@ -88,8 +88,7 @@ public class JobDetailServlet extends AbstractLightServlet {
   @Override
   public void doGet(HttpServletRequest request, HttpServletResponse response) {
     String jobIdStr = getRequestParameterValue(request, RequestParamKeyEnum.JOB_ID);
-    Long jobId = Long.parseLong(jobIdStr);
-    LightPreconditions.checkPositiveLong(jobId, "jobId");
+    JobId jobId = new JobId(jobIdStr).validate();
 
     JobEntity jobEntity = jobManager.get(null, jobId);
     if (jobEntity == null) {

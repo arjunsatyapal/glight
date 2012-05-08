@@ -145,7 +145,7 @@ public class ImportJobEntity extends AbstractPersistenceEntity<ImportJobEntity, 
     this.resourceId = checkNotBlank(builder.resourceId, "resourceId");
     this.id = computeId(moduleType, resourceId);
     checkPersonId(builder.personId);
-    this.personId = builder.personId.get();
+    this.personId = builder.personId.getValue();
     this.additionalJsonInfo = checkNotBlank(builder.additionalJsonInfo, "additionalJsonInfo");
   }
 

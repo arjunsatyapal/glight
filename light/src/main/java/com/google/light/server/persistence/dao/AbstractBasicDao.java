@@ -63,7 +63,7 @@ public abstract class AbstractBasicDao<D, P extends AbstractPersistenceEntity<P,
    * @param entity
    * @return
    */
-  public final P put(P entity) {
+  protected final P put(P entity) {
     return put(null, entity);
   }
 

@@ -19,8 +19,8 @@ import com.google.gdata.data.BaseEntry;
 import com.google.gdata.data.BaseFeed;
 import com.google.gdata.data.ExtensionProfile;
 import com.google.gdata.util.common.xml.XmlWriter;
+import com.google.light.server.constants.LightDtos;
 import com.google.light.server.dto.AbstractDto;
-import com.google.light.server.dto.person.PersonDto;
 import com.google.light.server.exception.unchecked.XmlException;
 import java.io.IOException;
 import java.io.StringReader;
@@ -53,17 +53,21 @@ import org.xml.sax.SAXException;
  */
 public class XmlUtils {
   @SuppressWarnings("unchecked")
-  public static <D extends AbstractDto<D>> D getDto(String xmlString) throws JAXBException {
-    JAXBContext jaxbContext = JAXBContext.newInstance(PersonDto.class);
+  public static <D extends AbstractDto<D>> D getDto(String xmlString)  {
+    try {
+    JAXBContext jaxbContext = JAXBContext.newInstance(LightDtos.getArrayOfDtoClasses());
     Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-
+    
     D dto = ((D) unmarshaller.unmarshal(new StringReader(xmlString)));
     return dto.validate();
+    } catch (Exception e) {
+      throw new XmlException(e);
+    }
   }
 
   public static <T> String toXml(T object) {
     try {
-      JAXBContext jaxbContext = JAXBContext.newInstance(object.getClass());
+      JAXBContext jaxbContext = JAXBContext.newInstance(LightDtos.getArrayOfDtoClasses());
       Marshaller marshaller = jaxbContext.createMarshaller();
       StringWriter sw = new StringWriter();
       marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
@@ -72,7 +76,6 @@ public class XmlUtils {
     } catch (Exception e) {
       throw new XmlException(e);
     }
-
   }
 
   /**

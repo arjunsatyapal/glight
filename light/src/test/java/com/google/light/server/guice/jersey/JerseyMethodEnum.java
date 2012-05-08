@@ -18,6 +18,10 @@ package com.google.light.server.guice.jersey;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
+import com.google.light.server.jersey.resources.job.JobResource;
+
+import com.google.light.server.jersey.resources.notifications.NotificationResource;
+
 import com.google.light.server.jersey.resources.CollectionResource;
 
 import com.google.light.server.jersey.resources.test.TestResources;
@@ -38,8 +42,7 @@ import javax.ws.rs.PUT;
 
 /**
  * 
- * 
- * TODO(arjuns): Add test for this class.
+ * TODO(arjuns) : Add test for consumes.
  * 
  * @author Arjun Satyapal
  */
@@ -60,7 +63,9 @@ public enum JerseyMethodEnum {
                                              new Class[] { String.class, String.class },
                                              GET.class,
                                              "/rest/collection/{collection_id}/{version}",
-                                             new String[] { "application/json; charset=UTF-8", "text/xml; charset=UTF-8" }),
+
+                                             new String[] { "application/json; charset=UTF-8",
+                                                     "application/xml; charset=UTF-8" }),
 
   COLLECTION_RESOURCE_GET_COLLECTION_VERSION_CONTENT(
                                                      CollectionResource.class,
@@ -94,7 +99,9 @@ public enum JerseyMethodEnum {
                              new Class[] {},
                              GET.class,
                              "/rest/module/{module_id}",
-                             new String[] { "application/json; charset=UTF-8", "text/xml; charset=UTF-8" }),
+
+                             new String[] { "application/json; charset=UTF-8",
+                                     "application/xml; charset=UTF-8" }),
 
   MODULE_RESOURCE_GET_MODULE_VERSION(
                                      ModuleResource.class,
@@ -102,7 +109,9 @@ public enum JerseyMethodEnum {
                                      new Class[] { String.class, String.class },
                                      GET.class,
                                      "/rest/module/{module_id}/{version}",
-                                     new String[] { "application/json; charset=UTF-8", "text/xml; charset=UTF-8" }),
+
+                                     new String[] { "application/json; charset=UTF-8",
+                                             "application/xml; charset=UTF-8" }),
 
   MODULE_RESOURCE_GET_MODULE_VERSION_CONTENT(
                                              ModuleResource.class,
@@ -119,7 +128,9 @@ public enum JerseyMethodEnum {
                                                        String.class, String.class },
                                                GET.class,
                                                "/rest/module/{module_id}/{version}/{resource_type}/{resource}",
-                                               new String[] { "application/json; charset=UTF-8", "text/xml; charset=UTF-8" }),
+
+                                               new String[] { "application/json; charset=UTF-8",
+                                                       "application/xml; charset=UTF-8" }),
 
   // Google Doc Integration Jersey Methods.
   GOOGLE_DOC_GET_DOC_LIST(
@@ -128,37 +139,77 @@ public enum JerseyMethodEnum {
                           new Class[] { String.class, String.class },
                           GET.class,
                           "/rest/thirdparty/google/gdoc/list",
-                          new String[] { "application/json; charset=UTF-8", "text/xml; charset=UTF-8" }),
+
+                          new String[] { "application/json; charset=UTF-8",
+                                  "application/xml; charset=UTF-8" }),
   GOOGLE_DOC_GET_DOC_INFO(
                           GoogleDocIntegration.class,
                           "getDocInfo",
                           new Class[] { String.class },
                           GET.class,
                           "/rest/thirdparty/google/gdoc/info/{external_key}",
-                          new String[] { "application/json; charset=UTF-8", "text/xml; charset=UTF-8" }),
+                          new String[] { "application/json; charset=UTF-8",
+                                  "application/xml; charset=UTF-8" }),
+
+  GOOGLE_DOC_IMPORT_GOOGLE_DOC_BATCH_FROM_POST(
+                                               GoogleDocIntegration.class,
+                                               "importGoogleDocBatchFormPost",
+                                               new Class[] { String.class },
+                                               POST.class,
+                                               "/rest/thirdparty/google/gdoc/import",
+                                               new String[] {}),
 
   GOOGLE_DOC_IMPORT_GOOGLE_DOC_POST(
                                     GoogleDocIntegration.class,
-                                    "importGoogleDocPost",
+                                    "importGoogleDocBatchPost",
                                     new Class[] { String.class },
                                     POST.class,
                                     "/rest/thirdparty/google/gdoc/import",
-                                    new String[] { "application/json; charset=UTF-8", "text/xml; charset=UTF-8" }),
+                                    new String[] { "application/json; charset=UTF-8",
+                                            "application/xml; charset=UTF-8" }),
 
   GOOGLE_DOC_IMPORT_GOOGLE_DOC_PUT(
                                    GoogleDocIntegration.class,
-                                   "importGoogleDocPut",
+                                   "importGoogleDocBatchPut",
                                    new Class[] { String.class },
                                    PUT.class,
                                    "/rest/thirdparty/google/gdoc/import/{external_key}",
-                                   new String[] { "application/json; charset=UTF-8", "text/xml; charset=UTF-8" }),
+
+                                   new String[] { "application/json; charset=UTF-8",
+                                           "application/xml; charset=UTF-8" }),
   GOOGLE_DOC_GET_FOLDER_CONTENTS(
                                  GoogleDocIntegration.class,
                                  "getFolderContents",
                                  new Class[] { String.class, String.class },
                                  GET.class,
                                  "/rest/thirdparty/google/gdoc/info/folder/{external_key}",
-                                 new String[] { "application/json; charset=UTF-8", "text/xml; charset=UTF-8" }),
+                                 new String[] { "application/json; charset=UTF-8",
+                                         "application/xml; charset=UTF-8" }),
+
+  // Job Resource
+  JOB_RESOURCE_START_JOB(
+                         JobResource.class,
+                         "startJob",
+                         new Class[] { String.class },
+                         PUT.class,
+                         "/rest/job/{job_id}",
+                         new String[] {}),
+
+  JOB_RESOURCE_GET_JOB_STATUS(
+                              JobResource.class,
+                              "getJobStatus",
+                              new Class[] { String.class },
+                              GET.class,
+                              "/rest/job/{job_id}",
+                              new String[] { "text/plain; charset=UTF-8" }),
+  // Notification Resource
+  NOTIFICATION_RESOURCE_CHILD_COMPLETION_EVENT(
+                                               NotificationResource.class,
+                                               "childCompletionEvent",
+                                               new Class[] { String.class },
+                                               POST.class,
+                                               "/rest/notification/job",
+                                               new String[] {}),
 
   // Test Resource Jersey Methods.
   TEST_RESOURCE_SESSION(

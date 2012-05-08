@@ -17,14 +17,15 @@ import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
 import org.codehaus.jackson.annotate.JsonProperty;
 
-import com.google.light.server.dto.AbstractDto;
+import javax.xml.bind.annotation.XmlElement;
+
 import javax.xml.bind.annotation.XmlAccessType;
+
 import javax.xml.bind.annotation.XmlAccessorType;
+
 import javax.xml.bind.annotation.XmlRootElement;
-import org.codehaus.jackson.annotate.JsonCreator;
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
-import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
+
+import com.google.light.server.dto.AbstractDto;
 
 /**
  * Java representation for the JSON object returned by Google as a response to
@@ -35,33 +36,39 @@ import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
-@XmlRootElement(name = "TokenInfo")
+@XmlRootElement(name = "googleUserInfo")
 @XmlAccessorType(XmlAccessType.FIELD)
-@JsonSerialize(include = Inclusion.NON_NULL)
-// TODO(arjuns): Add test for this and token info.
-@JsonIgnoreProperties(ignoreUnknown = true)
 public class GoogleUserInfo extends AbstractDto<GoogleUserInfo> {
+  @XmlElement(name = "id")
+  @JsonProperty(value = "id")
   private String id;
+  
+  @XmlElement(name = "email")
+  @JsonProperty(value = "email")
   private String email;
-
+  
+  @XmlElement(name = "verified_email")
   @JsonProperty(value = "verified_email")
   private boolean verifiedEmail;
-
+  
+  @XmlElement(name = "name")
+  @JsonProperty(value = "name")
   private String name;
-
+  
+  @XmlElement(name = "given_name")
   @JsonProperty(value = "given_name")
   private String givenName;
   
+  @XmlElement(name = "family_name")
   @JsonProperty(value = "family_name")
   private String familyName;
+  
+  @XmlElement(name = "locale")
+  @JsonProperty(value = "locale")
   private String locale;
 
   public String getId() {
     return id;
-  }
-
-  public void setId(String id) {
-    this.id = id;
   }
 
   public String getName() {
@@ -110,12 +117,6 @@ public class GoogleUserInfo extends AbstractDto<GoogleUserInfo> {
       this.locale = "en";
     }
     return this;
-  }
-
-  // For JAXB.
-  @JsonCreator
-  public GoogleUserInfo() {
-    super(null);
   }
 
   public static class Builder extends AbstractDto.BaseBuilder<Builder> {
@@ -178,5 +179,10 @@ public class GoogleUserInfo extends AbstractDto<GoogleUserInfo> {
     this.givenName = builder.givenName;
     this.familyName = builder.familyName;
     this.locale = builder.locale;
+  }
+
+  // For Jaxb.
+  private GoogleUserInfo() {
+    super(null);
   }
 }

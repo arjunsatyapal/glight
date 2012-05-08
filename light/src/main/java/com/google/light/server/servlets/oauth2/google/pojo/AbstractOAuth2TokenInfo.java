@@ -20,18 +20,11 @@ import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
 import static com.google.light.server.utils.LightUtils.getCurrentTimeInMillis;
 
-import javax.xml.bind.annotation.XmlElement;
-
 import com.google.light.server.dto.AbstractDto;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
+import com.google.light.server.dto.AbstractPojo;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import org.codehaus.jackson.annotate.JsonCreator;
-import org.codehaus.jackson.annotate.JsonIgnore;
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
-import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
 
 /**
  * Java representation for the JSON object returned by Google as a response to
@@ -43,68 +36,49 @@ import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
  */
 @SuppressWarnings("serial")
 @XmlRootElement(name = "TokenInfo")
-@XmlAccessorType(XmlAccessType.FIELD)
-@JsonSerialize(include = Inclusion.NON_NULL)
-@JsonIgnoreProperties(ignoreUnknown = true)
-public abstract class AbstractOAuth2TokenInfo<D> extends AbstractDto<D> {
+public abstract class AbstractOAuth2TokenInfo<D> extends AbstractPojo<D> {
+  @XmlElement(name = "issued_to")
+  @JsonProperty(value = "issued_to")
   private String issuedTo;
+
+  @XmlElement
   private String audience;
+
+  @XmlElement
   private String scope;
+
   // This value is not of much use as it is in seconds.
   @XmlElement(name = "expires_in")
   @JsonProperty(value = "expires_in")
   private long expiresIn;
+
   // Hack to tell that value has not been set and then validate method updates this.
+  @XmlElement(name = "expires_in_millis")
+  @JsonProperty(value = "expires_in_millis")
   private long expiresInMillis = 0;
+
   @XmlElement(name = "access_type")
   @JsonProperty(value = "access_type")
   private String accessType;
 
-  @XmlElement(name = "issued_to")
-  @JsonProperty(value = "issued_to")
   public String getIssuedTo() {
     return issuedTo;
   }
-
-  @JsonProperty(value = "issued_to")
-  public void setIssuedTo(String issuedTo) {
-    this.issuedTo = issuedTo;
-  }
-
+  
   public String getAudience() {
     return audience;
-  }
-
-  public void setAudience(String audience) {
-    this.audience = audience;
   }
 
   public String getScope() {
     return scope;
   }
 
-  public void setScope(String scope) {
-    this.scope = scope;
-  }
-
-//  @JsonProperty(value = "expires_in")
   public long getExpiresIn() {
     return expiresIn;
   }
 
-//  @JsonProperty(value = "expires_in")
-  public void setExpiresIn(long expiresInMillis) {
-    this.expiresIn = expiresInMillis;
-  }
-
-//  @JsonProperty(value = "access_type")
   public String getAccessType() {
     return accessType;
-  }
-
-//  @JsonProperty(value = "access_type")
-  public void setAccessType(String accessType) {
-    this.accessType = accessType;
   }
 
   /**
@@ -137,7 +111,6 @@ public abstract class AbstractOAuth2TokenInfo<D> extends AbstractDto<D> {
     return (D) this;
   }
 
-  @JsonIgnore(value = true)
   public boolean hasAccessTokenExpired() {
     return getCurrentTimeInMillis() > expiresInMillis;
   }
@@ -159,7 +132,6 @@ public abstract class AbstractOAuth2TokenInfo<D> extends AbstractDto<D> {
    * @param expiresInSecFromNow
    * @return
    */
-  @JsonIgnore(value = true)
   public static long calculateExpireInMillis(long expiresInSecFromNow) {
     long nowInMillis = getCurrentTimeInMillis();
     long modifiedExpiryInMillis = (expiresInSecFromNow - TASK_QUEUUE_TIMEOUT_IN_SEC) * 1000;
@@ -171,9 +143,70 @@ public abstract class AbstractOAuth2TokenInfo<D> extends AbstractDto<D> {
     return actualExpiryInMillis;
   }
 
-  // For JAXB.
-  @JsonCreator
-  public AbstractOAuth2TokenInfo() {
-    super(null);
+  @SuppressWarnings("rawtypes")
+  public static class Builder<T extends Builder> extends AbstractDto.BaseBuilder<Builder>{
+    private String issuedTo;
+    private String audience;
+    private String scope;
+    private long expiresIn;
+    private long expiresInMillis;
+    private String accessType;
+
+    @SuppressWarnings("unchecked")
+    public T issuedTo(String issuedTo) {
+      this.issuedTo = issuedTo;
+      return (T) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public T audience(String audience) {
+      this.audience = audience;
+      return ((T) this);
+    }
+
+    @SuppressWarnings("unchecked")
+    public T scope(String scope) {
+      this.scope = scope;
+      return ((T) this);
+    }
+
+    @SuppressWarnings("unchecked")
+    public T expiresIn(long expiresIn) {
+      this.expiresIn = expiresIn;
+      return ((T) this);
+    }
+
+    @SuppressWarnings("unchecked")
+    public T expiresInMillis(long expiresInMillis) {
+      this.expiresInMillis = expiresInMillis;
+      return (T) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public T accessType(String accessType) {
+      this.accessType = accessType;
+      return ((T) this);
+    }
+  }
+
+  @SuppressWarnings({ "rawtypes", "synthetic-access" })
+  protected AbstractOAuth2TokenInfo(Builder builder) {
+//    super(builder);
+    
+    if (builder == null) {
+      return;
+    }
+    
+    this.issuedTo = builder.issuedTo;
+    this.audience = builder.audience;
+    this.scope = builder.scope;
+    this.expiresIn = builder.expiresIn;
+    this.expiresInMillis = builder.expiresInMillis;
+    this.accessType = builder.accessType;
+  }
+  
+  // For JAXB
+  private AbstractOAuth2TokenInfo() {
+//    super(null);
   }
 }

@@ -25,7 +25,6 @@ import com.google.light.server.utils.JsonUtils;
 import com.google.light.server.utils.XmlUtils;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
-import javax.xml.bind.JAXBException;
 
 /**
  * Request POJO for HTTP Requests. This class wraps the Content-Type, requestString and converted
@@ -46,7 +45,7 @@ public class ServletRequestPojo<D extends AbstractDto<D>> {
   private D dto;
 
   public ServletRequestPojo(HttpServletRequest request, ContentTypeEnum contentType,
-      String requestString, Class<D> clazz) throws JAXBException {
+      String requestString, Class<D> clazz) {
     this.request = checkNotNull(request);
     this.contentType = checkNotNull(contentType);
     logger.info("Content-Type[" + contentType + "], RequestBody = [" + requestString + "].");

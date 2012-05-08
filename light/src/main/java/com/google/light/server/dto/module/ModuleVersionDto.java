@@ -18,6 +18,16 @@ package com.google.light.server.dto.module;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
 
+import org.codehaus.jackson.annotate.JsonProperty;
+
+import javax.xml.bind.annotation.XmlAccessType;
+
+import javax.xml.bind.annotation.XmlAccessorType;
+
+import javax.xml.bind.annotation.XmlRootElement;
+
+import javax.xml.bind.annotation.XmlElement;
+
 import com.google.light.server.dto.pojo.longwrapper.Version;
 
 import com.google.light.server.dto.AbstractDtoToPersistence;
@@ -31,8 +41,15 @@ import com.google.light.server.persistence.entity.module.ModuleVersionEntity;
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
+@XmlRootElement(name = "moduleVersion")
+@XmlAccessorType(XmlAccessType.FIELD)
 public class ModuleVersionDto extends AbstractDtoToPersistence<ModuleVersionDto, ModuleVersionEntity, Long> {
+  @XmlElement(name = "version")
+  @JsonProperty(value = "version")
   private Long version;
+  
+  @XmlElement(name = "content")
+  @JsonProperty(value = "content")
   private String content;
 
   /** 
@@ -87,5 +104,10 @@ public class ModuleVersionDto extends AbstractDtoToPersistence<ModuleVersionDto,
     super(builder);
     this.version = builder.version;
     this.content = builder.content;
+  }
+
+  // For JAXB
+  private ModuleVersionDto() {
+    super(null);
   }
 }

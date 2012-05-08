@@ -17,9 +17,17 @@ package com.google.light.server.persistence.dao;
 
 import static com.google.light.server.utils.ObjectifyUtils.assertAndReturnUniqueEntity;
 
-import com.google.light.server.dto.pojo.JobHandlerId;
+import com.google.common.collect.Maps;
+
+import java.util.Map;
+
+import com.google.common.collect.Lists;
+
+import java.util.List;
 
 import com.google.inject.Inject;
+import com.google.light.server.dto.pojo.JobHandlerId;
+import com.google.light.server.dto.pojo.longwrapper.JobId;
 import com.google.light.server.persistence.entity.jobs.JobEntity;
 import com.google.light.server.persistence.entity.jobs.JobEntity.JobHandlerType;
 import com.google.light.server.utils.ObjectifyUtils;
@@ -48,7 +56,7 @@ public class JobDao extends AbstractBasicDao<Object, JobEntity> {
     super(JobEntity.class);
   }
 
-  public JobEntity get(Objectify ofy, Long id) {
+  public JobEntity get(Objectify ofy, JobId id) {
     Key<JobEntity> key = JobEntity.generateKey(id);
     return super.get(ofy, key);
   }
@@ -64,5 +72,25 @@ public class JobDao extends AbstractBasicDao<Object, JobEntity> {
         "For JobHandlerType[" + jobHandlerType + "], JobHandlerId[" + jobHandlerId
             + "], found more then one record.";
     return assertAndReturnUniqueEntity(query, errMessage);
+  }
+  
+  public Map<JobId, JobEntity> findListOfJobs(List<JobId> listOfJobIds) {
+    List<Key<JobEntity>> listOfKeys = Lists.newArrayListWithCapacity(listOfJobIds.size());
+    
+    for (JobId currJobId : listOfJobIds) {
+      listOfKeys.add(JobEntity.generateKey(currJobId));
+    }
+    
+    Objectify ofy = ObjectifyUtils.nonTransaction();
+    Map<Key<JobEntity>, JobEntity> fetchedMap = ofy.get(listOfKeys);
+    
+    Map<JobId, JobEntity> requiredMap = Maps.newHashMap();
+    
+    for (Key<JobEntity> currKey : fetchedMap.keySet()) {
+      JobEntity currEntity = fetchedMap.get(currKey);
+      requiredMap.put(currEntity.getId(), currEntity);
+    }
+    
+    return requiredMap;
   }
 }

@@ -16,6 +16,10 @@
 package com.google.light.server.servlets.test.jobs;
 
 import static com.google.appengine.api.datastore.Entity.KEY_RESERVED_PROPERTY;
+
+import com.google.light.pipeline_jobs.LightJob1;
+import com.google.light.pipeline_jobs.LightJob2;
+
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
@@ -25,8 +29,6 @@ import com.google.appengine.api.datastore.Query;
 import com.google.appengine.tools.pipeline.FutureValue;
 import com.google.appengine.tools.pipeline.Value;
 import com.google.common.collect.Lists;
-import com.google.light.jobs.LightJob1;
-import com.google.light.jobs.LightJob2;
 import java.util.List;
 import java.util.logging.Logger;
 

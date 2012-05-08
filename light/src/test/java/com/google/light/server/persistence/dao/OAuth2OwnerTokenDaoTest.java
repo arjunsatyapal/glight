@@ -109,7 +109,7 @@ public class OAuth2OwnerTokenDaoTest extends
       OAuth2OwnerTokenEntity getEntiy = dao.get(ofy, testEntity.getKey());
       assertEquals(testEntity, getEntiy);
     } catch (Exception e) {
-      ObjectifyUtils.rollbackTransaction(ofy);
+      ObjectifyUtils.rollbackTransactionIfStillActive(ofy);
     }
   }
 

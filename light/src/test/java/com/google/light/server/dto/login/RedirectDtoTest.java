@@ -44,7 +44,7 @@ public class RedirectDtoTest extends AbstractDtoTest {
    * Test constructing this Dto through QueryUtils.
    */
   @Test
-  public void testConstructThroughQueryUtils() {
+  public void test_ConstructThroughQueryUtils() {
     // Just positive tests. We can count with enough negative tests in QueryUtilsTest
 
     RedirectDto dto =
@@ -67,11 +67,12 @@ public class RedirectDtoTest extends AbstractDtoTest {
     return new RedirectDto.Builder();
   }
 
+  
   @Test
   @Override
   public void test_toJson() throws Exception {
     assertEquals(
-        TestingUtils.getResourceAsString(TestResourcePaths.LOGIN_STATE_JSON.get()),
+        TestingUtils.getResourceAsString(TestResourcePaths.REDIRECT_JSON.get()),
         getDefaultBuilder().redirectPath(SAMPLE_REDIRECT_PATH).build().toJson());
   }
 

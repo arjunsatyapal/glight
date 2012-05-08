@@ -22,6 +22,8 @@ import static com.google.light.server.constants.RequestParamKeyEnum.LOGIN_PROVID
 import static com.google.light.server.constants.RequestParamKeyEnum.LOGIN_PROVIDER_USER_ID;
 import static com.google.light.server.constants.RequestParamKeyEnum.PERSON_ID;
 
+import com.google.light.server.dto.pojo.longwrapper.AbstractTypeWrapper;
+
 import com.google.common.collect.Lists;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Iterables;
@@ -268,5 +270,29 @@ public class LightUtils {
   public static <T> String arrayToString(T[] array) {
     List<T> list = Lists.newArrayList(array);
     return Iterables.toString(list);
+  }
+  
+  public static boolean isListEmpty(List list) {
+    if (list == null || list.size() == 0) {
+      return true;
+    }
+    
+    return false;
+  }
+  
+  public static Long getInstantInMillis(Instant instant) {
+    if (instant == null) {
+      return null;
+    }
+    
+    return instant.getMillis();
+  }
+  
+  public static <I, W extends AbstractTypeWrapper<I, W>> I getWrapperValue(W wrapper) {
+    if (wrapper == null) {
+      return null;
+    }
+    
+    return wrapper.getValue();
   }
 }

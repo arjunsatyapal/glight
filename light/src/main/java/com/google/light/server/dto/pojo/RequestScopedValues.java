@@ -151,10 +151,10 @@ public class RequestScopedValues extends AbstractPojo<RequestScopedValues> {
   @Override
   public RequestScopedValues validate() {
     checkNotNull(actorId, "actorId");
-    checkPositiveLong(actorId.get(), "actorId");
+    checkPositiveLong(actorId.getValue(), "actorId");
 
-    if (ownerId != null && ownerId.get() != null) {
-      checkPositiveLong(ownerId.get(), "ownerId");
+    if (ownerId != null && ownerId.getValue() != null) {
+      checkPositiveLong(ownerId.getValue(), "ownerId");
     }
     return this;
   }

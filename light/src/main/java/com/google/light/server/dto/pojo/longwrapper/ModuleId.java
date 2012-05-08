@@ -35,6 +35,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class ModuleId extends AbstractTypeWrapper<Long, ModuleId> {
   public ModuleId(Long value) {
     super(value);
+    validate();
   }
   
   public ModuleId(String value) {

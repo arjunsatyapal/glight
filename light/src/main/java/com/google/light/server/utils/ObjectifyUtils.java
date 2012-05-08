@@ -17,6 +17,11 @@ package com.google.light.server.utils;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.collect.Maps;
+import com.google.light.server.dto.pojo.longwrapper.JobId;
+import com.google.light.server.persistence.entity.jobs.JobEntity;
+import java.util.Map;
+
 import com.google.appengine.api.datastore.QueryResultIterable;
 import com.google.common.collect.Lists;
 import com.google.light.server.persistence.entity.AbstractPersistenceEntity;
@@ -60,13 +65,13 @@ public class ObjectifyUtils {
   /**
    * Rollback an Objectify transaction which is in progress.
    */
-  public static void rollbackTransaction(Objectify txn) {
+  public static void rollbackTransactionIfStillActive(Objectify ofy) {
     // If its a non-transaction, then txn.getTxn will return null.
-    if (txn.getTxn() != null) {
-      if (txn.getTxn().isActive()) {
+    if (ofy.getTxn() != null) {
+      if (ofy.getTxn().isActive()) {
         // TODO(arjuns): Add requestId once available.
         logger.info("Rolling back transaction.");
-        txn.getTxn().rollback();
+        ofy.getTxn().rollback();
       }
     }
   }
@@ -74,17 +79,17 @@ public class ObjectifyUtils {
   /**
    * Commit an Objectify transaction which is in progress.
    */
-  public static void commitTransaction(Objectify txn) {
+  public static void commitTransaction(Objectify ofy) {
     try {
       // If its a non-transaction, then txn.getTxn will return null.
-      if (txn.getTxn() != null) {
-        txn.getTxn().commit();
+      if (ofy.getTxn() != null) {
+        ofy.getTxn().commit();
       }
     } finally {
-      if (txn.getTxn() != null && txn.getTxn().isActive()) {
+      if (ofy.getTxn() != null && ofy.getTxn().isActive()) {
         // TODO(arjuns): Add requestId once available.
         logger.severe("Rolling back.");
-        txn.getTxn().rollback();
+        ofy.getTxn().rollback();
       }
     }
   }
@@ -191,7 +196,7 @@ public class ObjectifyUtils {
     Query<T> query = ofy.query(clazz).ancestor(parentKey);
     
     if (StringUtils.isNotBlank(filter)) {
-      checkNotNull(value, "When filter is set, value cannot be none.");
+      checkNotNull(value, "When filter is set, value cannot be blank.");
       query.filter(filter, value);
     }
     

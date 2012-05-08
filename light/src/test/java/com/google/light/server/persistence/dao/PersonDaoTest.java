@@ -83,7 +83,7 @@ public class PersonDaoTest extends AbstractBasicDaoTest<PersonDto, PersonEntity>
       PersonEntity getEntiy = dao.get(ofy, savedEntity.getKey());
       assertEquals(savedEntity, getEntiy);
     } catch (Exception e) {
-      ObjectifyUtils.rollbackTransaction(ofy);
+      ObjectifyUtils.rollbackTransactionIfStillActive(ofy);
     }
   }
 

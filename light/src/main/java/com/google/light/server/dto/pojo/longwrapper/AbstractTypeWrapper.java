@@ -20,6 +20,9 @@ import javax.xml.bind.annotation.XmlElement;
 import com.google.light.server.dto.AbstractPojo;
 
 /**
+ * I : Type of Primitive Type.
+ * T : Wrapper Type.
+ * 
  * TODO(arjuns) : Move other Long Wrappers to use this.
  * TODO(arjuns): Add test for this.
  * 

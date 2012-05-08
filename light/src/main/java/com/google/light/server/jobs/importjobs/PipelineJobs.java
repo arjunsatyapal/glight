@@ -19,6 +19,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.jobs.JobUtils.updateChangeLog;
 import static com.google.light.server.utils.GuiceUtils.getInstance;
 
+import com.google.light.pipeline_jobs.LightJob1;
+import com.google.light.pipeline_jobs.LightJob2;
+
 import com.google.appengine.tools.pipeline.PipelineService;
 
 import com.google.appengine.tools.pipeline.PipelineServiceFactory;
@@ -26,8 +29,6 @@ import com.google.appengine.tools.pipeline.PipelineServiceFactory;
 import com.google.appengine.tools.pipeline.FutureValue;
 import com.google.appengine.tools.pipeline.ImmediateValue;
 import com.google.appengine.tools.pipeline.Value;
-import com.google.light.jobs.LightJob1;
-import com.google.light.jobs.LightJob2;
 import com.google.light.server.dto.pojo.ChangeLogEntryPojo;
 import com.google.light.server.dto.pojo.JobHandlerId;
 import com.google.light.server.dto.pojo.LightJobContextPojo;

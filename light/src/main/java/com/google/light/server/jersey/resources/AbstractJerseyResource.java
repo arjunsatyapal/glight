@@ -18,18 +18,23 @@ package com.google.light.server.jersey.resources;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.GuiceUtils.getInstance;
 import static com.google.light.server.utils.GuiceUtils.seedEntityInRequestScope;
+import static com.google.light.server.utils.LightPreconditions.checkIsRunningUnderQueue;
+import static com.google.light.server.utils.ServletUtils.getRequestHeaderValue;
 
-import com.google.light.server.dto.pojo.longwrapper.PersonId;
+import com.google.light.server.utils.JsonUtils;
 
 import com.google.common.base.Preconditions;
-
-import com.google.light.server.annotations.AnotOwner;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.light.server.annotations.AnotHttpSession;
+import com.google.light.server.annotations.AnotOwner;
+import com.google.light.server.constants.HttpHeaderEnum;
+import com.google.light.server.constants.QueueEnum;
+import com.google.light.server.constants.http.ContentTypeEnum;
+import com.google.light.server.dto.pojo.longwrapper.PersonId;
 import com.google.light.server.servlets.SessionManager;
 import com.google.light.server.utils.GuiceUtils;
+import com.google.light.server.utils.ServletUtils;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -45,7 +50,43 @@ public abstract class AbstractJerseyResource {
   @Inject Injector injector;
   protected HttpServletRequest request;
   protected HttpServletResponse response;
+  private QueueEnum queue;
+  private String taskName;
+  private int taskRetryCount;
+  // TODO(arjuns); See what is the dataType for this.
+  private String failFast;
+  // TOOD(arjuns0: See what is the dataType for this.
+  private String taskEta;
   
+  public boolean isRunningUnderTaskQueue() {
+    return queue == null;
+  }
+  
+  public QueueEnum getQueue() {
+    checkIsRunningUnderQueue(request);
+    return queue;
+  }
+
+  public String getTaskName() {
+    checkIsRunningUnderQueue(request);
+    return taskName;
+  }
+
+  public int getTaskRetryCount() {
+    checkIsRunningUnderQueue(request);
+    return taskRetryCount;
+  }
+
+  public String getFailFast() {
+    checkIsRunningUnderQueue(request);
+    return failFast;
+  }
+
+  public String getTaskEta() {
+    checkIsRunningUnderQueue(request);
+    return taskEta;
+  }
+
   @Inject
   public AbstractJerseyResource(Injector injector, HttpServletRequest request, 
       HttpServletResponse response) {
@@ -64,6 +105,44 @@ public abstract class AbstractJerseyResource {
 
     PersonId foo = getInstance(PersonId.class, AnotOwner.class);
     Preconditions.checkNotNull(foo);
+    
+    initQueueParamsIfRequired(request);
+  }
 
+  /**
+   * @param request2
+   */
+  private void initQueueParamsIfRequired(HttpServletRequest request) {
+    String queueName = getRequestHeaderValue(request, HttpHeaderEnum.GAE_QUEUE_NAME);
+    
+    if (queueName == null) {
+      return;
+    }
+    
+    queue = QueueEnum.getByName(queueName);
+    taskName = getRequestHeaderValue(request, HttpHeaderEnum.GAE_TASK_NAME);
+    taskRetryCount = Integer.parseInt(getRequestHeaderValue(request, 
+        HttpHeaderEnum.GAE_TASK_RETRY_COUNT));
+    failFast = getRequestHeaderValue(request, HttpHeaderEnum.GAE_FAILFAST);
+    taskEta = getRequestHeaderValue(request, HttpHeaderEnum.GAE_TASK_ETA);
+    
+    initOwner();
+  }
+  
+  /**
+   * 
+   */
+  private void initOwner() {
+    String ownerIdStr = getRequestHeaderValue(request, HttpHeaderEnum.LIGHT_OWNER_HEADER);
+    PersonId ownerId = JsonUtils.getPojo(ownerIdStr, PersonId.class);
+    // TODO(arjuns): Fix the actor id part.
+    GuiceUtils.enqueueRequestScopedVariables(ownerId, ownerId);
+  }
+
+  protected ContentTypeEnum getContentType() {
+    String contentTypeStr = ServletUtils.getRequestHeaderValue(
+        request, HttpHeaderEnum.CONTENT_TYPE);
+    
+    return ContentTypeEnum.getContentTypeByString(contentTypeStr);
   }
 }

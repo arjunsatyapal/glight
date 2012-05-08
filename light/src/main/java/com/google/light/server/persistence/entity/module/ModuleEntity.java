@@ -16,19 +16,23 @@
 package com.google.light.server.persistence.entity.module;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.light.server.utils.LightPreconditions.checkNonEmptyList;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
-import static com.google.light.server.utils.LightPreconditions.checkPersonId;
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
 
-import com.google.light.server.dto.pojo.longwrapper.Version;
+import com.google.common.base.Preconditions;
 
-import com.google.light.server.dto.pojo.longwrapper.ModuleId;
-import com.google.light.server.dto.pojo.longwrapper.PersonId;
+import org.joda.time.Instant;
 
 import com.google.light.server.dto.module.ModuleDto;
 import com.google.light.server.dto.module.ModuleState;
+import com.google.light.server.dto.module.ModuleType;
+import com.google.light.server.dto.pojo.longwrapper.ModuleId;
+import com.google.light.server.dto.pojo.longwrapper.PersonId;
+import com.google.light.server.dto.pojo.longwrapper.Version;
 import com.google.light.server.persistence.entity.AbstractPersistenceEntity;
 import com.googlecode.objectify.Key;
+import java.util.List;
 import javax.persistence.Embedded;
 import javax.persistence.Id;
 
@@ -45,13 +49,16 @@ public class ModuleEntity extends AbstractPersistenceEntity<ModuleEntity, Module
   Long id;
   String title;
   ModuleState state;
+  ModuleType type;
+
   @Embedded
-  PersonId ownerPersonId;
-  
+  List<PersonId> owners;
+
   String etag;
   @Embedded
   Version latestVersion;
-  
+  Long lastEditTimeInMillis;
+
   /**
    * {@inheritDoc}
    */
@@ -72,7 +79,7 @@ public class ModuleEntity extends AbstractPersistenceEntity<ModuleEntity, Module
   public static Key<ModuleEntity> generateKey(ModuleId moduleId) {
     return generateKey(moduleId.getValue());
   }
-
+  
   /**
    * {@inheritDoc}
    */
@@ -81,8 +88,7 @@ public class ModuleEntity extends AbstractPersistenceEntity<ModuleEntity, Module
     ModuleDto dto = new ModuleDto.Builder()
         .title(title)
         .state(state)
-        .ownerPersonId(ownerPersonId)
-        .etag(etag)
+        .owners(owners)
         .latestVersion(latestVersion)
         .build();
 
@@ -93,7 +99,7 @@ public class ModuleEntity extends AbstractPersistenceEntity<ModuleEntity, Module
     if (id == null) {
       return null;
     }
-    
+
     return new ModuleId(id);
   }
 
@@ -109,6 +115,10 @@ public class ModuleEntity extends AbstractPersistenceEntity<ModuleEntity, Module
     return state;
   }
 
+  public ModuleType getType() {
+    return type;
+  }
+
   public Version getLatestVersion() {
     return latestVersion;
   }
@@ -120,24 +130,36 @@ public class ModuleEntity extends AbstractPersistenceEntity<ModuleEntity, Module
 
   public String getEtag() {
     return etag;
-  } 
+  }
 
   public void setEtag(String etag) {
     this.etag = checkNotBlank(etag, "etag");
   }
   
+  public Instant getLastEditTime() {
+    return new Instant(lastEditTimeInMillis);
+  }
+  
+  public void setLastEditTime(Instant lastEditTime) {
+    Preconditions.checkNotNull(lastEditTime, "lastEditTime");
+    this.lastEditTimeInMillis = lastEditTime.getMillis();
+  }
+
   @Override
   public ModuleEntity validate() {
     super.validate();
     if (id != null) {
       getModuleId();
     }
+
     checkNotBlank(title, "title");
     checkNotNull(state, "moduleState");
-    checkPersonId(ownerPersonId);
+    checkNonEmptyList(owners, "owners list cannot be empty.");
+    checkNotNull(lastEditTimeInMillis, "lastEditTimeInMills");
     checkNotBlank(etag, "etag");
     // Latest version can be zero when module is only reserved.
     // TODO(arjuns): Add more checks here for version.
+    // TODO(arjuns): Add more checks here for moduleType.
 
     checkNotNull(latestVersion, "latestVersion");
     return this;
@@ -147,9 +169,11 @@ public class ModuleEntity extends AbstractPersistenceEntity<ModuleEntity, Module
     private Long id;
     private String title;
     private ModuleState state;
-    private PersonId ownerPersonId;
+    private ModuleType type;
+    private List<PersonId> owners;
     private String etag;
     private Version latestVersion;
+    private Instant lastEditTime;
 
     public Builder id(Long id) {
       this.id = id;
@@ -166,8 +190,13 @@ public class ModuleEntity extends AbstractPersistenceEntity<ModuleEntity, Module
       return this;
     }
 
-    public Builder ownerPersonId(PersonId ownerPersonId) {
-      this.ownerPersonId = ownerPersonId;
+    public Builder type(ModuleType type) {
+      this.type = type;
+      return this;
+    }
+
+    public Builder owners(List<PersonId> owners) {
+      this.owners = owners;
       return this;
     }
 
@@ -181,6 +210,11 @@ public class ModuleEntity extends AbstractPersistenceEntity<ModuleEntity, Module
       return this;
     }
     
+    public Builder lastEditTime(Instant lastEditTime) {
+      this.lastEditTime = lastEditTime;
+      return this;
+    }
+
     @SuppressWarnings("synthetic-access")
     public ModuleEntity build() {
       return new ModuleEntity(this).validate();
@@ -193,8 +227,13 @@ public class ModuleEntity extends AbstractPersistenceEntity<ModuleEntity, Module
     this.id = builder.id;
     this.title = builder.title;
     this.state = builder.state;
-    this.ownerPersonId = builder.ownerPersonId;
+    this.type = builder.type;
+    this.owners = builder.owners;
     this.etag = builder.etag;
+    
+    if (builder.lastEditTime != null) {
+      this.lastEditTimeInMillis = builder.lastEditTime.getMillis();
+    }
     // Latest version can be zero when module is only reserved.
     // TODO(arjuns): Add more checks here for version.
 

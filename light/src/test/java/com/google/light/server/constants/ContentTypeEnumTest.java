@@ -16,6 +16,7 @@
 package com.google.light.server.constants;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import com.google.common.collect.ImmutableMap;
@@ -30,7 +31,7 @@ import org.junit.Test;
  * @author Arjun Satyapal
  */
 public class ContentTypeEnumTest implements EnumTestInterface {
-
+  private int expectedCount = 31;
   /**
    * {@inheritDoc} When you change {@link ContentTypeEnum} update
    * {@link #test_getContentTypeByString}.
@@ -38,7 +39,7 @@ public class ContentTypeEnumTest implements EnumTestInterface {
   @Test
   @Override
   public void test_count() {
-    assertEquals("Update test_getContentTypeByString as required.", 31,
+    assertEquals("Update test_getContentTypeByString as required.", expectedCount,
         ContentTypeEnum.values().length);
   }
 
@@ -52,6 +53,7 @@ public class ContentTypeEnumTest implements EnumTestInterface {
             .<String, ContentTypeEnum> builder()
             .put("application/json", ContentTypeEnum.APPLICATION_JSON)
             .put("application/pdf", ContentTypeEnum.APPLICATION_PDF)
+            .put("application/x-www-form-urlencoded", ContentTypeEnum.APPLICATION_URL_ENCODED)
             .put("application/xml", ContentTypeEnum.APPLICATION_XML)
             .put("application/zip", ContentTypeEnum.APPLICATION_ZIP)
 
@@ -87,10 +89,15 @@ public class ContentTypeEnumTest implements EnumTestInterface {
             .put("text/plain", ContentTypeEnum.TEXT_PLAIN)
             .put("text/csv", ContentTypeEnum.TEXT_CSV)
             .put("text/tab-separated-values", ContentTypeEnum.TEXT_TSV)
-            .put("text/xml", ContentTypeEnum.TEXT_XML)
             .put("application/vnd.sun.xml.writer", ContentTypeEnum.SUN_XML_WRITE)
             .build();
 
+    
+    for (ContentTypeEnum curr : ContentTypeEnum.values()) {
+      assertTrue(curr + " is missing from the map.", map.containsValue(curr));
+    }
+    
+    
     for (String curr : map.keySet()) {
       assertEquals(map.get(curr), ContentTypeEnum.getContentTypeByString(curr));
     }

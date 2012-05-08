@@ -17,17 +17,22 @@ package com.google.light.server.dto.collection;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
-import static com.google.light.server.utils.LightPreconditions.checkPersonId;
 
-import com.google.light.server.dto.pojo.tree.CollectionTreeNode;
+import org.codehaus.jackson.annotate.JsonProperty;
 
-import com.google.light.server.dto.pojo.longwrapper.Version;
-
-import com.google.light.server.dto.pojo.longwrapper.PersonId;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 
 import com.google.light.server.dto.AbstractDto;
 import com.google.light.server.dto.AbstractDtoToPersistence;
+import com.google.light.server.dto.pojo.longwrapper.PersonId;
+import com.google.light.server.dto.pojo.longwrapper.Version;
+import com.google.light.server.dto.pojo.tree.CollectionTreeNodeDto;
 import com.google.light.server.persistence.entity.collection.CollectionEntity;
+import com.google.light.server.utils.LightPreconditions;
+import java.util.List;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * 
@@ -37,15 +42,30 @@ import com.google.light.server.persistence.entity.collection.CollectionEntity;
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
+@XmlRootElement(name = "collection")
+@XmlAccessorType(XmlAccessType.FIELD)
 public class CollectionDto extends
     AbstractDtoToPersistence<CollectionDto, CollectionEntity, String> {
 
+  @XmlElement(name = "title")
+  @JsonProperty(value = "title")
   private String title;
-  private CollectionState collectionState;
-  private PersonId ownerPersonId;
-  private String etag;
-  private Version latestVersion;
-  private CollectionTreeNode root;
+  
+  @XmlElement(name = "state")
+  @JsonProperty(value = "state")
+  private CollectionState state;
+  
+  @XmlElement(name = "owners")
+  @JsonProperty(value = "owners")
+  private List<PersonId> owners;
+  
+  @XmlElement(name = "version")
+  @JsonProperty(value = "version")
+  private Version version;
+  
+  @XmlElement(name = "root")
+  @JsonProperty(value = "root")
+  private CollectionTreeNodeDto root;
 
   /**
    * {@inheritDoc}
@@ -62,11 +82,11 @@ public class CollectionDto extends
   @Override
   public CollectionDto validate() {
     checkNotBlank(title, "title");
-    checkNotNull(collectionState, "collectionState");
-    checkPersonId(ownerPersonId);
+    checkNotNull(state, "collectionState");
+    
+    LightPreconditions.checkNonEmptyList(owners, "owners");
 
-    // TODO(arjuns): Add validation for etag.
-    checkNotNull(latestVersion, "latestVersion");
+    checkNotNull(version, "latestVersion");
     checkNotNull(root, "root");
     return this;
   }
@@ -75,60 +95,50 @@ public class CollectionDto extends
     return title;
   }
 
-  public CollectionState getCollectionState() {
-    return collectionState;
+  public CollectionState getState() {
+    return state;
   }
 
-  public PersonId getOwnerPersonId() {
-    return ownerPersonId;
+  public List<PersonId> getOwners() {
+    return owners;
   }
 
-  public String getEtag() {
-    return etag;
+  public Version getVersion() {
+    return version;
   }
 
-  public Version getLatestVersion() {
-    return latestVersion;
-  }
-
-  public CollectionTreeNode getRoot() {
+  public CollectionTreeNodeDto getRoot() {
     return root;
   }
 
   public static class Builder extends AbstractDto.BaseBuilder<Builder> {
     private String title;
-    private CollectionState collectionState;
-    private PersonId ownerPersonId;
-    private String etag;
-    private Version latestVersion;
-    private CollectionTreeNode root;
+    private CollectionState state;
+    private List<PersonId> owners;
+    private Version version;
+    private CollectionTreeNodeDto root;
 
     public Builder title(String title) {
       this.title = title;
       return this;
     }
 
-    public Builder collectionState(CollectionState collectionState) {
-      this.collectionState = collectionState;
+    public Builder collectionState(CollectionState state) {
+      this.state = state;
       return this;
     }
 
-    public Builder ownerPersonId(PersonId ownerPersonId) {
-      this.ownerPersonId = ownerPersonId;
+    public Builder ownerPersonId(List<PersonId> owners) {
+      this.owners = owners;
       return this;
     }
 
-    public Builder etag(String etag) {
-      this.etag = etag;
+    public Builder version(Version version) {
+      this.version = version;
       return this;
     }
 
-    public Builder latestVersion(Version latestVersion) {
-      this.latestVersion = latestVersion;
-      return this;
-    }
-
-    public Builder root(CollectionTreeNode root) {
+    public Builder root(CollectionTreeNodeDto root) {
       this.root = root;
       return this;
     }
@@ -143,10 +153,14 @@ public class CollectionDto extends
   private CollectionDto(Builder builder) {
     super(builder);
     this.title = builder.title;
-    this.collectionState = builder.collectionState;
-    this.ownerPersonId = builder.ownerPersonId;
-    this.etag = builder.etag;
-    this.latestVersion = builder.latestVersion;
+    this.state = builder.state;
+    this.owners = builder.owners;
+    this.version = builder.version;
     this.root = builder.root;
+  }
+
+  // For Jaxb
+  private CollectionDto() {
+    super(null);
   }
 }

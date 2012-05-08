@@ -19,9 +19,8 @@ import static com.google.light.server.utils.LightPreconditions.checkEmail;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPersonId;
 
-import com.google.light.server.dto.pojo.longwrapper.PersonId;
-
 import com.google.light.server.dto.person.PersonDto;
+import com.google.light.server.dto.pojo.longwrapper.PersonId;
 import com.google.light.server.persistence.entity.AbstractPersistenceEntity;
 import com.googlecode.objectify.Key;
 import javax.persistence.Id;
@@ -81,7 +80,7 @@ public class PersonEntity extends AbstractPersistenceEntity<PersonEntity, Person
    */
   public static Key<PersonEntity> generateKey(PersonId personId) {
     checkPersonId(personId);
-    return new Key<PersonEntity>(PersonEntity.class, personId.get());
+    return new Key<PersonEntity>(PersonEntity.class, personId.getValue());
   }
   
   // TODO(arjuns) : Add a test.
@@ -94,7 +93,7 @@ public class PersonEntity extends AbstractPersistenceEntity<PersonEntity, Person
     }
 
     checkPersonId(personId);
-    this.id = personId.get();
+    this.id = personId.getValue();
   }
 
   public String getFirstName() {
@@ -164,7 +163,7 @@ public class PersonEntity extends AbstractPersistenceEntity<PersonEntity, Person
     super(builder, true);
     if (builder.personId != null) {
       checkPersonId(builder.personId);
-      this.id = builder.personId.get();
+      this.id = builder.personId.getValue();
     } else {
       this.id = null;
     }

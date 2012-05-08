@@ -24,6 +24,12 @@ import static com.google.light.server.utils.GoogleCloudStorageUtils.writeFileOnG
 import static com.google.light.server.utils.GuiceUtils.getInstance;
 import static com.google.light.server.utils.LightUtils.getRandomFileName;
 
+import com.google.light.server.exception.unchecked.taskqueue.GoogleDocArchivalWaitingException;
+
+import com.google.light.pipeline_jobs.LightJob2;
+import com.google.light.pipeline_jobs.LightJob3;
+import com.google.light.pipeline_jobs.LightJob4;
+
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpHeaders;
 import com.google.api.client.http.HttpRequest;
@@ -39,9 +45,6 @@ import com.google.appengine.tools.pipeline.Value;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.light.jobs.LightJob2;
-import com.google.light.jobs.LightJob3;
-import com.google.light.jobs.LightJob4;
 import com.google.light.server.constants.FileExtensions;
 import com.google.light.server.constants.HttpHeaderEnum;
 import com.google.light.server.constants.OAuth2ProviderService;
@@ -53,7 +56,6 @@ import com.google.light.server.dto.pojo.LightJobContextPojo;
 import com.google.light.server.dto.pojo.longwrapper.ModuleId;
 import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocResourceId;
 import com.google.light.server.exception.unchecked.GoogleDocException;
-import com.google.light.server.exception.unchecked.pipelineexceptions.ignore.GoogleDocArchivalWaitingException;
 import com.google.light.server.jobs.importjobs.PipelineJobs;
 import com.google.light.server.jobs.lightjobs.ModuleJobs;
 import com.google.light.server.manager.implementation.oauth2.owner.OAuth2OwnerTokenManagerFactory;
@@ -334,7 +336,7 @@ public class ImportGoogleDocJobs {
           }
 
           GSBlobInfo gsBlobInfo = resourceMap.get(currKey);
-          logger.info(gsBlobInfo.toJson());
+          logger.info(JsonUtils.toJson(gsBlobInfo));
 
           FutureValue<Void> fv = futureCall(
               new ModuleJobs.AddModuleResources(),

@@ -15,7 +15,8 @@
  */
 package com.google.light.server.utils;
 
-import com.google.light.server.dto.pojo.longwrapper.ModuleId;
+import static com.google.light.server.utils.LightUtils.getRandomFileName;
+import com.google.light.server.constants.FileExtensions;
 
 import com.google.appengine.api.files.AppEngineFile;
 import com.google.appengine.api.files.FileService;
@@ -26,10 +27,13 @@ import com.google.appengine.api.files.GSFileOptions.GSFileOptionsBuilder;
 import com.google.common.io.ByteStreams;
 import com.google.light.server.constants.google.cloudstorage.GoogleCloudStorageBuckets;
 import com.google.light.server.constants.http.ContentTypeEnum;
+import com.google.light.server.dto.pojo.longwrapper.ModuleId;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.channels.Channels;
+import org.joda.time.DateTime;
+import org.joda.time.Instant;
 
 /**
  * 
@@ -57,7 +61,8 @@ public class GoogleCloudStorageUtils {
   public static String getAbsoluteModuleHtmlPath(GoogleCloudStorageBuckets bucket,
       ModuleId moduleId) {
 
-    return bucket.getAbsoluteFilePath("" + moduleId.getValue() + "/" + moduleId.getValue() + ".html");
+    return bucket.getAbsoluteFilePath("" + moduleId.getValue() + "/" + moduleId.getValue()
+        + ".html");
   }
 
   public static String writeFileOnGCS(InputStream inputStream, GSFileOptions gsFileOptions)
@@ -72,6 +77,19 @@ public class GoogleCloudStorageUtils {
     writeChannel.closeFinally();
 
     return appengineFile.getFullPath();
+  }
+
+  public static String getFolderForToday() {
+    Instant now = LightUtils.getNow();
+
+    DateTime dateTime = new DateTime(now);
+
+    return dateTime.getYear() + "/" + dateTime.getMonthOfYear() + "/" + dateTime.getDayOfMonth();
+  }
+
+  public static String getDestinationFileNameForGDoc() {
+    return getFolderForToday() + "/" + "google_doc_archive/"
+        + getRandomFileName(FileExtensions.ZIP);
   }
 
   // Utility class.

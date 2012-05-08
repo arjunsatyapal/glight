@@ -16,6 +16,11 @@
 package com.google.light.server.constants;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import com.google.common.collect.Sets;
+import com.google.light.testingutils.TestingUtils;
+import java.util.Set;
 import org.junit.Test;
 
 /**
@@ -24,14 +29,34 @@ import org.junit.Test;
  * @author Arjun Satyapal
  */
 public class HtmlPathEnumTest implements EnumTestInterface {
-
+  private String WEBAPP = "webapp";
   /** 
    * {@inheritDoc}
    */
   @Test
   @Override
   public void test_count() {
-    // TODO(arjuns): Add tests to ensure all htmls are covered.
-    assertEquals("Add more tests as required.", 3, HtmlPathEnum.values().length);
+    Set<String> requiredFiles = findLightHtmlFiles();
+    assertEquals("Add more tests as required.", 5, HtmlPathEnum.values().length);
+    
+    for (String currFile : requiredFiles) {
+      int len = currFile.indexOf(WEBAPP) + WEBAPP.length();
+      String path = currFile.substring(len);
+      assertTrue(path + " is missing from " + HtmlPathEnum.class.getSimpleName(),
+          HtmlPathEnum.contains(path));
+    }
+  }
+  
+  private Set<String> findLightHtmlFiles() {
+    Set<String> setOfFiles = TestingUtils.findAllFilesUnderLight();
+    
+    Set<String> requiredFiles = Sets.newHashSet();
+    for (String currFile : setOfFiles) {
+      if(currFile.contains(WEBAPP) && currFile.endsWith(".html")) {
+        requiredFiles.add(currFile);
+      }
+    }
+    
+    return requiredFiles;
   }
 }

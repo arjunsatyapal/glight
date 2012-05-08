@@ -50,7 +50,7 @@ public class SearchRequestDtoTest extends AbstractDtoTest {
    * Test constructing this Dto through QueryUtils.
    */
   @Test
-  public void testConstructThroughQueryUtils() {
+  public void test_ConstructThroughQueryUtils() {
     // Just positive tests. We can count with enough negative tests in QueryUtilsTest
 
     SearchRequestDto searchRequest =

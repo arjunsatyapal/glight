@@ -33,7 +33,13 @@ public class JerseyConstants {
 
   public static final String PATH_PARAM_COLLECTION_ID = "collection_id";
   public static final String PATH_COLLECTION_ID = "/{" + PATH_PARAM_COLLECTION_ID + "}";
+
+  public static final String PATH_PARAM_JOB_ID = "job_id";
+  public static final String PATH_JOB_ID = "/{" + PATH_PARAM_JOB_ID + "}";
   
+  public static final String PATH_PARAM_JOB_ID_PARENT = "job_id_PARENT";
+  public static final String PATH_JOB_ID_PARENT = "/{" + PATH_PARAM_JOB_ID_PARENT + "}";
+
   public static final String PATH_PARAM_MODULE_ID = "module_id";
   public static final String PATH_MODULE_ID = "/{" + PATH_PARAM_MODULE_ID + "}";
 
@@ -94,8 +100,15 @@ public class JerseyConstants {
   public static final String PATH_GOOGLE_FOLDER_INFO = "/info/folder" + PATH_EXTERNAL_KEY;
 
   public static final String PATH_GOOGLE_DOC_IMPORT_POST = "/import";
+  public static final String URI_GOOGLE_DOC_IMPORT_POST = URI_RESOURCE_PATH_THIRD_PARTH_GOOGLE_DOC
+      + PATH_GOOGLE_DOC_IMPORT_POST;
+
   public static final String PATH_GOOGLE_DOC_IMPORT_PUT = PATH_GOOGLE_DOC_IMPORT_POST
       + PATH_EXTERNAL_KEY;
+
+  // Path for Job Resource
+  public static final String RESOURCE_JOB = "/job";
+  public static final String URI_RESOURCE_JOB = JERSEY_CONTEXT + RESOURCE_JOB;
 
   // Path for Module Resources.
   public static final String RESOURCE_PATH_MODULE = "/module";
@@ -105,6 +118,17 @@ public class JerseyConstants {
   public static final String PATH_COLLECTION_VERSION_CONTENT = PATH_COLLECTION_VERSION + "/"
       + CONTENT;
 
+  // Path for Notification Resources.
+  public static final String RESOURCE_PATH_NOTIFICATION = "/notification";
+  public static final String URI_RESOURCE_PATH_NOTIFICATION = JERSEY_CONTEXT
+      + RESOURCE_PATH_NOTIFICATION;
+  
+  public static final String PATH_NOTIFICATION_JOB = "/job";
+  public static final String URI_RESOURCE_PATH_NOTIFICATION_JOB = URI_RESOURCE_PATH_NOTIFICATION
+      + PATH_NOTIFICATION_JOB;
+
+  
+  
   // Path for Person Resource.
   public static final String RESOURCE_PATH_PERSON = "/person";
   public static final String PATH_PERSON = PATH_PERSON_ID;
@@ -115,7 +139,7 @@ public class JerseyConstants {
 
   public static final String PATH_SESSION = "/session";
   public static final String URI_TEST_SESSION = URI_RESOURCE_PATH_TEST + PATH_SESSION;
-  
+
   public static final String PATH_TEST_LINKS = "/links";
   public static final String URI_TEST_LINKS = URI_RESOURCE_PATH_TEST + PATH_TEST_LINKS;
 

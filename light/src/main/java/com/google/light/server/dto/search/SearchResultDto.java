@@ -3,10 +3,16 @@ package com.google.light.server.dto.search;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+
+import org.codehaus.jackson.annotate.JsonProperty;
+
+import javax.xml.bind.annotation.XmlElement;
+
 import com.google.light.server.dto.AbstractDto;
 import java.util.List;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
-import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * DTO to hold the final search result
@@ -14,13 +20,23 @@ import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
  * @author Walter Cacau
  */
 @SuppressWarnings("serial")
-@JsonSerialize(include = Inclusion.NON_NULL)
+@XmlRootElement(name = "searchResult")
+@XmlAccessorType(XmlAccessType.FIELD)
 public class SearchResultDto extends AbstractDto<SearchResultDto> {
+  @XmlElement(name = "items")
+  @JsonProperty(value = "items")
   private List<SearchResultItemDto> items;
 
+  @XmlElement(name = "hasNextPage")
+  @JsonProperty(value = "hasNextPage")
   private boolean hasNextPage;
 
+  @XmlElement(name = "suggestion")
+  @JsonProperty(value = "suggestion")
   private String suggestion;
+
+  @XmlElement(name = "suggestionQuery")
+  @JsonProperty(value = "suggestionQuery")
   private String suggestionQuery;
 
   public List<SearchResultItemDto> getItems() {

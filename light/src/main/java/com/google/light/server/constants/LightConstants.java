@@ -25,6 +25,7 @@ import static com.google.light.server.servlets.path.ServletPathEnum.SEARCH_PAGE;
  * @author Arjun Satyapal
  */
 public class LightConstants {
+  public static int SECONDS_IN_HR = 60 * 60;
   public static int SECONDS_IN_A_DAY = 24 * 60 * 60;
   
   public static int SESSION_MAX_INACTIVITY_PERIOD = SECONDS_IN_A_DAY;
@@ -63,11 +64,32 @@ public class LightConstants {
   public static final JobSetting.BackoffFactor JOB_BACK_OFF_FACTOR = new JobSetting.BackoffFactor(2);
   public static final JobSetting.BackoffSeconds JOB_BACK_OFF_SECONDS = new JobSetting.BackoffSeconds(1);
   public static final JobSetting.MaxAttempts JOB_MAX_ATTEMPTES = new JobSetting.MaxAttempts(3);
+  
+  // TODO(arjuns): Get this value from client.
+  /** Number of recrds to be fetched in GDATA Feed */
+  public static int GDATA_MAX_RESULT = 10;
+  
+  /**
+   * Number of documents that can be requested by client to import in single batch.
+   * This includes only first level documents. It is allowed to have folders with multiple-level
+   * of hierarchy. The request can even contain 10 folders. This is done to ensure that in real
+   * time it can be verified that User has access to all these documents and another assumption is 
+   * that Google provides access permissions to whole nested tree. If this changes in future, then
+   * this may have to be changed. 
+   */
+  public static int GOOGLE_DOC_IMPORT_BATCH_SIZE_MAX = 10;
+
 
   public static final int MAX_RESULTS_MIN = 10;
   public static final int MAX_RESULTS_DEFAULT = MAX_RESULTS_MIN;
   public static final int MAX_RESULTS_MAX = 100;
   
-  /** Number of recrds to be fetched in GDATA Feed */
-  public static int GDATA_MAX_RESULT = MAX_RESULTS_DEFAULT;
+  public static final int TASK_COUNTDOWN_MILLIS = 1000;
+  public static final int TASK_MAX_BACKOFF_SEC = SECONDS_IN_HR;
+  public static final int TASK_MAX_DOUBLINGS = 5;
+  public static final int TASK_MIN_BACKOFF_SECONDS = 2;
+  public static final int TASK_MAX_AGE = SECONDS_IN_HR;
+  public static final int TASK_RETRY_LIMIT = 3;
+  
+
 }

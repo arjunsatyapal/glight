@@ -212,8 +212,10 @@ public class GoogleLoginCallbackServlet extends HttpServlet {
    * @return
    */
   private boolean doesTokenDetailEntityNeedsUpdate(boolean updatePersistedTokenDetails) {
-    if (updatePersistedTokenDetails)
+    if (updatePersistedTokenDetails) {
       return true;
+    }
+    
     OAuth2OwnerTokenEntity fetchedTokenEntity = googLoginTokenManager.get();
     if (fetchedTokenEntity == null) {
       updatePersistedTokenDetails = true;
@@ -260,7 +262,7 @@ public class GoogleLoginCallbackServlet extends HttpServlet {
     OAuth2OwnerTokenDto tokenDto =
         OAuth2OwnerTokenDto.getOAuth2OwnerTokenDto(
             personId, refreshToken, tokenResponse, GOOGLE_LOGIN, providerUserId,
-            googTokenInfo.toJson());
+            JsonUtils.toJson(googTokenInfo));
 
     googLoginTokenManager.put(tokenDto.toPersistenceEntity());
   }

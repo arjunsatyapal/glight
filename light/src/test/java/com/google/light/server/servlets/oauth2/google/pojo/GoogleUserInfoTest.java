@@ -37,7 +37,7 @@ public class GoogleUserInfoTest {
   @Test
   public void test_jsonParsing() throws Exception {
     String jsonString = getResourceAsString(TestResourcePaths.GOOGLE_USER_INFO_JSON.get());
-    GoogleUserInfo userTokenInfo = JsonUtils.getDto(jsonString, GoogleUserInfo.class);
+    GoogleUserInfo userTokenInfo = JsonUtils.getPojo(jsonString, GoogleUserInfo.class);
     
     assertEquals("115639870677665060321", userTokenInfo.getId());
     assertEquals("unit-test1@myopenedu.com", userTokenInfo.getEmail());

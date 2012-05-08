@@ -20,18 +20,15 @@ package com.google.light.server.dto.pojo.longwrapper;
 import static com.google.light.server.utils.LightPreconditions.checkPersonId;
 
 import com.google.inject.Inject;
-import com.google.light.server.dto.AbstractPojo;
 
 /**
  *
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
-public class PersonId extends AbstractPojo<PersonId> {
-  private Long id;
-
+public class PersonId extends AbstractTypeWrapper<Long, PersonId> {
   public PersonId(Long id) {
-    this.id = id;
+    super(id);
     validate();
   }
   
@@ -39,23 +36,9 @@ public class PersonId extends AbstractPojo<PersonId> {
     this(Long.parseLong(id));
   }
   
-  // For Guice Binding and JAXB.
-  @SuppressWarnings("unused")
-  @Inject
-  private PersonId() {
-  }
-  
-  public Long get() {
-    return id;
-  }
-  
-  public boolean isValid() {
-    return id != null;
-  }
-  
   @Override
   public String toString() {
-    return "PersonId:" + get();
+    return "PersonId:" + getValue();
   }
 
   /** 
@@ -65,5 +48,11 @@ public class PersonId extends AbstractPojo<PersonId> {
   public PersonId validate() {
     checkPersonId(this);
     return this;
+  }
+  
+  // For JAXB, Guice and Objectify.
+  @Inject
+  private PersonId() {
+    super(null);
   }
 }

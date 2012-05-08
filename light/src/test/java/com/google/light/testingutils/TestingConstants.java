@@ -65,5 +65,8 @@ public class TestingConstants {
   public static final ArrayList<String> SAMPLE_GSS_LIST_OUTPUTS = Lists.newArrayList(
       TestResourcePaths.SEARCH_GSS_ADDITION_QUERY_OUTPUT_JSON.get(),
       TestResourcePaths.SEARCH_GSS_ADDXITION_QUERY_OUTPUT_JSON.get());
+  
+  
+  public static final String SERVER_URL = "http://localhost:8080";
 
 }

@@ -36,7 +36,7 @@ public enum TestResourcePaths {
    */
   GOOGLE_USER_INFO_JSON("/login/oauth2/google/google_user_info.json"),
 
-  LOGIN_STATE_JSON("/login/login_state.json"),
+  REDIRECT_JSON("/redirect/redirect.json"),
   JS_VARIABLES_PRELOAD_JSON("/js_variables_preload.json");
 
   private String path;

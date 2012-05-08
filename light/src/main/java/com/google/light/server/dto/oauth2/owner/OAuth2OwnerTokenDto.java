@@ -22,6 +22,15 @@ import static com.google.light.server.utils.LightPreconditions.checkPersonId;
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
 import static com.google.light.server.utils.LightPreconditions.checkProviderUserId;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+
+import org.codehaus.jackson.annotate.JsonProperty;
+
+import javax.xml.bind.annotation.XmlElement;
+
+import javax.xml.bind.annotation.XmlRootElement;
+
 import com.google.light.server.dto.pojo.longwrapper.PersonId;
 
 import com.google.light.server.dto.AbstractDto;
@@ -38,15 +47,40 @@ import com.google.light.server.persistence.entity.person.PersonEntity;
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
+@XmlRootElement(name="oauth2OwnerToken")
+@XmlAccessorType(XmlAccessType.FIELD)
 public class OAuth2OwnerTokenDto extends
     AbstractDtoToPersistence<OAuth2OwnerTokenDto, OAuth2OwnerTokenEntity, String> {
+  @XmlElement(name = "personId")
+  @JsonProperty(value = "personId")
   private PersonId personId;
+  
+  @XmlElement(name = "providerService")
+  @JsonProperty(value = "providerService")
   private OAuth2ProviderService providerService;
+  
+  @XmlElement(name = "providerUserId")
+  @JsonProperty(value = "providerUserId")
   private String providerUserId;
+  
+  @XmlElement(name = "accessToken")
+  @JsonProperty(value = "accessToken")
   private String accessToken;
+  
+  @XmlElement(name = "refreshToken")
+  @JsonProperty(value = "refreshToken")
   private String refreshToken;
+  
+  @XmlElement(name = "expiresInMillis")
+  @JsonProperty(value = "expiresInMillis")
   private long expiresInMillis;
+  
+  @XmlElement(name = "tokenType")
+  @JsonProperty(value = "tokenType")
   private String tokenType;
+  
+  @XmlElement(name = "tokenInfo")
+  @JsonProperty(value = "tokenInfo")
   private String tokenInfo;
 
   /**
@@ -218,5 +252,10 @@ public class OAuth2OwnerTokenDto extends
     this.expiresInMillis = builder.expiresInMillis;
     this.tokenType = builder.tokenType;
     this.tokenInfo = builder.tokenInfo;
+  }
+  
+  // For JAXB
+  private OAuth2OwnerTokenDto() {
+    super(null);
   }
 }

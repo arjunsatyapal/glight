@@ -22,18 +22,13 @@ import static com.google.light.testingutils.TestingUtils.getResourceAsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-import com.google.light.server.dto.pojo.longwrapper.PersonId;
-
-
-
-
-import com.google.light.testingutils.TestingUtils;
-
 import com.google.light.server.dto.AbstractDtoToPersistenceTest;
+import com.google.light.server.dto.pojo.longwrapper.PersonId;
 import com.google.light.server.exception.unchecked.BlankStringException;
 import com.google.light.server.persistence.entity.person.PersonEntity;
 import com.google.light.server.utils.JsonUtils;
 import com.google.light.server.utils.XmlUtils;
+import com.google.light.testingutils.TestingUtils;
 import org.junit.Before;
 import org.junit.Test;
 

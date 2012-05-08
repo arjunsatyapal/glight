@@ -28,4 +28,8 @@ public class LightStringConstants {
   public static final String VERSION_LATEST_STR = "latest";
   public static final String START_INDEX_STR = "start-index";
   public static final String MAX_RESULTS_STR = "max-results";
+  
+  // TODO(arjuns): Find a better way for URLs. See also LocationHeader.
+  // Some URLs.
+  
 }

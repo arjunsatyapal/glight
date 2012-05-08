@@ -53,6 +53,10 @@ public class LightConversionPojo extends AbstractPojo<LightConversionPojo>{
     checkNotBlank(source, "source");
     checkNotBlank(target, "target");
     return this;
+  }
 
+  // For Jaxb.
+  @SuppressWarnings("unused")
+  private LightConversionPojo() {
   }
 }

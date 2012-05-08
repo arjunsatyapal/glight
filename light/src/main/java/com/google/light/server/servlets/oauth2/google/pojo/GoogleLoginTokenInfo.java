@@ -18,14 +18,10 @@ package com.google.light.server.servlets.oauth2.google.pojo;
 import static com.google.light.server.utils.LightPreconditions.checkEmail;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
-import org.codehaus.jackson.annotate.JsonCreator;
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
-import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
+
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * Java representation for the JSON object returned by Google as a response to
@@ -36,42 +32,29 @@ import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
-@XmlRootElement(name = "TokenInfo")
-@XmlAccessorType(XmlAccessType.PROPERTY)
-@JsonSerialize(include = Inclusion.NON_NULL)
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class GoogleLoginTokenInfo extends AbstractOAuth2TokenInfo<GoogleLoginTokenInfo>{
-  private String userId;
-  private String email;
-  private boolean verifiedEmail;
-  
-
+@XmlRootElement(name = "google_login_token_info")
+public class GoogleLoginTokenInfo extends AbstractOAuth2TokenInfo<GoogleLoginTokenInfo> {
+  @XmlElement(name = "user_id")
   @JsonProperty(value = "user_id")
+  private String userId;
+  
+  @XmlElement
+  private String email;
+  
+  @XmlElement(name = "verified_email")
+  @JsonProperty(value = "verified_email")
+  private boolean verifiedEmail;
+
   public String getUserId() {
     return userId;
-  }
-
-  @JsonProperty(value = "user_id")
-  public void setUserId(String userId) {
-    this.userId = userId;
   }
 
   public String getEmail() {
     return email;
   }
-
-  public void setEmail(String email) {
-    this.email = email;
-  }
-
-  @JsonProperty(value = "verified_email")
+  
   public boolean getVerifiedEmail() {
     return verifiedEmail;
-  }
-
-  @JsonProperty(value = "verified_email")
-  public void setVerifiedEmail(boolean verifiedEmail) {
-    this.verifiedEmail = verifiedEmail;
   }
 
   /**
@@ -88,8 +71,43 @@ public class GoogleLoginTokenInfo extends AbstractOAuth2TokenInfo<GoogleLoginTok
     return this;
   }
 
-  // For JAXB.
-  @JsonCreator
-  public GoogleLoginTokenInfo() {
+  public static class Builder extends AbstractOAuth2TokenInfo.Builder<Builder> {
+    private String userId;
+    private String email;
+    private boolean verifiedEmail;
+
+    public Builder userId(String userId) {
+      this.userId = userId;
+      return this;
+    }
+
+    public Builder email(String email) {
+      this.email = email;
+      return this;
+    }
+
+    public Builder verifiedEmail(boolean verifiedEmail) {
+      this.verifiedEmail = verifiedEmail;
+      return this;
+    }
+
+    @SuppressWarnings("synthetic-access")
+    public GoogleLoginTokenInfo build() {
+      return new GoogleLoginTokenInfo(this).validate();
+    }
+  }
+
+  @SuppressWarnings("synthetic-access")
+  private GoogleLoginTokenInfo(Builder builder) {
+    super(builder);
+    
+    this.userId = builder.userId;
+    this.email = builder.email;
+    this.verifiedEmail = builder.verifiedEmail;
+  }
+  
+  // For JAXB
+  private GoogleLoginTokenInfo() {
+    super(null);
   }
 }

@@ -19,23 +19,28 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkNull;
-import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
 
+import com.google.light.server.constants.PlacementOrder;
+
+import com.google.appengine.api.datastore.Text;
 import com.google.appengine.tools.pipeline.JobInfo;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.light.server.constants.RequestParamKeyEnum;
 import com.google.light.server.dto.pojo.ChangeLogEntryPojo;
 import com.google.light.server.dto.pojo.JobHandlerId;
+import com.google.light.server.dto.pojo.longwrapper.JobId;
 import com.google.light.server.persistence.entity.AbstractPersistenceEntity;
 import com.google.light.server.servlets.path.ServletPathEnum;
 import com.googlecode.objectify.Key;
+import com.googlecode.objectify.annotation.Unindexed;
 import java.util.List;
 import javax.persistence.Embedded;
 import javax.persistence.Id;
 
 /**
  * 
- * 
+ * TODO(arjuns): Add child jobs.
  * TODO(arjuns): Add test for this class.
  * 
  * @author Arjun Satyapal
@@ -44,8 +49,10 @@ import javax.persistence.Id;
 public class JobEntity extends AbstractPersistenceEntity<JobEntity, Object> {
   @Id
   private Long jobId;
-  private Long parentJobId;
-  private Long rootJobId;
+  @Embedded
+  private JobId parentJobId;
+  @Embedded
+  private JobId rootJobId;
 
   // This is used in Objectify Query.
   public static final String OFY_JOB_HANDLER_TYPE = "jobHandlerType";
@@ -53,6 +60,7 @@ public class JobEntity extends AbstractPersistenceEntity<JobEntity, Object> {
 
   // This is used in Objectify Query.
   public static final String OFY_JOB_HANDLER_ID = "jobHandlerId.id";
+  @Deprecated
   @Embedded
   private JobHandlerId jobHandlerId;
   private JobType jobType;
@@ -62,18 +70,24 @@ public class JobEntity extends AbstractPersistenceEntity<JobEntity, Object> {
 
   // Following values can be modified.
   private JobState jobState;
-  private String stopReason;
   
+  @Unindexed
+  private String stopReason;
+
+  private Text request;
+  private Text context;
+
+  @Unindexed
   @Embedded
   private List<ChangeLogEntryPojo> changeLogs;
 
-  public static Key<JobEntity> generateKey(Long jobId) {
-    return new Key<JobEntity>(JobEntity.class, jobId);
+  public static Key<JobEntity> generateKey(JobId jobId) {
+    return new Key<JobEntity>(JobEntity.class, jobId.getValue());
   }
 
   @Override
   public Key<JobEntity> getKey() {
-    return generateKey(jobId);
+    return generateKey(getId());
   }
 
   /**
@@ -85,11 +99,11 @@ public class JobEntity extends AbstractPersistenceEntity<JobEntity, Object> {
     throw new UnsupportedOperationException();
   }
 
-  public Long getId() {
-    return jobId;
+  public JobId getId() {
+    return new JobId(jobId);
   }
 
-  public Long getParentJobId() {
+  public JobId getParentJobId() {
     return parentJobId;
   }
 
@@ -97,12 +111,12 @@ public class JobEntity extends AbstractPersistenceEntity<JobEntity, Object> {
     return getParentJobId() == null;
   }
 
-  public Long getRootJobId() {
+  public JobId getRootJobId() {
     if (isRootJob()) {
-      return jobId;
+      return getId();
     }
-    
-    return checkPositiveLong(rootJobId, "rootJobId");
+
+    return rootJobId;
   }
 
   public boolean isRootJob() {
@@ -152,15 +166,14 @@ public class JobEntity extends AbstractPersistenceEntity<JobEntity, Object> {
   public void setError(String stopReason) {
     this.stopReason = checkNotBlank(stopReason, "stopReason string is blank");
   }
-  
+
   public List<ChangeLogEntryPojo> getChangeLogs() {
     return changeLogs;
   }
-  
+
   public void addToChangeLog(ChangeLogEntryPojo changeLog) {
     changeLogs.add(changeLog);
   }
-  
 
   public String getLocation() {
     String encodedId = Long.toString(jobId);
@@ -169,13 +182,21 @@ public class JobEntity extends AbstractPersistenceEntity<JobEntity, Object> {
 
     return locationUrl;
   }
+
+  public Text getRequest() {
+    return request;
+  }
   
+  public Text getContext() {
+    return context;
+  }
+  
+  public void setContext(Text context) {
+    this.context = Preconditions.checkNotNull(context, "context");
+  }
+
   @Override
   public JobEntity validate() {
-    if (parentJobId != null) {
-      checkPositiveLong(parentJobId, "Invalid ParentJobId.");
-    }
-
     checkNotNull(jobType, "jobType");
 
     switch (jobType) {
@@ -185,7 +206,13 @@ public class JobEntity extends AbstractPersistenceEntity<JobEntity, Object> {
 
       case CHILD_JOB:
         checkNotNull(rootJobId, "For childJob, rootJobId cannot be null.");
-        checkArgument(jobId != rootJobId, "For childJob, jobId and rootJobId should be different.");
+        checkNotNull(parentJobId, "For childJob, rootJobId cannot be null.");
+        
+        if (jobId != null) {
+          checkArgument(!jobId.equals(rootJobId),
+              "For childJob, jobId and rootJobId should be different.");
+        }
+        
         break;
 
       default:
@@ -194,23 +221,22 @@ public class JobEntity extends AbstractPersistenceEntity<JobEntity, Object> {
 
     checkNotNull(jobHandlerType, "jobHandlerType");
 
-    switch (jobHandlerType) {
-      case PIPELINE:
-        // No specific validations for Pipeline.
-        break;
-
-      default:
-        throw new IllegalArgumentException(
-            "Add more validations here for Unsupported JobHandlerType : " + jobHandlerType);
-    }
-
-    checkNotNull(taskType, "jobType");
+    checkNotNull(taskType, "taskType");
     switch (taskType) {
       case IMPORT:
         checkNotNull(taskId, "taskId");
+        checkArgument(jobHandlerType == JobHandlerType.PIPELINE, 
+            "Import is handled by only Pipeline.");
         break;
 
       case DELETE:
+        break;
+
+      case IMPORT_GOOGLE_DOC1 :
+      case IMPORT_GOOGLE_DOC_BATCH:
+        checkNotNull(request, "jobRequest cannot be empty for IMPORT_GOOGLE_DOC");
+        checkArgument(jobHandlerType == JobHandlerType.TASK_QUEUE, 
+            "IMPORT_GOOGLE_DOC_BATCH is handled by only ." + JobHandlerType.TASK_QUEUE);
         break;
       default:
         throw new IllegalArgumentException("Add more validations for Unsupported JobType : "
@@ -220,35 +246,23 @@ public class JobEntity extends AbstractPersistenceEntity<JobEntity, Object> {
     checkNotNull(jobState, "jobState");
 
     switch (jobState) {
-      case COMPLETED_SUCCESSFULLY:
-        break;
-
-      case PRE_START:
-      case RUNNING:
-        if (jobHandlerType != JobHandlerType.PIPELINE) {
-          checkNotNull(jobHandlerId, "jobHandlerId");
-        }
-        break;
-
       case STOPPED_BY_ERROR:
       case STOPPED_BY_REQUEST:
         checkNotBlank(stopReason, "stopReason cannot be blank.");
         break;
-      case WAITING_TO_RETRY:
-        break;
 
       default:
-        throw new IllegalArgumentException("Update validation logic for UnSupported JobState : "
-            + jobState);
+        // TODO(arjuns) : Add more validations here.
+        break;
     }
 
     return this;
   }
 
   public static class Builder extends AbstractPersistenceEntity.BaseBuilder<Builder> {
-    private Long jobId;
-    private Long parentJobId;
-    private Long rootJobId;
+    private JobId jobId;
+    private JobId parentJobId;
+    private JobId rootJobId;
 
     private JobHandlerType jobHandlerType;
     private JobHandlerId jobHandlerId;
@@ -256,20 +270,21 @@ public class JobEntity extends AbstractPersistenceEntity<JobEntity, Object> {
     private TaskType taskType;
     private String taskId;
     private JobState jobState;
-    private String error;
     private String stopReason;
+    private Text request;
+    private Text context;
 
-    public Builder jobId(Long jobId) {
+    public Builder jobId(JobId jobId) {
       this.jobId = jobId;
       return this;
     }
 
-    public Builder parentJobId(Long parentJobId) {
+    public Builder parentJobId(JobId parentJobId) {
       this.parentJobId = parentJobId;
       return this;
     }
 
-    public Builder rootJobId(Long rootJobId) {
+    public Builder rootJobId(JobId rootJobId) {
       this.rootJobId = rootJobId;
       return this;
     }
@@ -304,16 +319,21 @@ public class JobEntity extends AbstractPersistenceEntity<JobEntity, Object> {
       return this;
     }
 
-    public Builder error(String error) {
-      this.error = error;
-      return this;
-    }
-
     public Builder stopReason(String stopReason) {
       this.stopReason = stopReason;
       return this;
     }
+
+    public Builder request(Text request) {
+      this.request = request;
+      return this;
+    }
     
+    public Builder context(Text context) {
+      this.context = context;
+      return this;
+    }
+
     @SuppressWarnings("synthetic-access")
     public JobEntity build() {
       return new JobEntity(this).validate();
@@ -324,46 +344,30 @@ public class JobEntity extends AbstractPersistenceEntity<JobEntity, Object> {
   private JobEntity(Builder builder) {
     super(builder, false);
 
-    this.jobId = builder.jobId;
+    if (builder.jobId != null) {
+      this.jobId = builder.jobId.getValue();
+    }
+
     this.parentJobId = builder.parentJobId;
     this.rootJobId = builder.rootJobId;
 
-    this.jobType = checkNotNull(builder.jobType, "jobType");
+    this.jobType = builder.jobType;
     this.jobHandlerType = builder.jobHandlerType;
 
-    this.taskType = checkNotNull(builder.taskType, "taskType");
-    this.taskId = checkNotBlank(builder.taskId, "taskId");
-    this.jobState = checkNotNull(builder.jobState, "jobState");
-
+    this.taskType = builder.taskType;
+    this.taskId = builder.taskId;
+    
+    this.jobState = builder.jobState;
     this.changeLogs = Lists.newArrayList();
-
-    switch (jobState) {
-      case PRE_START:
-        this.jobHandlerId = builder.jobHandlerId;
-        break;
-
-      case COMPLETED_SUCCESSFULLY:
-        setJobHandlerId(builder.jobHandlerId);
-        break;
-
-      case STOPPED_BY_ERROR:
-        setError(builder.error);
-        setJobHandlerId(builder.jobHandlerId);
-        break;
-
-      case STOPPED_BY_REQUEST:
-        setStopReason(builder.stopReason);
-        setJobHandlerId(builder.jobHandlerId);
-        break;
-
-      default:
-        setJobHandlerId(builder.jobHandlerId);
-        // do nothing.
-    }
+    this.request = builder.request;
+    this.context = builder.context;
+    this.jobHandlerId = builder.jobHandlerId;
+    this.stopReason = builder.stopReason;
   }
 
   public static enum JobHandlerType {
-    PIPELINE;
+    PIPELINE,
+    TASK_QUEUE;
   }
 
   public static enum JobType {
@@ -374,7 +378,9 @@ public class JobEntity extends AbstractPersistenceEntity<JobEntity, Object> {
 
   public static enum TaskType {
     DELETE,
-    IMPORT;
+    IMPORT,
+    IMPORT_GOOGLE_DOC_BATCH,
+    IMPORT_GOOGLE_DOC1;
   }
 
   /**
@@ -384,15 +390,49 @@ public class JobEntity extends AbstractPersistenceEntity<JobEntity, Object> {
    * TODO(arjuns): Ensure enum values match.
    */
   public static enum JobState {
-    RUNNING,
-    COMPLETED_SUCCESSFULLY,
-    STOPPED_BY_REQUEST,
-    STOPPED_BY_ERROR,
-    WAITING_TO_RETRY,
+    @Deprecated
+    RUNNING(1),
+    @Deprecated
+    COMPLETED_SUCCESSFULLY(2),
+    @Deprecated
+    STOPPED_BY_REQUEST(3),
+    @Deprecated
+    STOPPED_BY_ERROR(4),
+    @Deprecated
+    WAITING_TO_RETRY(5),
 
     // Additional States.
-    PRE_START;
+    @Deprecated
+    PRE_START(6),
+    ENQUEUED(100),
+    CREATING_CHILDS(200),
+    WAITING_FOR_CHILD_COMPLETE_NOTIFICATION(300),
+    POLLING_FOR_CHILDS(400),
+    ALL_CHILDS_COMPLETED_SUCCESSFULLY(500),
+    COMPLETE(950),
+    READY_FOR_CLEANUP(1000);
 
+    private int level;
+    
+    private JobState(int level) {
+      this.level = level;
+    }
+    
+    public int getLevel() {
+      return level;
+    }
+    
+    public PlacementOrder getPlacement(JobState jobState) {
+      if (this == jobState) {
+        return PlacementOrder.EQUAL;
+      } else if (this.getLevel() < jobState.getLevel()) {
+        return PlacementOrder.BEFORE;
+      } else {
+        return PlacementOrder.AFTER;
+      }
+    }
+    
+    
     public static JobState fromPipelineJobState(JobInfo.State pipelineJobState) {
       for (JobState curr : JobState.values()) {
         if (curr.name().equals(pipelineJobState.name())) {
