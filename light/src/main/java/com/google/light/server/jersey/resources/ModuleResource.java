@@ -6,6 +6,7 @@ import static com.google.light.server.constants.LightConstants.MAX_RESULTS_MAX;
 import static com.google.light.server.constants.LightStringConstants.VERSION_LATEST_STR;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPersonLoggedIn;
+import static com.google.light.server.utils.LightUtils.isListEmpty;
 
 import com.google.appengine.api.blobstore.BlobKey;
 import com.google.appengine.api.blobstore.BlobstoreService;
@@ -18,6 +19,7 @@ import com.google.light.server.constants.LightConstants;
 import com.google.light.server.constants.LightStringConstants;
 import com.google.light.server.constants.ResourceTypes;
 import com.google.light.server.constants.http.ContentTypeConstants;
+import com.google.light.server.dto.module.ModuleDto;
 import com.google.light.server.dto.pages.PageDto;
 import com.google.light.server.dto.pojo.longwrapper.ModuleId;
 import com.google.light.server.dto.pojo.longwrapper.Version;
@@ -28,6 +30,7 @@ import com.google.light.server.persistence.entity.module.ModuleVersionResourceEn
 import com.google.light.server.servlets.SessionManager;
 import com.google.light.server.utils.GuiceUtils;
 import com.google.light.server.utils.LightUtils;
+import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.GET;
@@ -172,5 +175,35 @@ public class ModuleResource extends AbstractJerseyResource {
     checkArgument(maxResult <= MAX_RESULTS_MAX, "Max results allowed = " + MAX_RESULTS_MAX);
     
     return moduleManager.findModulesByOwnerId(GuiceUtils.getOwnerId(), startIndex, maxResult);
+  }
+  
+  @SuppressWarnings("unchecked")
+  @GET
+  @Path(JerseyConstants.PATH_ME_HTML)
+  @Produces( ContentTypeConstants.TEXT_HTML )
+  public String getModulesPublishedByMeHtml() {
+    SessionManager sessionManager = GuiceUtils.getInstance(SessionManager.class);
+    checkPersonLoggedIn(sessionManager);
+    
+    PageDto pageDto = moduleManager.findModulesByOwnerId(GuiceUtils.getOwnerId(), null, 5000);
+    
+    StringBuilder htmlBuilder = new StringBuilder("Modules created by me : <br>");
+    
+    List<ModuleDto> list = ((List<ModuleDto>) pageDto.getList());
+    if (!isListEmpty(list)) {
+      int counter = 1;
+      for (ModuleDto currDto : list) {
+        htmlBuilder.append(counter++)
+        .append(".&nbsp")
+        .append("<a href=" + "/rest/module/")
+        .append(currDto.getId().getValue())
+        .append("/latest/content")
+        .append(">")
+        .append(currDto.getTitle())
+        .append("</a><br>\n");
+      }
+    }
+    
+    return htmlBuilder.toString();
   }
 }

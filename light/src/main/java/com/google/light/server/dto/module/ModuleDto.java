@@ -81,6 +81,22 @@ public class ModuleDto extends AbstractDtoToPersistence<ModuleDto, ModuleEntity,
     return this;
   }
 
+  public ModuleId getId() {
+    return id;
+  }
+
+  public ModuleState getState() {
+    return state;
+  }
+
+  public List<PersonId> getOwners() {
+    return owners;
+  }
+
+  public Version getVersion() {
+    return version;
+  }
+
   /** 
    * {@inheritDoc}
    */

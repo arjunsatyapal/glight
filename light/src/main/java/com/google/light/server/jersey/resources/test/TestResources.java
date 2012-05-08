@@ -95,10 +95,12 @@ public class TestResources extends AbstractJerseyResource {
 
       appendSectionHeader(builder, "Module Utils.");
       appendHref(builder, JerseyConstants.URI_RESOURCE_PATH_MODULE_ME, "Modules Published by Me");
+      appendHref(builder, JerseyConstants.URI_RESOURCE_PATH_MODULE_ME_HTML, "Modules Published by Me in HTML List");
 
       appendSectionHeader(builder, "Collection Utils.");
       appendHref(builder, JerseyConstants.URI_RESOURCE_PATH_COLLECTION_ME,
           "Collections Published by Me");
+      appendHref(builder, JerseyConstants.URI_RESOURCE_PATH_COLLECTION_ME_HTML, "Collections Published by Me in HTML List");
 
       return Response.ok(builder.toString()).build();
     } catch (Exception e) {

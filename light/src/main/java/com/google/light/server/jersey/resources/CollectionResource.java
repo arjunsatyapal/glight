@@ -21,6 +21,14 @@ import static com.google.light.server.constants.LightConstants.MAX_RESULTS_MAX;
 import static com.google.light.server.constants.LightStringConstants.VERSION_LATEST_STR;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPersonLoggedIn;
+import static com.google.light.server.utils.LightUtils.isListEmpty;
+
+import com.google.light.server.dto.collection.CollectionDto;
+
+import com.google.light.server.persistence.dao.CollectionDao;
+
+import com.google.light.server.dto.module.ModuleDto;
+import java.util.List;
 
 import com.google.light.server.constants.LightConstants;
 import com.google.light.server.constants.LightStringConstants;
@@ -167,5 +175,35 @@ public class CollectionResource extends AbstractJerseyResource {
     checkArgument(maxResult <= MAX_RESULTS_MAX, "Max results allowed = " + MAX_RESULTS_MAX);
     
     return collectionManager.findCollectionsByOwnerId(GuiceUtils.getOwnerId(), startIndex, maxResult);
+  }
+  
+  @SuppressWarnings("unchecked")
+  @GET
+  @Path(JerseyConstants.PATH_ME_HTML)
+  @Produces( ContentTypeConstants.TEXT_HTML )
+  public String getModulesPublishedByMeHtml() {
+    SessionManager sessionManager = GuiceUtils.getInstance(SessionManager.class);
+    checkPersonLoggedIn(sessionManager);
+    
+    PageDto pageDto = collectionManager.findCollectionsByOwnerId(GuiceUtils.getOwnerId(), null, 5000);
+    
+    StringBuilder htmlBuilder = new StringBuilder("Collections created by me : <br>");
+    
+    List<CollectionDto> list = ((List<CollectionDto>) pageDto.getList());
+    if (!isListEmpty(list)) {
+      int counter = 1;
+      for (CollectionDto currDto : list) {
+        htmlBuilder.append(counter++)
+        .append(".&nbsp")
+        .append("<a href=" + "/rest/collection/")
+        .append(currDto.getId().getValue())
+        .append("/latest/content")
+        .append(">")
+        .append(currDto.getTitle())
+        .append("</a><br>\n");
+      }
+    }
+    
+    return htmlBuilder.toString();
   }
 }

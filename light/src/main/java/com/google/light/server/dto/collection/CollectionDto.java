@@ -98,6 +98,10 @@ public class CollectionDto extends
     return this;
   }
 
+  public CollectionId getId() {
+    return id;
+  }
+
   public String getTitle() {
     return title;
   }
