@@ -16,11 +16,17 @@
 package com.google.light.server.manager.implementation;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
+
+import com.google.light.server.utils.LightPreconditions;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
+import com.google.light.server.constants.JerseyConstants;
+import com.google.light.server.dto.collection.CollectionDto;
 import com.google.light.server.dto.collection.CollectionState;
+import com.google.light.server.dto.pages.PageDto;
 import com.google.light.server.dto.pojo.longwrapper.CollectionId;
 import com.google.light.server.dto.pojo.longwrapper.PersonId;
 import com.google.light.server.dto.pojo.longwrapper.Version;
@@ -31,8 +37,10 @@ import com.google.light.server.persistence.dao.CollectionDao;
 import com.google.light.server.persistence.dao.CollectionVersionDao;
 import com.google.light.server.persistence.entity.collection.CollectionEntity;
 import com.google.light.server.persistence.entity.collection.CollectionVersionEntity;
+import com.google.light.server.serveronlypojos.GAEQueryWrapper;
 import com.google.light.server.utils.LightUtils;
 import com.googlecode.objectify.Objectify;
+import java.util.List;
 
 /**
  * Implementation class for {@link ModuleManager}.
@@ -142,10 +150,11 @@ public class CollectionManagerImpl implements CollectionManager {
    * {@inheritDoc}
    */
   @Override
-  public CollectionEntity reserveCollectionId(Objectify ofy, PersonId ownerId) {
+  public CollectionEntity reserveCollectionId(Objectify ofy, PersonId ownerId, String title) {
+    checkNotBlank(title, "title");
     // Now create a new Collection.
     CollectionEntity collectionEntity = new CollectionEntity.Builder()
-        .title("reserved")
+        .title(title)
         .collectionState(CollectionState.RESERVED)
         .owners(Lists.newArrayList(ownerId))
         .latestVersion(new Version(0L /* noVersion */, Version.State.NO_VERSION))
@@ -173,7 +182,7 @@ public class CollectionManagerImpl implements CollectionManager {
         .lastUpdateTime(LightUtils.getNow())
         .build();
     collectionVersionDao.put(ofy, collectionVersionEntity);
-
+    
     // TODO(arjuns): Add support for etag.
     collectionEntity.setLatestVersion(collectionVersion);
     collectionDao.put(ofy, collectionEntity);
@@ -200,5 +209,28 @@ public class CollectionManagerImpl implements CollectionManager {
     }
 
     return version;
+  }
+  
+  /** 
+   * {@inheritDoc}
+   */
+  @Override
+  public PageDto findCollectionsByOwnerId(PersonId ownerId, String startIndex, int maxResults) {
+    GAEQueryWrapper<CollectionEntity>  wrapper = collectionDao.findCollectionsByOwnerId(
+        ownerId, startIndex, maxResults);
+    
+    List<CollectionDto> list = Lists.newArrayList();
+    for (CollectionEntity currEntity : wrapper.getList()) {
+      list.add(currEntity.toDto());
+    }
+    
+    
+    PageDto pageDto = new PageDto.Builder()
+        .startIndex(wrapper.getStartIndex())
+        .list(list)
+        .handlerUri(JerseyConstants.URI_RESOURCE_PATH_COLLECTION_ME)
+        .build();
+    
+    return pageDto;
   }
 }

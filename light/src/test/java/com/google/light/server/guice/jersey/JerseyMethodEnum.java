@@ -75,6 +75,15 @@ public enum JerseyMethodEnum {
                                                      "/rest/collection/{collection_id}/{version}/content",
                                                      new String[] { "text/html; charset=UTF-8" }),
 
+  COLLECTION_RESOURCE_COLLECTIONS_PUBLISHED_BY_ME(
+                                              CollectionResource.class,
+                                              "getCollectionsPublishedByMe",
+                                              new Class[] { String.class, String.class },
+                                              GET.class,
+                                              "/rest/collection/me",
+                                              new String[] { "application/json; charset=UTF-8",
+                                                      "application/xml; charset=UTF-8" }),
+
   // GAEPipeline Resource Jersey Methods.
   GAE_PIPELINE_RESOURCE_STATUS_GET(
                                    GAEPipelineResource.class,
@@ -131,7 +140,14 @@ public enum JerseyMethodEnum {
 
                                                new String[] { "application/json; charset=UTF-8",
                                                        "application/xml; charset=UTF-8" }),
-
+  MODULE_RESOURCE_MODULES_PUBLISHED_BY_ME(
+                                          ModuleResource.class,
+                                          "getModulesPublishedByMe",
+                                          new Class[] { String.class, String.class },
+                                          GET.class,
+                                          "/rest/module/me",
+                                          new String[] { "application/json; charset=UTF-8",
+                                                  "application/xml; charset=UTF-8" }),
   // Google Doc Integration Jersey Methods.
   GOOGLE_DOC_GET_DOC_LIST(
                           GoogleDocIntegration.class,

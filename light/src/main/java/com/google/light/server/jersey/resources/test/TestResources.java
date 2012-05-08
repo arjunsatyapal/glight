@@ -93,6 +93,13 @@ public class TestResources extends AbstractJerseyResource {
       appendSectionHeader(builder, "Some helper Utils.");
       appendHtmlPath(builder, HtmlPathEnum.REST_CLIENT);
 
+      appendSectionHeader(builder, "Module Utils.");
+      appendHref(builder, JerseyConstants.URI_RESOURCE_PATH_MODULE_ME, "Modules Published by Me");
+
+      appendSectionHeader(builder, "Collection Utils.");
+      appendHref(builder, JerseyConstants.URI_RESOURCE_PATH_COLLECTION_ME,
+          "Collections Published by Me");
+
       return Response.ok(builder.toString()).build();
     } catch (Exception e) {
       // TODO(arjuns): Add exception handling.

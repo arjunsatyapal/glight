@@ -109,7 +109,6 @@ public class DocsServiceWrapper extends DocsService {
     DocumentListFeed docListFeed = null;
     try {
       docListFeed = getFeed(feedUrl, DocumentListFeed.class);
-      System.out.println(XmlUtils.getXmlFeed(docListFeed));
 
       // TODO(arjuns): Test this on a person who has no document.
       checkNotNull(docListFeed, "docList should not be null.");
@@ -300,7 +299,6 @@ public class DocsServiceWrapper extends DocsService {
       writeFileOnGCS(response.getContent(), gsFileOptions);
 
       String gcsFilePath = getAbsolutePathOnBucket(WORKSPACE, destinationFileName);
-      System.out.println(gcsFilePath);
       return gcsFilePath;
     } catch (Exception e) {
       throw new GoogleDocException(e);

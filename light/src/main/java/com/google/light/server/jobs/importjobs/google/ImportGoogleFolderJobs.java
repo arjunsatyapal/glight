@@ -138,9 +138,6 @@ public class ImportGoogleFolderJobs {
           immediate(getContext()), immediate("all child jobs are completed."),
           waitFor(newlist.get(newlist.size() - 1)));
 
-      System.out.println("Created following jobs : " + Iterables.toString(
-          mapOfResourceToJob.keySet()));
-
       FutureValue<CollectionId> collectionIdFV =
           futureCall(new CreateCollectionJob(), immediate(getContext()),
               immediate(gdocFolderResourceId), immediate(mapOfResourceToJob), 
@@ -181,7 +178,6 @@ public class ImportGoogleFolderJobs {
           .build();
 
       createLightCollection(root, folderContents, moduleManager, docsService);
-      System.out.println(JsonUtils.toJson(root));
 
       // TODO(arjuns) : Update External Entity mapping.
       CollectionManager collectionManager = GuiceUtils.getInstance(CollectionManager.class);

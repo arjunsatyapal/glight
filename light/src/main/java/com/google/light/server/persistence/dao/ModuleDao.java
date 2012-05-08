@@ -15,13 +15,21 @@
  */
 package com.google.light.server.persistence.dao;
 
-import com.google.light.server.dto.pojo.longwrapper.ModuleId;
+import static com.google.light.server.persistence.entity.module.ModuleEntity.OFY_OWNER_QUERY_STRING;
+import static com.google.light.server.utils.LightPreconditions.checkNotNull;
 
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.light.server.dto.module.ModuleDto;
+import com.google.light.server.dto.pojo.longwrapper.ModuleId;
+import com.google.light.server.dto.pojo.longwrapper.PersonId;
+import com.google.light.server.exception.ExceptionType;
 import com.google.light.server.persistence.entity.module.ModuleEntity;
+import com.google.light.server.serveronlypojos.GAEQueryWrapper;
+import com.google.light.server.utils.ObjectifyUtils;
 import com.googlecode.objectify.Objectify;
 import com.googlecode.objectify.ObjectifyService;
+import java.util.ArrayList;
 import java.util.logging.Logger;
 
 /**
@@ -47,8 +55,8 @@ public class ModuleDao extends AbstractBasicDao<ModuleDto, ModuleEntity> {
    * {@inheritDoc}
    */
   @Override
-  public ModuleEntity put(Objectify txn, ModuleEntity entity) {
-    ModuleEntity returnEntity = super.put(txn, entity);
+  public ModuleEntity put(Objectify ofy, ModuleEntity entity) {
+    ModuleEntity returnEntity = super.put(ofy, entity);
     String returnMsg = "Created/Updated ModuleEntity[" + returnEntity.getModuleId() + "].";
 
     return logAndReturn(logger, returnEntity, returnMsg);
@@ -60,5 +68,18 @@ public class ModuleDao extends AbstractBasicDao<ModuleDto, ModuleEntity> {
    */
   public ModuleEntity get(Objectify ofy, ModuleId moduleId) {
     return super.get(ofy, ModuleEntity.generateKey(moduleId));
+  }
+
+  public GAEQueryWrapper<ModuleEntity> findModulesByOwnerId(
+      PersonId ownerId, String startIndex, int maxResults) {
+    checkNotNull(ownerId, ExceptionType.SERVER,
+        "OwnerId should not be null. Callers of this method should ensure that.");
+
+    Objectify ofy = ObjectifyUtils.nonTransaction();
+    ArrayList<Long> listOfValues = Lists.newArrayList(ownerId.getValue());
+
+    GAEQueryWrapper<ModuleEntity> listOfModules = ObjectifyUtils.findQueryResultsByPage(
+        ofy, ModuleEntity.class, OFY_OWNER_QUERY_STRING, listOfValues, startIndex, maxResults);
+    return listOfModules;
   }
 }

@@ -1,5 +1,7 @@
 package com.google.light.server.manager.interfaces;
 
+import com.google.light.server.dto.pages.PageDto;
+
 import org.joda.time.Instant;
 
 import java.util.List;
@@ -68,7 +70,7 @@ public interface ModuleManager {
    * Reserve a ModuleId for a OriginId.
    */
   public ModuleId reserveModuleIdForExternalId(ModuleType moduleType, String externalId,
-      List<PersonId> owners);
+      List<PersonId> owners, String title);
   
   public Version reserveModuleVersionForImport(ModuleId moduleId, String etag, 
       Instant lastEditTime);
@@ -118,4 +120,6 @@ public interface ModuleManager {
   public ModuleVersionResourceEntity getModuleResource(Objectify ofy, ModuleId moduleId,
       Version version,
       String resourceId);
+  
+  public PageDto findModulesByOwnerId(PersonId ownerId, String startIndex, int maxResults);
 }

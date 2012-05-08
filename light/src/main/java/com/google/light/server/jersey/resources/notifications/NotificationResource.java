@@ -91,7 +91,6 @@ public class NotificationResource extends AbstractJerseyResource {
    * 
    */
   private void handlChildJobCompletion(String body) {
-    System.out.println(body);
     ChildJobCompletionNotification jobNotification =
         JsonUtils.getDto(body, ChildJobCompletionNotification.class);
 

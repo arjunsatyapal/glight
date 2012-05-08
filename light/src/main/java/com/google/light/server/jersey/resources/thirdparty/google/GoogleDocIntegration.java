@@ -130,8 +130,6 @@ public class GoogleDocIntegration extends AbstractJerseyResource {
     PageDto pageDto = docsServiceProvider.get().getDocumentFeedWithFolders(
         url, JerseyConstants.URI_GOOGLE_DOC_LIST);
 
-    System.out.println(XmlUtils.toXml(pageDto));
-
     return pageDto;
   }
 

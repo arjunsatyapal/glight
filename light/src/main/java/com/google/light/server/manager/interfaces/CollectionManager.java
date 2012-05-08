@@ -1,5 +1,6 @@
 package com.google.light.server.manager.interfaces;
 
+import com.google.light.server.dto.pages.PageDto;
 import com.google.light.server.dto.pojo.longwrapper.CollectionId;
 import com.google.light.server.dto.pojo.longwrapper.PersonId;
 import com.google.light.server.dto.pojo.longwrapper.Version;
@@ -72,7 +73,7 @@ public interface CollectionManager {
    * @param ownerId
    * @return
    */
-  public CollectionEntity reserveCollectionId(Objectify ofy, PersonId ownerId);
+  public CollectionEntity reserveCollectionId(Objectify ofy, PersonId ownerId, String title);
 
   /**
    * Add CollectionVersion for GoogleDoc.
@@ -89,4 +90,6 @@ public interface CollectionManager {
    */
   public CollectionVersionEntity getCollectionVersion(Objectify ofy, CollectionId collectionId,
       Version version);
+  
+  public PageDto findCollectionsByOwnerId(PersonId ownerId, String startIndex, int maxResult);
 }

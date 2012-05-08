@@ -16,15 +16,14 @@
 package com.google.light.server.utils;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.light.server.utils.LightUtils.isListEmpty;
 
-import com.google.common.collect.Maps;
-import com.google.light.server.dto.pojo.longwrapper.JobId;
-import com.google.light.server.persistence.entity.jobs.JobEntity;
-import java.util.Map;
-
+import com.google.appengine.api.datastore.Cursor;
 import com.google.appengine.api.datastore.QueryResultIterable;
+import com.google.appengine.api.datastore.QueryResultIterator;
 import com.google.common.collect.Lists;
 import com.google.light.server.persistence.entity.AbstractPersistenceEntity;
+import com.google.light.server.serveronlypojos.GAEQueryWrapper;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Objectify;
 import com.googlecode.objectify.ObjectifyOpts;
@@ -171,10 +170,9 @@ public class ObjectifyUtils {
   @SuppressWarnings("rawtypes")
   public static <T, V extends AbstractPersistenceEntity> QueryResultIterable<T> getAllChildren(
       Objectify ofy, Key<V> parentKey, Class<T> clazz) {
-    return getChildren(ofy, parentKey, clazz, null/*filter*/, null /*value*/);
+    return getChildren(ofy, parentKey, clazz, null/* filter */, null /* value */);
   }
- 
-  
+
   /**
    * Helper method to fetch Child entities for a given Parent.
    * 
@@ -192,15 +190,40 @@ public class ObjectifyUtils {
       Objectify ofy, Key<V> parentKey, Class<T> clazz, String filter, Object value) {
     if (parentKey == null)
       throw new IllegalArgumentException();
-    
+
     Query<T> query = ofy.query(clazz).ancestor(parentKey);
-    
+
     if (StringUtils.isNotBlank(filter)) {
       checkNotNull(value, "When filter is set, value cannot be blank.");
       query.filter(filter, value);
     }
-    
+
     return query.fetch();
+  }
+
+  public static <T, O> GAEQueryWrapper<T> findQueryResultsByPage(Objectify ofy, 
+      Class<T> clazz, String filterKey, List<O> listOfValues, String startIndex, int maxResults) {
+    Query<T> query = ofy.query(clazz).filter(filterKey, listOfValues);
+    
+    if (StringUtils.isNotBlank(startIndex)) {
+      query.startCursor(Cursor.fromWebSafeString(startIndex));
+    }
+    
+    QueryResultIterator<T> iterator = query.fetch().iterator();
+    
+    List<T> listOfRecords = Lists.newArrayList();
+    for (int counter = 1; counter <= maxResults && iterator.hasNext(); counter++) {
+      listOfRecords.add(iterator.next());
+    }
+
+    GAEQueryWrapper<T> wrapper = new GAEQueryWrapper<T>();
+    
+    if(!isListEmpty(listOfRecords)) {
+      wrapper.setStartIndex(iterator.getCursor().toWebSafeString());
+    }
+    wrapper.setList(listOfRecords);
+    
+    return wrapper;
   }
 
   // Utility class.

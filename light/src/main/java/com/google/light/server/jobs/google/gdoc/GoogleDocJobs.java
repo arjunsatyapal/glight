@@ -93,7 +93,6 @@ public class GoogleDocJobs {
 
     List<GoogleDocInfoDto> listOfSupportedChilds = Lists.newArrayList();
     for (GoogleDocInfoDto currChild : listOfChilds) {
-      System.out.println(currChild.getTitle());
       if (currChild.getGoogleDocsResourceId().getModuleType().isSupported()) {
         listOfSupportedChilds.add(currChild);
       }

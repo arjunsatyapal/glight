@@ -54,7 +54,7 @@ public class ModuleJobs {
       ModuleManager moduleManager = getInstance(ModuleManager.class);
 
       ModuleId reservedModuleId = moduleManager.reserveModuleIdForExternalId(ModuleType.GOOGLE_DOC,
-          originId, Lists.newArrayList(getContext().getOwnerId()));
+          originId, Lists.newArrayList(getContext().getOwnerId()), "random title.");
 
       return immediate(reservedModuleId);
     }

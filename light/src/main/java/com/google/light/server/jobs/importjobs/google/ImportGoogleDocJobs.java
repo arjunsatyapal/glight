@@ -104,7 +104,6 @@ public class ImportGoogleDocJobs {
 //      String archiveId =
 //          "nTSZLtpDRSP5IP11Sol04pDkNbRFv7KVNL55qVoitx7rtrJHru1T6ljtTjMW26L3ygWrvW1tMZHHg6ARCy3Uj8iS9OgenD9AGEcBiAILa8GTlFmB04xyrJ1fG9XKMXdClcXNrOqXmSE";
 
-      System.out.println("ArchiveId = \n" + archiveId);
 
       updateChangeLog(null, getContext().getJobId(), "Asking Google to create an archive.");
 
@@ -123,7 +122,6 @@ public class ImportGoogleDocJobs {
     public Value<LightJobContextPojo> handler(String importEntityId, String archiveId) {
       DocsServiceWrapper docsService = getInstance(DocsServiceWrapper.class);
       GoogleDocArchivePojo pojo = docsService.getArchiveStatus(archiveId);
-      System.out.println(JsonUtils.toJson(pojo));
 
       switch (pojo.getArchiveStatus()) {
         case ARCHIVING:
@@ -185,7 +183,6 @@ public class ImportGoogleDocJobs {
         writeFileOnGCS(response.getContent(), gsFileOptions);
 
         String gcsFilePath = getAbsolutePathOnBucket(WORKSPACE, randomFileName);
-        System.out.println(gcsFilePath);
 
         updateChangeLog(null, getContext().getJobId(),
             "Finished storing on Blobstore. Handing over to zipdeflater with path[" + gcsFilePath

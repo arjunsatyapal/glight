@@ -302,7 +302,6 @@ public class JobManagerImpl implements JobManager {
     JobEntity jobEntity = this.get(null, jobId);
     checkNotNull(jobId, ExceptionType.CLIENT_PARAMETER, "No job found for : " + jobId);
 
-    System.out.println(jobEntity.getContext().getValue());
     switch (jobEntity.getTaskType()) {
       case IMPORT_GOOGLE_DOC_BATCH:
         handleImporgGoogleDocBatch(jobEntity);
@@ -450,7 +449,6 @@ public class JobManagerImpl implements JobManager {
             moduleVersionEntity.getVersion(), currKey, gsBlobInfo);
       }
 
-      System.out.println("Successfully published [" + moduleId + ", " + version);
       Objectify ofy = ObjectifyUtils.initiateTransaction();
       try {
         gdocImportContext.setState(GoogleDocImportJobContext.GoogleDocImportJobState.COMPLETE);
@@ -505,13 +503,13 @@ public class JobManagerImpl implements JobManager {
   private void startArchivingGoogleDoc(GoogleDocImportJobContext gdocImportContext,
       JobEntity jobEntity) {
     GoogleDocInfoDto resourceInfo = gdocImportContext.getResourceInfo();
-    // GoogleDocArchivePojo archiveInfo = docsServiceProvider.get().archiveResource(
-    // resourceInfo.getGoogleDocsResourceId());
-    // gdocImportContext.setArchiveId(archiveInfo.getArchiveId());
+    GoogleDocArchivePojo archiveInfo = docsServiceProvider.get().archiveResource(
+        resourceInfo.getGoogleDocsResourceId());
+    gdocImportContext.setArchiveId(archiveInfo.getArchiveId());
 
-    String archiveId =
-        "vax2Nuv9Oq4VIPQEBTcxlJDkNbRFv7KVNL55qVoitx7rtrJHru1T6ljtTjMW26L3ygWrvW1tMZHHg6ARCy3Uj2yisT1mrH5gSGOwR4aPv4ZY86T6L4_M-8kg97Ll_3a3satbRaEsmug";
-    gdocImportContext.setArchiveId(archiveId);
+    // String archiveId =
+    // "vax2Nuv9Oq4VIPQEBTcxlJDkNbRFv7KVNL55qVoitx7rtrJHru1T6ljtTjMW26L3ygWrvW1tMZHHg6ARCy3Uj2yisT1mrH5gSGOwR4aPv4ZY86T6L4_M-8kg97Ll_3a3satbRaEsmug";
+    // gdocImportContext.setArchiveId(archiveId);
 
     gdocImportContext
         .setState(GoogleDocImportJobContext.GoogleDocImportJobState.WAITING_FOR_ARCHIVE);
@@ -561,7 +559,6 @@ public class JobManagerImpl implements JobManager {
 
       case COMPLETE:
         logger.severe("Inspite off being complete, it was called for : " + jobEntity.getId());
-        System.out.println("All complete now.");
         break;
       default:
         throw new IllegalStateException("Unsupported state : " + jobEntity.getJobState());
@@ -581,11 +578,11 @@ public class JobManagerImpl implements JobManager {
     }
 
     if (cvEntity != null) {
-      System.out.println(cvEntity.getCollectionKey().getId() + ":"
+      logger.info(cvEntity.getCollectionKey().getId() + ":"
           + cvEntity.getVersion().getValue() + "was published successfully");
     }
 
-    this.enqueueCompleteJob(jobEntity.getId(), 
+    this.enqueueCompleteJob(jobEntity.getId(),
         "Successfully pulished collection. Now marking as done.");
   }
 
@@ -650,7 +647,6 @@ public class JobManagerImpl implements JobManager {
       GoogleDocImportBatchJobContext gdocImportBatchContext, GoogleDocTree gdocTreeParent,
       CollectionTreeNodeDto collectionParent) {
     boolean isModified = false;
-    System.out.println("GdocTree title : " + gdocTreeParent.getTitle());
     checkNotNull(gdocTreeParent, "gdocTreeParent");
     checkNotNull(collectionParent, "collectionParent");
     for (GoogleDocTree currGDocTreeNode : gdocTreeParent.getChildren()) {
@@ -698,7 +694,7 @@ public class JobManagerImpl implements JobManager {
             handOverChilds(gdocImportBatchContext, currGDocTreeNode, newCollectionParent);
             isModified = true;
           }
-          
+
           checkNotNull(newCollectionParent, "newCollectionParent");
 
           break;
@@ -730,7 +726,7 @@ public class JobManagerImpl implements JobManager {
     Objectify ofy = ObjectifyUtils.initiateTransaction();
     try {
       CollectionEntity collectionEntity = collectionManager.reserveCollectionId(
-          ofy, GuiceUtils.getOwnerId());
+          ofy, GuiceUtils.getOwnerId(), gdocImportBatchContext.getCollectionTitle());
       gdocImportBatchContext.setCollectionId(collectionEntity.getCollectionId());
 
       Text context = new Text(gdocImportBatchContext.toJson());
@@ -818,7 +814,6 @@ public class JobManagerImpl implements JobManager {
           if (currGDocTreeChild.getGoogleDocResourceId().getModuleType().isSupported()) {
             ModuleId moduleId = gdocImportBatchContext.getModuleIdForExternalId(
                 currGDocTreeChild.getGoogleDocResourceId().getExternalId());
-            System.out.println(moduleId);
             treeNode = treeNodeBuilder.moduleId(moduleId).build();
           } else {
             // Ignoring unsupported types.
@@ -882,15 +877,15 @@ public class JobManagerImpl implements JobManager {
     switch (jobEntity.getJobState()) {
       case ENQUEUED:
         updateRootNode(jobEntity, gdocBatchImportContext);
-        
-        if(!gdocBatchImportContext.getTreeRoot().hasChildren()) {
+
+        if (!gdocBatchImportContext.getTreeRoot().hasChildren()) {
           // There is no child that needs to be worked on. So marking as complete.
           logger.info("Since there is no child which needs to be imported, "
               + "so marking job as complete.");
           enqueueCompleteJob(jobEntity.getId(), "no work needs to be done, so marking as done.");
           break;
         }
-        
+
         // else continue creating childs.
         //$FALL-THROUGH$
 
@@ -900,7 +895,7 @@ public class JobManagerImpl implements JobManager {
       default:
         throw new IllegalArgumentException("Unsupported State : " + jobEntity.getJobState());
     }
-    System.out.println("done");
+    logger.info("done");
   }
 
   /**
@@ -917,13 +912,9 @@ public class JobManagerImpl implements JobManager {
     List<GoogleDocResourceId> listOfGDocsToImport = Lists.newArrayList();
 
     for (GoogleDocInfoDto currInfo : setOfSupportedGoogleDocs) {
-      System.out.println("Etag = " + currInfo.getEtag());
-      System.out.println("resourceId = " + currInfo.getGoogleDocsResourceId().getTypedResourceId());
-
       GoogleDocResourceId resourceId = currInfo.getGoogleDocsResourceId();
       ModuleId moduleId = moduleManager.reserveModuleIdForExternalId(
-          currInfo.getType(), resourceId.getExternalId(), owners);
-      System.out.println(moduleId);
+          currInfo.getType(), resourceId.getExternalId(), owners, currInfo.getTitle());
 
       boolean childAlreadyCreated = gdocBatchImportBatchContext.isChildJobCreated(
           resourceId.getExternalId(), moduleId);
@@ -935,7 +926,7 @@ public class JobManagerImpl implements JobManager {
 
       Version version = moduleManager.reserveModuleVersionForImport(
           moduleId, currInfo.getEtag(), currInfo.getLastEditTime());
-      System.out.println(version);
+      logger.info("Reserved/created module : " + moduleId + " version : " + version);
 
       if (version != null) {
         // Now creating a child job and adding its reference in Job Context.

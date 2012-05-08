@@ -13,16 +13,35 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.server.dto.module;
+package com.google.light.server.serveronlypojos;
+
+import java.util.List;
 
 /**
- * Enum to encapsulate different possible states for Modules.
+ * 
  * 
  * TODO(arjuns): Add test for this class.
- *
+ * 
  * @author Arjun Satyapal
  */
-public enum ModuleState {
-  PUBLISHED,
-  RESERVED;
+public class GAEQueryWrapper<T> {
+  private String startIndex;
+  private List<T> list;
+
+  public String getStartIndex() {
+    return startIndex;
+  }
+
+  public void setStartIndex(String startIndex) {
+    this.startIndex = startIndex;
+  }
+
+  public List<T> getList() {
+    return list;
+  }
+
+  public void setList(List<T> list) {
+    this.list = list;
+  }
+
 }

@@ -15,12 +15,21 @@
  */
 package com.google.light.server.persistence.dao;
 
+import static com.google.light.server.persistence.entity.module.ModuleEntity.OFY_OWNER_QUERY_STRING;
+import static com.google.light.server.utils.LightPreconditions.checkNotNull;
+
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.light.server.dto.collection.CollectionDto;
 import com.google.light.server.dto.pojo.longwrapper.CollectionId;
+import com.google.light.server.dto.pojo.longwrapper.PersonId;
+import com.google.light.server.exception.ExceptionType;
 import com.google.light.server.persistence.entity.collection.CollectionEntity;
+import com.google.light.server.serveronlypojos.GAEQueryWrapper;
+import com.google.light.server.utils.ObjectifyUtils;
 import com.googlecode.objectify.Objectify;
 import com.googlecode.objectify.ObjectifyService;
+import java.util.ArrayList;
 import java.util.logging.Logger;
 
 /**
@@ -57,5 +66,19 @@ private static final Logger logger = Logger.getLogger(CollectionDao.class.getNam
   
   public CollectionEntity get(Objectify ofy, CollectionId collectionId) {
     return super.get(ofy, CollectionEntity.generateKey(collectionId));
+  }
+  
+  public GAEQueryWrapper<CollectionEntity> findCollectionsByOwnerId(
+      PersonId ownerId, String startIndex, int maxResults) {
+    checkNotNull(ownerId, ExceptionType.SERVER,
+        "OwnerId should not be null. Callers of this method should ensure that.");
+
+    Objectify ofy = ObjectifyUtils.nonTransaction();
+
+    ArrayList<Long> listOfValues = Lists.newArrayList(ownerId.getValue());
+
+    GAEQueryWrapper<CollectionEntity> listOfCollections = ObjectifyUtils.findQueryResultsByPage(
+        ofy, CollectionEntity.class, OFY_OWNER_QUERY_STRING, listOfValues, startIndex, maxResults);
+    return listOfCollections;
   }
 }

@@ -100,7 +100,6 @@ public class GDocXmlClient {
       HttpResponse response = request.execute();
       String xml = LightUtils.getInputStreamAsString(response.getContent());
       String prettyXml = XmlUtils.pretyfyXml(xml); 
-      System.out.println(prettyXml);
       return prettyXml;
     } catch (Exception e) {
       // TODO(arjuns): Add exception handling.

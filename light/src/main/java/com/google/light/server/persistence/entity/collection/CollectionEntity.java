@@ -42,7 +42,7 @@ public class CollectionEntity extends AbstractPersistenceEntity<CollectionEntity
   @Id
   Long id;
   String title;
-  CollectionState collectionState;
+  CollectionState state;
   @Embedded
   List<PersonId> owners;
 
@@ -54,7 +54,7 @@ public class CollectionEntity extends AbstractPersistenceEntity<CollectionEntity
   public CollectionEntity validate() {
     super.validate();
     checkNotBlank(title, "title");
-    checkNotNull(collectionState, "collectionState");
+    checkNotNull(state, "collectionState");
     checkNonEmptyList(owners, "owners");
 
     // TODO(arjuns): Add validation for etag.
@@ -88,8 +88,8 @@ public class CollectionEntity extends AbstractPersistenceEntity<CollectionEntity
     return title;
   }
 
-  public CollectionState getCollectionState() {
-    return collectionState;
+  public CollectionState getState() {
+    return state;
   }
 
   public List<PersonId> getOwners() {
@@ -113,14 +113,18 @@ public class CollectionEntity extends AbstractPersistenceEntity<CollectionEntity
    */
   @Override
   public CollectionDto toDto() {
-    // TODO(arjuns): Auto-generated method stub
-    throw new UnsupportedOperationException();
+    return new CollectionDto.Builder()
+      .title(title)
+      .state(state)
+      .owners(owners)
+      .version(latestVersion)
+      .build();
   }
 
   public static class Builder extends AbstractPersistenceEntity.BaseBuilder<Builder> {
     private Long id;
     private String title;
-    private CollectionState collectionState;
+    private CollectionState state;
     private List<PersonId> owners;
     private String etag;
     private Version latestVersion;
@@ -136,7 +140,7 @@ public class CollectionEntity extends AbstractPersistenceEntity<CollectionEntity
     }
 
     public Builder collectionState(CollectionState collectionState) {
-      this.collectionState = collectionState;
+      this.state = collectionState;
       return this;
     }
 
@@ -166,7 +170,7 @@ public class CollectionEntity extends AbstractPersistenceEntity<CollectionEntity
     super(builder, true);
     this.id = builder.id;
     this.title = builder.title;
-    this.collectionState = builder.collectionState;
+    this.state = builder.state;
     this.owners = builder.owners;
     this.etag = builder.etag;
     this.latestVersion = builder.latestVersion;

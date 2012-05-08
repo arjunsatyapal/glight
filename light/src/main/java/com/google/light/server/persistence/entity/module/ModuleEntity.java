@@ -21,9 +21,6 @@ import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
 
 import com.google.common.base.Preconditions;
-
-import org.joda.time.Instant;
-
 import com.google.light.server.dto.module.ModuleDto;
 import com.google.light.server.dto.module.ModuleState;
 import com.google.light.server.dto.module.ModuleType;
@@ -35,6 +32,7 @@ import com.googlecode.objectify.Key;
 import java.util.List;
 import javax.persistence.Embedded;
 import javax.persistence.Id;
+import org.joda.time.Instant;
 
 /**
  * Persistence entity for {@link ModuleDto}.
@@ -51,6 +49,8 @@ public class ModuleEntity extends AbstractPersistenceEntity<ModuleEntity, Module
   ModuleState state;
   ModuleType type;
 
+  
+  public static final String OFY_OWNER_QUERY_STRING = "owners.value IN";
   @Embedded
   List<PersonId> owners;
 
@@ -113,6 +113,11 @@ public class ModuleEntity extends AbstractPersistenceEntity<ModuleEntity, Module
 
   public ModuleState getState() {
     return state;
+  }
+  
+  public void setState(ModuleState state) {
+    this.state = checkNotNull(state, "state");
+    
   }
 
   public ModuleType getType() {

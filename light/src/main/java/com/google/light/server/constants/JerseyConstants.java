@@ -58,6 +58,7 @@ public class JerseyConstants {
   public static final String PATH_PARAM_VERSION = "version";
   public static final String PATH_VERSION = "/{" + PATH_PARAM_VERSION + "}";
 
+  public static final String PATH_ME = "/me";
   /*
    * *********************************
    * Now Path for Different Resources.
@@ -68,6 +69,7 @@ public class JerseyConstants {
   public static final String RESOURCE_PATH_COLLECTION = "/collection";
   public static final String URI_RESOURCE_PATH_COLLECTION = JERSEY_CONTEXT
       + RESOURCE_PATH_COLLECTION;
+  public static final String URI_RESOURCE_PATH_COLLECTION_ME = URI_RESOURCE_PATH_COLLECTION + PATH_ME;
 
   public static final String PATH_MODULE_VERSION = PATH_MODULE_ID + PATH_VERSION;
   public static final String PATH_MODULE_VERSION_CONTENT = PATH_MODULE_VERSION + "/"
@@ -112,7 +114,8 @@ public class JerseyConstants {
 
   // Path for Module Resources.
   public static final String RESOURCE_PATH_MODULE = "/module";
-  public static final String URI_RESOURCE_PATH_MODULE = JERSEY_CONTEXT + RESOURCE_PATH_COLLECTION;
+  public static final String URI_RESOURCE_PATH_MODULE = JERSEY_CONTEXT + RESOURCE_PATH_MODULE;
+  public static final String URI_RESOURCE_PATH_MODULE_ME = URI_RESOURCE_PATH_MODULE + PATH_ME; 
 
   public static final String PATH_COLLECTION_VERSION = PATH_COLLECTION_ID + PATH_VERSION;
   public static final String PATH_COLLECTION_VERSION_CONTENT = PATH_COLLECTION_VERSION + "/"

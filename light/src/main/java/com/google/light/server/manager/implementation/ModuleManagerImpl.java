@@ -16,13 +16,18 @@
 package com.google.light.server.manager.implementation;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
+import com.google.light.server.constants.JerseyConstants;
 import com.google.light.server.dto.module.GSBlobInfo;
+import com.google.light.server.dto.module.ModuleDto;
 import com.google.light.server.dto.module.ModuleState;
 import com.google.light.server.dto.module.ModuleType;
 import com.google.light.server.dto.module.ModuleVersionState;
+import com.google.light.server.dto.pages.PageDto;
 import com.google.light.server.dto.pojo.longwrapper.ModuleId;
 import com.google.light.server.dto.pojo.longwrapper.PersonId;
 import com.google.light.server.dto.pojo.longwrapper.Version;
@@ -38,6 +43,7 @@ import com.google.light.server.persistence.entity.module.ModuleEntity;
 import com.google.light.server.persistence.entity.module.ModuleVersionEntity;
 import com.google.light.server.persistence.entity.module.ModuleVersionResourceEntity;
 import com.google.light.server.persistence.entity.module.OriginModuleMappingEntity;
+import com.google.light.server.serveronlypojos.GAEQueryWrapper;
 import com.google.light.server.utils.LightUtils;
 import com.google.light.server.utils.ObjectifyUtils;
 import com.googlecode.objectify.Key;
@@ -133,7 +139,8 @@ public class ModuleManagerImpl implements ModuleManager {
    */
   @Override
   public ModuleId reserveModuleIdForExternalId(ModuleType moduleType, String externalId,
-      List<PersonId> owners) {
+      List<PersonId> owners, String title) {
+    checkNotBlank(title, "title");
     Objectify ofy = ObjectifyUtils.initiateTransaction();
 
     try {
@@ -147,7 +154,7 @@ public class ModuleManagerImpl implements ModuleManager {
       // TODO(arjuns): Add a cleanup job for cleaning up MOdules which dont move from Reserved state
       // for long time.
       ModuleEntity moduleEntity = new ModuleEntity.Builder()
-          .title("reserved")
+          .title(title)
           .state(ModuleState.RESERVED)
           .type(moduleType)
           .owners(owners)
@@ -229,8 +236,14 @@ public class ModuleManagerImpl implements ModuleManager {
       moduleVersionEntity.setContent(content);
       moduleVersionEntity.setTitle(docInfo.getTitle());
       moduleVersionEntity.setEtag(docInfo.getEtag());
-      
       moduleVersionDao.put(ofy, moduleVersionEntity);
+      
+      ModuleEntity moduleEntity = moduleDao.get(ofy, moduleVersionEntity.getModuleKey());
+      if (moduleEntity.getLatestVersion().equals(moduleVersionEntity.getVersion())) {
+        moduleEntity.setState(ModuleState.PUBLISHED);
+        moduleDao.put(ofy, moduleEntity);
+      }
+      
 
       ObjectifyUtils.commitTransaction(ofy);
       return moduleVersionEntity;
@@ -321,8 +334,6 @@ public class ModuleManagerImpl implements ModuleManager {
       ModuleEntity moduleEntity = this.get(ofy, moduleId);
       Preconditions.checkNotNull(moduleEntity, "moduleEntity");
 
-      System.out.println("Module update time : " + moduleEntity.getLastEditTime());
-      System.out.println("Google update time : " + lastEditTime);
       if (moduleEntity.getLastEditTime().isEqual(lastEditTime)
           || moduleEntity.getLastEditTime().isAfter(lastEditTime)) {
         // No need to import new version.
@@ -354,5 +365,28 @@ public class ModuleManagerImpl implements ModuleManager {
     } finally {
       ObjectifyUtils.rollbackTransactionIfStillActive(ofy);
     }
+  }
+
+  /** 
+   * {@inheritDoc}
+   */
+  @Override
+  public PageDto findModulesByOwnerId(PersonId ownerId, String startIndex, int maxResults) {
+    GAEQueryWrapper<ModuleEntity>  wrapper = moduleDao.findModulesByOwnerId(
+        ownerId, startIndex, maxResults);
+    
+    List<ModuleDto> list = Lists.newArrayList();
+    for (ModuleEntity currEntity : wrapper.getList()) {
+      list.add(currEntity.toDto());
+    }
+    
+    
+    PageDto pageDto = new PageDto.Builder()
+        .startIndex(wrapper.getStartIndex())
+        .list(list)
+        .handlerUri(JerseyConstants.URI_RESOURCE_PATH_MODULE_ME)
+        .build();
+    
+    return pageDto;
   }
 }

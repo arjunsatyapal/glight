@@ -87,7 +87,9 @@ public class CollectionDto extends
     LightPreconditions.checkNonEmptyList(owners, "owners");
 
     checkNotNull(version, "latestVersion");
-    checkNotNull(root, "root");
+    
+    // TODO(arjuns): Fix this check.
+//    checkNotNull(root, "root");
     return this;
   }
 
@@ -123,12 +125,12 @@ public class CollectionDto extends
       return this;
     }
 
-    public Builder collectionState(CollectionState state) {
+    public Builder state(CollectionState state) {
       this.state = state;
       return this;
     }
 
-    public Builder ownerPersonId(List<PersonId> owners) {
+    public Builder owners(List<PersonId> owners) {
       this.owners = owners;
       return this;
     }

@@ -15,9 +15,20 @@
  */
 package com.google.light.server.jersey.resources;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.light.server.constants.LightConstants.MAX_RESULTS_MAX;
 import static com.google.light.server.constants.LightStringConstants.VERSION_LATEST_STR;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
+import static com.google.light.server.utils.LightPreconditions.checkPersonLoggedIn;
+
+import com.google.light.server.constants.LightConstants;
+import com.google.light.server.constants.LightStringConstants;
+import com.google.light.server.dto.pages.PageDto;
+import com.google.light.server.servlets.SessionManager;
+import com.google.light.server.utils.GuiceUtils;
+import javax.ws.rs.QueryParam;
+import org.apache.commons.lang.StringUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -107,7 +118,6 @@ public class CollectionResource extends AbstractJerseyResource {
       builder.append(" ");
     }
 
-    System.out.println("\n\n\n****" + node.toJson());
     if (node.isLeafNode()) {
       String uri = "/rest/module/" + node.getModuleId().getValue() + "/latest/content";
       builder.append("<a href=").append(uri).append(">").append(node.getTitle()).append("</a>");
@@ -137,5 +147,25 @@ public class CollectionResource extends AbstractJerseyResource {
     }
 
     return cvEntity;
+  }
+  
+  @GET
+  @Path(JerseyConstants.PATH_ME)
+  @Produces({ ContentTypeConstants.APPLICATION_JSON, ContentTypeConstants.APPLICATION_XML })
+  public PageDto getCollectionsPublishedByMe(
+      @QueryParam(LightStringConstants.START_INDEX_STR) String startIndex,
+      @QueryParam(LightStringConstants.MAX_RESULTS_STR) String maxResultStr) {
+    SessionManager sessionManager = GuiceUtils.getInstance(SessionManager.class);
+    checkPersonLoggedIn(sessionManager);
+    
+    int maxResult = LightConstants.MAX_RESULTS_DEFAULT;
+    
+    if (StringUtils.isNotBlank(maxResultStr)) {
+      maxResult = Integer.parseInt(maxResultStr);
+    }
+    
+    checkArgument(maxResult <= MAX_RESULTS_MAX, "Max results allowed = " + MAX_RESULTS_MAX);
+    
+    return collectionManager.findCollectionsByOwnerId(GuiceUtils.getOwnerId(), startIndex, maxResult);
   }
 }

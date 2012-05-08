@@ -249,7 +249,7 @@ public class LightPreconditions {
       throw new PersonLoginRequiredException("");
     }
   }
-
+  
   /**
    * Ensures that Session is valid.
    * NOTE : Unlike other check functions, this does not return anything.

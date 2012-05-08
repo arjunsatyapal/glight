@@ -1,8 +1,11 @@
 package com.google.light.server.jersey.resources;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.light.server.constants.LightConstants.MAX_RESULTS_MAX;
 import static com.google.light.server.constants.LightStringConstants.VERSION_LATEST_STR;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
+import static com.google.light.server.utils.LightPreconditions.checkPersonLoggedIn;
 
 import com.google.appengine.api.blobstore.BlobKey;
 import com.google.appengine.api.blobstore.BlobstoreService;
@@ -11,14 +14,19 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.light.server.constants.HttpHeaderEnum;
 import com.google.light.server.constants.JerseyConstants;
+import com.google.light.server.constants.LightConstants;
+import com.google.light.server.constants.LightStringConstants;
 import com.google.light.server.constants.ResourceTypes;
 import com.google.light.server.constants.http.ContentTypeConstants;
+import com.google.light.server.dto.pages.PageDto;
 import com.google.light.server.dto.pojo.longwrapper.ModuleId;
 import com.google.light.server.dto.pojo.longwrapper.Version;
 import com.google.light.server.exception.unchecked.httpexception.NotFoundException;
 import com.google.light.server.manager.interfaces.ModuleManager;
 import com.google.light.server.persistence.entity.module.ModuleVersionEntity;
 import com.google.light.server.persistence.entity.module.ModuleVersionResourceEntity;
+import com.google.light.server.servlets.SessionManager;
+import com.google.light.server.utils.GuiceUtils;
 import com.google.light.server.utils.LightUtils;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -26,9 +34,11 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * Jersey Resource for Modules.
@@ -142,5 +152,25 @@ public class ModuleResource extends AbstractJerseyResource {
     }
 
     return moduleEntity;
+  }
+
+  @GET
+  @Path(JerseyConstants.PATH_ME)
+  @Produces({ ContentTypeConstants.APPLICATION_JSON, ContentTypeConstants.APPLICATION_XML })
+  public PageDto getModulesPublishedByMe(
+      @QueryParam(LightStringConstants.START_INDEX_STR) String startIndex,
+      @QueryParam(LightStringConstants.MAX_RESULTS_STR) String maxResultStr) {
+    SessionManager sessionManager = GuiceUtils.getInstance(SessionManager.class);
+    checkPersonLoggedIn(sessionManager);
+    
+    int maxResult = LightConstants.MAX_RESULTS_DEFAULT;
+    
+    if (StringUtils.isNotBlank(maxResultStr)) {
+      maxResult = Integer.parseInt(maxResultStr);
+    }
+    
+    checkArgument(maxResult <= MAX_RESULTS_MAX, "Max results allowed = " + MAX_RESULTS_MAX);
+    
+    return moduleManager.findModulesByOwnerId(GuiceUtils.getOwnerId(), startIndex, maxResult);
   }
 }
