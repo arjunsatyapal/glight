@@ -179,6 +179,7 @@ public class ModuleManagerImpl implements ModuleManager {
   /**
    * {@inheritDoc} TODO(arjuns): Make this better once we have other Docs.
    */
+  @Deprecated
   @Override
   public ModuleVersionEntity addModuleVersionForGoogleDoc(ModuleId moduleId, String content,
       GoogleDocInfoDto docInfoDto) {
@@ -204,6 +205,32 @@ public class ModuleManagerImpl implements ModuleManager {
       moduleEntity.setEtag(docInfoDto.getEtag());
       moduleEntity.setLatestVersion(moduleVersion);
       moduleDao.put(ofy, moduleEntity);
+
+      ObjectifyUtils.commitTransaction(ofy);
+      return moduleVersionEntity;
+    } finally {
+      if (ofy.getTxn().isActive()) {
+        ObjectifyUtils.rollbackTransactionIfStillActive(ofy);
+      }
+    }
+  }
+
+  /**
+   * {@inheritDoc} TODO(arjuns): Make this better once we have other Docs.
+   */
+  @Override
+  public ModuleVersionEntity publishModuleVersion(ModuleId moduleId, Version version,
+      String content, GoogleDocInfoDto docInfo) {
+    // TODO(arjuns): Handle ofy txn.
+    Objectify ofy = ObjectifyUtils.initiateTransaction();
+
+    try {
+      ModuleVersionEntity moduleVersionEntity = moduleVersionDao.get(ofy, moduleId, version);
+      moduleVersionEntity.setContent(content);
+      moduleVersionEntity.setTitle(docInfo.getTitle());
+      moduleVersionEntity.setEtag(docInfo.getEtag());
+      
+      moduleVersionDao.put(ofy, moduleVersionEntity);
 
       ObjectifyUtils.commitTransaction(ofy);
       return moduleVersionEntity;
@@ -296,8 +323,8 @@ public class ModuleManagerImpl implements ModuleManager {
 
       System.out.println("Module update time : " + moduleEntity.getLastEditTime());
       System.out.println("Google update time : " + lastEditTime);
-      if (moduleEntity.getLastEditTime().isEqual(lastEditTime) 
-          ||moduleEntity.getLastEditTime().isAfter(lastEditTime)) {
+      if (moduleEntity.getLastEditTime().isEqual(lastEditTime)
+          || moduleEntity.getLastEditTime().isAfter(lastEditTime)) {
         // No need to import new version.
         logger.info("Skipping creating version because for [" + moduleEntity.getModuleId()
             + "], lastEditTime[" + moduleEntity.getLastEditTime()
@@ -306,10 +333,10 @@ public class ModuleManagerImpl implements ModuleManager {
       }
 
       Version version = moduleEntity.getLatestVersion().getNextVersion();
-      
+
       // TODO(arjuns): differentiate latest and published version.
       moduleEntity.setLatestVersion(version);
-//      moduleEntity.setLastEditTime(lastEditTime);
+      // moduleEntity.setLastEditTime(lastEditTime);
       moduleDao.put(ofy, moduleEntity);
 
       ModuleVersionEntity moduleVersionEntity = new ModuleVersionEntity.Builder()

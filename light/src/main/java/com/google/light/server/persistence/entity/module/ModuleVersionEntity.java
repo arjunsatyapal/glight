@@ -44,6 +44,7 @@ public class ModuleVersionEntity extends
   @Parent
   Key<ModuleEntity> moduleKey;
   ModuleVersionState state;
+  String title;
   String content;
   String etag;
 
@@ -96,8 +97,20 @@ public class ModuleVersionEntity extends
     return new Version(version);
   }
 
+  public String getTitle() {
+    return title;
+  }
+  
+  public void setTitle(String title) {
+    this.title = checkNotBlank(title, "title");
+  }
+  
   public String getContent() {
     return content;
+  }
+  
+  public void setContent(String content) {
+    this.content = checkNotBlank(content, "content");
   }
 
   public Key<ModuleEntity> getModuleKey() {
@@ -112,6 +125,10 @@ public class ModuleVersionEntity extends
 
   public String getEtag() {
     return etag;
+  }
+  
+  public void setEtag(String etag) {
+    this.etag = etag;
   }
 
   public Instant getLastEditTime() {
@@ -140,6 +157,7 @@ public class ModuleVersionEntity extends
 
   public static class Builder extends AbstractPersistenceEntity.BaseBuilder<Builder> {
     private Version version;
+    private String title;
     private String content;
     private Key<ModuleEntity> moduleKey;
     private ModuleVersionState state;
@@ -156,6 +174,11 @@ public class ModuleVersionEntity extends
       return this;
     }
 
+    public Builder title(String title) {
+      this.title = title;
+      return this;
+    }
+    
     public Builder content(String content) {
       this.content = content;
       return this;
@@ -188,6 +211,7 @@ public class ModuleVersionEntity extends
     checkNotNull(builder.version, "version");
     this.version = builder.version.getValue();
     
+    this.title = builder.title;
     this.content = builder.content;
     this.moduleKey = builder.moduleKey;
     this.state = builder.state;

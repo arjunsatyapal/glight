@@ -15,16 +15,41 @@
  */
 package com.google.light.server.manager.implementation;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.constants.LightConstants.JOB_BACK_OFF_FACTOR;
 import static com.google.light.server.constants.LightConstants.JOB_BACK_OFF_SECONDS;
 import static com.google.light.server.constants.LightConstants.JOB_MAX_ATTEMPTES;
+import static com.google.light.server.constants.google.cloudstorage.GoogleCloudStorageBuckets.CONTENT;
 import static com.google.light.server.exception.ExceptionType.SERVER_GUICE_INJECTION;
+import static com.google.light.server.jobs.JobUtils.updateChangeLog;
+import static com.google.light.server.utils.GoogleCloudStorageUtils.writeFileOnGCS;
+import static com.google.light.server.utils.GuiceUtils.getInstance;
 import static com.google.light.server.utils.GuiceUtils.getRequestScopedValues;
 import static com.google.light.server.utils.LightPreconditions.checkJobId;
 import static com.google.light.server.utils.LightPreconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkTxnIsRunning;
 import static com.google.light.server.utils.LightUtils.isListEmpty;
+
+import com.google.appengine.tools.pipeline.FutureValue;
+
+import com.google.light.server.dto.module.ModuleType;
+import com.google.light.server.persistence.entity.module.ModuleVersionEntity;
+
+import com.google.light.server.jobs.lightjobs.ModuleJobs;
+import com.google.light.server.utils.LightUtils;
+
+import com.google.appengine.api.files.GSFileOptions;
+
+import com.google.light.server.dto.module.GSBlobInfo;
+
+import com.google.light.server.constants.google.cloudstorage.GoogleCloudStorageBuckets;
+
+import com.google.light.server.constants.http.ContentTypeEnum;
+
+import com.google.light.server.constants.FileExtensions;
+
+import com.google.common.base.Preconditions;
 
 import com.google.appengine.api.datastore.Text;
 import com.google.appengine.api.files.AppEngineFile;
@@ -329,8 +354,11 @@ public class JobManagerImpl implements JobManager {
    * @param jobEntity
    */
   private void publishModule(GoogleDocImportJobContext gdocImportContext, JobEntity jobEntity) {
+    ModuleId moduleId = gdocImportContext.getModuleId();
+    Version version = gdocImportContext.getVersion();
     try {
       FileService fileService = FileServiceFactory.getFileService();
+      Map<String, GSBlobInfo> resourceMap = Maps.newConcurrentMap();
 
       AppEngineFile file = new AppEngineFile(gdocImportContext.getGCSArchiveLocation());
       FileReadChannel readChannel = fileService.openReadChannel(file, true /* lock */);
@@ -346,107 +374,84 @@ public class JobManagerImpl implements JobManager {
         }
         System.out.println(zipEntry.getName());
 
-        // // TODO(arjuns): Get contentType from File extension.
-        // // Storing file on Cloud Storage.
-        // String nameFromGoogleDoc = zipEntry.getName();
-        //
-        // checkArgument(nameFromGoogleDoc.contains("/"), "Unexpected name from GoogleDoc : "
-        // + nameFromGoogleDoc);
-        // String parts[] = nameFromGoogleDoc.split("/");
-        //
-        // String newFileName = "";
-        // // Parts[0] is always the folder whose name is same as prettified title for a GoogleDoc.
-        // if (parts.length == 2) {
-        // // This will be true for HTML file.
-        // newFileName = parts[1];
-        // } else {
-        // Preconditions.checkArgument(parts.length == 3, "Google Docs will return files " +
-        // "name of format <pretty title/images/image names>");
-        // // This will be true for images/resources.
-        // newFileName = parts[1] + "/" + parts[2];
-        // }
-        //
-        // if (newFileName.endsWith(FileExtensions.HTML.get())) {
-        // newFileName = moduleId.getValue() + "." + FileExtensions.HTML.get();
-        // }
-        //
-        // ContentTypeEnum contentType =
-        // FileExtensions.getFileExtension(newFileName).getContentType();
-        // String storeFileName = moduleId.getValue() + "/" + newFileName;
-        // String storeAbsFilePath = CONTENT.getAbsoluteFilePath(storeFileName);
-        //
-        // GSBlobInfo gsBlobInfo = new GSBlobInfo.Builder()
-        // .contentType(contentType)
-        // .fileName(parts[parts.length - 1])
-        // .gsKey(storeAbsFilePath)
-        // .sizeInBytes(zipEntry.getSize())
-        // .build();
-        // resourceMap.put(newFileName, gsBlobInfo);
-        //
-        // updateChangeLog(null, getContext().getJobId(), "Storing [" + zipEntry.getName()
-        // + "] as [" +
-        // storeAbsFilePath + "].");
-        //
-        // GSFileOptions gsFileOptions = GoogleCloudStorageUtils.getGCSFileOptionsForCreate(
-        // GoogleCloudStorageBuckets.CONTENT, contentType, storeFileName);
-        // writeFileOnGCS(zipIn, gsFileOptions);
-        //
-        // updateChangeLog(null, getContext().getJobId(), "Successfully stored");
+        // TODO(arjuns): Get contentType from File extension.
+        // Storing file on Cloud Storage.
+        String nameFromGoogleDoc = zipEntry.getName();
+
+        checkArgument(nameFromGoogleDoc.contains("/"), "Unexpected name from GoogleDoc : "
+            + nameFromGoogleDoc);
+        String parts[] = nameFromGoogleDoc.split("/");
+
+        String newFileName = "";
+        // Parts[0] is always the folder whose name is same as prettified title for a GoogleDoc.
+        if (parts.length == 2) {
+          // This will be true for HTML file.
+          newFileName = parts[1];
+        } else {
+          checkArgument(parts.length == 3, "Google Docs will return files " +
+              "name of format <pretty title/images/image names>");
+          // This will be true for images/resources.
+          newFileName = parts[1] + "/" + parts[2];
+        }
+
+        if (newFileName.endsWith(FileExtensions.HTML.get())) {
+          newFileName = moduleId.getValue() + "." + FileExtensions.HTML.get();
+        }
+
+        ContentTypeEnum contentType = FileExtensions.getFileExtension(newFileName).getContentType();
+        String storeFileName = moduleId.getValue() + "/" + newFileName;
+        String storeAbsFilePath =
+            GoogleCloudStorageBuckets.CONTENT.getAbsoluteFilePath(storeFileName);
+
+        GSBlobInfo gsBlobInfo = new GSBlobInfo.Builder()
+            .contentType(contentType)
+            .fileName(parts[parts.length - 1])
+            .gsKey(storeAbsFilePath)
+            .sizeInBytes(zipEntry.getSize())
+            .build();
+        resourceMap.put(newFileName, gsBlobInfo);
+
+        GSFileOptions gsFileOptions = GoogleCloudStorageUtils.getGCSFileOptionsForCreate(
+            GoogleCloudStorageBuckets.CONTENT, contentType, storeFileName);
+        writeFileOnGCS(zipIn, gsFileOptions);
       } while (zipEntry != null);
 
       zipIn.close();
       inputStream.close();
       readChannel.close();
 
-      // updateChangeLog(null, getContext().getJobId(),
-      // "Finished unarchiving files from [" + fileName + "].");
-      //
-      // // Now lets add the moduleVersion. This will require adding html and resources.
-      // // First adding Html.
-      // FutureValue<ModuleVersionEntity> moduleVersionEntityFV = futureCall(new AddContent(),
-      // immediate(getContext()), immediate(importEntityId), immediate(moduleId));
-      //
-      // futureCall(new PipelineJobs.DummyJob(), immediate(getContext()),
-      // immediate("module version created"),
-      // waitFor(moduleVersionEntityFV));
-      //
-      // int htmlCount = 0;
-      // @SuppressWarnings("rawtypes")
-      // List<FutureValue> jobsToWait = Lists.newArrayList();
-      // // Now moduleVersion is created. So adding resources for that.
-      // for (String currKey : resourceMap.keySet()) {
-      // // We dont want to store HTML files as resources. They are handled separately.
-      // if (currKey.endsWith(FileExtensions.HTML.get())) {
-      // checkArgument(htmlCount == 0, "Found more then one HtmlFiles for ImportId["
-      // + importEntityId + "].");
-      // htmlCount++;
-      // continue;
-      // }
-      //
-      // GSBlobInfo gsBlobInfo = resourceMap.get(currKey);
-      // logger.info(JsonUtils.toJson(gsBlobInfo));
-      //
-      // FutureValue<Void> fv = futureCall(
-      // new ModuleJobs.AddModuleResources(),
-      // immediate(getContext()),
-      // moduleVersionEntityFV,
-      // immediate(importEntityId),
-      // immediate(currKey),
-      // immediate(gsBlobInfo));
-      // jobsToWait.add(fv);
-      // }
-      //
-      // // Hacky way so that we wait for all the resources to be created before returning.
-      // // TODO(arjuns): Find a better way to do this.
-      // FutureValue<LightJobContextPojo> context = null;
-      // for (FutureValue<Long> curr : jobsToWait) {
-      // context =
-      // futureCall(new PipelineJobs.DummyJob(), immediate(getContext()), immediate(""),
-      // waitFor(curr));
-      // }
-      //
-      // return context;
+      logger.info("Finished unarchiving files");
 
+      // Now lets add the moduleVersion. This will require adding html and resources.
+      // First adding Html.
+
+      logger.info("Adding html for moduleId[" + moduleId + "].");
+
+      String filePath = GoogleCloudStorageUtils.getAbsoluteModuleHtmlPath(CONTENT, moduleId);
+
+      fileService = FileServiceFactory.getFileService();
+      file = new AppEngineFile(filePath);
+      readChannel = fileService.openReadChannel(file, true /* lock */);
+      inputStream = Channels.newInputStream(readChannel);
+      String htmlContent = LightUtils.getInputStreamAsString(inputStream);
+
+      ModuleManager moduleManager = getInstance(ModuleManager.class);
+      ModuleVersionEntity moduleVersionEntity = moduleManager.publishModuleVersion(
+          moduleId, version, htmlContent, gdocImportContext.getResourceInfo());
+
+      for (String currKey : resourceMap.keySet()) {
+        // We dont want to store HTML files as resources. They are handled separately.
+        if (currKey.endsWith(FileExtensions.HTML.get())) {
+          continue;
+        }
+
+        GSBlobInfo gsBlobInfo = resourceMap.get(currKey);
+        logger.info(JsonUtils.toJson(gsBlobInfo));
+        moduleManager.addModuleResource(moduleVersionEntity.getModuleId(),
+            moduleVersionEntity.getVersion(), currKey, gsBlobInfo);
+      }
+
+      System.out.println("Successfully published [" + moduleId + ", " + version);
       Objectify ofy = ObjectifyUtils.initiateTransaction();
       try {
         gdocImportContext.setState(GoogleDocImportJobContext.GoogleDocImportJobState.COMPLETE);
@@ -479,7 +484,8 @@ public class JobManagerImpl implements JobManager {
     String gcsArchiveLocation = docsServiceProvider.get().downloadArchive(
         archivePojo.getContentLocation(), destinationFileName);
 
-    gdocImportContext.setState(GoogleDocImportJobContext.GoogleDocImportJobState.ARCHIVE_DOWNLOADED);
+    gdocImportContext
+        .setState(GoogleDocImportJobContext.GoogleDocImportJobState.ARCHIVE_DOWNLOADED);
     gdocImportContext.setGCSArchiveLocation(gcsArchiveLocation);
 
     Objectify ofy = ObjectifyUtils.initiateTransaction();
@@ -508,7 +514,8 @@ public class JobManagerImpl implements JobManager {
     // "vax2Nuv9Oq4VIPQEBTcxlJDkNbRFv7KVNL55qVoitx7rtrJHru1T6ljtTjMW26L3ygWrvW1tMZHHg6ARCy3Uj_n3moSCE8uDDX6WKaTD-0nw0zcwfBiiFEufFSITnTO06n0TsXIIHSQ";
     // gdocImportContext.setArchiveId(archiveId);
 
-    gdocImportContext.setState(GoogleDocImportJobContext.GoogleDocImportJobState.WAITING_FOR_ARCHIVE);
+    gdocImportContext
+        .setState(GoogleDocImportJobContext.GoogleDocImportJobState.WAITING_FOR_ARCHIVE);
 
     Objectify ofy = ObjectifyUtils.initiateTransaction();
     try {

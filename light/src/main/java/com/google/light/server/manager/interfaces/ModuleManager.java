@@ -81,8 +81,12 @@ public interface ModuleManager {
    * @param docInfoDto
    * @return
    */
+  @Deprecated
   public ModuleVersionEntity addModuleVersionForGoogleDoc(ModuleId moduleId, String content,
       GoogleDocInfoDto docInfoDto);
+  
+  public ModuleVersionEntity publishModuleVersion(ModuleId moduleId, Version version, 
+      String content, GoogleDocInfoDto docInfo);
 
   /**
    * Add resources for a Module-Version.
