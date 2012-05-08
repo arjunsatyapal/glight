@@ -174,7 +174,6 @@ public class LoginITCase {
 
       Thread thread = new Thread(new ParallelTests(serverUrl, email));
       thread.start();
-      thread.join();
       listOfThread.add(thread);
     }
 

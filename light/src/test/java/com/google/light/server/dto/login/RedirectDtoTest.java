@@ -98,7 +98,6 @@ public class RedirectDtoTest extends AbstractDtoTest {
     }
   }
 
-  @Ignore(value="TODO(arjuns): Fix me.")
   @Test
   @Override
   public void test_toXml() throws Exception {

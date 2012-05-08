@@ -36,8 +36,8 @@ import com.google.common.base.Preconditions;
 @XmlRootElement(name = "redirect")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class RedirectDto extends AbstractDto<RedirectDto> {
-  @XmlElement(name = "redirect_path")
-  @JsonProperty(value = "redirect_path")
+  @XmlElement(name = "redirectPath")
+  @JsonProperty(value = "redirectPath")
   private String redirectPath;
 
   /**
@@ -61,6 +61,11 @@ public class RedirectDto extends AbstractDto<RedirectDto> {
           "redirectPath should start with a slash (/)");
     }
     return this;
+  }
+  
+  @Override
+  public String toXml() {
+    throw new UnsupportedOperationException("RedirectDto should only be used as JSON.");
   }
 
   public static class Builder extends AbstractDto.BaseBuilder<Builder> {

@@ -50,6 +50,7 @@ import com.google.light.testingutils.scripts.LoginITCase.ParallelTests;
 import java.util.Properties;
 import java.util.Set;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.Cookie;
 
@@ -60,6 +61,8 @@ import org.openqa.selenium.Cookie;
  * 
  * @author Arjun Satyapal
  */
+// TODO(arjuns): Complete this test
+@Ignore
 public class GoogleDocIntegrationITCase {
   private String serverUrl = TestingConstants.SERVER_URL;
   private String email = "unit-test1@myopenedu.com";
