@@ -59,6 +59,14 @@ define(['dojo/_base/declare', 'dojo/_base/xhr',
      */
     get: function(params) {
       return this.send('GET', params);
+    },
+
+
+    /**
+     * Alias for send('POST', ...)
+     */
+    post: function(params) {
+      return this.send('POST', params);
     }
 
   };

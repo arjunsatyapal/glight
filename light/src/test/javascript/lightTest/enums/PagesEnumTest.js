@@ -32,7 +32,6 @@
         for (var i = 0, len = enumNames.length; i < len; i++) {
           var pageName = enumNames[i];
           var page = PagesEnum[enumNames[i]];
-          expect(page.path).toBe('/' + pageName.toLowerCase());
           expect(page.build).toBe(pageName.toLowerCase());
           expect(page.main.toLowerCase()).toBe(pageName.toLowerCase() + 'main');
           TestUtils.expectModuleToExist('light/main/' + page.main);
@@ -58,7 +57,7 @@
         it('should map to the correct enum value', function() {
           for (var i = 0, len = enumNames.length; i < len; i++) {
             var page = PagesEnum[enumNames[i]];
-            expect(PagesEnum.getByPath(page.path)).toBe(page);
+            expect(PagesEnum.getByPath(page.getPath().split("#")[0])).toBe(page);
           }
         });
       });

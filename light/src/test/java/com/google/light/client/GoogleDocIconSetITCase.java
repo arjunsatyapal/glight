@@ -48,7 +48,7 @@ public class GoogleDocIconSetITCase {
           "https://ssl.gstatic.com/docs/doclist/images/icon_10_document_list.png"
   };
   String[] CURRENT_ICON_NAMES = {
-          ModuleType.GOOGLE_COLLECTION.name()+"_ORIGINAL",
+          ModuleType.GOOGLE_COLLECTION.name() + "_ORIGINAL",
           ModuleType.GOOGLE_SPREADSHEET.name(),
           ModuleType.GOOGLE_PRESENTATION.name(),
           ModuleType.GOOGLE_FILE.name(),
@@ -70,12 +70,13 @@ public class GoogleDocIconSetITCase {
   private final String serverUrl = "http://localhost:8080";
 
   @Test
-  public void test_counters() throws Exception {
-    assertEquals("You should add/remove an icon if the ModuleType changes", 7,
+  public void test_counters() throws IOException {
+    assertEquals("You should add/remove an Google Docs Icon if you add/remove a"
+        + " Google Docs type in the ModuleType changes", 8,
         ModuleType.values().length);
-    assertEquals(CURRENT_ICON_LINKS.length, ModuleType.values().length);
-    assertEquals(CURRENT_ICON_NAMES.length, ModuleType.values().length);
-    assertEquals(NEXT_ITERATION_ICON_LINKS.length, ModuleType.values().length);
+    assertEquals(CURRENT_ICON_LINKS.length, 7);
+    assertEquals(CURRENT_ICON_NAMES.length, CURRENT_ICON_LINKS.length);
+    assertEquals(NEXT_ITERATION_ICON_LINKS.length, 7);
   }
 
   @Test

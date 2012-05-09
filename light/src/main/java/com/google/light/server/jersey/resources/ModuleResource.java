@@ -81,7 +81,7 @@ public class ModuleResource extends AbstractJerseyResource {
   @GET
   @Path(JerseyConstants.PATH_MODULE_VERSION)
   @Produces({ ContentTypeConstants.APPLICATION_JSON, ContentTypeConstants.APPLICATION_XML })
-  public String getModuleVersion(
+  public ModuleVersionEntity getModuleVersion(
       @PathParam(JerseyConstants.PATH_PARAM_MODULE_ID) String moduleIdStr,
       @PathParam(JerseyConstants.PATH_PARAM_VERSION) String versionStr) {
     checkNotBlank(versionStr, "Invalid version.");
@@ -91,7 +91,7 @@ public class ModuleResource extends AbstractJerseyResource {
     ModuleVersionEntity moduleVersionEntity = moduleManager.getModuleVersion(
         null /* ofy */, moduleId, version);
 
-    return moduleVersionEntity.getContent();
+    return moduleVersionEntity;
   }
 
   @GET

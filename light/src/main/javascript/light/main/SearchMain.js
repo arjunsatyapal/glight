@@ -31,7 +31,7 @@ define(['light/views/SearchBarView',
   // Going to the anonymous search page
   // TODO(waltercacau): optimize the login somehow to go directly to MYDASH.
   if (PersonUtils.isLogged()) {
-    URLUtils.replace(PagesEnum.MYDASH.path);
+    URLUtils.replace(PagesEnum.MYDASH.getPath());
   }
 
   var searchResultListView = new SearchResultListView({}, 'searchResults');

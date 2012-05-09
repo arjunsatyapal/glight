@@ -54,7 +54,9 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
     _onBrowseContextStateChange: function(browseContextState, source) {
       if (browseContextState.context == BrowseContextsEnum.IMPORT) {
         if (browseContextState.subcontext == 'gdoc') {
-          this.getGdocListFirstPage();
+          this._view.showGdocListForm('/rest/thirdparty/google/gdoc/list');
+        } else if (browseContextState.subcontext == 'me') {
+          this._view.showImportedListForm('/rest/module/me');
         } else {
           this._view.showFirstForm();
         }
@@ -73,58 +75,15 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
                .context(BrowseContextsEnum.IMPORT)
                .subcontext('gdoc').build(), this]);
     },
-
-    _gdocPage: 0,
-
+    
     /**
-     * Gets first page of GdocList and shows it when the data arrive.
+     * Indicates the user wants to see what he have imported on light.
      */
-    getGdocListFirstPage: function() {
-      this._gdocPage = 0;
-      this._getGdocList();
-    },
-
-    /**
-     * Gets next page of GdocList and shows it when the data arrive.
-     */
-    getGdocListNextPage: function() {
-      this._gdocPage++;
-      this._getGdocList();
-    },
-
-    /**
-     * Gets previous page of GdocList and shows it when the data arrive.
-     */
-    getGdocListPreviousPage: function() {
-      if (this._gdocPage > 0)
-        this._gdocPage--;
-      this._getGdocList();
-    },
-
-    /**
-     * Utility function that loads the gdoc list for the current page
-     * and shows it.
-     */
-    _getGdocList: function() {
-      this._view.hide();
-      var self = this;
-      XHRUtils.get({
-        url: this._gdocPageLinks[this._gdocPage]
-      }).then(function(result) {
-        if (result['start-index']) {
-          self._gdocPageLinks[self._gdocPage + 1] =
-              '/rest/thirdparty/google/gdoc/list?start-index=' +
-              result['start-index'] + '&' + dojo.objectToQuery({
-                'max-results': NUMBER_OF_ITEMS_PER_PAGE
-              });
-          self._view.showGdocListForm(result, self._gdocPage, true);
-        } else {
-          self._view.showGdocListForm(result, self._gdocPage, false);
-        }
-      }, function() {
-        // TODO(waltercacau): Check if it was really because of missing auth.
-        self._view.showGdocAuthRequiredForm();
-      });
+    showWhatIHaveImported: function() {
+      connect.publish(EventsEnum.BROWSE_CONTEXT_STATE_CHANGED, [
+           new BrowseContextStateBuilder()
+               .context(BrowseContextsEnum.IMPORT)
+               .subcontext('me').build(), this]);
     },
 
     /**
@@ -135,6 +94,23 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
       URLUtils.redirect('/oauth2/google_doc?' + dojo.objectToQuery({
         'redirectPath': URLUtils.getPathWithHash()
       }));
+    },
+    
+    /**
+     * 
+     */
+    importGdocs: function(items) {
+      var list = [];
+      for(var i=0, len=items.length; i<len; i++) {
+        list.push(items[i].resourceId);
+      }
+      var self = this;
+      XHRUtils.post({
+        url: '/rest/thirdparty/google/gdoc/import',
+        postData: JSON.stringify({'list': list})
+      }).then(function() {
+        self._view.alertSuccessfullyStartedGdocsImport();
+      });
     }
   });
 });

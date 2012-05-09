@@ -30,7 +30,7 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
     constructor: function(personStore) {
       this._personStore = personStore;
     },
-    _redirectPath: PagesEnum.SEARCH.path,
+    _redirectPath: PagesEnum.SEARCH.getPath(),
 
     setup: function() {
       this._person = PersonUtils.getCurrent();

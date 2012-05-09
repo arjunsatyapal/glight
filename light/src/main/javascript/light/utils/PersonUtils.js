@@ -55,9 +55,9 @@ define(['dojo/_base/declare', 'light/utils/URLUtils', 'light/enums/PagesEnum',
 
       var person = this.getCurrent();
       if (person && !person.acceptedTos) {
-        URLUtils.redirect(PagesEnum.REGISTER.path + "#" + dojo.objectToQuery({
+        URLUtils.redirect(PagesEnum.REGISTER.getPath(dojo.objectToQuery({
           "redirectPath": URLUtils.getPathWithHash()
-        }));
+        })));
         return false;
       }
       return true;

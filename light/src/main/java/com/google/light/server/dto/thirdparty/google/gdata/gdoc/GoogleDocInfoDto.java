@@ -75,8 +75,9 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
   @JsonProperty(value = "lastEditTimeInMillis")
   private Long lastEditTimeInMillis;
   
-  @XmlElement(name = "type")
-  @JsonProperty(value = "type")
+  @XmlElement(name = "moduleType")
+  @JsonProperty(value = "moduleType")
+  // TODO(arjuns): Rename this field to moduleType
   private ModuleType type;
   
   @XmlElement(name = "title")

@@ -1,0 +1,13 @@
+<div>
+    <div data-dojo-attach-point="_resultsForm">
+        <div data-dojo-attach-point="_listWidgetDiv"></div>
+        <div class="searchInfo">
+            <button data-dojo-type="dijit.form.Button" data-dojo-attach-point="_getPreviousPageButton" data-dojo-attach-event="onClick:_getPreviousPage">${messages.previous}</button>
+            <span data-dojo-attach-point="_pageInfoSpan"></span>
+            <button data-dojo-type="dijit.form.Button" data-dojo-attach-point="_getNextPageButton" data-dojo-attach-event="onClick:_getNextPage">${messages.next}</button>
+        </div>
+    </div>
+    <div data-dojo-attach-point="_noResultsForm" class="searchInfo">
+        ${messages.noResults}
+    </div>
+</div>

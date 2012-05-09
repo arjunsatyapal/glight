@@ -231,10 +231,11 @@ public class GoogleDocIntegration extends AbstractJerseyResource {
     JobEntity jobEntity = jobManager.enqueueGoogleDocImportBatchJob(gdocImportBatchJobContext);
 
     URI jobLocationUri = LocationHeaderUtils.getJobLocation(jobEntity.getId());
-    HtmlBuilder htmlBuilder = new HtmlBuilder();
-    htmlBuilder.appendHref(null/* id */, jobLocationUri, "Check Status for : " + jobEntity.getId());
-
-    return Response.created(jobLocationUri).entity(htmlBuilder.toString())
-        .type(ContentTypeConstants.TEXT_HTML).build();
+    /*HtmlBuilder htmlBuilder = new HtmlBuilder();
+    htmlBuilder.appendHref(null/* id * /, jobLocationUri, "Check Status for : " + jobEntity.getId());*/
+    // TODO(waltercacau): allow JSON responses
+    // TODO(arjuns): Fix Jersey's relative path bug with locationUris.
+    return Response.created(jobLocationUri).entity(JsonUtils.toJson(jobEntity.getId()))
+        .type(ContentTypeConstants.APPLICATION_JSON).build();
   }
 }

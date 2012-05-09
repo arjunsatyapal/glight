@@ -21,21 +21,37 @@
  */
 define(['light/enums/EventsEnum',
         'light/builders/SearchStateBuilder',
-        'light/builders/BrowseContextStateBuilder'],
-        function(EventsEnum, SearchStateBuilder, BrowseContextStateBuilder) {
+        'light/builders/BrowseContextStateBuilder',
+        'light/utils/RouterManager'],
+        function(EventsEnum, SearchStateBuilder, BrowseContextStateBuilder, RouterManager) {
+    function toHash(statesOrHash) {
+      if(typeof states == "undefined") {
+        return "";
+      } else if(typeof states == "string") {
+        return statesOrHash;
+      } else {
+        // TODO(waltercacau): remove this use of a private method
+        return RouterManager._hashForStates(statesOrHash);
+      }
+    }
+    
     return {
     /** @lends light.enums.PagesEnum */
 
     REGISTER: {
       build: 'register',
       main: 'RegisterMain',
-      path: '/register',
+      getPath: function(statesOrHash) {
+        return '/register#'+toHash(statesOrHash);
+      },
       states: []
     },
     SEARCH: {
       build: 'search',
       main: 'SearchMain',
-      path: '/search',
+      getPath: function(statesOrHash) {
+        return '/search#'+toHash(statesOrHash);
+      },
       states: [
         {
           changeEvent: EventsEnum.SEARCH_STATE_CHANGED,
@@ -46,7 +62,9 @@ define(['light/enums/EventsEnum',
     MYDASH: {
       build: 'mydash',
       main: 'MyDashMain',
-      path: '/mydash',
+      getPath: function(statesOrHash) {
+        return '/mydash#'+toHash(statesOrHash);
+      },
       states: [
         {
           changeEvent: EventsEnum.BROWSE_CONTEXT_STATE_CHANGED,

@@ -55,7 +55,6 @@
        it('should not throw and show one button for each provider', function() {
          var providerList = ['provider1', 'provider2'];
          view.showUnloggedForm(providerList);
-         console.log(view.domNode);
          for (var i = 0, len = providerList.length; i < len; i++) {
            var id = view.id + '_' + providerList[i] +
              'LoginProviderButton';

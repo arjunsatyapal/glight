@@ -38,7 +38,7 @@ define(['light/views/SearchBarView',
 
   // Going to the anonymous search page
   if (!PersonUtils.isLogged()) {
-    URLUtils.replace(PagesEnum.SEARCH.path);
+    URLUtils.replace(PagesEnum.SEARCH.getPath());
   }
 
   var searchResultListView = new SearchResultListView({}, 'searchResults');

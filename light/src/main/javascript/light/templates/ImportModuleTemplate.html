@@ -8,14 +8,12 @@
     <div>${messages.authInstruction}</div>
     <button data-dojo-type="dijit.form.Button" data-dojo-attach-event="onClick:_gdocAuthorize">${messages.authButton}</button>
   </div>
-  <div class="gdocEmptyListForm" data-dojo-attach-point="_gdocEmptyListFormDiv">${messages.gdocEmptyList}</div>
   <div class="gdocListForm" data-dojo-attach-point="_gdocListFormDiv">
-    <div>${messages.selectOneOrMoreToImport}</div>
-    <div data-dojo-attach-point="_gdocListWidgetDiv"></div>
-    <div class="searchInfo">
-        <button data-dojo-type="dijit.form.Button" data-dojo-attach-point="_getPreviousPageButton" data-dojo-attach-event="onClick:_getGdocListPreviousPage">${messages.previous}</button>
-        <span data-dojo-attach-point="_gdocPageInfoSpan"></span>
-        <button data-dojo-type="dijit.form.Button" data-dojo-attach-point="_getNextPageButton" data-dojo-attach-event="onClick:_getGdocListNextPage">${messages.next}</button>
-    </div>
+    <div class="searchInfo"><button data-dojo-type="dijit.form.Button" data-dojo-attach-event="onClick:_importSelectedGdocs">${messages.importSelected}</button></div>
+    <div data-dojo-attach-point="_gdocPaginatedListWidgetDiv"></div>
+  </div>
+  <div class="importedListForm" data-dojo-attach-point="_importedListFormDiv">
+    <div class="searchInfo">The following modules where imported by you into Light.</div>
+    <div data-dojo-attach-point="_importedPaginatedListWidgetDiv"></div>
   </div>
 </div>

@@ -17,13 +17,32 @@ define(['dojo/_base/declare',
         'dojo/_base/lang',
         'light/utils/TemplateUtils',
         'dojo/text!light/templates/PromptDialogTemplate.html',
+        'dojo/text!light/templates/AlertDialogTemplate.html',
         'light/views/TemplatedLightView',
         'dijit/_WidgetsInTemplateMixin',
         'dijit/Dialog',
         'dijit/form/Button',
         'dijit/form/TextBox'],
-        function(declare, lang, TemplateUtils, PromptDialogTemplate, TemplatedLightView, _WidgetsInTemplateMixin) {
-  var PromptDialog = declare([TemplatedLightView, _WidgetsInTemplateMixin], {
+        function(declare, lang, TemplateUtils, PromptDialogTemplate, AlertDialogTemplate, TemplatedLightView, _WidgetsInTemplateMixin) {
+  var BaseDialog = declare([TemplatedLightView, _WidgetsInTemplateMixin], {
+    cleanup: function() {
+      var self = this;
+      self._dialog.hide();
+      setTimeout(function () {
+        self._dialog.destroyRecursive();
+        self.destroyRecursive();
+      }, 3000);
+    },
+    _earlyTemplatedStartup: true,
+    constructor: function(options) {
+      declare.safeMixin(options);
+    },
+    show: function() {
+      this._dialog.show();
+    }
+  });
+  
+  var PromptDialog = declare([BaseDialog], {
     // Options
     // TODO(waltercacau): Add support for translations
     okLabel: 'OK',
@@ -43,27 +62,31 @@ define(['dojo/_base/declare',
       this.onCancel();
       this.cleanup();
     },
-    cleanup: function() {
-      var self = this;
-      setTimeout(function () {
-        self._dialog.hide();
-        self._dialog.destroyRecursive();
-        self.destroyRecursive();
-      }, 0);
-    },
-    _earlyTemplatedStartup: true,
-    constructor: function(options) {
-      declare.safeMixin(options);
-    },
     postCreate: function() {
       this.inherited(arguments);
       this.connect(this._dialog, "onCancel", this._onClickCancel);
-    },
-    show: function() {
-      this._dialog.show();
     }
   });
   
+  
+  var AlertDialog = declare([BaseDialog], {
+    // Options
+    // TODO(waltercacau): Add support for translations
+    okLabel: 'OK',
+    title: 'Alert',
+    onOk: function() {},
+    content: '',
+    
+    templateString: AlertDialogTemplate,
+    _onClickOk: function() {
+      this.onOk();
+      this.cleanup();
+    },
+    postCreate: function() {
+      this.inherited(arguments);
+      this.connect(this._dialog, "onCancel", this._onClickOk);
+    }
+  });
   
   /**
    * Some utilities for dealing with DOM and style.
@@ -90,11 +113,17 @@ define(['dojo/_base/declare',
      */
     prompt: function(options) {
       var dialog = new PromptDialog(options)
-      console.log(dialog);
       document.body.appendChild(dialog.domNode);
       dialog.show();
     },
     
+    alert: function(options) {
+      var dialog = new AlertDialog(options)
+      document.body.appendChild(dialog.domNode);
+      dialog.show();
+    },
+
+    _AlertDialog: AlertDialog,
     _PromptDialog: PromptDialog
   
   };
