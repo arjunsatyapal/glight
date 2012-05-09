@@ -17,6 +17,8 @@ package com.google.light.server.dto.pages;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import org.codehaus.jackson.annotate.JsonTypeName;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 
@@ -35,6 +37,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
+@JsonTypeName(value = "page")
 @XmlRootElement(name = "page")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class PageDto extends AbstractDto<PageDto> {

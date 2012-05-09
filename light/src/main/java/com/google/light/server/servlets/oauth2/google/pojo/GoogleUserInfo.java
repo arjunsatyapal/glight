@@ -15,6 +15,8 @@ package com.google.light.server.servlets.oauth2.google.pojo;
 import static com.google.light.server.utils.LightPreconditions.checkEmail;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
+import org.codehaus.jackson.annotate.JsonTypeName;
+
 import org.codehaus.jackson.annotate.JsonProperty;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -36,6 +38,7 @@ import com.google.light.server.dto.AbstractDto;
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
+@JsonTypeName(value = "googleUserInfo")
 @XmlRootElement(name = "googleUserInfo")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class GoogleUserInfo extends AbstractDto<GoogleUserInfo> {

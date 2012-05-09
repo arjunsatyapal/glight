@@ -17,10 +17,8 @@ package com.google.light.server.dto.thirdparty.google.gdata.gdoc;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNonEmptyList;
-import static com.google.light.server.utils.LightPreconditions.checkPersonId;
+import static com.google.light.server.utils.LightUtils.getWrapperValue;
 import static com.google.light.server.utils.LightUtils.isListEmpty;
-
-import org.apache.commons.lang.StringUtils;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -31,13 +29,16 @@ import com.google.light.server.dto.pojo.longwrapper.ModuleId;
 import com.google.light.server.dto.pojo.longwrapper.PersonId;
 import com.google.light.server.dto.pojo.tree.AbstractTreeNode.TreeNodeType;
 import com.google.light.server.dto.pojo.tree.GoogleDocTree;
+import com.google.light.server.utils.LightPreconditions;
 import com.google.light.server.utils.LightUtils;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.annotate.JsonProperty;
+import org.codehaus.jackson.annotate.JsonTypeName;
 
 /**
  * 
@@ -47,12 +48,13 @@ import org.codehaus.jackson.annotate.JsonProperty;
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
+@JsonTypeName(value = "googleDocImportBatchJobContext")
 @XmlRootElement(name = "googleDocImportBatchJobContext")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class GoogleDocImportBatchJobContext extends AbstractDto<GoogleDocImportBatchJobContext> {
   @XmlElement(name = "ownerId")
   @JsonProperty(value = "ownerId")
-  private PersonId ownerId;
+  private Long ownerId;
   
   @XmlElement(name = "resourceInfoList")
   @JsonProperty(value = "resourceInfoList")
@@ -76,14 +78,14 @@ public class GoogleDocImportBatchJobContext extends AbstractDto<GoogleDocImportB
 
   @XmlElement(name = "collectionId")
   @JsonProperty(value = "collectionId")
-  private CollectionId collectionId; 
+  private Long collectionId; 
 
   /**
    * {@inheritDoc}
    */
   @Override
   public GoogleDocImportBatchJobContext validate() {
-    checkPersonId(ownerId);
+    LightPreconditions.checkPersonId(getOwnerId());
     checkNotNull(state, "state");
 
     switch (state) {
@@ -102,6 +104,18 @@ public class GoogleDocImportBatchJobContext extends AbstractDto<GoogleDocImportB
         checkNonEmptyList(listOfImportDestinations, "listOfImportDestinations");
     }
     return this;
+  }
+
+  public PersonId getOwnerId() {
+    return new PersonId(ownerId);
+  }
+
+  public List<GoogleDocInfoDto> getResourceInfoList() {
+    return resourceInfoList;
+  }
+
+  public GoogleDocTree getRoot() {
+    return root;
   }
 
   public boolean isEmpty() {
@@ -159,7 +173,7 @@ public class GoogleDocImportBatchJobContext extends AbstractDto<GoogleDocImportB
   }
 
   public CollectionId getCollectionId() {
-    return collectionId;
+    return new CollectionId(collectionId);
   }
 
   public void setCollectionTitle(String collectionTitle) {
@@ -167,7 +181,7 @@ public class GoogleDocImportBatchJobContext extends AbstractDto<GoogleDocImportB
   }
 
   public void setCollectionId(CollectionId collectionId) {
-    this.collectionId = collectionId;
+    this.collectionId = getWrapperValue(collectionId);
   }
   
   
@@ -261,13 +275,13 @@ public class GoogleDocImportBatchJobContext extends AbstractDto<GoogleDocImportB
   @SuppressWarnings("synthetic-access")
   private GoogleDocImportBatchJobContext(Builder builder) {
     super(builder);
-    this.ownerId = builder.ownerId;
+    this.ownerId = getWrapperValue(builder.ownerId);
     this.resourceInfoList = builder.resourceInfoList;
     this.root = builder.root;
     this.listOfImportDestinations = builder.listOfImportDestinations;
     this.state = builder.state;
     this.collectionTitle = builder.collectionTitle;
-    this.collectionId = builder.collectionId;
+    this.collectionId = getWrapperValue(builder.collectionId);
   }
 
   // For JAXB

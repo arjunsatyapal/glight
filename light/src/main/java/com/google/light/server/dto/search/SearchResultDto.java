@@ -3,6 +3,8 @@ package com.google.light.server.dto.search;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import org.codehaus.jackson.annotate.JsonTypeName;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 
@@ -20,6 +22,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  * @author Walter Cacau
  */
 @SuppressWarnings("serial")
+@JsonTypeName(value = "searchResult")
 @XmlRootElement(name = "searchResult")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class SearchResultDto extends AbstractDto<SearchResultDto> {

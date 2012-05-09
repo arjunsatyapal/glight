@@ -37,11 +37,10 @@ import org.openqa.selenium.Cookie;
  * @author Arjun Satyapal
  */
 public class LightHttpClient {
-  private Cookie cookie;
   private HttpHeaders httpHeaders;
   
   public LightHttpClient(Cookie cookie) {
-    this.cookie = checkNotNull(cookie, "cookie cannot be null");
+    checkNotNull(cookie, "cookie cannot be null");
     this.httpHeaders = new HttpHeaders();
     httpHeaders.set(HttpHeaderEnum.COOKIE.get(), cookie.toString());
   }

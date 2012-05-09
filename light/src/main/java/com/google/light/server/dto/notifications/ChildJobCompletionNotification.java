@@ -16,17 +16,15 @@
 package com.google.light.server.dto.notifications;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-
-import javax.xml.bind.annotation.XmlElement;
-import org.codehaus.jackson.annotate.JsonProperty;
-
-import javax.xml.bind.annotation.XmlAccessType;
-
-import javax.xml.bind.annotation.XmlAccessorType;
-
-import javax.xml.bind.annotation.XmlRootElement;
+import static com.google.light.server.utils.LightUtils.getWrapperValue;
 
 import com.google.light.server.dto.pojo.longwrapper.JobId;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import org.codehaus.jackson.annotate.JsonProperty;
+import org.codehaus.jackson.annotate.JsonTypeName;
 
 /**
  * 
@@ -36,17 +34,18 @@ import com.google.light.server.dto.pojo.longwrapper.JobId;
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
+@JsonTypeName(value = "childJobCompletionNotification")
 @XmlRootElement(name = "childJobCompletionNotification")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class ChildJobCompletionNotification extends
     AbstractNotification<ChildJobCompletionNotification> {
   @XmlElement(name = "childJobId")
   @JsonProperty(value = "childJobId")
-  private JobId childJobId;
+  private Long childJobId;
   
   @XmlElement(name = "parentJobId")
   @JsonProperty(value = "parentJobId")
-  private JobId parentJobId;
+  private Long parentJobId;
   
   @XmlElement(name = "jsonPayLoad")
   @JsonProperty(value = "jsonPayLoad")
@@ -67,11 +66,11 @@ public class ChildJobCompletionNotification extends
   }
 
   public JobId getChildJobId() {
-    return childJobId;
+    return new JobId(childJobId);
   }
 
   public JobId getParentJobId() {
-    return parentJobId;
+    return new JobId(parentJobId);
   }
 
   public String getJsonPayLoad() {
@@ -107,8 +106,8 @@ public class ChildJobCompletionNotification extends
   @SuppressWarnings("synthetic-access")
   private ChildJobCompletionNotification(Builder builder) {
     super(builder);
-    this.childJobId = builder.childJobId;
-    this.parentJobId = builder.parentJobId;
+    this.childJobId = getWrapperValue(builder.childJobId);
+    this.parentJobId = getWrapperValue(builder.parentJobId);
     this.jsonPayLoad = builder.jsonPayLoad;
   }
 

@@ -2,6 +2,8 @@ package com.google.light.server.dto.search;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import org.codehaus.jackson.annotate.JsonTypeName;
+
 import org.codehaus.jackson.annotate.JsonProperty;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -19,20 +21,21 @@ import com.google.light.server.dto.AbstractDto;
  * @author Walter Cacau
  */
 @SuppressWarnings("serial")
+@JsonTypeName(value = "searchResultItem")
 @XmlRootElement(name = "searchResultItem")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class SearchResultItemDto extends AbstractDto<SearchResultItemDto> {
   @XmlElement(name = "title")
   @JsonProperty(value = "title")
-  String title;
+  private String title;
   
   @XmlElement(name = "description")
   @JsonProperty(value = "description")
-  String description;
+  private String description;
   
   @XmlElement(name = "link")
   @JsonProperty(value = "link")
-  String link;
+  private String link;
 
   /**
    * Title

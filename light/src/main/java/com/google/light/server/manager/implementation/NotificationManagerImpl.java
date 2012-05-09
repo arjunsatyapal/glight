@@ -20,8 +20,6 @@ import static com.google.light.server.utils.LightPreconditions.checkTxnIsRunning
 
 import java.util.logging.Logger;
 
-import com.google.light.server.utils.QueueUtils;
-
 import com.google.inject.Inject;
 import com.google.light.server.constants.NotificationType;
 import com.google.light.server.dto.notifications.ChildJobCompletionNotification;

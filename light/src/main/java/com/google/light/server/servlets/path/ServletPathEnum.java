@@ -15,14 +15,12 @@ package com.google.light.server.servlets.path;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
-import com.google.appengine.tools.pipeline.impl.servlets.PipelineServlet;
 import com.google.common.collect.Lists;
 import com.google.light.server.constants.LightEnvEnum;
 import com.google.light.server.exception.unchecked.httpexception.NotFoundException;
 import com.google.light.server.servlets.LightGenericJSPServlet;
 import com.google.light.server.servlets.admin.OAuth2ConsumerCredentialServlet;
 import com.google.light.server.servlets.filters.FilterPathEnum;
-import com.google.light.server.servlets.jobs.JobDetailServlet;
 import com.google.light.server.servlets.login.LoginServlet;
 import com.google.light.server.servlets.login.LogoutServlet;
 import com.google.light.server.servlets.oauth2.google.gdoc.GoogleDocAuthCallbackServlet;
@@ -31,7 +29,6 @@ import com.google.light.server.servlets.oauth2.google.login.GoogleLoginCallbackS
 import com.google.light.server.servlets.oauth2.google.login.GoogleLoginServlet;
 import com.google.light.server.servlets.person.PersonServlet;
 import com.google.light.server.servlets.search.SearchServlet;
-import com.google.light.server.servlets.test.DeleteAllServlet;
 import com.google.light.server.servlets.test.TestCleanUpDatastore;
 import com.google.light.server.servlets.test.TestHeaders;
 import com.google.light.server.servlets.test.TestLogin;
@@ -70,10 +67,6 @@ public enum ServletPathEnum {
          Lists.newArrayList(FilterPathEnum.API, FilterPathEnum.TEST)),
 
   // Third party integrations.
-  IMPORT_STAGE_DETAIL_SERVLET(JobDetailServlet.class, "/api/queue/import_stage_detail",
-                              true, false, true, true,
-                              Lists.newArrayList(FilterPathEnum.API, FilterPathEnum.TEST)),
-
   SEARCH(SearchServlet.class, "/api/search",
          false, false, true, true,
          Lists.newArrayList(FilterPathEnum.API, FilterPathEnum.TEST)),
@@ -114,14 +107,7 @@ public enum ServletPathEnum {
                               "/admin/oauth2_consumer_credential",
                               true, true, true, true,
                               Lists.newArrayList(FilterPathEnum.API, FilterPathEnum.TEST)),
-  // Pipeline Servlet
-  PIPELINE_HANDLER(PipelineServlet.class, "/_ah/pipeline/handleTask",
-                   false, false, true, true,
-                   Lists.newArrayList(FilterPathEnum.TASK_QUEUE)),
   // Some test servlets.
-  DELETE_ALL(DeleteAllServlet.class, "/test/admin/delete_all",
-             true, true, false, true,
-             Lists.newArrayList(FilterPathEnum.API, FilterPathEnum.TEST)),
   FAKE_LOGIN(FakeLoginServlet.class, "/test/fakelogin",
              false, false, false, true,
              Lists.newArrayList(FilterPathEnum.API, FilterPathEnum.TEST)),

@@ -15,14 +15,12 @@
  */
 package com.google.light.server.persistence.entity.module;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.light.server.utils.LightPreconditions.checkModuleId;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
-
-import com.google.light.server.dto.pojo.longwrapper.ModuleId;
-
-import javax.persistence.Embedded;
+import static com.google.light.server.utils.LightUtils.getWrapperValue;
 
 import com.google.light.server.dto.module.ModuleDto;
+import com.google.light.server.dto.pojo.longwrapper.ModuleId;
 import com.google.light.server.persistence.entity.AbstractPersistenceEntity;
 import com.googlecode.objectify.Key;
 import javax.persistence.Id;
@@ -34,16 +32,16 @@ import javax.persistence.Id;
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
-public class OriginModuleMappingEntity extends AbstractPersistenceEntity<OriginModuleMappingEntity, Object> {
+public class OriginModuleMappingEntity extends
+    AbstractPersistenceEntity<OriginModuleMappingEntity, Object> {
   @Id
-  String id;
-  @Embedded
-  ModuleId moduleId;
+  private String id;
+  private Long moduleId;
 
   public String getId() {
     return id;
   }
-  
+
   /**
    * {@inheritDoc}
    */
@@ -68,10 +66,20 @@ public class OriginModuleMappingEntity extends AbstractPersistenceEntity<OriginM
   }
 
   public ModuleId getModuleId() {
-    return moduleId;
+    return new ModuleId(moduleId);
   }
 
-  public static class Builder extends AbstractPersistenceEntity.BaseBuilder<Builder>{
+  @Override
+  public OriginModuleMappingEntity validate() {
+    super.validate();
+    
+    checkNotBlank(id, "id");
+    checkModuleId(getModuleId());
+    
+    return this;
+  }
+
+  public static class Builder extends AbstractPersistenceEntity.BaseBuilder<Builder> {
     private String id;
     private ModuleId moduleId;
 
@@ -94,10 +102,10 @@ public class OriginModuleMappingEntity extends AbstractPersistenceEntity<OriginM
   @SuppressWarnings("synthetic-access")
   private OriginModuleMappingEntity(Builder builder) {
     super(builder, true);
-    this.id = checkNotBlank(builder.id, "id");
-    this.moduleId = checkNotNull(builder.moduleId, "moduleId");
+    this.id = builder.id;
+    this.moduleId = getWrapperValue(builder.moduleId);
   }
-  
+
   // For Objectify.
   private OriginModuleMappingEntity() {
     super(null, true);

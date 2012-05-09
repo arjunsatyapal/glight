@@ -1,5 +1,7 @@
 package com.google.light.server.manager.interfaces;
 
+import java.util.List;
+
 import com.google.light.server.dto.pages.PageDto;
 import com.google.light.server.dto.pojo.longwrapper.CollectionId;
 import com.google.light.server.dto.pojo.longwrapper.PersonId;
@@ -58,28 +60,21 @@ public interface CollectionManager {
   public CollectionId findCollectionIdByOriginId(Objectify ofy, String originId);
 
   /**
-   * Reserve a CollectionId for a OriginId.
-   * 
-   * @param originId
-   * @param ownerId
-   * @return
-   */
-  public CollectionEntity reserveCollectionIdForOriginId(Objectify ofy, String originId, PersonId ownerId);
-  
-  /**
    * Reserve a CollectionId.
    * 
    * @param originId
    * @param ownerId
    * @return
    */
-  public CollectionEntity reserveCollectionId(Objectify ofy, PersonId ownerId, String title);
+  public CollectionEntity reserveCollectionId(Objectify ofy, List<PersonId> owners, String title);
 
   /**
    * Add CollectionVersion for GoogleDoc.
    */
-  public CollectionVersionEntity addCollectionVersionForGoogleDoc(Objectify ofy, 
-      CollectionEntity collectionEntity, CollectionTreeNodeDto collectionRoot);
+  public Version reserveCollectionVersion(Objectify ofy, CollectionEntity collectionEntity);
+
+  public CollectionVersionEntity publishCollectionVersion(Objectify ofy,
+      CollectionEntity collectionEntity, Version version, CollectionTreeNodeDto collectionRoot);
 
   /**
    * Get Collection-Version.
@@ -90,6 +85,6 @@ public interface CollectionManager {
    */
   public CollectionVersionEntity getCollectionVersion(Objectify ofy, CollectionId collectionId,
       Version version);
-  
+
   public PageDto findCollectionsByOwnerId(PersonId ownerId, String startIndex, int maxResult);
 }

@@ -15,6 +15,8 @@
  */
 package com.google.light.server.dto;
 
+import org.codehaus.jackson.annotate.JsonTypeName;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 
@@ -33,6 +35,7 @@ import com.google.common.base.Preconditions;
  * @author Walter Cacau
  */
 @SuppressWarnings("serial")
+@JsonTypeName(value = "redirect")
 @XmlRootElement(name = "redirect")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class RedirectDto extends AbstractDto<RedirectDto> {

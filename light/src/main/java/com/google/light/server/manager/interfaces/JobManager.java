@@ -15,19 +15,14 @@
  */
 package com.google.light.server.manager.interfaces;
 
-import java.util.Map;
-
-import java.util.List;
-
 import com.google.light.server.dto.pojo.ChangeLogEntryPojo;
-import com.google.light.server.dto.pojo.JobHandlerId;
 import com.google.light.server.dto.pojo.longwrapper.JobId;
 import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocImportBatchJobContext;
 import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocImportJobContext;
 import com.google.light.server.persistence.entity.jobs.JobEntity;
-import com.google.light.server.persistence.entity.jobs.JobEntity.JobHandlerType;
-import com.google.light.server.persistence.entity.queue.importflow.ImportJobEntity;
 import com.googlecode.objectify.Objectify;
+import java.util.List;
+import java.util.Map;
 import javax.annotation.Nullable;
 
 /**
@@ -38,10 +33,6 @@ import javax.annotation.Nullable;
  * @author Arjun Satyapal
  */
 public interface JobManager {
-  @Deprecated
-  public JobEntity enqueueImportJob(ImportJobEntity importJobEntity, JobId parentJobId, 
-      JobId rootJobId, String promiseHandle);
-  
   /**
    * Enqueues a Batch job for importing Multiple Google Docs.
    */
@@ -75,15 +66,14 @@ public interface JobManager {
   
   public void enqueueLightJob(Objectify ofy, JobId jobId);
   
+  public void enqueueLightJobWithoutTxn(JobId jobId);
+
   
   public void enqueueGoogleDocInteractionJob(Objectify ofy, JobId jobId);
   
   public JobEntity put(@Nullable Objectify ofy, JobEntity jobEntity, ChangeLogEntryPojo changeLog);
   
   public JobEntity get(Objectify ofy, JobId jobId);
-  
-  @Deprecated
-  public JobEntity findByJobHandlerId(JobHandlerType jobHandlerType, JobHandlerId jobHandlerId);
   
   public void handleJob(JobId jobId);
   

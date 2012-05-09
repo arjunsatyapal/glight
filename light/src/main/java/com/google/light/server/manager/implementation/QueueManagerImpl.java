@@ -130,7 +130,22 @@ public class QueueManagerImpl implements QueueManager {
   @Override
   public void enqueueLightJob(Objectify ofy, JobId jobId) {
     checkTxnIsRunning(ofy);
+    RetryOptions retryOptions = getRetryOptions();
 
+    TaskOptions taskOptions = getTaskOptions(retryOptions,
+        TaskOptions.Method.PUT, ContentTypeConstants.TEXT_PLAIN,
+        Long.toString(jobId.getValue()), getJobLocation(jobId));
+
+    Queue queue = QueueFactory.getQueue(QueueEnum.LIGHT.getName());
+    TaskHandle taskHandle = queue.add(taskOptions);
+    logger.info("Enqueued enqueueLightJob for " + jobId + " with TaskHandle : " + taskHandle);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void enqueueLightJobWithoutTxn(JobId jobId) {
     RetryOptions retryOptions = getRetryOptions();
 
     TaskOptions taskOptions = getTaskOptions(retryOptions,

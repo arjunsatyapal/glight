@@ -17,19 +17,18 @@ package com.google.light.server.dto.module;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
-
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-
-import javax.xml.bind.annotation.XmlRootElement;
-
-import javax.xml.bind.annotation.XmlElement;
-import org.codehaus.jackson.annotate.JsonProperty;
+import static com.google.light.server.utils.LightUtils.getWrapperValue;
 
 import com.google.light.server.dto.AbstractDto;
 import com.google.light.server.dto.pojo.longwrapper.JobId;
 import com.google.light.server.dto.pojo.longwrapper.ModuleId;
 import com.google.light.server.dto.pojo.longwrapper.Version;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import org.codehaus.jackson.annotate.JsonProperty;
+import org.codehaus.jackson.annotate.JsonTypeName;
 
 /**
  * This DTO is used to wrap information about an Import operation.
@@ -39,6 +38,7 @@ import com.google.light.server.dto.pojo.longwrapper.Version;
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
+@JsonTypeName(value = "importDestination")
 @XmlRootElement(name = "importDestination")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class ImportDestinationDto extends AbstractDto<ImportDestinationDto> {
@@ -52,15 +52,15 @@ public class ImportDestinationDto extends AbstractDto<ImportDestinationDto> {
 
   @XmlElement(name = "moduleId")
   @JsonProperty(value = "moduleId")
-  private ModuleId moduleId;
+  private Long moduleId;
 
   @XmlElement(name = "version")
   @JsonProperty(value = "version")
-  private Version version;
+  private Long version;
 
   @XmlElement(name = "jobId")
   @JsonProperty(value = "jobId")
-  private JobId jobId;
+  private Long jobId;
 
   /**
    * {@inheritDoc}
@@ -85,15 +85,15 @@ public class ImportDestinationDto extends AbstractDto<ImportDestinationDto> {
   }
 
   public ModuleId getModuleId() {
-    return moduleId;
+    return new ModuleId(moduleId);
   }
 
   public Version getVersion() {
-    return version;
+    return new Version(version);
   }
 
   public JobId getJobId() {
-    return jobId;
+    return new JobId(jobId);
   }
 
   public static class Builder extends AbstractDto.BaseBuilder<Builder> {
@@ -139,9 +139,9 @@ public class ImportDestinationDto extends AbstractDto<ImportDestinationDto> {
     super(builder);
     this.externalId = builder.externalId;
     this.moduleType = builder.moduleType;
-    this.moduleId = builder.moduleId;
-    this.version = builder.version;
-    this.jobId = builder.jobId;
+    this.moduleId = getWrapperValue(builder.moduleId);
+    this.version = getWrapperValue(builder.version);
+    this.jobId = getWrapperValue(builder.jobId);
   }
 
   // For Jaxb.

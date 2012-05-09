@@ -17,15 +17,13 @@ package com.google.light.server.constants;
 
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.testingutils.TestingUtils.containsAnnotation;
+import static com.google.light.testingutils.TestingUtils.getAnnotationIfExists;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.util.Map;
-
 import com.google.common.collect.Maps;
-
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.light.server.dto.AbstractDto;
@@ -44,7 +42,6 @@ import com.google.light.server.servlets.oauth2.google.pojo.AbstractOAuth2TokenIn
 import com.google.light.server.servlets.oauth2.google.pojo.GoogleLoginTokenInfo;
 import com.google.light.server.servlets.oauth2.google.pojo.GoogleOAuth2TokenInfo;
 import com.google.light.server.servlets.oauth2.google.pojo.GoogleUserInfo;
-import com.google.light.server.utils.LightPreconditions;
 import com.google.light.testingutils.GaeTestingUtils;
 import com.google.light.testingutils.TestingUtils;
 import java.lang.annotation.Annotation;
@@ -52,6 +49,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 import javax.persistence.Embedded;
@@ -61,6 +59,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import org.codehaus.jackson.annotate.JsonProperty;
+import org.codehaus.jackson.annotate.JsonTypeName;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -142,6 +141,7 @@ public class LightDtosTest implements EnumTestInterface {
 
   private static Set<String> allowedAnnotationsForClasses = Sets.newHashSet(
       SuppressWarnings.class.getName(),
+      JsonTypeName.class.getName(),
       XmlAccessorType.class.getName(),
       XmlRootElement.class.getName(),
       XmlType.class.getName());
@@ -160,13 +160,18 @@ public class LightDtosTest implements EnumTestInterface {
           + XmlAccessorType.class.getSimpleName(),
           containsAnnotation(XmlAccessorType.class, currClass.getAnnotations()));
 
-      String name = getXmlRootElementName(currClass.getAnnotations());
+      assertTrue(currClassName + " should be annotated with "
+          + JsonTypeName.class.getSimpleName(),
+          containsAnnotation(JsonTypeName.class, currClass.getAnnotations()));
+
+      String rootElementName = getXmlRootElementName(currClass.getAnnotations());
+      String jsonTypeName = getJsonTypeValue(currClass.getAnnotations());
       String expectedRootElementName = lightDtoEnum.getXmlRootElementName();
 
-      LightPreconditions.checkNotBlank(expectedRootElementName,
-          currClassName + " cannot have blank rootElement name");
+      checkNotBlank(rootElementName, currClassName + " cannot have blank XmlRootElement name");
+      checkNotBlank(jsonTypeName, currClassName + " cannot have blank JsonTypeName value");
       assertEquals(currClassName + " root name does not match.",
-          expectedRootElementName, name);
+          expectedRootElementName, rootElementName);
 
     }
 
@@ -206,9 +211,9 @@ public class LightDtosTest implements EnumTestInterface {
       assertTrue(className + "#" + currField.getName() + " should be annotated with @XmlElement.",
           containsAnnotation(XmlElement.class, currField.getAnnotations()));
 
-      String errorMsg =
-          className + "#" + currField.getName() + " needs to have overriden names for both "
-              + "Json and Xml and these overridden names should be same.";
+      String errorMsg = className + "#" + currField.getName()
+          + " needs to have overriden names for both "
+          + "Json and Xml and these overridden names should be same.";
 
       String xmlElementName = getXmlElementName(currField.getAnnotations());
       checkNotBlank(xmlElementName, errorMsg);
@@ -230,36 +235,48 @@ public class LightDtosTest implements EnumTestInterface {
   }
 
   private String getXmlRootElementName(Annotation[] annotations) {
-    for (Annotation currAnnotation : annotations) {
-      if (TestingUtils.isSameAnnotation(currAnnotation, XmlRootElement.class)) {
-        XmlRootElement element = (XmlRootElement) currAnnotation;
-        return element.name();
-      }
+    Annotation tempAnnotation =
+        TestingUtils.getAnnotationIfExists(XmlRootElement.class, annotations);
+
+    if (tempAnnotation == null) {
+      return null;
     }
 
-    return null;
+    XmlRootElement element = (XmlRootElement) tempAnnotation;
+    return element.name();
   }
 
   private String getXmlElementName(Annotation[] annotations) {
-    for (Annotation currAnnotation : annotations) {
-      if (TestingUtils.isSameAnnotation(currAnnotation, XmlElement.class)) {
-        XmlElement element = (XmlElement) currAnnotation;
-        return element.name();
-      }
+    Annotation tempAnnotation = getAnnotationIfExists(XmlElement.class, annotations);
+
+    if (tempAnnotation == null) {
+      return null;
     }
 
-    return null;
+    XmlElement element = (XmlElement) tempAnnotation;
+    return element.name();
   }
 
   private String getJsonPropertyValue(Annotation[] annotations) {
-    for (Annotation currAnnotation : annotations) {
-      if (TestingUtils.isSameAnnotation(currAnnotation, JsonProperty.class)) {
-        JsonProperty property = (JsonProperty) currAnnotation;
-        return property.value();
-      }
+    Annotation tempAnnotation = getAnnotationIfExists(JsonProperty.class, annotations);
+
+    if (tempAnnotation == null) {
+      return null;
     }
 
-    return null;
+    JsonProperty property = (JsonProperty) tempAnnotation;
+    return property.value();
+  }
+
+  private String getJsonTypeValue(Annotation[] annotations) {
+    Annotation tempAnnotation = TestingUtils.getAnnotationIfExists(JsonTypeName.class, annotations);
+
+    if (tempAnnotation == null) {
+      return null;
+    }
+
+    JsonTypeName typeName = (JsonTypeName) tempAnnotation;
+    return typeName.value();
   }
 
   private boolean isIgnorableField(Field field) {
@@ -341,7 +358,7 @@ public class LightDtosTest implements EnumTestInterface {
       if (currDto.getClazz().getSimpleName().startsWith("Abstract")) {
         continue;
       }
-      
+
       String rootElementName = currDto.getXmlRootElementName();
       if (map.keySet().contains(rootElementName)) {
         fail("More then one is tagged with " + rootElementName + " and are : " + currDto + ", "

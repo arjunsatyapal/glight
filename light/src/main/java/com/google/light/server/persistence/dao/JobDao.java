@@ -15,26 +15,17 @@
  */
 package com.google.light.server.persistence.dao;
 
-import static com.google.light.server.utils.ObjectifyUtils.assertAndReturnUniqueEntity;
-
-import com.google.common.collect.Maps;
-
-import java.util.Map;
-
 import com.google.common.collect.Lists;
-
-import java.util.List;
-
+import com.google.common.collect.Maps;
 import com.google.inject.Inject;
-import com.google.light.server.dto.pojo.JobHandlerId;
 import com.google.light.server.dto.pojo.longwrapper.JobId;
 import com.google.light.server.persistence.entity.jobs.JobEntity;
-import com.google.light.server.persistence.entity.jobs.JobEntity.JobHandlerType;
 import com.google.light.server.utils.ObjectifyUtils;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Objectify;
 import com.googlecode.objectify.ObjectifyService;
-import com.googlecode.objectify.Query;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 
@@ -61,19 +52,6 @@ public class JobDao extends AbstractBasicDao<Object, JobEntity> {
     return super.get(ofy, key);
   }
 
-  public JobEntity findByJobHandlerId(JobHandlerType jobHandlerType, JobHandlerId jobHandlerId) {
-    Objectify ofy = ObjectifyUtils.nonTransaction();
-
-    Query<JobEntity> query = ofy.query(JobEntity.class)
-        .filter(JobEntity.OFY_JOB_HANDLER_ID, jobHandlerId.get())
-        .filter(JobEntity.OFY_JOB_HANDLER_TYPE, jobHandlerType);
-
-    String errMessage =
-        "For JobHandlerType[" + jobHandlerType + "], JobHandlerId[" + jobHandlerId
-            + "], found more then one record.";
-    return assertAndReturnUniqueEntity(query, errMessage);
-  }
-  
   public Map<JobId, JobEntity> findListOfJobs(List<JobId> listOfJobIds) {
     List<Key<JobEntity>> listOfKeys = Lists.newArrayListWithCapacity(listOfJobIds.size());
     

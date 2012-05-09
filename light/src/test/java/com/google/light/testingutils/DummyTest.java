@@ -17,29 +17,18 @@ package com.google.light.testingutils;
 
 import static org.junit.Assert.assertEquals;
 
-import com.google.light.server.dto.module.ModuleType;
-
-import com.google.light.server.dto.pojo.longwrapper.CollectionId;
-
 import com.google.common.collect.Lists;
-import com.google.light.server.dto.AbstractPojo;
+import com.google.light.server.dto.module.ModuleType;
+import com.google.light.server.dto.pojo.longwrapper.CollectionId;
 import com.google.light.server.dto.pojo.longwrapper.ModuleId;
-import com.google.light.server.dto.pojo.tree.CollectionTreeNodeDto;
 import com.google.light.server.dto.pojo.tree.AbstractTreeNode.TreeNodeType;
+import com.google.light.server.dto.pojo.tree.CollectionTreeNodeDto;
 import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocResourceId;
 import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocResourceIdListWrapperDto;
 import com.google.light.server.exception.unchecked.JsonException;
-import com.google.light.server.exception.unchecked.XmlException;
 import com.google.light.server.utils.JsonUtils;
 import com.google.light.server.utils.XmlUtils;
-import java.io.StringReader;
-import java.io.StringWriter;
 import java.util.List;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.bind.annotation.XmlRootElement;
 import org.codehaus.jackson.annotate.JsonAutoDetect;
 import org.codehaus.jackson.map.AnnotationIntrospector;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -108,6 +97,7 @@ public class DummyTest {
     assertEquals(list, resourceList2.get());
   }
   
+  
 //  @Test
 //  public void test_post_json_xml() throws Exception {
 //    List<GoogleDocResourceId> list = Lists.newArrayList();
@@ -138,27 +128,6 @@ public class DummyTest {
 //    assertEquals(result, json);
 //  }
   
-  public static <T> String toXml(T object) {
-    try {
-      JAXBContext jaxbContext = JAXBContext.newInstance(TestClass.class);
-      Marshaller marshaller = jaxbContext.createMarshaller();
-      StringWriter sw = new StringWriter();
-      marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-      marshaller.marshal(object, sw);
-      return sw.toString();
-    } catch (Exception e) {
-      throw new XmlException(e);
-    }
-  }
-  
-  @SuppressWarnings("unchecked")
-  public static <D> D getDto(String xmlString) throws JAXBException {
-    JAXBContext jaxbContext = JAXBContext.newInstance(TestClass.class);
-    Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-
-    D dto = ((D) unmarshaller.unmarshal(new StringReader(xmlString)));
-    return dto;
-  }
   
   public static <T> String toJson(T object, boolean prettyPrint) {
     ObjectMapper mapper = new ObjectMapper();
@@ -185,24 +154,6 @@ public class DummyTest {
       return writer.writeValueAsString(object);
     } catch (Exception e) {
       throw new JsonException(e);
-    }
-  }
-  
-  
-  @SuppressWarnings("serial")
-  @XmlRootElement(name = "test_class")
-  private static class TestClass extends AbstractPojo<TestClass>{
-    int camelCase = 1;
-
-    /** 
-     * {@inheritDoc}
-     */
-    @Override
-    public TestClass validate() {
-      return this;
-    }
-    
-    private TestClass() {
     }
   }
 }

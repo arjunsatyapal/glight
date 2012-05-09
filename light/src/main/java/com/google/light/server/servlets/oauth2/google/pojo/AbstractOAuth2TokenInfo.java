@@ -206,6 +206,7 @@ public abstract class AbstractOAuth2TokenInfo<D> extends AbstractPojo<D> {
   }
   
   // For JAXB
+  @SuppressWarnings("unused")
   private AbstractOAuth2TokenInfo() {
 //    super(null);
   }

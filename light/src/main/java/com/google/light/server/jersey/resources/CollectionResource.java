@@ -23,11 +23,12 @@ import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPersonLoggedIn;
 import static com.google.light.server.utils.LightUtils.isListEmpty;
 
+import javax.ws.rs.Consumes;
+
+import javax.ws.rs.PUT;
+
 import com.google.light.server.dto.collection.CollectionDto;
 
-import com.google.light.server.persistence.dao.CollectionDao;
-
-import com.google.light.server.dto.module.ModuleDto;
 import java.util.List;
 
 import com.google.light.server.constants.LightConstants;
@@ -92,6 +93,21 @@ public class CollectionResource extends AbstractJerseyResource {
   public CollectionTreeNodeDto getCollectionVersion(
       @PathParam(JerseyConstants.PATH_PARAM_COLLECTION_ID) String collectionIdStr,
       @PathParam(JerseyConstants.PATH_PARAM_VERSION) String versionStr) {
+    CollectionVersionEntity collectionVersionEntity = getCollectionVersionEntity(
+        collectionIdStr, versionStr);
+    return collectionVersionEntity.getCollectionTree();
+  }
+  
+  @PUT
+  @Path(JerseyConstants.PATH_COLLECTION_VERSION)
+  @Consumes({ ContentTypeConstants.APPLICATION_JSON, ContentTypeConstants.APPLICATION_XML })
+  @Produces({ ContentTypeConstants.APPLICATION_JSON, ContentTypeConstants.APPLICATION_XML })
+  public CollectionTreeNodeDto putCollectionVersion(
+      @PathParam(JerseyConstants.PATH_PARAM_COLLECTION_ID) String collectionIdStr,
+      @PathParam(JerseyConstants.PATH_PARAM_VERSION) String versionStr,
+      String body) {
+    
+    System.out.println(body);
     CollectionVersionEntity collectionVersionEntity = getCollectionVersionEntity(
         collectionIdStr, versionStr);
     return collectionVersionEntity.getCollectionTree();
@@ -181,7 +197,7 @@ public class CollectionResource extends AbstractJerseyResource {
   @GET
   @Path(JerseyConstants.PATH_ME_HTML)
   @Produces( ContentTypeConstants.TEXT_HTML )
-  public String getModulesPublishedByMeHtml() {
+  public String getCollectionsPublishedByMeHtml() {
     SessionManager sessionManager = GuiceUtils.getInstance(SessionManager.class);
     checkPersonLoggedIn(sessionManager);
     

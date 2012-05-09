@@ -15,21 +15,19 @@
  */
 package com.google.light.server.dto.thirdparty.google.gdata.gdoc;
 
-import org.apache.commons.lang.StringUtils;
-
-import com.google.light.server.dto.pojo.longwrapper.CollectionId;
-
-import org.codehaus.jackson.annotate.JsonProperty;
-
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-
-import javax.xml.bind.annotation.XmlRootElement;
+import static com.google.light.server.utils.LightUtils.getWrapperValue;
 
 import com.google.common.collect.Lists;
 import com.google.light.server.dto.AbstractDto;
+import com.google.light.server.dto.pojo.longwrapper.CollectionId;
 import java.util.List;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import org.apache.commons.lang.StringUtils;
+import org.codehaus.jackson.annotate.JsonProperty;
+import org.codehaus.jackson.annotate.JsonTypeName;
 
 /**
  *
@@ -39,6 +37,7 @@ import javax.xml.bind.annotation.XmlElement;
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
+@JsonTypeName(value = "googleDocResourceIdList")
 @XmlRootElement(name="googleDocResourceIdList")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class GoogleDocResourceIdListWrapperDto extends AbstractDto<GoogleDocResourceIdListWrapperDto> {
@@ -52,14 +51,14 @@ public class GoogleDocResourceIdListWrapperDto extends AbstractDto<GoogleDocReso
 
   @XmlElement(name = "collectionId")
   @JsonProperty(value = "collectionId")
-  private CollectionId collectionId; 
+  private Long collectionId; 
   
   public String getCollectionTitle() {
     return collectionTitle;
   }
 
   public CollectionId getCollectionId() {
-    return collectionId;
+    return new CollectionId(collectionId);
   }
 
   public void setCollectionTitle(String collectionTitle) {
@@ -67,7 +66,7 @@ public class GoogleDocResourceIdListWrapperDto extends AbstractDto<GoogleDocReso
   }
 
   public void setCollectionId(CollectionId collectionId) {
-    this.collectionId = collectionId;
+    this.collectionId = getWrapperValue(collectionId);
   }
   
   

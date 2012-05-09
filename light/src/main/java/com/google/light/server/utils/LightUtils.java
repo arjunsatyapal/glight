@@ -22,14 +22,13 @@ import static com.google.light.server.constants.RequestParamKeyEnum.LOGIN_PROVID
 import static com.google.light.server.constants.RequestParamKeyEnum.LOGIN_PROVIDER_USER_ID;
 import static com.google.light.server.constants.RequestParamKeyEnum.PERSON_ID;
 
-import com.google.light.server.dto.pojo.longwrapper.AbstractTypeWrapper;
-
-import com.google.common.collect.Lists;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.google.common.io.CharStreams;
 import com.google.light.server.constants.FileExtensions;
 import com.google.light.server.constants.OAuth2ProviderService;
+import com.google.light.server.dto.pojo.longwrapper.AbstractTypeWrapper;
 import com.google.light.server.exception.unchecked.httpexception.LightHttpException;
 import com.google.light.server.guice.providers.InstantProvider;
 import java.io.IOException;
@@ -295,4 +294,13 @@ public class LightUtils {
     
     return wrapper.getValue();
   }
+  
+//  public static <I, W extends AbstractTypeWrapper<I, W>> I getWrapperValueAsString(W wrapper) {
+//    if (wrapper == null) {
+//      return null;
+//    }
+//    
+//    return wrapper.getValue();
+//  }
+
 }

@@ -18,57 +18,59 @@ package com.google.light.server.dto.module;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNonEmptyList;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
-
-import com.google.light.server.dto.pojo.longwrapper.ModuleId;
-
-import org.codehaus.jackson.annotate.JsonProperty;
-
-import javax.xml.bind.annotation.XmlAccessType;
-
-import javax.xml.bind.annotation.XmlAccessorType;
+import static com.google.light.server.utils.LightUtils.getWrapperValue;
 
 import com.google.light.server.dto.AbstractDtoToPersistence;
+import com.google.light.server.dto.pojo.longwrapper.ModuleId;
 import com.google.light.server.dto.pojo.longwrapper.PersonId;
 import com.google.light.server.dto.pojo.longwrapper.Version;
 import com.google.light.server.persistence.entity.module.ModuleEntity;
-import com.google.light.server.utils.LightPreconditions;
 import java.util.List;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import org.codehaus.jackson.annotate.JsonCreator;
+import org.codehaus.jackson.annotate.JsonProperty;
+import org.codehaus.jackson.annotate.JsonTypeName;
 
 /**
  * DTO for Light Modules.
  * 
  * TODO(arjuns): Add test for this class.
- *
+ * 
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
-@XmlRootElement(name="module")
+@JsonTypeName(value = "module")
+@XmlRootElement(name = "module")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class ModuleDto extends AbstractDtoToPersistence<ModuleDto, ModuleEntity, Long> {
+public class ModuleDto extends AbstractDtoToPersistence<ModuleDto, ModuleEntity, ModuleId> {
   @XmlElement(name = "id")
   @JsonProperty(value = "id")
-  private ModuleId id;
-  
+  private Long id;
+
   @XmlElement(name = "title")
   @JsonProperty(value = "title")
   private String title;
-  
+
   @XmlElement(name = "state")
   @JsonProperty(value = "state")
   private ModuleState state;
-  
+
   @XmlElement(name = "owners")
   @JsonProperty(value = "owners")
   private List<PersonId> owners;
 
-  @XmlElement(name = "version")
-  @JsonProperty(value = "version")
-  private Version version;
+  @XmlElement(name = "latestPublishVersion")
+  @JsonProperty(value = "latestPublishVersion")
+  private Long latestPublishVersion;
+  
+  @XmlElement(name = "nextVersion")
+  @JsonProperty(value = "nextVersion")
+  private Long nextVersion;
 
-  /** 
+  /**
    * {@inheritDoc}
    */
   @Override
@@ -77,12 +79,12 @@ public class ModuleDto extends AbstractDtoToPersistence<ModuleDto, ModuleEntity,
     checkNotNull(state, "moduleState");
     checkNonEmptyList(owners, "owner list cannot be empty");
     // Version can be zero when module is in process of import.
-    checkNotNull(version, "version");
+    checkNotNull(latestPublishVersion, "version");
     return this;
   }
 
   public ModuleId getId() {
-    return id;
+    return new ModuleId(id);
   }
 
   public ModuleState getState() {
@@ -93,15 +95,19 @@ public class ModuleDto extends AbstractDtoToPersistence<ModuleDto, ModuleEntity,
     return owners;
   }
 
-  public Version getVersion() {
-    return version;
+  public Version getLatestPublishVersion() {
+    return new Version(latestPublishVersion);
+  }
+  
+  public Version getNextVersion() {
+    return new Version(nextVersion);
   }
 
-  /** 
+  /**
    * {@inheritDoc}
    */
   @Override
-  public ModuleEntity toPersistenceEntity(Long id) {
+  public ModuleEntity toPersistenceEntity(ModuleId id) {
     // Since there are many things that are required for Updating a module, so this method
     // is inappropriate.
     throw new UnsupportedOperationException();
@@ -116,8 +122,9 @@ public class ModuleDto extends AbstractDtoToPersistence<ModuleDto, ModuleEntity,
     private String title;
     private ModuleState state;
     private List<PersonId> owners;
-    private Version version;
-    
+    private Version latestPublishVersion;
+    private Version nextVersion;
+
     public Builder id(ModuleId id) {
       this.id = id;
       return this;
@@ -127,19 +134,24 @@ public class ModuleDto extends AbstractDtoToPersistence<ModuleDto, ModuleEntity,
       this.title = title;
       return this;
     }
-    
+
     public Builder state(ModuleState state) {
       this.state = state;
       return this;
     }
-    
+
     public Builder owners(List<PersonId> owners) {
       this.owners = owners;
       return this;
     }
+
+    public Builder latestPublishVersion(Version latestPublishVersion) {
+      this.latestPublishVersion = latestPublishVersion;
+      return this;
+    }
     
-    public Builder latestVersion(Version version) {
-      this.version = version;
+    public Builder nextVersion(Version nextVersion) {
+      this.nextVersion = nextVersion;
       return this;
     }
 
@@ -152,13 +164,14 @@ public class ModuleDto extends AbstractDtoToPersistence<ModuleDto, ModuleEntity,
   @SuppressWarnings("synthetic-access")
   private ModuleDto(Builder builder) {
     super(builder);
-    this.id = builder.id;
+    this.id = getWrapperValue(builder.id);
     this.title = builder.title;
     this.state = builder.state;
     this.owners = builder.owners;
-    this.version = builder.version;
+    this.latestPublishVersion = getWrapperValue(builder.latestPublishVersion);
+    this.nextVersion = getWrapperValue(builder.nextVersion);
   }
-  
+
   @JsonCreator
   private ModuleDto() {
     super(null);

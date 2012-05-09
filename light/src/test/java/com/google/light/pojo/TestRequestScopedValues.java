@@ -44,12 +44,12 @@ public class TestRequestScopedValues extends RequestScopedValues {
     updateActor(actorId);
   }
   
-  public void updateOwner(PersonId personId) {
-    super.ownerId = personId;
+  public void updateOwner(PersonId ownerId) {
+    super.setOwnerId(ownerId);
   }
   
-  public void updateActor(PersonId personId) {
-    super.actorId = personId;
+  public void updateActor(PersonId actorId) {
+    super.setActorId(actorId);
   }
   
   public void updateBoth(PersonId personId) {

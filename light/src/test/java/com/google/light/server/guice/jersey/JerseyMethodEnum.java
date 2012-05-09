@@ -18,20 +18,15 @@ package com.google.light.server.guice.jersey;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
-import com.google.light.server.jersey.resources.job.JobResource;
-
-import com.google.light.server.jersey.resources.notifications.NotificationResource;
-
-import com.google.light.server.jersey.resources.CollectionResource;
-
-import com.google.light.server.jersey.resources.test.TestResources;
-
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.light.server.jersey.resources.AbstractJerseyResource;
+import com.google.light.server.jersey.resources.CollectionResource;
 import com.google.light.server.jersey.resources.ModuleResource;
 import com.google.light.server.jersey.resources.admin.gae.GAEAdminResources;
-import com.google.light.server.jersey.resources.admin.gae.GAEPipelineResource;
+import com.google.light.server.jersey.resources.job.JobResource;
+import com.google.light.server.jersey.resources.notifications.NotificationResource;
+import com.google.light.server.jersey.resources.test.TestResources;
 import com.google.light.server.jersey.resources.thirdparty.google.GoogleDocIntegration;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -76,23 +71,35 @@ public enum JerseyMethodEnum {
                                                      new String[] { "text/html; charset=UTF-8" }),
 
   COLLECTION_RESOURCE_COLLECTIONS_PUBLISHED_BY_ME(
-                                              CollectionResource.class,
-                                              "getCollectionsPublishedByMe",
-                                              new Class[] { String.class, String.class },
-                                              GET.class,
-                                              "/rest/collection/me",
-                                              new String[] { "application/json; charset=UTF-8",
-                                                      "application/xml; charset=UTF-8" }),
+                                                  CollectionResource.class,
+                                                  "getCollectionsPublishedByMe",
+                                                  new Class[] { String.class, String.class },
+                                                  GET.class,
+                                                  "/rest/collection/me",
+                                                  new String[] { "application/json; charset=UTF-8",
+                                                          "application/xml; charset=UTF-8" }),
 
-  // GAEPipeline Resource Jersey Methods.
-  GAE_PIPELINE_RESOURCE_STATUS_GET(
-                                   GAEPipelineResource.class,
-                                   "getGAEPipelineStatus",
-                                   new Class[] { String.class },
-                                   GET.class,
-                                   "/rest/gaeadmin/gae_pipeline/{pipeline_id}",
-                                   new String[] { "text/plain; charset=UTF-8" }),
-  // GAEAdmin Resource Jersey Methods.
+  COLLECTION_RESOURCE_COLLECTIONS_PUBLISHED_BY_ME_HTML(
+                                                       CollectionResource.class,
+                                                       "getCollectionsPublishedByMeHtml",
+                                                       new Class[] {},
+                                                       GET.class,
+                                                       "/rest/collection/me/html",
+                                                       new String[] {
+                                                               "text/html; charset=UTF-8" }),
+
+  COLLECTION_RESOURCE_COLLECTIONS_PUT_COLLECTION_VERSION(
+                                                         CollectionResource.class,
+                                                         "putCollectionVersion",
+                                                         new Class[] { String.class, String.class,
+                                                                 String.class },
+                                                         PUT.class,
+                                                         "/rest/collection/{collection_id}/{version}",
+                                                         new String[] {
+                                                                 "application/json; charset=UTF-8",
+                                                                 "application/xml; charset=UTF-8" }),
+
+// GAEAdmin Resource Jersey Methods.
   GAE_ADMIN_RESOURCE_GET_CONFIG(
                                 GAEAdminResources.class,
                                 "getConfig",
@@ -148,6 +155,14 @@ public enum JerseyMethodEnum {
                                           "/rest/module/me",
                                           new String[] { "application/json; charset=UTF-8",
                                                   "application/xml; charset=UTF-8" }),
+
+  MODULE_RESOURCE_MODULES_PUBLISHED_BY_ME_HTML(
+                                          ModuleResource.class,
+                                          "getModulesPublishedByMeHtml",
+                                          new Class[] {},
+                                          GET.class,
+                                          "/rest/module/me/html",
+                                          new String[] { "text/html; charset=UTF-8" }),
   // Google Doc Integration Jersey Methods.
   GOOGLE_DOC_GET_DOC_LIST(
                           GoogleDocIntegration.class,

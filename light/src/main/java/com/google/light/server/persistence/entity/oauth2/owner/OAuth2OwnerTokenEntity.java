@@ -22,6 +22,10 @@ import static com.google.light.server.utils.LightPreconditions.checkPositiveLong
 import static com.google.light.server.utils.LightPreconditions.checkProviderUserId;
 import static com.google.light.server.utils.LightUtils.getCurrentTimeInMillis;
 
+import com.google.light.server.annotations.ObjectifyQueryField;
+
+import com.google.light.server.annotations.ObjectifyQueryFieldName;
+
 import com.google.light.server.dto.pojo.longwrapper.PersonId;
 
 import com.google.light.server.constants.OAuth2ProviderService;
@@ -42,19 +46,21 @@ import javax.persistence.Id;
 public class OAuth2OwnerTokenEntity extends
     AbstractPersistenceEntity<OAuth2OwnerTokenEntity, OAuth2OwnerTokenDto> {
   @Id
-  String providerServiceName;
+  private String providerServiceName;
   @Parent
-  Key<PersonEntity> personKey;
+  private Key<PersonEntity> personKey;
 
   // This is used in Objectify Query.
+  @ObjectifyQueryFieldName("providerUserId")
   public static final String OFY_PROVIDER_USER_ID = "providerUserId";
-  String providerUserId;
+  @ObjectifyQueryField("OFY_PROVIDER_USER_ID")
+  private String providerUserId;
 
-  String accessToken;
-  String refreshToken;
-  long expiresInMillis;
-  String tokenType;
-  String tokenInfo;
+  private String accessToken;
+  private String refreshToken;
+  private long expiresInMillis;
+  private String tokenType;
+  private String tokenInfo;
 
   /**
    * {@inheritDoc}

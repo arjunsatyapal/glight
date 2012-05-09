@@ -118,12 +118,6 @@
       <scope>test</scope>
     </dependency>
 
-    <dependency>
-      <groupId>com.google.appengine</groupId>
-      <artifactId>appengine-pipeline</artifactId>
-      <version>69</version>
-    </dependency>
-
     <!-- Apache Commons Dependencies : -->
     <dependency>
       <groupId>org.apache.directory.studio</groupId>

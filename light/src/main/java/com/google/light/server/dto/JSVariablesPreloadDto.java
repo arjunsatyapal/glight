@@ -17,6 +17,8 @@ package com.google.light.server.dto;
 
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
+import org.codehaus.jackson.annotate.JsonTypeName;
+
 import org.codehaus.jackson.annotate.JsonProperty;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -33,6 +35,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  * @author Walter Cacau
  */
 @SuppressWarnings("serial")
+@JsonTypeName(value = "jsVariablesPreload")
 @XmlRootElement(name = "jsVariablesPreload")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class JSVariablesPreloadDto extends AbstractDto<JSVariablesPreloadDto> {

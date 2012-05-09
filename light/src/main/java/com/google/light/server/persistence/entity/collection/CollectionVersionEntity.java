@@ -39,10 +39,10 @@ import javax.persistence.Id;
 @SuppressWarnings("serial")
 public class CollectionVersionEntity extends AbstractPersistenceEntity<CollectionVersionEntity, CollectionVersionDto> {
   @Id
-  Long version;
+  private Long version;
   @Parent
-  Key<CollectionEntity> collectionKey;
-  Text collectionTreeJson;
+  private Key<CollectionEntity> collectionKey;
+  private Text collectionTreeJson;
   /**
    * {@inheritDoc}
    */

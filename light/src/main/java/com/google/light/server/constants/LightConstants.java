@@ -13,9 +13,6 @@
 package com.google.light.server.constants;
 
 
-import com.google.appengine.tools.pipeline.JobSetting;
-
-
 import static com.google.light.server.servlets.path.ServletPathEnum.SEARCH_PAGE;
 
 
@@ -60,11 +57,6 @@ public class LightConstants {
   /** EmailId for Light Bot. */
   public static final String LIGHT_BOT_EMAIL = "light-bot@myopenedu.com";
 
-  // AppEngine pipeline Settings.
-  public static final JobSetting.BackoffFactor JOB_BACK_OFF_FACTOR = new JobSetting.BackoffFactor(2);
-  public static final JobSetting.BackoffSeconds JOB_BACK_OFF_SECONDS = new JobSetting.BackoffSeconds(1);
-  public static final JobSetting.MaxAttempts JOB_MAX_ATTEMPTES = new JobSetting.MaxAttempts(3);
-  
   // TODO(arjuns): Get this value from client.
   /** Number of recrds to be fetched in GDATA Feed */
   public static int GDATA_MAX_RESULT = 10;

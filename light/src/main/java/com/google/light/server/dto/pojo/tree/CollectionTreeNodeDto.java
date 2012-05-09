@@ -16,7 +16,9 @@
 package com.google.light.server.dto.pojo.tree;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.light.server.utils.LightPreconditions.checkModuleId;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
+import static com.google.light.server.utils.LightUtils.getWrapperValue;
 
 import com.google.light.server.dto.module.ModuleType;
 import com.google.light.server.dto.pojo.longwrapper.ModuleId;
@@ -25,6 +27,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import org.codehaus.jackson.annotate.JsonProperty;
+import org.codehaus.jackson.annotate.JsonTypeName;
 
 /**
  * 
@@ -34,12 +37,13 @@ import org.codehaus.jackson.annotate.JsonProperty;
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
+@JsonTypeName(value = "collectionTree")
 @XmlRootElement(name = "collectionTree")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class CollectionTreeNodeDto extends AbstractTreeNode<CollectionTreeNodeDto> {
   @XmlElement(name = "moduleId")
   @JsonProperty(value = "moduleId")
-  private ModuleId moduleId;
+  private Long moduleId;
 
   @XmlElement(name = "moduleType")
   @JsonProperty(value = "moduleType")
@@ -55,8 +59,7 @@ public class CollectionTreeNodeDto extends AbstractTreeNode<CollectionTreeNodeDt
 
     switch (getType()) {
       case LEAF_NODE:
-        checkNotNull(moduleId, "moduleId");
-        moduleId.validate();
+        checkModuleId(getModuleId());
         break;
 
       default:
@@ -70,11 +73,11 @@ public class CollectionTreeNodeDto extends AbstractTreeNode<CollectionTreeNodeDt
   }
 
   public ModuleId getModuleId() {
-    return moduleId;
+    return new ModuleId(moduleId);
   }
 
   public void setModuleId(ModuleId moduleId) {
-    this.moduleId = moduleId;
+    this.moduleId = moduleId.getValue();
   }
 
   public ModuleType getModuleType() {
@@ -164,7 +167,7 @@ public class CollectionTreeNodeDto extends AbstractTreeNode<CollectionTreeNodeDt
   @SuppressWarnings("synthetic-access")
   private CollectionTreeNodeDto(Builder builder) {
     super(builder);
-    this.moduleId = builder.moduleId;
+    this.moduleId = getWrapperValue(builder.moduleId);
     this.moduleType = builder.moduleType;
     this.externalId = builder.externalId;
   }

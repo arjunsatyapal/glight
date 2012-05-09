@@ -15,6 +15,8 @@ package com.google.light.server.dto.admin;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
+import org.codehaus.jackson.annotate.JsonTypeName;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 
@@ -36,6 +38,7 @@ import com.google.light.server.persistence.entity.admin.OAuth2ConsumerCredential
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
+@JsonTypeName(value = "oauth2ConsumerCredential")
 @XmlRootElement(name = "oauth2ConsumerCredential")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class OAuth2ConsumerCredentialDto extends

@@ -17,16 +17,22 @@ package com.google.light.server.persistence.entity.module;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNonEmptyList;
+import static com.google.light.server.utils.LightPreconditions.checkNonNegativeLong;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
+import static com.google.light.server.utils.LightPreconditions.checkVersion;
+import static com.google.light.server.utils.LightUtils.getWrapperValue;
 
 import com.google.common.base.Preconditions;
+import com.google.light.server.annotations.ObjectifyQueryField;
+import com.google.light.server.annotations.ObjectifyQueryFieldName;
 import com.google.light.server.dto.module.ModuleDto;
 import com.google.light.server.dto.module.ModuleState;
 import com.google.light.server.dto.module.ModuleType;
 import com.google.light.server.dto.pojo.longwrapper.ModuleId;
 import com.google.light.server.dto.pojo.longwrapper.PersonId;
 import com.google.light.server.dto.pojo.longwrapper.Version;
+import com.google.light.server.dto.pojo.longwrapper.Version.State;
 import com.google.light.server.persistence.entity.AbstractPersistenceEntity;
 import com.googlecode.objectify.Key;
 import java.util.List;
@@ -44,20 +50,21 @@ import org.joda.time.Instant;
 @SuppressWarnings("serial")
 public class ModuleEntity extends AbstractPersistenceEntity<ModuleEntity, ModuleDto> {
   @Id
-  Long id;
-  String title;
-  ModuleState state;
-  ModuleType type;
+  private Long id;
+  private String title;
+  private ModuleState state;
+  private ModuleType type;
 
-  
+  @ObjectifyQueryFieldName("owners")
   public static final String OFY_OWNER_QUERY_STRING = "owners.value IN";
   @Embedded
-  List<PersonId> owners;
+  @ObjectifyQueryField("OFY_OWNER_QUERY_STRING")
+  private List<PersonId> owners;
 
-  String etag;
-  @Embedded
-  Version latestVersion;
-  Long lastEditTimeInMillis;
+  private String etag;
+  private Long latestPublishVersion;
+  private Long nextVersion;
+  private Long lastEditTimeInMillis;
 
   /**
    * {@inheritDoc}
@@ -90,7 +97,7 @@ public class ModuleEntity extends AbstractPersistenceEntity<ModuleEntity, Module
         .title(title)
         .state(state)
         .owners(owners)
-        .latestVersion(latestVersion)
+        .latestPublishVersion(getLatestPublishVersion())
         .build();
 
     return dto;
@@ -125,13 +132,43 @@ public class ModuleEntity extends AbstractPersistenceEntity<ModuleEntity, Module
     return type;
   }
 
-  public Version getLatestVersion() {
-    return latestVersion;
+  public Version getLatestPublishVersion() {
+    if (latestPublishVersion == 0) {
+      return null;
+    }
+    
+    return new Version(latestPublishVersion);
   }
 
-  public void setLatestVersion(Version latestVersion) {
+  public Version getNextVersion() {
+    return new Version(nextVersion);
+  }
+  
+  /**
+   * Thisk should be called by callers if they want to reserve a version. And callers are expected
+   * to save the entity. 
+   */
+  public Version reserveVersion() {
+    nextVersion++;
+    return new Version(nextVersion);
+  }
+
+  /**
+   * If the currently published version is newer then latestPublishVersion, then update it.
+   * Caller is expected to persist this entity.
+   * @param latestVersion
+   */
+  public void publishVersion(Version latestPublishVersion, Instant lastEditTime, String etag) {
     // Other then builder, all are required to set a positive latestVersion.
-    this.latestVersion = checkNotNull(latestVersion, "latestVersion");
+    checkVersion(latestPublishVersion);
+    
+    Long tempVersion = getWrapperValue(latestPublishVersion);
+    if (this.latestPublishVersion < tempVersion) {
+      this.latestPublishVersion = tempVersion;
+      this.lastEditTimeInMillis = lastEditTime.getMillis();
+      this.etag = etag;
+      this.state = ModuleState.PUBLISHED;
+    }
   }
 
   public String getEtag() {
@@ -162,12 +199,14 @@ public class ModuleEntity extends AbstractPersistenceEntity<ModuleEntity, Module
     checkNotNull(state, "moduleState");
     checkNonEmptyList(owners, "owners list cannot be empty.");
     checkNotNull(lastEditTimeInMillis, "lastEditTimeInMills");
-    checkNotBlank(etag, "etag");
+    
+    // In many cases Etag can be null. So not checking it.
     // Latest version can be zero when module is only reserved.
     // TODO(arjuns): Add more checks here for version.
     // TODO(arjuns): Add more checks here for moduleType.
 
-    checkNotNull(latestVersion, "latestVersion");
+    checkNonNegativeLong(latestPublishVersion, "latestVersion");
+    checkNonNegativeLong(nextVersion, "nextVersion");
     return this;
   }
 
@@ -178,8 +217,9 @@ public class ModuleEntity extends AbstractPersistenceEntity<ModuleEntity, Module
     private ModuleType type;
     private List<PersonId> owners;
     private String etag;
-    private Version latestVersion;
-    private Instant lastEditTime;
+    private Version latestPublishVersion = new Version(0L, State.NO_VERSION);
+    private Version nextVersion = new Version(0L, State.NO_VERSION);
+    private Instant lastEditTime = new Instant(0L);
 
     public Builder id(Long id) {
       this.id = id;
@@ -211,8 +251,13 @@ public class ModuleEntity extends AbstractPersistenceEntity<ModuleEntity, Module
       return this;
     }
 
-    public Builder latestVersion(Version latestVersion) {
-      this.latestVersion = latestVersion;
+    public Builder latestPublishVersion(Version latestPublishVersion) {
+      this.latestPublishVersion = latestPublishVersion;
+      return this;
+    }
+    
+    public Builder nextVersion(Version nextVersion) {
+      this.nextVersion = nextVersion;
       return this;
     }
     
@@ -243,7 +288,8 @@ public class ModuleEntity extends AbstractPersistenceEntity<ModuleEntity, Module
     // Latest version can be zero when module is only reserved.
     // TODO(arjuns): Add more checks here for version.
 
-    this.latestVersion = builder.latestVersion;
+    this.latestPublishVersion = getWrapperValue(builder.latestPublishVersion);
+    this.nextVersion = getWrapperValue(builder.nextVersion);
   }
 
   // For Objectify.

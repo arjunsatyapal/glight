@@ -20,6 +20,8 @@ import static com.google.light.server.constants.OAuth2ProviderService.GOOGLE_DOC
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
 
+import org.codehaus.jackson.annotate.JsonTypeName;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 
@@ -54,6 +56,7 @@ import org.joda.time.Instant;
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
+@JsonTypeName(value = "googleDocInfo")
 @XmlRootElement(name = "googleDocInfo")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {

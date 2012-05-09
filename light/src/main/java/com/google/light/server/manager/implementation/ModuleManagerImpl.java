@@ -17,8 +17,8 @@ package com.google.light.server.manager.implementation;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
+import static com.google.light.server.utils.LightPreconditions.checkTxnIsRunning;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.light.server.constants.JerseyConstants;
@@ -44,8 +44,6 @@ import com.google.light.server.persistence.entity.module.ModuleVersionEntity;
 import com.google.light.server.persistence.entity.module.ModuleVersionResourceEntity;
 import com.google.light.server.persistence.entity.module.OriginModuleMappingEntity;
 import com.google.light.server.serveronlypojos.GAEQueryWrapper;
-import com.google.light.server.utils.LightUtils;
-import com.google.light.server.utils.ObjectifyUtils;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Objectify;
 import java.util.List;
@@ -138,149 +136,81 @@ public class ModuleManagerImpl implements ModuleManager {
    * {@inheritDoc}
    */
   @Override
-  public ModuleId reserveModuleIdForExternalId(ModuleType moduleType, String externalId,
+  public ModuleId reserveModuleId(Objectify ofy, ModuleType moduleType, String externalId,
       List<PersonId> owners, String title) {
+    checkTxnIsRunning(ofy);
     checkNotBlank(title, "title");
-    Objectify ofy = ObjectifyUtils.initiateTransaction();
 
-    try {
-      ModuleId existingModuleId = findModuleIdByOriginId(ofy, externalId);
-      if (existingModuleId != null) {
-        return existingModuleId;
-      }
-
-      // Now create a new Module.
-      // Creating a dummy module to get Id.
-      // TODO(arjuns): Add a cleanup job for cleaning up MOdules which dont move from Reserved state
-      // for long time.
-      ModuleEntity moduleEntity = new ModuleEntity.Builder()
-          .title(title)
-          .state(ModuleState.RESERVED)
-          .type(moduleType)
-          .owners(owners)
-          .latestVersion(new Version(0L /* noVersion */, Version.State.NO_VERSION))
-          .lastEditTime(new Instant(0L))
-          .etag("etag")
-          .build();
-      ModuleEntity persistedEntity = this.create(ofy, moduleEntity);
-
-      OriginModuleMappingEntity mappingEntity = new OriginModuleMappingEntity.Builder()
-          .id(externalId)
-          .moduleId(persistedEntity.getModuleId())
-          .build();
-      originModuleMappingDao.put(ofy, mappingEntity);
-
-      ObjectifyUtils.commitTransaction(ofy);
-
-      return persistedEntity.getModuleId();
-    } catch (Exception e) {
-      e.printStackTrace();
-      throw new RuntimeException(e);
-    } finally {
-      if (ofy.getTxn().isActive()) {
-        ObjectifyUtils.rollbackTransactionIfStillActive(ofy);
-      }
+    ModuleId existingModuleId = findModuleIdByOriginId(ofy, externalId);
+    if (existingModuleId != null) {
+      return existingModuleId;
     }
-  }
-  
-  /**
-   * {@inheritDoc} TODO(arjuns): Make this better once we have other Docs.
-   */
-  @Deprecated
-  @Override
-  public ModuleVersionEntity addModuleVersionForGoogleDoc(ModuleId moduleId, String content,
-      GoogleDocInfoDto docInfoDto) {
-    // TODO(arjuns): Handle ofy txn.
-    Objectify ofy = ObjectifyUtils.initiateTransaction();
 
-    try {
-      Key<ModuleEntity> moduleKey = ModuleEntity.generateKey(moduleId);
-      ModuleEntity moduleEntity = moduleDao.get(ofy, moduleKey);
-      checkNotNull(moduleEntity, "moduleEntity not found for moduleId[" + moduleId + "].");
-      Version moduleVersion = moduleEntity.getLatestVersion().getNextVersion();
+    // Now create a new Module.
+    // Creating a dummy module to get Id.
+    // TODO(arjuns): Add a cleanup job for cleaning up MOdules which dont move from Reserved state
+    // for long time.
+    ModuleEntity moduleEntity = new ModuleEntity.Builder()
+        .title(title)
+        .state(ModuleState.RESERVED)
+        .type(moduleType)
+        .owners(owners)
+        .build();
+    ModuleEntity persistedEntity = this.create(ofy, moduleEntity);
 
-      ModuleVersionEntity moduleVersionEntity = new ModuleVersionEntity.Builder()
-          .version(moduleVersion)
-          .moduleKey(moduleKey)
-          .content(content)
-          .creationTime(LightUtils.getNow())
-          .lastUpdateTime(LightUtils.getNow())
-          .build();
-      moduleVersionDao.put(ofy, moduleVersionEntity);
+    OriginModuleMappingEntity mappingEntity = new OriginModuleMappingEntity.Builder()
+        .id(externalId)
+        .moduleId(persistedEntity.getModuleId())
+        .build();
+    originModuleMappingDao.put(ofy, mappingEntity);
 
-      moduleEntity.setTitle(docInfoDto.getTitle());
-      moduleEntity.setEtag(docInfoDto.getEtag());
-      moduleEntity.setLatestVersion(moduleVersion);
-      moduleDao.put(ofy, moduleEntity);
-
-      ObjectifyUtils.commitTransaction(ofy);
-      return moduleVersionEntity;
-    } finally {
-      if (ofy.getTxn().isActive()) {
-        ObjectifyUtils.rollbackTransactionIfStillActive(ofy);
-      }
-    }
+    return persistedEntity.getModuleId();
   }
 
   /**
    * {@inheritDoc} TODO(arjuns): Make this better once we have other Docs.
    */
   @Override
-  public ModuleVersionEntity publishModuleVersion(ModuleId moduleId, Version version,
-      String content, GoogleDocInfoDto docInfo) {
-    // TODO(arjuns): Handle ofy txn.
-    Objectify ofy = ObjectifyUtils.initiateTransaction();
+  public ModuleVersionEntity publishModuleVersion(Objectify ofy, ModuleEntity moduleEntity,
+      Version version, String content, GoogleDocInfoDto docInfo) {
+    checkTxnIsRunning(ofy);
+    ModuleVersionEntity moduleVersionEntity = new ModuleVersionEntity.Builder()
+        .version(version)
+        .moduleKey(moduleEntity.getKey())
+        .state(ModuleVersionState.PUBLISHED)
+        .title(docInfo.getTitle())
+        .content(content)
+        .etag(docInfo.getEtag())
+        .lastEditTime(docInfo.getLastEditTime())
+        .build();
 
-    try {
-      ModuleVersionEntity moduleVersionEntity = moduleVersionDao.get(ofy, moduleId, version);
-      moduleVersionEntity.setContent(content);
-      moduleVersionEntity.setTitle(docInfo.getTitle());
-      moduleVersionEntity.setEtag(docInfo.getEtag());
-      moduleVersionDao.put(ofy, moduleVersionEntity);
-      
-      ModuleEntity moduleEntity = moduleDao.get(ofy, moduleVersionEntity.getModuleKey());
-      if (moduleEntity.getLatestVersion().equals(moduleVersionEntity.getVersion())) {
-        moduleEntity.setState(ModuleState.PUBLISHED);
-        moduleDao.put(ofy, moduleEntity);
-      }
-      
+    moduleVersionDao.put(ofy, moduleVersionEntity);
 
-      ObjectifyUtils.commitTransaction(ofy);
-      return moduleVersionEntity;
-    } finally {
-      if (ofy.getTxn().isActive()) {
-        ObjectifyUtils.rollbackTransactionIfStillActive(ofy);
-      }
-    }
+    moduleEntity.publishVersion(version, docInfo.getLastEditTime(), docInfo.getEtag());
+    moduleDao.put(ofy, moduleEntity);
+
+    return moduleVersionEntity;
   }
 
   /**
    * {@inheritDoc}
    */
   @Override
-  public ModuleVersionResourceEntity addModuleResource(ModuleId moduleId, Version moduleVersion,
-      String resourceId, GSBlobInfo resourceInfo) {
-    // TODO(arjuns): Handle ofy txn.
-    Objectify ofy = ObjectifyUtils.initiateTransaction();
-    try {
-      Key<ModuleVersionEntity> moduleVersionKey =
-          ModuleVersionEntity.generateKey(moduleId, moduleVersion);
+  public ModuleVersionResourceEntity publishModuleResource(Objectify ofy,
+      ModuleEntity moduleEntity, Version version, String resourceId, GSBlobInfo resourceInfo) {
+    checkTxnIsRunning(ofy);
+    checkNotNull(moduleEntity, "moduleEntity");
+    Key<ModuleVersionEntity> moduleVersionKey = ModuleVersionEntity.generateKey(
+        moduleEntity.getKey(), version);
 
-      ModuleVersionResourceEntity entity = new ModuleVersionResourceEntity.Builder()
-          .id(resourceId)
-          .moduleVersionKey(moduleVersionKey)
-          .resourceInfo(resourceInfo)
-          .build();
-      ModuleVersionResourceEntity savedEntity = moduleVersionResourceDao.put(ofy, entity);
+    ModuleVersionResourceEntity entity = new ModuleVersionResourceEntity.Builder()
+        .id(resourceId)
+        .moduleVersionKey(moduleVersionKey)
+        .resourceInfo(resourceInfo)
+        .build();
+    ModuleVersionResourceEntity savedEntity = moduleVersionResourceDao.put(ofy, entity);
 
-      ObjectifyUtils.commitTransaction(ofy);
-
-      return savedEntity;
-    } finally {
-      if (ofy.getTxn().isActive()) {
-        ObjectifyUtils.rollbackTransactionIfStillActive(ofy);
-      }
-    }
+    return savedEntity;
   }
 
   /**
@@ -288,7 +218,7 @@ public class ModuleManagerImpl implements ModuleManager {
    */
   @Override
   public ModuleVersionEntity getModuleVersion(Objectify ofy, ModuleId moduleId, Version version) {
-    Version requiredVersion = convertLatestToSpecificVersion(ofy, moduleId, version);
+    Version requiredVersion = convertLatestToLatestPublishedVersion(ofy, moduleId, version);
 
     ModuleVersionEntity moduleVersionEntity = moduleVersionDao.get(ofy, moduleId, requiredVersion);
     return moduleVersionEntity;
@@ -301,7 +231,7 @@ public class ModuleManagerImpl implements ModuleManager {
   public ModuleVersionResourceEntity getModuleResource(Objectify ofy, ModuleId moduleId,
       Version version,
       String resourceId) {
-    Version requiredVersion = convertLatestToSpecificVersion(ofy, moduleId, version);
+    Version requiredVersion = convertLatestToLatestPublishedVersion(ofy, moduleId, version);
 
     ModuleVersionResourceEntity entity =
         moduleVersionResourceDao.get(moduleId, requiredVersion, resourceId);
@@ -313,11 +243,11 @@ public class ModuleManagerImpl implements ModuleManager {
     return entity;
   }
 
-  private Version convertLatestToSpecificVersion(Objectify ofy, ModuleId moduleId,
+  private Version convertLatestToLatestPublishedVersion(Objectify ofy, ModuleId moduleId,
       Version version) {
-    if (version.isLatest()) {
+    if (version.isLatestVersion()) {
       ModuleEntity moduleEntity = get(ofy, moduleId);
-      return moduleEntity.getLatestVersion();
+      return moduleEntity.getLatestPublishVersion();
     }
 
     return version;
@@ -327,66 +257,55 @@ public class ModuleManagerImpl implements ModuleManager {
    * {@inheritDoc}
    */
   @Override
-  public Version reserveModuleVersionForImport(
-      ModuleId moduleId, String etag, Instant lastEditTime) {
-    Objectify ofy = ObjectifyUtils.initiateTransaction();
-    try {
-      ModuleEntity moduleEntity = this.get(ofy, moduleId);
-      Preconditions.checkNotNull(moduleEntity, "moduleEntity");
+  public Version reserveModuleVersion(Objectify ofy,
+      ModuleEntity moduleEntity, String etag, Instant lastEditTime) {
+    checkTxnIsRunning(ofy);
+    checkNotNull(moduleEntity, "moduleEntity");
 
-      if (moduleEntity.getLastEditTime().isEqual(lastEditTime)
-          || moduleEntity.getLastEditTime().isAfter(lastEditTime)) {
-        // No need to import new version.
-        logger.info("Skipping creating version because for [" + moduleEntity.getModuleId()
-            + "], lastEditTime[" + moduleEntity.getLastEditTime()
-            + "] is equal/after lastEditTime[" + lastEditTime + "] given by Google.");
-        return null;
-      }
-
-      Version version = moduleEntity.getLatestVersion().getNextVersion();
-
-      // TODO(arjuns): differentiate latest and published version.
-      moduleEntity.setLatestVersion(version);
-      // moduleEntity.setLastEditTime(lastEditTime);
-      moduleDao.put(ofy, moduleEntity);
-
-      ModuleVersionEntity moduleVersionEntity = new ModuleVersionEntity.Builder()
-          .version(version)
-          .moduleKey(moduleEntity.getKey())
-          .state(ModuleVersionState.RESERVED)
-          .etag(etag)
-          .lastEditTime(lastEditTime)
-          .build();
-
-      moduleVersionDao.put(ofy, moduleVersionEntity);
-
-      ObjectifyUtils.commitTransaction(ofy);
-      return moduleVersionEntity.getVersion();
-    } finally {
-      ObjectifyUtils.rollbackTransactionIfStillActive(ofy);
+    if (moduleEntity.getLastEditTime().isEqual(lastEditTime)
+        || moduleEntity.getLastEditTime().isAfter(lastEditTime)) {
+      // No need to import new version.
+      logger.info("Skipping creating version because for [" + moduleEntity.getModuleId()
+          + "], lastEditTime[" + moduleEntity.getLastEditTime()
+          + "] is equal/after lastEditTime[" + lastEditTime + "] given by Google.");
+      return null;
     }
+
+    Version version = moduleEntity.reserveVersion();
+    moduleDao.put(ofy, moduleEntity);
+
+    // Eventually add who reserved what.
+    ModuleVersionEntity moduleVersionEntity = new ModuleVersionEntity.Builder()
+        .version(version)
+        .moduleKey(moduleEntity.getKey())
+        .state(ModuleVersionState.RESERVED)
+        .etag(etag)
+        .lastEditTime(lastEditTime)
+        .build();
+    moduleVersionDao.put(ofy, moduleVersionEntity);
+
+    return moduleVersionEntity.getVersion();
   }
 
-  /** 
+  /**
    * {@inheritDoc}
    */
   @Override
   public PageDto findModulesByOwnerId(PersonId ownerId, String startIndex, int maxResults) {
-    GAEQueryWrapper<ModuleEntity>  wrapper = moduleDao.findModulesByOwnerId(
+    GAEQueryWrapper<ModuleEntity> wrapper = moduleDao.findModulesByOwnerId(
         ownerId, startIndex, maxResults);
-    
+
     List<ModuleDto> list = Lists.newArrayList();
     for (ModuleEntity currEntity : wrapper.getList()) {
       list.add(currEntity.toDto());
     }
-    
-    
+
     PageDto pageDto = new PageDto.Builder()
         .startIndex(wrapper.getStartIndex())
         .list(list)
         .handlerUri(JerseyConstants.URI_RESOURCE_PATH_MODULE_ME)
         .build();
-    
+
     return pageDto;
   }
 }

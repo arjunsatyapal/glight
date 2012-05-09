@@ -17,8 +17,7 @@ package com.google.light.server.manager.implementation;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
-
-import com.google.light.server.utils.LightPreconditions;
+import static com.google.light.server.utils.LightPreconditions.checkTxnIsRunning;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -114,51 +113,48 @@ public class CollectionManagerImpl implements CollectionManager {
     throw new UnsupportedOperationException();
   }
 
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public CollectionEntity reserveCollectionIdForOriginId(Objectify ofy, String originId,
-      PersonId ownerId) {
-    CollectionId existingCollectionId = null; // findCollectionIdByOriginId(ofy, originId);
-    if (existingCollectionId != null) {
-      return collectionDao.get(ofy, existingCollectionId);
-    }
-
-    // Now create a new Collection.
-    // TODO(arjuns): Add a cleanup job for cleaning up MOdules which dont move from Reserved state
-    // for long time.
-    CollectionEntity collectionEntity = new CollectionEntity.Builder()
-        .title("reserved")
-        .collectionState(CollectionState.RESERVED)
-        .owners(Lists.newArrayList(ownerId))
-        .latestVersion(new Version(0L /* noVersion */, Version.State.NO_VERSION))
-        .etag("etag")
-        .build();
-    CollectionEntity persistedEntity = this.create(ofy, collectionEntity);
-
-    // OriginCollectionMappingEntity mappingEntity = new OriginModuleMappingEntity.Builder()
-    // .id(originId)
-    // .moduleId(persistedEntity.getModuleId())
-    // .build();
-    // originModuleMappingDao.put(ofy, mappingEntity);
-
-    return persistedEntity;
-  }
+//  /**
+//   * {@inheritDoc}
+//   */
+//  @Override
+//  public CollectionEntity reserveCollectionIdForOriginId(Objectify ofy, String originId,
+//      PersonId ownerId) {
+//    CollectionId existingCollectionId = null; // findCollectionIdByOriginId(ofy, originId);
+//    if (existingCollectionId != null) {
+//      return collectionDao.get(ofy, existingCollectionId);
+//    }
+//
+//    // Now create a new Collection.
+//    // TODO(arjuns): Add a cleanup job for cleaning up MOdules which dont move from Reserved state
+//    // for long time.
+//    CollectionEntity collectionEntity = new CollectionEntity.Builder()
+//        .title("reserved")
+//        .collectionState(CollectionState.RESERVED)
+//        .owners(Lists.newArrayList(ownerId))
+//        .etag("etag")
+//        .build();
+//    CollectionEntity persistedEntity = this.create(ofy, collectionEntity);
+//
+//    // OriginCollectionMappingEntity mappingEntity = new OriginModuleMappingEntity.Builder()
+//    // .id(originId)
+//    // .moduleId(persistedEntity.getModuleId())
+//    // .build();
+//    // originModuleMappingDao.put(ofy, mappingEntity);
+//
+//    return persistedEntity;
+//  }
   
   /**
    * {@inheritDoc}
    */
   @Override
-  public CollectionEntity reserveCollectionId(Objectify ofy, PersonId ownerId, String title) {
+  public CollectionEntity reserveCollectionId(Objectify ofy, List<PersonId> owners, String title) {
     checkNotBlank(title, "title");
     // Now create a new Collection.
     CollectionEntity collectionEntity = new CollectionEntity.Builder()
         .title(title)
         .collectionState(CollectionState.RESERVED)
-        .owners(Lists.newArrayList(ownerId))
-        .latestVersion(new Version(0L /* noVersion */, Version.State.NO_VERSION))
-        .etag("etag")
+        .owners(owners)
         .build();
     CollectionEntity persistedEntity = this.create(ofy, collectionEntity);
 
@@ -169,23 +165,33 @@ public class CollectionManagerImpl implements CollectionManager {
    * {@inheritDoc} TODO(arjuns): Make this better once we have other Docs.
    */
   @Override
-  public CollectionVersionEntity addCollectionVersionForGoogleDoc(Objectify ofy,
-      CollectionEntity collectionEntity, CollectionTreeNodeDto collectionTree) {
+  public Version reserveCollectionVersion(Objectify ofy, CollectionEntity collectionEntity) {
+    checkTxnIsRunning(ofy);
     checkNotNull(collectionEntity, "collectionEntity");
-    Version collectionVersion = collectionEntity.getLatestVersion().getNextVersion();
-
+    
+    Version collectionVersion = collectionEntity.reserveVersion();
+    collectionDao.put(ofy, collectionEntity);
+    
+    return collectionVersion;
+  }
+  
+  @Override
+  public CollectionVersionEntity publishCollectionVersion(Objectify ofy, 
+      CollectionEntity collectionEntity, Version version, CollectionTreeNodeDto collectionRoot) {
+    checkTxnIsRunning(ofy);
+    checkNotNull(collectionEntity, "collectionEntity");
+    
     CollectionVersionEntity collectionVersionEntity = new CollectionVersionEntity.Builder()
-        .version(collectionVersion)
+        .version(version)
         .collectionKey(collectionEntity.getKey())
-        .collectionTree(collectionTree)
+        .collectionTree(collectionRoot)
         .creationTime(LightUtils.getNow())
         .lastUpdateTime(LightUtils.getNow())
         .build();
     collectionVersionDao.put(ofy, collectionVersionEntity);
     
     // TODO(arjuns): Add support for etag.
-    collectionEntity.setLatestVersion(collectionVersion);
-    collectionEntity.setState(CollectionState.PUBLISHED);
+    collectionEntity.publishVersion(version, LightUtils.getNow(), null);
     collectionDao.put(ofy, collectionEntity);
 
     return collectionVersionEntity;
@@ -204,9 +210,9 @@ public class CollectionManagerImpl implements CollectionManager {
   }
 
   private Version convertLatestToSpecificVersion(CollectionId collectionId, Version version) {
-    if (version.isLatest()) {
+    if (version.isLatestVersion()) {
       CollectionEntity entity = get(null, collectionId);
-      return entity.getLatestVersion();
+      return entity.getLatestPublishVersion();
     }
 
     return version;

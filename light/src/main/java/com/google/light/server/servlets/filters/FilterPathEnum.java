@@ -26,7 +26,6 @@ import javax.servlet.Filter;
  */
 public enum FilterPathEnum {
   API(ProdServletFilter.class, true, false),
-  TASK_QUEUE(PipelineFilter.class, true, true),
   TEST(TestServletFilter.class, false, true);
   
   private Class<? extends Filter> clazz;

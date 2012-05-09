@@ -16,22 +16,22 @@
 package com.google.light.server.dto.thirdparty.google.gdata.gdoc;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.light.server.utils.LightPreconditions.checkModuleId;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
-
-import javax.xml.bind.annotation.XmlElement;
-import org.codehaus.jackson.annotate.JsonProperty;
-
-import javax.xml.bind.annotation.XmlAccessType;
-
-import javax.xml.bind.annotation.XmlAccessorType;
-
-import javax.xml.bind.annotation.XmlRootElement;
+import static com.google.light.server.utils.LightPreconditions.checkVersion;
+import static com.google.light.server.utils.LightUtils.getWrapperValue;
 
 import com.google.light.server.dto.AbstractDto;
 import com.google.light.server.dto.pojo.longwrapper.ModuleId;
 import com.google.light.server.dto.pojo.longwrapper.Version;
 import com.google.light.server.exception.ExceptionType;
 import com.google.light.server.utils.LightPreconditions;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import org.codehaus.jackson.annotate.JsonProperty;
+import org.codehaus.jackson.annotate.JsonTypeName;
 
 /**
  * 
@@ -41,6 +41,7 @@ import com.google.light.server.utils.LightPreconditions;
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
+@JsonTypeName(value = "googleDocImportJobContext")
 @XmlRootElement(name = "googleDocImportJobContext")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class GoogleDocImportJobContext extends AbstractDto<GoogleDocImportJobContext> {
@@ -50,11 +51,11 @@ public class GoogleDocImportJobContext extends AbstractDto<GoogleDocImportJobCon
   
   @XmlElement(name = "moduleId")
   @JsonProperty(value = "moduleId")
-  private ModuleId moduleId;
+  private Long moduleId;
   
   @XmlElement(name = "version")
   @JsonProperty(value = "version")
-  private Version version;
+  private Long version;
   
   @XmlElement(name = "archiveId")
   @JsonProperty(value = "archiveId")
@@ -76,12 +77,8 @@ public class GoogleDocImportJobContext extends AbstractDto<GoogleDocImportJobCon
     checkNotNull(resourceInfo, "resourceInfo");
     resourceInfo.validate();
 
-    checkNotNull(moduleId, "moduleId");
-    moduleId.validate();
-
-    checkNotNull(version, "version");
-    version.validate();
-
+    checkModuleId(getModuleId());
+    checkVersion(getVersion());
     checkNotNull(state, "state");
 
     switch (state) {
@@ -104,11 +101,11 @@ public class GoogleDocImportJobContext extends AbstractDto<GoogleDocImportJobCon
   }
 
   public ModuleId getModuleId() {
-    return moduleId;
+    return new ModuleId(moduleId);
   }
 
   public Version getVersion() {
-    return version;
+    return new Version(version);
   }
 
   public GoogleDocImportJobState getState() {
@@ -184,8 +181,8 @@ public class GoogleDocImportJobContext extends AbstractDto<GoogleDocImportJobCon
   private GoogleDocImportJobContext(Builder builder) {
     super(builder);
     this.resourceInfo = builder.resourceInfo;
-    this.moduleId = builder.moduleId;
-    this.version = builder.version;
+    this.moduleId = getWrapperValue(builder.moduleId);
+    this.version = getWrapperValue(builder.version);
     this.state = builder.state;
     this.archiveId = builder.archiveId;
     this.gcsArchiveLocation = builder.gcsArchiveLocation;

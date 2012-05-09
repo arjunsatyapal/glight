@@ -15,14 +15,6 @@
  */
 package com.google.light.server.guice.modules;
 
-import com.google.light.server.manager.implementation.NotificationManagerImpl;
-
-import com.google.light.server.manager.interfaces.NotificationManager;
-
-import com.google.light.server.manager.implementation.QueueManagerImpl;
-
-import com.google.light.server.manager.interfaces.QueueManager;
-
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
@@ -41,10 +33,11 @@ import com.google.light.server.guice.providers.InstantProvider;
 import com.google.light.server.guice.providers.RequestScopedValuesProvider;
 import com.google.light.server.manager.implementation.AdminOperationManagerImpl;
 import com.google.light.server.manager.implementation.CollectionManagerImpl;
-import com.google.light.server.manager.implementation.ImportManagerImpl;
 import com.google.light.server.manager.implementation.JobManagerImpl;
 import com.google.light.server.manager.implementation.ModuleManagerImpl;
+import com.google.light.server.manager.implementation.NotificationManagerImpl;
 import com.google.light.server.manager.implementation.PersonManagerImpl;
+import com.google.light.server.manager.implementation.QueueManagerImpl;
 import com.google.light.server.manager.implementation.SearchManagerGSSImpl;
 import com.google.light.server.manager.implementation.oauth2.consumer.OAuth2ConsumerCredentialManagerFactory;
 import com.google.light.server.manager.implementation.oauth2.consumer.OAuth2ConsumerCredentialManagerImpl;
@@ -52,12 +45,13 @@ import com.google.light.server.manager.implementation.oauth2.owner.OAuth2OwnerTo
 import com.google.light.server.manager.implementation.oauth2.owner.OAuth2OwnerTokenManagerImpl;
 import com.google.light.server.manager.interfaces.AdminOperationManager;
 import com.google.light.server.manager.interfaces.CollectionManager;
-import com.google.light.server.manager.interfaces.ImportManager;
 import com.google.light.server.manager.interfaces.JobManager;
 import com.google.light.server.manager.interfaces.ModuleManager;
+import com.google.light.server.manager.interfaces.NotificationManager;
 import com.google.light.server.manager.interfaces.OAuth2ConsumerCredentialManager;
 import com.google.light.server.manager.interfaces.OAuth2OwnerTokenManager;
 import com.google.light.server.manager.interfaces.PersonManager;
+import com.google.light.server.manager.interfaces.QueueManager;
 import com.google.light.server.manager.interfaces.SearchManager;
 import com.google.light.server.persistence.dao.OAuth2ConsumerCredentialDao;
 import com.google.light.server.servlets.oauth2.google.OAuth2Helper;
@@ -116,9 +110,6 @@ public abstract class BaseGuiceModule extends AbstractModule {
 
     bind(CollectionManager.class)
       .to(CollectionManagerImpl.class);
-
-    bind(ImportManager.class)
-        .to(ImportManagerImpl.class);
 
     bind(JobManager.class)
         .to(JobManagerImpl.class);

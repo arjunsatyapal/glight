@@ -16,7 +16,6 @@
 package com.google.light.server.guice.jersey;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.light.server.constants.JerseyConstants.URI_RESOURCE_PATH_GAE_PIPELINE;
 import static com.google.light.server.constants.JerseyConstants.URI_RESOURCE_PATH_MISC_ADMIN;
 import static com.google.light.server.constants.JerseyConstants.URI_RESOURCE_PATH_MODULE;
 import static com.google.light.server.constants.JerseyConstants.URI_RESOURCE_PATH_NOTIFICATION;
@@ -24,19 +23,14 @@ import static com.google.light.server.constants.JerseyConstants.URI_RESOURCE_PAT
 import static com.google.light.server.constants.JerseyConstants.URI_RESOURCE_PATH_THIRD_PARTH_GOOGLE_DOC;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
-import com.google.light.server.jersey.resources.notifications.NotificationResource;
-
-import com.google.light.server.jersey.resources.job.JobResource;
-
-import com.google.light.server.constants.JerseyConstants;
-
-import com.google.light.server.jersey.resources.CollectionResource;
-
 import com.google.common.collect.Sets;
+import com.google.light.server.constants.JerseyConstants;
 import com.google.light.server.jersey.resources.AbstractJerseyResource;
+import com.google.light.server.jersey.resources.CollectionResource;
 import com.google.light.server.jersey.resources.ModuleResource;
 import com.google.light.server.jersey.resources.admin.gae.GAEAdminResources;
-import com.google.light.server.jersey.resources.admin.gae.GAEPipelineResource;
+import com.google.light.server.jersey.resources.job.JobResource;
+import com.google.light.server.jersey.resources.notifications.NotificationResource;
 import com.google.light.server.jersey.resources.test.TestResources;
 import com.google.light.server.jersey.resources.thirdparty.google.GoogleDocIntegration;
 import java.util.Set;
@@ -50,7 +44,6 @@ import java.util.Set;
  */
 public enum JerseyResourcesEnum {
   COLLECTION_RESOURCE(CollectionResource.class, JerseyConstants.URI_RESOURCE_PATH_COLLECTION),
-  GAE_PIPELINE_RESOURCE(GAEPipelineResource.class, URI_RESOURCE_PATH_GAE_PIPELINE),
   GOOGLE_DOC_RESOURCE(GoogleDocIntegration.class, URI_RESOURCE_PATH_THIRD_PARTH_GOOGLE_DOC),
   JOB_RESOURCE(JobResource.class, JerseyConstants.URI_RESOURCE_JOB),
   MISC_ADMIN_RESOURCES(GAEAdminResources.class, URI_RESOURCE_PATH_MISC_ADMIN),

@@ -10,7 +10,6 @@ import com.google.light.server.utils.JsonUtils;
 
 import com.google.light.server.exception.unchecked.MissingOwnerCredentialException;
 
-import com.google.light.server.constants.JerseyConstants;
 import com.google.light.server.dto.RedirectDto;
 import com.google.light.server.dto.pojo.longwrapper.PersonId;
 
@@ -32,8 +31,6 @@ import com.google.light.server.servlets.SessionManager;
 import com.google.light.server.servlets.oauth2.google.OAuth2Helper;
 import com.google.light.server.servlets.oauth2.google.OAuth2HelperFactoryInterface;
 import com.google.light.server.servlets.oauth2.google.pojo.GoogleOAuth2TokenInfo;
-import com.google.light.server.utils.GaeUtils;
-import com.google.light.server.utils.JsonUtils;
 import com.google.light.server.utils.ServletUtils;
 import java.io.IOException;
 import javax.servlet.http.HttpServlet;

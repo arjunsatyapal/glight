@@ -21,8 +21,6 @@ import static com.google.light.server.constants.RequestParamKeyEnum.LOGIN_PROVID
 import static com.google.light.server.constants.RequestParamKeyEnum.PERSON_ID;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
-import com.google.light.server.dto.pojo.longwrapper.PersonId;
-
 import com.google.common.base.Charsets;
 import com.google.common.base.Throwables;
 import com.google.common.io.CharStreams;
@@ -32,6 +30,7 @@ import com.google.light.server.constants.OAuth2ProviderService;
 import com.google.light.server.constants.RequestParamKeyEnum;
 import com.google.light.server.constants.http.ContentTypeEnum;
 import com.google.light.server.dto.AbstractDto;
+import com.google.light.server.dto.pojo.longwrapper.PersonId;
 import com.google.light.server.servlets.path.ServletPathEnum;
 import com.google.light.server.servlets.pojo.ServletRequestPojo;
 import java.io.IOException;
@@ -42,7 +41,6 @@ import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import javax.xml.bind.JAXBException;
 
 /**
  * Utility methods for Servlets and Servlet Environment.
@@ -129,7 +127,7 @@ public class ServletUtils {
    */
   public static <D extends AbstractDto<D>> ServletRequestPojo<D> getRequestPojo(
       HttpServletRequest request, Class<D> clazz)
-      throws IOException, JAXBException {
+      throws IOException {
     String reqContentType = request.getContentType();
     ContentTypeEnum contentType = ContentTypeEnum.getContentTypeByString(reqContentType);
 

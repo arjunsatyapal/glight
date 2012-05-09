@@ -20,6 +20,16 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.light.server.utils.ServletUtils.getRequestHeaderValue;
 
+import com.google.light.server.dto.pojo.longwrapper.CollectionId;
+
+import com.google.light.server.exception.unchecked.InvalidVersionException;
+
+import com.google.light.server.dto.pojo.longwrapper.Version;
+
+import com.google.light.server.exception.unchecked.InvalidModuleIdException;
+
+import com.google.light.server.dto.pojo.longwrapper.ModuleId;
+
 import com.google.light.server.exception.unchecked.InvalidJobIdException;
 
 import com.google.light.server.dto.pojo.longwrapper.JobId;
@@ -65,7 +75,6 @@ public class LightPreconditions {
   private static LongValidator longValidator = LongValidator.getInstance();
   private static IntegerValidator integerValidator = IntegerValidator.getInstance();
 
-
   /**
    * Ensures that the Email passed to the referenced method is valid.
    * 
@@ -89,7 +98,52 @@ public class LightPreconditions {
 
     return personId;
   }
-  
+
+  /**
+   * Ensures that ModuleId is valid.
+   * TODO(arjuns): Add test for this.
+   */
+  public static ModuleId checkModuleId(ModuleId moduleId) {
+    try {
+      Preconditions.checkNotNull(moduleId, "moduleId");
+      checkPositiveLong(moduleId.getValue(), "Invalid [" + moduleId.getValue() + "].");
+    } catch (Exception e) {
+      throw new InvalidModuleIdException(e);
+    }
+
+    return moduleId;
+  }
+
+  /**
+   * Ensures that CollectionId is valid.
+   * TODO(arjuns): Add test for this.
+   */
+  public static CollectionId checkCollectionId(CollectionId collectionId) {
+    try {
+      Preconditions.checkNotNull(collectionId, "collectionId");
+      checkPositiveLong(collectionId.getValue(), "Invalid [" + collectionId.getValue() + "].");
+    } catch (Exception e) {
+      throw new InvalidModuleIdException(e);
+    }
+
+    return collectionId;
+  }
+
+  /**
+   * Ensures that ModuleId is valid.
+   * TODO(arjuns): Add test for this.
+   */
+  public static Version checkVersion(Version version) {
+    try {
+      Preconditions.checkNotNull(version, "version");
+      checkPositiveLong(version.getValue(), "Invalid [" + version.getValue() + "].");
+    } catch (Exception e) {
+      throw new InvalidVersionException(e);
+    }
+
+    return version;
+  }
+
   /**
    * Ensures that PersonId is valid.
    */
@@ -135,6 +189,19 @@ public class LightPreconditions {
   public static Long checkPositiveLong(Long value, String message) {
     Preconditions.checkNotNull(value, message);
     checkArgument(longValidator.isInRange(value, 1, Long.MAX_VALUE), message + "[" + value + "].");
+    return value;
+  }
+
+  /**
+   * Ensures that the passed value is a valid positive long and its range is [1, Long.Max_value].
+   * TODO(arjuns): Update test.
+   * 
+   * @param value
+   * @return
+   */
+  public static Long checkNonNegativeLong(Long value, String message) {
+    Preconditions.checkNotNull(value, message);
+    checkArgument(longValidator.isInRange(value, 0, Long.MAX_VALUE), message + "[" + value + "].");
     return value;
   }
 
@@ -249,7 +316,7 @@ public class LightPreconditions {
       throw new PersonLoginRequiredException("");
     }
   }
-  
+
   /**
    * Ensures that Session is valid.
    * NOTE : Unlike other check functions, this does not return anything.
@@ -270,22 +337,22 @@ public class LightPreconditions {
     Preconditions.checkNotNull(ofy, "txn is null.");
     checkArgument(ofy.getTxn().isActive(), "txn is inactive.");
   }
-  
+
   public static void checkIsRunningUnderQueue(HttpServletRequest request) {
     String queueName = getRequestHeaderValue(request, HttpHeaderEnum.GAE_QUEUE_NAME);
     Preconditions.checkNotNull(queueName, "Currently request is not running under queue.");
   }
-  
-  public static<T> T checkNotNull(T object, ExceptionType type, String message) {
+
+  public static <T> T checkNotNull(T object, ExceptionType type, String message) {
     try {
       return Preconditions.checkNotNull(object);
     } catch (Exception e) {
       handleError(type, message);
     }
-    
+
     throw new IllegalStateException("Code should not reach here.");
   }
-  
+
   /**
    * Javadoc is same as for {{@link #checkNotBlank(String)}. This throws an exception with cause as
    * errorString.
@@ -301,7 +368,7 @@ public class LightPreconditions {
 
     return reference;
   }
-  
+
   /**
    * Javadoc is same as for {{@link #checkNotBlank(String)}. This throws an exception with cause as
    * errorString.
@@ -310,7 +377,7 @@ public class LightPreconditions {
    * @param errorString
    * @return
    */
-  public static String checkNotBlank(String reference, ExceptionType type, 
+  public static String checkNotBlank(String reference, ExceptionType type,
       String errorString) {
     if (StringUtils.isBlank(reference)) {
       throw new BlankStringException(errorString, type);
@@ -318,20 +385,20 @@ public class LightPreconditions {
 
     return reference;
   }
-  
+
   private static void handleError(ExceptionType exceptionType, String message) {
     switch (exceptionType) {
-      case CLIENT_PARAMETER :
+      case CLIENT_PARAMETER:
         throw new NotFoundException(message);
-        
-      case SERVER :
+
+      case SERVER:
         throw new InternalServerError(message);
-        
-      default :
+
+      default:
         throw new IllegalArgumentException("Unsupported type : " + exceptionType);
     }
   }
-  
+
   // Utility class.
   private LightPreconditions() {
   }

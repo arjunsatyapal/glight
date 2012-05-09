@@ -17,24 +17,23 @@ package com.google.light.server.dto.collection;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
-
-import com.google.light.server.dto.pojo.longwrapper.CollectionId;
-
-import org.codehaus.jackson.annotate.JsonProperty;
-
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
+import static com.google.light.server.utils.LightUtils.getWrapperValue;
 
 import com.google.light.server.dto.AbstractDto;
 import com.google.light.server.dto.AbstractDtoToPersistence;
+import com.google.light.server.dto.pojo.longwrapper.CollectionId;
 import com.google.light.server.dto.pojo.longwrapper.PersonId;
 import com.google.light.server.dto.pojo.longwrapper.Version;
 import com.google.light.server.dto.pojo.tree.CollectionTreeNodeDto;
 import com.google.light.server.persistence.entity.collection.CollectionEntity;
 import com.google.light.server.utils.LightPreconditions;
 import java.util.List;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import org.codehaus.jackson.annotate.JsonProperty;
+import org.codehaus.jackson.annotate.JsonTypeName;
 
 /**
  * 
@@ -46,11 +45,12 @@ import javax.xml.bind.annotation.XmlRootElement;
 @SuppressWarnings("serial")
 @XmlRootElement(name = "collection")
 @XmlAccessorType(XmlAccessType.FIELD)
+@JsonTypeName(value = "collection")
 public class CollectionDto extends
-    AbstractDtoToPersistence<CollectionDto, CollectionEntity, String> {
+    AbstractDtoToPersistence<CollectionDto, CollectionEntity, CollectionId> {
   @XmlElement(name = "id")
   @JsonProperty(value = "id")
-  private CollectionId id;
+  private Long id;
   
   @XmlElement(name = "title")
   @JsonProperty(value = "title")
@@ -66,7 +66,7 @@ public class CollectionDto extends
   
   @XmlElement(name = "version")
   @JsonProperty(value = "version")
-  private Version version;
+  private Long version;
   
   @XmlElement(name = "root")
   @JsonProperty(value = "root")
@@ -76,7 +76,7 @@ public class CollectionDto extends
    * {@inheritDoc}
    */
   @Override
-  public CollectionEntity toPersistenceEntity(String id) {
+  public CollectionEntity toPersistenceEntity(CollectionId id) {
     // TODO(arjuns): Auto-generated method stub
     throw new UnsupportedOperationException();
   }
@@ -99,7 +99,7 @@ public class CollectionDto extends
   }
 
   public CollectionId getId() {
-    return id;
+    return new CollectionId(id);
   }
 
   public String getTitle() {
@@ -115,7 +115,7 @@ public class CollectionDto extends
   }
 
   public Version getVersion() {
-    return version;
+    return new Version(version);
   }
 
   public CollectionTreeNodeDto getRoot() {
@@ -169,11 +169,11 @@ public class CollectionDto extends
   @SuppressWarnings("synthetic-access")
   private CollectionDto(Builder builder) {
     super(builder);
-    this.id = builder.id;
+    this.id = getWrapperValue(builder.id);
     this.title = builder.title;
     this.state = builder.state;
     this.owners = builder.owners;
-    this.version = builder.version;
+    this.version = getWrapperValue(builder.version);
     this.root = builder.root;
   }
 

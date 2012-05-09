@@ -27,6 +27,8 @@ import com.google.light.server.dto.TestAbstractDto;
  * @author Walter Cacau
  */
 public class QueryUtilsTestSampleDto extends TestAbstractDto<QueryUtilsTestSampleDto> {
+  private String field;
+  private int someOtherField;
 
   /**
    * Choosing private because several DTO's create private constructors to force the use of their
@@ -35,9 +37,6 @@ public class QueryUtilsTestSampleDto extends TestAbstractDto<QueryUtilsTestSampl
   private QueryUtilsTestSampleDto() {
     super(null);
   }
-
-  String field;
-  int someOtherField;
 
   public String getField() {
     return field;

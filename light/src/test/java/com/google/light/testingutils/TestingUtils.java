@@ -29,6 +29,8 @@ import static com.google.light.server.utils.LightUtils.getUUIDString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.lang.reflect.Field;
+
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.LowLevelHttpRequest;
 import com.google.api.client.http.LowLevelHttpResponse;
@@ -484,24 +486,39 @@ public class TestingUtils {
     return classes;
   }
 
+  /**
+   * Checks if the given annotation is same as mentioned in the annotationClass.
+   */
   @SuppressWarnings("rawtypes")
   public static boolean isSameAnnotation(Annotation annotation, Class annotationClass) {
     return annotation.annotationType().getName().equals(annotationClass.getName());
   }
   
+  /**
+   * Returns true if the specified Annotaiton exists.
+   */
   @SuppressWarnings("rawtypes")
   public static boolean containsAnnotation(Class requiredAnnotation, Annotation[] annotations) {
     if (annotations.length == 0) {
       return false;
     }
 
+    return getAnnotationIfExists(requiredAnnotation, annotations) != null;
+  }
+  
+  /**
+   * Returns required Annotation object if it exists.
+   */
+  @SuppressWarnings("rawtypes")
+  public static Annotation getAnnotationIfExists(Class requiredAnnotation, 
+      Annotation[] annotations) {
     for (Annotation currAnnotation : annotations) {
       if (isSameAnnotation(currAnnotation, requiredAnnotation)) {
-        return true;
+        return currAnnotation;
       }
     }
 
-    return false;
+    return null;
   }
 
   public static Set<String> findAllFilesUnderLight() {
@@ -534,5 +551,17 @@ public class TestingUtils {
     } else {
       setOfFiles.add(self.getAbsolutePath());
     }
+  }
+  
+  @SuppressWarnings("rawtypes")
+  public static List<Field> getFieldsWithRequiredAnnotation(Class requiredAnnotation, Class clazz) {
+    List<Field> list = Lists.newArrayList();
+    for (Field currField : clazz.getDeclaredFields()) {
+      if (containsAnnotation(requiredAnnotation, currField.getAnnotations())) {
+        list.add(currField);
+      }
+    }
+
+    return list;
   }
 }

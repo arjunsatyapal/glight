@@ -19,10 +19,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
-import org.junit.Ignore;
-
-import org.junit.Test;
-
 import com.google.common.collect.ImmutableMapBuilder;
 import com.google.light.server.dto.AbstractDtoTest;
 import com.google.light.server.dto.RedirectDto;
@@ -30,6 +26,7 @@ import com.google.light.server.dto.RedirectDto.Builder;
 import com.google.light.server.utils.QueryUtils;
 import com.google.light.testingutils.TestResourcePaths;
 import com.google.light.testingutils.TestingUtils;
+import org.junit.Test;
 
 /**
  * Test for {@link RedirectDto}

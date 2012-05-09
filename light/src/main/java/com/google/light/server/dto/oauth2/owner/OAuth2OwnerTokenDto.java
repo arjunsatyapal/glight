@@ -21,25 +21,21 @@ import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPersonId;
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
 import static com.google.light.server.utils.LightPreconditions.checkProviderUserId;
-
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-
-import org.codehaus.jackson.annotate.JsonProperty;
-
-import javax.xml.bind.annotation.XmlElement;
-
-import javax.xml.bind.annotation.XmlRootElement;
-
-import com.google.light.server.dto.pojo.longwrapper.PersonId;
-
-import com.google.light.server.dto.AbstractDto;
+import static com.google.light.server.utils.LightUtils.getWrapperValue;
 
 import com.google.api.client.auth.oauth2.TokenResponse;
 import com.google.light.server.constants.OAuth2ProviderService;
+import com.google.light.server.dto.AbstractDto;
 import com.google.light.server.dto.AbstractDtoToPersistence;
+import com.google.light.server.dto.pojo.longwrapper.PersonId;
 import com.google.light.server.persistence.entity.oauth2.owner.OAuth2OwnerTokenEntity;
 import com.google.light.server.persistence.entity.person.PersonEntity;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import org.codehaus.jackson.annotate.JsonProperty;
+import org.codehaus.jackson.annotate.JsonTypeName;
 
 /**
  * DTO for OAuth2 Tokens. Corresponding TokenEntity is {@link OAuth2OwnerTokenEntity}
@@ -47,13 +43,14 @@ import com.google.light.server.persistence.entity.person.PersonEntity;
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
+@JsonTypeName(value = "oauth2OwnerToken")
 @XmlRootElement(name="oauth2OwnerToken")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class OAuth2OwnerTokenDto extends
     AbstractDtoToPersistence<OAuth2OwnerTokenDto, OAuth2OwnerTokenEntity, String> {
   @XmlElement(name = "personId")
   @JsonProperty(value = "personId")
-  private PersonId personId;
+  private Long personId;
   
   @XmlElement(name = "providerService")
   @JsonProperty(value = "providerService")
@@ -88,7 +85,7 @@ public class OAuth2OwnerTokenDto extends
    */
   @Override
   public OAuth2OwnerTokenDto validate() {
-    checkPersonId(personId);
+    checkPersonId(getPersonId());
     checkNotNull(providerService, "provider");
     checkProviderUserId(providerService, providerUserId);
     checkNotBlank(accessToken, "accessToken");
@@ -109,7 +106,7 @@ public class OAuth2OwnerTokenDto extends
 
   public OAuth2OwnerTokenEntity toPersistenceEntity() {
     return new OAuth2OwnerTokenEntity.Builder()
-        .personKey(PersonEntity.generateKey(personId))
+        .personKey(PersonEntity.generateKey(getPersonId()))
         .providerService(providerService)
         .providerUserId(providerUserId)
         .accessToken(accessToken)
@@ -121,7 +118,7 @@ public class OAuth2OwnerTokenDto extends
   }
 
   public PersonId getPersonId() {
-    return personId;
+    return new PersonId(personId);
   }
 
   public OAuth2ProviderService getProviderService() {
@@ -244,7 +241,7 @@ public class OAuth2OwnerTokenDto extends
   @SuppressWarnings("synthetic-access")
   private OAuth2OwnerTokenDto(Builder builder) {
     super(builder);
-    this.personId = builder.personId;
+    this.personId = getWrapperValue(builder.personId);
     this.providerService = builder.providerService;
     this.providerUserId = builder.providerUserId;
     this.accessToken = builder.accessToken;

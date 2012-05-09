@@ -15,17 +15,34 @@
  */
 package com.google.light;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.testingutils.TestingUtils.containsAnnotation;
+import static com.google.light.testingutils.TestingUtils.getAnnotationIfExists;
+import static com.google.light.testingutils.TestingUtils.getClassesInPackage;
+import static com.google.light.testingutils.TestingUtils.getFieldsWithRequiredAnnotation;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import com.google.common.collect.Sets;
+import com.google.light.server.annotations.ObjectifyQueryField;
+import com.google.light.server.annotations.ObjectifyQueryFieldName;
 import com.google.light.server.constants.LightEnvEnum;
+import com.google.light.server.dto.AbstractPojo;
+import com.google.light.server.dto.pojo.longwrapper.AbstractTypeWrapper;
 import com.google.light.testingutils.GaeTestingUtils;
 import com.google.light.testingutils.TestingUtils;
+import com.googlecode.objectify.Key;
+import com.googlecode.objectify.annotation.Parent;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Logger;
+import javax.persistence.Id;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -74,7 +91,7 @@ public class TestBasicCodingGuidelines {// extends AbstractLightServerTest {
     String errorMessage = currMethod.getDeclaringClass().getSimpleName() + "#"
         + currMethod.getName() + " is tagged with " + Test.class.getName() +
         " annotation, but it does not start with test_";
-    
+
     if (containsAnnotation(Test.class, currMethod.getAnnotations())) {
       assertTrue(errorMessage, currMethod.getName().startsWith("test_"));
     }
@@ -134,5 +151,124 @@ public class TestBasicCodingGuidelines {// extends AbstractLightServerTest {
     }
 
     return false;
+  }
+
+  /**
+   * This test ensures that AbstractWrappers are not used inside Persistence or DTOs.
+   */
+  @SuppressWarnings({ "rawtypes" })
+  @Test
+  public void test_persistenceEntitiesAndDTOs() {
+    List<Class> classes = getClassesInPackage("com.google.light", null);
+
+    for (Class currClass : classes) {
+      if (AbstractPojo.class.isAssignableFrom(currClass)) {
+        validateClassFields(currClass);
+      }
+    }
+  }
+
+  /**
+   * @param currClass
+   */
+  @SuppressWarnings("rawtypes")
+  private void validateClassFields(Class currClass) {
+    for (Field currField : currClass.getDeclaredFields()) {
+      if (currField.isSynthetic() || currField.getType().isAssignableFrom(Logger.class)) {
+        // for switch blocks.
+        continue;
+      } else if (Modifier.isStatic(currField.getModifiers())) {
+        assertTrue("Invalid " + currClass.getSimpleName() + "#" + currField.getName()
+            + ". Only Fields which are marked with "
+            + ObjectifyQueryFieldName.class.getSimpleName()
+            + " are allowed to be static fields as they are used by Objectify.",
+            containsAnnotation(ObjectifyQueryFieldName.class, currField.getDeclaredAnnotations()));
+
+        validateQueryStringAndFields(currClass, currField);
+      } else {
+        assertTrue(currClass.getSimpleName() + "#" + currField.getName()
+            + " should be either private/protected.",
+            Modifier.isPrivate(currField.getModifiers())
+                || Modifier.isProtected(currField.getModifiers()));
+
+        if (containsAnnotation(Id.class, currField.getAnnotations())) {
+          assertTrue("Invalid " + currClass.getSimpleName() + "#" + currField.getName()
+              + " as Id fields can be only Long or String.",
+              Long.class.isAssignableFrom(currField.getType())
+                  || String.class.isAssignableFrom(currField.getType()));
+        } else if (containsAnnotation(Parent.class, currField.getAnnotations())) {
+          assertTrue("Invalid " + currClass.getSimpleName() + "#" + currField.getName()
+              + " as fields marked with Parent should be of type " + Key.class.getName(),
+              Key.class.isAssignableFrom(currField.getType()));
+        }
+
+        validateWrapperIfRequired(currClass, currField);
+
+      }
+    }
+  }
+
+  @SuppressWarnings("rawtypes")
+  private void validateWrapperIfRequired(Class currClass, Field currField) {
+    String errorMessage = "Invalid field " + currClass.getSimpleName() + "#" + currField.getName()
+        + ", as for DTOs and Persistence, un-wrapped values should be used.";
+    
+    assertFalse(errorMessage, AbstractTypeWrapper.class.isAssignableFrom(currField.getType()));
+  }
+
+  @SuppressWarnings("rawtypes")
+  private void validateQueryStringAndFields(Class currClass, Field ofyQueryStringField) {
+    String queryStringValue = getObjectifyQueryStringValue(ofyQueryStringField.getAnnotations());
+    checkNotBlank(queryStringValue, currClass.getSimpleName() + "#"
+        + ofyQueryStringField.getName() + " is used for ObjectifyQuery, but annotation does not "
+        + "have the value which points to that field.");
+
+    // Now find a field in current class which is annotated with @ObjectifyQueryField
+    List<Field> listOfFields = getFieldsWithRequiredAnnotation(
+        ObjectifyQueryField.class, currClass);
+    assertTrue("Inside " + currClass.getSimpleName()
+        + ", expectation is at least one field should be tagged with "
+        + ObjectifyQueryField.class.getSimpleName(), listOfFields.size() > 0);
+
+    Field requiredField = null;
+
+    for (Field currField : listOfFields) {
+      if (currField.getName().equals(queryStringValue)) {
+        requiredField = currField;
+        break;
+      }
+    }
+
+    checkNotNull(requiredField, "Did not find any field "
+        + currClass.getSimpleName() + "#" + queryStringValue);
+
+    String queryFieldValue = getObjectifyQueryFieldValue(requiredField.getAnnotations());
+
+    assertEquals("For class " + currClass.getSimpleName() + ", " + ofyQueryStringField.getName()
+        + " does not match with annotation for " + requiredField.getName(),
+        ofyQueryStringField.getName(), queryFieldValue);
+
+  }
+
+  private String getObjectifyQueryStringValue(Annotation[] annotations) {
+    Annotation annotation = getAnnotationIfExists(ObjectifyQueryFieldName.class, annotations);
+    if (annotation == null) {
+      return null;
+    }
+
+    ObjectifyQueryFieldName queryString = (ObjectifyQueryFieldName) annotation;
+
+    return queryString.value();
+  }
+
+  private String getObjectifyQueryFieldValue(Annotation[] annotations) {
+    Annotation annotation = getAnnotationIfExists(ObjectifyQueryField.class, annotations);
+    if (annotation == null) {
+      return null;
+    }
+
+    ObjectifyQueryField queryString = (ObjectifyQueryField) annotation;
+
+    return queryString.value();
   }
 }

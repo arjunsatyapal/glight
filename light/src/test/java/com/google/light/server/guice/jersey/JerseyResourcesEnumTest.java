@@ -54,7 +54,7 @@ public class JerseyResourcesEnumTest implements EnumTestInterface {
   @Override
   @Test
   public void test_count() throws Exception {
-    assertEquals(8, JerseyResourcesEnum.values().length);
+    assertEquals(7, JerseyResourcesEnum.values().length);
 
     Set<Class<? extends AbstractJerseyResource>> existingSet =
         JerseyMethodEnum.getSetOfJerseyResources();
@@ -84,12 +84,11 @@ public class JerseyResourcesEnumTest implements EnumTestInterface {
 
         JerseyMethodEnum myenum = JerseyMethodEnum.getEnum(clazz,
             currMethod.getName(), currMethod.getParameterTypes());
-
         checkNotNull(myenum, "Did not find mapping for : "
-            + "\nclass[" + clazz + "], "
-            + "\nmethod[" + currMethod + "], "
+            + "\nclass[" + clazz.getSimpleName() + "], "
+            + "\nmethod[" + currMethod.getName() + "], "
             + "\nParameterTypes[" + Iterables.toString(Lists.newArrayList(
-                currMethod.getParameterTypes())) + "].");
+                currMethod.getParameterTypes().getClass().getSimpleName())) + "].");
 
         // Now validating Method Type Annotation.
         Map<String, Annotation> mapOfAnnotation = convertAnnotations(listOfAnnotations);

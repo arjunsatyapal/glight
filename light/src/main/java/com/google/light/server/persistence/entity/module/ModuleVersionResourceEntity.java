@@ -41,11 +41,11 @@ import javax.persistence.Id;
 public class ModuleVersionResourceEntity extends
     AbstractPersistenceEntity<ModuleVersionResourceEntity, Object> {
   @Id
-  String id;
+  private String id;
   @Parent
-  Key<ModuleVersionEntity> moduleVersionKey;
+  private Key<ModuleVersionEntity> moduleVersionKey;
   @Embedded
-  GSBlobInfo resourceInfo;
+  private GSBlobInfo resourceInfo;
 
   /**
    * {@inheritDoc}

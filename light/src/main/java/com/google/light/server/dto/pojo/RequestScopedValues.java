@@ -18,12 +18,10 @@ package com.google.light.server.dto.pojo;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.GuiceUtils.getInstance;
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
-
-import com.google.light.server.dto.pojo.longwrapper.PersonId;
+import static com.google.light.server.utils.LightUtils.getWrapperValue;
 
 import com.google.light.server.dto.AbstractPojo;
-
-import com.google.common.base.Preconditions;
+import com.google.light.server.dto.pojo.longwrapper.PersonId;
 import com.google.light.server.exception.unchecked.httpexception.PersonLoginRequiredException;
 import com.google.light.server.manager.interfaces.PersonManager;
 import com.google.light.server.persistence.entity.person.PersonEntity;
@@ -38,10 +36,10 @@ import com.google.light.server.persistence.entity.person.PersonEntity;
 @SuppressWarnings("serial")
 public class RequestScopedValues extends AbstractPojo<RequestScopedValues> {
   /** Id of Person who is responsible for the current action */
-  protected PersonId ownerId;
+  protected Long ownerId;
 
   /** Id of Person who is performing current action on behalf of Owner. */
-  protected PersonId actorId;
+  protected Long actorId;
 
   // These entities are lazily initialized.
   private PersonEntity owner;
@@ -59,16 +57,24 @@ public class RequestScopedValues extends AbstractPojo<RequestScopedValues> {
 
   public RequestScopedValues(PersonId ownerId, PersonId actorId) {
     if (ownerId.isValid()) {
-      this.ownerId = ownerId;
+      this.ownerId = getWrapperValue(ownerId);
     }
-    
+
     if (actorId.isValid()) {
-      this.actorId = actorId;
+      this.actorId = getWrapperValue(actorId);
     }
   }
 
   public PersonId getOwnerId() {
-    return ownerId;
+    if (ownerId == null) {
+      return null;
+    }
+    
+    return new PersonId(ownerId);
+  }
+
+  public void setOwnerId(PersonId ownerId) {
+    this.ownerId = getWrapperValue(ownerId);
   }
 
   public PersonEntity getOwner() {
@@ -77,20 +83,33 @@ public class RequestScopedValues extends AbstractPojo<RequestScopedValues> {
     }
 
     if (owner == null) {
-      owner = loadPerson(ownerId);
+      owner = loadPerson(getOwnerId());
+      checkNotNull(owner, "owner[" + getOwnerId() + "] not found");
     }
 
     return owner;
   }
 
   public PersonId getActorId() {
-    return actorId;
+    if (actorId == null) {
+      return null;
+    }
+    
+    return new PersonId(actorId);
+  }
+
+  public void setActorId(PersonId actorId) {
+    this.actorId = getWrapperValue(actorId);
   }
 
   public PersonEntity getActor() {
+    if (actorId  == null) {
+      return null;
+    }
+    
     if (actor == null) {
-      actor = loadPerson(actorId);
-      Preconditions.checkNotNull(actor, "Actor[" + actorId + "] not found");
+      actor = loadPerson(getActorId());
+      checkNotNull(actor, "Actor[" + getActorId() + "] not found");
     }
 
     return actor;
@@ -150,11 +169,11 @@ public class RequestScopedValues extends AbstractPojo<RequestScopedValues> {
    */
   @Override
   public RequestScopedValues validate() {
-    checkNotNull(actorId, "actorId");
-    checkPositiveLong(actorId.getValue(), "actorId");
+    checkNotNull(getActorId(), "actorId");
+    checkPositiveLong(actorId, "actorId");
 
-    if (ownerId != null && ownerId.getValue() != null) {
-      checkPositiveLong(ownerId.getValue(), "ownerId");
+    if (ownerId != null && getOwnerId() != null) {
+      checkPositiveLong(ownerId, "ownerId");
     }
     return this;
   }

@@ -18,16 +18,12 @@ package com.google.light.server.dto.pojo.tree;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNull;
 
-import org.codehaus.jackson.annotate.JsonProperty;
-
 import com.google.common.collect.Lists;
 import com.google.light.server.dto.AbstractDto;
 import java.util.List;
 import javax.persistence.Embedded;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+import org.codehaus.jackson.annotate.JsonProperty;
 
 /**
  * 

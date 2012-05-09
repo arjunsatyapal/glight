@@ -23,6 +23,6 @@ package com.google.light.server.dto.module;
  * @author Arjun Satyapal
  */
 public enum ModuleVersionState {
-  ADDED,
+  PUBLISHED,
   RESERVED;
 }

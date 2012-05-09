@@ -22,19 +22,14 @@ import static com.google.light.server.dto.module.ModuleType.getByProviderService
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightUtils.decodeFromUrlEncodedString;
 
-import org.codehaus.jackson.annotate.JsonProperty;
-
-import javax.xml.bind.annotation.XmlElement;
-
-import javax.xml.bind.annotation.XmlAccessType;
-
-import javax.xml.bind.annotation.XmlAccessorType;
-
-import javax.xml.bind.annotation.XmlRootElement;
-
 import com.google.light.server.dto.AbstractDto;
-
 import com.google.light.server.dto.module.ModuleType;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import org.codehaus.jackson.annotate.JsonProperty;
+import org.codehaus.jackson.annotate.JsonTypeName;
 
 /**
  * Creating a type for GoogleDoc ResourceId.
@@ -44,6 +39,7 @@ import com.google.light.server.dto.module.ModuleType;
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
+@JsonTypeName(value = "googleDocResourceId")
 @XmlRootElement(name = "googleDocResourceId")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class GoogleDocResourceId extends AbstractDto<GoogleDocResourceId>{

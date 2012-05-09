@@ -19,19 +19,17 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkNull;
-
-import com.google.light.server.constants.PlacementOrder;
+import static com.google.light.server.utils.LightUtils.getWrapperValue;
 
 import com.google.appengine.api.datastore.Text;
-import com.google.appengine.tools.pipeline.JobInfo;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-import com.google.light.server.constants.RequestParamKeyEnum;
+import com.google.light.server.annotations.ObjectifyQueryField;
+import com.google.light.server.annotations.ObjectifyQueryFieldName;
+import com.google.light.server.constants.PlacementOrder;
 import com.google.light.server.dto.pojo.ChangeLogEntryPojo;
-import com.google.light.server.dto.pojo.JobHandlerId;
 import com.google.light.server.dto.pojo.longwrapper.JobId;
 import com.google.light.server.persistence.entity.AbstractPersistenceEntity;
-import com.google.light.server.servlets.path.ServletPathEnum;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.Unindexed;
 import java.util.List;
@@ -48,27 +46,23 @@ import javax.persistence.Id;
 @SuppressWarnings("serial")
 public class JobEntity extends AbstractPersistenceEntity<JobEntity, Object> {
   @Id
-  private Long jobId;
-  @Embedded
-  private JobId parentJobId;
-  @Embedded
-  private JobId rootJobId;
+  private Long id;
+  private Long parentJobId;
+  private Long rootJobId;
 
   // This is used in Objectify Query.
+  @ObjectifyQueryFieldName(value = "jobHandlerType")
   public static final String OFY_JOB_HANDLER_TYPE = "jobHandlerType";
+  
+  @ObjectifyQueryField(value = "OFY_JOB_HANDLER_TYPE")
   private JobHandlerType jobHandlerType;
 
-  // This is used in Objectify Query.
-  public static final String OFY_JOB_HANDLER_ID = "jobHandlerId.id";
-  @Deprecated
-  @Embedded
-  private JobHandlerId jobHandlerId;
   private JobType jobType;
 
   private TaskType taskType;
   private String taskId;
 
-  // Following values can be modified.
+  // Following values can 
   private JobState jobState;
   
   @Unindexed
@@ -100,11 +94,11 @@ public class JobEntity extends AbstractPersistenceEntity<JobEntity, Object> {
   }
 
   public JobId getId() {
-    return new JobId(jobId);
+    return new JobId(id);
   }
 
   public JobId getParentJobId() {
-    return parentJobId;
+    return new JobId(parentJobId);
   }
 
   public boolean hasParent() {
@@ -116,7 +110,7 @@ public class JobEntity extends AbstractPersistenceEntity<JobEntity, Object> {
       return getId();
     }
 
-    return rootJobId;
+    return new JobId(rootJobId);
   }
 
   public boolean isRootJob() {
@@ -125,14 +119,6 @@ public class JobEntity extends AbstractPersistenceEntity<JobEntity, Object> {
 
   public JobHandlerType getJobHandlerType() {
     return jobHandlerType;
-  }
-
-  public JobHandlerId getJobHandlerId() {
-    return jobHandlerId;
-  }
-
-  public void setJobHandlerId(JobHandlerId jobHandlerId) {
-    this.jobHandlerId = checkNotNull(jobHandlerId, "jobHandlerId");
   }
 
   public JobType getJobType() {
@@ -175,13 +161,13 @@ public class JobEntity extends AbstractPersistenceEntity<JobEntity, Object> {
     changeLogs.add(changeLog);
   }
 
-  public String getLocation() {
-    String encodedId = Long.toString(jobId);
-    String locationUrl = ServletPathEnum.IMPORT_STAGE_DETAIL_SERVLET.get() + "?"
-        + RequestParamKeyEnum.JOB_ID.get() + "=" + encodedId;
-
-    return locationUrl;
-  }
+//  public String getLocation() {
+//    String encodedId = Long.toString(id);
+//    String locationUrl = ServletPathEnum.IMPORT_STAGE_DETAIL_SERVLET.get() + "?"
+//        + RequestParamKeyEnum.JOB_ID.get() + "=" + encodedId;
+//
+//    return locationUrl;
+//  }
 
   public Text getRequest() {
     return request;
@@ -208,8 +194,8 @@ public class JobEntity extends AbstractPersistenceEntity<JobEntity, Object> {
         checkNotNull(rootJobId, "For childJob, rootJobId cannot be null.");
         checkNotNull(parentJobId, "For childJob, rootJobId cannot be null.");
         
-        if (jobId != null) {
-          checkArgument(!jobId.equals(rootJobId),
+        if (id != null) {
+          checkArgument(!id.equals(rootJobId),
               "For childJob, jobId and rootJobId should be different.");
         }
         
@@ -265,7 +251,6 @@ public class JobEntity extends AbstractPersistenceEntity<JobEntity, Object> {
     private JobId rootJobId;
 
     private JobHandlerType jobHandlerType;
-    private JobHandlerId jobHandlerId;
     private JobType jobType;
     private TaskType taskType;
     private String taskId;
@@ -291,11 +276,6 @@ public class JobEntity extends AbstractPersistenceEntity<JobEntity, Object> {
 
     public Builder jobHandlerType(JobHandlerType jobHandlerType) {
       this.jobHandlerType = jobHandlerType;
-      return this;
-    }
-
-    public Builder jobHandlerId(JobHandlerId jobHandlerId) {
-      this.jobHandlerId = jobHandlerId;
       return this;
     }
 
@@ -345,11 +325,11 @@ public class JobEntity extends AbstractPersistenceEntity<JobEntity, Object> {
     super(builder, false);
 
     if (builder.jobId != null) {
-      this.jobId = builder.jobId.getValue();
+      this.id = builder.jobId.getValue();
     }
 
-    this.parentJobId = builder.parentJobId;
-    this.rootJobId = builder.rootJobId;
+    this.parentJobId = getWrapperValue(builder.parentJobId);
+    this.rootJobId = getWrapperValue(builder.rootJobId);
 
     this.jobType = builder.jobType;
     this.jobHandlerType = builder.jobHandlerType;
@@ -361,7 +341,6 @@ public class JobEntity extends AbstractPersistenceEntity<JobEntity, Object> {
     this.changeLogs = Lists.newArrayList();
     this.request = builder.request;
     this.context = builder.context;
-    this.jobHandlerId = builder.jobHandlerId;
     this.stopReason = builder.stopReason;
   }
 
@@ -390,27 +369,15 @@ public class JobEntity extends AbstractPersistenceEntity<JobEntity, Object> {
    * TODO(arjuns): Ensure enum values match.
    */
   public static enum JobState {
-    @Deprecated
-    RUNNING(1),
-    @Deprecated
-    COMPLETED_SUCCESSFULLY(2),
-    @Deprecated
-    STOPPED_BY_REQUEST(3),
-    @Deprecated
-    STOPPED_BY_ERROR(4),
-    @Deprecated
-    WAITING_TO_RETRY(5),
-
-    // Additional States.
-    @Deprecated
-    PRE_START(6),
     ENQUEUED(100),
     CREATING_CHILDS(200),
     WAITING_FOR_CHILD_COMPLETE_NOTIFICATION(300),
     POLLING_FOR_CHILDS(400),
     ALL_CHILDS_COMPLETED_SUCCESSFULLY(500),
     COMPLETE(950),
-    READY_FOR_CLEANUP(1000);
+    STOPPED_BY_ERROR(1000),
+    STOPPED_BY_REQUEST(1100),
+    READY_FOR_CLEANUP(2000);
 
     private int level;
     
@@ -430,17 +397,6 @@ public class JobEntity extends AbstractPersistenceEntity<JobEntity, Object> {
       } else {
         return PlacementOrder.AFTER;
       }
-    }
-    
-    
-    public static JobState fromPipelineJobState(JobInfo.State pipelineJobState) {
-      for (JobState curr : JobState.values()) {
-        if (curr.name().equals(pipelineJobState.name())) {
-          return curr;
-        }
-      }
-
-      throw new IllegalArgumentException(pipelineJobState.name());
     }
   }
 

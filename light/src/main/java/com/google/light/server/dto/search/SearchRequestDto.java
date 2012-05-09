@@ -18,6 +18,8 @@ package com.google.light.server.dto.search;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
+import org.codehaus.jackson.annotate.JsonTypeName;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 
@@ -36,6 +38,7 @@ import com.google.light.server.dto.AbstractDto;
  * @author Walter Cacau
  */
 @SuppressWarnings("serial")
+@JsonTypeName(value = "searchRequest")
 @XmlRootElement(name="searchRequest")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class SearchRequestDto extends AbstractDto<SearchRequestDto> {

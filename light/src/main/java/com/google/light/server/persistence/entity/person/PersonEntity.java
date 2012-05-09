@@ -19,6 +19,10 @@ import static com.google.light.server.utils.LightPreconditions.checkEmail;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPersonId;
 
+import com.google.light.server.annotations.ObjectifyQueryField;
+
+import com.google.light.server.annotations.ObjectifyQueryFieldName;
+
 import com.google.light.server.dto.person.PersonDto;
 import com.google.light.server.dto.pojo.longwrapper.PersonId;
 import com.google.light.server.persistence.entity.AbstractPersistenceEntity;
@@ -33,15 +37,17 @@ import javax.persistence.Id;
 @SuppressWarnings("serial")
 public class PersonEntity extends AbstractPersistenceEntity<PersonEntity, PersonDto> {
   @Id
-  Long id;
-  String firstName;
-  String lastName;
+  private Long id;
+  private String firstName;
+  private String lastName;
   // defaulting to false so older entities can have the default value
-  boolean acceptedTos = false; 
+  private boolean acceptedTos = false; 
 
   // This is used in Objectify Query.
+  @ObjectifyQueryFieldName("email")
   public static final String OFY_EMAIL_QUERY_STRING = "email";
-  String email;
+  @ObjectifyQueryField("OFY_EMAIL_QUERY_STRING")
+  private String email;
 
   @Override
   public PersonDto toDto() {

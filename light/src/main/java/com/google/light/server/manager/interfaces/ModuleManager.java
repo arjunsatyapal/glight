@@ -69,26 +69,14 @@ public interface ModuleManager {
   /**
    * Reserve a ModuleId for a OriginId.
    */
-  public ModuleId reserveModuleIdForExternalId(ModuleType moduleType, String externalId,
+  public ModuleId reserveModuleId(Objectify ofy, ModuleType moduleType, String externalId,
       List<PersonId> owners, String title);
   
-  public Version reserveModuleVersionForImport(ModuleId moduleId, String etag, 
+  public Version reserveModuleVersion(Objectify ofy, ModuleEntity moduleEntity, String etag, 
       Instant lastEditTime);
 
-  /**
-   * Add ModuleVersion for GoogleDoc.
-   * 
-   * @param moduleId
-   * @param content
-   * @param docInfoDto
-   * @return
-   */
-  @Deprecated
-  public ModuleVersionEntity addModuleVersionForGoogleDoc(ModuleId moduleId, String content,
-      GoogleDocInfoDto docInfoDto);
-
-  public ModuleVersionEntity publishModuleVersion(ModuleId moduleId, Version version,
-      String content, GoogleDocInfoDto docInfo);
+  public ModuleVersionEntity publishModuleVersion(Objectify ofy, ModuleEntity moduleEntity,
+      Version version, String content, GoogleDocInfoDto docInfo);
 
   /**
    * Add resources for a Module-Version.
@@ -98,8 +86,8 @@ public interface ModuleManager {
    * @param resourceInfo
    * @return
    */
-  public ModuleVersionResourceEntity addModuleResource(ModuleId moduleId, Version moduleVersion,
-      String resourceId, GSBlobInfo resourceInfo);
+  public ModuleVersionResourceEntity publishModuleResource(Objectify ofy, ModuleEntity moduleEntity, 
+      Version version, String resourceId, GSBlobInfo resourceInfo);
 
   /**
    * Get Module-Version.

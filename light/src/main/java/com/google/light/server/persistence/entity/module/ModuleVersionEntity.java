@@ -19,6 +19,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
 
+import com.google.light.server.annotations.ObjectifyQueryField;
+
+import com.google.light.server.annotations.ObjectifyQueryFieldName;
+
 import com.google.light.server.dto.module.ModuleVersionDto;
 import com.google.light.server.dto.module.ModuleVersionState;
 import com.google.light.server.dto.pojo.longwrapper.ModuleId;
@@ -40,18 +44,20 @@ import org.joda.time.Instant;
 public class ModuleVersionEntity extends
     AbstractPersistenceEntity<ModuleVersionEntity, ModuleVersionDto> {
   @Id
-  Long version;
+  private Long version;
   @Parent
-  Key<ModuleEntity> moduleKey;
-  ModuleVersionState state;
-  String title;
-  String content;
-  String etag;
+  private Key<ModuleEntity> moduleKey;
+  private ModuleVersionState state;
+  private String title;
+  private String content;
+  private String etag;
 
   // TODO(arjuns): Add a test to ensure this string matches with field name.
+  @ObjectifyQueryFieldName("lastEditTimeInMillis")
   public static final String OFY_GREATER_THEN_LAST_EDIT_TIME_IN_MILLIS_QUERY_STRING =
       "lastEditTimeInMillis >";
-  Long lastEditTimeInMillis;
+  @ObjectifyQueryField("OFY_GREATER_THEN_LAST_EDIT_TIME_IN_MILLIS_QUERY_STRING")
+  private Long lastEditTimeInMillis;
 
   /**
    * {@inheritDoc}

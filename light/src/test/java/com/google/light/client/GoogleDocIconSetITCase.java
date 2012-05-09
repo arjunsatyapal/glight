@@ -20,18 +20,16 @@ import static com.google.light.server.constants.http.HttpStatusCodesEnum.OK;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
 
-import java.io.IOException;
-import java.util.Arrays;
-
-import org.apache.commons.io.IOUtils;
-import org.junit.Test;
-
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.light.server.dto.module.ModuleType;
+import java.io.IOException;
+import java.util.Arrays;
+import org.apache.commons.io.IOUtils;
+import org.junit.Test;
 
 /**
  * Tests in this class should ensure we are in sync
@@ -72,7 +70,7 @@ public class GoogleDocIconSetITCase {
   private final String serverUrl = "http://localhost:8080";
 
   @Test
-  public void test_counters() throws IOException {
+  public void test_counters() throws Exception {
     assertEquals("You should add/remove an icon if the ModuleType changes", 7,
         ModuleType.values().length);
     assertEquals(CURRENT_ICON_LINKS.length, ModuleType.values().length);

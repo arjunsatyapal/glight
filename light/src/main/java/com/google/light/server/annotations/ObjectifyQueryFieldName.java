@@ -13,22 +13,25 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.pipeline_jobs;
+package com.google.light.server.annotations;
 
-import com.google.light.server.dto.pojo.LightJobContextPojo;
-
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- *
- * 
- * TODO(arjuns): Add test for this class.
+ * This annotation is used to annotate a Field which will be used by Objectify for Filtering
+ * inside queries. This is used for testing.
  *
  * @author Arjun Satyapal
  */
-public interface BasicJobMethods {
-  public LightJobContextPojo getContext();
-  
-  public void bootStrapGuice();
-  
-  public String getPipelineId();
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.FIELD})
+public @interface ObjectifyQueryFieldName {
+  /**
+   * Name of the field annotated with {@link ObjectifyQueryField} that will be used for doing 
+   * Objectify Queries.
+   */
+  public String value() default "";
 }

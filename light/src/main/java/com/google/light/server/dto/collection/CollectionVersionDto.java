@@ -18,6 +18,8 @@ package com.google.light.server.dto.collection;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
 
+import org.codehaus.jackson.annotate.JsonTypeName;
+
 import javax.xml.bind.annotation.XmlAccessType;
 
 import com.google.light.server.dto.AbstractDtoToPersistence;
@@ -37,6 +39,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
+@JsonTypeName(value = "collectionVersion")
 @XmlRootElement(name = "collectionVersion")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class CollectionVersionDto extends AbstractDtoToPersistence<CollectionVersionDto, CollectionVersionEntity, Long> {

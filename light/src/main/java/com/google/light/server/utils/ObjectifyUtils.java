@@ -218,7 +218,7 @@ public class ObjectifyUtils {
 
     GAEQueryWrapper<T> wrapper = new GAEQueryWrapper<T>();
     
-    if(!isListEmpty(listOfRecords)) {
+    if(!isListEmpty(listOfRecords) && iterator.hasNext()) {
       wrapper.setStartIndex(iterator.getCursor().toWebSafeString());
     }
     wrapper.setList(listOfRecords);

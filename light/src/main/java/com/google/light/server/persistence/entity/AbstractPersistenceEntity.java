@@ -37,7 +37,8 @@ import org.joda.time.Instant;
 public abstract class AbstractPersistenceEntity<P, D> extends AbstractPojo<P> implements
     PersistenceToDtoInterface<P, D> {
   // This value will not be persisted in dataStore.
-  @Transient Boolean needsCreationTime;
+  @Transient
+  protected Boolean needsCreationTime;
 
   // Transient avoids comparison for equals.
   protected transient Instant creationTime;
@@ -60,11 +61,10 @@ public abstract class AbstractPersistenceEntity<P, D> extends AbstractPojo<P> im
   protected void prePersist() {
     Instant now = LightUtils.getNow();
     this.lastUpdateTime = now;
-    
+
     // TODO(arjuns): Fix creationTime.
     this.creationTime = null;
-    
-    
+
   }
 
   /**

@@ -18,16 +18,12 @@ package com.google.light.server.jersey.resources.thirdparty.google;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.light.server.constants.LightConstants.GOOGLE_DOC_IMPORT_BATCH_SIZE_MAX;
 import static com.google.light.server.exception.ExceptionType.SERVER_GUICE_INJECTION;
-import static com.google.light.server.jersey.resources.thirdparty.google.GoogleDocIntegrationUtils.importGDocResource;
 import static com.google.light.server.servlets.thirdparty.google.gdoc.GoogleDocUtils.getDocumentFeedWithFolderUrl;
 import static com.google.light.server.utils.LightPreconditions.checkIntegerIsInRage;
 import static com.google.light.server.utils.LightPreconditions.checkNonEmptyList;
 import static com.google.light.server.utils.LightPreconditions.checkNotNull;
 import static com.google.light.server.utils.LightUtils.getURL;
 
-import com.google.light.server.exception.unchecked.httpexception.BadRequestException;
-
-import com.google.appengine.api.log.InvalidRequestException;
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -37,13 +33,13 @@ import com.google.light.server.constants.LightConstants;
 import com.google.light.server.constants.LightStringConstants;
 import com.google.light.server.constants.http.ContentTypeConstants;
 import com.google.light.server.constants.http.ContentTypeEnum;
-import com.google.light.server.constants.http.HttpStatusCodesEnum;
 import com.google.light.server.dto.pages.PageDto;
 import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocImportBatchJobContext;
 import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocInfoDto;
 import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocResourceId;
 import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocResourceIdListWrapperDto;
 import com.google.light.server.exception.ExceptionType;
+import com.google.light.server.exception.unchecked.httpexception.BadRequestException;
 import com.google.light.server.jersey.resources.AbstractJerseyResource;
 import com.google.light.server.manager.interfaces.CollectionManager;
 import com.google.light.server.manager.interfaces.JobManager;
@@ -66,14 +62,12 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
 import org.apache.commons.lang.StringUtils;
 
 /**
@@ -242,29 +236,5 @@ public class GoogleDocIntegration extends AbstractJerseyResource {
 
     return Response.created(jobLocationUri).entity(htmlBuilder.toString())
         .type(ContentTypeConstants.TEXT_HTML).build();
-  }
-
-  @Deprecated
-  @PUT
-  @Path(JerseyConstants.PATH_GOOGLE_DOC_IMPORT_PUT)
-  public Response importGoogleDocBatchPut(
-      @PathParam(JerseyConstants.PATH_PARAM_EXTERNAL_KEY) String externalKeyStr) {
-    if (StringUtils.isBlank(externalKeyStr)) {
-      throw new InvalidRequestException("ExternalKeyStr should be set.");
-    }
-
-    GoogleDocResourceId resourceId = new GoogleDocResourceId(externalKeyStr);
-    JobEntity jobEntity = importGDocResource(resourceId, docsServiceProvider.get(),
-        null /* parentJobId */, null /* rootJobId */, null /* promiseHandle */);
-
-    ResponseBuilder responseBuilder = Response.ok();
-    responseBuilder.status(HttpStatusCodesEnum.CREATED.getStatusCode());
-    responseBuilder.location(LightUtils.getURI(jobEntity.getLocation()));
-    responseBuilder.type(ContentTypeEnum.TEXT_HTML.get());
-
-    String url = LightUtils.getHref(jobEntity.getLocation(), "Check status");
-
-    responseBuilder.entity(url);
-    return responseBuilder.build();
   }
 }

@@ -19,6 +19,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkEmail;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
+import org.codehaus.jackson.annotate.JsonTypeName;
+
 import javax.xml.bind.annotation.XmlAccessType;
 
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -39,6 +41,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
+@JsonTypeName(value = "person")
 @XmlRootElement(name = "person")
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "personType", propOrder = { "firstName", "lastName", "email", "acceptedTos" })

@@ -17,6 +17,8 @@ package com.google.light.server.dto.pojo.tree;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import org.codehaus.jackson.annotate.JsonTypeName;
+
 import javax.xml.bind.annotation.XmlAccessType;
 
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -35,6 +37,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
+@JsonTypeName(value = "googleDocTree")
 @XmlRootElement(name = "googleDocTree")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class GoogleDocTree extends AbstractTreeNode<GoogleDocTree> {

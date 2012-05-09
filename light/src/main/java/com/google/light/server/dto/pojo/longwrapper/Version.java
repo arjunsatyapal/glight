@@ -59,7 +59,7 @@ public class Version extends AbstractTypeWrapper<Long, Version> {
     return state;
   }
   
-  public boolean isLatest() {
+  public boolean isLatestVersion() {
     return state == State.LATEST;
   }
   
@@ -77,10 +77,12 @@ public class Version extends AbstractTypeWrapper<Long, Version> {
   }
 
   public static enum State {
-    /** Refer to Latest version. */
-    LATEST,
+    /** Refers to Latest by User */
+    LATEST, 
+    
     /** Refers to a state when there is no version */
     NO_VERSION,
+    
     /** Refers to a specific version */
     SPECIFIC;
   }
@@ -95,7 +97,7 @@ public class Version extends AbstractTypeWrapper<Long, Version> {
       case LATEST:
         checkNull(getValue(), "For LatestState, Version should be null.");
         break;
-
+        
       case NO_VERSION:
         checkArgument(0 == getValue(), "For State=NO_VERSION, version should be zero.");
         break;

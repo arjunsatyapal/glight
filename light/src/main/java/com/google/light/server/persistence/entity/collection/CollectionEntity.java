@@ -17,20 +17,25 @@ package com.google.light.server.persistence.entity.collection;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNonEmptyList;
+import static com.google.light.server.utils.LightPreconditions.checkNonNegativeLong;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkNotNull;
+import static com.google.light.server.utils.LightPreconditions.checkVersion;
+import static com.google.light.server.utils.LightUtils.getWrapperValue;
 
 import com.google.light.server.dto.collection.CollectionDto;
 import com.google.light.server.dto.collection.CollectionState;
 import com.google.light.server.dto.pojo.longwrapper.CollectionId;
 import com.google.light.server.dto.pojo.longwrapper.PersonId;
 import com.google.light.server.dto.pojo.longwrapper.Version;
+import com.google.light.server.dto.pojo.longwrapper.Version.State;
 import com.google.light.server.exception.ExceptionType;
 import com.google.light.server.persistence.entity.AbstractPersistenceEntity;
 import com.googlecode.objectify.Key;
 import java.util.List;
 import javax.persistence.Embedded;
 import javax.persistence.Id;
+import org.joda.time.Instant;
 
 /**
  * 
@@ -42,15 +47,15 @@ import javax.persistence.Id;
 @SuppressWarnings("serial")
 public class CollectionEntity extends AbstractPersistenceEntity<CollectionEntity, CollectionDto> {
   @Id
-  Long id;
-  String title;
-  CollectionState state;
+  private Long id;
+  private String title;
+  private CollectionState state;
   @Embedded
-  List<PersonId> owners;
+  private List<PersonId> owners;
 
-  String etag;
-  @Embedded
-  Version latestVersion;
+  private String etag;
+  private Long latestPublishVersion;
+  private Long nextVersion;
 
   @Override
   public CollectionEntity validate() {
@@ -60,7 +65,8 @@ public class CollectionEntity extends AbstractPersistenceEntity<CollectionEntity
     checkNonEmptyList(owners, "owners");
 
     // TODO(arjuns): Add validation for etag.
-    checkNotNull(latestVersion, "latestVersion");
+    checkNonNegativeLong(latestPublishVersion, "latestVersion");
+    checkNonNegativeLong(nextVersion, "nextVersion");
     return this;
   }
 
@@ -76,13 +82,12 @@ public class CollectionEntity extends AbstractPersistenceEntity<CollectionEntity
   public Key<CollectionEntity> getKey() {
     return generateKey(getId());
   }
-  
 
   public CollectionId getId() {
     if (id == null) {
       return null;
     }
-    
+
     return new CollectionId(id);
   }
 
@@ -93,7 +98,7 @@ public class CollectionEntity extends AbstractPersistenceEntity<CollectionEntity
   public CollectionState getState() {
     return state;
   }
-  
+
   public void setState(CollectionState state) {
     this.state = checkNotNull(state, ExceptionType.SERVER, "state");
   }
@@ -106,12 +111,42 @@ public class CollectionEntity extends AbstractPersistenceEntity<CollectionEntity
     return etag;
   }
 
-  public Version getLatestVersion() {
-    return latestVersion;
+  public Version getLatestPublishVersion() {
+    if (latestPublishVersion == 0) {
+      return null;
+    }
+    
+    return new Version(latestPublishVersion);
+  }
+
+  public Version getNextVersion() {
+    return new Version(nextVersion);
   }
   
-  public void setLatestVersion(Version version) {
-    this.latestVersion = version;
+  /**
+   * Thisk should be called by callers if they want to reserve a version. And callers are expected
+   * to save the entity. 
+   */
+  public Version reserveVersion() {
+    nextVersion++;
+    return new Version(nextVersion);
+  }
+
+  /**
+   * If the currently published version is newer then latestPublishVersion, then update it.
+   * Caller is expected to persist this entity.
+   * @param latestVersion
+   */
+  public void publishVersion(Version latestPublishVersion, Instant lastEditTime, String etag) {
+    // Other then builder, all are required to set a positive latestVersion.
+    checkVersion(latestPublishVersion);
+    
+    Long tempVersion = getWrapperValue(latestPublishVersion);
+    if (this.latestPublishVersion < tempVersion) {
+      this.latestPublishVersion = tempVersion;
+      this.etag = etag;
+      this.state = CollectionState.PUBLISHED;
+    }
   }
 
   /**
@@ -120,12 +155,12 @@ public class CollectionEntity extends AbstractPersistenceEntity<CollectionEntity
   @Override
   public CollectionDto toDto() {
     return new CollectionDto.Builder()
-      .id(getId())
-      .title(title)
-      .state(state)
-      .owners(owners)
-      .version(latestVersion)
-      .build();
+        .id(getId())
+        .title(title)
+        .state(state)
+        .owners(owners)
+        .version(getLatestPublishVersion())
+        .build();
   }
 
   public static class Builder extends AbstractPersistenceEntity.BaseBuilder<Builder> {
@@ -134,7 +169,8 @@ public class CollectionEntity extends AbstractPersistenceEntity<CollectionEntity
     private CollectionState state;
     private List<PersonId> owners;
     private String etag;
-    private Version latestVersion;
+    private Version latestPublishVersion = new Version(0L, State.NO_VERSION);
+    private Version nextVersion = new Version(0L, State.NO_VERSION);
 
     public Builder id(Long id) {
       this.id = id;
@@ -161,8 +197,8 @@ public class CollectionEntity extends AbstractPersistenceEntity<CollectionEntity
       return this;
     }
 
-    public Builder latestVersion(Version latestVersion) {
-      this.latestVersion = latestVersion;
+    public Builder latestPublishVersion(Version latestPublishVersion) {
+      this.latestPublishVersion = latestPublishVersion;
       return this;
     }
 
@@ -180,7 +216,9 @@ public class CollectionEntity extends AbstractPersistenceEntity<CollectionEntity
     this.state = builder.state;
     this.owners = builder.owners;
     this.etag = builder.etag;
-    this.latestVersion = builder.latestVersion;
+    this.latestPublishVersion = getWrapperValue(builder.latestPublishVersion);
+    this.nextVersion = getWrapperValue(builder.nextVersion);
+    
   }
 
   // For objectify.
