@@ -23,11 +23,12 @@ import static com.google.light.server.utils.LightPreconditions.checkPositiveLong
 import static com.google.light.server.utils.LightPreconditions.checkProviderUserId;
 import static com.google.light.server.utils.LightUtils.getWrapperValue;
 
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
+
 import com.google.api.client.auth.oauth2.TokenResponse;
 import com.google.light.server.constants.OAuth2ProviderService;
 import com.google.light.server.dto.AbstractDto;
 import com.google.light.server.dto.AbstractDtoToPersistence;
-import com.google.light.server.dto.pojo.longwrapper.PersonId;
 import com.google.light.server.persistence.entity.oauth2.owner.OAuth2OwnerTokenEntity;
 import com.google.light.server.persistence.entity.person.PersonEntity;
 import javax.xml.bind.annotation.XmlAccessType;

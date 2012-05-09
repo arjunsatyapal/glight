@@ -17,8 +17,9 @@ package com.google.light.server.jobs;
 
 import static com.google.light.server.utils.GuiceUtils.getInstance;
 
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.JobId;
+
 import com.google.light.server.dto.pojo.ChangeLogEntryPojo;
-import com.google.light.server.dto.pojo.longwrapper.JobId;
 import com.google.light.server.manager.interfaces.JobManager;
 import com.google.light.server.persistence.entity.jobs.JobEntity;
 import com.googlecode.objectify.Objectify;

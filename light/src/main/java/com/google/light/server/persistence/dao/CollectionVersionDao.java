@@ -15,10 +15,11 @@
  */
 package com.google.light.server.persistence.dao;
 
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.CollectionId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
+
 import com.google.inject.Inject;
 import com.google.light.server.dto.collection.CollectionVersionDto;
-import com.google.light.server.dto.pojo.longwrapper.CollectionId;
-import com.google.light.server.dto.pojo.longwrapper.Version;
 import com.google.light.server.persistence.entity.collection.CollectionEntity;
 import com.google.light.server.persistence.entity.collection.CollectionVersionEntity;
 import com.googlecode.objectify.Key;

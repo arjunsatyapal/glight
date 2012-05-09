@@ -19,11 +19,16 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightUtils.getWrapperValue;
 
+import javax.xml.bind.annotation.XmlElementWrapper;
+
+import com.google.light.server.utils.LightUtils;
+
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.CollectionId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
+
 import com.google.light.server.dto.AbstractDto;
 import com.google.light.server.dto.AbstractDtoToPersistence;
-import com.google.light.server.dto.pojo.longwrapper.CollectionId;
-import com.google.light.server.dto.pojo.longwrapper.PersonId;
-import com.google.light.server.dto.pojo.longwrapper.Version;
 import com.google.light.server.dto.pojo.tree.CollectionTreeNodeDto;
 import com.google.light.server.persistence.entity.collection.CollectionEntity;
 import com.google.light.server.utils.LightPreconditions;
@@ -60,9 +65,10 @@ public class CollectionDto extends
   @JsonProperty(value = "state")
   private CollectionState state;
   
-  @XmlElement(name = "owners")
+  @XmlElementWrapper(name = "owners")
+  @XmlElement(name = "personId")
   @JsonProperty(value = "owners")
-  private List<PersonId> owners;
+  private List<Long> owners;
   
   @XmlElement(name = "version")
   @JsonProperty(value = "version")
@@ -111,7 +117,7 @@ public class CollectionDto extends
   }
 
   public List<PersonId> getOwners() {
-    return owners;
+    return LightUtils.convertListOfValuesToWrapperList(owners, PersonId.class);
   }
 
   public Version getVersion() {
@@ -172,7 +178,7 @@ public class CollectionDto extends
     this.id = getWrapperValue(builder.id);
     this.title = builder.title;
     this.state = builder.state;
-    this.owners = builder.owners;
+    this.owners = LightUtils.convertWrapperListToListOfValues(builder.owners);
     this.version = getWrapperValue(builder.version);
     this.root = builder.root;
   }

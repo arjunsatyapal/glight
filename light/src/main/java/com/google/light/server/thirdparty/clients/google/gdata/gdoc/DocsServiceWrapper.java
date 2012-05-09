@@ -157,7 +157,7 @@ public class DocsServiceWrapper extends DocsService {
       entry = getEntry(GoogleDocUtils.getResourceEntryWithAclFeedUrl(resourceId),
           DocumentListEntry.class);
     } catch (ResourceNotFoundException e) {
-      throw new NotFoundException("GoogleDoc resource[" + resourceId + "] not found.");
+      throw new NotFoundException("GoogleDoc resource[" + resourceId + "] was not found.");
     } catch (Exception e) {
       throw new GoogleDocException(e);
     }

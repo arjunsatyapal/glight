@@ -1,11 +1,12 @@
 package com.google.light.server.manager.interfaces;
 
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.CollectionId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
+
 import java.util.List;
 
 import com.google.light.server.dto.pages.PageDto;
-import com.google.light.server.dto.pojo.longwrapper.CollectionId;
-import com.google.light.server.dto.pojo.longwrapper.PersonId;
-import com.google.light.server.dto.pojo.longwrapper.Version;
 import com.google.light.server.dto.pojo.tree.CollectionTreeNodeDto;
 import com.google.light.server.persistence.entity.collection.CollectionEntity;
 import com.google.light.server.persistence.entity.collection.CollectionVersionEntity;

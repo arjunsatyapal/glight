@@ -18,7 +18,8 @@ package com.google.light.server.utils;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.light.server.dto.pojo.longwrapper.PersonId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
+
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;

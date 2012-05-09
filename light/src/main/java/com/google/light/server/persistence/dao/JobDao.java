@@ -15,10 +15,11 @@
  */
 package com.google.light.server.persistence.dao;
 
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.JobId;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
-import com.google.light.server.dto.pojo.longwrapper.JobId;
 import com.google.light.server.persistence.entity.jobs.JobEntity;
 import com.google.light.server.utils.ObjectifyUtils;
 import com.googlecode.objectify.Key;

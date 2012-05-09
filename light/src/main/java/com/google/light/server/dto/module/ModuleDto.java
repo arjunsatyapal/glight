@@ -18,17 +18,20 @@ package com.google.light.server.dto.module;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNonEmptyList;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
+import static com.google.light.server.utils.LightUtils.convertListOfValuesToWrapperList;
+import static com.google.light.server.utils.LightUtils.convertWrapperListToListOfValues;
 import static com.google.light.server.utils.LightUtils.getWrapperValue;
 
 import com.google.light.server.dto.AbstractDtoToPersistence;
-import com.google.light.server.dto.pojo.longwrapper.ModuleId;
-import com.google.light.server.dto.pojo.longwrapper.PersonId;
-import com.google.light.server.dto.pojo.longwrapper.Version;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
 import com.google.light.server.persistence.entity.module.ModuleEntity;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonProperty;
@@ -58,9 +61,10 @@ public class ModuleDto extends AbstractDtoToPersistence<ModuleDto, ModuleEntity,
   @JsonProperty(value = "state")
   private ModuleState state;
 
-  @XmlElement(name = "owners")
+  @XmlElementWrapper(name = "owners")
+  @XmlElement(name = "personId")
   @JsonProperty(value = "owners")
-  private List<PersonId> owners;
+  private List<Long> owners;
 
   @XmlElement(name = "latestPublishVersion")
   @JsonProperty(value = "latestPublishVersion")
@@ -92,7 +96,7 @@ public class ModuleDto extends AbstractDtoToPersistence<ModuleDto, ModuleEntity,
   }
 
   public List<PersonId> getOwners() {
-    return owners;
+    return convertListOfValuesToWrapperList(owners, PersonId.class);
   }
 
   public Version getLatestPublishVersion() {
@@ -167,7 +171,7 @@ public class ModuleDto extends AbstractDtoToPersistence<ModuleDto, ModuleEntity,
     this.id = getWrapperValue(builder.id);
     this.title = builder.title;
     this.state = builder.state;
-    this.owners = builder.owners;
+    this.owners = convertWrapperListToListOfValues(builder.owners);
     this.latestPublishVersion = getWrapperValue(builder.latestPublishVersion);
     this.nextVersion = getWrapperValue(builder.nextVersion);
   }

@@ -18,10 +18,11 @@ package com.google.light.server.persistence.entity.collection;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
 
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.CollectionId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
+
 import com.google.appengine.api.datastore.Text;
 import com.google.light.server.dto.collection.CollectionVersionDto;
-import com.google.light.server.dto.pojo.longwrapper.CollectionId;
-import com.google.light.server.dto.pojo.longwrapper.Version;
 import com.google.light.server.dto.pojo.tree.CollectionTreeNodeDto;
 import com.google.light.server.persistence.entity.AbstractPersistenceEntity;
 import com.google.light.server.utils.JsonUtils;

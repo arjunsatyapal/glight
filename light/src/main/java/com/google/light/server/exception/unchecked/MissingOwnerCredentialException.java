@@ -15,8 +15,9 @@
  */
 package com.google.light.server.exception.unchecked;
 
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
+
 import com.google.light.server.constants.OAuth2ProviderService;
-import com.google.light.server.dto.pojo.longwrapper.PersonId;
 
 /**
  * This indicates that an attempt was done to fetch Owner Credentials for the Specified provider.

@@ -15,6 +15,8 @@
  */
 package com.google.light.server.guice.modules;
 
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
+
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
@@ -28,7 +30,6 @@ import com.google.light.server.annotations.AnotActor;
 import com.google.light.server.annotations.AnotHttpSession;
 import com.google.light.server.annotations.AnotOwner;
 import com.google.light.server.dto.pojo.RequestScopedValues;
-import com.google.light.server.dto.pojo.longwrapper.PersonId;
 import com.google.light.server.guice.providers.InstantProvider;
 import com.google.light.server.guice.providers.RequestScopedValuesProvider;
 import com.google.light.server.manager.implementation.AdminOperationManagerImpl;

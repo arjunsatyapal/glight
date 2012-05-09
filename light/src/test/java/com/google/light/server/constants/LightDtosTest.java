@@ -23,6 +23,11 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.util.Collection;
+
+import javax.xml.bind.annotation.XmlElementWrapper;
+
+
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
@@ -192,8 +197,9 @@ public class LightDtosTest implements EnumTestInterface {
   private static Set<String> allowedAnnotationsForFields = Sets.newHashSet(
       // TODO(arjuns): Fix this.
       Embedded.class.getName(),
+      JsonProperty.class.getName(),
       XmlElement.class.getName(),
-      JsonProperty.class.getName());
+      XmlElementWrapper.class.getName());
 
   /**
    * @param field
@@ -201,30 +207,52 @@ public class LightDtosTest implements EnumTestInterface {
   @SuppressWarnings("rawtypes")
   private void validateFieldAnnotations(Class currClass) {
     String className = currClass.getSimpleName();
+    
     for (Field currField : currClass.getDeclaredFields()) {
-
+      String fieldNameForErr = className + "#" + currField.getName();
+      
       if (isIgnorableField(currField)) {
         continue;
       }
 
+      String xmlElementWrapperName = null;
+      /*
+       * If a field is a collection, then it should have two tags for XML : One for wrapper and
+       * one for elements. Third tag should be for JsonProperty. And JsonProperty should share name
+       * with XmlElementWrapper. If its not a collection, then XmlElement and XmlWrapper name
+       * should be same.
+       */
+      if (Collection.class.isAssignableFrom(currField.getType())) {
+        assertTrue(fieldNameForErr + " should be annotated with "
+            + XmlElementWrapper.class.getSimpleName() + " and " + XmlElement.class.getName(),
+            containsAnnotation(XmlElementWrapper.class, currField.getAnnotations()));
+        xmlElementWrapperName = getXmlElementWrappertName(currField.getAnnotations());
+      }
+
       // Check for XmlElement Annotation.
-      assertTrue(className + "#" + currField.getName() + " should be annotated with @XmlElement.",
+      assertTrue(fieldNameForErr + " should be annotated with @XmlElement.",
           containsAnnotation(XmlElement.class, currField.getAnnotations()));
 
-      String errorMsg = className + "#" + currField.getName()
-          + " needs to have overriden names for both "
-          + "Json and Xml and these overridden names should be same.";
+      String errorMsg = fieldNameForErr + " needs to have overriden names for both "
+              + "Json and Xml and these overridden names should be same. For Xml, if its a list, then "
+              + "use both" + XmlElementWrapper.class.getSimpleName() + " & "
+              + XmlElement.class.getSimpleName() + " and for Json use "
+              + JsonProperty.class.getSimpleName();
 
       String xmlElementName = getXmlElementName(currField.getAnnotations());
       checkNotBlank(xmlElementName, errorMsg);
 
-      assertTrue(
-          className + "#" + currField.getName() + " should be annotated with @JsonProperty.",
-          containsAnnotation(XmlElement.class, currField.getAnnotations()));
+      assertTrue(fieldNameForErr + " should be annotated with @JsonProperty.",
+          containsAnnotation(JsonProperty.class, currField.getAnnotations()));
 
       String jsonPropertyValue = getJsonPropertyValue(currField.getAnnotations());
       checkNotBlank(jsonPropertyValue, errorMsg);
-      assertEquals(errorMsg, xmlElementName, jsonPropertyValue);
+
+      if (xmlElementWrapperName != null) {
+        assertEquals(errorMsg, xmlElementWrapperName, jsonPropertyValue);
+      } else {
+        assertEquals(errorMsg, xmlElementName, jsonPropertyValue);
+      }
 
       // Ensure that all the annotations are permitted.
       for (Annotation currAnnotation : currField.getAnnotations()) {
@@ -243,6 +271,17 @@ public class LightDtosTest implements EnumTestInterface {
     }
 
     XmlRootElement element = (XmlRootElement) tempAnnotation;
+    return element.name();
+  }
+
+  private String getXmlElementWrappertName(Annotation[] annotations) {
+    Annotation tempAnnotation = getAnnotationIfExists(XmlElementWrapper.class, annotations);
+
+    if (tempAnnotation == null) {
+      return null;
+    }
+
+    XmlElementWrapper element = (XmlElementWrapper) tempAnnotation;
     return element.name();
   }
 

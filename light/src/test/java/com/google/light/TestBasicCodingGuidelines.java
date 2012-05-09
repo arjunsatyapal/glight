@@ -30,7 +30,7 @@ import com.google.light.server.annotations.ObjectifyQueryField;
 import com.google.light.server.annotations.ObjectifyQueryFieldName;
 import com.google.light.server.constants.LightEnvEnum;
 import com.google.light.server.dto.AbstractPojo;
-import com.google.light.server.dto.pojo.longwrapper.AbstractTypeWrapper;
+import com.google.light.server.dto.pojo.typewrapper.AbstractTypeWrapper;
 import com.google.light.testingutils.GaeTestingUtils;
 import com.google.light.testingutils.TestingUtils;
 import com.googlecode.objectify.Key;
@@ -212,8 +212,18 @@ public class TestBasicCodingGuidelines {// extends AbstractLightServerTest {
   private void validateWrapperIfRequired(Class currClass, Field currField) {
     String errorMessage = "Invalid field " + currClass.getSimpleName() + "#" + currField.getName()
         + ", as for DTOs and Persistence, un-wrapped values should be used.";
-    
+
     assertFalse(errorMessage, AbstractTypeWrapper.class.isAssignableFrom(currField.getType()));
+
+    if (Iterable.class.isAssignableFrom(currField.getType())) {
+      String string = "" + currField.getGenericType();
+      if (string.contains("com.google.light.server.dto.pojo.typewrapper")) {
+        throw new IllegalStateException("Seems like " + currClass.getSimpleName()
+                + "#" + currField.getName() + " is present in one of the DTOs/Persistence object "
+                + "and is using a WrapperObject. This is not correct. Instead use the " 
+                + "native wrapped value for the collection");
+      }
+    }
   }
 
   @SuppressWarnings("rawtypes")

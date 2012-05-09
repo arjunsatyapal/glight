@@ -8,6 +8,9 @@ import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPersonLoggedIn;
 import static com.google.light.server.utils.LightUtils.isListEmpty;
 
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
+
 import com.google.appengine.api.blobstore.BlobKey;
 import com.google.appengine.api.blobstore.BlobstoreService;
 import com.google.appengine.api.blobstore.BlobstoreServiceFactory;
@@ -21,8 +24,6 @@ import com.google.light.server.constants.ResourceTypes;
 import com.google.light.server.constants.http.ContentTypeConstants;
 import com.google.light.server.dto.module.ModuleDto;
 import com.google.light.server.dto.pages.PageDto;
-import com.google.light.server.dto.pojo.longwrapper.ModuleId;
-import com.google.light.server.dto.pojo.longwrapper.Version;
 import com.google.light.server.exception.unchecked.httpexception.NotFoundException;
 import com.google.light.server.manager.interfaces.ModuleManager;
 import com.google.light.server.persistence.entity.module.ModuleVersionEntity;

@@ -21,9 +21,10 @@ import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkVersion;
 import static com.google.light.server.utils.LightUtils.getWrapperValue;
 
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
+
 import com.google.light.server.dto.AbstractDto;
-import com.google.light.server.dto.pojo.longwrapper.ModuleId;
-import com.google.light.server.dto.pojo.longwrapper.Version;
 import com.google.light.server.exception.ExceptionType;
 import com.google.light.server.utils.LightPreconditions;
 import javax.xml.bind.annotation.XmlAccessType;

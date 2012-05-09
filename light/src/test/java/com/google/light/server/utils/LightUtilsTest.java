@@ -35,7 +35,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.google.light.server.dto.pojo.longwrapper.PersonId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
+
 
 
 

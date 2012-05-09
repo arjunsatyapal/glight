@@ -15,14 +15,15 @@
  */
 package com.google.light.server.persistence.dao;
 
-import static com.google.light.server.persistence.entity.module.ModuleEntity.OFY_OWNER_QUERY_STRING;
+import static com.google.light.server.persistence.entity.module.ModuleEntity.OFY_MODULE_OWNER_QUERY_STRING;
 import static com.google.light.server.utils.LightPreconditions.checkNotNull;
+
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
 
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.light.server.dto.module.ModuleDto;
-import com.google.light.server.dto.pojo.longwrapper.ModuleId;
-import com.google.light.server.dto.pojo.longwrapper.PersonId;
 import com.google.light.server.exception.ExceptionType;
 import com.google.light.server.persistence.entity.module.ModuleEntity;
 import com.google.light.server.serveronlypojos.GAEQueryWrapper;
@@ -79,7 +80,7 @@ public class ModuleDao extends AbstractBasicDao<ModuleDto, ModuleEntity> {
     ArrayList<Long> listOfValues = Lists.newArrayList(ownerId.getValue());
 
     GAEQueryWrapper<ModuleEntity> listOfModules = ObjectifyUtils.findQueryResultsByPage(
-        ofy, ModuleEntity.class, OFY_OWNER_QUERY_STRING, listOfValues, startIndex, maxResults);
+        ofy, ModuleEntity.class, OFY_MODULE_OWNER_QUERY_STRING, listOfValues, startIndex, maxResults);
     return listOfModules;
   }
 }

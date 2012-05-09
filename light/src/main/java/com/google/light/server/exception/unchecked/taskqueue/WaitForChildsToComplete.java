@@ -15,7 +15,8 @@
  */
 package com.google.light.server.exception.unchecked.taskqueue;
 
-import com.google.light.server.dto.pojo.longwrapper.JobId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.JobId;
+
 import com.google.light.server.exception.unchecked.pipelineexceptions.ignore.PipelineIgnoreException;
 
 

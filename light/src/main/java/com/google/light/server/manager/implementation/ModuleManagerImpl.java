@@ -19,6 +19,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkTxnIsRunning;
 
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
+
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.light.server.constants.JerseyConstants;
@@ -28,9 +32,6 @@ import com.google.light.server.dto.module.ModuleState;
 import com.google.light.server.dto.module.ModuleType;
 import com.google.light.server.dto.module.ModuleVersionState;
 import com.google.light.server.dto.pages.PageDto;
-import com.google.light.server.dto.pojo.longwrapper.ModuleId;
-import com.google.light.server.dto.pojo.longwrapper.PersonId;
-import com.google.light.server.dto.pojo.longwrapper.Version;
 import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocInfoDto;
 import com.google.light.server.exception.unchecked.IdShouldNotBeSet;
 import com.google.light.server.exception.unchecked.httpexception.NotFoundException;

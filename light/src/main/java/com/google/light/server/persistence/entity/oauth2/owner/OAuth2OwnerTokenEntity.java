@@ -22,11 +22,12 @@ import static com.google.light.server.utils.LightPreconditions.checkPositiveLong
 import static com.google.light.server.utils.LightPreconditions.checkProviderUserId;
 import static com.google.light.server.utils.LightUtils.getCurrentTimeInMillis;
 
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
+
 import com.google.light.server.annotations.ObjectifyQueryField;
 
 import com.google.light.server.annotations.ObjectifyQueryFieldName;
 
-import com.google.light.server.dto.pojo.longwrapper.PersonId;
 
 import com.google.light.server.constants.OAuth2ProviderService;
 import com.google.light.server.dto.oauth2.owner.OAuth2OwnerTokenDto;

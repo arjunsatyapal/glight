@@ -13,43 +13,56 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.server.dto.pojo.longwrapper;
+package com.google.light.server.dto.pojo.typewrapper.longwrapper;
 
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
 
+import com.google.light.server.dto.pojo.typewrapper.AbstractTypeWrapper;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
+
 /**
- * Wrapper for JobId.
+ * 
  * 
  * TODO(arjuns): Add test for this class.
- *
+ * 
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
-public class JobId extends AbstractTypeWrapper<Long, JobId>{
-
-  public JobId(String value) {
-    this(Long.parseLong(value));
-  }
-  
+@XmlRootElement(name = "module_id")
+@XmlAccessorType(XmlAccessType.FIELD)
+public class CollectionId extends AbstractTypeWrapper<Long, CollectionId> {
   /**
    * @param value
    */
-  public JobId(Long value) {
+  public CollectionId(Long value) {
     super(value);
-    validate();
+  }
+
+  public CollectionId(String value) {
+    this(Long.parseLong(value));
   }
 
   /** 
    * {@inheritDoc}
    */
   @Override
-  public JobId validate() {
-    checkPositiveLong(getValue(), "InvalidJobId");
+  public CollectionId validate() {
+    checkPositiveLong(getValue(), "Invalid CollectionId");
     return this;
   }
-
-  // For Objectify and JAXB.
-  private JobId() {
+  
+  // For JAXB.
+  private CollectionId() {
     super(null);
+  }
+
+  /** 
+   * {@inheritDoc}
+   */
+  @Override
+  public CollectionId createInstance(Long value) {
+    return new CollectionId(value);
   }
 }

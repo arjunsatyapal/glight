@@ -13,13 +13,14 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.server.dto.pojo.longwrapper;
+package com.google.light.server.dto.pojo.typewrapper.longwrapper;
 
 
 
 import static com.google.light.server.utils.LightPreconditions.checkPersonId;
 
 import com.google.inject.Inject;
+import com.google.light.server.dto.pojo.typewrapper.AbstractTypeWrapper;
 
 /**
  *
@@ -54,5 +55,13 @@ public class PersonId extends AbstractTypeWrapper<Long, PersonId> {
   @Inject
   private PersonId() {
     super(null);
+  }
+
+  /** 
+   * {@inheritDoc}
+   */
+  @Override
+  public PersonId createInstance(Long value) {
+    return new PersonId(value);
   }
 }

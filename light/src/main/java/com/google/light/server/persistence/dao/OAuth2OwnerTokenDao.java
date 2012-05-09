@@ -19,11 +19,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.GuiceUtils.getProvider;
 import static com.google.light.server.utils.LightPreconditions.checkPersonId;
 
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
+
 import com.google.light.server.exception.unchecked.httpexception.PersonLoginRequiredException;
 
 import com.google.light.server.persistence.entity.person.PersonEntity;
 
-import com.google.light.server.dto.pojo.longwrapper.PersonId;
 
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;

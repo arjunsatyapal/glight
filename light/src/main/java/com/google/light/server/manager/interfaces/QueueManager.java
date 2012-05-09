@@ -15,9 +15,10 @@
  */
 package com.google.light.server.manager.interfaces;
 
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.JobId;
+
 import com.google.light.server.dto.notifications.AbstractNotification;
 
-import com.google.light.server.dto.pojo.longwrapper.JobId;
 import com.googlecode.objectify.Objectify;
 
 /**

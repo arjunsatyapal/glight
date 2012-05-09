@@ -21,6 +21,9 @@ import static com.google.light.server.utils.LightPreconditions.checkTxnIsRunning
 import static com.google.light.server.utils.LightUtils.getURI;
 import static com.google.light.server.utils.LocationHeaderUtils.getJobLocation;
 
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.JobId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
+
 import java.util.logging.Logger;
 
 import com.google.appengine.api.taskqueue.Queue;
@@ -34,8 +37,6 @@ import com.google.light.server.constants.LightConstants;
 import com.google.light.server.constants.QueueEnum;
 import com.google.light.server.constants.http.ContentTypeConstants;
 import com.google.light.server.dto.notifications.AbstractNotification;
-import com.google.light.server.dto.pojo.longwrapper.JobId;
-import com.google.light.server.dto.pojo.longwrapper.PersonId;
 import com.google.light.server.manager.interfaces.QueueManager;
 import com.google.light.server.utils.GuiceUtils;
 import com.google.light.server.utils.JsonUtils;

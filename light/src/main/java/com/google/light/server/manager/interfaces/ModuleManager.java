@@ -1,5 +1,9 @@
 package com.google.light.server.manager.interfaces;
 
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
+
 import com.google.light.server.dto.pages.PageDto;
 
 import org.joda.time.Instant;
@@ -9,9 +13,6 @@ import java.util.List;
 import com.google.light.server.dto.module.ModuleType;
 
 import com.google.light.server.dto.module.GSBlobInfo;
-import com.google.light.server.dto.pojo.longwrapper.ModuleId;
-import com.google.light.server.dto.pojo.longwrapper.PersonId;
-import com.google.light.server.dto.pojo.longwrapper.Version;
 import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocInfoDto;
 import com.google.light.server.persistence.entity.module.ModuleEntity;
 import com.google.light.server.persistence.entity.module.ModuleVersionEntity;

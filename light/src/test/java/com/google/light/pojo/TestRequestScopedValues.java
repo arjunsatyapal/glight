@@ -17,7 +17,8 @@ package com.google.light.pojo;
 
 import static com.google.light.testingutils.TestingUtils.getRandomPersonId;
 
-import com.google.light.server.dto.pojo.longwrapper.PersonId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
+
 
 import com.google.light.server.dto.pojo.RequestScopedValues;
 

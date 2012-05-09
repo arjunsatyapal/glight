@@ -24,7 +24,8 @@ import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPersonId;
 import static com.google.light.server.utils.ServletUtils.prepareSession;
 
-import com.google.light.server.dto.pojo.longwrapper.PersonId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
+
 
 import com.google.inject.Inject;
 import com.google.light.server.constants.LightEnvEnum;

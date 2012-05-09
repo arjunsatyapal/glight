@@ -21,19 +21,22 @@ import static com.google.light.server.utils.LightPreconditions.checkNonNegativeL
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkVersion;
+import static com.google.light.server.utils.LightUtils.convertListOfValuesToWrapperList;
+import static com.google.light.server.utils.LightUtils.convertWrapperListToListOfValues;
 import static com.google.light.server.utils.LightUtils.getWrapperValue;
 
+import com.google.light.server.annotations.ObjectifyQueryField;
+import com.google.light.server.annotations.ObjectifyQueryFieldName;
 import com.google.light.server.dto.collection.CollectionDto;
 import com.google.light.server.dto.collection.CollectionState;
-import com.google.light.server.dto.pojo.longwrapper.CollectionId;
-import com.google.light.server.dto.pojo.longwrapper.PersonId;
-import com.google.light.server.dto.pojo.longwrapper.Version;
-import com.google.light.server.dto.pojo.longwrapper.Version.State;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.CollectionId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version.State;
 import com.google.light.server.exception.ExceptionType;
 import com.google.light.server.persistence.entity.AbstractPersistenceEntity;
 import com.googlecode.objectify.Key;
 import java.util.List;
-import javax.persistence.Embedded;
 import javax.persistence.Id;
 import org.joda.time.Instant;
 
@@ -50,8 +53,11 @@ public class CollectionEntity extends AbstractPersistenceEntity<CollectionEntity
   private Long id;
   private String title;
   private CollectionState state;
-  @Embedded
-  private List<PersonId> owners;
+  @ObjectifyQueryFieldName("owners")
+  public static final String OFY_COLLECTION_OWNER_QUERY_STRING = "owners IN";
+
+  @ObjectifyQueryField("OFY_COLLECTION_OWNER_QUERY_STRING")
+  private List<Long> owners;
 
   private String etag;
   private Long latestPublishVersion;
@@ -104,7 +110,7 @@ public class CollectionEntity extends AbstractPersistenceEntity<CollectionEntity
   }
 
   public List<PersonId> getOwners() {
-    return owners;
+    return convertListOfValuesToWrapperList(owners, PersonId.class);
   }
 
   public String getEtag() {
@@ -158,7 +164,7 @@ public class CollectionEntity extends AbstractPersistenceEntity<CollectionEntity
         .id(getId())
         .title(title)
         .state(state)
-        .owners(owners)
+        .owners(getOwners())
         .version(getLatestPublishVersion())
         .build();
   }
@@ -214,7 +220,7 @@ public class CollectionEntity extends AbstractPersistenceEntity<CollectionEntity
     this.id = builder.id;
     this.title = builder.title;
     this.state = builder.state;
-    this.owners = builder.owners;
+    this.owners = convertWrapperListToListOfValues(builder.owners);
     this.etag = builder.etag;
     this.latestPublishVersion = getWrapperValue(builder.latestPublishVersion);
     this.nextVersion = getWrapperValue(builder.nextVersion);

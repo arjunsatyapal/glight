@@ -17,7 +17,8 @@ package com.google.light.server.guice.providers;
 
 import static com.google.light.server.utils.GuiceUtils.getInstance;
 
-import com.google.light.server.dto.pojo.longwrapper.PersonId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
+
 
 import com.google.light.server.dto.pojo.RequestScopedValues;
 

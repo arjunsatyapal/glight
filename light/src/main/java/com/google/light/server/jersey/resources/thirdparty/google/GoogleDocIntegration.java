@@ -184,9 +184,9 @@ public class GoogleDocIntegration extends AbstractJerseyResource {
       throw new IllegalArgumentException("Invalid contentType : " + contentType);
     }
 
-    checkNonEmptyList(resourceIdListWrapper.get(),
+    checkNonEmptyList(resourceIdListWrapper.getList(),
         "List should not be empty at this point.");
-    checkIntegerIsInRage(resourceIdListWrapper.get().size(),
+    checkIntegerIsInRage(resourceIdListWrapper.getList().size(),
         1, GOOGLE_DOC_IMPORT_BATCH_SIZE_MAX,
         "Number of docuements that can be downloaded in a batch should be between 1 & " +
             GOOGLE_DOC_IMPORT_BATCH_SIZE_MAX + ".");
@@ -204,7 +204,7 @@ public class GoogleDocIntegration extends AbstractJerseyResource {
     }
 
     List<GoogleDocInfoDto> docInfoList = docsServiceProvider.get().getGoogleDocInfoInBatch(
-        resourceIdListWrapper.get());
+        resourceIdListWrapper.getList());
     
     
     GoogleDocImportBatchJobContext gdocImportBatchJobContext =

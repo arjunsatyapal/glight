@@ -23,6 +23,9 @@ import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPersonLoggedIn;
 import static com.google.light.server.utils.LightUtils.isListEmpty;
 
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.CollectionId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
+
 import javax.ws.rs.Consumes;
 
 import javax.ws.rs.PUT;
@@ -43,8 +46,6 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.light.server.constants.JerseyConstants;
 import com.google.light.server.constants.http.ContentTypeConstants;
-import com.google.light.server.dto.pojo.longwrapper.CollectionId;
-import com.google.light.server.dto.pojo.longwrapper.Version;
 import com.google.light.server.dto.pojo.tree.CollectionTreeNodeDto;
 import com.google.light.server.exception.unchecked.httpexception.NotFoundException;
 import com.google.light.server.manager.interfaces.CollectionManager;

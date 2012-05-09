@@ -18,7 +18,8 @@ package com.google.light.server.dto.notifications;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightUtils.getWrapperValue;
 
-import com.google.light.server.dto.pojo.longwrapper.JobId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.JobId;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;

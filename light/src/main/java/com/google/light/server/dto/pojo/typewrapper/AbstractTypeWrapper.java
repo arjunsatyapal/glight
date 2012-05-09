@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.server.dto.pojo.longwrapper;
+package com.google.light.server.dto.pojo.typewrapper;
 
 import javax.xml.bind.annotation.XmlElement;
 
@@ -35,10 +35,13 @@ public abstract class AbstractTypeWrapper<I, T> extends AbstractPojo<T> {
   protected AbstractTypeWrapper(I value) {
     this.value = value;
   }
+  
 
   public I getValue() {
     return value;
   }
+  
+  public abstract T createInstance(I value);
 
   public boolean isValid() {
     return value != null;

@@ -17,6 +17,8 @@ package com.google.light.server.dto.pages;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import javax.xml.bind.annotation.XmlElementWrapper;
+
 import org.codehaus.jackson.annotate.JsonTypeName;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -50,7 +52,8 @@ public class PageDto extends AbstractDto<PageDto> {
   private String startIndex;
 
   @SuppressWarnings("rawtypes")
-  @XmlElement(name = "list")
+  @XmlElementWrapper(name = "list")
+  @XmlElement(name = "item")
   @JsonProperty(value = "list")
   private List<? extends AbstractDto> list;
 

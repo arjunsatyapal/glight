@@ -20,7 +20,8 @@ import static com.google.light.server.utils.LightPreconditions.checkEmail;
 import static com.google.light.testingutils.TestingUtils.getInjectorByEnv;
 import static com.google.light.testingutils.TestingUtils.getMockSessionForTesting;
 
-import com.google.light.server.dto.pojo.longwrapper.PersonId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
+
 
 
 import com.google.light.server.guice.provider.TestRequestScopedValuesProvider;

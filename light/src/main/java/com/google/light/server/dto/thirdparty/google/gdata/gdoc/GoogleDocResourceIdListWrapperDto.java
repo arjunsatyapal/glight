@@ -17,9 +17,14 @@ package com.google.light.server.dto.thirdparty.google.gdata.gdoc;
 
 import static com.google.light.server.utils.LightUtils.getWrapperValue;
 
+import javax.xml.bind.annotation.XmlElementWrapper;
+
+import com.google.light.server.utils.LightUtils;
+
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.CollectionId;
+
 import com.google.common.collect.Lists;
 import com.google.light.server.dto.AbstractDto;
-import com.google.light.server.dto.pojo.longwrapper.CollectionId;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -41,7 +46,9 @@ import org.codehaus.jackson.annotate.JsonTypeName;
 @XmlRootElement(name="googleDocResourceIdList")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class GoogleDocResourceIdListWrapperDto extends AbstractDto<GoogleDocResourceIdListWrapperDto> {
-  @XmlElement(name = "list")
+  // TODO(arjuns) : See how this looks
+  @XmlElementWrapper(name = "list")
+  @XmlElement(name = "googleDocResourceId")
   @JsonProperty(value = "list")
   private List<String> list;
 
@@ -87,10 +94,10 @@ public class GoogleDocResourceIdListWrapperDto extends AbstractDto<GoogleDocReso
   }
   
   public boolean isEmpty() {
-    return list == null || list.size() == 0;
+    return LightUtils.isListEmpty(list);
   }
   
-  public List<GoogleDocResourceId> get() {
+  public List<GoogleDocResourceId> getList() {
     if (isEmpty()) {
       return null;
     }

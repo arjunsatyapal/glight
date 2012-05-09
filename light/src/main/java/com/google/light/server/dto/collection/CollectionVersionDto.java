@@ -18,12 +18,13 @@ package com.google.light.server.dto.collection;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
 
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
+
 import org.codehaus.jackson.annotate.JsonTypeName;
 
 import javax.xml.bind.annotation.XmlAccessType;
 
 import com.google.light.server.dto.AbstractDtoToPersistence;
-import com.google.light.server.dto.pojo.longwrapper.Version;
 import com.google.light.server.dto.pojo.tree.CollectionTreeNodeDto;
 import com.google.light.server.persistence.entity.collection.CollectionVersionEntity;
 import javax.xml.bind.annotation.XmlAccessorType;

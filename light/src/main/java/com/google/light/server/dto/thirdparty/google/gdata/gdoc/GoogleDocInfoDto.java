@@ -20,6 +20,8 @@ import static com.google.light.server.constants.OAuth2ProviderService.GOOGLE_DOC
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
 
+import javax.xml.bind.annotation.XmlElementWrapper;
+
 import org.codehaus.jackson.annotate.JsonTypeName;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -93,9 +95,10 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
   @JsonProperty(value = "htmlExportUrl")
   private String htmlExportUrl;
   
-  @XmlElement(name = "parentCollectionUrls")
-  @JsonProperty(value = "parentCollectionUrls")
-  private List<String> parentCollectionUrls;
+  @XmlElementWrapper(name = "parentFolderUrls")
+  @XmlElement(name = "url")
+  @JsonProperty(value = "parentFolderUrls")
+  private List<String> parentFoldersUrls;
 
   /*
    * TODO(arjuns): Figure out what should happen when a Person publishes a document on Light, and
@@ -106,19 +109,23 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
    * retrieving_the_acl_for_a_document_file_or_collection}.
    * See roles at : {@link AclRole}.
    */
-  @XmlElement(name = "owners")
+  @XmlElementWrapper(name = "owners")
+  @XmlElement(name = "email")
   @JsonProperty(value = "owners")
   private List<String> owners;
   
-  @XmlElement(name = "writers")
-  @JsonProperty(value = "writers")
+  @XmlElementWrapper(name = "writers")
+  @XmlElement(name = "writer")
+  @JsonProperty(value = "email")
   private List<String> writers;
 
-  @XmlElement(name = "commenters")
+  @XmlElementWrapper(name = "commenters")
+  @XmlElement(name = "email")
   @JsonProperty(value = "commenters")
   private List<String> commenters;
   
-  @XmlElement(name = "readers")
+  @XmlElementWrapper(name = "readers")
+  @XmlElement(name = "email")
   @JsonProperty(value = "readers")
   private List<String> readers;
 
@@ -256,8 +263,8 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
     return htmlExportUrl;
   }
 
-  public List<String> getParentCollectionUrls() {
-    return parentCollectionUrls;
+  public List<String> getParentFoldersUrls() {
+    return parentFoldersUrls;
   }
 
   public List<String> getOwners() {
@@ -314,7 +321,7 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
     private String documentLink;
     private String aclFeedLink;
     private String htmlExportUrl;
-    private List<String> parentCollectionUrls = Lists.newArrayList();
+    private List<String> parentFoldersUrls = Lists.newArrayList();
     private List<String> owners = Lists.newArrayList();
     private List<String> writers = Lists.newArrayList();
     private List<String> commenters = Lists.newArrayList();
@@ -387,10 +394,10 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
       return this;
     }
 
-    public Builder parentCollectionUrls(List<Link> parentUrls) {
+    public Builder parentFoldersUrls(List<Link> parentFolderUrls) {
       if (config != Configuration.DTO_FOR_IMPORT) {
-        for (Link currLink : parentUrls) {
-          parentCollectionUrls.add(currLink.getHref());
+        for (Link currLink : parentFolderUrls) {
+          parentFoldersUrls.add(currLink.getHref());
         }
       }
       return this;
@@ -555,10 +562,10 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
               + " is currently not supported.");
       }
 
-      List<Link> parentUrls = docListEntry.getParentLinks();
+      List<Link> parentFolderUrls = docListEntry.getParentLinks();
 
       // TODO(arjuns): Eventually we will need to handle movement of documents in/out of collection.
-      parentCollectionUrls(parentUrls);
+      parentFoldersUrls(parentFolderUrls);
 
       // TODO(arjuns): Add for readers.
 
@@ -593,7 +600,7 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
     this.documentLink = builder.documentLink;
     this.aclFeedLink = builder.aclFeedLink;
     this.htmlExportUrl = builder.htmlExportUrl;
-    this.parentCollectionUrls = getNonEmptyList(builder.parentCollectionUrls);
+    this.parentFoldersUrls = getNonEmptyList(builder.parentFoldersUrls);
 
     this.owners = getNonEmptyList(builder.owners);
     this.writers = getNonEmptyList(builder.writers);

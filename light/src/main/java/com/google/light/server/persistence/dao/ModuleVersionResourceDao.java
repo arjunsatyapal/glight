@@ -18,9 +18,10 @@ package com.google.light.server.persistence.dao;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.light.server.dto.pojo.longwrapper.Version;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
 
-import com.google.light.server.dto.pojo.longwrapper.ModuleId;
+
 
 import com.google.inject.Inject;
 import com.google.light.server.persistence.entity.module.ModuleEntity;

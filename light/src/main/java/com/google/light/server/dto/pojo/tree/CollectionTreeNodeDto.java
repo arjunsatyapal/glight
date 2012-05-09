@@ -20,8 +20,9 @@ import static com.google.light.server.utils.LightPreconditions.checkModuleId;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightUtils.getWrapperValue;
 
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
+
 import com.google.light.server.dto.module.ModuleType;
-import com.google.light.server.dto.pojo.longwrapper.ModuleId;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;

@@ -29,7 +29,8 @@ import static com.google.light.server.utils.LightPreconditions.checkPersonLogged
 import static com.google.light.server.utils.ServletUtils.getRequestHeaderValue;
 import static org.apache.commons.lang.StringUtils.isBlank;
 
-import com.google.light.server.dto.pojo.longwrapper.PersonId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
+
 
 import com.google.inject.Inject;
 import com.google.light.server.annotations.AnotActor;

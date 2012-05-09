@@ -20,15 +20,17 @@ import static com.google.light.server.utils.LightPreconditions.checkNonEmptyList
 import static com.google.light.server.utils.LightUtils.getWrapperValue;
 import static com.google.light.server.utils.LightUtils.isListEmpty;
 
+import javax.xml.bind.annotation.XmlElementWrapper;
+
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.light.server.dto.AbstractDto;
 import com.google.light.server.dto.module.ImportDestinationDto;
-import com.google.light.server.dto.pojo.longwrapper.CollectionId;
-import com.google.light.server.dto.pojo.longwrapper.ModuleId;
-import com.google.light.server.dto.pojo.longwrapper.PersonId;
 import com.google.light.server.dto.pojo.tree.AbstractTreeNode.TreeNodeType;
 import com.google.light.server.dto.pojo.tree.GoogleDocTree;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.CollectionId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
 import com.google.light.server.utils.LightPreconditions;
 import com.google.light.server.utils.LightUtils;
 import java.util.List;
@@ -56,7 +58,8 @@ public class GoogleDocImportBatchJobContext extends AbstractDto<GoogleDocImportB
   @JsonProperty(value = "ownerId")
   private Long ownerId;
   
-  @XmlElement(name = "resourceInfoList")
+  @XmlElementWrapper(name = "resourceInfoList")
+  @XmlElement(name = "googleDocInfo")
   @JsonProperty(value = "resourceInfoList")
   private List<GoogleDocInfoDto> resourceInfoList;
   
@@ -64,7 +67,8 @@ public class GoogleDocImportBatchJobContext extends AbstractDto<GoogleDocImportB
   @JsonProperty(value = "root")
   private GoogleDocTree root;
   
-  @XmlElement(name = "listOfImportDestinations")
+  @XmlElementWrapper(name = "listOfImportDestinations")
+  @XmlElement(name = "importDestination")
   @JsonProperty(value = "listOfImportDestinations")
   private List<ImportDestinationDto> listOfImportDestinations;
   

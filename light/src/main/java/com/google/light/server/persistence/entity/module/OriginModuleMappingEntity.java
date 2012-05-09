@@ -19,8 +19,9 @@ import static com.google.light.server.utils.LightPreconditions.checkModuleId;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightUtils.getWrapperValue;
 
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
+
 import com.google.light.server.dto.module.ModuleDto;
-import com.google.light.server.dto.pojo.longwrapper.ModuleId;
 import com.google.light.server.persistence.entity.AbstractPersistenceEntity;
 import com.googlecode.objectify.Key;
 import javax.persistence.Id;

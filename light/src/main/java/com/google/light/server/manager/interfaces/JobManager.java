@@ -15,8 +15,9 @@
  */
 package com.google.light.server.manager.interfaces;
 
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.JobId;
+
 import com.google.light.server.dto.pojo.ChangeLogEntryPojo;
-import com.google.light.server.dto.pojo.longwrapper.JobId;
 import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocImportBatchJobContext;
 import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocImportJobContext;
 import com.google.light.server.persistence.entity.jobs.JobEntity;

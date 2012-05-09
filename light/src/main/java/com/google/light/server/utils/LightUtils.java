@@ -22,13 +22,20 @@ import static com.google.light.server.constants.RequestParamKeyEnum.LOGIN_PROVID
 import static com.google.light.server.constants.RequestParamKeyEnum.LOGIN_PROVIDER_USER_ID;
 import static com.google.light.server.constants.RequestParamKeyEnum.PERSON_ID;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.io.CharStreams;
 import com.google.light.server.constants.FileExtensions;
 import com.google.light.server.constants.OAuth2ProviderService;
-import com.google.light.server.dto.pojo.longwrapper.AbstractTypeWrapper;
+import com.google.light.server.dto.pojo.typewrapper.AbstractTypeWrapper;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.CollectionId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.JobId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
 import com.google.light.server.exception.unchecked.httpexception.LightHttpException;
 import com.google.light.server.guice.providers.InstantProvider;
 import java.io.IOException;
@@ -42,6 +49,7 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpSession;
@@ -82,9 +90,10 @@ public class LightUtils {
   public static void appendLine(StringBuilder builder, String text) {
     builder.append(text).append("<br>");
   }
-  
+
   public static void appendHref(StringBuilder builder, String id, String href, String name) {
-    builder.append("<a " + id + " href=\"").append(href).append("\">").append(name).append("</a><br>");
+    builder.append("<a " + id + " href=\"").append(href).append("\">").append(name)
+        .append("</a><br>");
   }
 
   // TODO(arjuns): Abstract out common userInfo.
@@ -270,37 +279,80 @@ public class LightUtils {
     List<T> list = Lists.newArrayList(array);
     return Iterables.toString(list);
   }
-  
-  public static boolean isListEmpty(List list) {
+
+  public static boolean isListEmpty(List<?> list) {
     if (list == null || list.size() == 0) {
       return true;
     }
-    
+
     return false;
   }
-  
+
   public static Long getInstantInMillis(Instant instant) {
     if (instant == null) {
       return null;
     }
-    
+
     return instant.getMillis();
   }
-  
+
   public static <I, W extends AbstractTypeWrapper<I, W>> I getWrapperValue(W wrapper) {
     if (wrapper == null) {
       return null;
     }
-    
+
     return wrapper.getValue();
   }
-  
-//  public static <I, W extends AbstractTypeWrapper<I, W>> I getWrapperValueAsString(W wrapper) {
-//    if (wrapper == null) {
-//      return null;
-//    }
-//    
-//    return wrapper.getValue();
-//  }
 
+  public static <I, W extends AbstractTypeWrapper<I, W>> String getWrapperValueAsString(W wrapper) {
+    if (wrapper == null) {
+      return null;
+    }
+
+    return wrapper.getValue().toString();
+  }
+
+  public static <E, W extends AbstractTypeWrapper<E, W>>
+      List<E> convertWrapperListToListOfValues(List<W> listOfWrappers) {
+    if (isListEmpty(listOfWrappers)) {
+      return null;
+    }
+
+    List<E> requiredList = Lists.newArrayListWithCapacity(listOfWrappers.size());
+
+    for (W curr : listOfWrappers) {
+      E wrappedValue = getWrapperValue(curr);
+      requiredList.add(wrappedValue);
+    }
+
+    return requiredList;
+  }
+
+  @VisibleForTesting
+  @SuppressWarnings("rawtypes")
+  static Map<String, AbstractTypeWrapper> map = new ImmutableMap.Builder<String, AbstractTypeWrapper>()
+      .put(CollectionId.class.getName(), new CollectionId(Long.MAX_VALUE))
+      .put(JobId.class.getName(), new JobId(Long.MAX_VALUE))
+      .put(ModuleId.class.getName(), new ModuleId(Long.MAX_VALUE))
+      .put(PersonId.class.getName(), new PersonId(Long.MAX_VALUE))
+      .put(Version.class.getName(), new Version(Long.MAX_VALUE))
+      .build();
+
+  @SuppressWarnings({ "unchecked", "rawtypes" })
+  public static <I, W extends AbstractTypeWrapper<I, W>> 
+  List<W> convertListOfValuesToWrapperList(List<I> listOfValues, Class<W> clazz) {
+    if (isListEmpty(listOfValues)) {
+      return null;
+    }
+    
+    List<W> requiredList = Lists.newArrayListWithCapacity(listOfValues.size());
+    
+    for (I curr : listOfValues) {
+      AbstractTypeWrapper instanceCreator = map.get(clazz.getName());
+      W instance = ((W) instanceCreator.createInstance(curr));
+      requiredList.add(instance);
+    }
+    
+    return requiredList;
+  }
 }

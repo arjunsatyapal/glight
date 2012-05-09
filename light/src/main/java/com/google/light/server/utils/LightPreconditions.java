@@ -20,19 +20,21 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.light.server.utils.ServletUtils.getRequestHeaderValue;
 
-import com.google.light.server.dto.pojo.longwrapper.CollectionId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.CollectionId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.JobId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
+
 
 import com.google.light.server.exception.unchecked.InvalidVersionException;
 
-import com.google.light.server.dto.pojo.longwrapper.Version;
 
 import com.google.light.server.exception.unchecked.InvalidModuleIdException;
 
-import com.google.light.server.dto.pojo.longwrapper.ModuleId;
 
 import com.google.light.server.exception.unchecked.InvalidJobIdException;
 
-import com.google.light.server.dto.pojo.longwrapper.JobId;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
@@ -40,7 +42,6 @@ import com.google.common.collect.Lists;
 import com.google.light.server.constants.HttpHeaderEnum;
 import com.google.light.server.constants.LightEnvEnum;
 import com.google.light.server.constants.OAuth2ProviderService;
-import com.google.light.server.dto.pojo.longwrapper.PersonId;
 import com.google.light.server.exception.ExceptionType;
 import com.google.light.server.exception.unchecked.BlankStringException;
 import com.google.light.server.exception.unchecked.InvalidPersonIdException;

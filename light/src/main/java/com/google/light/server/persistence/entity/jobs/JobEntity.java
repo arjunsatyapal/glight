@@ -21,6 +21,8 @@ import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkNull;
 import static com.google.light.server.utils.LightUtils.getWrapperValue;
 
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.JobId;
+
 import com.google.appengine.api.datastore.Text;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -28,7 +30,6 @@ import com.google.light.server.annotations.ObjectifyQueryField;
 import com.google.light.server.annotations.ObjectifyQueryFieldName;
 import com.google.light.server.constants.PlacementOrder;
 import com.google.light.server.dto.pojo.ChangeLogEntryPojo;
-import com.google.light.server.dto.pojo.longwrapper.JobId;
 import com.google.light.server.persistence.entity.AbstractPersistenceEntity;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.Unindexed;

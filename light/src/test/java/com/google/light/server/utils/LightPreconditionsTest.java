@@ -42,7 +42,8 @@ import static com.google.light.testingutils.TestingUtils.getRandomString;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import com.google.light.server.dto.pojo.longwrapper.PersonId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
+
 
 import com.google.common.collect.Lists;
 import com.google.inject.Injector;

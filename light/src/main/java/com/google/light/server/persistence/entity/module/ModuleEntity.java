@@ -21,6 +21,8 @@ import static com.google.light.server.utils.LightPreconditions.checkNonNegativeL
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
 import static com.google.light.server.utils.LightPreconditions.checkVersion;
+import static com.google.light.server.utils.LightUtils.convertListOfValuesToWrapperList;
+import static com.google.light.server.utils.LightUtils.convertWrapperListToListOfValues;
 import static com.google.light.server.utils.LightUtils.getWrapperValue;
 
 import com.google.common.base.Preconditions;
@@ -29,14 +31,13 @@ import com.google.light.server.annotations.ObjectifyQueryFieldName;
 import com.google.light.server.dto.module.ModuleDto;
 import com.google.light.server.dto.module.ModuleState;
 import com.google.light.server.dto.module.ModuleType;
-import com.google.light.server.dto.pojo.longwrapper.ModuleId;
-import com.google.light.server.dto.pojo.longwrapper.PersonId;
-import com.google.light.server.dto.pojo.longwrapper.Version;
-import com.google.light.server.dto.pojo.longwrapper.Version.State;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version.State;
 import com.google.light.server.persistence.entity.AbstractPersistenceEntity;
 import com.googlecode.objectify.Key;
 import java.util.List;
-import javax.persistence.Embedded;
 import javax.persistence.Id;
 import org.joda.time.Instant;
 
@@ -56,10 +57,10 @@ public class ModuleEntity extends AbstractPersistenceEntity<ModuleEntity, Module
   private ModuleType type;
 
   @ObjectifyQueryFieldName("owners")
-  public static final String OFY_OWNER_QUERY_STRING = "owners.value IN";
-  @Embedded
-  @ObjectifyQueryField("OFY_OWNER_QUERY_STRING")
-  private List<PersonId> owners;
+  public static final String OFY_MODULE_OWNER_QUERY_STRING = "owners IN";
+
+  @ObjectifyQueryField("OFY_MODULE_OWNER_QUERY_STRING")
+  private List<Long> owners;
 
   private String etag;
   private Long latestPublishVersion;
@@ -96,7 +97,7 @@ public class ModuleEntity extends AbstractPersistenceEntity<ModuleEntity, Module
         .id(new ModuleId(id))
         .title(title)
         .state(state)
-        .owners(owners)
+        .owners(getOwners())
         .latestPublishVersion(getLatestPublishVersion())
         .build();
 
@@ -186,6 +187,22 @@ public class ModuleEntity extends AbstractPersistenceEntity<ModuleEntity, Module
   public void setLastEditTime(Instant lastEditTime) {
     Preconditions.checkNotNull(lastEditTime, "lastEditTime");
     this.lastEditTimeInMillis = lastEditTime.getMillis();
+  }
+
+  public Long getId() {
+    return id;
+  }
+
+  public static String getOfyModuleOwnerQueryString() {
+    return OFY_MODULE_OWNER_QUERY_STRING;
+  }
+
+  public List<PersonId> getOwners() {
+    return convertListOfValuesToWrapperList(owners, PersonId.class);
+  }
+
+  public Long getLastEditTimeInMillis() {
+    return lastEditTimeInMillis;
   }
 
   @Override
@@ -279,7 +296,7 @@ public class ModuleEntity extends AbstractPersistenceEntity<ModuleEntity, Module
     this.title = builder.title;
     this.state = builder.state;
     this.type = builder.type;
-    this.owners = builder.owners;
+    this.owners = convertWrapperListToListOfValues(builder.owners);
     this.etag = builder.etag;
     
     if (builder.lastEditTime != null) {

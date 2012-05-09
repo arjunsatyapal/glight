@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.server.dto.pojo.longwrapper;
+package com.google.light.server.dto.pojo.typewrapper.longwrapper;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -21,6 +21,7 @@ import static com.google.light.server.utils.LightPreconditions.checkNull;
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
 
 import com.google.light.server.constants.LightStringConstants;
+import com.google.light.server.dto.pojo.typewrapper.AbstractTypeWrapper;
 
 /**
  * Wrapper for Version.
@@ -115,5 +116,13 @@ public class Version extends AbstractTypeWrapper<Long, Version> {
   // For Objectify and JAXB.
   private Version() {
     super(null);
+  }
+
+  /** 
+   * {@inheritDoc}
+   */
+  @Override
+  public Version createInstance(Long value) {
+    return new Version(value);
   }
 }

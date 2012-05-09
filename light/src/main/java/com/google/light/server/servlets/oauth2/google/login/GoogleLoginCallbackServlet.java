@@ -7,6 +7,8 @@ import static com.google.light.server.utils.GuiceUtils.enqueueRequestScopedVaria
 import static com.google.light.server.utils.GuiceUtils.getInstance;
 import static com.google.light.server.utils.ServletUtils.prepareSession;
 
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
+
 import com.google.api.client.auth.oauth2.AuthorizationCodeResponseUrl;
 import com.google.api.client.auth.oauth2.TokenResponse;
 import com.google.common.base.Strings;
@@ -15,7 +17,6 @@ import com.google.light.server.constants.JerseyConstants;
 import com.google.light.server.dto.RedirectDto;
 import com.google.light.server.dto.oauth2.owner.OAuth2OwnerTokenDto;
 import com.google.light.server.dto.person.PersonDto;
-import com.google.light.server.dto.pojo.longwrapper.PersonId;
 import com.google.light.server.exception.unchecked.GoogleAuthorizationException;
 import com.google.light.server.manager.implementation.oauth2.owner.OAuth2OwnerTokenManagerFactory;
 import com.google.light.server.manager.interfaces.OAuth2OwnerTokenManager;

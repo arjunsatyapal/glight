@@ -18,6 +18,8 @@ package com.google.light.server.dto.module;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
 
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
+
 import org.codehaus.jackson.annotate.JsonTypeName;
 
 import org.codehaus.jackson.annotate.JsonProperty;
@@ -30,7 +32,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import javax.xml.bind.annotation.XmlElement;
 
-import com.google.light.server.dto.pojo.longwrapper.Version;
 
 import com.google.light.server.dto.AbstractDtoToPersistence;
 import com.google.light.server.persistence.entity.module.ModuleVersionEntity;

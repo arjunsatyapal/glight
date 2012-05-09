@@ -15,8 +15,9 @@
  */
 package com.google.light.server.utils;
 
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.JobId;
+
 import com.google.light.server.constants.JerseyConstants;
-import com.google.light.server.dto.pojo.longwrapper.JobId;
 import java.net.URI;
 
 /**

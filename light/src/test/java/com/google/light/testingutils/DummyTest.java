@@ -17,10 +17,11 @@ package com.google.light.testingutils;
 
 import static org.junit.Assert.assertEquals;
 
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.CollectionId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
+
 import com.google.common.collect.Lists;
 import com.google.light.server.dto.module.ModuleType;
-import com.google.light.server.dto.pojo.longwrapper.CollectionId;
-import com.google.light.server.dto.pojo.longwrapper.ModuleId;
 import com.google.light.server.dto.pojo.tree.AbstractTreeNode.TreeNodeType;
 import com.google.light.server.dto.pojo.tree.CollectionTreeNodeDto;
 import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocResourceId;
@@ -94,7 +95,7 @@ public class DummyTest {
     
     GoogleDocResourceIdListWrapperDto resourceList2 = JsonUtils.getDto(json, GoogleDocResourceIdListWrapperDto.class);
     assertEquals(JsonUtils.toJson(resourceList1), JsonUtils.toJson(resourceList2));
-    assertEquals(list, resourceList2.get());
+    assertEquals(list, resourceList2.getList());
   }
   
   

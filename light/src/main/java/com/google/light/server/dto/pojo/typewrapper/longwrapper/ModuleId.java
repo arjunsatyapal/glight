@@ -13,10 +13,11 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.server.dto.pojo.longwrapper;
+package com.google.light.server.dto.pojo.typewrapper.longwrapper;
 
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
 
+import com.google.light.server.dto.pojo.typewrapper.AbstractTypeWrapper;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -54,5 +55,13 @@ public class ModuleId extends AbstractTypeWrapper<Long, ModuleId> {
   // For JAXB.
   private ModuleId() {
     super(0L);
+  }
+
+  /** 
+   * {@inheritDoc}
+   */
+  @Override
+  public ModuleId createInstance(Long value) {
+    return new ModuleId(value);
   }
 }

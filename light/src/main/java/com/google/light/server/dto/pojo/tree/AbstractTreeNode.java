@@ -18,6 +18,8 @@ package com.google.light.server.dto.pojo.tree;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNull;
 
+import javax.xml.bind.annotation.XmlElementWrapper;
+
 import com.google.common.collect.Lists;
 import com.google.light.server.dto.AbstractDto;
 import java.util.List;
@@ -45,9 +47,10 @@ public abstract class AbstractTreeNode<T extends AbstractTreeNode<T>> extends Ab
   // TODO(arjuns): See if this embedded can be removed. At present both Dto and persistence are using this.
   // This is bad.
   @Embedded
-  @XmlElement(name = "children")
-  @JsonProperty(value = "children")
-  protected List<T> children;
+  @XmlElementWrapper(name = "list")
+  @XmlElement(name = "item")
+  @JsonProperty(value = "list")
+  protected List<T> list;
 
   /**
    * {@inheritDoc}
@@ -65,7 +68,7 @@ public abstract class AbstractTreeNode<T extends AbstractTreeNode<T>> extends Ab
         break;
 
       case LEAF_NODE:
-        checkNull(children, "LEAF_NODE should have no child");
+        checkNull(list, "LEAF_NODE should have no child");
         break;
 
       default:
@@ -88,20 +91,20 @@ public abstract class AbstractTreeNode<T extends AbstractTreeNode<T>> extends Ab
   }
 
   public void addChildren(T treeNode) {
-    if (children == null) {
-      children = Lists.newArrayList();
+    if (list == null) {
+      list = Lists.newArrayList();
     }
 
-    children.add(treeNode);
+    list.add(treeNode);
     validate();
   }
 
   public List<T> getChildren() {
-    return children;
+    return list;
   }
   
   public boolean hasChildren() {
-    if (children == null || children.size() == 0) {
+    if (list == null || list.size() == 0) {
       return false;
     }
     
@@ -165,7 +168,7 @@ public abstract class AbstractTreeNode<T extends AbstractTreeNode<T>> extends Ab
     this.title = builder.title;
     this.type = builder.type;
     // this.parent = builder.parent;
-    this.children = builder.children;
+    this.list = builder.children;
   }
 
   // For Jaxb and objectify.

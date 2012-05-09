@@ -18,7 +18,8 @@ package com.google.light.server.persistence.dao;
 import static com.google.light.server.utils.LightPreconditions.checkPersonId;
 import static com.google.light.server.utils.ObjectifyUtils.assertAndReturnUniqueEntity;
 
-import com.google.light.server.dto.pojo.longwrapper.PersonId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
+
 
 
 
