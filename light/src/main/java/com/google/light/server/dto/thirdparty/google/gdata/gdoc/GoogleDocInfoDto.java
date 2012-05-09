@@ -115,8 +115,8 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
   private List<String> owners;
   
   @XmlElementWrapper(name = "writers")
-  @XmlElement(name = "writer")
-  @JsonProperty(value = "email")
+  @XmlElement(name = "email")
+  @JsonProperty(value = "writers")
   private List<String> writers;
 
   @XmlElementWrapper(name = "commenters")
