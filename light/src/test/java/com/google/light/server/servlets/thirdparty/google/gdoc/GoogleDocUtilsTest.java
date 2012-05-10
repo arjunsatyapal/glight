@@ -15,6 +15,9 @@
  */
 package com.google.light.server.servlets.thirdparty.google.gdoc;
 
+import static com.google.light.server.constants.LightConstants.GDATA_GDOC_MAX_RESULTS;
+import static com.google.light.server.constants.LightConstants.MAX_RESULTS_DEFAULT;
+import static com.google.light.server.servlets.thirdparty.google.gdoc.GoogleDocUtils.getFolderContentUrl;
 import static org.junit.Assert.assertEquals;
 
 import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocResourceId;
@@ -62,7 +65,21 @@ public class GoogleDocUtilsTest {
     String expected = "https://docs.google.com/feeds/default/private/full" + 
         "?showroots=true&showfolders=true&max-results=10";
     URL expectedUrl = new URL(expected);
-    assertEquals(expectedUrl, GoogleDocUtils.getDocumentFeedWithFolderUrl());
+    assertEquals(expectedUrl, GoogleDocUtils.getDocumentFeedWithFolderUrl(MAX_RESULTS_DEFAULT));
+  }
+  
+  /**
+   * Test for {@link GoogleDocUtils#getDocumentFeedWithFolderUrlAndFilter(int, String)()}.
+   * 
+   * @throws Exception
+   */
+  @Test
+  public void test_getDocumentFeedWithFolderUrlAndFilter() throws Exception {
+    String expected = "https://docs.google.com/feeds/default/private/full" + 
+        "?showroots=true&showfolders=true&max-results=10&q=someQuery";
+    URL expectedUrl = new URL(expected);
+    assertEquals(expectedUrl, GoogleDocUtils.getDocumentFeedWithFolderUrlAndFilter(
+        MAX_RESULTS_DEFAULT, "someQuery"));
   }
   
   /**
@@ -127,8 +144,8 @@ public class GoogleDocUtilsTest {
   @Test
   public void test_getFolderContentUrl() throws Exception {
     GoogleDocResourceId resourceId = new GoogleDocResourceId("folder:1234");
-    String expected = "https://docs.google.com/feeds/default/private/full/folder:1234/contents?max-results=10";
+    String expected = "https://docs.google.com/feeds/default/private/full/folder:1234/contents?max-results=1000";
     URL expectedUrl = new URL(expected);
-    assertEquals(expectedUrl, GoogleDocUtils.getFolderContentUrl(resourceId));
+    assertEquals(expectedUrl, getFolderContentUrl(resourceId, GDATA_GDOC_MAX_RESULTS));
   }
 }

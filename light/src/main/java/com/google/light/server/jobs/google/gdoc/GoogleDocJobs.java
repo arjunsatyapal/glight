@@ -15,24 +15,21 @@
  */
 package com.google.light.server.jobs.google.gdoc;
 
+import static com.google.light.server.constants.LightConstants.GDATA_GDOC_MAX_RESULTS;
 import static com.google.light.server.utils.LightPreconditions.checkNotNull;
 
-import com.google.light.server.utils.LightUtils;
-
 import com.google.common.collect.Lists;
-
-import java.util.logging.Logger;
-
 import com.google.inject.Inject;
-
 import com.google.inject.Provider;
-import com.google.light.server.dto.pojo.tree.GoogleDocTree;
 import com.google.light.server.dto.pojo.tree.AbstractTreeNode.TreeNodeType;
+import com.google.light.server.dto.pojo.tree.GoogleDocTree;
 import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocInfoDto;
 import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocResourceId;
 import com.google.light.server.exception.ExceptionType;
 import com.google.light.server.thirdparty.clients.google.gdata.gdoc.DocsServiceWrapper;
+import com.google.light.server.utils.LightUtils;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * Jobs related to Google Docs.
@@ -89,7 +86,9 @@ public class GoogleDocJobs {
     
     // This is a folder. So adding child Tree into current node.
     nodeBuilder.type(TreeNodeType.INTERMEDIATE_NODE);
-    List<GoogleDocInfoDto> listOfChilds = docsServiceProvider.get().getFolderContentWhichAreSupported(resourceId);
+    List<GoogleDocInfoDto> listOfChilds = 
+        docsServiceProvider.get().getFolderContentWhichAreSupported(
+            resourceId, GDATA_GDOC_MAX_RESULTS);
 
     List<GoogleDocInfoDto> listOfSupportedChilds = Lists.newArrayList();
     for (GoogleDocInfoDto currChild : listOfChilds) {

@@ -20,6 +20,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.constants.LightConstants.HTTP_CONNECTION_TIMEOUT_IN_MILLIS;
 import static com.google.light.server.constants.OAuth2ProviderService.GOOGLE_DOC;
 import static com.google.light.server.constants.google.cloudstorage.GoogleCloudStorageBuckets.WORKSPACE;
+import static com.google.light.server.servlets.thirdparty.google.gdoc.GoogleDocUtils.getFolderContentUrl;
 import static com.google.light.server.utils.GoogleCloudStorageUtils.getAbsolutePathOnBucket;
 import static com.google.light.server.utils.GoogleCloudStorageUtils.writeFileOnGCS;
 import static com.google.light.server.utils.GuiceUtils.getInstance;
@@ -185,7 +186,8 @@ public class DocsServiceWrapper extends DocsService {
   }
 
   @SuppressWarnings("rawtypes")
-  public List<GoogleDocInfoDto> getFolderContentWhichAreSupported(GoogleDocResourceId resourceId) {
+  public List<GoogleDocInfoDto> getFolderContentWhichAreSupported(GoogleDocResourceId resourceId, 
+      int maxResult) {
     String randomString = LightUtils.getUUIDString();
 
     List<GoogleDocInfoDto> list = Lists.newArrayList();
@@ -193,7 +195,7 @@ public class DocsServiceWrapper extends DocsService {
 
     do {
       if (pageDto == null) {
-        pageDto = getFolderContentPageWise(resourceId, randomString);
+        pageDto = getFolderContentPageWise(resourceId, randomString, maxResult);
       } else {
         String decodedStartIndex = LightUtils.decodeFromUrlEncodedString(pageDto.getStartIndex());
         pageDto = getFolderContentWithStartIndex(getURL(decodedStartIndex), randomString);
@@ -212,8 +214,9 @@ public class DocsServiceWrapper extends DocsService {
     return list;
   }
 
-  public PageDto getFolderContentPageWise(GoogleDocResourceId resourceId, String handlerUri) {
-    return getFolderContentWithStartIndex(GoogleDocUtils.getFolderContentUrl(resourceId),
+  public PageDto getFolderContentPageWise(GoogleDocResourceId resourceId, String handlerUri, 
+      int maxResult) {
+    return getFolderContentWithStartIndex(getFolderContentUrl(resourceId, maxResult),
         handlerUri);
   }
 

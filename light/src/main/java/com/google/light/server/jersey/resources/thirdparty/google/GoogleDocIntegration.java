@@ -19,10 +19,14 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.light.server.constants.LightConstants.GOOGLE_DOC_IMPORT_BATCH_SIZE_MAX;
 import static com.google.light.server.exception.ExceptionType.SERVER_GUICE_INJECTION;
 import static com.google.light.server.servlets.thirdparty.google.gdoc.GoogleDocUtils.getDocumentFeedWithFolderUrl;
+import static com.google.light.server.servlets.thirdparty.google.gdoc.GoogleDocUtils.getDocumentFeedWithFolderUrlAndFilter;
 import static com.google.light.server.utils.LightPreconditions.checkIntegerIsInRage;
 import static com.google.light.server.utils.LightPreconditions.checkNonEmptyList;
 import static com.google.light.server.utils.LightPreconditions.checkNotNull;
+import static com.google.light.server.utils.LightUtils.encodeToUrlEncodedString;
 import static com.google.light.server.utils.LightUtils.getURL;
+
+import com.google.light.server.servlets.thirdparty.google.gdoc.GoogleDocUtils;
 
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
@@ -47,9 +51,7 @@ import com.google.light.server.persistence.entity.collection.CollectionEntity;
 import com.google.light.server.persistence.entity.jobs.JobEntity;
 import com.google.light.server.thirdparty.clients.google.gdata.gdoc.DocsServiceWrapper;
 import com.google.light.server.utils.GuiceUtils;
-import com.google.light.server.utils.HtmlBuilder;
 import com.google.light.server.utils.JsonUtils;
-import com.google.light.server.utils.LightPreconditions;
 import com.google.light.server.utils.LightUtils;
 import com.google.light.server.utils.LocationHeaderUtils;
 import com.google.light.server.utils.XmlUtils;
@@ -103,28 +105,55 @@ public class GoogleDocIntegration extends AbstractJerseyResource {
   @Produces({ ContentTypeConstants.APPLICATION_JSON, ContentTypeConstants.APPLICATION_XML })
   public PageDto getDocList(
       @QueryParam(LightStringConstants.START_INDEX_STR) String startIndexStr,
-      @QueryParam(LightStringConstants.MAX_RESULTS_STR) String maxResultsStr) {
+      @QueryParam(LightStringConstants.MAX_RESULTS_STR) String maxResultsStr,
+      @QueryParam(LightStringConstants.FILTER) String queryStr) {
     // TODO(arjuns): Test maxResult.
-    int maxResult = LightConstants.MAX_RESULTS_DEFAULT;
-    if (maxResultsStr != null) {
-      maxResult = Integer.parseInt(maxResultsStr);
-      LightPreconditions.checkIntegerIsInRage(maxResult, LightConstants.MAX_RESULTS_MIN,
-          LightConstants.MAX_RESULTS_MAX, "Invalid value for maxResult[" + maxResult + "].");
-    }
-
+    int maxResults = initializeMaxResults(maxResultsStr);
+    String query = initializeQueryStr(queryStr);
+    
     URL url = null;
     if (!StringUtils.isBlank(startIndexStr)) {
       // Get values for next page.
       url = LightUtils.getURL(startIndexStr);
     } else {
       // Start from page1.
-      url = getDocumentFeedWithFolderUrl();
+      if (query == null) {
+        url = getDocumentFeedWithFolderUrl(maxResults);
+      } else {
+        url = getDocumentFeedWithFolderUrlAndFilter(maxResults, query);
+      }
     }
 
     PageDto pageDto = docsServiceProvider.get().getDocumentFeedWithFolders(
         url, JerseyConstants.URI_GOOGLE_DOC_LIST);
 
     return pageDto;
+  }
+
+  /**
+   * @param queryStr
+   * @return
+   */
+  private String initializeQueryStr(String queryStr) {
+    if (StringUtils.isBlank(queryStr)) {
+      return null;
+    }
+    
+    return encodeToUrlEncodedString(queryStr);
+  }
+
+  /**
+   * @param maxResultsStr
+   * @return
+   */
+  private int initializeMaxResults(String maxResultsStr) {
+    int maxResult = LightConstants.MAX_RESULTS_DEFAULT;
+    if (maxResultsStr != null) {
+      maxResult = Integer.parseInt(maxResultsStr);
+      checkIntegerIsInRage(maxResult, LightConstants.MAX_RESULTS_MIN,
+          LightConstants.MAX_RESULTS_MAX, "Invalid value for maxResult[" + maxResult + "].");
+    }
+    return maxResult;
   }
 
   @GET
@@ -142,16 +171,21 @@ public class GoogleDocIntegration extends AbstractJerseyResource {
   @Produces({ ContentTypeConstants.APPLICATION_JSON, ContentTypeConstants.APPLICATION_XML })
   public PageDto getFolderContents(
       @PathParam(JerseyConstants.PATH_PARAM_EXTERNAL_KEY) String externalKey,
-      @QueryParam(LightStringConstants.START_INDEX_STR) String startIndex) {
+      @QueryParam(LightStringConstants.START_INDEX_STR) String startIndex,
+      @QueryParam(LightStringConstants.MAX_RESULTS_STR) String maxResultsStr) {
+    int maxResult = initializeMaxResults(maxResultsStr);
+    
     try {
       String handlerUri = request.getRequestURI();
 
+      // TODO(arjuns): Here client could have modified the start-index.
       if (!Strings.isNullOrEmpty(startIndex)) {
         return docsServiceProvider.get().getFolderContentWithStartIndex(getURL(startIndex),
             handlerUri);
       }
       GoogleDocResourceId resourceId = new GoogleDocResourceId(externalKey);
-      PageDto pageDto = docsServiceProvider.get().getFolderContentPageWise(resourceId, handlerUri);
+      PageDto pageDto = docsServiceProvider.get().getFolderContentPageWise(
+          resourceId, handlerUri, maxResult);
       return pageDto;
     } catch (Exception e) {
       // TODO(arjuns): Add exception Handling.

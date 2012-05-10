@@ -15,11 +15,12 @@
  */
 package com.google.light.server.servlets.thirdparty.google.gdoc;
 
-import static com.google.light.server.constants.LightConstants.GDATA_MAX_RESULT;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.light.server.constants.LightConstants.GDATA_GDOC_MAX_RESULTS;
 import static com.google.light.server.utils.LightUtils.getURL;
 
 import com.google.common.base.Preconditions;
-
+import com.google.light.server.constants.LightConstants;
 import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocResourceId;
 import java.net.URL;
 import java.util.logging.Logger;
@@ -43,7 +44,6 @@ public class GoogleDocUtils {
 
   private static String SHOW_FOLDERS = "showroots=true&showfolders=true";
   private static String EXPAND_ACL = "expand-acl=true";
-  private static String MAX_RESULTS = "max-results=" + GDATA_MAX_RESULT;
 
   /**
    * Get URL for fetching User Account Information.
@@ -55,8 +55,12 @@ public class GoogleDocUtils {
   /**
    * Get Document Feed for a User with both RootFolder and Folders enabled.
    */
-  public static URL getDocumentFeedWithFolderUrl() {
-    return getURL(DOCUMENT_FEED_BASE_URL + "?" + SHOW_FOLDERS + "&" + MAX_RESULTS);
+  public static URL getDocumentFeedWithFolderUrl(int maxResults) {
+    return getURL(DOCUMENT_FEED_BASE_URL + "?" + SHOW_FOLDERS + "&" + getMaxResults(maxResults));
+  }
+
+  public static URL getDocumentFeedWithFolderUrlAndFilter(int maxResults, String query) {
+    return getURL(getDocumentFeedWithFolderUrl(maxResults) + "&q=" + query);
   }
 
   /**
@@ -79,6 +83,7 @@ public class GoogleDocUtils {
   protected static URL getResourceEntryUrl(GoogleDocResourceId resourceId) {
     return getURL(DOCUMENT_FEED_BASE_URL + "/" + resourceId.getTypedResourceId());
   }
+
   /**
    * Get URL to fetch GData Entry for a Resource.
    */
@@ -96,7 +101,7 @@ public class GoogleDocUtils {
   }
 
   /**
-   * Get ACL feed for a Resource. 
+   * Get ACL feed for a Resource.
    */
   public static URL getResourceAclFeedUrl(GoogleDocResourceId resourceId) {
     logger.warning("Ideally, ACL Feed link should be fetched from the ResourceEntry. " +
@@ -104,11 +109,19 @@ public class GoogleDocUtils {
     URL url = getResourceEntryUrl(resourceId);
     return getURL(url.toString() + "/acl");
   }
-  
-  public static URL getFolderContentUrl(GoogleDocResourceId resourceId) {
-    Preconditions.checkArgument(resourceId.isFolder(), 
+
+  public static URL getFolderContentUrl(GoogleDocResourceId resourceId, int maxResult) {
+    Preconditions.checkArgument(resourceId.isFolder(),
         "Invalid GoogleResource[" + resourceId + "].");
     URL url = getResourceEntryUrl(resourceId);
-    return getURL(url.toString() + "/contents" + "?" + MAX_RESULTS);
+    return getURL(url.toString() + "/contents" + "?" + getMaxResults(maxResult));
+  }
+
+  public static String getMaxResults(int maxResults) {
+    checkArgument(maxResults > 0 && maxResults <= LightConstants.GDATA_GDOC_MAX_RESULTS,
+        "GDATA API for Google Doc supports MaxResults between (1, " + GDATA_GDOC_MAX_RESULTS
+            + "). Invalid MaxResults : " + maxResults);
+    return "max-results=" + maxResults;
+
   }
 }
