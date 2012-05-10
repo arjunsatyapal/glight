@@ -207,9 +207,9 @@ public class LightPreconditions {
   }
 
   public static Integer checkIntegerIsInRage(Integer value, int min, int max, String message) {
-    String errorMessage = message + ": Range : [" + min + ":" + max + "].";
+    String errorMessage = message + " Allowed Range : [" + min + ":" + max + "].";
     Preconditions.checkNotNull(value, errorMessage);
-    checkArgument(integerValidator.isInRange(value, min, max), message);
+    checkArgument(integerValidator.isInRange(value, min, max), errorMessage);
     return value;
   }
 
@@ -353,7 +353,7 @@ public class LightPreconditions {
 
     throw new IllegalStateException("Code should not reach here.");
   }
-
+  
   /**
    * Javadoc is same as for {{@link #checkNotBlank(String)}. This throws an exception with cause as
    * errorString.

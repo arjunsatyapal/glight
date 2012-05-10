@@ -167,7 +167,7 @@ public enum JerseyMethodEnum {
   GOOGLE_DOC_GET_DOC_LIST(
                           GoogleDocIntegration.class,
                           "getDocList",
-                          new Class[] { String.class, String.class },
+                          new Class[] { String.class, String.class, String.class },
                           GET.class,
                           "/rest/thirdparty/google/gdoc/list",
 
@@ -211,7 +211,7 @@ public enum JerseyMethodEnum {
   GOOGLE_DOC_GET_FOLDER_CONTENTS(
                                  GoogleDocIntegration.class,
                                  "getFolderContents",
-                                 new Class[] { String.class, String.class },
+                                 new Class[] { String.class, String.class, String.class },
                                  GET.class,
                                  "/rest/thirdparty/google/gdoc/info/folder/{external_key}",
                                  new String[] { "application/json; charset=UTF-8",

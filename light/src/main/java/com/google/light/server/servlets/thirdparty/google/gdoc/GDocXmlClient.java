@@ -76,8 +76,8 @@ public class GDocXmlClient {
     return fetchFeedFromGoogle(url);
   }
 
-  public String getCollectionFeed(GoogleDocResourceId resourceId) {
-    URL url = GoogleDocUtils.getFolderContentUrl(resourceId);
+  public String getFolderFeed(GoogleDocResourceId resourceId, int maxResult) {
+    URL url = GoogleDocUtils.getFolderContentUrl(resourceId, maxResult);
     return fetchFeedFromGoogle(url.toString());
   }
 

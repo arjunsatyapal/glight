@@ -58,8 +58,11 @@ public class LightConstants {
   public static final String LIGHT_BOT_EMAIL = "light-bot@myopenedu.com";
 
   // TODO(arjuns): Get this value from client.
-  /** Number of recrds to be fetched in GDATA Feed */
-  public static int GDATA_MAX_RESULT = 10;
+  /** Number of records to be fetched in Google Doc GDATA Feed. 
+   * {@link https://developers.google.com/google-apps/documents-list/#retrieving_fewer_changes_per_request}
+   */
+  public static final int GDATA_GDOC_MAX_RESULTS = 1000;
+  
   
   /**
    * Number of documents that can be requested by client to import in single batch.
@@ -71,9 +74,8 @@ public class LightConstants {
    */
   public static int GOOGLE_DOC_IMPORT_BATCH_SIZE_MAX = 10;
 
-
-  public static final int MAX_RESULTS_MIN = 10;
-  public static final int MAX_RESULTS_DEFAULT = MAX_RESULTS_MIN;
+  public static final int MAX_RESULTS_MIN = 1;
+  public static final int MAX_RESULTS_DEFAULT = 10;
   public static final int MAX_RESULTS_MAX = 100;
   
   public static final int TASK_COUNTDOWN_MILLIS = 1000;
