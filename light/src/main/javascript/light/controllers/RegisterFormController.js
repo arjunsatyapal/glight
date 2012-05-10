@@ -36,6 +36,8 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
       this._person = PersonUtils.getCurrent();
       this._view.setData(this._person);
       var hashData = null;
+      // TODO(waltercacau): extract this information from RouterManager
+      // with the event REDIRECT_STATE_CHANGED
       try {
         hashData = dojo.queryToObject(URLUtils.getHash());
       } catch (e) {

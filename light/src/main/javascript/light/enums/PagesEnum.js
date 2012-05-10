@@ -22,12 +22,14 @@
 define(['light/enums/EventsEnum',
         'light/builders/SearchStateBuilder',
         'light/builders/BrowseContextStateBuilder',
+        'light/builders/RedirectStateBuilder',
         'light/utils/RouterManager'],
-        function(EventsEnum, SearchStateBuilder, BrowseContextStateBuilder, RouterManager) {
+        function(EventsEnum, SearchStateBuilder, BrowseContextStateBuilder,
+                 RedirectStateBuilder, RouterManager) {
     function toHash(statesOrHash) {
-      if(typeof states == "undefined") {
+      if(typeof statesOrHash == "undefined") {
         return "";
-      } else if(typeof states == "string") {
+      } else if(typeof statesOrHash == "string") {
         return statesOrHash;
       } else {
         // TODO(waltercacau): remove this use of a private method
@@ -44,7 +46,10 @@ define(['light/enums/EventsEnum',
       getPath: function(statesOrHash) {
         return '/register#'+toHash(statesOrHash);
       },
-      states: []
+      states: [{
+        changeEvent: EventsEnum.REDIRECT_STATE_CHANGED,
+        Builder: RedirectStateBuilder
+      }]
     },
     SEARCH: {
       build: 'search',

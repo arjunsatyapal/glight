@@ -14,7 +14,8 @@
  * the License.
  */
 define(['dojo/_base/declare', 'light/utils/URLUtils', 'light/enums/PagesEnum',
-    'dojo'], function(declare, URLUtils, PagesEnum, dojo) {
+    'light/builders/RedirectStateBuilder', 'dojo'],
+    function(declare, URLUtils, PagesEnum, RedirectStateBuilder, dojo) {
   /**
    * Utilities for handling with the logged person. TODO(waltercacau): add test
    * for this class
@@ -55,9 +56,11 @@ define(['dojo/_base/declare', 'light/utils/URLUtils', 'light/enums/PagesEnum',
 
       var person = this.getCurrent();
       if (person && !person.acceptedTos) {
-        URLUtils.redirect(PagesEnum.REGISTER.getPath(dojo.objectToQuery({
-          "redirectPath": URLUtils.getPathWithHash()
-        })));
+        URLUtils.redirect(PagesEnum.REGISTER.getPath([
+                new RedirectStateBuilder()
+                    .redirectPath(URLUtils.getPathWithHash())
+                    .build()
+        ]));
         return false;
       }
       return true;

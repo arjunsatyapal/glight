@@ -40,6 +40,8 @@ import com.google.light.server.dto.pages.PageDto;
 import com.google.light.server.servlets.SessionManager;
 import com.google.light.server.utils.GuiceUtils;
 import javax.ws.rs.QueryParam;
+
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 
 import com.google.inject.Inject;
@@ -98,7 +100,7 @@ public class CollectionResource extends AbstractJerseyResource {
         collectionIdStr, versionStr);
     return collectionVersionEntity.getCollectionTree();
   }
-  
+
   @PUT
   @Path(JerseyConstants.PATH_COLLECTION_VERSION)
   @Consumes({ ContentTypeConstants.APPLICATION_JSON, ContentTypeConstants.APPLICATION_XML })
@@ -107,7 +109,7 @@ public class CollectionResource extends AbstractJerseyResource {
       @PathParam(JerseyConstants.PATH_PARAM_COLLECTION_ID) String collectionIdStr,
       @PathParam(JerseyConstants.PATH_PARAM_VERSION) String versionStr,
       String body) {
-    
+
     System.out.println(body);
     CollectionVersionEntity collectionVersionEntity = getCollectionVersionEntity(
         collectionIdStr, versionStr);
@@ -122,12 +124,14 @@ public class CollectionResource extends AbstractJerseyResource {
       @PathParam(JerseyConstants.PATH_PARAM_VERSION) String versionStr) {
     CollectionVersionEntity collectionVersionEntity = getCollectionVersionEntity(
         collectionIdStr, versionStr);
-    
+
     CollectionTreeNodeDto tree = collectionVersionEntity.getCollectionTree();
     StringBuilder builder = new StringBuilder();
-    
+
+    builder.append("<ul>");
     appendCurrNode(tree, builder, 2);
-    
+    builder.append("</ul>");
+
     return Response.ok(builder.toString()).build();
   }
 
@@ -136,25 +140,19 @@ public class CollectionResource extends AbstractJerseyResource {
    * @param builder
    */
   private void appendCurrNode(CollectionTreeNodeDto node, StringBuilder builder, int space) {
-    builder.append("<br>");
-    
-    builder.append("<pre>");
-    for (int i = 0; i < space; i++) {
-      builder.append(" ");
-    }
-
     if (node.isLeafNode()) {
       String uri = "/rest/module/" + node.getModuleId().getValue() + "/latest/content";
-      builder.append("<a href=").append(uri).append(">").append(node.getTitle()).append("</a>");
+      builder.append("<li><a href=").append(StringEscapeUtils.escapeHtml(uri)).append(">")
+          .append(StringEscapeUtils.escapeHtml(node.getTitle())).append("</a></li>");
     } else {
-      builder.append("<b>").append(node.getTitle()).append("</b>");
+      builder.append("<li>").append(StringEscapeUtils.escapeHtml(node.getTitle())).append("<ul>");
       if (node.hasChildren()) {
         for (CollectionTreeNodeDto currChild : node.getChildren()) {
           appendCurrNode(currChild, builder, space * 2);
         }
       }
     }
-    builder.append("</pre>");
+    builder.append("</ul>");
   }
 
   protected CollectionVersionEntity getCollectionVersionEntity(String collectionIdStr,
@@ -173,7 +171,7 @@ public class CollectionResource extends AbstractJerseyResource {
 
     return cvEntity;
   }
-  
+
   @GET
   @Path(JerseyConstants.PATH_ME)
   @Produces({ ContentTypeConstants.APPLICATION_JSON, ContentTypeConstants.APPLICATION_XML })
@@ -182,45 +180,47 @@ public class CollectionResource extends AbstractJerseyResource {
       @QueryParam(LightStringConstants.MAX_RESULTS_STR) String maxResultStr) {
     SessionManager sessionManager = GuiceUtils.getInstance(SessionManager.class);
     checkPersonLoggedIn(sessionManager);
-    
+
     int maxResult = LightConstants.MAX_RESULTS_DEFAULT;
-    
+
     if (StringUtils.isNotBlank(maxResultStr)) {
       maxResult = Integer.parseInt(maxResultStr);
     }
-    
+
     checkArgument(maxResult <= MAX_RESULTS_MAX, "Max results allowed = " + MAX_RESULTS_MAX);
-    
-    return collectionManager.findCollectionsByOwnerId(GuiceUtils.getOwnerId(), startIndex, maxResult);
+
+    return collectionManager.findCollectionsByOwnerId(GuiceUtils.getOwnerId(), startIndex,
+        maxResult);
   }
-  
+
   @SuppressWarnings("unchecked")
   @GET
   @Path(JerseyConstants.PATH_ME_HTML)
-  @Produces( ContentTypeConstants.TEXT_HTML )
+  @Produces(ContentTypeConstants.TEXT_HTML)
   public String getCollectionsPublishedByMeHtml() {
     SessionManager sessionManager = GuiceUtils.getInstance(SessionManager.class);
     checkPersonLoggedIn(sessionManager);
-    
-    PageDto pageDto = collectionManager.findCollectionsByOwnerId(GuiceUtils.getOwnerId(), null, 5000);
-    
+
+    PageDto pageDto =
+        collectionManager.findCollectionsByOwnerId(GuiceUtils.getOwnerId(), null, 5000);
+
     StringBuilder htmlBuilder = new StringBuilder("Collections created by me : <br>");
-    
+
     List<CollectionDto> list = ((List<CollectionDto>) pageDto.getList());
     if (!isListEmpty(list)) {
       int counter = 1;
       for (CollectionDto currDto : list) {
         htmlBuilder.append(counter++)
-        .append(".&nbsp")
-        .append("<a href=" + "/rest/collection/")
-        .append(currDto.getId().getValue())
-        .append("/latest/content")
-        .append(">")
-        .append(currDto.getTitle())
-        .append("</a><br>\n");
+            .append(".&nbsp")
+            .append("<a href=" + "/rest/collection/")
+            .append(currDto.getId().getValue())
+            .append("/latest/content")
+            .append(">")
+            .append(currDto.getTitle())
+            .append("</a><br>\n");
       }
     }
-    
+
     return htmlBuilder.toString();
   }
 }

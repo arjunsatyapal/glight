@@ -29,6 +29,8 @@ import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
 import javax.xml.bind.JAXBContext;
 
+import org.codehaus.jackson.jaxrs.JacksonJaxbJsonProvider;
+
 
 /**
  * JAXB Context Resolver for 
@@ -41,7 +43,7 @@ import javax.xml.bind.JAXBContext;
  */
 @Produces(ContentTypeConstants.APPLICATION_JSON)
 @Provider
-public final class JAXBJsonContextResolver implements ContextResolver<JAXBContext> {
+public final class JAXBJsonContextResolver extends JacksonJaxbJsonProvider implements ContextResolver<JAXBContext> {
   private final JAXBContext context;
 
   @SuppressWarnings("rawtypes")

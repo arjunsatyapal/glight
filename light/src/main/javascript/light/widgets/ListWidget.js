@@ -220,7 +220,7 @@ define(['dojo/_base/declare',
         this.node.setAttribute('tabindex', '-1');
         this._lastAnchorFocusNode = this._focusNodeMap[node.id];
         this._lastAnchorFocusNode.setAttribute('tabindex', '0');
-        focusUtil.focus(this._lastAnchorFocusNode);
+        setTimeout(function() {focusUtil.focus(this._lastAnchorFocusNode);}, 0);
       }
       this.inherited(arguments);
     },
