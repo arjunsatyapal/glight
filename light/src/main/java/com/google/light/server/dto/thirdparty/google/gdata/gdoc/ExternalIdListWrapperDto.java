@@ -15,40 +15,41 @@
  */
 package com.google.light.server.dto.thirdparty.google.gdata.gdoc;
 
+import static com.google.light.server.utils.LightUtils.getWrapper;
 import static com.google.light.server.utils.LightUtils.getWrapperValue;
-
-import javax.xml.bind.annotation.XmlElementWrapper;
-
-import com.google.light.server.utils.LightUtils;
-
-import com.google.light.server.dto.pojo.typewrapper.longwrapper.CollectionId;
+import static com.google.light.server.utils.LightUtils.isListEmpty;
 
 import com.google.common.collect.Lists;
 import com.google.light.server.dto.AbstractDto;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.CollectionId;
+import com.google.light.server.dto.pojo.typewrapper.stringwrapper.ExternalId;
+import com.google.light.server.exception.unchecked.httpexception.BadRequestException;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.annotate.JsonTypeName;
 
 /**
- *
+ * 
  * 
  * TODO(arjuns): Add test for this class.
- *
+ * 
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
 @JsonTypeName(value = "googleDocResourceIdList")
-@XmlRootElement(name="googleDocResourceIdList")
+@XmlRootElement(name = "googleDocResourceIdList")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class GoogleDocResourceIdListWrapperDto extends AbstractDto<GoogleDocResourceIdListWrapperDto> {
+public class ExternalIdListWrapperDto extends
+    AbstractDto<ExternalIdListWrapperDto> {
   // TODO(arjuns) : See how this looks
   @XmlElementWrapper(name = "list")
-  @XmlElement(name = "googleDocResourceId")
+  @XmlElement(name = "item")
   @JsonProperty(value = "list")
   private List<String> list;
 
@@ -58,14 +59,14 @@ public class GoogleDocResourceIdListWrapperDto extends AbstractDto<GoogleDocReso
 
   @XmlElement(name = "collectionId")
   @JsonProperty(value = "collectionId")
-  private Long collectionId; 
-  
+  private Long collectionId;
+
   public String getCollectionTitle() {
     return collectionTitle;
   }
 
   public CollectionId getCollectionId() {
-    return new CollectionId(collectionId);
+    return getWrapper(collectionId, CollectionId.class);
   }
 
   public void setCollectionTitle(String collectionTitle) {
@@ -75,61 +76,73 @@ public class GoogleDocResourceIdListWrapperDto extends AbstractDto<GoogleDocReso
   public void setCollectionId(CollectionId collectionId) {
     this.collectionId = getWrapperValue(collectionId);
   }
-  
-  
-  public boolean isEditCollection() {
-    return collectionId != null;
+
+  public GoogleDocImportBatchType getGoogleDocImportBatchType() {
+    if (collectionId != null) {
+      // User wants to apppend current list to the existing collection.
+      return GoogleDocImportBatchType.EDIT_COLLECTION_JOB;
+    } else if (StringUtils.isNotBlank(collectionTitle)) {
+      // CollectionId is null, but title is there. This means create new collection.
+      return GoogleDocImportBatchType.CREATE_COLLECTION_JOB;
+    }
+
+    if (listContainsFolder()) {
+      throw new BadRequestException(
+          "Request contains a folder, and folders need to be part of a collection. So either "
+              + "provide a CollectionId where it can be imported or Provide a collectionTitle "
+              + "for new Collection.");
+    }
+    
+    return GoogleDocImportBatchType.MODULE_JOB;
   }
-  
-  public boolean isCreateCollection() {
-    return !isEditCollection() && !StringUtils.isEmpty(collectionTitle);
+
+  private boolean listContainsFolder() {
+    for (String curr : list) {
+      ExternalId externalId = new ExternalId(curr);
+      if (externalId.getModuleType().mapsToCollection()) {
+        return true;
+      }
+    }
+
+    return false;
   }
-  /** 
+
+  /**
    * {@inheritDoc}
    */
   @Override
-  public GoogleDocResourceIdListWrapperDto validate() {
+  public ExternalIdListWrapperDto validate() {
 
     return this;
   }
-  
+
   public boolean isEmpty() {
-    return LightUtils.isListEmpty(list);
+    return isListEmpty(list);
   }
-  
-  public List<GoogleDocResourceId> getList() {
+
+  public List<ExternalId> getList() {
     if (isEmpty()) {
       return null;
     }
-    
-    List<GoogleDocResourceId> requiredList = Lists.newArrayListWithCapacity(list.size());
-    
+
+    List<ExternalId> requiredList = Lists.newArrayListWithCapacity(list.size());
+
     for (String curr : list) {
-      requiredList.add(new GoogleDocResourceId(curr).validate());
+      requiredList.add(new ExternalId(curr).validate());
     }
-    
+
     return requiredList;
   }
-  
+
   public void addGoogleDocResource(GoogleDocResourceId googleDocResourceId) {
     if (isEmpty()) {
       list = Lists.newArrayList();
     }
-    
+
     list.add(googleDocResourceId.getTypedResourceId());
   }
-  
-  public void setGoogleDocResourceList(List<GoogleDocResourceId> googleDocResourceIdList) {
-    if (!isEmpty()) {
-      list.clear();
-    }
-    
-    for (GoogleDocResourceId curr : googleDocResourceIdList) {
-      addGoogleDocResource(curr);
-    }
-  }
 
-  public GoogleDocResourceIdListWrapperDto() {
+  public ExternalIdListWrapperDto() {
     super(null);
   }
 }

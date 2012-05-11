@@ -20,6 +20,8 @@ import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
 import com.google.light.server.constants.OAuth2ProviderService;
 import com.google.light.server.constants.http.ContentTypeEnum;
+import javax.xml.bind.annotation.XmlEnumValue;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * Types of Modules supported by Light.
@@ -30,50 +32,86 @@ import com.google.light.server.constants.http.ContentTypeEnum;
  * 
  * @author Arjun Satyapal
  */
+@XmlRootElement(name = "moduleType")
 public enum ModuleType {
+  @XmlEnumValue(value = "GOOGLE_COLLECTION")
   GOOGLE_COLLECTION(
                     OAuth2ProviderService.GOOGLE_DOC,
                     "folder",
                     // TODO(arjuns):See what should be the content type enum for collections.
                     ContentTypeEnum.GOOGLE_DOC,
-                    true),
-  GOOGLE_DOC(
+                    ModuleTypeProvider.GOOGLE_DOC,
+                    false, true, true),
+
+  @XmlEnumValue(value = "GOOGLE_DOC")
+  GOOGLE_DOCUMENT(
              OAuth2ProviderService.GOOGLE_DOC,
              "document",
              ContentTypeEnum.GOOGLE_DOC,
-             true),
-  GOOGLE_SPREADSHEET(
-                     OAuth2ProviderService.GOOGLE_DOC,
-                     "spreadsheet",
-                     ContentTypeEnum.GOOGLE_SPREADSHEET,
-                     false),
-  GOOGLE_FORM(
-              OAuth2ProviderService.GOOGLE_DOC,
-              "form",
-              ContentTypeEnum.GOOGLE_FORM,
-              false),
-  GOOGLE_PRESENTATION(
-                      OAuth2ProviderService.GOOGLE_DOC,
-                      "presentation",
-                      ContentTypeEnum.GOOGLE_PRESENTATION,
-                      false),
+             ModuleTypeProvider.GOOGLE_DOC,
+             true, false, true),
+
+  @XmlEnumValue(value = "GOOGLE_DRAWING")
   GOOGLE_DRAWING(
                  OAuth2ProviderService.GOOGLE_DOC,
                  "drawing",
                  ContentTypeEnum.GOOGLE_DRAWING,
-                 false),
+                 ModuleTypeProvider.GOOGLE_DOC,
+                 true, false, false),
+
+  @XmlEnumValue(value = "GOOGLE_FILE")
   GOOGLE_FILE(
               OAuth2ProviderService.GOOGLE_DOC,
               "file",
               // TODO(arjuns): See what should be the content type.
               ContentTypeEnum.GOOGLE_DOC,
-              false),
-  
+              ModuleTypeProvider.GOOGLE_DOC,
+              true, false, false),
+
+  @XmlEnumValue(value = "GOOGLE_FORM")
+  GOOGLE_FORM(
+              OAuth2ProviderService.GOOGLE_DOC,
+              "form",
+              ContentTypeEnum.GOOGLE_FORM,
+              ModuleTypeProvider.GOOGLE_DOC,
+              true, false, false),
+
+  @XmlEnumValue(value = "GOOGLE_PRESENTATION")
+  GOOGLE_PRESENTATION(
+                      OAuth2ProviderService.GOOGLE_DOC,
+                      "presentation",
+                      ContentTypeEnum.GOOGLE_PRESENTATION,
+                      ModuleTypeProvider.GOOGLE_DOC,
+                      true, false, false),
+
+  @XmlEnumValue(value = "GOOGLE_SPREADSHEET")
+  GOOGLE_SPREADSHEET(
+                     OAuth2ProviderService.GOOGLE_DOC,
+                     "spreadsheet",
+                     ContentTypeEnum.GOOGLE_SPREADSHEET,
+                     ModuleTypeProvider.GOOGLE_DOC,
+                     true, false, false),
+
   // To be used at places where ModuleType is not known.
+  @XmlEnumValue(value = "LIGHT_COLLECTION")
   LIGHT_COLLECTION(OAuth2ProviderService.GOOGLE_DOC,
-         "root",
-         ContentTypeEnum.OASIS_DOCUMENT,
-         false);
+                   "root",
+                   ContentTypeEnum.OASIS_DOCUMENT,
+                   ModuleTypeProvider.LIGHT,
+                   false, true, false),
+  LIGHT_SYNTHETIC_MODULE(OAuth2ProviderService.GOOGLE_DOC,
+                         "light_synthetic_module",
+                         ContentTypeEnum.OASIS_DOCUMENT,
+                         ModuleTypeProvider.LIGHT,
+                         true, false, false),
+  @XmlEnumValue(value = "UNKNOWN")
+  UNKNOWN(OAuth2ProviderService.GOOGLE_DOC,
+          "root",
+          ContentTypeEnum.OASIS_DOCUMENT,
+          ModuleTypeProvider.LIGHT,
+          false, false, false),
+
+  ;
 
   private OAuth2ProviderService providerService;
   /*
@@ -83,13 +121,20 @@ public enum ModuleType {
   private String category;
   private ContentTypeEnum contentType;
   private boolean supported;
+  private boolean mapsToModule;
+  private boolean mapsToCollection;
+  private ModuleTypeProvider moduleTypeProvider;
 
   private ModuleType(OAuth2ProviderService providerService, String category,
-      ContentTypeEnum contentType, boolean supported) {
+      ContentTypeEnum contentType, ModuleTypeProvider moduleTypeProvider,
+      boolean mapsToModule, boolean mapsToCollection, boolean supported) {
     this.providerService = checkNotNull(providerService, "providerService");
     this.category = checkNotBlank(category, "category");
     this.contentType = checkNotNull(contentType, "contentType");
     this.supported = supported;
+    this.mapsToCollection = mapsToCollection;
+    this.mapsToModule = mapsToModule;
+    this.moduleTypeProvider = checkNotNull(moduleTypeProvider);
   }
 
   public OAuth2ProviderService getProviderService() {
@@ -104,6 +149,10 @@ public enum ModuleType {
     return contentType;
   }
 
+  public ModuleTypeProvider getModuleTypeProvider() {
+    return moduleTypeProvider;
+  }
+  
   public boolean isSupported() {
     return supported;
   }
@@ -119,5 +168,13 @@ public enum ModuleType {
     }
 
     throw new EnumConstantNotPresentException(ModuleType.class, providerService + ":" + category);
+  }
+
+  public boolean mapsToCollection() {
+    return mapsToCollection;
+  }
+
+  public boolean mapsToModule() {
+    return mapsToModule;
   }
 }

@@ -7,6 +7,8 @@ import static com.google.light.server.utils.GuiceUtils.enqueueRequestScopedVaria
 import static com.google.light.server.utils.GuiceUtils.getInstance;
 import static com.google.light.server.utils.ServletUtils.prepareSession;
 
+import com.google.light.server.exception.unchecked.MissingOwnerCredentialException;
+
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
 
 import com.google.api.client.auth.oauth2.AuthorizationCodeResponseUrl;
@@ -217,7 +219,14 @@ public class GoogleLoginCallbackServlet extends HttpServlet {
       return true;
     }
     
-    OAuth2OwnerTokenEntity fetchedTokenEntity = googLoginTokenManager.get();
+    OAuth2OwnerTokenEntity fetchedTokenEntity = null;
+    
+    try {
+      fetchedTokenEntity = googLoginTokenManager.get();
+    } catch (MissingOwnerCredentialException e) {
+      // Eat this exception.
+    }
+    
     if (fetchedTokenEntity == null) {
       updatePersistedTokenDetails = true;
     }

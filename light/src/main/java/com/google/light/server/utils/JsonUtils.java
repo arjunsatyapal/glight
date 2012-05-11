@@ -25,6 +25,7 @@ import org.codehaus.jackson.map.AnnotationIntrospector;
 import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.ObjectWriter;
+import org.codehaus.jackson.map.SerializationConfig;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.codehaus.jackson.xc.JaxbAnnotationIntrospector;
 
@@ -74,18 +75,7 @@ public class JsonUtils {
   }
 
   public static <T> String toJson(T object, boolean prettyPrint) {
-    ObjectMapper mapper = new ObjectMapper();
-    mapper.setSerializationInclusion(JsonSerialize.Inclusion.NON_NULL);
-    
-    AnnotationIntrospector jaxbAnnoIntrospector = new JaxbAnnotationIntrospector();
-    // make serializer use JAXB annotations (only)
-    mapper.getSerializationConfig().withAnnotationIntrospector(jaxbAnnoIntrospector);
-    mapper.setVisibilityChecker(mapper.getSerializationConfig().getDefaultVisibilityChecker()
-        .withFieldVisibility(JsonAutoDetect.Visibility.ANY)
-        .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
-        .withSetterVisibility(JsonAutoDetect.Visibility.NONE)
-        .withIsGetterVisibility(JsonAutoDetect.Visibility.NONE)
-        .withCreatorVisibility(JsonAutoDetect.Visibility.NONE));
+    ObjectMapper mapper = getJsonMapper();
     
     ObjectWriter writer = null;
 
@@ -100,7 +90,24 @@ public class JsonUtils {
       throw new JsonException(e);
     }
   }
+  /**
+   * Json Mapper used by both {@link JsonUtils} and {@link com.google.light.server.guice.jersey.JAXBJsonContextResolver}
+   */
+  public static  ObjectMapper getJsonMapper() {
+    ObjectMapper mapper = new ObjectMapper();
+    mapper.configure(SerializationConfig.Feature.INDENT_OUTPUT, true);
+    mapper.configure(SerializationConfig.Feature.SORT_PROPERTIES_ALPHABETICALLY, true);
+    mapper.setSerializationInclusion(JsonSerialize.Inclusion.NON_NULL);
+    
 
+    mapper.setVisibilityChecker(mapper.getSerializationConfig().getDefaultVisibilityChecker()
+        .withFieldVisibility(JsonAutoDetect.Visibility.ANY)
+        .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
+        .withSetterVisibility(JsonAutoDetect.Visibility.NONE)
+        .withIsGetterVisibility(JsonAutoDetect.Visibility.NONE)
+        .withCreatorVisibility(JsonAutoDetect.Visibility.NONE));
+    return mapper;
+  }
   // Utility class.
   private JsonUtils() {
   }

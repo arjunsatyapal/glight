@@ -15,6 +15,8 @@
  */
 package com.google.light.server.dto.collection;
 
+import javax.xml.bind.annotation.XmlEnumValue;
+
 /**
  *
  * 
@@ -23,6 +25,9 @@ package com.google.light.server.dto.collection;
  * @author Arjun Satyapal
  */
 public enum CollectionState {
+  @XmlEnumValue(value="PUBLISHED")
   PUBLISHED,
+  
+  @XmlEnumValue(value="RESERVED")
   RESERVED;
 }

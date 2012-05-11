@@ -60,7 +60,7 @@ public class ModuleVersionResourceDao extends AbstractBasicDao<Object, ModuleVer
     checkArgument(txn.getTxn().isActive(), "Txn should be active for ModuleVersionEntity.");
 
     ModuleVersionResourceEntity returnEntity = super.put(txn, entity);
-    String returnMsg = "Created/Updated ModuleVersionResourceEntity[" + returnEntity.getId() 
+    String returnMsg = "Created/Updated ModuleVersionResourceEntity[" + returnEntity.getResourceId() 
         + "], for Module[" + returnEntity.getKey().getId() + "].";
 
     return logAndReturn(logger, returnEntity, returnMsg);

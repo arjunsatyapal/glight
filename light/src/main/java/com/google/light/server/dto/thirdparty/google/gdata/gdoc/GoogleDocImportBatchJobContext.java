@@ -17,11 +17,12 @@ package com.google.light.server.dto.thirdparty.google.gdata.gdoc;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNonEmptyList;
-import static com.google.light.server.utils.LightUtils.getWrapperValue;
+import static com.google.light.server.utils.LightPreconditions.checkPersonId;
 import static com.google.light.server.utils.LightUtils.isListEmpty;
 
-import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlAnyElement;
 
+import com.google.light.server.constants.PlacementOrder;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.light.server.dto.AbstractDto;
@@ -31,14 +32,14 @@ import com.google.light.server.dto.pojo.tree.GoogleDocTree;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.CollectionId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
-import com.google.light.server.utils.LightPreconditions;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
 import com.google.light.server.utils.LightUtils;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
-import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.annotate.JsonTypeName;
 
@@ -56,53 +57,70 @@ import org.codehaus.jackson.annotate.JsonTypeName;
 public class GoogleDocImportBatchJobContext extends AbstractDto<GoogleDocImportBatchJobContext> {
   @XmlElement(name = "ownerId")
   @JsonProperty(value = "ownerId")
-  private Long ownerId;
-  
+  private PersonId ownerId;
+
   @XmlElementWrapper(name = "resourceInfoList")
-  @XmlElement(name = "googleDocInfo")
+  @XmlAnyElement
   @JsonProperty(value = "resourceInfoList")
   private List<GoogleDocInfoDto> resourceInfoList;
-  
+
   @XmlElement(name = "root")
   @JsonProperty(value = "root")
   private GoogleDocTree root;
-  
+
   @XmlElementWrapper(name = "listOfImportDestinations")
   @XmlElement(name = "importDestination")
   @JsonProperty(value = "listOfImportDestinations")
   private List<ImportDestinationDto> listOfImportDestinations;
-  
-  @XmlElement(name = "state")
-  @JsonProperty(value = "state")
+
+  @XmlElement(name = "googleDocImportBatchJobState")
+  @JsonProperty(value = "googleDocImportBatchJobState")
   private GoogleDocImportBatchJobState state;
-  
+
   @XmlElement(name = "collectionTitle")
   @JsonProperty(value = "collectionTitle")
   private String collectionTitle;
 
+  @XmlElement(name = "googleDocImportBatchJobType")
+  @JsonProperty(value = "googleDocImportBatchJobType")
+  private GoogleDocImportBatchType type;
+
   @XmlElement(name = "collectionId")
   @JsonProperty(value = "collectionId")
-  private Long collectionId; 
+  private CollectionId collectionId;
+
+  @XmlElement(name = "version")
+  @JsonProperty(value = "version")
+  private Version version;
 
   /**
    * {@inheritDoc}
    */
   @Override
   public GoogleDocImportBatchJobContext validate() {
-    LightPreconditions.checkPersonId(getOwnerId());
+    checkPersonId(getOwnerId());
     checkNotNull(state, "state");
+    checkNotNull(type, "type");
 
     switch (state) {
       case COMPLETE:
         break;
 
+      case COLLECTION_VERSION_PUBLISHED:
+        checkNotNull(version, "version");
+        //$FALL-THROUGH$
+
+      case COLLECTION_CREATED:
+        checkNotNull(collectionId, "collectionId");
+        //$FALL-THROUGH$
+
       case ENQUEUED:
         checkNonEmptyList(resourceInfoList, "resourceInfoList");
         break;
 
-      case BUILDING :
+      case BUILDING:
         break;
-        
+
       default:
         checkNotNull(root, "root");
         checkNonEmptyList(listOfImportDestinations, "listOfImportDestinations");
@@ -111,7 +129,7 @@ public class GoogleDocImportBatchJobContext extends AbstractDto<GoogleDocImportB
   }
 
   public PersonId getOwnerId() {
-    return new PersonId(ownerId);
+    return ownerId;
   }
 
   public List<GoogleDocInfoDto> getResourceInfoList() {
@@ -176,8 +194,12 @@ public class GoogleDocImportBatchJobContext extends AbstractDto<GoogleDocImportB
     return collectionTitle;
   }
 
+  public GoogleDocImportBatchType getType() {
+    return type;
+  }
+
   public CollectionId getCollectionId() {
-    return new CollectionId(collectionId);
+    return collectionId;
   }
 
   public void setCollectionTitle(String collectionTitle) {
@@ -185,45 +207,47 @@ public class GoogleDocImportBatchJobContext extends AbstractDto<GoogleDocImportB
   }
 
   public void setCollectionId(CollectionId collectionId) {
-    this.collectionId = getWrapperValue(collectionId);
-  }
-  
-  
-  public boolean isEditCollection() {
-    return collectionId != null;
-  }
-  
-  public boolean isCreateCollection() {
-    return !isEditCollection() && !StringUtils.isEmpty(collectionTitle);
+    this.collectionId = collectionId;
   }
 
-  public boolean isChildJobCreated(String externalId, ModuleId moduleId) {
+  public Version getVersion() {
+    return version;
+  }
+
+  public void setVersion(Version version) {
+    this.version = version;
+  }
+
+  public boolean isChildJobCreated(String externalId) {
     if (isListEmpty(listOfImportDestinations)) {
       return false;
     }
 
     for (ImportDestinationDto currDest : listOfImportDestinations) {
-      if (currDest.getExternalId().equals(externalId)
-          && currDest.getModuleId().equals(moduleId)) {
+      if (currDest.getExternalId().equals(externalId)) {
         return true;
       }
     }
 
     return false;
   }
-  
+
   public ModuleId getModuleIdForExternalId(String externalId) {
     if (LightUtils.isListEmpty(listOfImportDestinations)) {
       return null;
     }
-    
+
     for (ImportDestinationDto currDest : listOfImportDestinations) {
       if (currDest.getExternalId().equals(externalId)) {
         return currDest.getModuleId();
       }
     }
-    
+
     return null;
+  }
+
+  public void setType(GoogleDocImportBatchType type) {
+    this.type = type;
   }
 
   public static class Builder extends AbstractDto.BaseBuilder<Builder> {
@@ -233,7 +257,9 @@ public class GoogleDocImportBatchJobContext extends AbstractDto<GoogleDocImportB
     private List<ImportDestinationDto> listOfImportDestinations;
     private GoogleDocImportBatchJobState state;
     private String collectionTitle;
-    private CollectionId collectionId; 
+    private GoogleDocImportBatchType type;
+    private CollectionId collectionId;
+    private Version version;
 
     public Builder ownerId(PersonId ownerId) {
       this.ownerId = ownerId;
@@ -259,14 +285,24 @@ public class GoogleDocImportBatchJobContext extends AbstractDto<GoogleDocImportB
       this.state = state;
       return this;
     }
-    
+
     public Builder collectionTitle(String collectionTitle) {
       this.collectionTitle = collectionTitle;
       return this;
     }
-    
+
+    public Builder type(GoogleDocImportBatchType type) {
+      this.type = type;
+      return this;
+    }
+
     public Builder collectionId(CollectionId collectionId) {
       this.collectionId = collectionId;
+      return this;
+    }
+
+    public Builder version(Version version) {
+      this.version = version;
       return this;
     }
 
@@ -279,13 +315,15 @@ public class GoogleDocImportBatchJobContext extends AbstractDto<GoogleDocImportB
   @SuppressWarnings("synthetic-access")
   private GoogleDocImportBatchJobContext(Builder builder) {
     super(builder);
-    this.ownerId = getWrapperValue(builder.ownerId);
+    this.ownerId = builder.ownerId;
     this.resourceInfoList = builder.resourceInfoList;
     this.root = builder.root;
     this.listOfImportDestinations = builder.listOfImportDestinations;
     this.state = builder.state;
     this.collectionTitle = builder.collectionTitle;
-    this.collectionId = getWrapperValue(builder.collectionId);
+    this.type = builder.type;
+    this.collectionId = builder.collectionId;
+    this.version = builder.version;
   }
 
   // For JAXB
@@ -294,8 +332,31 @@ public class GoogleDocImportBatchJobContext extends AbstractDto<GoogleDocImportB
   }
 
   public static enum GoogleDocImportBatchJobState {
-    BUILDING,
-    ENQUEUED,
-    COMPLETE;
+    BUILDING(100),
+    ENQUEUED(200),
+    COLLECTION_CREATED(300),
+    COLLECTION_VERSION_RESERVED(400),
+    COLLECTION_VERSION_PUBLISHED(500),
+    COMPLETE(1000);
+
+    private int level;
+
+    private GoogleDocImportBatchJobState(int level) {
+      this.level = level;
+    }
+
+    public int getLevel() {
+      return level;
+    }
+
+    public PlacementOrder getPlacement(GoogleDocImportBatchJobState state) {
+      if (this == state) {
+        return PlacementOrder.EQUAL;
+      } else if (this.getLevel() < state.getLevel()) {
+        return PlacementOrder.BEFORE;
+      } else {
+        return PlacementOrder.AFTER;
+      }
+    }
   }
 }

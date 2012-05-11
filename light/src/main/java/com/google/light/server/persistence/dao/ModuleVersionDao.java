@@ -53,11 +53,11 @@ public class ModuleVersionDao extends AbstractBasicDao<ModuleVersionDto, ModuleV
    * {@inheritDoc}
    */
   @Override
-  public ModuleVersionEntity put(Objectify txn, ModuleVersionEntity entity) {
-    checkNotNull(txn, "Txn should not be null");
-    checkArgument(txn.getTxn().isActive(), "Txn should be active for ModuleVersionEntity.");
+  public ModuleVersionEntity put(Objectify ofy, ModuleVersionEntity entity) {
+    checkNotNull(ofy, "Txn should not be null");
+    checkArgument(ofy.getTxn().isActive(), "Txn should be active for ModuleVersionEntity.");
 
-    ModuleVersionEntity returnEntity = super.put(txn, entity);
+    ModuleVersionEntity returnEntity = super.put(ofy, entity);
     String returnMsg = "Created/Updated ModuleVersionEntity[" + returnEntity.getVersion() 
         + "], for Module[" + returnEntity.getKey().getId() + "].";
 

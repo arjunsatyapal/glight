@@ -17,14 +17,12 @@ package com.google.light.server.persistence.entity.module;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
-
-import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
-import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
-
-
+import static com.google.light.server.utils.LightUtils.getWrapper;
 
 import com.google.light.server.dto.module.GSBlobInfo;
 import com.google.light.server.dto.module.ModuleVersionDto;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
 import com.google.light.server.persistence.entity.AbstractPersistenceEntity;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.Parent;
@@ -42,20 +40,29 @@ import javax.persistence.Id;
 public class ModuleVersionResourceEntity extends
     AbstractPersistenceEntity<ModuleVersionResourceEntity, Object> {
   @Id
-  private String id;
+  private String resourceId;
   @Parent
   private Key<ModuleVersionEntity> moduleVersionKey;
   @Embedded
   private GSBlobInfo resourceInfo;
+
+  @Override
+  public ModuleVersionResourceEntity validate() {
+    checkNotNull(resourceId, "resourceId");
+    checkNotNull(moduleVersionKey, "moduleVersionKey");
+    checkNotNull(resourceInfo, "resourceInfo");
+    
+    return this;
+  }
 
   /**
    * {@inheritDoc}
    */
   @Override
   public Key<ModuleVersionResourceEntity> getKey() {
-    return generateKey(moduleVersionKey, id);
+    return generateKey(moduleVersionKey, resourceId);
   }
-
+  
   /**
    * Method to generate Objectify key for {@link ModuleEntity}.
    */
@@ -83,12 +90,20 @@ public class ModuleVersionResourceEntity extends
     throw new UnsupportedOperationException();
   }
 
-  public String getId() {
-    return id;
+  public String getResourceId() {
+    return resourceId;
   }
 
   public Key<ModuleVersionEntity> getModuleVersionKey() {
     return moduleVersionKey;
+  }
+  
+  public Version getModuleVersion() {
+    return getWrapper(moduleVersionKey.getId(), Version.class);
+  }
+
+  public ModuleId getModuleId() {
+    return getWrapper(moduleVersionKey.getParent().getId(), ModuleId.class);
   }
 
   public GSBlobInfo getGSBlobInfo() {
@@ -126,7 +141,7 @@ public class ModuleVersionResourceEntity extends
   @SuppressWarnings("synthetic-access")
   private ModuleVersionResourceEntity(Builder builder) {
     super(builder, true);
-    this.id = builder.id != null ? checkNotBlank(builder.id, "id") : id;
+    this.resourceId = builder.id;
     this.moduleVersionKey = checkNotNull(builder.moduleVersionKey, "moduleVersionKey");
     this.resourceInfo = checkNotNull(builder.resourceInfo, "resourceInfo");
   }

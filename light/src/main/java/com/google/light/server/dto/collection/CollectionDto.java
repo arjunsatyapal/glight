@@ -17,25 +17,20 @@ package com.google.light.server.dto.collection;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
-import static com.google.light.server.utils.LightUtils.getWrapperValue;
-
-import javax.xml.bind.annotation.XmlElementWrapper;
-
-import com.google.light.server.utils.LightUtils;
-
-import com.google.light.server.dto.pojo.typewrapper.longwrapper.CollectionId;
-import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
-import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
 
 import com.google.light.server.dto.AbstractDto;
 import com.google.light.server.dto.AbstractDtoToPersistence;
 import com.google.light.server.dto.pojo.tree.CollectionTreeNodeDto;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.CollectionId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
 import com.google.light.server.persistence.entity.collection.CollectionEntity;
 import com.google.light.server.utils.LightPreconditions;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.annotate.JsonTypeName;
@@ -53,9 +48,9 @@ import org.codehaus.jackson.annotate.JsonTypeName;
 @JsonTypeName(value = "collection")
 public class CollectionDto extends
     AbstractDtoToPersistence<CollectionDto, CollectionEntity, CollectionId> {
-  @XmlElement(name = "id")
-  @JsonProperty(value = "id")
-  private Long id;
+  @XmlElement(name = "collectionId")
+  @JsonProperty(value = "collectionId")
+  private CollectionId collectionId;
   
   @XmlElement(name = "title")
   @JsonProperty(value = "title")
@@ -68,11 +63,15 @@ public class CollectionDto extends
   @XmlElementWrapper(name = "owners")
   @XmlElement(name = "personId")
   @JsonProperty(value = "owners")
-  private List<Long> owners;
+  private List<PersonId> owners;
   
-  @XmlElement(name = "version")
-  @JsonProperty(value = "version")
-  private Long version;
+  @XmlElement(name = "latestPublishedVersion")
+  @JsonProperty(value = "latestPublishedVersion")
+  private Version latestPublishedVersion;
+  
+  @XmlElement(name = "nextVersion")
+  @JsonProperty(value = "nextVersion")
+  private Version nextVersion;
   
   @XmlElement(name = "root")
   @JsonProperty(value = "root")
@@ -97,15 +96,16 @@ public class CollectionDto extends
     
     LightPreconditions.checkNonEmptyList(owners, "owners");
 
-    checkNotNull(version, "latestVersion");
+    checkNotNull(latestPublishedVersion, "latestPublishedVersion");
+    checkNotNull(nextVersion, "nextVersion");
     
     // TODO(arjuns): Fix this check.
 //    checkNotNull(root, "root");
     return this;
   }
 
-  public CollectionId getId() {
-    return new CollectionId(id);
+  public CollectionId getCollectionId() {
+    return collectionId;
   }
 
   public String getTitle() {
@@ -117,11 +117,15 @@ public class CollectionDto extends
   }
 
   public List<PersonId> getOwners() {
-    return LightUtils.convertListOfValuesToWrapperList(owners, PersonId.class);
+    return owners;
   }
 
-  public Version getVersion() {
-    return new Version(version);
+  public Version getLatestPublishedVersion() {
+    return latestPublishedVersion;
+  }
+  
+  public Version getNextVersion() {
+    return nextVersion;
   }
 
   public CollectionTreeNodeDto getRoot() {
@@ -129,15 +133,16 @@ public class CollectionDto extends
   }
 
   public static class Builder extends AbstractDto.BaseBuilder<Builder> {
-    private CollectionId id;
+    private CollectionId collectionId;
     private String title;
     private CollectionState state;
     private List<PersonId> owners;
-    private Version version;
+    private Version latestPublishedVersion;
+    private Version nextVersion;
     private CollectionTreeNodeDto root;
 
-    public Builder id(CollectionId id) {
-      this.id = id;
+    public Builder collectionId(CollectionId collectionId) {
+      this.collectionId = collectionId;
       return this;
     }
     
@@ -156,8 +161,13 @@ public class CollectionDto extends
       return this;
     }
 
-    public Builder version(Version version) {
-      this.version = version;
+    public Builder latestPublishedVersion(Version latestPublishedVersion) {
+      this.latestPublishedVersion = latestPublishedVersion;
+      return this;
+    }
+    
+    public Builder nextVersion(Version nextVersion) {
+      this.nextVersion = nextVersion;
       return this;
     }
 
@@ -175,11 +185,12 @@ public class CollectionDto extends
   @SuppressWarnings("synthetic-access")
   private CollectionDto(Builder builder) {
     super(builder);
-    this.id = getWrapperValue(builder.id);
+    this.collectionId = builder.collectionId;
     this.title = builder.title;
     this.state = builder.state;
-    this.owners = LightUtils.convertWrapperListToListOfValues(builder.owners);
-    this.version = getWrapperValue(builder.version);
+    this.owners = builder.owners;
+    this.latestPublishedVersion = builder.latestPublishedVersion;
+    this.nextVersion = builder.nextVersion;
     this.root = builder.root;
   }
 

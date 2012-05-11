@@ -17,6 +17,7 @@ package com.google.light.server.persistence.entity.collection;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
+import static com.google.light.server.utils.LightUtils.getWrapper;
 
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.CollectionId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
@@ -76,7 +77,8 @@ public class CollectionVersionEntity extends AbstractPersistenceEntity<Collectio
   @Override
   public CollectionVersionDto toDto() {
     CollectionVersionDto dto = new CollectionVersionDto.Builder()
-      .version(version)
+      .collectionId(getCollectionId())
+      .version(getVersion())
       .collectionTree(getCollectionTree())
       .build();
 
@@ -98,6 +100,10 @@ public class CollectionVersionEntity extends AbstractPersistenceEntity<Collectio
   
   public Key<CollectionEntity> getCollectionKey() {
     return collectionKey;
+  }
+  
+  public CollectionId getCollectionId() {
+    return getWrapper(collectionKey.getId(), CollectionId.class);
   }
   
   @Override

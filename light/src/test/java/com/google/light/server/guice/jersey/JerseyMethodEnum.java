@@ -51,10 +51,10 @@ public enum JerseyMethodEnum {
   COLLECTION_RESOURCE_GET_COLLECTION(
                                      CollectionResource.class,
                                      "getCollection",
-                                     new Class[] {},
+                                     new Class[] { String.class },
                                      GET.class,
                                      "/rest/collection/{collection_id}",
-                                     new String[] {}),
+                                     new String[] { "application/json; charset=UTF-8, application/xml; charset=UTF-8" }),
 
   COLLECTION_RESOURCE_GET_COLLECTION_VERSION(
                                              CollectionResource.class,
@@ -96,65 +96,68 @@ public enum JerseyMethodEnum {
                                                                  "application/xml; charset=UTF-8" }),
 
   CONTENT_RESOURCE_GET_COLLECTION_CONTENT(
-      ContentResource.class,
-      "getCollectionContent",
-      new Class[] { UriInfo.class },
-      GET.class,
-      "/rest/content/general/collection/{collection_id}",
-      new String[] {}
-      ),
+                                          ContentResource.class,
+                                          "getCollectionContent",
+                                          new Class[] { UriInfo.class },
+                                          GET.class,
+                                          "/rest/content/general/collection/{collection_id}",
+                                          new String[] {}
+  ),
   CONTENT_RESOURCE_GET_COLLECTION_VERSION_CONTENT(
-      ContentResource.class,
-      "getCollectionVersionContent",
-      new Class[] { String.class, String.class },
-      GET.class,
-      "/rest/content/general/collection/{collection_id}/{version}",
-      new String[] { "text/html; charset=UTF-8"  }
-      ),
+                                                  ContentResource.class,
+                                                  "getCollectionVersionContent",
+                                                  new Class[] { String.class, String.class },
+                                                  GET.class,
+                                                  "/rest/content/general/collection/{collection_id}/{version}",
+                                                  new String[] { "text/html; charset=UTF-8" }
+  ),
   CONTENT_RESOURCE_GET_MODULE_CONTENT(
-      ContentResource.class,
-      "getModuleContent",
-      new Class[] { UriInfo.class },
-      GET.class,
-      "/rest/content/general/module/{module_id}",
-      new String[] {}
-      ),
+                                      ContentResource.class,
+                                      "getModuleContent",
+                                      new Class[] { UriInfo.class },
+                                      GET.class,
+                                      "/rest/content/general/module/{module_id}",
+                                      new String[] {}
+  ),
   CONTENT_RESOURCE_GET_MODULE_VERSION_RESOURCE(
-      ContentResource.class,
-      "getModuleVersionResource",
-      new Class[] { String.class, String.class, String.class, String.class },
-      GET.class,
-      "/rest/content/general/module/{module_id}/{version}/{resource_type}/{resource}",
-      new String[] {  }
-      ),
+                                               ContentResource.class,
+                                               "getModuleVersionResource",
+                                               new Class[] { String.class, String.class,
+                                                       String.class, String.class },
+                                               GET.class,
+                                               "/rest/content/general/module/{module_id}/{version}/{resource_type}/{resource}",
+                                               new String[] {}
+  ),
 
   CONTENT_RESOURCE_GET_MODULE_VERSION_CONTENT(
-      ContentResource.class,
-      "getModuleVersionContent",
-      new Class[] { String.class, String.class },
-      GET.class,
-      "/rest/content/general/module/{module_id}/{version}/",
-      new String[] { "text/html; charset=UTF-8"  }
-      ),
+                                              ContentResource.class,
+                                              "getModuleVersionContent",
+                                              new Class[] { String.class, String.class },
+                                              GET.class,
+                                              "/rest/content/general/module/{module_id}/{version}/",
+                                              new String[] { "text/html; charset=UTF-8" }
+  ),
   CONTENT_RESOURCE_GET_MODULE_IN_COLLECTION_VERSION_RESOURCE(
-      ContentResource.class,
-      "getModuleInCollectionVersionResource",
-      new Class[] { String.class, String.class, String.class, String.class, String.class },
-      GET.class,
-      "/rest/content/general/collection/{collection_id}/{version}/{module_id}/{resource_type}/{resource}",
-      new String[] {  }
-      ),
+                                                             ContentResource.class,
+                                                             "getModuleInCollectionVersionResource",
+                                                             new Class[] { String.class,
+                                                                     String.class, String.class,
+                                                                     String.class, String.class },
+                                                             GET.class,
+                                                             "/rest/content/general/collection/{collection_id}/{version}/{module_id}/{resource_type}/{resource}",
+                                                             new String[] {}
+  ),
 
   CONTENT_RESOURCE_GET_MODULE_IN_COLLECTION_VERSION_CONTENT(
-      ContentResource.class,
-      "getModuleInCollectionVersionContent",
-      new Class[] { String.class, String.class, String.class },
-      GET.class,
-      "/rest/content/general/collection/{collection_id}/{version}/{module_id}/",
-      new String[] { "text/html; charset=UTF-8"  }
-      ),
-  
-  
+                                                            ContentResource.class,
+                                                            "getModuleInCollectionVersionContent",
+                                                            new Class[] { String.class,
+                                                                    String.class, String.class },
+                                                            GET.class,
+                                                            "/rest/content/general/collection/{collection_id}/{version}/{module_id}/",
+                                                            new String[] { "text/html; charset=UTF-8" }
+  ),
+
   // GAEAdmin Resource Jersey Methods.
   GAE_ADMIN_RESOURCE_GET_CONFIG(
                                 GAEAdminResources.class,
@@ -168,7 +171,7 @@ public enum JerseyMethodEnum {
   MODULE_RESOURCE_GET_MODULE(
                              ModuleResource.class,
                              "getModule",
-                             new Class[] {},
+                             new Class[] { String.class },
                              GET.class,
                              "/rest/module/{module_id}",
 
@@ -195,12 +198,12 @@ public enum JerseyMethodEnum {
                                                   "application/xml; charset=UTF-8" }),
 
   MODULE_RESOURCE_MODULES_PUBLISHED_BY_ME_HTML(
-                                          ModuleResource.class,
-                                          "getModulesPublishedByMeHtml",
-                                          new Class[] {},
-                                          GET.class,
-                                          "/rest/module/me/html",
-                                          new String[] { "text/html; charset=UTF-8" }),
+                                               ModuleResource.class,
+                                               "getModulesPublishedByMeHtml",
+                                               new Class[] {},
+                                               GET.class,
+                                               "/rest/module/me/html",
+                                               new String[] { "text/html; charset=UTF-8" }),
   // Google Doc Integration Jersey Methods.
   GOOGLE_DOC_GET_DOC_LIST(
                           GoogleDocIntegration.class,

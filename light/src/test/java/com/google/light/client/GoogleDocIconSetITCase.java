@@ -54,7 +54,7 @@ public class GoogleDocIconSetITCase {
           ModuleType.GOOGLE_FILE.name(),
           ModuleType.GOOGLE_FORM.name(),
           ModuleType.GOOGLE_DRAWING.name(),
-          ModuleType.GOOGLE_DOC.name()
+          ModuleType.GOOGLE_DOCUMENT.name()
   };
 
   String[] NEXT_ITERATION_ICON_LINKS = {
@@ -70,7 +70,7 @@ public class GoogleDocIconSetITCase {
   private final String serverUrl = "http://localhost:8080";
 
   @Test
-  public void test_counters() throws IOException {
+  public void test_counters() throws Exception {
     assertEquals("You should add/remove an Google Docs Icon if you add/remove a"
         + " Google Docs type in the ModuleType changes", 8,
         ModuleType.values().length);

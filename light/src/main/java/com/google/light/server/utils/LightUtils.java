@@ -22,8 +22,11 @@ import static com.google.light.server.constants.RequestParamKeyEnum.LOGIN_PROVID
 import static com.google.light.server.constants.RequestParamKeyEnum.LOGIN_PROVIDER_USER_ID;
 import static com.google.light.server.constants.RequestParamKeyEnum.PERSON_ID;
 
+import com.google.light.server.dto.pojo.typewrapper.stringwrapper.ExternalId;
+
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -296,6 +299,8 @@ public class LightUtils {
     return instant.getMillis();
   }
 
+
+  
   public static <I, W extends AbstractTypeWrapper<I, W>> I getWrapperValue(W wrapper) {
     if (wrapper == null) {
       return null;
@@ -332,11 +337,41 @@ public class LightUtils {
   @SuppressWarnings("rawtypes")
   static Map<String, AbstractTypeWrapper> map = new ImmutableMap.Builder<String, AbstractTypeWrapper>()
       .put(CollectionId.class.getName(), new CollectionId(Long.MAX_VALUE))
+      .put(ExternalId.class.getName(), new ExternalId("http://google.com"))
       .put(JobId.class.getName(), new JobId(Long.MAX_VALUE))
       .put(ModuleId.class.getName(), new ModuleId(Long.MAX_VALUE))
       .put(PersonId.class.getName(), new PersonId(Long.MAX_VALUE))
-      .put(Version.class.getName(), new Version(Long.MAX_VALUE))
+      .put(Version.class.getName(), new Version(1L))
       .build();
+
+  @SuppressWarnings({ "unchecked", "rawtypes", "deprecation" })
+  public static <I, W extends AbstractTypeWrapper<I, W>> W getWrapper(I value, Class<W> clazz) {
+    if (value == null) {
+      return null;
+    }
+
+    AbstractTypeWrapper instanceCreator = map.get(clazz.getName());
+    Preconditions.checkNotNull(instanceCreator, "instanceCreator for : " + clazz.getSimpleName());
+    return ((W) instanceCreator.createInstance(value));
+  }
+  
+  @SuppressWarnings({ "cast" })
+  public static <W extends AbstractTypeWrapper<Long, W>> W getLongWrapper(String value, Class<W> clazz) {
+    if (value == null || value.equals("null")) {
+      return null;
+    }
+
+    return ((W) getWrapper(Long.parseLong(value), clazz));
+  }
+  
+  @SuppressWarnings({ "cast" })
+  public static <W extends AbstractTypeWrapper<String, W>> W getStringWrapper(String value, Class<W> clazz) {
+    if (value == null || value.equals("null")) {
+      return null;
+    }
+
+    return ((W) getWrapper(value, clazz));
+  }
 
   @SuppressWarnings({ "unchecked", "rawtypes" })
   public static <I, W extends AbstractTypeWrapper<I, W>> 

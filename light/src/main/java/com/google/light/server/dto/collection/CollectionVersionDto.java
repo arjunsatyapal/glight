@@ -16,21 +16,19 @@
 package com.google.light.server.dto.collection;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
 
-import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
-
-import org.codehaus.jackson.annotate.JsonTypeName;
-
-import javax.xml.bind.annotation.XmlAccessType;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.CollectionId;
 
 import com.google.light.server.dto.AbstractDtoToPersistence;
 import com.google.light.server.dto.pojo.tree.CollectionTreeNodeDto;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
 import com.google.light.server.persistence.entity.collection.CollectionVersionEntity;
+import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import org.codehaus.jackson.annotate.JsonProperty;
+import org.codehaus.jackson.annotate.JsonTypeName;
 
 /**
  * DTO for Light Collection Version.
@@ -44,9 +42,13 @@ import org.codehaus.jackson.annotate.JsonProperty;
 @XmlRootElement(name = "collectionVersion")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class CollectionVersionDto extends AbstractDtoToPersistence<CollectionVersionDto, CollectionVersionEntity, Long> {
+  @XmlElement(name = "collectionId")
+  @JsonProperty(value = "collectionId")
+  private CollectionId collectionId;
+  
   @XmlElement(name = "version")
   @JsonProperty(value = "version")
-  private Long version;
+  private Version version;
   
   @XmlElement(name = "collectionTree")
   @JsonProperty(value = "collectionTree")
@@ -57,7 +59,8 @@ public class CollectionVersionDto extends AbstractDtoToPersistence<CollectionVer
    */
   @Override
   public CollectionVersionDto validate() {
-    checkPositiveLong(version, "version");
+    checkNotNull(collectionId, "collectionId");
+    checkNotNull(version, "version");
     checkNotNull(collectionTree, "collectionTree");
     return this;
   }
@@ -79,11 +82,21 @@ public class CollectionVersionDto extends AbstractDtoToPersistence<CollectionVer
     return collectionTree;
   }
 
+  public Version getVersion() {
+    return version;
+  }
+
   public static class Builder extends AbstractDtoToPersistence.BaseBuilder<Builder> {
-    private Long version;
+    private CollectionId collectionId;
+    private Version version;
     private CollectionTreeNodeDto collectionTree;
 
-    public Builder version(Long version) {
+    public Builder collectionId(CollectionId collectionId) {
+      this.collectionId = collectionId;
+      return this;
+    }
+    
+    public Builder version(Version version) {
       this.version = version;
       return this;
     }
@@ -102,6 +115,7 @@ public class CollectionVersionDto extends AbstractDtoToPersistence<CollectionVer
   @SuppressWarnings("synthetic-access")
   private CollectionVersionDto(Builder builder) {
     super(builder);
+    this.collectionId = builder.collectionId;
     this.version = builder.version;
     this.collectionTree = builder.collectionTree;
   }

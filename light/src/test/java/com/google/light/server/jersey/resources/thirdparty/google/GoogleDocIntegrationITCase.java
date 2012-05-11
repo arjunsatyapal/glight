@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.server.jersey.google;
+package com.google.light.server.jersey.resources.thirdparty.google;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.constants.RequestParamKeyEnum.EMAIL;
@@ -37,7 +37,7 @@ import com.google.api.client.http.HttpContent;
 
 import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocResourceId;
 
-import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocResourceIdListWrapperDto;
+import com.google.light.server.dto.thirdparty.google.gdata.gdoc.ExternalIdListWrapperDto;
 
 import com.google.light.testingutils.httpclient.LightHttpClient;
 
@@ -101,7 +101,7 @@ public class GoogleDocIntegrationITCase {
 
     LightHttpClient lightClient = new LightHttpClient(requiredCookie);
 
-    GoogleDocResourceIdListWrapperDto list = new GoogleDocResourceIdListWrapperDto();
+    ExternalIdListWrapperDto list = new ExternalIdListWrapperDto();
     list.addGoogleDocResource(new GoogleDocResourceId(
         "document:1tJZGzv_2sjMpvs4jtwxg18PGuSG-6nlfmx8Hlqa-_58"));
 

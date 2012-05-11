@@ -79,7 +79,7 @@ public class GoogleDocJobs {
       return null;
     }
     
-    if (!resourceId.isFolder()) {
+    if (!resourceId.getModuleType().mapsToCollection()) {
       nodeBuilder.type(TreeNodeType.LEAF_NODE);
       return nodeBuilder.build();
     } 

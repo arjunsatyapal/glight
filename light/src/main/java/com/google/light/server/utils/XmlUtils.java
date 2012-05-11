@@ -15,6 +15,8 @@
  */
 package com.google.light.server.utils;
 
+import com.google.light.server.dto.AbstractPojo;
+
 import com.google.gdata.data.BaseEntry;
 import com.google.gdata.data.BaseFeed;
 import com.google.gdata.data.ExtensionProfile;
@@ -52,22 +54,41 @@ import org.xml.sax.SAXException;
  * @author Arjun Satyapal
  */
 public class XmlUtils {
-  @SuppressWarnings("unchecked")
-  public static <D extends AbstractDto<D>> D getDto(String xmlString)  {
+  public static <D extends AbstractDto<D>> D getDto(String xmlString) {
+    return unmarshal(xmlString, LightDtos.getArrayOfDtoClasses());
+  }
+
+  public static <D extends AbstractPojo<D>> D getPojo(String xmlString, Class<D> clazz) {
+    return unmarshal(xmlString, clazz);
+
+  }
+
+  @SuppressWarnings({ "unchecked", "rawtypes" })
+  private static <D> D unmarshal(String xmlString, Class ... classes) {
     try {
-    JAXBContext jaxbContext = JAXBContext.newInstance(LightDtos.getArrayOfDtoClasses());
-    Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-    
-    D dto = ((D) unmarshaller.unmarshal(new StringReader(xmlString)));
-    return dto.validate();
+      JAXBContext jaxbContext = JAXBContext.newInstance(classes);
+      Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+
+      D dto = ((D) unmarshaller.unmarshal(new StringReader(xmlString)));
+      return dto;
     } catch (Exception e) {
       throw new XmlException(e);
     }
   }
 
   public static <T> String toXml(T object) {
+    return marshal(object, LightDtos.getArrayOfDtoClasses());
+  }
+
+  @SuppressWarnings("rawtypes")
+  public static <T> String toXml(T object, Class ... clazz) {
+    return marshal(object, clazz);
+  }
+  
+  @SuppressWarnings("rawtypes")
+  private static <T> String marshal(T object, Class ... classes) {
     try {
-      JAXBContext jaxbContext = JAXBContext.newInstance(LightDtos.getArrayOfDtoClasses());
+      JAXBContext jaxbContext = JAXBContext.newInstance(classes);
       Marshaller marshaller = jaxbContext.createMarshaller();
       StringWriter sw = new StringWriter();
       marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);

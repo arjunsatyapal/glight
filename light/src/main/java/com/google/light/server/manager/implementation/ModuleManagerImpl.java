@@ -19,10 +19,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkTxnIsRunning;
 
-import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
-import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
-import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
-
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.light.server.constants.JerseyConstants;
@@ -32,8 +28,12 @@ import com.google.light.server.dto.module.ModuleState;
 import com.google.light.server.dto.module.ModuleType;
 import com.google.light.server.dto.module.ModuleVersionState;
 import com.google.light.server.dto.pages.PageDto;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
 import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocInfoDto;
 import com.google.light.server.exception.unchecked.IdShouldNotBeSet;
+import com.google.light.server.exception.unchecked.VersionMutabilityViolation;
 import com.google.light.server.exception.unchecked.httpexception.NotFoundException;
 import com.google.light.server.manager.interfaces.ModuleManager;
 import com.google.light.server.persistence.dao.ModuleDao;
@@ -153,8 +153,8 @@ public class ModuleManagerImpl implements ModuleManager {
     // for long time.
     ModuleEntity moduleEntity = new ModuleEntity.Builder()
         .title(title)
-        .state(ModuleState.RESERVED)
-        .type(moduleType)
+        .moduleState(ModuleState.RESERVED)
+        .moduleType(moduleType)
         .owners(owners)
         .build();
     ModuleEntity persistedEntity = this.create(ofy, moduleEntity);
@@ -172,9 +172,14 @@ public class ModuleManagerImpl implements ModuleManager {
    * {@inheritDoc} TODO(arjuns): Make this better once we have other Docs.
    */
   @Override
-  public ModuleVersionEntity publishModuleVersion(Objectify ofy, ModuleEntity moduleEntity,
+  public ModuleVersionEntity publishModuleVersion(Objectify ofy, ModuleId moduleId,
       Version version, String content, GoogleDocInfoDto docInfo) {
     checkTxnIsRunning(ofy);
+    ModuleEntity moduleEntity = this.get(ofy, moduleId);
+    checkNotNull(moduleEntity, "Module[" + moduleId + "] was not found.");
+
+    ModuleVersionEntity fetchedEntity = moduleVersionDao.get(ofy, moduleId, version);
+
     ModuleVersionEntity moduleVersionEntity = new ModuleVersionEntity.Builder()
         .version(version)
         .moduleKey(moduleEntity.getKey())
@@ -182,12 +187,23 @@ public class ModuleManagerImpl implements ModuleManager {
         .title(docInfo.getTitle())
         .content(content)
         .etag(docInfo.getEtag())
+        .externalId(docInfo.getDocumentLink())
         .lastEditTime(docInfo.getLastEditTime())
         .build();
 
+    if (fetchedEntity != null) {
+      if (fetchedEntity.equals(moduleVersionEntity)) {
+        return fetchedEntity;
+      } else {
+        throw new VersionMutabilityViolation("Tried to modify immutable " + moduleId + ":"
+            + version);
+      }
+    }
+
     moduleVersionDao.put(ofy, moduleVersionEntity);
 
-    moduleEntity.publishVersion(version, docInfo.getLastEditTime(), docInfo.getEtag());
+    moduleEntity.publishVersion(version, docInfo.getLastEditTime(), docInfo.getEtag(), 
+        docInfo.getDocumentLink());
     moduleDao.put(ofy, moduleEntity);
 
     return moduleVersionEntity;
@@ -197,18 +213,31 @@ public class ModuleManagerImpl implements ModuleManager {
    * {@inheritDoc}
    */
   @Override
-  public ModuleVersionResourceEntity publishModuleResource(Objectify ofy,
-      ModuleEntity moduleEntity, Version version, String resourceId, GSBlobInfo resourceInfo) {
+  public ModuleVersionResourceEntity publishModuleResource(Objectify ofy, ModuleId moduleId,
+      Version version, String resourceId, GSBlobInfo resourceInfo) {
     checkTxnIsRunning(ofy);
-    checkNotNull(moduleEntity, "moduleEntity");
+
+    ModuleVersionResourceEntity fetchedEntity = this.getModuleResource(
+        ofy, moduleId, version, resourceId);
+
     Key<ModuleVersionEntity> moduleVersionKey = ModuleVersionEntity.generateKey(
-        moduleEntity.getKey(), version);
+        moduleId, version);
 
     ModuleVersionResourceEntity entity = new ModuleVersionResourceEntity.Builder()
         .id(resourceId)
         .moduleVersionKey(moduleVersionKey)
         .resourceInfo(resourceInfo)
         .build();
+
+    if (fetchedEntity != null) {
+      if (fetchedEntity.equals(entity)) {
+        return fetchedEntity;
+      } else {
+        throw new VersionMutabilityViolation("Tried to modify immutable version : "
+            + moduleId + ":" + version + ":" + resourceId);
+      }
+    }
+
     ModuleVersionResourceEntity savedEntity = moduleVersionResourceDao.put(ofy, entity);
 
     return savedEntity;
@@ -219,7 +248,8 @@ public class ModuleManagerImpl implements ModuleManager {
    */
   @Override
   public ModuleVersionEntity getModuleVersion(Objectify ofy, ModuleId moduleId, Version version) {
-    Version requiredVersion = convertLatestToLatestPublishedVersion(ofy, moduleId, version);
+    Version requiredVersion =
+        convertLatestToLatestPublishedVersionForModule(ofy, moduleId, version);
 
     ModuleVersionEntity moduleVersionEntity = moduleVersionDao.get(ofy, moduleId, requiredVersion);
     return moduleVersionEntity;
@@ -232,22 +262,24 @@ public class ModuleManagerImpl implements ModuleManager {
   public ModuleVersionResourceEntity getModuleResource(Objectify ofy, ModuleId moduleId,
       Version version,
       String resourceId) {
-    Version requiredVersion = convertLatestToLatestPublishedVersion(ofy, moduleId, version);
+    Version requiredVersion =
+        convertLatestToLatestPublishedVersionForModule(ofy, moduleId, version);
 
-    ModuleVersionResourceEntity entity =
-        moduleVersionResourceDao.get(moduleId, requiredVersion, resourceId);
-    if (entity == null) {
-      throw new NotFoundException("Resource[" + resourceId + " Not found for " + moduleId + ":"
-          + version);
-    }
+    ModuleVersionResourceEntity entity = moduleVersionResourceDao.get(
+        moduleId, requiredVersion, resourceId);
 
     return entity;
   }
 
-  private Version convertLatestToLatestPublishedVersion(Objectify ofy, ModuleId moduleId,
+  private Version convertLatestToLatestPublishedVersionForModule(Objectify ofy, ModuleId moduleId,
       Version version) {
     if (version.isLatestVersion()) {
       ModuleEntity moduleEntity = get(ofy, moduleId);
+
+      if (moduleEntity == null) {
+        throw new NotFoundException("Module[" + moduleId + "] was not found.");
+      }
+
       return moduleEntity.getLatestPublishVersion();
     }
 
@@ -258,9 +290,10 @@ public class ModuleManagerImpl implements ModuleManager {
    * {@inheritDoc}
    */
   @Override
-  public Version reserveModuleVersion(Objectify ofy,
-      ModuleEntity moduleEntity, String etag, Instant lastEditTime) {
+  public Version reserveModuleVersion(Objectify ofy, ModuleId moduleId,
+      String etag, Instant lastEditTime) {
     checkTxnIsRunning(ofy);
+    ModuleEntity moduleEntity = this.get(ofy, moduleId);
     checkNotNull(moduleEntity, "moduleEntity");
 
     if (moduleEntity.getLastEditTime().isEqual(lastEditTime)
@@ -272,20 +305,10 @@ public class ModuleManagerImpl implements ModuleManager {
       return null;
     }
 
-    Version version = moduleEntity.reserveVersion();
+    Version reservedVersion = moduleEntity.reserveVersion();
     moduleDao.put(ofy, moduleEntity);
 
-    // Eventually add who reserved what.
-    ModuleVersionEntity moduleVersionEntity = new ModuleVersionEntity.Builder()
-        .version(version)
-        .moduleKey(moduleEntity.getKey())
-        .state(ModuleVersionState.RESERVED)
-        .etag(etag)
-        .lastEditTime(lastEditTime)
-        .build();
-    moduleVersionDao.put(ofy, moduleVersionEntity);
-
-    return moduleVersionEntity.getVersion();
+    return reservedVersion;
   }
 
   /**

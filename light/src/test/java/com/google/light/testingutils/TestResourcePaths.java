@@ -35,7 +35,19 @@ public enum TestResourcePaths {
    * then those things will have to be fixed.
    */
   GOOGLE_USER_INFO_JSON("/login/oauth2/google/google_user_info.json"),
-
+  
+  // Wrapper Objects.
+  COLLECTION_ID_XML("/server/dto/pojo/typewrapper/longwrapper/collectionId.xml"),
+  EXTERNAL_ID_XML("/server/dto/pojo/typewrapper/stringwrapper/externalId.xml"),
+  JOB_ID_XML("/server/dto/pojo/typewrapper/longwrapper/jobId.xml"),
+  MODULE_ID_XML("/server/dto/pojo/typewrapper/longwrapper/moduleId.xml"),
+  PERSON_ID_XML("/server/dto/pojo/typewrapper/longwrapper/personId.xml"),
+  
+  VERSION_SPECIFIC_XML("/server/dto/pojo/typewrapper/longwrapper/versionSpecific.xml"),
+  VERSION_LATEST_XML("/server/dto/pojo/typewrapper/longwrapper/versionLatest.xml"),
+  VERSION_NO_VERSION_XML("/server/dto/pojo/typewrapper/longwrapper/versionNoVersion.xml"),
+  
+  
   REDIRECT_JSON("/login/oauth2/redirect.json"),
   JS_VARIABLES_PRELOAD_JSON("/js_variables_preload.json");
 

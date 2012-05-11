@@ -19,19 +19,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.constants.LightStringConstants.VERSION_LATEST_STR;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.ws.rs.core.UriInfo;
-
-import org.apache.commons.lang.StringEscapeUtils;
-
 import com.google.appengine.api.blobstore.BlobKey;
 import com.google.appengine.api.blobstore.BlobstoreService;
 import com.google.appengine.api.blobstore.BlobstoreServiceFactory;
@@ -54,6 +41,17 @@ import com.google.light.server.persistence.entity.module.ModuleVersionEntity;
 import com.google.light.server.persistence.entity.module.ModuleVersionResourceEntity;
 import com.google.light.server.utils.LightUtils;
 import com.google.light.server.utils.ServletUtils;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.UriInfo;
+import org.apache.commons.lang.StringEscapeUtils;
 
 /**
  * Jersey resource to serve content from collections and
@@ -61,6 +59,7 @@ import com.google.light.server.utils.ServletUtils;
  * 
  * @author Walter Cacau
  */
+@SuppressWarnings("synthetic-access")
 @Path(JerseyConstants.RESOURCE_PATH_CONTENT)
 public class ContentResource extends AbstractJerseyResource {
 
@@ -200,7 +199,7 @@ public class ContentResource extends AbstractJerseyResource {
     ResourceTypes resourceType = ResourceTypes.valueOf(resourceTypeStr);
 
     ModuleId moduleId = new ModuleId(moduleIdStr);
-    Version moduleVersion = Version.createVersion(versionStr);
+    Version moduleVersion = new Version(versionStr);
     String resourceId = resourceType.name() + "/" + resourceStr;
     
     return buildResponseForAndServeModuleResource(resourceId, moduleVersion, moduleId);
@@ -352,7 +351,7 @@ public class ContentResource extends AbstractJerseyResource {
     checkNotBlank(collectionIdStr, "Invalid CollectionId.");
     checkNotBlank(versionStr, "Invalid version.");
     CollectionId collectionId = new CollectionId(collectionIdStr);
-    Version version = Version.createVersion(versionStr);
+    Version version = new Version(versionStr);
 
     CollectionVersionEntity cvEntity = collectionManager.getCollectionVersion(
         null, collectionId, version);
@@ -368,7 +367,7 @@ public class ContentResource extends AbstractJerseyResource {
     checkNotBlank(moduleIdStr, "Invalid ModuleId.");
     checkNotBlank(versionStr, "Invalid version.");
     ModuleId moduleId = new ModuleId(moduleIdStr);
-    Version version = Version.createVersion(versionStr);
+    Version version = new Version(versionStr);
 
     ModuleVersionEntity moduleEntity = moduleManager.getModuleVersion(
         null /* ofy */, moduleId, version);

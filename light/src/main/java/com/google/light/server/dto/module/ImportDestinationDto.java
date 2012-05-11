@@ -17,13 +17,11 @@ package com.google.light.server.dto.module;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
-import static com.google.light.server.utils.LightUtils.getWrapperValue;
 
+import com.google.light.server.dto.AbstractDto;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.JobId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
-
-import com.google.light.server.dto.AbstractDto;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -53,15 +51,15 @@ public class ImportDestinationDto extends AbstractDto<ImportDestinationDto> {
 
   @XmlElement(name = "moduleId")
   @JsonProperty(value = "moduleId")
-  private Long moduleId;
+  private ModuleId moduleId;
 
   @XmlElement(name = "version")
   @JsonProperty(value = "version")
-  private Long version;
+  private Version version;
 
   @XmlElement(name = "jobId")
   @JsonProperty(value = "jobId")
-  private Long jobId;
+  private JobId jobId;
 
   /**
    * {@inheritDoc}
@@ -86,15 +84,15 @@ public class ImportDestinationDto extends AbstractDto<ImportDestinationDto> {
   }
 
   public ModuleId getModuleId() {
-    return new ModuleId(moduleId);
+    return moduleId;
   }
 
   public Version getVersion() {
-    return new Version(version);
+    return version;
   }
 
   public JobId getJobId() {
-    return new JobId(jobId);
+    return jobId;
   }
 
   public static class Builder extends AbstractDto.BaseBuilder<Builder> {
@@ -140,9 +138,9 @@ public class ImportDestinationDto extends AbstractDto<ImportDestinationDto> {
     super(builder);
     this.externalId = builder.externalId;
     this.moduleType = builder.moduleType;
-    this.moduleId = getWrapperValue(builder.moduleId);
-    this.version = getWrapperValue(builder.version);
-    this.jobId = getWrapperValue(builder.jobId);
+    this.moduleId = builder.moduleId;
+    this.version = builder.version;
+    this.jobId = builder.jobId;
   }
 
   // For Jaxb.

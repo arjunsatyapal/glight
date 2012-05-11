@@ -111,7 +111,7 @@ public class GoogleDocUtils {
   }
 
   public static URL getFolderContentUrl(GoogleDocResourceId resourceId, int maxResult) {
-    Preconditions.checkArgument(resourceId.isFolder(),
+    Preconditions.checkArgument(resourceId.getModuleType().mapsToCollection(),
         "Invalid GoogleResource[" + resourceId + "].");
     URL url = getResourceEntryUrl(resourceId);
     return getURL(url.toString() + "/contents" + "?" + getMaxResults(maxResult));

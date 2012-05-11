@@ -15,6 +15,7 @@
  */
 package com.google.light.server.persistence.entity.collection;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNonEmptyList;
 import static com.google.light.server.utils.LightPreconditions.checkNonNegativeLong;
@@ -23,6 +24,7 @@ import static com.google.light.server.utils.LightPreconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkVersion;
 import static com.google.light.server.utils.LightUtils.convertListOfValuesToWrapperList;
 import static com.google.light.server.utils.LightUtils.convertWrapperListToListOfValues;
+import static com.google.light.server.utils.LightUtils.getWrapper;
 import static com.google.light.server.utils.LightUtils.getWrapperValue;
 
 import com.google.light.server.annotations.ObjectifyQueryField;
@@ -32,7 +34,6 @@ import com.google.light.server.dto.collection.CollectionState;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.CollectionId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
-import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version.State;
 import com.google.light.server.exception.ExceptionType;
 import com.google.light.server.persistence.entity.AbstractPersistenceEntity;
 import com.googlecode.objectify.Key;
@@ -50,7 +51,7 @@ import org.joda.time.Instant;
 @SuppressWarnings("serial")
 public class CollectionEntity extends AbstractPersistenceEntity<CollectionEntity, CollectionDto> {
   @Id
-  private Long id;
+  private Long collectionId;
   private String title;
   private CollectionState state;
   @ObjectifyQueryFieldName("owners")
@@ -86,15 +87,11 @@ public class CollectionEntity extends AbstractPersistenceEntity<CollectionEntity
    */
   @Override
   public Key<CollectionEntity> getKey() {
-    return generateKey(getId());
+    return generateKey(getCollectionId());
   }
 
-  public CollectionId getId() {
-    if (id == null) {
-      return null;
-    }
-
-    return new CollectionId(id);
+  public CollectionId getCollectionId() {
+    return getWrapper(collectionId, CollectionId.class);
   }
 
   public String getTitle() {
@@ -118,15 +115,11 @@ public class CollectionEntity extends AbstractPersistenceEntity<CollectionEntity
   }
 
   public Version getLatestPublishVersion() {
-    if (latestPublishVersion == 0) {
-      return null;
-    }
-    
-    return new Version(latestPublishVersion);
+    return getWrapper(latestPublishVersion, Version.class);
   }
 
   public Version getNextVersion() {
-    return new Version(nextVersion);
+    return getWrapper(nextVersion, Version.class);
   }
   
   /**
@@ -134,8 +127,11 @@ public class CollectionEntity extends AbstractPersistenceEntity<CollectionEntity
    * to save the entity. 
    */
   public Version reserveVersion() {
-    nextVersion++;
-    return new Version(nextVersion);
+    /*
+     * PostIncrement is deliberate so that first Version is created with the current nextVersion
+     * value and then it is incremented.
+     */
+    return new Version(nextVersion++);
   }
 
   /**
@@ -153,6 +149,9 @@ public class CollectionEntity extends AbstractPersistenceEntity<CollectionEntity
       this.etag = etag;
       this.state = CollectionState.PUBLISHED;
     }
+    
+    checkArgument(this.latestPublishVersion < this.nextVersion, 
+        "latestPublishVersion should be always less then nextVersion");
   }
 
   /**
@@ -161,11 +160,12 @@ public class CollectionEntity extends AbstractPersistenceEntity<CollectionEntity
   @Override
   public CollectionDto toDto() {
     return new CollectionDto.Builder()
-        .id(getId())
+        .collectionId(getCollectionId())
         .title(title)
         .state(state)
         .owners(getOwners())
-        .version(getLatestPublishVersion())
+        .latestPublishedVersion(getLatestPublishVersion())
+        .nextVersion(getNextVersion())
         .build();
   }
 
@@ -175,8 +175,8 @@ public class CollectionEntity extends AbstractPersistenceEntity<CollectionEntity
     private CollectionState state;
     private List<PersonId> owners;
     private String etag;
-    private Version latestPublishVersion = new Version(0L, State.NO_VERSION);
-    private Version nextVersion = new Version(0L, State.NO_VERSION);
+    private Version latestPublishVersion = new Version(0L);
+    private Version nextVersion = new Version(1L);
 
     public Builder id(Long id) {
       this.id = id;
@@ -217,7 +217,7 @@ public class CollectionEntity extends AbstractPersistenceEntity<CollectionEntity
   @SuppressWarnings("synthetic-access")
   private CollectionEntity(Builder builder) {
     super(builder, true);
-    this.id = builder.id;
+    this.collectionId = builder.id;
     this.title = builder.title;
     this.state = builder.state;
     this.owners = convertWrapperListToListOfValues(builder.owners);

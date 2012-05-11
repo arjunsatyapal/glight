@@ -18,11 +18,9 @@ package com.google.light.server.dto.pojo.tree;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkModuleId;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
-import static com.google.light.server.utils.LightUtils.getWrapperValue;
-
-import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
 
 import com.google.light.server.dto.module.ModuleType;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -44,7 +42,7 @@ import org.codehaus.jackson.annotate.JsonTypeName;
 public class CollectionTreeNodeDto extends AbstractTreeNode<CollectionTreeNodeDto> {
   @XmlElement(name = "moduleId")
   @JsonProperty(value = "moduleId")
-  private Long moduleId;
+  private ModuleId moduleId;
 
   @XmlElement(name = "moduleType")
   @JsonProperty(value = "moduleType")
@@ -78,11 +76,11 @@ public class CollectionTreeNodeDto extends AbstractTreeNode<CollectionTreeNodeDt
   }
   
   public ModuleId getModuleId() {
-    return new ModuleId(moduleId);
+    return moduleId;
   }
 
   public void setModuleId(ModuleId moduleId) {
-    this.moduleId = moduleId.getValue();
+    this.moduleId = moduleId;
   }
 
   public ModuleType getModuleType() {
@@ -172,7 +170,7 @@ public class CollectionTreeNodeDto extends AbstractTreeNode<CollectionTreeNodeDt
   @SuppressWarnings("synthetic-access")
   private CollectionTreeNodeDto(Builder builder) {
     super(builder);
-    this.moduleId = getWrapperValue(builder.moduleId);
+    this.moduleId = builder.moduleId;
     this.moduleType = builder.moduleType;
     this.externalId = builder.externalId;
   }

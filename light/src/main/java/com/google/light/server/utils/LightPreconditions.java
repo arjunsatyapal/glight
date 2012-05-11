@@ -237,7 +237,7 @@ public class LightPreconditions {
     new URI(uri);
     return uri;
   }
-
+  
   /**
    * Ensures that given object was instantiated in one of the allowedEnvs.
    * 
@@ -394,7 +394,7 @@ public class LightPreconditions {
         throw new IllegalArgumentException("Unsupported type : " + exceptionType);
     }
   }
-
+  
   // Utility class.
   private LightPreconditions() {
   }

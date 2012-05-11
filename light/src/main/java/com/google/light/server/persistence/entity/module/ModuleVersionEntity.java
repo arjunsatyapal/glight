@@ -18,16 +18,16 @@ package com.google.light.server.persistence.entity.module;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
-
-import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
-import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
+import static com.google.light.server.utils.LightUtils.getWrapper;
+import static com.google.light.server.utils.LightUtils.getWrapperValue;
 
 import com.google.light.server.annotations.ObjectifyQueryField;
-
 import com.google.light.server.annotations.ObjectifyQueryFieldName;
-
 import com.google.light.server.dto.module.ModuleVersionDto;
 import com.google.light.server.dto.module.ModuleVersionState;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
+import com.google.light.server.dto.pojo.typewrapper.stringwrapper.ExternalId;
 import com.google.light.server.persistence.entity.AbstractPersistenceEntity;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.Parent;
@@ -52,6 +52,8 @@ public class ModuleVersionEntity extends
   private String title;
   private String content;
   private String etag;
+  private String externalId;
+//  private Text
 
   // TODO(arjuns): Add a test to ensure this string matches with field name.
   @ObjectifyQueryFieldName("lastEditTimeInMillis")
@@ -89,8 +91,10 @@ public class ModuleVersionEntity extends
   @Override
   public ModuleVersionDto toDto() {
     ModuleVersionDto dto = new ModuleVersionDto.Builder()
-        .version(version)
+        .moduleId(getModuleId())
+        .version(getVersion())
         .content(content)
+        .externalId(getExternalId())
         .build();
 
     return dto;
@@ -123,11 +127,9 @@ public class ModuleVersionEntity extends
   public Key<ModuleEntity> getModuleKey() {
     return moduleKey;
   }
-
+  
   public ModuleId getModuleId() {
-    checkNotNull(getModuleKey(), "moduleKey");
-    Long id = getModuleKey().getId();
-    return new ModuleId(id);
+    return getWrapper(moduleKey.getId(), ModuleId.class);
   }
 
   public String getEtag() {
@@ -136,6 +138,10 @@ public class ModuleVersionEntity extends
   
   public void setEtag(String etag) {
     this.etag = etag;
+  }
+  
+  public ExternalId getExternalId() {
+    return getWrapper(externalId, ExternalId.class);
   }
 
   public Instant getLastEditTime() {
@@ -170,6 +176,7 @@ public class ModuleVersionEntity extends
     private ModuleVersionState state;
     private String etag;
     private Instant lastEditTime;
+    private ExternalId externalId;
 
     public Builder moduleKey(Key<ModuleEntity> moduleKey) {
       this.moduleKey = moduleKey;
@@ -205,6 +212,11 @@ public class ModuleVersionEntity extends
       this.lastEditTime = lastEditTime;
       return this;
     }
+    
+    public Builder externalId(ExternalId externalId) {
+      this.externalId = externalId;
+      return this;
+    }
 
     @SuppressWarnings("synthetic-access")
     public ModuleVersionEntity build() {
@@ -215,14 +227,16 @@ public class ModuleVersionEntity extends
   @SuppressWarnings("synthetic-access")
   private ModuleVersionEntity(Builder builder) {
     super(builder, true);
-    checkNotNull(builder.version, "version");
-    this.version = builder.version.getValue();
+    this.version = getWrapperValue(builder.version);
     
     this.title = builder.title;
     this.content = builder.content;
+    
     this.moduleKey = builder.moduleKey;
     this.state = builder.state;
     this.etag = builder.etag;
+    this.externalId = getWrapperValue(builder.externalId);
+    
     if (builder.lastEditTime != null) {
       this.lastEditTimeInMillis = builder.lastEditTime.getMillis();
     }

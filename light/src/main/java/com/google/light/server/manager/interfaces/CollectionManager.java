@@ -72,10 +72,10 @@ public interface CollectionManager {
   /**
    * Add CollectionVersion for GoogleDoc.
    */
-  public Version reserveCollectionVersion(Objectify ofy, CollectionEntity collectionEntity);
+  public Version reserveCollectionVersion(Objectify ofy, CollectionId collectionId);
 
   public CollectionVersionEntity publishCollectionVersion(Objectify ofy,
-      CollectionEntity collectionEntity, Version version, CollectionTreeNodeDto collectionRoot);
+      CollectionId collectionId, Version version, CollectionTreeNodeDto collectionRoot);
 
   /**
    * Get Collection-Version.

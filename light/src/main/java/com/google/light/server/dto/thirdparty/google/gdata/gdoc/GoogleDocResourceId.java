@@ -51,6 +51,10 @@ public class GoogleDocResourceId extends AbstractDto<GoogleDocResourceId>{
   @JsonProperty(value = "typedResourceId")
   private String typedResourceId;
 
+  public GoogleDocResourceId(ModuleType moduleType, String key) {
+    this(moduleType.getCategory() + ":" + key);
+  }
+  
   public GoogleDocResourceId(String typedResourceId) {
     super(null);
     this.typedResourceId = checkNotBlank(typedResourceId, "typedResourceId");
@@ -94,10 +98,6 @@ public class GoogleDocResourceId extends AbstractDto<GoogleDocResourceId>{
     return moduleType;
   }
   
-  public boolean isFolder() {
-    return moduleType == ModuleType.GOOGLE_COLLECTION;
-  }
-
   // For JAXB and Pipeline and Guice.
   private GoogleDocResourceId() {
     super(null);

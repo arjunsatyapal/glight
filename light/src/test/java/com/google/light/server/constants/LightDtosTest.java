@@ -23,11 +23,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.util.Collection;
-
-import javax.xml.bind.annotation.XmlElementWrapper;
-
-
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
@@ -47,22 +42,27 @@ import com.google.light.server.servlets.oauth2.google.pojo.AbstractOAuth2TokenIn
 import com.google.light.server.servlets.oauth2.google.pojo.GoogleLoginTokenInfo;
 import com.google.light.server.servlets.oauth2.google.pojo.GoogleOAuth2TokenInfo;
 import com.google.light.server.servlets.oauth2.google.pojo.GoogleUserInfo;
+import com.google.light.server.utils.LightPreconditions;
 import com.google.light.testingutils.GaeTestingUtils;
 import com.google.light.testingutils.TestingUtils;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 import javax.persistence.Embedded;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAnyElement;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
+import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.annotate.JsonTypeName;
 import org.junit.Before;
@@ -198,6 +198,7 @@ public class LightDtosTest implements EnumTestInterface {
       // TODO(arjuns): Fix this.
       Embedded.class.getName(),
       JsonProperty.class.getName(),
+      XmlAnyElement.class.getName(),
       XmlElement.class.getName(),
       XmlElementWrapper.class.getName());
 
@@ -207,14 +208,22 @@ public class LightDtosTest implements EnumTestInterface {
   @SuppressWarnings("rawtypes")
   private void validateFieldAnnotations(Class currClass) {
     String className = currClass.getSimpleName();
-    
+
     for (Field currField : currClass.getDeclaredFields()) {
       String fieldNameForErr = className + "#" + currField.getName();
       
+      // Ensure that all the annotations are permitted.
+      for (Annotation currAnnotation : currField.getAnnotations()) {
+        assertTrue(fieldNameForErr + " : Annotation " + currAnnotation.annotationType().getSimpleName()
+            + " is not allowed",
+            allowedAnnotationsForFields.contains(currAnnotation.annotationType().getName()));
+      }
+
       if (isIgnorableField(currField)) {
         continue;
       }
 
+      String xmlElementName = null;
       String xmlElementWrapperName = null;
       /*
        * If a field is a collection, then it should have two tags for XML : One for wrapper and
@@ -229,18 +238,34 @@ public class LightDtosTest implements EnumTestInterface {
         xmlElementWrapperName = getXmlElementWrappertName(currField.getAnnotations());
       }
 
-      // Check for XmlElement Annotation.
-      assertTrue(fieldNameForErr + " should be annotated with @XmlElement.",
-          containsAnnotation(XmlElement.class, currField.getAnnotations()));
+      // Check for XmlElement/XmlElementWrapper Annotation.
+      if (StringUtils.isNotBlank(xmlElementWrapperName)) {
+        assertTrue(
+            fieldNameForErr + " should be annotated with "
+                + XmlElementWrapper.class.getSimpleName(),
+            containsAnnotation(XmlElementWrapper.class, currField.getAnnotations()));
+        if (!containsAnnotation(XmlElement.class, currField.getAnnotations())) {
+          assertTrue(
+              fieldNameForErr + " should be annotated with " + XmlAnyElement.class.getSimpleName(),
+              containsAnnotation(XmlAnyElement.class, currField.getAnnotations()));
+        }
+      } else {
+        assertTrue(
+            fieldNameForErr + " should be annotated with " + XmlElement.class.getSimpleName(),
+            containsAnnotation(XmlElement.class, currField.getAnnotations()));
+        xmlElementName = getXmlElementName(currField.getAnnotations());
+        
+        LightPreconditions.checkNotBlank(xmlElementName, 
+            fieldNameForErr + " has empty XmlElement.");
+      }
 
       String errorMsg = fieldNameForErr + " needs to have overriden names for both "
-              + "Json and Xml and these overridden names should be same. For Xml, if its a list, then "
-              + "use both" + XmlElementWrapper.class.getSimpleName() + " & "
-              + XmlElement.class.getSimpleName() + " and for Json use "
-              + JsonProperty.class.getSimpleName();
+          + "Json and Xml and these overridden names should be same. For Xml, if its a list, then "
+          + "use both" + XmlElementWrapper.class.getSimpleName() + " & "
+          + XmlElement.class.getSimpleName() + " and for Json use "
+          + JsonProperty.class.getSimpleName();
 
-      String xmlElementName = getXmlElementName(currField.getAnnotations());
-      checkNotBlank(xmlElementName, errorMsg);
+      
 
       assertTrue(fieldNameForErr + " should be annotated with @JsonProperty.",
           containsAnnotation(JsonProperty.class, currField.getAnnotations()));
@@ -252,12 +277,6 @@ public class LightDtosTest implements EnumTestInterface {
         assertEquals(errorMsg, xmlElementWrapperName, jsonPropertyValue);
       } else {
         assertEquals(errorMsg, xmlElementName, jsonPropertyValue);
-      }
-
-      // Ensure that all the annotations are permitted.
-      for (Annotation currAnnotation : currField.getAnnotations()) {
-        assertTrue("Annotation " + currAnnotation.annotationType() + " is not allowed",
-            allowedAnnotationsForFields.contains(currAnnotation.annotationType().getName()));
       }
     }
   }

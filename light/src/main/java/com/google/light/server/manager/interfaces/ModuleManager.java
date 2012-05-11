@@ -73,10 +73,10 @@ public interface ModuleManager {
   public ModuleId reserveModuleId(Objectify ofy, ModuleType moduleType, String externalId,
       List<PersonId> owners, String title);
   
-  public Version reserveModuleVersion(Objectify ofy, ModuleEntity moduleEntity, String etag, 
+  public Version reserveModuleVersion(Objectify ofy, ModuleId moduleId, String etag, 
       Instant lastEditTime);
 
-  public ModuleVersionEntity publishModuleVersion(Objectify ofy, ModuleEntity moduleEntity,
+  public ModuleVersionEntity publishModuleVersion(Objectify ofy, ModuleId moduleId,
       Version version, String content, GoogleDocInfoDto docInfo);
 
   /**
@@ -87,7 +87,7 @@ public interface ModuleManager {
    * @param resourceInfo
    * @return
    */
-  public ModuleVersionResourceEntity publishModuleResource(Objectify ofy, ModuleEntity moduleEntity, 
+  public ModuleVersionResourceEntity publishModuleResource(Objectify ofy, ModuleId moduleId, 
       Version version, String resourceId, GSBlobInfo resourceInfo);
 
   /**

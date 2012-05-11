@@ -25,11 +25,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import com.google.light.server.persistence.entity.AbstractPersistenceEntity;
+
 import com.google.common.collect.Sets;
 import com.google.light.server.annotations.ObjectifyQueryField;
 import com.google.light.server.annotations.ObjectifyQueryFieldName;
 import com.google.light.server.constants.LightEnvEnum;
-import com.google.light.server.dto.AbstractPojo;
 import com.google.light.server.dto.pojo.typewrapper.AbstractTypeWrapper;
 import com.google.light.testingutils.GaeTestingUtils;
 import com.google.light.testingutils.TestingUtils;
@@ -162,7 +163,7 @@ public class TestBasicCodingGuidelines {// extends AbstractLightServerTest {
     List<Class> classes = getClassesInPackage("com.google.light", null);
 
     for (Class currClass : classes) {
-      if (AbstractPojo.class.isAssignableFrom(currClass)) {
+      if (AbstractPersistenceEntity.class.isAssignableFrom(currClass)) {
         validateClassFields(currClass);
       }
     }

@@ -51,7 +51,7 @@ import com.google.light.server.dto.search.SearchResultItemDto;
 import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocImportBatchJobContext;
 import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocInfoDto;
 import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocResourceId;
-import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocResourceIdListWrapperDto;
+import com.google.light.server.dto.thirdparty.google.gdata.gdoc.ExternalIdListWrapperDto;
 import com.google.light.server.servlets.oauth2.google.pojo.GoogleUserInfo;
 import java.util.List;
 
@@ -79,7 +79,7 @@ public enum LightDtos {
                                       "googleDocImportBatchJobContext"),
   GOOGLE_DOC_IMPORT_JOB_CONTEXT(GoogleDocImportJobContext.class, "googleDocImportJobContext"),
   GOOGLE_DOC_INFO_DTO(GoogleDocInfoDto.class, "googleDocInfo"),
-  GOOGLE_DOC_RESOURCE_ID_LIST_DTO(GoogleDocResourceIdListWrapperDto.class,
+  GOOGLE_DOC_RESOURCE_ID_LIST_DTO(ExternalIdListWrapperDto.class,
                                   "googleDocResourceIdList"),
   GOOGLE_DOC_INFO_LIST_DTO(GoogleDocImportBatchJobContext.class, "googleDocResourceInfoList"),
   GOOGLE_DOC_TREE(GoogleDocTree.class, "googleDocTree"),
@@ -93,7 +93,7 @@ public enum LightDtos {
   OAUTH2_OWNER_CREDENTIAL_DTO(OAuth2OwnerTokenDto.class, "oauth2OwnerToken"),
   // TODO(arjuns): Get rid of this from DTO.
   OAUTH2_CONSUMER_CREDENTIAL_DTO(OAuth2ConsumerCredentialDto.class, "oauth2ConsumerCredential"),
-
+  
   MODULE_DTO(ModuleDto.class, "module"),
   MODULE_VERSION_DTO(ModuleVersionDto.class, "moduleVersion"),
 

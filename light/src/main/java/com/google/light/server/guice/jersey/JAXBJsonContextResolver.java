@@ -15,21 +15,13 @@
  */
 package com.google.light.server.guice.jersey;
 
-import com.google.common.collect.Sets;
-import com.google.light.server.constants.LightDtos;
 import com.google.light.server.constants.http.ContentTypeConstants;
-import com.google.light.server.dto.AbstractDto;
-import com.sun.jersey.api.json.JSONConfiguration;
-import com.sun.jersey.api.json.JSONConfiguration.NaturalBuilder;
-import com.sun.jersey.api.json.JSONJAXBContext;
-import java.util.List;
-import java.util.Set;
+import com.google.light.server.utils.JsonUtils;
 import javax.ws.rs.Produces;
-import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
-import javax.xml.bind.JAXBContext;
-
+import org.codehaus.jackson.jaxrs.Annotations;
 import org.codehaus.jackson.jaxrs.JacksonJaxbJsonProvider;
+import org.codehaus.jackson.map.ObjectMapper;
 
 
 /**
@@ -43,25 +35,31 @@ import org.codehaus.jackson.jaxrs.JacksonJaxbJsonProvider;
  */
 @Produces(ContentTypeConstants.APPLICATION_JSON)
 @Provider
-public final class JAXBJsonContextResolver extends JacksonJaxbJsonProvider implements ContextResolver<JAXBContext> {
-  private final JAXBContext context;
+public final class JAXBJsonContextResolver extends JacksonJaxbJsonProvider /*implements ContextResolver<JAXBContext> */{
+//  private final JAXBContext context;
+//
+//  @SuppressWarnings("rawtypes")
+//  private final Set<Class<? extends AbstractDto>> types;
 
-  @SuppressWarnings("rawtypes")
-  private final Set<Class<? extends AbstractDto>> types;
-
-  @SuppressWarnings("rawtypes")
   public JAXBJsonContextResolver() throws Exception {
-    List<Class<? extends AbstractDto>> list = LightDtos.getListOfDtoClasses();
-    this.types = Sets.newHashSet(list);
+    super(null, Annotations.JAXB);
     
-    NaturalBuilder configBuilder = JSONConfiguration.natural();
-    configBuilder.humanReadableFormatting(true);
+    ObjectMapper mapper = JsonUtils.getJsonMapper();
     
-    this.context = new JSONJAXBContext(configBuilder.build(), LightDtos.getArrayOfDtoClasses());
+    setMapper(mapper);
+    
+    
+//    List<Class<? extends AbstractDto>> list = LightDtos.getListOfDtoClasses();
+//    this.types = Sets.newHashSet(list);
+//    
+//    NaturalBuilder configBuilder = JSONConfiguration.natural();
+//    configBuilder.humanReadableFormatting(true);
+//    
+//    this.context = new JSONJAXBContext(configBuilder.build(), LightDtos.getArrayOfDtoClasses());
   }
 
-  @Override
-  public JAXBContext getContext(Class<?> objectType) {
-    return (types.contains(objectType)) ? context : null;
-  }
+//  @Override
+//  public JAXBContext getContext(Class<?> objectType) {
+//    return (types.contains(objectType)) ? context : null;
+//  }
 }

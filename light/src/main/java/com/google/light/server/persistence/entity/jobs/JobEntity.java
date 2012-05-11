@@ -19,9 +19,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkNull;
+import static com.google.light.server.utils.LightUtils.getWrapper;
 import static com.google.light.server.utils.LightUtils.getWrapperValue;
-
-import com.google.light.server.dto.pojo.typewrapper.longwrapper.JobId;
 
 import com.google.appengine.api.datastore.Text;
 import com.google.common.base.Preconditions;
@@ -30,6 +29,7 @@ import com.google.light.server.annotations.ObjectifyQueryField;
 import com.google.light.server.annotations.ObjectifyQueryFieldName;
 import com.google.light.server.constants.PlacementOrder;
 import com.google.light.server.dto.pojo.ChangeLogEntryPojo;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.JobId;
 import com.google.light.server.persistence.entity.AbstractPersistenceEntity;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.Unindexed;
@@ -47,7 +47,7 @@ import javax.persistence.Id;
 @SuppressWarnings("serial")
 public class JobEntity extends AbstractPersistenceEntity<JobEntity, Object> {
   @Id
-  private Long id;
+  private Long jobId;
   private Long parentJobId;
   private Long rootJobId;
 
@@ -82,7 +82,7 @@ public class JobEntity extends AbstractPersistenceEntity<JobEntity, Object> {
 
   @Override
   public Key<JobEntity> getKey() {
-    return generateKey(getId());
+    return generateKey(getJobId());
   }
 
   /**
@@ -94,8 +94,8 @@ public class JobEntity extends AbstractPersistenceEntity<JobEntity, Object> {
     throw new UnsupportedOperationException();
   }
 
-  public JobId getId() {
-    return new JobId(id);
+  public JobId getJobId() {
+    return getWrapper(jobId, JobId.class);
   }
 
   public JobId getParentJobId() {
@@ -108,7 +108,7 @@ public class JobEntity extends AbstractPersistenceEntity<JobEntity, Object> {
 
   public JobId getRootJobId() {
     if (isRootJob()) {
-      return getId();
+      return getJobId();
     }
 
     return new JobId(rootJobId);
@@ -195,8 +195,8 @@ public class JobEntity extends AbstractPersistenceEntity<JobEntity, Object> {
         checkNotNull(rootJobId, "For childJob, rootJobId cannot be null.");
         checkNotNull(parentJobId, "For childJob, rootJobId cannot be null.");
         
-        if (id != null) {
-          checkArgument(!id.equals(rootJobId),
+        if (jobId != null) {
+          checkArgument(!jobId.equals(rootJobId),
               "For childJob, jobId and rootJobId should be different.");
         }
         
@@ -326,7 +326,7 @@ public class JobEntity extends AbstractPersistenceEntity<JobEntity, Object> {
     super(builder, false);
 
     if (builder.jobId != null) {
-      this.id = builder.jobId.getValue();
+      this.jobId = builder.jobId.getValue();
     }
 
     this.parentJobId = getWrapperValue(builder.parentJobId);

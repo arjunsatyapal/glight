@@ -67,7 +67,7 @@ public class JobDao extends AbstractBasicDao<Object, JobEntity> {
     
     for (Key<JobEntity> currKey : fetchedMap.keySet()) {
       JobEntity currEntity = fetchedMap.get(currKey);
-      requiredMap.put(currEntity.getId(), currEntity);
+      requiredMap.put(currEntity.getJobId(), currEntity);
     }
     
     return requiredMap;

@@ -112,7 +112,7 @@ public class NotificationResource extends AbstractJerseyResource {
           parentJobEntity.setJobState(JobState.POLLING_FOR_CHILDS);
           jobManager.put(ofy, parentJobEntity,
               new ChangeLogEntryPojo("Starting polling for childs"));
-          jobManager.enqueueJobForPolling(ofy, parentJobEntity.getId());
+          jobManager.enqueueJobForPolling(ofy, parentJobEntity.getJobId());
           break;
 
         case AFTER:

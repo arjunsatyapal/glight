@@ -16,11 +16,25 @@
 package com.google.light.server.dto.pojo.typewrapper.longwrapper;
 
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
+import static com.google.light.server.utils.LightUtils.getLongWrapper;
 
 import com.google.light.server.dto.pojo.typewrapper.AbstractTypeWrapper;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.CollectionId.CollectionIdDeserializer;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.CollectionId.CollectionIdSerializer;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.CollectionId.CollectionIdXmlAdapter;
+import java.io.IOException;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.adapters.XmlAdapter;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import org.codehaus.jackson.JsonGenerator;
+import org.codehaus.jackson.JsonParser;
+import org.codehaus.jackson.JsonProcessingException;
+import org.codehaus.jackson.map.DeserializationContext;
+import org.codehaus.jackson.map.JsonDeserializer;
+import org.codehaus.jackson.map.JsonSerializer;
+import org.codehaus.jackson.map.SerializerProvider;
+import org.codehaus.jackson.map.annotate.JsonDeserialize;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
 
 /**
  * 
@@ -30,8 +44,10 @@ import javax.xml.bind.annotation.XmlRootElement;
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
-@XmlRootElement(name = "module_id")
-@XmlAccessorType(XmlAccessType.FIELD)
+@JsonSerialize(using = CollectionIdSerializer.class)
+@JsonDeserialize(using = CollectionIdDeserializer.class)
+@XmlJavaTypeAdapter(CollectionIdXmlAdapter.class)
+@XmlRootElement(name = "collectionId")
 public class CollectionId extends AbstractTypeWrapper<Long, CollectionId> {
   /**
    * @param value
@@ -44,7 +60,7 @@ public class CollectionId extends AbstractTypeWrapper<Long, CollectionId> {
     this(Long.parseLong(value));
   }
 
-  /** 
+  /**
    * {@inheritDoc}
    */
   @Override
@@ -52,17 +68,77 @@ public class CollectionId extends AbstractTypeWrapper<Long, CollectionId> {
     checkPositiveLong(getValue(), "Invalid CollectionId");
     return this;
   }
-  
+
   // For JAXB.
+  @SuppressWarnings("unused")
   private CollectionId() {
-    super(null);
+    super();
   }
 
-  /** 
+  /**
    * {@inheritDoc}
    */
   @Override
   public CollectionId createInstance(Long value) {
     return new CollectionId(value);
+  }
+
+  // Adding Custom Serializer/Deserializer and XmlAdapter.
+
+  /**
+   * Xml Adapter for {@link CollectionId}.
+   */
+  public static class CollectionIdXmlAdapter extends XmlAdapter<Long, CollectionId> {
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public CollectionId unmarshal(Long value) throws Exception {
+      return new CollectionId(value);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Long marshal(CollectionId value) throws Exception {
+      return value.getValue();
+    }
+  }
+
+  /**
+   * {@link JsonDeserializer} for {@link CollectionId}.
+   */
+  public static class CollectionIdDeserializer extends JsonDeserializer<CollectionId> {
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public CollectionId deserialize(JsonParser jsonParser, DeserializationContext ctxt)
+        throws IOException,
+        JsonProcessingException {
+      String value = jsonParser.getText();
+
+      return getLongWrapper(value, CollectionId.class);
+    }
+  }
+
+  /**
+   * {@link JsonSerializer} for {@link CollectionId}.
+   */
+  public static class CollectionIdSerializer extends JsonSerializer<CollectionId> {
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void serialize(CollectionId value, JsonGenerator jsonGenerator,
+        SerializerProvider provider)
+        throws IOException, JsonProcessingException {
+      if (value == null) {
+        return;
+      }
+      jsonGenerator.writeString("" + value.getValue());
+    }
   }
 }

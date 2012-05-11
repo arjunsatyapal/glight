@@ -15,6 +15,8 @@
  */
 package com.google.light.server.dto.pojo.typewrapper;
 
+import com.google.inject.Inject;
+
 import javax.xml.bind.annotation.XmlElement;
 
 import com.google.light.server.dto.AbstractPojo;
@@ -30,21 +32,39 @@ import com.google.light.server.dto.AbstractPojo;
  */
 @SuppressWarnings("serial")
 public abstract class AbstractTypeWrapper<I, T> extends AbstractPojo<T> {
-  @XmlElement private I value;
+  @XmlElement(nillable=true)
+  private I value;
 
   protected AbstractTypeWrapper(I value) {
     this.value = value;
+    validate();
   }
   
-
+  // For JAXB.
+  @Inject
+  protected AbstractTypeWrapper() {
+  }
+  
+  // Deliberately protected so that child classes can have their own getter name.
   public I getValue() {
     return value;
   }
   
+  // Deliberately protected so that child classes can manipulate as they want but no external one.
+  protected void setValue(I value) {
+    this.value = value;
+  }
+  
+  @Deprecated
   public abstract T createInstance(I value);
 
   public boolean isValid() {
-    return value != null;
+    try {
+      validate();
+      return true;
+    } catch (Exception e) {
+      return false;
+    }
   }
 
   @Override

@@ -16,10 +16,8 @@
 package com.google.light.server.dto.notifications;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.light.server.utils.LightUtils.getWrapperValue;
 
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.JobId;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -42,11 +40,11 @@ public class ChildJobCompletionNotification extends
     AbstractNotification<ChildJobCompletionNotification> {
   @XmlElement(name = "childJobId")
   @JsonProperty(value = "childJobId")
-  private Long childJobId;
+  private JobId childJobId;
   
   @XmlElement(name = "parentJobId")
   @JsonProperty(value = "parentJobId")
-  private Long parentJobId;
+  private JobId parentJobId;
   
   @XmlElement(name = "jsonPayLoad")
   @JsonProperty(value = "jsonPayLoad")
@@ -67,11 +65,11 @@ public class ChildJobCompletionNotification extends
   }
 
   public JobId getChildJobId() {
-    return new JobId(childJobId);
+    return childJobId;
   }
 
   public JobId getParentJobId() {
-    return new JobId(parentJobId);
+    return parentJobId;
   }
 
   public String getJsonPayLoad() {
@@ -107,8 +105,8 @@ public class ChildJobCompletionNotification extends
   @SuppressWarnings("synthetic-access")
   private ChildJobCompletionNotification(Builder builder) {
     super(builder);
-    this.childJobId = getWrapperValue(builder.childJobId);
-    this.parentJobId = getWrapperValue(builder.parentJobId);
+    this.childJobId = builder.childJobId;
+    this.parentJobId = builder.parentJobId;
     this.jsonPayLoad = builder.jsonPayLoad;
   }
 

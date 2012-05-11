@@ -19,10 +19,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkTxnIsRunning;
 
-import com.google.light.server.dto.pojo.typewrapper.longwrapper.CollectionId;
-import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
-import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
-
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
@@ -31,7 +27,12 @@ import com.google.light.server.dto.collection.CollectionDto;
 import com.google.light.server.dto.collection.CollectionState;
 import com.google.light.server.dto.pages.PageDto;
 import com.google.light.server.dto.pojo.tree.CollectionTreeNodeDto;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.CollectionId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
 import com.google.light.server.exception.unchecked.IdShouldNotBeSet;
+import com.google.light.server.exception.unchecked.VersionMutabilityViolation;
+import com.google.light.server.exception.unchecked.httpexception.NotFoundException;
 import com.google.light.server.manager.interfaces.CollectionManager;
 import com.google.light.server.persistence.dao.CollectionDao;
 import com.google.light.server.persistence.dao.CollectionVersionDao;
@@ -65,7 +66,7 @@ public class CollectionManagerImpl implements CollectionManager {
    */
   @Override
   public CollectionEntity create(Objectify ofy, CollectionEntity entity) {
-    if (entity.getId() != null) {
+    if (entity.getCollectionId() != null) {
       throw new IdShouldNotBeSet();
     }
 
@@ -77,8 +78,8 @@ public class CollectionManagerImpl implements CollectionManager {
    */
   @Override
   public CollectionEntity update(Objectify ofy, CollectionEntity updatedEntity) {
-    Preconditions.checkArgument(updatedEntity.getId().isValid(),
-        "Invalid CollectionId : " + updatedEntity.getId());
+    Preconditions.checkArgument(updatedEntity.getCollectionId().isValid(),
+        "Invalid CollectionId : " + updatedEntity.getCollectionId());
     return collectionDao.put(ofy, updatedEntity);
   }
 
@@ -114,37 +115,37 @@ public class CollectionManagerImpl implements CollectionManager {
     throw new UnsupportedOperationException();
   }
 
-//  /**
-//   * {@inheritDoc}
-//   */
-//  @Override
-//  public CollectionEntity reserveCollectionIdForOriginId(Objectify ofy, String originId,
-//      PersonId ownerId) {
-//    CollectionId existingCollectionId = null; // findCollectionIdByOriginId(ofy, originId);
-//    if (existingCollectionId != null) {
-//      return collectionDao.get(ofy, existingCollectionId);
-//    }
-//
-//    // Now create a new Collection.
-//    // TODO(arjuns): Add a cleanup job for cleaning up MOdules which dont move from Reserved state
-//    // for long time.
-//    CollectionEntity collectionEntity = new CollectionEntity.Builder()
-//        .title("reserved")
-//        .collectionState(CollectionState.RESERVED)
-//        .owners(Lists.newArrayList(ownerId))
-//        .etag("etag")
-//        .build();
-//    CollectionEntity persistedEntity = this.create(ofy, collectionEntity);
-//
-//    // OriginCollectionMappingEntity mappingEntity = new OriginModuleMappingEntity.Builder()
-//    // .id(originId)
-//    // .moduleId(persistedEntity.getModuleId())
-//    // .build();
-//    // originModuleMappingDao.put(ofy, mappingEntity);
-//
-//    return persistedEntity;
-//  }
-  
+  // /**
+  // * {@inheritDoc}
+  // */
+  // @Override
+  // public CollectionEntity reserveCollectionIdForOriginId(Objectify ofy, String originId,
+  // PersonId ownerId) {
+  // CollectionId existingCollectionId = null; // findCollectionIdByOriginId(ofy, originId);
+  // if (existingCollectionId != null) {
+  // return collectionDao.get(ofy, existingCollectionId);
+  // }
+  //
+  // // Now create a new Collection.
+  // // TODO(arjuns): Add a cleanup job for cleaning up MOdules which dont move from Reserved state
+  // // for long time.
+  // CollectionEntity collectionEntity = new CollectionEntity.Builder()
+  // .title("reserved")
+  // .collectionState(CollectionState.RESERVED)
+  // .owners(Lists.newArrayList(ownerId))
+  // .etag("etag")
+  // .build();
+  // CollectionEntity persistedEntity = this.create(ofy, collectionEntity);
+  //
+  // // OriginCollectionMappingEntity mappingEntity = new OriginModuleMappingEntity.Builder()
+  // // .id(originId)
+  // // .moduleId(persistedEntity.getModuleId())
+  // // .build();
+  // // originModuleMappingDao.put(ofy, mappingEntity);
+  //
+  // return persistedEntity;
+  // }
+
   /**
    * {@inheritDoc}
    */
@@ -166,36 +167,52 @@ public class CollectionManagerImpl implements CollectionManager {
    * {@inheritDoc} TODO(arjuns): Make this better once we have other Docs.
    */
   @Override
-  public Version reserveCollectionVersion(Objectify ofy, CollectionEntity collectionEntity) {
+  public Version reserveCollectionVersion(Objectify ofy, CollectionId collectionId) {
     checkTxnIsRunning(ofy);
-    checkNotNull(collectionEntity, "collectionEntity");
+    checkNotNull(collectionId, "collectionId");
     
-    Version collectionVersion = collectionEntity.reserveVersion();
+    CollectionEntity collectionEntity = this.get(ofy, collectionId);
+    checkNotNull(collectionEntity, "collectionEntity");
+
+    Version reservedVersion = collectionEntity.reserveVersion();
     collectionDao.put(ofy, collectionEntity);
-    
-    return collectionVersion;
+
+    return reservedVersion;
   }
-  
+
   @Override
-  public CollectionVersionEntity publishCollectionVersion(Objectify ofy, 
-      CollectionEntity collectionEntity, Version version, CollectionTreeNodeDto collectionRoot) {
+  public CollectionVersionEntity publishCollectionVersion(Objectify ofy,
+      CollectionId collectionId, Version version, CollectionTreeNodeDto collectionRoot) {
     checkTxnIsRunning(ofy);
-    checkNotNull(collectionEntity, "collectionEntity");
     
-    CollectionVersionEntity collectionVersionEntity = new CollectionVersionEntity.Builder()
+    CollectionEntity collectionEntity = this.get(ofy, collectionId); 
+    checkNotNull(collectionEntity, "Collection[" + collectionId + "] was not found.");
+    
+    CollectionVersionEntity fetchedEntity = collectionVersionDao.get(ofy, collectionId, version);
+
+    CollectionVersionEntity cvEntity = new CollectionVersionEntity.Builder()
         .version(version)
         .collectionKey(collectionEntity.getKey())
         .collectionTree(collectionRoot)
         .creationTime(LightUtils.getNow())
         .lastUpdateTime(LightUtils.getNow())
         .build();
-    collectionVersionDao.put(ofy, collectionVersionEntity);
     
+    if (fetchedEntity != null) {
+      if (fetchedEntity.equals(cvEntity)) {
+        return fetchedEntity;
+      } else {
+        throw new VersionMutabilityViolation("Tried to modify : " + collectionId + ":" 
+            + version); 
+      }
+    }
+    collectionVersionDao.put(ofy, cvEntity);
+
     // TODO(arjuns): Add support for etag.
     collectionEntity.publishVersion(version, LightUtils.getNow(), null);
     collectionDao.put(ofy, collectionEntity);
 
-    return collectionVersionEntity;
+    return cvEntity;
   }
 
   /**
@@ -204,41 +221,45 @@ public class CollectionManagerImpl implements CollectionManager {
   @Override
   public CollectionVersionEntity getCollectionVersion(Objectify ofy, CollectionId collectionId,
       Version version) {
-    Version requiredVersion = convertLatestToSpecificVersion(collectionId, version);
+    Version requiredVersion =
+        convertLatestToLatestPublishedVersionForCollection(collectionId, version);
 
     CollectionVersionEntity cvEntity = collectionVersionDao.get(ofy, collectionId, requiredVersion);
     return cvEntity;
   }
 
-  private Version convertLatestToSpecificVersion(CollectionId collectionId, Version version) {
+  private Version convertLatestToLatestPublishedVersionForCollection(CollectionId collectionId,
+      Version version) {
     if (version.isLatestVersion()) {
       CollectionEntity entity = get(null, collectionId);
+      if (entity == null) {
+        throw new NotFoundException("Collection [" + collectionId + "] was not found.");
+      }
       return entity.getLatestPublishVersion();
     }
 
     return version;
   }
-  
-  /** 
+
+  /**
    * {@inheritDoc}
    */
   @Override
   public PageDto findCollectionsByOwnerId(PersonId ownerId, String startIndex, int maxResults) {
-    GAEQueryWrapper<CollectionEntity>  wrapper = collectionDao.findCollectionsByOwnerId(
+    GAEQueryWrapper<CollectionEntity> wrapper = collectionDao.findCollectionsByOwnerId(
         ownerId, startIndex, maxResults);
-    
+
     List<CollectionDto> list = Lists.newArrayList();
     for (CollectionEntity currEntity : wrapper.getList()) {
       list.add(currEntity.toDto());
     }
-    
-    
+
     PageDto pageDto = new PageDto.Builder()
         .startIndex(wrapper.getStartIndex())
         .list(list)
         .handlerUri(JerseyConstants.URI_RESOURCE_PATH_COLLECTION_ME)
         .build();
-    
+
     return pageDto;
   }
 }

@@ -19,19 +19,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.constants.OAuth2ProviderService.GOOGLE_DOC;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
+import static com.google.light.server.utils.LightUtils.getWrapper;
 
-import javax.xml.bind.annotation.XmlElementWrapper;
-
-import org.codehaus.jackson.annotate.JsonTypeName;
-
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-
-import org.codehaus.jackson.annotate.JsonProperty;
-
-import javax.xml.bind.annotation.XmlElement;
-
-import javax.xml.bind.annotation.XmlRootElement;
+import com.google.light.server.dto.pojo.typewrapper.stringwrapper.ExternalId;
 
 import com.google.common.collect.Lists;
 import com.google.gdata.data.Link;
@@ -46,7 +36,14 @@ import com.google.light.server.dto.AbstractDto;
 import com.google.light.server.dto.module.ModuleType;
 import java.util.List;
 import java.util.logging.Logger;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlRootElement;
 import org.codehaus.jackson.annotate.JsonCreator;
+import org.codehaus.jackson.annotate.JsonProperty;
+import org.codehaus.jackson.annotate.JsonTypeName;
 import org.joda.time.DateTime;
 import org.joda.time.Instant;
 
@@ -86,7 +83,7 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
   
   @XmlElement(name = "documentLink")
   @JsonProperty(value = "documentLink")
-  private String documentLink;
+  private ExternalId documentLink;
   
   @XmlElement(name = "aclFeedLink")
   @JsonProperty(value = "aclFeedLink")
@@ -190,7 +187,7 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
     // Required for all configs.
     checkNotNull(type, "ModuleType");
     checkNotBlank(title, "title");
-    checkNotBlank(documentLink, "documentLink");
+    checkNotNull(documentLink, "documentLink");
 
     if (config != Configuration.DTO_FOR_IMPORT) {
 
@@ -252,7 +249,7 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
     return title;
   }
 
-  public String getDocumentLink() {
+  public ExternalId getDocumentLink() {
     return documentLink;
   }
 
@@ -319,7 +316,7 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
     private Long lastEditTimeInMillis;
     private ModuleType moduleType;
     private String title;
-    private String documentLink;
+    private ExternalId documentLink;
     private String aclFeedLink;
     private String htmlExportUrl;
     private List<String> parentFoldersUrls = Lists.newArrayList();
@@ -376,7 +373,7 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
       return this;
     }
 
-    public Builder documentLink(String documentLink) {
+    public Builder documentLink(ExternalId documentLink) {
       this.documentLink = documentLink;
       return this;
     }
@@ -545,7 +542,7 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
       moduleType(ModuleType.getByProviderServiceAndCategory(GOOGLE_DOC, docListEntry.getType()));
       title(docListEntry.getTitle().getPlainText());
 
-      documentLink(docListEntry.getDocumentLink().getHref());
+      documentLink(getWrapper(docListEntry.getDocumentLink().getHref(), ExternalId.class));
       aclFeedLink(docListEntry.getAclFeedLink().getHref());
       // TODO(arjuns) : Verify this.
       int contentTypeInt = docListEntry.getContent().getType();

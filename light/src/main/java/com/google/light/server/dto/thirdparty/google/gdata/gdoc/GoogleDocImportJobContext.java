@@ -19,12 +19,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkModuleId;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkVersion;
-import static com.google.light.server.utils.LightUtils.getWrapperValue;
-
-import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
-import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
 
 import com.google.light.server.dto.AbstractDto;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
 import com.google.light.server.exception.ExceptionType;
 import com.google.light.server.utils.LightPreconditions;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -52,11 +50,11 @@ public class GoogleDocImportJobContext extends AbstractDto<GoogleDocImportJobCon
   
   @XmlElement(name = "moduleId")
   @JsonProperty(value = "moduleId")
-  private Long moduleId;
+  private ModuleId moduleId;
   
   @XmlElement(name = "version")
   @JsonProperty(value = "version")
-  private Long version;
+  private Version version;
   
   @XmlElement(name = "archiveId")
   @JsonProperty(value = "archiveId")
@@ -102,11 +100,11 @@ public class GoogleDocImportJobContext extends AbstractDto<GoogleDocImportJobCon
   }
 
   public ModuleId getModuleId() {
-    return new ModuleId(moduleId);
+    return moduleId;
   }
 
   public Version getVersion() {
-    return new Version(version);
+    return version;
   }
 
   public GoogleDocImportJobState getState() {
@@ -182,8 +180,8 @@ public class GoogleDocImportJobContext extends AbstractDto<GoogleDocImportJobCon
   private GoogleDocImportJobContext(Builder builder) {
     super(builder);
     this.resourceInfo = builder.resourceInfo;
-    this.moduleId = getWrapperValue(builder.moduleId);
-    this.version = getWrapperValue(builder.version);
+    this.moduleId = builder.moduleId;
+    this.version = builder.version;
     this.state = builder.state;
     this.archiveId = builder.archiveId;
     this.gcsArchiveLocation = builder.gcsArchiveLocation;
@@ -198,6 +196,9 @@ public class GoogleDocImportJobContext extends AbstractDto<GoogleDocImportJobCon
     ENQUEUED,
     WAITING_FOR_ARCHIVE,
     ARCHIVE_DOWNLOADED,
+    MODULE_CREATED,
+    MODULE_VERSION_RESERVED,
+    MODULE_VERSION_PUBLISHED,
     COMPLETE;
   }
 }

@@ -80,6 +80,7 @@ public class TestResources extends AbstractJerseyResource {
       appendSectionHeader(builder, "Admin Utilities");
       appendHtmlPath(builder, HtmlPathEnum.PUT_OAUTH2_CONSUMER_CREDENTIAL);
       appendHref(builder, JerseyConstants.URI_MISC_ADMIN_CONFIG, "Config");
+      appendHref(builder, JerseyConstants.URI_RESOURCE_JOB + "/0", "Job");
 
       appendSectionHeader(builder, "Owner OAuth2 Workflow :");
       appendServletPath(builder, ServletPathEnum.OAUTH2_GOOGLE_LOGIN);

@@ -15,26 +15,20 @@
  */
 package com.google.light.server.dto.module;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
-import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
-
-import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
-
-import org.codehaus.jackson.annotate.JsonTypeName;
-
-import org.codehaus.jackson.annotate.JsonProperty;
-
-import javax.xml.bind.annotation.XmlAccessType;
-
-import javax.xml.bind.annotation.XmlAccessorType;
-
-import javax.xml.bind.annotation.XmlRootElement;
-
-import javax.xml.bind.annotation.XmlElement;
-
 
 import com.google.light.server.dto.AbstractDtoToPersistence;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
+import com.google.light.server.dto.pojo.typewrapper.stringwrapper.ExternalId;
 import com.google.light.server.persistence.entity.module.ModuleVersionEntity;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import org.codehaus.jackson.annotate.JsonProperty;
+import org.codehaus.jackson.annotate.JsonTypeName;
 
 /**
  * DTO for Light Modules.
@@ -50,19 +44,29 @@ import com.google.light.server.persistence.entity.module.ModuleVersionEntity;
 public class ModuleVersionDto extends AbstractDtoToPersistence<ModuleVersionDto, ModuleVersionEntity, Long> {
   @XmlElement(name = "version")
   @JsonProperty(value = "version")
-  private Long version;
+  private ModuleId moduleId;
+  
+  @XmlElement(name = "version")
+  @JsonProperty(value = "version")
+  private Version version;
   
   @XmlElement(name = "content")
   @JsonProperty(value = "content")
   private String content;
+  
+  @XmlElement(name = "externalId")
+  @JsonProperty(value = "externalId")
+  private ExternalId externalId;
 
   /** 
    * {@inheritDoc}
    */
   @Override
   public ModuleVersionDto validate() {
-    checkPositiveLong(version, "version");
+    checkNotNull(moduleId, "moduleId");
+    checkNotNull(version, "version");
     checkNotBlank(content, "content");
+    checkNotNull(externalId, "externalId");
     return this;
   }
 
@@ -83,17 +87,37 @@ public class ModuleVersionDto extends AbstractDtoToPersistence<ModuleVersionDto,
     return content;
   }
 
-  public static class Builder extends AbstractDtoToPersistence.BaseBuilder<Builder> {
-    private Long version;
-    private String content;
+  public Version getVersion() {
+    return version;
+  }
+  
+  public ExternalId getExternalId() {
+    return externalId;
+  }
 
-    public Builder version(Long version) {
+  public static class Builder extends AbstractDtoToPersistence.BaseBuilder<Builder> {
+    private ModuleId moduleId;
+    private Version version;
+    private String content;
+    private ExternalId externalId;
+
+    public Builder moduleId(ModuleId moduleId) {
+      this.moduleId = moduleId;
+      return this;
+    }
+    
+    public Builder version(Version version) {
       this.version = version;
       return this;
     }
 
     public Builder content(String content) {
       this.content = content;
+      return this;
+    }
+    
+    public Builder externalId(ExternalId externalId) {
+      this.externalId = externalId;
       return this;
     }
 
@@ -106,8 +130,10 @@ public class ModuleVersionDto extends AbstractDtoToPersistence<ModuleVersionDto,
   @SuppressWarnings("synthetic-access")
   private ModuleVersionDto(Builder builder) {
     super(builder);
+    this.moduleId = builder.moduleId;
     this.version = builder.version;
     this.content = builder.content;
+    this.externalId = builder.externalId;
   }
 
   // For JAXB

@@ -18,6 +18,22 @@ package com.google.light.server.dto.pojo.typewrapper.longwrapper;
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
 
 import com.google.light.server.dto.pojo.typewrapper.AbstractTypeWrapper;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.JobId.JobIdDeserializer;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.JobId.JobIdSerializer;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.JobId.JobIdXmlAdapter;
+import java.io.IOException;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.adapters.XmlAdapter;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import org.codehaus.jackson.JsonGenerator;
+import org.codehaus.jackson.JsonParser;
+import org.codehaus.jackson.JsonProcessingException;
+import org.codehaus.jackson.map.DeserializationContext;
+import org.codehaus.jackson.map.JsonDeserializer;
+import org.codehaus.jackson.map.JsonSerializer;
+import org.codehaus.jackson.map.SerializerProvider;
+import org.codehaus.jackson.map.annotate.JsonDeserialize;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
 
 /**
  * Wrapper for JobId.
@@ -27,6 +43,10 @@ import com.google.light.server.dto.pojo.typewrapper.AbstractTypeWrapper;
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
+@JsonSerialize(using = JobIdSerializer.class)
+@JsonDeserialize(using = JobIdDeserializer.class)
+@XmlJavaTypeAdapter(JobIdXmlAdapter.class)
+@XmlRootElement(name = "jobId")
 public class JobId extends AbstractTypeWrapper<Long, JobId> {
 
   public JobId(String value) {
@@ -46,13 +66,15 @@ public class JobId extends AbstractTypeWrapper<Long, JobId> {
    */
   @Override
   public JobId validate() {
-    checkPositiveLong(getValue(), "InvalidJobId");
+    checkPositiveLong(getValue(), "Invalid InvalidJobId");
+
     return this;
   }
 
   // For Objectify and JAXB.
+  @SuppressWarnings("unused")
   private JobId() {
-    super(null);
+    super();
   }
 
   /**
@@ -61,5 +83,62 @@ public class JobId extends AbstractTypeWrapper<Long, JobId> {
   @Override
   public JobId createInstance(Long value) {
     return new JobId(value);
+  }
+
+  // Adding Custom Serializer/Deserializer and XmlAdapter.
+
+  /**
+   * Xml Adapter for {@link JobId}.
+   */
+  public static class JobIdXmlAdapter extends XmlAdapter<Long, JobId> {
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public JobId unmarshal(Long value) throws Exception {
+      return new JobId(value);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Long marshal(JobId value) throws Exception {
+      return value.getValue();
+    }
+  }
+
+  /**
+   * {@link JsonDeserializer} for {@link JobId}.
+   */
+  public static class JobIdDeserializer extends JsonDeserializer<JobId> {
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public JobId deserialize(JsonParser jsonParser, DeserializationContext ctxt)
+        throws IOException,
+        JsonProcessingException {
+      String value = jsonParser.getText();
+      return new JobId(value);
+    }
+  }
+
+  /**
+   * {@link JsonSerializer} for {@link JobId}.
+   */
+  public static class JobIdSerializer extends JsonSerializer<JobId> {
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void serialize(JobId value, JsonGenerator jsonGenerator, SerializerProvider provider)
+        throws IOException, JsonProcessingException {
+      if (value == null) {
+        return;
+      }
+      jsonGenerator.writeString("" + value.getValue());
+    }
   }
 }

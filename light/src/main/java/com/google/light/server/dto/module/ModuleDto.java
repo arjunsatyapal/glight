@@ -18,14 +18,12 @@ package com.google.light.server.dto.module;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNonEmptyList;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
-import static com.google.light.server.utils.LightUtils.convertListOfValuesToWrapperList;
-import static com.google.light.server.utils.LightUtils.convertWrapperListToListOfValues;
-import static com.google.light.server.utils.LightUtils.getWrapperValue;
 
 import com.google.light.server.dto.AbstractDtoToPersistence;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
+import com.google.light.server.dto.pojo.typewrapper.stringwrapper.ExternalId;
 import com.google.light.server.persistence.entity.module.ModuleEntity;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -49,30 +47,38 @@ import org.codehaus.jackson.annotate.JsonTypeName;
 @XmlRootElement(name = "module")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class ModuleDto extends AbstractDtoToPersistence<ModuleDto, ModuleEntity, ModuleId> {
-  @XmlElement(name = "id")
-  @JsonProperty(value = "id")
-  private Long id;
+  @XmlElement(name = "moduleId")
+  @JsonProperty(value = "moduleId")
+  private ModuleId moduleId;
 
   @XmlElement(name = "title")
   @JsonProperty(value = "title")
   private String title;
 
-  @XmlElement(name = "state")
-  @JsonProperty(value = "state")
-  private ModuleState state;
+  @XmlElement(name = "moduleState")
+  @JsonProperty(value = "moduleState")
+  private ModuleState moduleState;
+
+  @XmlElement(name = "moduleType")
+  @JsonProperty(value = "moduleType")
+  private ModuleType moduleType;
 
   @XmlElementWrapper(name = "owners")
   @XmlElement(name = "personId")
   @JsonProperty(value = "owners")
-  private List<Long> owners;
+  private List<PersonId> owners;
 
   @XmlElement(name = "latestPublishVersion")
   @JsonProperty(value = "latestPublishVersion")
-  private Long latestPublishVersion;
+  private Version latestPublishVersion;
   
   @XmlElement(name = "nextVersion")
   @JsonProperty(value = "nextVersion")
-  private Long nextVersion;
+  private Version nextVersion;
+  
+  @XmlElement(name = "nextVersion")
+  @JsonProperty(value = "nextVersion")
+  private ExternalId externalId;
 
   /**
    * {@inheritDoc}
@@ -80,31 +86,42 @@ public class ModuleDto extends AbstractDtoToPersistence<ModuleDto, ModuleEntity,
   @Override
   public ModuleDto validate() {
     checkNotBlank(title, "title");
-    checkNotNull(state, "moduleState");
+    checkNotNull(moduleState, "moduleState");
+    checkNotNull(moduleType, "moduleType");
     checkNonEmptyList(owners, "owner list cannot be empty");
     // Version can be zero when module is in process of import.
     checkNotNull(latestPublishVersion, "version");
+    checkNotNull(externalId, "externalId");
     return this;
   }
 
-  public ModuleId getId() {
-    return new ModuleId(id);
+  public ModuleId getModuleId() {
+    return moduleId;
   }
 
-  public ModuleState getState() {
-    return state;
+  public ModuleType getModuleType() {
+    return moduleType;
+  }
+  
+  public ModuleState getModuleState() {
+    return moduleState;
   }
 
   public List<PersonId> getOwners() {
-    return convertListOfValuesToWrapperList(owners, PersonId.class);
+//    return convertListOfValuesToWrapperList(owners, PersonId.class);
+    return owners;
   }
 
   public Version getLatestPublishVersion() {
-    return new Version(latestPublishVersion);
+    return latestPublishVersion;
   }
   
   public Version getNextVersion() {
-    return new Version(nextVersion);
+    return nextVersion;
+  }
+  
+  public ExternalId getExternalId() {
+    return externalId;
   }
 
   /**
@@ -124,10 +141,12 @@ public class ModuleDto extends AbstractDtoToPersistence<ModuleDto, ModuleEntity,
   public static class Builder extends AbstractDtoToPersistence.BaseBuilder<Builder> {
     private ModuleId id;
     private String title;
-    private ModuleState state;
+    private ModuleType moduleType;
+    private ModuleState moduleState;
     private List<PersonId> owners;
     private Version latestPublishVersion;
     private Version nextVersion;
+    private ExternalId externalId;
 
     public Builder id(ModuleId id) {
       this.id = id;
@@ -139,8 +158,13 @@ public class ModuleDto extends AbstractDtoToPersistence<ModuleDto, ModuleEntity,
       return this;
     }
 
-    public Builder state(ModuleState state) {
-      this.state = state;
+    public Builder moduleType(ModuleType moduleType) {
+      this.moduleType = moduleType;
+      return this;
+    }
+    
+    public Builder moduleState(ModuleState moduleState) {
+      this.moduleState = moduleState;
       return this;
     }
 
@@ -158,6 +182,11 @@ public class ModuleDto extends AbstractDtoToPersistence<ModuleDto, ModuleEntity,
       this.nextVersion = nextVersion;
       return this;
     }
+    
+    public Builder externalId(ExternalId externalId) {
+      this.externalId = externalId;
+      return this;
+    }
 
     @SuppressWarnings("synthetic-access")
     public ModuleDto build() {
@@ -168,12 +197,14 @@ public class ModuleDto extends AbstractDtoToPersistence<ModuleDto, ModuleEntity,
   @SuppressWarnings("synthetic-access")
   private ModuleDto(Builder builder) {
     super(builder);
-    this.id = getWrapperValue(builder.id);
+    this.moduleId = builder.id;
     this.title = builder.title;
-    this.state = builder.state;
-    this.owners = convertWrapperListToListOfValues(builder.owners);
-    this.latestPublishVersion = getWrapperValue(builder.latestPublishVersion);
-    this.nextVersion = getWrapperValue(builder.nextVersion);
+    this.moduleType = builder.moduleType;
+    this.moduleState = builder.moduleState;
+    this.owners = /*convertWrapperListToListOfValues(builder.owners);*/ builder.owners;
+    this.latestPublishVersion = builder.latestPublishVersion;
+    this.nextVersion = builder.nextVersion;
+    this.externalId = builder.externalId;
   }
 
   @JsonCreator

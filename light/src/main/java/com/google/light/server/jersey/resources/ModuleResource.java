@@ -3,24 +3,9 @@ package com.google.light.server.jersey.resources;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.constants.LightConstants.MAX_RESULTS_MAX;
-import static com.google.light.server.constants.LightStringConstants.VERSION_LATEST_STR;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPersonLoggedIn;
 import static com.google.light.server.utils.LightUtils.isListEmpty;
-
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
-
-import org.apache.commons.lang.StringUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -29,15 +14,26 @@ import com.google.light.server.constants.LightConstants;
 import com.google.light.server.constants.LightStringConstants;
 import com.google.light.server.constants.http.ContentTypeConstants;
 import com.google.light.server.dto.module.ModuleDto;
+import com.google.light.server.dto.module.ModuleVersionDto;
 import com.google.light.server.dto.pages.PageDto;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
 import com.google.light.server.exception.unchecked.httpexception.NotFoundException;
 import com.google.light.server.manager.interfaces.ModuleManager;
+import com.google.light.server.persistence.entity.module.ModuleEntity;
 import com.google.light.server.persistence.entity.module.ModuleVersionEntity;
 import com.google.light.server.servlets.SessionManager;
 import com.google.light.server.utils.GuiceUtils;
-import com.google.light.server.utils.LightUtils;
+import java.util.List;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * Jersey Resource for Modules.
@@ -66,32 +62,36 @@ public class ModuleResource extends AbstractJerseyResource {
    */
   @GET
   @Path(JerseyConstants.PATH_MODULE_ID)
-  public Response getModule() {
-    String uri = request.getRequestURI() + "/" + VERSION_LATEST_STR;
-    return Response.seeOther(LightUtils.getURI(uri)).build();
+  @Produces({ ContentTypeConstants.APPLICATION_JSON, ContentTypeConstants.APPLICATION_XML })
+  public ModuleDto getModule(
+      @PathParam(JerseyConstants.PATH_PARAM_MODULE_ID)String moduleIdStr) {
+    ModuleId moduleId = new ModuleId(moduleIdStr);
+    ModuleEntity moduleEntity = moduleManager.get(null, moduleId);
+    
+    if (moduleEntity == null) {
+      throw new NotFoundException("Module[" + moduleId + "] was not found.");
+    }
+    
+    return moduleEntity.toDto();
   }
 
   @GET
   @Path(JerseyConstants.PATH_MODULE_VERSION)
   @Produces({ ContentTypeConstants.APPLICATION_JSON, ContentTypeConstants.APPLICATION_XML })
-  public ModuleVersionEntity getModuleVersion(
+  public ModuleVersionDto getModuleVersion(
       @PathParam(JerseyConstants.PATH_PARAM_MODULE_ID) String moduleIdStr,
       @PathParam(JerseyConstants.PATH_PARAM_VERSION) String versionStr) {
     checkNotBlank(versionStr, "Invalid version.");
-    ModuleId moduleId = new ModuleId(moduleIdStr);
-    Version version = Version.createVersion(versionStr);
+    ModuleVersionDto moduleVersion= getModuleVersionDto(moduleIdStr, versionStr);
 
-    ModuleVersionEntity moduleVersionEntity = moduleManager.getModuleVersion(
-        null /* ofy */, moduleId, version);
-
-    return moduleVersionEntity;
+    return moduleVersion;
   }
 
-  protected ModuleVersionEntity getModuleVersionEntity(String moduleIdStr, String versionStr) {
+  protected ModuleVersionDto getModuleVersionDto(String moduleIdStr, String versionStr) {
     checkNotBlank(moduleIdStr, "Invalid ModuleId.");
     checkNotBlank(versionStr, "Invalid version.");
     ModuleId moduleId = new ModuleId(moduleIdStr);
-    Version version = Version.createVersion(versionStr);
+    Version version = new Version(versionStr);
 
     ModuleVersionEntity moduleEntity = moduleManager.getModuleVersion(
         null /* ofy */, moduleId, version);
@@ -100,7 +100,7 @@ public class ModuleResource extends AbstractJerseyResource {
       throw new NotFoundException("Could not find " + moduleId + ":" + version);
     }
 
-    return moduleEntity;
+    return moduleEntity.toDto();
   }
 
   @GET
@@ -142,7 +142,7 @@ public class ModuleResource extends AbstractJerseyResource {
         htmlBuilder.append(counter++)
         .append(".&nbsp")
         .append("<a href=" + "/rest/module/")
-        .append(currDto.getId().getValue())
+        .append(currDto.getModuleId().getValue())
         .append("/latest/content")
         .append(">")
         .append(currDto.getTitle())

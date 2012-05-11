@@ -17,6 +17,8 @@ package com.google.light.server.dto.pages;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import javax.xml.bind.annotation.XmlAnyElement;
+
 import javax.xml.bind.annotation.XmlElementWrapper;
 
 import org.codehaus.jackson.annotate.JsonTypeName;
@@ -53,7 +55,7 @@ public class PageDto extends AbstractDto<PageDto> {
 
   @SuppressWarnings("rawtypes")
   @XmlElementWrapper(name = "list")
-  @XmlElement(name = "item")
+  @XmlAnyElement
   @JsonProperty(value = "list")
   private List<? extends AbstractDto> list;
 
@@ -65,6 +67,10 @@ public class PageDto extends AbstractDto<PageDto> {
     checkNotNull(handlerUri, "handlerUri");
 
     return this;
+  }
+
+  public String getHandlerUri() {
+    return handlerUri;
   }
 
   public String getStartIndex() {

@@ -1,5 +1,6 @@
 {
+  "acceptedTos" : true,
+  "email" : "unit-test@myopenedu.com",
   "firstName" : "first name",
-  "lastName" : "last name",
-  "acceptedTos" : true
+  "lastName" : "last name"
 }
