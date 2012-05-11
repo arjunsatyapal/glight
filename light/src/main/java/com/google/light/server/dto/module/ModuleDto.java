@@ -76,8 +76,8 @@ public class ModuleDto extends AbstractDtoToPersistence<ModuleDto, ModuleEntity,
   @JsonProperty(value = "nextVersion")
   private Version nextVersion;
   
-  @XmlElement(name = "nextVersion")
-  @JsonProperty(value = "nextVersion")
+  @XmlElement(name = "externalId")
+  @JsonProperty(value = "externalId")
   private ExternalId externalId;
 
   /**
