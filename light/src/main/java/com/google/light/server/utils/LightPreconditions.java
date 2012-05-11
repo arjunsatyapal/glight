@@ -20,21 +20,16 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.light.server.utils.ServletUtils.getRequestHeaderValue;
 
-import com.google.light.server.dto.pojo.typewrapper.longwrapper.CollectionId;
-import com.google.light.server.dto.pojo.typewrapper.longwrapper.JobId;
-import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
-import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
-import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
 
-import com.google.light.server.exception.unchecked.InvalidVersionException;
-
-
-import com.google.light.server.exception.unchecked.InvalidModuleIdException;
-
-
-import com.google.light.server.exception.unchecked.InvalidJobIdException;
-
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.validator.routines.EmailValidator;
+import org.apache.commons.validator.routines.IntegerValidator;
+import org.apache.commons.validator.routines.LongValidator;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
@@ -42,12 +37,20 @@ import com.google.common.collect.Lists;
 import com.google.light.server.constants.HttpHeaderEnum;
 import com.google.light.server.constants.LightEnvEnum;
 import com.google.light.server.constants.OAuth2ProviderService;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.CollectionId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.JobId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
 import com.google.light.server.exception.ExceptionType;
 import com.google.light.server.exception.unchecked.BlankStringException;
+import com.google.light.server.exception.unchecked.InvalidJobIdException;
+import com.google.light.server.exception.unchecked.InvalidModuleIdException;
 import com.google.light.server.exception.unchecked.InvalidPersonIdException;
 import com.google.light.server.exception.unchecked.InvalidSessionException;
+import com.google.light.server.exception.unchecked.InvalidVersionException;
 import com.google.light.server.exception.unchecked.ServerConfigurationException;
-import com.google.light.server.exception.unchecked.httpexception.InternalServerError;
+import com.google.light.server.exception.unchecked.httpexception.InternalServerErrorException;
 import com.google.light.server.exception.unchecked.httpexception.NotFoundException;
 import com.google.light.server.exception.unchecked.httpexception.PersonLoginRequiredException;
 import com.google.light.server.exception.unchecked.httpexception.UnauthorizedException;
@@ -55,14 +58,6 @@ import com.google.light.server.persistence.entity.person.PersonEntity;
 import com.google.light.server.servlets.SessionManager;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Objectify;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.List;
-import javax.servlet.http.HttpServletRequest;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.validator.routines.EmailValidator;
-import org.apache.commons.validator.routines.IntegerValidator;
-import org.apache.commons.validator.routines.LongValidator;
 
 /**
  * Some Additional Preconditions which are not available with Guava Library's {@link Preconditions}.
@@ -393,7 +388,7 @@ public class LightPreconditions {
         throw new NotFoundException(message);
 
       case SERVER:
-        throw new InternalServerError(message);
+        throw new InternalServerErrorException(message);
 
       default:
         throw new IllegalArgumentException("Unsupported type : " + exceptionType);

@@ -73,6 +73,10 @@ public class CollectionTreeNodeDto extends AbstractTreeNode<CollectionTreeNodeDt
     return this;
   }
 
+  public boolean hasModuleId() {
+    return moduleId != null;
+  }
+  
   public ModuleId getModuleId() {
     return new ModuleId(moduleId);
   }

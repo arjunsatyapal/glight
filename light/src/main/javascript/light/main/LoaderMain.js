@@ -19,11 +19,11 @@
  */
 define(['dojo/has', 'dojo/query', 'dojo/dom-construct', 'dojo',
         'light/utils/URLUtils', 'light/utils/PersonUtils',
-        'light/enums/PagesEnum', 
+        'light/enums/PagesEnum',
         'light/utils/RouterManager'],
         function(has, $, domConstruct, dojo, URLUtils, PersonUtils,
                  PagesEnum, RouterManager) {
-  
+
   function loadMainFor(page) {
     require(['light/main/CoreMain'], function() {
       require(['light/main/' + page.main], function() {
@@ -34,9 +34,9 @@ define(['dojo/has', 'dojo/query', 'dojo/dom-construct', 'dojo',
 
   var page = PagesEnum.getByPath(URLUtils.getPath());
   if (page) {
-    
+
     // Checking if the Person has accepted the Terms of Service.
-    if(!PersonUtils.tosCheck(page))
+    if (!PersonUtils.tosCheck(page))
       return;
 
     /*
@@ -83,8 +83,8 @@ define(['dojo/has', 'dojo/query', 'dojo/dom-construct', 'dojo',
     // Adding the dojo theme class to the body element
     var body = $('body')[0];
     var currentClassAttr = body.getAttribute('class');
-    if(currentClassAttr)
-      body.setAttribute('class', 'claro '+currentClassAttr);
+    if (currentClassAttr)
+      body.setAttribute('class', 'claro ' + currentClassAttr);
     else
       body.setAttribute('class', 'claro');
 

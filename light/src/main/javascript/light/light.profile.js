@@ -56,7 +56,7 @@ var profile = (function() {
       location: './external/djk/dojox',
       destLocation: './external/djk/dojox'
     }],
-    
+
     files: [
       []
     ],
@@ -65,12 +65,12 @@ var profile = (function() {
 
     /*
      * Dojo configuration for runtime
-     * 
+     *
      * It is encapsulated in a function so we can add some
      * runtime logic.
      */
-    userConfig: "("+function() {
-      
+    userConfig: '('+ function() {
+
       var config = {
         // Packages as seen by the runtime enviroment
         packages: [{
@@ -87,13 +87,13 @@ var profile = (function() {
           location: '/js/external/djk/dojox'
         }]
       };
-      if(this.lightPreload && this.lightPreload.locale) {
+      if (this.lightPreload && this.lightPreload.locale) {
         config.locale = this.lightPreload.locale;
       }
-      
+
       return config;
-      
-    }.toString()+")()",
+
+    }.toString() + ')()',
 
     // Builds a new release.
     action: 'release',
@@ -164,7 +164,7 @@ var profile = (function() {
         boot: true,
         customBase: true
       },
-      
+
       // Making the usual hardcoded dojo/dojo layer just a dummy file
       'dojo/dojo': {
         customBase: true

@@ -67,7 +67,7 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
             self._view.warnError();
             self._view.enable();
           }
-      )
+      );
     }
   });
 });

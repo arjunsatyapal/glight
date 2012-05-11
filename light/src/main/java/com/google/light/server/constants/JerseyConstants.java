@@ -79,6 +79,22 @@ public class JerseyConstants {
       + CONTENT;
   public static final String PATH_MODULE_RESOURCE = PATH_MODULE_VERSION + PATH_RESOURCE_TYPE
       + PATH_RESOURCE;
+  
+  // Path for Content Resource
+  public static final String PATH_CONTENT_COLLECTION = "/collection/{" + PATH_PARAM_COLLECTION_ID + "}";
+  public static final String PATH_CONTENT_COLLECTION_VERSION = PATH_CONTENT_COLLECTION + "/{" + PATH_PARAM_VERSION + "}";
+  public static final String PATH_CONTENT_MODULE = "/module/{" + PATH_PARAM_MODULE_ID + "}";
+  public static final String PATH_CONTENT_MODULE_VERSION = PATH_CONTENT_MODULE + "/{" + PATH_PARAM_VERSION + "}";
+  public static final String PATH_CONTENT_MODULE_VERSION_WITH_SLASH = PATH_CONTENT_MODULE_VERSION + "/";
+  public static final String PATH_CONTENT_MODULE_VERSION_RESOURCE = PATH_CONTENT_MODULE_VERSION + PATH_RESOURCE_TYPE + PATH_RESOURCE;
+  
+  public static final String PATH_CONTENT_MODULE_IN_COLLECTION_VERSION = PATH_CONTENT_COLLECTION_VERSION + "/{" + PATH_PARAM_MODULE_ID + "}";
+  public static final String PATH_CONTENT_MODULE_IN_COLLECTION_VERSION_WITH_SLASH = PATH_CONTENT_MODULE_IN_COLLECTION_VERSION +"/";
+  public static final String PATH_CONTENT_MODULE_IN_COLLECTION_VERSION_RESOURCE = PATH_CONTENT_MODULE_IN_COLLECTION_VERSION + PATH_RESOURCE_TYPE
+      + PATH_RESOURCE;
+  
+  public static final String RESOURCE_PATH_CONTENT = "/content/general";
+  public static final String URI_RESOURCE_PATH_CONTENT = "/rest/content/general";
 
   // Path for Miscallaneous Admin Resource.
   public static final String RESOURCE_PATH_MISC_ADMIN = GAE_ADMIN_CONTEXT;

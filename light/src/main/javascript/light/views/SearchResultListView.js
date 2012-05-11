@@ -134,9 +134,9 @@ define(['dojo/_base/declare', 'light/views/AbstractLightView',
         }
 
         this.domNode.appendChild(pageInfo);
-        
-        
-        
+
+
+
       }
     }
   });

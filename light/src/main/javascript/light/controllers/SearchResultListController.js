@@ -26,7 +26,7 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
 
     lastSearchState: null,
     enabled: true,
-    
+
     /**
      * @extends light.controllers.AbstractLightController
      * @constructs
@@ -54,8 +54,8 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
       // Canceling last search
       this.searchService.cancelLastSearch();
       this.lastSearchState = searchState;
-      
-      if(!this.enabled)
+
+      if (!this.enabled)
         return;
 
       var view = this._view;
@@ -69,14 +69,14 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
       }
 
     },
-    
+
     /**
      * Handler for browse context state change events.
      */
     _onBrowseContextStateChange: function(browseContextState, source) {
-      if(browseContextState.context == BrowseContextsEnum.ALL) {
+      if (browseContextState.context == BrowseContextsEnum.ALL) {
         this.enabled = true;
-        if(this.lastSearchState)
+        if (this.lastSearchState)
           this._onSearchStateChange(this.lastSearchState);
       } else {
         this.enabled = false;

@@ -75,15 +75,25 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
                .context(BrowseContextsEnum.IMPORT)
                .subcontext('gdoc').build(), this]);
     },
-    
+
     /**
      * Indicates the user wants to see what he have imported on light.
      */
-    showWhatIHaveImported: function() {
+    seeImported: function() {
       connect.publish(EventsEnum.BROWSE_CONTEXT_STATE_CHANGED, [
            new BrowseContextStateBuilder()
                .context(BrowseContextsEnum.IMPORT)
                .subcontext('me').build(), this]);
+    },
+
+    /**
+     * Indicates the user wants to import modules on light
+     * and should see a list of sources from where he can do it.
+     */
+    importModules: function() {
+      connect.publish(EventsEnum.BROWSE_CONTEXT_STATE_CHANGED, [
+           new BrowseContextStateBuilder()
+               .context(BrowseContextsEnum.IMPORT).build(), this]);
     },
 
     /**
@@ -95,13 +105,13 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
         'redirectPath': URLUtils.getPathWithHash()
       }));
     },
-    
+
     /**
-     * 
+     *
      */
     importGdocs: function(items) {
       var list = [];
-      for(var i=0, len=items.length; i<len; i++) {
+      for (var i = 0, len = items.length; i < len; i++) {
         list.push(items[i].resourceId);
       }
       var self = this;

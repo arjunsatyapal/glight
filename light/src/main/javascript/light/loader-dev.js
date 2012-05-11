@@ -40,4 +40,4 @@ document.write('<script src="/js/external/djk/dojo/dojo.js"></script>');
 // loading method of writing a script tag with the following require code.
 window.onload = function() {
   require(['light/main/LoaderMain'], function() {});
-}
+};

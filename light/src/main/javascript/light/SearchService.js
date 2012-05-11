@@ -34,7 +34,7 @@ define(['dojo/_base/declare', 'dojo', 'light/utils/XHRUtils', 'dojo/_base/lang',
           .build();
 
       return this._lastXhr = XHRUtils.get({
-        url: '/api/search?' + dojo.objectToQuery(request),
+        url: '/api/search?' + dojo.objectToQuery(request)
       }).then(null, function() {
         this._lastXhr = null;
       });

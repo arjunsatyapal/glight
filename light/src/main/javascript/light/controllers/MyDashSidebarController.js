@@ -50,7 +50,7 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
     changeContextTo: function(browseContextState) {
       connect.publish(EventsEnum.BROWSE_CONTEXT_STATE_CHANGED,
           [browseContextState, this]);
-    },
-    
+    }
+
   });
 });

@@ -148,8 +148,8 @@ define(['dojo/_base/declare',
         }
       }
       if (newAnchor) {
-        if(evt.shiftKey && this.anchor) {
-          if(this.selection[newAnchor.id]) {
+        if (evt.shiftKey && this.anchor) {
+          if (this.selection[newAnchor.id]) {
             delete this.selection[this.anchor.id];
             this._removeItemClass(newAnchor, 'Selected');
           } else {
@@ -161,7 +161,7 @@ define(['dojo/_base/declare',
         this._setNewAnchor(newAnchor);
       }
     },
-    
+
     /**
      * Focus the first item of this widget.
      */
@@ -187,26 +187,31 @@ define(['dojo/_base/declare',
      * Focus handler
      */
     _onFocus: function(evt) {
-      if (!this.anchor) {
-        newAnchor = this.getAllNodes()[0];
-        if (newAnchor) {
-          this.selectNone();
-          this._setNewAnchor(newAnchor);
+      // For some reason we need to delay this, otherwise we get random
+      // DOM Exceptions from a query selector call inside Dojo Dnd Selector.
+      var self = this;
+      setTimeout(function() {
+        if (!self.anchor) {
+          newAnchor = self.getAllNodes()[0];
+          if (newAnchor) {
+            self.selectNone();
+            self._setNewAnchor(newAnchor);
+          }
         }
-      }
+      }, 0);
     },
 
     /*
      * Overriding the css functions so we can properly
      * make elements focusabled depending of the current state
      * of the node.
-     * 
+     *
      * There is one invariant in this widget that is accomplished
      * in the following methods: There is only one focusabled element
      * all the time (either this.node or this._lastAnchorFocusNode).
      * This makes tab's leave the listWidget and get back in the
      * current anchor.
-     * 
+     *
      * One implicit assumption: You always remove the class from
      * the previous anchor before adding to the new one.
      */
@@ -218,9 +223,11 @@ define(['dojo/_base/declare',
                           'anchor before adding a new one.');
         }
         this.node.setAttribute('tabindex', '-1');
-        this._lastAnchorFocusNode = this._focusNodeMap[node.id];
-        this._lastAnchorFocusNode.setAttribute('tabindex', '0');
-        setTimeout(function() {focusUtil.focus(this._lastAnchorFocusNode);}, 0);
+        var focusNode = this._lastAnchorFocusNode = this._focusNodeMap[node.id];
+        focusNode.setAttribute('tabindex', '0');
+        setTimeout(function() {
+          focusUtil.focus(focusNode);
+        }, 0);
       }
       this.inherited(arguments);
     },

@@ -25,9 +25,9 @@ define(['dojo/_base/connect', 'dojo/_base/declare', 'light/utils/URLUtils',
 
     /**
      * Responsible for syncing the URL hash with the current search state.
-     * 
+     *
      * TODO(waltercacau): Remove this class
-     * 
+     *
      * @deprecated
      * @constructs
      */

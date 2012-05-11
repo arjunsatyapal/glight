@@ -13,18 +13,8 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-/**
- * This file should be bundled with our custom dojo core layer so it can
- * take care of localization issues.
- */
-define(['light/utils/LanguageUtils'],
-        function(LanguageUtils) {
+package com.google.light.server.utils;
 
-  /**
-   * Because of loading problems, we can't add any localized dependency to the
-   * loader layer.
-   */
-  require(['dojo/domReady!'], function() {
-    document.body.setAttribute('dir', LanguageUtils.isLeftToRight() ? 'ltr' : 'rtl');
-  });
-});
+public class ContentUtils {
+
+}

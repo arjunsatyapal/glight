@@ -19,7 +19,7 @@ define(['dojo/_base/declare', 'light/utils/URLUtils', 'light/enums/PagesEnum',
   /**
    * Utilities for handling with the logged person. TODO(waltercacau): add test
    * for this class
-   * 
+   *
    * @class
    * @name light.utils.PersonUtils
    */
@@ -29,8 +29,8 @@ define(['dojo/_base/declare', 'light/utils/URLUtils', 'light/enums/PagesEnum',
     /**
      * Return's the current logged person or null if there is no person logged
      * in.
-     * 
-     * @returns Current hash
+     *
+     * @return Current hash
      */
     getCurrent: function() {
       return lightPreload.person ? lightPreload.person : null;
@@ -43,10 +43,10 @@ define(['dojo/_base/declare', 'light/utils/URLUtils', 'light/enums/PagesEnum',
      * <p>
      * This function is supposed to be called in the beginning of
      * {@link light.main.LoaderMain}.
-     * 
+     *
      * @param {light.enums.PagesEnum}
      *          currentPage The page we are currently in.
-     * @return {boolean} true if the user passes the tosCheck or if we 
+     * @return {boolean} true if the user passes the tosCheck or if we
      *          are in the register page.
      */
     tosCheck: function(currentPage) {
@@ -68,9 +68,9 @@ define(['dojo/_base/declare', 'light/utils/URLUtils', 'light/enums/PagesEnum',
 
     /**
      * Return's true if there is a person logged in.
-     * 
+     *
      * TODO(waltercacau): add test for this.
-     * @returns
+     * @return
      */
     isLogged: function() {
       return this.getCurrent() ? true : false;

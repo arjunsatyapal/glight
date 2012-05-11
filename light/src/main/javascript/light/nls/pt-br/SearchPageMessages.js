@@ -15,7 +15,7 @@
  */
 /**
  * Calling window.define instead of define because of dojo build bug.
- * 
+ *
  * @see http://bugs.dojotoolkit.org/ticket/15057
  */
 window.define({

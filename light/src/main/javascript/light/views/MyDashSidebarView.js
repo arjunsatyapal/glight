@@ -11,7 +11,7 @@ define(['dojo/_base/declare', 'dojo/_base/array',
         'light/builders/BrowseContextStateBuilder',
         'light/utils/TemplateUtils',
         'dojo/_base/event',
-        'light/utils/DialogUtils',
+        'light/utils/DialogUtils'
         ],
         function(declare, array, TemplatedLightView, _WidgetsInTemplateMixin,
                 DOMUtils, Tree, TreeDndSource, TreeDndSelector,
@@ -253,7 +253,7 @@ define(['dojo/_base/declare', 'dojo/_base/array',
       // this.setContext(BrowseContextsEnum.COLLECTION);
     },
     _onAddCollectionByKey: function(evt) {
-      if(evt.charOrCode == dojo.keys.ENTER) {
+      if (evt.charOrCode == dojo.keys.ENTER) {
         this._onAddCollection();
       }
     },

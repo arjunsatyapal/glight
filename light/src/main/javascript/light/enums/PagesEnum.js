@@ -27,16 +27,16 @@ define(['light/enums/EventsEnum',
         function(EventsEnum, SearchStateBuilder, BrowseContextStateBuilder,
                  RedirectStateBuilder, RouterManager) {
     function toHash(statesOrHash) {
-      if(typeof statesOrHash == "undefined") {
-        return "";
-      } else if(typeof statesOrHash == "string") {
+      if (typeof statesOrHash == 'undefined') {
+        return '';
+      } else if (typeof statesOrHash == 'string') {
         return statesOrHash;
       } else {
         // TODO(waltercacau): remove this use of a private method
         return RouterManager._hashForStates(statesOrHash);
       }
     }
-    
+
     return {
     /** @lends light.enums.PagesEnum */
 
@@ -44,7 +44,7 @@ define(['light/enums/EventsEnum',
       build: 'register',
       main: 'RegisterMain',
       getPath: function(statesOrHash) {
-        return '/register#'+toHash(statesOrHash);
+        return '/register#' + toHash(statesOrHash);
       },
       states: [{
         changeEvent: EventsEnum.REDIRECT_STATE_CHANGED,
@@ -55,7 +55,7 @@ define(['light/enums/EventsEnum',
       build: 'search',
       main: 'SearchMain',
       getPath: function(statesOrHash) {
-        return '/search#'+toHash(statesOrHash);
+        return '/search#' + toHash(statesOrHash);
       },
       states: [
         {
@@ -68,7 +68,7 @@ define(['light/enums/EventsEnum',
       build: 'mydash',
       main: 'MyDashMain',
       getPath: function(statesOrHash) {
-        return '/mydash#'+toHash(statesOrHash);
+        return '/mydash#' + toHash(statesOrHash);
       },
       states: [
         {
@@ -86,7 +86,7 @@ define(['light/enums/EventsEnum',
      * Get's the page for a given path.
      *
      * @param {string} path Path.
-     * @return {light.enums.PagesEnum|null} The enum value for
+     * @return {?light.enums.PagesEnum} The enum value for
      *    the page or null if not found.
      */
     getByPath: function(path) {

@@ -16,9 +16,9 @@
 define({
   /**
    * Search state changed.
-   * 
+   *
    * <p>Example of publish call (connect is 'dojo/_base/connect'):
-   * 
+   *
    * <pre>
    * connect.publish(EventsEnum.SEARCH_STATE_CHANGED, [{
    *    query: 'myquery', // the query value
@@ -28,8 +28,8 @@ define({
    * </pre>
    * <p>We specify the source because some of the sources are also
    * subscribed for the same event and embedding the source in the callback
-   * arguments allows such sources to ignore their own published events. 
-   * 
+   * arguments allows such sources to ignore their own published events.
+   *
    * @const
    */
   SEARCH_STATE_CHANGED: '/light/search/searchStateChanged',

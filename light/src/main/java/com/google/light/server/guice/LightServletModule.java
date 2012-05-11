@@ -15,6 +15,12 @@
  */
 package com.google.light.server.guice;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Logger;
+
+import javax.xml.bind.Marshaller;
+
 import com.google.inject.Scopes;
 import com.google.inject.servlet.ServletModule;
 import com.google.light.server.exception.unchecked.ServerConfigurationException;
@@ -22,11 +28,8 @@ import com.google.light.server.guice.jersey.JerseyApplication;
 import com.google.light.server.servlets.filters.FilterPathEnum;
 import com.google.light.server.servlets.path.ServletPathEnum;
 import com.google.light.server.utils.GaeUtils;
+import com.sun.jersey.api.core.ResourceConfig;
 import com.sun.jersey.guice.spi.container.servlet.GuiceContainer;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.logging.Logger;
-import javax.xml.bind.Marshaller;
 
 /**
  * Guice Servlet Module to bind Servlets & Filters to corresponding URL Patterns.
@@ -60,6 +63,11 @@ public class LightServletModule extends ServletModule {
     final Map<String, String> params = new HashMap<String, String>();
     params.put("com.sun.jersey.config.feature.DisableWADL", "true");
     params.put(Marshaller.JAXB_FORMATTED_OUTPUT, "true");
+    // Without ResourceConfig.FEATURE_REDIRECT set to true, we might
+    // break some links that require "/" in the end to match and
+    // the client side sent the link without the trailing "/".
+    // TODO(waltercacau): Add a test for this
+    params.put(ResourceConfig.FEATURE_REDIRECT, "true");
     params.put("javax.ws.rs.Application", JerseyApplication.class.getName());
     serve("/rest/*").with(GuiceContainer.class, params);
   }
@@ -74,7 +82,7 @@ public class LightServletModule extends ServletModule {
      * TODO(waltercacau): Remove this filter and set charset in a better place.
      * Eg. the servlet's or while generating the response pojos.
      */
-//    filter("*").through(CharacterEncondingFilter.class);
+    // filter("*").through(CharacterEncondingFilter.class);
 
     if (filter.isAllowedInCurrentEnv()) {
       bind(filter.getClazz()).in(Scopes.SINGLETON);
@@ -89,7 +97,7 @@ public class LightServletModule extends ServletModule {
    */
   private void initServlet(ServletPathEnum servletPath) {
     bind(servletPath.getClazz()).in(Scopes.SINGLETON);
-    
+
     // First registering filters for current Servlet Path.
     for (FilterPathEnum currFilter : servletPath.getListOfFilters()) {
       initFilters(currFilter, servletPath.get());

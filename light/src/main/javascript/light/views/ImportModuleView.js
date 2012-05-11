@@ -20,6 +20,7 @@ define(['dojo/_base/declare', 'light/views/TemplatedLightView',
         'light/utils/DOMUtils',
         'light/utils/URLUtils',
         'light/utils/LanguageUtils',
+        'light/utils/RouterManager',
         'dojo/string',
         'dojo/dom-construct',
         'dijit/_WidgetsInTemplateMixin',
@@ -28,9 +29,15 @@ define(['dojo/_base/declare', 'light/views/TemplatedLightView',
         'light/utils/DialogUtils',
         'dijit/form/Button'],
         function(declare, TemplatedLightView, template, GDocListItemTemplate,
-                messages, DOMUtils, URLUtils, LanguageUtils, string,
+                messages, DOMUtils, URLUtils, LanguageUtils,
+                RouterManager, string,
                 domConstruct, _WidgetsInTemplateMixin, PaginatedListWidget, 
                 TemplateUtils, DialogUtils, Button) {
+  var SUPPORTED_GDOC_MODULE_TYPES_TO_IMPORT = {
+          'GOOGLE_DOC': true,
+          'GOOGLE_COLLECTION': true
+  };
+
 
   /**
    * @class
@@ -49,7 +56,17 @@ define(['dojo/_base/declare', 'light/views/TemplatedLightView',
         listOptions: {
           type: 'gdocDndSource',
           rawCreator: function(item) {
-            var node = TemplateUtils.toDom(GDocListItemTemplate, item);
+            var additionalClasses = '';
+            if (!SUPPORTED_GDOC_MODULE_TYPES_TO_IMPORT[item.moduleType]) {
+              additionalClasses = ' gdocListItemNotSupported';
+            }
+            var node = TemplateUtils.toDom(GDocListItemTemplate, {
+              moduleType: item.moduleType,
+              documentLink: item.documentLink,
+              title: item.title,
+              additionalClasses: additionalClasses
+            });
+
             return {
               node: node,
               data: item,
@@ -61,14 +78,17 @@ define(['dojo/_base/declare', 'light/views/TemplatedLightView',
         onError: function() {
           // TODO(waltercacau): Check if it was really because of missing auth.
           self.showGdocAuthRequiredForm();
-        },
+        }
       }, this._gdocPaginatedListWidgetDiv);
-      
+
       this._importedPaginatedListWidget = new PaginatedListWidget({
         listOptions: {
           //type: 'gdocDndSource',
           rawCreator: function(item) {
-            var node = TemplateUtils.toDom('<div class="gdocListItem"><a href="#">${title}</a></div>', item);
+            var node = TemplateUtils.toDom('<div class="gdocListItem"><a href="${link}" target="_blank" tabindex="-1">${title}</a></div>', {
+              title: item.title,
+              link: RouterManager.buildLinkForModuleContent(item.id)
+            });
             return {
               node: node,
               data: item,
@@ -80,10 +100,10 @@ define(['dojo/_base/declare', 'light/views/TemplatedLightView',
         onError: function() {
           // TODO(waltercacau): Check if it was really because of missing auth.
           self.showGdocAuthRequiredForm();
-        },
+        }
       }, this._importedPaginatedListWidgetDiv);
-      
-      
+
+
       this.inherited(arguments);
       this.hide();
     },
@@ -131,20 +151,20 @@ define(['dojo/_base/declare', 'light/views/TemplatedLightView',
 
     /**
      * Shows a list of Gdocs items.
-     * @param {Object} data Data returned from the server containing the list.
-     * @param {number} page Current page index 0-based.
-     * @param {boolean} hasNextPage
      */
     showGdocListForm: function(link) {
       this._showForm('gdocList');
       this._gdocPaginatedListWidget.getFirstPage(link);
     },
-    
+
+    /**
+     * Show a list of imported modules
+     */
     showImportedListForm: function(link) {
       this._showForm('importedList');
       this._importedPaginatedListWidget.getFirstPage(link);
     },
-    
+
 
     /**
      * Shows explanation to the user that he needs to grant authorization
@@ -170,11 +190,19 @@ define(['dojo/_base/declare', 'light/views/TemplatedLightView',
     _importSelectedGdocs: function() {
       var selected = [];
       this._gdocPaginatedListWidget.forInSelectedItems(function(item) {
-        selected.push(item.data);
+        if (SUPPORTED_GDOC_MODULE_TYPES_TO_IMPORT[item.data.moduleType]) {
+          selected.push(item.data);
+        }
       });
-      if(selected.length > 0) {
+      if (selected.length > 0) {
         this._controller.importGdocs(selected);
       }
+    },
+    _seeImported: function() {
+      this._controller.seeImported();
+    },
+    _importOtherModules: function() {
+      this._controller.importModules();
     }
   });
 

@@ -28,7 +28,7 @@ define(['dojo/_base/declare',
     cleanup: function() {
       var self = this;
       self._dialog.hide();
-      setTimeout(function () {
+      setTimeout(function() {
         self._dialog.destroyRecursive();
         self.destroyRecursive();
       }, 3000);
@@ -41,7 +41,7 @@ define(['dojo/_base/declare',
       this._dialog.show();
     }
   });
-  
+
   var PromptDialog = declare([BaseDialog], {
     // Options
     // TODO(waltercacau): Add support for translations
@@ -52,7 +52,7 @@ define(['dojo/_base/declare',
     onOk: function() {},
     label: '',
     value: '',
-    
+
     templateString: PromptDialogTemplate,
     _onClickOk: function() {
       this.onOk(this._value.get('value'));
@@ -64,11 +64,11 @@ define(['dojo/_base/declare',
     },
     postCreate: function() {
       this.inherited(arguments);
-      this.connect(this._dialog, "onCancel", this._onClickCancel);
+      this.connect(this._dialog, 'onCancel', this._onClickCancel);
     }
   });
-  
-  
+
+
   var AlertDialog = declare([BaseDialog], {
     // Options
     // TODO(waltercacau): Add support for translations
@@ -76,7 +76,7 @@ define(['dojo/_base/declare',
     title: 'Alert',
     onOk: function() {},
     content: '',
-    
+
     templateString: AlertDialogTemplate,
     _onClickOk: function() {
       this.onOk();
@@ -84,10 +84,10 @@ define(['dojo/_base/declare',
     },
     postCreate: function() {
       this.inherited(arguments);
-      this.connect(this._dialog, "onCancel", this._onClickOk);
+      this.connect(this._dialog, 'onCancel', this._onClickOk);
     }
   });
-  
+
   /**
    * Some utilities for dealing with DOM and style.
    *
@@ -99,7 +99,7 @@ define(['dojo/_base/declare',
 
     /**
      * Shows a prompt dialog.
-     * 
+     *
      * Usage example:
      * DialogUtils.prompt({
      *  okLabel: 'Create',
@@ -112,19 +112,19 @@ define(['dojo/_base/declare',
      * })
      */
     prompt: function(options) {
-      var dialog = new PromptDialog(options)
+      var dialog = new PromptDialog(options);
       document.body.appendChild(dialog.domNode);
       dialog.show();
     },
-    
+
     alert: function(options) {
-      var dialog = new AlertDialog(options)
+      var dialog = new AlertDialog(options);
       document.body.appendChild(dialog.domNode);
       dialog.show();
     },
 
     _AlertDialog: AlertDialog,
     _PromptDialog: PromptDialog
-  
+
   };
 });

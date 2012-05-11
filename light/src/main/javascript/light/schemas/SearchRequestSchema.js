@@ -24,16 +24,16 @@ define({
   properties: {
     query: {
       type: 'string',
-      required : true
+      required: true
     },
     page: {
       type: 'number',
       minimum: 1,
-      required : true
+      required: true
     },
     clientLanguageCode: {
       type: 'string',
-      required : true
+      required: true
     }
   }
 });

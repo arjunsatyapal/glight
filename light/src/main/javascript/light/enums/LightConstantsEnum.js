@@ -13,18 +13,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.server.exception.unchecked.httpexception;
-
-import com.google.light.server.constants.http.HttpStatusCodesEnum;
-
-/**
- * HTTP Not Found Exception.
- * 
- * @author Arjun Satyapal
- */
-@SuppressWarnings("serial")
-public class InternalServerError extends LightHttpException {
-  public InternalServerError(String errString) {
-    super(HttpStatusCodesEnum.INTERNAL_SERVER_ERROR, errString);
-  }
-}
+define({
+  LATEST_VERSION_STR: 'latest'
+});

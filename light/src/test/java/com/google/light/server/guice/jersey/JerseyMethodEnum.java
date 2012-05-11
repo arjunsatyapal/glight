@@ -18,22 +18,26 @@ package com.google.light.server.guice.jersey;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Set;
+
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.core.UriInfo;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.light.server.jersey.resources.AbstractJerseyResource;
 import com.google.light.server.jersey.resources.CollectionResource;
+import com.google.light.server.jersey.resources.ContentResource;
 import com.google.light.server.jersey.resources.ModuleResource;
 import com.google.light.server.jersey.resources.admin.gae.GAEAdminResources;
 import com.google.light.server.jersey.resources.job.JobResource;
 import com.google.light.server.jersey.resources.notifications.NotificationResource;
 import com.google.light.server.jersey.resources.test.TestResources;
 import com.google.light.server.jersey.resources.thirdparty.google.GoogleDocIntegration;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Set;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
 
 /**
  * 
@@ -61,14 +65,6 @@ public enum JerseyMethodEnum {
 
                                              new String[] { "application/json; charset=UTF-8",
                                                      "application/xml; charset=UTF-8" }),
-
-  COLLECTION_RESOURCE_GET_COLLECTION_VERSION_CONTENT(
-                                                     CollectionResource.class,
-                                                     "getCollectionVersionContent",
-                                                     new Class[] { String.class, String.class },
-                                                     GET.class,
-                                                     "/rest/collection/{collection_id}/{version}/content",
-                                                     new String[] { "text/html; charset=UTF-8" }),
 
   COLLECTION_RESOURCE_COLLECTIONS_PUBLISHED_BY_ME(
                                                   CollectionResource.class,
@@ -99,7 +95,67 @@ public enum JerseyMethodEnum {
                                                                  "application/json; charset=UTF-8",
                                                                  "application/xml; charset=UTF-8" }),
 
-// GAEAdmin Resource Jersey Methods.
+  CONTENT_RESOURCE_GET_COLLECTION_CONTENT(
+      ContentResource.class,
+      "getCollectionContent",
+      new Class[] { UriInfo.class },
+      GET.class,
+      "/rest/content/general/collection/{collection_id}",
+      new String[] {}
+      ),
+  CONTENT_RESOURCE_GET_COLLECTION_VERSION_CONTENT(
+      ContentResource.class,
+      "getCollectionVersionContent",
+      new Class[] { String.class, String.class },
+      GET.class,
+      "/rest/content/general/collection/{collection_id}/{version}",
+      new String[] { "text/html; charset=UTF-8"  }
+      ),
+  CONTENT_RESOURCE_GET_MODULE_CONTENT(
+      ContentResource.class,
+      "getModuleContent",
+      new Class[] { UriInfo.class },
+      GET.class,
+      "/rest/content/general/module/{module_id}",
+      new String[] {}
+      ),
+  CONTENT_RESOURCE_GET_MODULE_VERSION_RESOURCE(
+      ContentResource.class,
+      "getModuleVersionResource",
+      new Class[] { String.class, String.class, String.class, String.class },
+      GET.class,
+      "/rest/content/general/module/{module_id}/{version}/{resource_type}/{resource}",
+      new String[] {  }
+      ),
+
+  CONTENT_RESOURCE_GET_MODULE_VERSION_CONTENT(
+      ContentResource.class,
+      "getModuleVersionContent",
+      new Class[] { String.class, String.class },
+      GET.class,
+      "/rest/content/general/module/{module_id}/{version}/",
+      new String[] { "text/html; charset=UTF-8"  }
+      ),
+  CONTENT_RESOURCE_GET_MODULE_IN_COLLECTION_VERSION_RESOURCE(
+      ContentResource.class,
+      "getModuleInCollectionVersionResource",
+      new Class[] { String.class, String.class, String.class, String.class, String.class },
+      GET.class,
+      "/rest/content/general/collection/{collection_id}/{version}/{module_id}/{resource_type}/{resource}",
+      new String[] {  }
+      ),
+
+  CONTENT_RESOURCE_GET_MODULE_IN_COLLECTION_VERSION_CONTENT(
+      ContentResource.class,
+      "getModuleInCollectionVersionContent",
+      new Class[] { String.class, String.class, String.class },
+      GET.class,
+      "/rest/content/general/collection/{collection_id}/{version}/{module_id}/",
+      new String[] { "text/html; charset=UTF-8"  }
+      ),
+  
+  
+  // GAEAdmin Resource Jersey Methods.
   GAE_ADMIN_RESOURCE_GET_CONFIG(
                                 GAEAdminResources.class,
                                 "getConfig",
@@ -129,24 +185,6 @@ public enum JerseyMethodEnum {
                                      new String[] { "application/json; charset=UTF-8",
                                              "application/xml; charset=UTF-8" }),
 
-  MODULE_RESOURCE_GET_MODULE_VERSION_CONTENT(
-                                             ModuleResource.class,
-                                             "getModuleVersionContent",
-                                             new Class[] { String.class, String.class },
-                                             GET.class,
-                                             "/rest/module/{module_id}/{version}/content",
-                                             new String[] { "text/html; charset=UTF-8" }),
-
-  MODULE_RESOURCE_GET_MODULE_VERSION_RESOURCES(
-                                               ModuleResource.class,
-                                               "getModuleVersionResources",
-                                               new Class[] { String.class, String.class,
-                                                       String.class, String.class },
-                                               GET.class,
-                                               "/rest/module/{module_id}/{version}/{resource_type}/{resource}",
-
-                                               new String[] { "application/json; charset=UTF-8",
-                                                       "application/xml; charset=UTF-8" }),
   MODULE_RESOURCE_MODULES_PUBLISHED_BY_ME(
                                           ModuleResource.class,
                                           "getModulesPublishedByMe",
@@ -199,15 +237,6 @@ public enum JerseyMethodEnum {
                                     new String[] { "application/json; charset=UTF-8",
                                             "application/xml; charset=UTF-8" }),
 
-  GOOGLE_DOC_IMPORT_GOOGLE_DOC_PUT(
-                                   GoogleDocIntegration.class,
-                                   "importGoogleDocBatchPut",
-                                   new Class[] { String.class },
-                                   PUT.class,
-                                   "/rest/thirdparty/google/gdoc/import/{external_key}",
-
-                                   new String[] { "application/json; charset=UTF-8",
-                                           "application/xml; charset=UTF-8" }),
   GOOGLE_DOC_GET_FOLDER_CONTENTS(
                                  GoogleDocIntegration.class,
                                  "getFolderContents",

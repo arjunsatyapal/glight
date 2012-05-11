@@ -47,7 +47,7 @@ define(['dojo/_base/declare',
       selfCopy: false
     },
     DEFAULT_MESSAGES: PaginatedListWidgetMessages,
-    
+
     templateString: PaginatedListWidgetTemplate,
 
     /**
@@ -89,7 +89,7 @@ define(['dojo/_base/declare',
     },
 
     forInSelectedItems: function(func) {
-      if(this._listWidget != null)
+      if (this._listWidget != null)
         this._listWidget.forInSelectedItems(func);
     },
 

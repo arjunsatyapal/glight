@@ -33,10 +33,10 @@ define(['light/utils/BuilderUtils',
         },
         schema: schema,
         normalize: function() {
-          if (!(""+this.page).match(RegexCommon.INTEGER)) {
+          if (!(''+ this.page).match(RegexCommon.INTEGER)) {
             throw new Error('Page is not an integer');
           }
-          this.page = parseInt(""+this.page);
+          this.page = parseInt(''+ this.page);
           if (this.page <= 0) {
             throw new Error('Page is less then 1');
           }
@@ -46,6 +46,6 @@ define(['light/utils/BuilderUtils',
           return this;
         }
       }
-      
+
   );
 });

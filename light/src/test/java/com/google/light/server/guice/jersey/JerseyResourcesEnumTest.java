@@ -22,6 +22,19 @@ import static com.google.light.testingutils.TestingUtils.getClassesInPackage;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+
+import org.junit.Test;
+
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -30,15 +43,6 @@ import com.google.common.collect.Sets.SetView;
 import com.google.inject.Inject;
 import com.google.light.server.constants.EnumTestInterface;
 import com.google.light.server.jersey.resources.AbstractJerseyResource;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import org.junit.Test;
 
 /**
  * Test for {@link JerseyResourcesEnum}.
@@ -54,7 +58,7 @@ public class JerseyResourcesEnumTest implements EnumTestInterface {
   @Override
   @Test
   public void test_count() throws Exception {
-    assertEquals(7, JerseyResourcesEnum.values().length);
+    assertEquals(8, JerseyResourcesEnum.values().length);
 
     Set<Class<? extends AbstractJerseyResource>> existingSet =
         JerseyMethodEnum.getSetOfJerseyResources();
@@ -109,6 +113,16 @@ public class JerseyResourcesEnumTest implements EnumTestInterface {
           // 
         }
       }
+    }
+    
+    // Now verify that each declared JerseyMethodEnum exists in their corresponding resources
+    for (JerseyMethodEnum jerseyMethod : JerseyMethodEnum.values()) {
+      Class<? extends AbstractJerseyResource> clazz = jerseyMethod.getClazz();
+      
+      // This will throw NoSuchMethodException if it doesn't exist
+      Method declaredMethod = clazz.getDeclaredMethod(jerseyMethod.getMethodName(), jerseyMethod.getParameterTypes());
+      assertTrue("JerseyMethod "+jerseyMethod.name()+" must be public!", Modifier.isPublic(declaredMethod.getModifiers()));
+      
     }
   }
 

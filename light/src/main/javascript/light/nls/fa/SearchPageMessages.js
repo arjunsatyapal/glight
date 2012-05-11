@@ -18,10 +18,10 @@
  * @see http://bugs.dojotoolkit.org/ticket/15057
  */
 window.define({
-  searchButtonLabel: "جستجو",
-  didYouMeanBox: "آیا منظور شما ${suggestion}",
-  noResults: "هیچ نتیجه ای برای این جستجو",
-  pageInfo: "صفحه ${page}",
-  next: "بعد",
-  previous: "قبلی",
+  searchButtonLabel: 'جستجو',
+  didYouMeanBox: 'آیا منظور شما ${suggestion}',
+  noResults: 'هیچ نتیجه ای برای این جستجو',
+  pageInfo: 'صفحه ${page}',
+  next: 'بعد',
+  previous: 'قبلی'
 });

@@ -16,7 +16,7 @@
 define(['dojo/_base/declare', 'dijit/_Widget'], function(declare, _Widget) {
   /**
    * Base abstract class for all light views.
-   * 
+   *
    * @class
    * @name light.views.AbstractLightView
    */
@@ -25,7 +25,7 @@ define(['dojo/_base/declare', 'dijit/_Widget'], function(declare, _Widget) {
 
     /**
      * Defines the controller for this view.
-     * 
+     *
      * @param {light.controllers.AbstractLightController}
      *          controller Controller.
      */

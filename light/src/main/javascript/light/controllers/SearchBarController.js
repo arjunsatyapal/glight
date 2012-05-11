@@ -38,7 +38,7 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
       connect.subscribe(EventsEnum.BROWSE_CONTEXT_STATE_CHANGED, this,
               this._onBrowseContextStateChange);
     },
-    
+
     /**
      * Handler for search state change events.
      */
@@ -46,12 +46,12 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
       if (source != this)
         this._view.setQuery(searchState.query);
     },
-    
+
     /**
      * Handler for browse context state change events.
      */
     _onBrowseContextStateChange: function(browseContextState, source) {
-      if(browseContextState.context != BrowseContextsEnum.ALL)
+      if (browseContextState.context != BrowseContextsEnum.ALL)
         this._view.disable();
       else
         this._view.enable();

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) Google Inc.
+a * Copyright (C) Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -14,8 +14,10 @@
  * the License.
  */
 define(['dojo/_base/connect', 'dojo/_base/declare', 'dojo/_base/lang',
-        'light/utils/URLUtils', 'dojo', 'light/RegexCommon'],
-        function(connect, declare, lang, URLUtils, dojo, RegexCommon) {
+        'light/utils/URLUtils', 'dojo', 'light/RegexCommon',
+        'light/enums/LightConstantsEnum'],
+        function(connect, declare, lang, URLUtils, dojo, RegexCommon,
+                 LightConstantsEnum) {
 
   /**
    * Responsible for reflecting the page states in the URL.
@@ -192,8 +194,33 @@ define(['dojo/_base/connect', 'dojo/_base/declare', 'dojo/_base/lang',
       // Redefining the hash to the normalized and validated format
       this._setHash(this._hashForStates(this._getCurrentStates()),
               true /* replaces the current one in browser history */);
-    }
+    },
 
+    // Utility linking build
+    buildLinkForModuleContent: function(moduleId, version) {
+      if (!version) {
+        version = LightConstantsEnum.LATEST_VERSION_STR;
+      }
+      return '/rest/content/general/module/' + moduleId + '/' + version + '/';
+    },
+
+
+    buildLinkForModuleInCollectionContent:
+      function(collectionId, version, moduleId) {
+      if (!version) {
+        version = LightConstantsEnum.LATEST_VERSION_STR;
+      }
+      return '/rest/content/general/collection/' + collectionId +
+          '/' + version;
+    },
+
+    buildLinkForCollectionContent: function(collectionId, version) {
+      if (!version) {
+        version = LightConstantsEnum.LATEST_VERSION_STR;
+      }
+      return '/rest/content/general/collection/' + collectionId +
+          '/' + version + '/' + moduleId + '/';
+    }
 
   };
 

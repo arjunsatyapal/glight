@@ -20,12 +20,17 @@ define({
     authRequired: 'Before importing, you need to authorize Light to access your Google Docs.',
     authInstruction: 'Click the button bellow to start the authorization process.',
     authButton: 'Authorize',
-    importSelected: 'Import selected',
+    importSelectedButton: 'Import selected',
     pageInfo: 'Page ${page}',
     next: 'Next',
     previous: 'Previous',
     gdocEmptyList: 'No google documents found.',
     successfullyStartedGdocsImport: 'Your import request has started and your imported docs should be avaiable in a few minutes.',
-    importInProgress: 'Import in progress'
+    importInProgress: 'Import in progress',
+    seeImportedButton: 'Imported Modules',
+    importOtherModulesButton: 'Import Other Modules',
+    gdocListLabel: 'The following are your Google Documents.',
+    gdocItemObservation: 'Items with a line through are not yet supported by light, so you cannot import them.',
+    importListLabel: 'The following modules where imported by you into Light.'
   }
 });

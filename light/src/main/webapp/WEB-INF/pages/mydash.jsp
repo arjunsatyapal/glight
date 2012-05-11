@@ -100,6 +100,9 @@
     .gdocListItem img {
         margin-right: 5px;
     }
+    .gdocListItemNotSupported {
+        text-decoration: line-through;
+    }
     #importModule .dojoDndItemSelected, #importModule .dojoDndItemAnchor,
     #searchResults .dojoDndItemSelected, #searchResults .dojoDndItemAnchor {
       background-repeat: repeat-x;

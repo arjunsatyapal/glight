@@ -18,13 +18,13 @@
  * @see http://bugs.dojotoolkit.org/ticket/15057
  */
 window.define({
-  instructions: "قبل از ادامه شما نیاز به پر کردن این فرم ثبت نام کوچک و شرایط نور از خدمات را بپذیرند.",
-  firstNameTextBoxLabel: "نام و نام خانوادگی:",
-  lastNameTextBoxLabel: "نام خانوادگی:",
-  tosTextareaLabel: "شرایط و ضوابط خدمات",
-  tosTextareaContent: "اصطلاحات حقوقی",
-  tosCheckboxLabel: "من با شرایط استفاده از خدمات موافقم",
-  submitButton: "ثبت نام",
-  tosTooltipError: "شما باید به شرایط و ضوابط خدمات قبل از اقدام به توافق برسند",
+  instructions: 'قبل از ادامه شما نیاز به پر کردن این فرم ثبت نام کوچک و شرایط نور از خدمات را بپذیرند.',
+  firstNameTextBoxLabel: 'نام و نام خانوادگی:',
+  lastNameTextBoxLabel: 'نام خانوادگی:',
+  tosTextareaLabel: 'شرایط و ضوابط خدمات',
+  tosTextareaContent: 'اصطلاحات حقوقی',
+  tosCheckboxLabel: 'من با شرایط استفاده از خدمات موافقم',
+  submitButton: 'ثبت نام',
+  tosTooltipError: 'شما باید به شرایط و ضوابط خدمات قبل از اقدام به توافق برسند',
   warnError: 'مشکل با سرور است.لطفا دوباره سعی کنید.'
 });

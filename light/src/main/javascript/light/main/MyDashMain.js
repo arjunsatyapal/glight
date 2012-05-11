@@ -66,7 +66,7 @@ define(['light/views/SearchBarView',
   myDashSidebarController.setView(myDashSidebarView);
   myDashSidebarView.setController(myDashSidebarController);
   myDashSidebarController.watch();
-  
+
   var importModuleView = new ImportModuleView({}, 'importModule');
   var importModuleController = new ImportModuleController();
   importModuleController.setView(importModuleView);

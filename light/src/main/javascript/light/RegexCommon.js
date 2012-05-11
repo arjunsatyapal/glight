@@ -16,4 +16,4 @@
 define({
   SPACES_ONLY: /^\s*$/,
   INTEGER: /[0-9]+/
-})
+});

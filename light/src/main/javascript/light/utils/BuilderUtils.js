@@ -74,7 +74,7 @@ define(['dojo/_base/declare', 'dojo/_base/lang',
           },
 
           build: function() {
-            if(params.normalize) {
+            if (params.normalize) {
               params.normalize.apply(this._data, []);
             }
             if (has('light-dev') && params.schema) {
@@ -90,7 +90,7 @@ define(['dojo/_base/declare', 'dojo/_base/lang',
             return this._data;
           }
         };
-        if(params.normalize) {
+        if (params.normalize) {
           proto.normalize = function() {
             params.normalize.apply(this._data, []);
             return this;

@@ -23,44 +23,39 @@ import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPersonLoggedIn;
 import static com.google.light.server.utils.LightUtils.isListEmpty;
 
-import com.google.light.server.dto.pojo.typewrapper.longwrapper.CollectionId;
-import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
-
-import javax.ws.rs.Consumes;
-
-import javax.ws.rs.PUT;
-
-import com.google.light.server.dto.collection.CollectionDto;
-
 import java.util.List;
 
-import com.google.light.server.constants.LightConstants;
-import com.google.light.server.constants.LightStringConstants;
-import com.google.light.server.dto.pages.PageDto;
-import com.google.light.server.servlets.SessionManager;
-import com.google.light.server.utils.GuiceUtils;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
 
-import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.light.server.constants.JerseyConstants;
+import com.google.light.server.constants.LightConstants;
+import com.google.light.server.constants.LightStringConstants;
 import com.google.light.server.constants.http.ContentTypeConstants;
+import com.google.light.server.dto.collection.CollectionDto;
+import com.google.light.server.dto.pages.PageDto;
 import com.google.light.server.dto.pojo.tree.CollectionTreeNodeDto;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.CollectionId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
 import com.google.light.server.exception.unchecked.httpexception.NotFoundException;
 import com.google.light.server.manager.interfaces.CollectionManager;
 import com.google.light.server.persistence.entity.collection.CollectionVersionEntity;
+import com.google.light.server.servlets.SessionManager;
+import com.google.light.server.utils.GuiceUtils;
 import com.google.light.server.utils.LightUtils;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
 
 /**
  * 
@@ -114,45 +109,6 @@ public class CollectionResource extends AbstractJerseyResource {
     CollectionVersionEntity collectionVersionEntity = getCollectionVersionEntity(
         collectionIdStr, versionStr);
     return collectionVersionEntity.getCollectionTree();
-  }
-
-  @GET
-  @Path(JerseyConstants.PATH_COLLECTION_VERSION_CONTENT)
-  @Produces(ContentTypeConstants.TEXT_HTML)
-  public Response getCollectionVersionContent(
-      @PathParam(JerseyConstants.PATH_PARAM_COLLECTION_ID) String collectionIdStr,
-      @PathParam(JerseyConstants.PATH_PARAM_VERSION) String versionStr) {
-    CollectionVersionEntity collectionVersionEntity = getCollectionVersionEntity(
-        collectionIdStr, versionStr);
-
-    CollectionTreeNodeDto tree = collectionVersionEntity.getCollectionTree();
-    StringBuilder builder = new StringBuilder();
-
-    builder.append("<ul>");
-    appendCurrNode(tree, builder, 2);
-    builder.append("</ul>");
-
-    return Response.ok(builder.toString()).build();
-  }
-
-  /**
-   * @param tree
-   * @param builder
-   */
-  private void appendCurrNode(CollectionTreeNodeDto node, StringBuilder builder, int space) {
-    if (node.isLeafNode()) {
-      String uri = "/rest/module/" + node.getModuleId().getValue() + "/latest/content";
-      builder.append("<li><a href=").append(StringEscapeUtils.escapeHtml(uri)).append(">")
-          .append(StringEscapeUtils.escapeHtml(node.getTitle())).append("</a></li>");
-    } else {
-      builder.append("<li>").append(StringEscapeUtils.escapeHtml(node.getTitle())).append("<ul>");
-      if (node.hasChildren()) {
-        for (CollectionTreeNodeDto currChild : node.getChildren()) {
-          appendCurrNode(currChild, builder, space * 2);
-        }
-      }
-    }
-    builder.append("</ul>");
   }
 
   protected CollectionVersionEntity getCollectionVersionEntity(String collectionIdStr,

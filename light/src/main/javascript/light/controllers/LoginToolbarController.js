@@ -47,7 +47,7 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
      */
     login: function(provider) {
       var redirectPath = URLUtils.getPathWithHash();
-      if(PagesEnum.getByPath(URLUtils.getPath()) == PagesEnum.SEARCH) {
+      if (PagesEnum.getByPath(URLUtils.getPath()) == PagesEnum.SEARCH) {
         redirectPath = PagesEnum.MYDASH.getPath(URLUtils.getHash());
       }
       URLUtils.redirect('/login/' + provider + '?' + dojo.objectToQuery({
