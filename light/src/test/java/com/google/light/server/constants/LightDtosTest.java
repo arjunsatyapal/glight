@@ -23,6 +23,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import com.google.light.server.annotations.OverrideFieldAnnotationName;
+
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
@@ -198,6 +200,7 @@ public class LightDtosTest implements EnumTestInterface {
       // TODO(arjuns): Fix this.
       Embedded.class.getName(),
       JsonProperty.class.getName(),
+      OverrideFieldAnnotationName.class.getName(),
       XmlAnyElement.class.getName(),
       XmlElement.class.getName(),
       XmlElementWrapper.class.getName());
@@ -208,7 +211,9 @@ public class LightDtosTest implements EnumTestInterface {
   @SuppressWarnings("rawtypes")
   private void validateFieldAnnotations(Class currClass) {
     String className = currClass.getSimpleName();
-
+    
+    Map<String, Field> mapOfJsonPropertyNameToField = Maps.newConcurrentMap();
+    
     for (Field currField : currClass.getDeclaredFields()) {
       String fieldNameForErr = className + "#" + currField.getName();
       
@@ -260,12 +265,10 @@ public class LightDtosTest implements EnumTestInterface {
       }
 
       String errorMsg = fieldNameForErr + " needs to have overriden names for both "
-          + "Json and Xml and these overridden names should be same. For Xml, if its a list, then "
-          + "use both" + XmlElementWrapper.class.getSimpleName() + " & "
+          + "Json and Xml and these overridden names should be same and should match fieldName."
+          + "For Xml, if its a list, then use both" + XmlElementWrapper.class.getSimpleName() + " & "
           + XmlElement.class.getSimpleName() + " and for Json use "
           + JsonProperty.class.getSimpleName();
-
-      
 
       assertTrue(fieldNameForErr + " should be annotated with @JsonProperty.",
           containsAnnotation(JsonProperty.class, currField.getAnnotations()));
@@ -277,6 +280,22 @@ public class LightDtosTest implements EnumTestInterface {
         assertEquals(errorMsg, xmlElementWrapperName, jsonPropertyValue);
       } else {
         assertEquals(errorMsg, xmlElementName, jsonPropertyValue);
+      }
+      
+      if (!containsAnnotation(OverrideFieldAnnotationName.class, currField.getAnnotations())) {
+        assertEquals(errorMsg, jsonPropertyValue, currField.getName());
+      }
+      
+      // Now ensure that it is unqiue in this class so that deserialization can work.
+      Field tempField = mapOfJsonPropertyNameToField.get(jsonPropertyValue);
+      if (tempField != null) {
+        String dupErrMsg = "For class " + currClass.getSimpleName() 
+            + ", Found more then one field annotated with " + jsonPropertyValue + " and they are "
+            + "#" + tempField.getName() + " and #" + currField.getName();
+
+        throw new IllegalArgumentException(dupErrMsg);
+      } else {
+        mapOfJsonPropertyNameToField.put(jsonPropertyValue, currField);
       }
     }
   }

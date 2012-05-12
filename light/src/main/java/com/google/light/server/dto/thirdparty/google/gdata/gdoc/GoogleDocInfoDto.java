@@ -21,8 +21,6 @@ import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
 import static com.google.light.server.utils.LightUtils.getWrapper;
 
-import com.google.light.server.dto.pojo.typewrapper.stringwrapper.ExternalId;
-
 import com.google.common.collect.Lists;
 import com.google.gdata.data.Link;
 import com.google.gdata.data.MediaContent;
@@ -32,8 +30,10 @@ import com.google.gdata.data.acl.AclRole;
 import com.google.gdata.data.acl.AclScope;
 import com.google.gdata.data.acl.AdditionalRole;
 import com.google.gdata.data.docs.DocumentListEntry;
+import com.google.light.server.annotations.OverrideFieldAnnotationName;
 import com.google.light.server.dto.AbstractDto;
 import com.google.light.server.dto.module.ModuleType;
+import com.google.light.server.dto.pojo.typewrapper.stringwrapper.ExternalId;
 import java.util.List;
 import java.util.logging.Logger;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -72,6 +72,7 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
   @JsonProperty(value = "lastEditTimeInMillis")
   private Long lastEditTimeInMillis;
   
+  @OverrideFieldAnnotationName(value = "For proper deserialization, need to know the Type.")
   @XmlElement(name = "moduleType")
   @JsonProperty(value = "moduleType")
   // TODO(arjuns): Rename this field to moduleType
@@ -81,9 +82,9 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
   @JsonProperty(value = "title")
   private String title;
   
-  @XmlElement(name = "documentLink")
-  @JsonProperty(value = "documentLink")
-  private ExternalId documentLink;
+  @XmlElement(name = "externalId")
+  @JsonProperty(value = "externalId")
+  private ExternalId externalId;
   
   @XmlElement(name = "aclFeedLink")
   @JsonProperty(value = "aclFeedLink")
@@ -96,7 +97,7 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
   @XmlElementWrapper(name = "parentFolderUrls")
   @XmlElement(name = "url")
   @JsonProperty(value = "parentFolderUrls")
-  private List<String> parentFoldersUrls;
+  private List<String> parentFolderUrls;
 
   /*
    * TODO(arjuns): Figure out what should happen when a Person publishes a document on Light, and
@@ -145,8 +146,8 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
   private String etag;
   
   // MD5 checksum for file.
-  @XmlElement(name = "md5Sum")
-  @JsonProperty(value = "md5Sum")
+  @XmlElement(name = "md5sum")
+  @JsonProperty(value = "md5sum")
   private String md5sum;
   
   // Size of file in bytes.
@@ -187,7 +188,7 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
     // Required for all configs.
     checkNotNull(type, "ModuleType");
     checkNotBlank(title, "title");
-    checkNotNull(documentLink, "documentLink");
+    checkNotNull(externalId, "externalId");
 
     if (config != Configuration.DTO_FOR_IMPORT) {
 
@@ -249,8 +250,8 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
     return title;
   }
 
-  public ExternalId getDocumentLink() {
-    return documentLink;
+  public ExternalId getExternalId() {
+    return externalId;
   }
 
   public String getAclFeedLink() {
@@ -261,8 +262,8 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
     return htmlExportUrl;
   }
 
-  public List<String> getParentFoldersUrls() {
-    return parentFoldersUrls;
+  public List<String> getParentFolderUrls() {
+    return parentFolderUrls;
   }
 
   public List<String> getOwners() {
@@ -316,10 +317,10 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
     private Long lastEditTimeInMillis;
     private ModuleType moduleType;
     private String title;
-    private ExternalId documentLink;
+    private ExternalId externalId;
     private String aclFeedLink;
     private String htmlExportUrl;
-    private List<String> parentFoldersUrls = Lists.newArrayList();
+    private List<String> parentFolderUrls = Lists.newArrayList();
     private List<String> owners = Lists.newArrayList();
     private List<String> writers = Lists.newArrayList();
     private List<String> commenters = Lists.newArrayList();
@@ -373,8 +374,8 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
       return this;
     }
 
-    public Builder documentLink(ExternalId documentLink) {
-      this.documentLink = documentLink;
+    public Builder externalId(ExternalId externalId) {
+      this.externalId = externalId;
       return this;
     }
 
@@ -392,10 +393,10 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
       return this;
     }
 
-    public Builder parentFoldersUrls(List<Link> parentFolderUrls) {
+    public Builder parentFolderUrls(List<Link> parentFolderUrls) {
       if (config != Configuration.DTO_FOR_IMPORT) {
         for (Link currLink : parentFolderUrls) {
-          parentFoldersUrls.add(currLink.getHref());
+          this.parentFolderUrls.add(currLink.getHref());
         }
       }
       return this;
@@ -542,7 +543,7 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
       moduleType(ModuleType.getByProviderServiceAndCategory(GOOGLE_DOC, docListEntry.getType()));
       title(docListEntry.getTitle().getPlainText());
 
-      documentLink(getWrapper(docListEntry.getDocumentLink().getHref(), ExternalId.class));
+      externalId(getWrapper(docListEntry.getDocumentLink().getHref(), ExternalId.class));
       aclFeedLink(docListEntry.getAclFeedLink().getHref());
       // TODO(arjuns) : Verify this.
       int contentTypeInt = docListEntry.getContent().getType();
@@ -563,7 +564,7 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
       List<Link> parentFolderUrls = docListEntry.getParentLinks();
 
       // TODO(arjuns): Eventually we will need to handle movement of documents in/out of collection.
-      parentFoldersUrls(parentFolderUrls);
+      parentFolderUrls(parentFolderUrls);
 
       // TODO(arjuns): Add for readers.
 
@@ -595,10 +596,10 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
     this.lastEditTimeInMillis = builder.lastEditTimeInMillis;
     this.type = builder.moduleType;
     this.title = builder.title;
-    this.documentLink = builder.documentLink;
+    this.externalId = builder.externalId;
     this.aclFeedLink = builder.aclFeedLink;
     this.htmlExportUrl = builder.htmlExportUrl;
-    this.parentFoldersUrls = getNonEmptyList(builder.parentFoldersUrls);
+    this.parentFolderUrls = getNonEmptyList(builder.parentFolderUrls);
 
     this.owners = getNonEmptyList(builder.owners);
     this.writers = getNonEmptyList(builder.writers);

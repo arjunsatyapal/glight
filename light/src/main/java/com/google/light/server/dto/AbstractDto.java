@@ -38,12 +38,12 @@ import org.joda.time.Instant;
  */
 @SuppressWarnings("serial")
 public abstract class AbstractDto<D> extends AbstractPojo<D>  {
-  @XmlElement(name = "creation_time_in_millis")
-  @JsonProperty(value = "creation_time_in_millis")
+  @XmlElement(name = "creationTimeInMillis")
+  @JsonProperty(value = "creationTimeInMillis")
   protected final Long creationTimeInMillis = null;
   
-  @XmlElement(name = "last_update_time_in_millis")
-  @JsonProperty(value = "last_update_time_in_millis")
+  @XmlElement(name = "lastUpdateTimeInMillis")
+  @JsonProperty(value = "lastUpdateTimeInMillis")
   protected Long lastUpdateTimeInMillis;
 
   /**

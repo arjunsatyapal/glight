@@ -20,6 +20,8 @@ import static com.google.light.server.utils.LightPreconditions.checkNonEmptyList
 import static com.google.light.server.utils.LightPreconditions.checkPersonId;
 import static com.google.light.server.utils.LightUtils.isListEmpty;
 
+import com.google.light.server.annotations.OverrideFieldAnnotationName;
+
 import javax.xml.bind.annotation.XmlAnyElement;
 
 import com.google.light.server.constants.PlacementOrder;
@@ -73,6 +75,7 @@ public class GoogleDocImportBatchJobContext extends AbstractDto<GoogleDocImportB
   @JsonProperty(value = "listOfImportDestinations")
   private List<ImportDestinationDto> listOfImportDestinations;
 
+  @OverrideFieldAnnotationName(value = "To deserialize properly, need to know type of State.")
   @XmlElement(name = "googleDocImportBatchJobState")
   @JsonProperty(value = "googleDocImportBatchJobState")
   private GoogleDocImportBatchJobState state;
@@ -81,6 +84,7 @@ public class GoogleDocImportBatchJobContext extends AbstractDto<GoogleDocImportB
   @JsonProperty(value = "collectionTitle")
   private String collectionTitle;
 
+  @OverrideFieldAnnotationName(value = "To deserialize properly, need to know type of State.")
   @XmlElement(name = "googleDocImportBatchJobType")
   @JsonProperty(value = "googleDocImportBatchJobType")
   private GoogleDocImportBatchType type;

@@ -21,16 +21,17 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * This annotation is used to override policy that Fields and their annotationNames should match.
+ * This annotation is used to annotate a Field which will be used by Objectify for Filtering
+ * inside queries. This is used for testing.
  *
  * @author Arjun Satyapal
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD})
-public @interface ObjectifyQueryFieldName {
+public @interface OverrideFieldAnnotationName {
   /**
    * Name of the field annotated with {@link ObjectifyQueryField} that will be used for doing 
    * Objectify Queries.
    */
-  public String value() default "";
+  public String value() ;
 }

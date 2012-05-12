@@ -15,6 +15,8 @@ package com.google.light.server.servlets.oauth2.google.pojo;
 import static com.google.light.server.utils.LightPreconditions.checkEmail;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
+import com.google.light.server.annotations.OverrideFieldAnnotationName;
+
 import org.codehaus.jackson.annotate.JsonTypeName;
 
 import org.codehaus.jackson.annotate.JsonProperty;
@@ -50,6 +52,7 @@ public class GoogleUserInfo extends AbstractDto<GoogleUserInfo> {
   @JsonProperty(value = "email")
   private String email;
   
+  @OverrideFieldAnnotationName(value = "received from Google so have not control.")
   @XmlElement(name = "verified_email")
   @JsonProperty(value = "verified_email")
   private boolean verifiedEmail;
@@ -58,10 +61,12 @@ public class GoogleUserInfo extends AbstractDto<GoogleUserInfo> {
   @JsonProperty(value = "name")
   private String name;
   
+  @OverrideFieldAnnotationName(value = "received from Google so have not control.")
   @XmlElement(name = "given_name")
   @JsonProperty(value = "given_name")
   private String givenName;
   
+  @OverrideFieldAnnotationName(value = "received from Google so have not control.")
   @XmlElement(name = "family_name")
   @JsonProperty(value = "family_name")
   private String familyName;

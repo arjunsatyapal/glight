@@ -42,8 +42,8 @@ import org.codehaus.jackson.annotate.JsonTypeName;
 @XmlRootElement(name = "moduleVersion")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class ModuleVersionDto extends AbstractDtoToPersistence<ModuleVersionDto, ModuleVersionEntity, Long> {
-  @XmlElement(name = "version")
-  @JsonProperty(value = "version")
+  @XmlElement(name = "moduleId")
+  @JsonProperty(value = "moduleId")
   private ModuleId moduleId;
   
   @XmlElement(name = "version")
