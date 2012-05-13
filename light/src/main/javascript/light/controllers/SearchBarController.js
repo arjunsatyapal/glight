@@ -43,18 +43,20 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
      * Handler for search state change events.
      */
     _onSearchStateChange: function(searchState, source) {
-      if (source != this)
+      if (source != this) {
         this._view.setQuery(searchState.query);
+      }
     },
 
     /**
      * Handler for browse context state change events.
      */
     _onBrowseContextStateChange: function(browseContextState, source) {
-      if (browseContextState.context != BrowseContextsEnum.ALL)
+      if (browseContextState.context != BrowseContextsEnum.ALL) {
         this._view.disable();
-      else
+      } else {
         this._view.enable();
+      }
     },
 
     /**

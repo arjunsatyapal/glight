@@ -13,8 +13,9 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-define(['light/utils/XHRUtils', 'dojo/json', 'dojo/_base/declare', 'dojo/store/util/QueryResults'],
-        function(XHRUtils, JSON, declare, QueryResults) {
+define(['light/utils/XHRUtils', 'dojo/json', 'dojo/_base/declare',
+        'dojo/store/util/QueryResults', 'dojo'],
+        function(XHRUtils, JSON, declare, QueryResults, dojo) {
   return declare('light.stores.AbstractLightStore', null, {
     /** @lends light.stores.AbstractLightStore# */
 
@@ -29,12 +30,14 @@ define(['light/utils/XHRUtils', 'dojo/json', 'dojo/_base/declare', 'dojo/store/u
     constructor: function(options) {
       options = options || {};
 
-      if (!this.lightTarget)
+      if (!this.lightTarget) {
         throw new Error('You should specify a target!');
+      }
 
       options.target = this.lightTarget;
-      if (!options.target.match(/\/$/))
+      if (!options.target.match(/\/$/)) {
         options.target += '/';
+      }
 
       declare.safeMixin(this, options);
     },
@@ -151,7 +154,7 @@ define(['light/utils/XHRUtils', 'dojo/json', 'dojo/_base/declare', 'dojo/store/u
             (options.count + (options.start || 0) - 1) : '');
       }
       if (query && typeof query == 'object') {
-        query = xhr.objectToQuery(query);
+        query = dojo.objectToQuery(query);
         query = query ? '?' + query : '';
       }
       if (options && options.sort) {
@@ -174,6 +177,7 @@ define(['light/utils/XHRUtils', 'dojo/json', 'dojo/_base/declare', 'dojo/store/u
         var range = results.ioArgs.xhr.getResponseHeader('Content-Range');
         return range && (range = range.match(/\/(.*)/)) && +range[1];
       });
+      /*jshint newcap: false*/
       return QueryResults(results);
     }
 

@@ -89,8 +89,9 @@ define(['dojo/_base/declare',
     },
 
     forInSelectedItems: function(func) {
-      if (this._listWidget != null)
+      if (this._listWidget !== null) {
         this._listWidget.forInSelectedItems(func);
+      }
     },
 
     _currentPage: 0,
@@ -117,7 +118,7 @@ define(['dojo/_base/declare',
 
     _listWidget: null,
     _destroyOldListWidget: function() {
-      if (this._listWidget != null) {
+      if (this._listWidget !== null) {
         var node = this._listWidget.node;
         this._listWidget.destroy();
         domConstruct.empty(node);
@@ -135,6 +136,9 @@ define(['dojo/_base/declare',
       DOMUtils.hide(this._resultsForm);
       DOMUtils.hide(this._noResultsForm);
       var self = this;
+      // TODO(waltercacau): Encapsulate this kind of XHR in some utility
+      // so everything that needs to talk to a service that returns a PageDto
+      // can simply use it.
       XHRUtils.get({
         url: this._pageLinks[this._currentPage]
       }).then(function(result) {

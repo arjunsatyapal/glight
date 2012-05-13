@@ -17,7 +17,7 @@
  * This file is just a replacement loader to avoid needing to build
  * code using the dojo build system during development.
  */
-dojoConfig = {
+var dojoConfig = {
   async: true,
   isDebug: true,
   waitSeconds: 2,

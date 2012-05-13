@@ -84,7 +84,7 @@ define(['dojo/_base/declare', 'light/views/TemplatedLightView',
      */
     _createLoginClickCallback: function(provider) {
       var controller = this._controller;
-      return function() { controller.login(provider); }
+      return function() { controller.login(provider); };
     },
 
     /**

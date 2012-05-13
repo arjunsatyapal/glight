@@ -55,8 +55,9 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
       this.searchService.cancelLastSearch();
       this.lastSearchState = searchState;
 
-      if (!this.enabled)
+      if (!this.enabled) {
         return;
+      }
 
       var view = this._view;
       if (searchState.query.match(RegexCommon.SPACES_ONLY)) {
@@ -76,8 +77,9 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
     _onBrowseContextStateChange: function(browseContextState, source) {
       if (browseContextState.context == BrowseContextsEnum.ALL) {
         this.enabled = true;
-        if (this.lastSearchState)
+        if (this.lastSearchState) {
           this._onSearchStateChange(this.lastSearchState);
+        }
       } else {
         this.enabled = false;
         this.searchService.cancelLastSearch();

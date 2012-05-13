@@ -15,9 +15,9 @@
  */
 define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
         'light/utils/URLUtils', 'light/utils/PersonUtils',
-        'light/enums/PagesEnum'],
+        'light/enums/PagesEnum', 'dojo'],
         function(declare, AbstractLightController, URLUtils, PersonUtils,
-                 PagesEnum) {
+                 PagesEnum, dojo) {
   /**
    * Controller for the LoginToolbar
    *

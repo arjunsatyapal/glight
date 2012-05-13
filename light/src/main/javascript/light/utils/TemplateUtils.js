@@ -61,7 +61,7 @@ define(['dojo/_base/declare', 'dojox/html/entities', 'dojo/string',
         if (typeof value == 'undefined') {
           throw new Error(className + ' template:' + key);
         } // a debugging aide
-        if (value == null) { return ''; }
+        if (value === null) { return ''; }
 
         // Substitution keys beginning with ! will skip the transform step,
         // in case a user wishes to insert unescaped markup, e.g. ${!foo}

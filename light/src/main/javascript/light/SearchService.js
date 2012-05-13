@@ -29,7 +29,7 @@ define(['dojo/_base/declare', 'dojo', 'light/utils/XHRUtils', 'dojo/_base/lang',
      */
     search: function(state) {
       // Adding the clientLanguageCode to the request
-      request = new SearchRequestBuilder(state, true /* may have extra keys */)
+      var request = new SearchRequestBuilder(state, true /* may have extra keys */)
           .clientLanguageCode(LanguageUtils.currentLocale)
           .build();
 

@@ -36,8 +36,9 @@ define(['dojo/has', 'dojo/query', 'dojo/dom-construct', 'dojo',
   if (page) {
 
     // Checking if the Person has accepted the Terms of Service.
-    if (!PersonUtils.tosCheck(page))
+    if (!PersonUtils.tosCheck(page)) {
       return;
+    }
 
     /*
      * If we are in development, we should not load code through layers. this
@@ -83,10 +84,11 @@ define(['dojo/has', 'dojo/query', 'dojo/dom-construct', 'dojo',
     // Adding the dojo theme class to the body element
     var body = $('body')[0];
     var currentClassAttr = body.getAttribute('class');
-    if (currentClassAttr)
+    if (currentClassAttr) {
       body.setAttribute('class', 'claro ' + currentClassAttr);
-    else
+    } else {
       body.setAttribute('class', 'claro');
+    }
 
   });
 });

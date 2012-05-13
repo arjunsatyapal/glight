@@ -57,8 +57,9 @@ define(['dojo/_base/connect', 'dojo/_base/declare', 'dojo/_base/lang',
     },
 
     _hashForStates: function(states) {
-      if (!states || !states.length)
+      if (!states || !states.length) {
         return '';
+      }
       var hashData = {};
       for (var i = 0, len = states.length; i < len; i++) {
         lang.mixin(hashData, states[i]);
@@ -67,8 +68,9 @@ define(['dojo/_base/connect', 'dojo/_base/declare', 'dojo/_base/lang',
     },
 
     _getCurrentStates: function(except) {
-      if (!this._currentPage)
+      if (!this._currentPage) {
         return [];
+      }
       var states = [];
       for (var i = 0, len = this._currentPage.states.length; i < len; i++) {
         var stateDesc = this._currentPage.states[i];
@@ -141,8 +143,9 @@ define(['dojo/_base/connect', 'dojo/_base/declare', 'dojo/_base/lang',
     },
 
     _onStateChange: function(changeEvent, state, source) {
-      if (source == this)
+      if (source == this) {
         return;
+      }
       this._lastRecordedStateForEvent[changeEvent] = state;
       this._setHash(this._hashForStates(this._getCurrentStates()), false);
     },
@@ -157,8 +160,9 @@ define(['dojo/_base/connect', 'dojo/_base/declare', 'dojo/_base/lang',
      * @private
      */
     _onHashChange: function(hash) {
-      if (this._shouldSkipThisHashChange(hash))
+      if (this._shouldSkipThisHashChange(hash)) {
         return;
+      }
 
       var hashData = {};
       try {
@@ -211,7 +215,7 @@ define(['dojo/_base/connect', 'dojo/_base/declare', 'dojo/_base/lang',
         version = LightConstantsEnum.LATEST_VERSION_STR;
       }
       return '/rest/content/general/collection/' + collectionId +
-          '/' + version;
+          '/' + version + '/' + moduleId + '/';
     },
 
     buildLinkForCollectionContent: function(collectionId, version) {
@@ -219,7 +223,7 @@ define(['dojo/_base/connect', 'dojo/_base/declare', 'dojo/_base/lang',
         version = LightConstantsEnum.LATEST_VERSION_STR;
       }
       return '/rest/content/general/collection/' + collectionId +
-          '/' + version + '/' + moduleId + '/';
+          '/' + version;
     }
 
   };

@@ -38,41 +38,47 @@ var setupDojoLoaderForJasmine = function() {
    */
   var prettyPrintJSON = function(obj, indent) {
     indent = indent || '';
+    var i, key, last, val;
     var ownIndent = indent + '  ';
     if (typeof obj == 'object') {
       var builder = [];
       if (Array.prototype.isPrototypeOf(obj)) {
-        if (obj.length == 0)
+        if (obj.length === 0) {
           return '[]';
+        }
         builder.push('[');
         builder.push('\n');
-        for (var i = 0, val, last = obj.length - 1; val = obj[i]; i++) {
+        for (i = 0, val, last = obj.length - 1; (val = obj[i]); i++) {
           builder.push(ownIndent);
           builder.push(prettyPrintJSON(val, ownIndent));
-          if (i != last)
+          if (i != last) {
             builder.push(',');
+          }
           builder.push('\n');
         }
         builder.push(indent);
         builder.push(']');
       } else {
         var keys = [];
-        for (var key in obj) {
-          if (obj.hasOwnProperty(key))
+        for (key in obj) {
+          if (obj.hasOwnProperty(key)) {
             keys.push(key);
+          }
         }
-        if (keys.length == 0)
+        if (keys.length === 0) {
           return '{}';
+        }
         builder.push('{');
         builder.push('\n');
         keys.sort();
-        for (var i = 0, key, last = keys.length - 1; key = keys[i]; i++) {
+        for (i = 0, last = keys.length - 1; (key = keys[i]); i++) {
           builder.push(ownIndent);
           builder.push(key);
           builder.push(': ');
           builder.push(prettyPrintJSON(obj[key], ownIndent));
-          if (i != last)
+          if (i != last) {
             builder.push(',');
+          }
           builder.push('\n');
         }
         builder.push(indent);

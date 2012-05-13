@@ -52,7 +52,7 @@ define(['dojo/_base/connect', 'dojo/_base/declare', 'light/utils/URLUtils',
         expect(function() {
           SearchRouter.searchStateToHash(router.DEFAULT_SEARCH_STATE);
         }).not.toThrow();
-      })
+      });
     });
 
     describe('constructor', function() {
