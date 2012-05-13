@@ -21,6 +21,7 @@ define(['dojo/_base/declare', 'light/views/TemplatedLightView',
         'light/utils/URLUtils',
         'light/utils/LanguageUtils',
         'light/utils/RouterManager',
+        'dojo',
         'dojo/string',
         'dojo/dom-construct',
         'dijit/_WidgetsInTemplateMixin',
@@ -30,12 +31,14 @@ define(['dojo/_base/declare', 'light/views/TemplatedLightView',
         'dijit/form/Button'],
         function(declare, TemplatedLightView, template, GDocListItemTemplate,
                 messages, DOMUtils, URLUtils, LanguageUtils,
-                RouterManager, string,
+                RouterManager, dojo, string,
                 domConstruct, _WidgetsInTemplateMixin, PaginatedListWidget, 
                 TemplateUtils, DialogUtils, Button) {
   var SUPPORTED_GDOC_MODULE_TYPES_TO_IMPORT = {
-          'GOOGLE_DOC': true,
-          'GOOGLE_COLLECTION': true
+          'GOOGLE_DOCUMENT': true
+          // TODO(waltercacau): Fix import of folders giving
+          // the option to create collections. 
+          //, 'GOOGLE_COLLECTION': true
   };
 
 
@@ -62,7 +65,7 @@ define(['dojo/_base/declare', 'light/views/TemplatedLightView',
             }
             var node = TemplateUtils.toDom(GDocListItemTemplate, {
               moduleType: item.moduleType,
-              documentLink: item.documentLink,
+              link: item.externalId,
               title: item.title,
               additionalClasses: additionalClasses
             });
@@ -87,7 +90,7 @@ define(['dojo/_base/declare', 'light/views/TemplatedLightView',
           rawCreator: function(item) {
             var node = TemplateUtils.toDom('<div class="gdocListItem"><a href="${link}" target="_blank" tabindex="-1">${title}</a></div>', {
               title: item.title,
-              link: RouterManager.buildLinkForModuleContent(item.id)
+              link: RouterManager.buildLinkForModuleContent(item.moduleId)
             });
             return {
               node: node,

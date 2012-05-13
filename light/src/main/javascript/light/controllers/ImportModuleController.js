@@ -112,7 +112,7 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
     importGdocs: function(items) {
       var list = [];
       for (var i = 0, len = items.length; i < len; i++) {
-        list.push(items[i].resourceId);
+        list.push(items[i].externalId);
       }
       var self = this;
       XHRUtils.post({

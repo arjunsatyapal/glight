@@ -245,7 +245,7 @@ public class TestingUtils {
     when(mockSession.getAttribute(LOGIN_PROVIDER_USER_ID.get())).thenReturn(providerUserId);
 
     if (personId != null) {
-      when(mockSession.getAttribute(PERSON_ID.get())).thenReturn(personId);
+      when(mockSession.getAttribute(PERSON_ID.get())).thenReturn(personId.getValue());
     } else {
       when(mockSession.getAttribute(PERSON_ID.get())).thenReturn(null);
     }

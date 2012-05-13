@@ -31,7 +31,6 @@ import static org.apache.commons.lang.StringUtils.isBlank;
 
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
 
-
 import com.google.inject.Inject;
 import com.google.light.server.annotations.AnotActor;
 import com.google.light.server.annotations.AnotHttpSession;
@@ -40,6 +39,7 @@ import com.google.light.server.constants.HttpHeaderEnum;
 import com.google.light.server.constants.OAuth2ProviderService;
 import com.google.light.server.exception.unchecked.BlankStringException;
 import com.google.light.server.persistence.entity.person.PersonEntity;
+import com.google.light.server.utils.LightUtils;
 import com.googlecode.objectify.Key;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -54,16 +54,16 @@ import javax.servlet.http.HttpSession;
 public class SessionManager {
   private HttpSession session;
   private PersonEntity personEntity;
-  
+
   @Inject
   public SessionManager(@AnotHttpSession HttpSession session) {
     this.session = session;
   }
-  
+
   public HttpSession getSession() {
     return session;
   }
-  
+
   /**
    * Get Person's Login Provider from Session.
    * 
@@ -86,7 +86,7 @@ public class SessionManager {
   public void setLoginProviderService(OAuth2ProviderService providerService) {
     session.setAttribute(LOGIN_PROVIDER_ID.get(), providerService.name());
   }
-  
+
   /**
    * Get Person's Login Provider User Id.
    * TODO(arjuns): Add test.
@@ -109,7 +109,7 @@ public class SessionManager {
    */
   @Deprecated
   public void setLoginProviderUserId(String providerUserId) {
-    session.setAttribute(LOGIN_PROVIDER_USER_ID.get(), 
+    session.setAttribute(LOGIN_PROVIDER_USER_ID.get(),
         checkNotBlank(providerUserId, "providerUserId"));
   }
 
@@ -135,13 +135,14 @@ public class SessionManager {
   public PersonId getPersonId() {
     if (session != null) {
       checkPersonLoggedIn(this);
-      PersonId personId = (PersonId) session.getAttribute(PERSON_ID.get());
+      PersonId personId =
+          LightUtils.getWrapper((Long) session.getAttribute(PERSON_ID.get()), PersonId.class);
       return checkPersonId(personId);
     } else {
       return personEntity.getPersonId();
     }
   }
-  
+
   @Deprecated
   public Key<PersonEntity> getPersonKey() {
     Key<PersonEntity> personKey = PersonEntity.generateKey(getPersonId());
@@ -153,13 +154,14 @@ public class SessionManager {
    * depend on whether Session is null or not.
    * 
    * TODO(arjuns): Add test.
+   * 
    * @return
    */
   public boolean isPersonLoggedIn() {
     if (session == null) {
       return false;
     }
-    
+
     try {
       return !isBlank(getLoginProviderUserId());
     } catch (BlankStringException e) {
@@ -179,7 +181,7 @@ public class SessionManager {
         checkNotNull(getLoginProviderService(), "providerService");
         checkNotBlank(getLoginProviderUserId(), "providerUserId");
       }
-      
+
       checkNotBlank(getEmail(), "email");
       checkNotNull(getPersonId(), "personId");
     } catch (Exception e) {
@@ -188,13 +190,13 @@ public class SessionManager {
 
     return true;
   }
-  
-//  TODO(arjuns): Add test for this.
+
+  // TODO(arjuns): Add test for this.
   public void seedPersonIds(HttpServletRequest request) {
     if (isPersonLoggedIn()) {
       PersonId ownerId = getPersonId();
       seedEntityInRequestScope(request, PersonId.class, AnotOwner.class, ownerId);
-      
+
       String actorIdStr = getRequestHeaderValue(request, HttpHeaderEnum.LIGHT_ACTOR_HEADER);
       if (actorIdStr != null) {
         seedEntityInRequestScope(request, PersonId.class, AnotActor.class, new PersonId(actorIdStr));

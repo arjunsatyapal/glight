@@ -209,7 +209,7 @@ public class ServletUtils {
           + ", providerUserId[" + personId
           + "], providerUserEmail[" + defaultEmail + "].");
       session.setAttribute(LOGIN_PROVIDER_ID.get(), loginProvider.name());
-      session.setAttribute(PERSON_ID.get(), personId);
+      session.setAttribute(PERSON_ID.get(), LightUtils.getWrapperValue(personId));
       session.setAttribute(DEFAULT_EMAIL.get(), defaultEmail);
       session.setAttribute(LOGIN_PROVIDER_USER_ID.get(), providerUserId);
     }

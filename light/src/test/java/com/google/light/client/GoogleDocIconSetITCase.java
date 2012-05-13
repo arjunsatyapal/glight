@@ -72,7 +72,7 @@ public class GoogleDocIconSetITCase {
   @Test
   public void test_counters() throws Exception {
     assertEquals("You should add/remove an Google Docs Icon if you add/remove a"
-        + " Google Docs type in the ModuleType changes", 8,
+        + " Google Docs type in the ModuleType changes", 10,
         ModuleType.values().length);
     assertEquals(CURRENT_ICON_LINKS.length, 7);
     assertEquals(CURRENT_ICON_NAMES.length, CURRENT_ICON_LINKS.length);

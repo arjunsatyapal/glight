@@ -81,9 +81,9 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
   @JsonProperty(value = "title")
   private String title;
   
-  @XmlElement(name = "documentLink")
-  @JsonProperty(value = "documentLink")
-  private ExternalId documentLink;
+  @XmlElement(name = "externalId")
+  @JsonProperty(value = "externalId")
+  private ExternalId externalId;
   
   @XmlElement(name = "aclFeedLink")
   @JsonProperty(value = "aclFeedLink")
@@ -187,7 +187,7 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
     // Required for all configs.
     checkNotNull(type, "ModuleType");
     checkNotBlank(title, "title");
-    checkNotNull(documentLink, "documentLink");
+    checkNotNull(externalId, "externalId");
 
     if (config != Configuration.DTO_FOR_IMPORT) {
 
@@ -249,8 +249,8 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
     return title;
   }
 
-  public ExternalId getDocumentLink() {
-    return documentLink;
+  public ExternalId getExternalId() {
+    return externalId;
   }
 
   public String getAclFeedLink() {
@@ -316,7 +316,7 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
     private Long lastEditTimeInMillis;
     private ModuleType moduleType;
     private String title;
-    private ExternalId documentLink;
+    private ExternalId externalId;
     private String aclFeedLink;
     private String htmlExportUrl;
     private List<String> parentFoldersUrls = Lists.newArrayList();
@@ -373,8 +373,8 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
       return this;
     }
 
-    public Builder documentLink(ExternalId documentLink) {
-      this.documentLink = documentLink;
+    public Builder externalId(ExternalId externalId) {
+      this.externalId = externalId;
       return this;
     }
 
@@ -542,7 +542,7 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
       moduleType(ModuleType.getByProviderServiceAndCategory(GOOGLE_DOC, docListEntry.getType()));
       title(docListEntry.getTitle().getPlainText());
 
-      documentLink(getWrapper(docListEntry.getDocumentLink().getHref(), ExternalId.class));
+      externalId(getWrapper(docListEntry.getDocumentLink().getHref(), ExternalId.class));
       aclFeedLink(docListEntry.getAclFeedLink().getHref());
       // TODO(arjuns) : Verify this.
       int contentTypeInt = docListEntry.getContent().getType();
@@ -595,7 +595,7 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
     this.lastEditTimeInMillis = builder.lastEditTimeInMillis;
     this.type = builder.moduleType;
     this.title = builder.title;
-    this.documentLink = builder.documentLink;
+    this.externalId = builder.externalId;
     this.aclFeedLink = builder.aclFeedLink;
     this.htmlExportUrl = builder.htmlExportUrl;
     this.parentFoldersUrls = getNonEmptyList(builder.parentFoldersUrls);

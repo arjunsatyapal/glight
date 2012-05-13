@@ -187,7 +187,7 @@ public class ModuleManagerImpl implements ModuleManager {
         .title(docInfo.getTitle())
         .content(content)
         .etag(docInfo.getEtag())
-        .externalId(docInfo.getDocumentLink())
+        .externalId(docInfo.getExternalId())
         .lastEditTime(docInfo.getLastEditTime())
         .build();
 
@@ -203,7 +203,7 @@ public class ModuleManagerImpl implements ModuleManager {
     moduleVersionDao.put(ofy, moduleVersionEntity);
 
     moduleEntity.publishVersion(version, docInfo.getLastEditTime(), docInfo.getEtag(), 
-        docInfo.getDocumentLink());
+        docInfo.getExternalId());
     moduleDao.put(ofy, moduleEntity);
 
     return moduleVersionEntity;

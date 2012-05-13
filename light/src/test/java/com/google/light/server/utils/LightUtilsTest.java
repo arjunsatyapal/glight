@@ -178,7 +178,7 @@ public class LightUtilsTest {
     Map<String, Object> map = new ImmutableMapBuilder<String, Object>()
         .put(LOGIN_PROVIDER_ID.get(), providerService.name())
         .put(LOGIN_PROVIDER_USER_ID.get(), providerUserId)
-        .put(PERSON_ID.get(), personId)
+        .put(PERSON_ID.get(), personId.getValue())
         .put(DEFAULT_EMAIL.get(), userEmail)
         .getMap();
 
