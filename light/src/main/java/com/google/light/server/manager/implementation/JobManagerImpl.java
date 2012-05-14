@@ -580,11 +580,11 @@ public class JobManagerImpl implements JobManager {
       CollectionTreeNodeDto.Builder newCollectionTreeNodeBuilder =
           new CollectionTreeNodeDto.Builder()
               .title(currGDocTreeNode.getTitle())
-              .type(currGDocTreeNode.getType())
+              .nodeType(currGDocTreeNode.getNodeType())
               .moduleType(currGDocTreeNode.getResourceInfo().getType())
               .externalId(externalId);
 
-      switch (currGDocTreeNode.getType()) {
+      switch (currGDocTreeNode.getNodeType()) {
         case ROOT_NODE:
           throw new IllegalStateException("This should not be called for root node.");
 
@@ -731,7 +731,7 @@ public class JobManagerImpl implements JobManager {
     }
 
     CollectionTreeNodeDto collectionTreeRoot = new CollectionTreeNodeDto.Builder()
-        .type(TreeNodeType.ROOT_NODE)
+        .nodeType(TreeNodeType.ROOT_NODE)
         .title(title)
         .moduleType(ModuleType.LIGHT_COLLECTION)
         .externalId("null")
@@ -755,13 +755,13 @@ public class JobManagerImpl implements JobManager {
     for (GoogleDocTree currGDocTreeChild : gdocTreeParent.getChildren()) {
       CollectionTreeNodeDto.Builder treeNodeBuilder = new CollectionTreeNodeDto.Builder()
           .title(currGDocTreeChild.getTitle())
-          .type(currGDocTreeChild.getType())
+          .nodeType(currGDocTreeChild.getNodeType())
           .moduleType(currGDocTreeChild.getGoogleDocResourceId().getModuleType())
           .externalId(currGDocTreeChild.getGoogleDocResourceId().getExternalId());
 
       CollectionTreeNodeDto treeNode = null;
 
-      switch (currGDocTreeChild.getType()) {
+      switch (currGDocTreeChild.getNodeType()) {
         case ROOT_NODE:
           throw new IllegalStateException("Found a child with type = ROOT_NODE");
 
@@ -782,7 +782,7 @@ public class JobManagerImpl implements JobManager {
           break;
 
         default:
-          throw new IllegalStateException("Unsupporetd type : " + currGDocTreeChild.getType());
+          throw new IllegalStateException("Unsupporetd type : " + currGDocTreeChild.getNodeType());
       }
 
       checkNotNull(treeNode, "treeNode should have been created by now.");
@@ -972,7 +972,7 @@ public class JobManagerImpl implements JobManager {
       GoogleDocImportBatchJobContext gdocBatchImportContext) {
     GoogleDocTree rootNode = new GoogleDocTree.Builder()
         .title("root")
-        .type(TreeNodeType.ROOT_NODE)
+        .nodeType(TreeNodeType.ROOT_NODE)
         .build();
     googleDocJobs.addChildTreeToParent(rootNode, gdocBatchImportContext.get());
     gdocBatchImportContext.setTreeRoot(rootNode);

@@ -36,14 +36,14 @@ public class DummyTest {
   public void test_collectionTreeNode() throws Exception {
     CollectionTreeNodeDto root = new CollectionTreeNodeDto.Builder()
         .title("title")
-        .type(TreeNodeType.ROOT_NODE)
+        .nodeType(TreeNodeType.ROOT_NODE)
         .moduleType(ModuleType.LIGHT_COLLECTION)
         .externalId("null")
         .build();
 
     CollectionTreeNodeDto child0 = new CollectionTreeNodeDto.Builder()
         .title("child0")
-        .type(TreeNodeType.LEAF_NODE)
+        .nodeType(TreeNodeType.LEAF_NODE)
         .moduleId(new ModuleId(1234L))
         .moduleType(ModuleType.GOOGLE_DOCUMENT)
         .externalId("1234")
@@ -52,7 +52,7 @@ public class DummyTest {
 
     CollectionTreeNodeDto child1 = new CollectionTreeNodeDto.Builder()
         .title("child1")
-        .type(TreeNodeType.INTERMEDIATE_NODE)
+        .nodeType(TreeNodeType.INTERMEDIATE_NODE)
         .moduleType(ModuleType.GOOGLE_COLLECTION)
         .externalId("1234")
         .build();

@@ -98,7 +98,14 @@ public enum ModuleType {
                    "root",
                    ContentTypeEnum.OASIS_DOCUMENT,
                    ModuleTypeProvider.LIGHT,
-                   false, true, false),
+                   false, true, true),
+
+  @XmlEnumValue(value = "LIGHT_COLLECTION")
+  LIGHT_SUB_COLLECTION(OAuth2ProviderService.GOOGLE_DOC,
+                   "root",
+                   ContentTypeEnum.OASIS_DOCUMENT,
+                   ModuleTypeProvider.LIGHT,
+                   false, false, true),
   LIGHT_SYNTHETIC_MODULE(OAuth2ProviderService.GOOGLE_DOC,
                          "light_synthetic_module",
                          ContentTypeEnum.OASIS_DOCUMENT,

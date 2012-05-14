@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-define(['light/controllers/SearchResultListController', 'light/SearchService',
+define(['light/controllers/SearchResultListController', 'light/services/SearchService',
         'light/views/SearchResultListView', 'lightTest/TestUtils',
         'dojo/_base/connect', 'light/enums/EventsEnum',
         'light/schemas/SearchStateSchema'],

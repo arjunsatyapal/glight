@@ -156,6 +156,7 @@
     <div id="content">
         <div id="searchResults"></div>
         <div id="importModule"></div>
+        <div id="collectionEditor"></div>
     </div>
   </body>
 </html>

@@ -17,7 +17,7 @@ define(['dojo/_base/declare', 'dojo', 'light/utils/XHRUtils', 'dojo/_base/lang',
         'light/utils/LanguageUtils', 'light/builders/SearchRequestBuilder'],
         function(declare, dojo, XHRUtils, lang, LanguageUtils,
                  SearchRequestBuilder) {
-  return declare('light.SearchService', null, {
+  return declare('light.services.SearchService', null, {
 
     /**
      * Issues a search request based on a given SearchState

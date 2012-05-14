@@ -44,11 +44,11 @@ define(['dojo/_base/declare', 'light/views/TemplatedLightView',
 
   /**
    * @class
-   * @name light.views.LoginToolbarView
+   * @name light.views.ImportModuleView
    */
-  return declare('light.views.LoginToolbarView', [TemplatedLightView,
+  return declare('light.views.ImportModuleView', [TemplatedLightView,
       _WidgetsInTemplateMixin], {
-    /** @lends light.views.LoginToolbarView# */
+    /** @lends light.views.ImportModuleView# */
     templateString: template,
     messages: messages,
     _earlyTemplatedStartup: true,

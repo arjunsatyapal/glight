@@ -40,9 +40,9 @@ public abstract class AbstractTreeNode<T extends AbstractTreeNode<T>> extends Ab
   @JsonProperty(value = "title")
   protected String title;
   
-  @XmlElement(name = "type")
-  @JsonProperty(value = "type")
-  protected TreeNodeType type;
+  @XmlElement(name = "nodeType")
+  @JsonProperty(value = "nodeType")
+  protected TreeNodeType nodeType;
 
   // TODO(arjuns): See if this embedded can be removed. At present both Dto and persistence are using this.
   // This is bad.
@@ -58,9 +58,9 @@ public abstract class AbstractTreeNode<T extends AbstractTreeNode<T>> extends Ab
   @SuppressWarnings("unchecked")
   @Override
   public T validate() {
-    checkNotNull(type, "type");
+    checkNotNull(nodeType, "nodeType");
     checkNotNull(title, "title");
-    switch (type) {
+    switch (nodeType) {
       case ROOT_NODE:
         break;
 
@@ -72,7 +72,7 @@ public abstract class AbstractTreeNode<T extends AbstractTreeNode<T>> extends Ab
         break;
 
       default:
-        throw new IllegalStateException("Add more validations for unsupported type : " + type);
+        throw new IllegalStateException("Add more validations for unsupported type : " + nodeType);
     }
 
     return ((T) this);
@@ -82,12 +82,12 @@ public abstract class AbstractTreeNode<T extends AbstractTreeNode<T>> extends Ab
     return title;
   }
 
-  public TreeNodeType getType() {
-    return type;
+  public TreeNodeType getNodeType() {
+    return nodeType;
   }
   
   public boolean isLeafNode() {
-    return type == TreeNodeType.LEAF_NODE;
+    return nodeType == TreeNodeType.LEAF_NODE;
   }
 
   public void addChildren(T treeNode) {
@@ -113,7 +113,7 @@ public abstract class AbstractTreeNode<T extends AbstractTreeNode<T>> extends Ab
   
   @SuppressWarnings("unchecked")
   public List<T> getInOrderTraversalOfLeafNodes() {
-    if (getType() == TreeNodeType.LEAF_NODE) {
+    if (getNodeType() == TreeNodeType.LEAF_NODE) {
       return ((List<T>) Lists.newArrayList(this));
     }
     
@@ -132,7 +132,7 @@ public abstract class AbstractTreeNode<T extends AbstractTreeNode<T>> extends Ab
   public static class Builder<N extends AbstractTreeNode, T extends Builder> extends
       AbstractDto.BaseBuilder<Builder> {
     private String title;
-    private TreeNodeType type;
+    private TreeNodeType nodeType;
     // private N parent;
     private List<N> children;
 
@@ -141,8 +141,8 @@ public abstract class AbstractTreeNode<T extends AbstractTreeNode<T>> extends Ab
       return ((T) this);
     }
 
-    public T type(TreeNodeType type) {
-      this.type = type;
+    public T nodeType(TreeNodeType nodeType) {
+      this.nodeType = nodeType;
       return ((T) this);
     }
 
@@ -166,7 +166,7 @@ public abstract class AbstractTreeNode<T extends AbstractTreeNode<T>> extends Ab
     }
 
     this.title = builder.title;
-    this.type = builder.type;
+    this.nodeType = builder.nodeType;
     // this.parent = builder.parent;
     this.list = builder.children;
   }

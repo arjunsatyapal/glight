@@ -5,6 +5,7 @@ define(['dojo/_base/declare', 'dojo/_base/array',
         'dijit/Tree', 'dijit/tree/dndSource', 'dijit/tree/_dndSelector',
         'dojo/data/ItemFileWriteStore',
         'dojo/data/ItemFileReadStore',
+        'dojo/store/DataStore',
         'dijit/tree/TreeStoreModel',
         'dijit/tree/ForestStoreModel', 'dojo/_base/lang',
         'dojo', 'dijit', 'light/enums/BrowseContextsEnum',
@@ -15,7 +16,7 @@ define(['dojo/_base/declare', 'dojo/_base/array',
         ],
         function(declare, array, TemplatedLightView, _WidgetsInTemplateMixin,
                 DOMUtils, Tree, TreeDndSource, TreeDndSelector,
-                ItemFileWriteStore, ItemFileReadStore, TreeStoreModel,
+                ItemFileWriteStore, ItemFileReadStore, DataStore, TreeStoreModel,
                 ForestStoreModel, lang, dojo, dijit, BrowseContextsEnum,
                 BrowseContextStateBuilder, TemplateUtils, eventUtil,
                 DialogUtils) {
@@ -44,7 +45,7 @@ define(['dojo/_base/declare', 'dojo/_base/array',
     setContext: function(browseContextState) {
       if (browseContextState.context == BrowseContextsEnum.COLLECTION) {
         var collectionNodes = this._collectionTree
-            .getNodesByItem(browseContextState.id);
+            .getNodesByItem(browseContextState.subcontext);
         if (collectionNodes[0]) {
           this._collectionTree.dndController
               .setSelection([collectionNodes[0]], true);
@@ -82,8 +83,9 @@ define(['dojo/_base/declare', 'dojo/_base/array',
       var synchronizedSetSelection = function(newSelection,
               shouldNotChangeContext) {
         // Avoiding empty selection
-        if (newSelection.length == 0)
+        if (newSelection.length === 0) {
           return;
+        }
 
         if (!shouldNotChangeContext) {
           // Changing the page's context
@@ -94,10 +96,12 @@ define(['dojo/_base/declare', 'dojo/_base/array',
                         .build());
           } else if (this == self._collectionTree.dndController) {
             if (!newSelection[0].item.root) {
+              var collectionId = self._collectionStore.store
+                  .getValue(newSelection[0].item, "collectionId");
               self._controller.changeContextTo(
                       new BrowseContextStateBuilder()
                           .context(BrowseContextsEnum.COLLECTION)
-                          .subcontext(newSelection[0].item.id)
+                          .subcontext(collectionId)
                           .build());
             }
           }
@@ -129,16 +133,16 @@ define(['dojo/_base/declare', 'dojo/_base/array',
           store: new ItemFileReadStore({
             data: {
               identifier: 'context',
-              label: 'name',
+              label: 'title',
               items: [
                        { context: BrowseContextsEnum.ALL,
-                         name: 'All modules' },
+                         title: 'All modules' },
                        { context: BrowseContextsEnum.IMPORT,
-                         name: 'Import' }
+                         title: 'Import' }
                       ]
             }
           }),
-          query: {} // TODO(waltercacau): remove this if possible
+          query: {}
         }),
         persist: false,
         showRoot: false,
@@ -154,20 +158,37 @@ define(['dojo/_base/declare', 'dojo/_base/array',
 
       // Collection's tree stuff
       this._collectionStoreNextId = 4;
-      this._collectionStore = new ItemFileWriteStore({
-        data: {
-          identifier: 'id',
-          label: 'name',
-          items: [
-                  { id: '1', name: 'Collection 1' },
-                  { id: '2', name: 'Collection 2' },
-                  { id: '3', name: 'Collection 3' }
-                ]
-        }
+      // Encapsulating the store that will be used by the tree in the new
+      // dojo.store api, which is much cleaner to use
+      this._collectionStore = new DataStore({
+        store: new ItemFileWriteStore({
+          data: {
+            identifier: 'collectionId',
+            label: 'title',
+            items: []
+          }
+        })
       });
+      // Patching to keep the result list sorted by title
+      this._collectionStore.store.fetch = function(options) {
+        var onComplete = options.onComplete || function() {};
+        options.onComplete = function(items) {
+          items.sort(function(a, b) {
+            if (a.title == b.title) {
+              return 0;
+            } else if (a.title < b.title) {
+              return -1;
+            } else {
+              return 1;
+            }
+          });
+          onComplete(items);
+        };
+        return ItemFileWriteStore.prototype.fetch.apply(this, [options]);
+      };
 
       this._collectionTreeModel = new ForestStoreModel({
-          store: this._collectionStore,
+          store: this._collectionStore.store,
           childrenAttrs: ['children'],
           rootLabel: 'My Collections',
           query: {}, // TODO(waltercacau): remove this if possible
@@ -179,7 +200,7 @@ define(['dojo/_base/declare', 'dojo/_base/array',
           }
       });
 
-      this._collectionTree = new dijit.Tree({
+      this._collectionTree = new Tree({
           model: this._collectionTreeModel,
           persist: false,
 
@@ -217,7 +238,7 @@ define(['dojo/_base/declare', 'dojo/_base/array',
             }
             if (array.indexOf(item.type, SEARCH_RESULT_TYPE) != -1) {
               return {
-                name: DOMUtils.asText(item.data.title),
+                title: DOMUtils.asText(item.data.title),
                 link: item.data.link
               };
             }
@@ -264,14 +285,27 @@ define(['dojo/_base/declare', 'dojo/_base/array',
       DialogUtils.prompt({
         title: 'Create a collection',
         okLabel: 'Create',
-        label: 'Name',
+        label: 'Title',
         onOk: function(collectionName) {
-          self._collectionStore.newItem({
-            id: '' + (self._collectionStoreNextId++),
-            name: collectionName
+          self._collectionStore.put({
+            collectionId: '' + (self._collectionStoreNextId++),
+            title: collectionName
           });
         }
       });
+    },
+
+    setCollectionList: function(list) {
+      var self = this;
+      array.forEach(self._collectionStore.query(), function(item) {
+        self._collectionStore.remove(item.collectionId);
+      });
+      array.forEach(list, function(item) {
+        self._collectionStore.put(item);
+      });
+    },
+    addToCollectionList: function(item) {
+      this._collectionStore.put(item);
     }
   });
 });

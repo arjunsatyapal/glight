@@ -19,11 +19,14 @@ define(['light/views/SearchBarView',
         'light/controllers/ImportModuleController',
         'light/views/SearchResultListView',
         'light/controllers/SearchResultListController',
-        'light/SearchService',
+        'light/services/SearchService',
         'light/views/LoginToolbarView',
         'light/controllers/LoginToolbarController',
         'light/views/MyDashSidebarView',
         'light/controllers/MyDashSidebarController',
+        'light/views/CollectionEditorView',
+        'light/controllers/CollectionEditorController',
+        'light/services/CollectionService',
         'light/utils/PersonUtils',
         'light/utils/URLUtils',
         'light/enums/PagesEnum',
@@ -34,7 +37,8 @@ define(['light/views/SearchBarView',
                  SearchService,
                  LoginToolbarView, LoginToolbarController,
                  MyDashSidebarView, MyDashSidebarController,
-                 PersonUtils, URLUtils, PagesEnum) {
+                 CollectionEditorView, CollectionEditorController,
+                 CollectionService, PersonUtils, URLUtils, PagesEnum) {
 
   // Going to the anonymous search page
   if (!PersonUtils.isLogged()) {
@@ -66,6 +70,13 @@ define(['light/views/SearchBarView',
   myDashSidebarController.setView(myDashSidebarView);
   myDashSidebarView.setController(myDashSidebarController);
   myDashSidebarController.watch();
+  
+  var collectionService = new CollectionService();
+  var collectionEditorView = new CollectionEditorView({}, 'collectionEditor');
+  var collectionEditorController = new CollectionEditorController(collectionService);
+  collectionEditorController.setView(collectionEditorView);
+  collectionEditorView.setController(collectionEditorController);
+  collectionEditorController.watch();
 
   var importModuleView = new ImportModuleView({}, 'importModule');
   var importModuleController = new ImportModuleController();
