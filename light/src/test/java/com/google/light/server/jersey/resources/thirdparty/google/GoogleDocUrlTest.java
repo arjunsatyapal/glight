@@ -45,7 +45,7 @@ public class GoogleDocUrlTest {
       GoogleDocUrl gdocUrl = new GoogleDocUrl(currUrl);
       assertEquals(currUrl.toString(), ModuleType.GOOGLE_COLLECTION, gdocUrl.getModuleType());
       assertEquals(currUrl.toString(), "folder:f1234", 
-          gdocUrl.getResourceId().getTypedResourceId());
+          gdocUrl.getTypedResourceId());
     }
   }
   
@@ -59,7 +59,7 @@ public class GoogleDocUrlTest {
       GoogleDocUrl gdocUrl = new GoogleDocUrl(currUrl);
       assertEquals(currUrl.toString(), ModuleType.GOOGLE_DOCUMENT, gdocUrl.getModuleType());
       assertEquals(currUrl.toString(), "document:d1234", 
-          gdocUrl.getResourceId().getTypedResourceId());
+          gdocUrl.getTypedResourceId());
     }
   }
   
@@ -73,7 +73,7 @@ public class GoogleDocUrlTest {
       GoogleDocUrl gdocUrl = new GoogleDocUrl(currUrl);
       assertEquals(currUrl.toString(), ModuleType.GOOGLE_DRAWING, gdocUrl.getModuleType());
       assertEquals(currUrl.toString(), "drawing:dr1234", 
-          gdocUrl.getResourceId().getTypedResourceId());
+          gdocUrl.getTypedResourceId());
     }
   }
   
@@ -87,7 +87,7 @@ public class GoogleDocUrlTest {
       GoogleDocUrl gdocUrl = new GoogleDocUrl(currUrl);
       assertEquals(currUrl.toString(), ModuleType.GOOGLE_FILE, gdocUrl.getModuleType());
       assertEquals(currUrl.toString(), "file:fl1234", 
-          gdocUrl.getResourceId().getTypedResourceId());
+          gdocUrl.getTypedResourceId());
     }
   }
   
@@ -115,7 +115,7 @@ public class GoogleDocUrlTest {
       GoogleDocUrl gdocUrl = new GoogleDocUrl(currUrl);
       assertEquals(currUrl.toString(), ModuleType.GOOGLE_PRESENTATION, gdocUrl.getModuleType());
       assertEquals(currUrl.toString(), "presentation:p1234", 
-          gdocUrl.getResourceId().getTypedResourceId());
+          gdocUrl.getTypedResourceId());
     }
   }
   
@@ -129,7 +129,7 @@ public class GoogleDocUrlTest {
       GoogleDocUrl gdocUrl = new GoogleDocUrl(currUrl);
       assertEquals(currUrl.toString(), ModuleType.GOOGLE_SPREADSHEET, gdocUrl.getModuleType());
       assertEquals(currUrl.toString(), "spreadsheet:s1234", 
-          gdocUrl.getResourceId().getTypedResourceId());
+          gdocUrl.getTypedResourceId());
     }
   }
   

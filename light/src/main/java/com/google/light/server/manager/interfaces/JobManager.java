@@ -15,11 +15,21 @@
  */
 package com.google.light.server.manager.interfaces;
 
-import com.google.light.server.dto.pojo.typewrapper.longwrapper.JobId;
+import com.google.light.server.jobs.handlers.modulejobs.ImportModuleSyntheticModuleJobContext;
 
+import com.google.light.server.dto.AbstractDto;
+
+import com.google.light.server.jobs.handlers.collectionjobs.ImportCollectionGoogleDocContext;
+
+import com.google.light.server.jobs.handlers.modulejobs.ImportModuleGoogleDocJobContext;
+
+
+import com.google.light.server.constants.QueueEnum;
+import com.google.light.server.dto.importresource.ImportBatchWrapper;
+import com.google.light.server.dto.importresource.ImportExternalIdDto;
 import com.google.light.server.dto.pojo.ChangeLogEntryPojo;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.JobId;
 import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocImportBatchJobContext;
-import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocImportJobContext;
 import com.google.light.server.persistence.entity.jobs.JobEntity;
 import com.googlecode.objectify.Objectify;
 import java.util.List;
@@ -43,8 +53,8 @@ public interface JobManager {
   /**
    * This is enqueued by a Batch Job for each google doc that needs to be downloaded and published.
    */
-  public JobEntity enqueueGoogleDocImportChildJob(Objectify ofy, 
-      GoogleDocImportJobContext docImportJobRequest, JobId parentJobId, JobId rootJobId);
+  public JobEntity createGoogleDocImportChildJob(Objectify ofy, 
+      ImportModuleGoogleDocJobContext docImportJobRequest, JobId parentJobId, JobId rootJobId);
   
   /**
    * This is used for complete Job. This will do two things
@@ -54,7 +64,7 @@ public interface JobManager {
    * @param jobId
    * @return
    */
-  public JobEntity enqueueCompleteJob(JobId jobId, String message);
+  public <D extends AbstractDto<D>> JobEntity enqueueCompleteJob(JobId jobId, D responseDto, String message);
   
   /**
    * This will enqueue a Job in {@link com.google.light.server.constants.QueueEnum#LIGHT_POLLING}
@@ -76,7 +86,17 @@ public interface JobManager {
   
   public JobEntity get(Objectify ofy, JobId jobId);
   
-  public void handleJob(JobId jobId);
-  
   public Map<JobId, JobEntity> findListOfJobs(List<JobId> listOfJobIds);
+  
+  // For using externalIds.
+  public JobId createImportBatchJob(ImportBatchWrapper jobRequest);
+  
+  public JobEntity createImportCollectionGoogleCollectionJob(Objectify ofy, ImportCollectionGoogleDocContext jobRequest,
+      JobId parentJobId, JobId rootJobId);
+  
+  public void enqueueImportChildJob(Objectify ofy, JobId parentJobId, JobId childJobId,
+      ImportExternalIdDto childJob, QueueEnum queue);
+  
+  public JobEntity createSyntheticModuleJob(Objectify ofy, ImportModuleSyntheticModuleJobContext context, 
+      JobId parentJobId, JobId rootJobId);
 }

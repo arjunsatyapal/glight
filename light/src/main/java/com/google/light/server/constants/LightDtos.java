@@ -17,15 +17,13 @@ package com.google.light.server.constants;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocImportJobContext;
+import com.google.light.server.jobs.handlers.collectionjobs.ImportCollectionGoogleDocContext;
 
-import com.google.light.server.dto.notifications.AbstractNotification;
+import com.google.light.server.jobs.handlers.modulejobs.ImportModuleSyntheticModuleJobContext;
 
-import com.google.light.server.dto.pojo.tree.GoogleDocTree;
+import com.google.light.server.dto.pojo.tree.collection.CollectionTreeNodeDto;
 
-import com.google.light.server.dto.notifications.ChildJobCompletionNotification;
-
-import com.google.light.server.dto.module.ImportDestinationDto;
+import com.google.light.server.jobs.handlers.modulejobs.ImportModuleGoogleDocJobContext;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
@@ -38,20 +36,23 @@ import com.google.light.server.dto.RedirectDto;
 import com.google.light.server.dto.admin.OAuth2ConsumerCredentialDto;
 import com.google.light.server.dto.collection.CollectionDto;
 import com.google.light.server.dto.collection.CollectionVersionDto;
+import com.google.light.server.dto.importresource.ImportBatchWrapper;
+import com.google.light.server.dto.importresource.ImportExternalIdDto;
 import com.google.light.server.dto.module.ModuleDto;
 import com.google.light.server.dto.module.ModuleVersionDto;
+import com.google.light.server.dto.notifications.AbstractNotification;
+import com.google.light.server.dto.notifications.ChildJobCompletionNotification;
 import com.google.light.server.dto.oauth2.owner.OAuth2OwnerTokenDto;
 import com.google.light.server.dto.pages.PageDto;
 import com.google.light.server.dto.person.PersonDto;
-import com.google.light.server.dto.pojo.tree.CollectionTreeNodeDto;
 import com.google.light.server.dto.pojo.tree.AbstractTreeNode;
+import com.google.light.server.dto.pojo.tree.GoogleDocTree;
 import com.google.light.server.dto.search.SearchRequestDto;
 import com.google.light.server.dto.search.SearchResultDto;
 import com.google.light.server.dto.search.SearchResultItemDto;
 import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocImportBatchJobContext;
 import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocInfoDto;
 import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocResourceId;
-import com.google.light.server.dto.thirdparty.google.gdata.gdoc.ExternalIdListWrapperDto;
 import com.google.light.server.servlets.oauth2.google.pojo.GoogleUserInfo;
 import java.util.List;
 
@@ -77,16 +78,17 @@ public enum LightDtos {
   GOOGLE_DOC_RESOURCE_ID(GoogleDocResourceId.class, "googleDocResourceId"),
   GOOGLE_DOC_IMPORT_BATCH_JOB_CONTEXT(GoogleDocImportBatchJobContext.class,
                                       "googleDocImportBatchJobContext"),
-  GOOGLE_DOC_IMPORT_JOB_CONTEXT(GoogleDocImportJobContext.class, "googleDocImportJobContext"),
+  GOOGLE_DOC_IMPORT_JOB_CONTEXT(ImportModuleGoogleDocJobContext.class, "googleDocImportJobContext"),
   GOOGLE_DOC_INFO_DTO(GoogleDocInfoDto.class, "googleDocInfo"),
-  GOOGLE_DOC_RESOURCE_ID_LIST_DTO(ExternalIdListWrapperDto.class,
-                                  "googleDocResourceIdList"),
   GOOGLE_DOC_INFO_LIST_DTO(GoogleDocImportBatchJobContext.class, "googleDocResourceInfoList"),
   GOOGLE_DOC_TREE(GoogleDocTree.class, "googleDocTree"),
   GOOGLE_USER_INFO(GoogleUserInfo.class, "googleUserInfo"),
 
-  IMPORT_DESTINATION_DTO(ImportDestinationDto.class, "importDestination"),
-
+  IMPORT_BATCH_WRAPPER(ImportBatchWrapper.class, "importBatch"),
+  IMPORT_COLLECTION_GOOGLE_DOC_CONTEXT(ImportCollectionGoogleDocContext.class, "importCollectionGoogleDocContext"),
+  IMPORT_EXTERNAL_ID_DTO(ImportExternalIdDto.class, "importExternalId"),
+  IMPORT_MODULE_SYNTHETIC_JOB_CONTEXT(ImportModuleSyntheticModuleJobContext.class, "importModuleSyntheticModuleJobContext"),
+  
   JS_VARIABLES_PRELOAD_DTO(JSVariablesPreloadDto.class, "jsVariablesPreload"),
 
   // TODO(arjuns): Get rid of this from DTO.

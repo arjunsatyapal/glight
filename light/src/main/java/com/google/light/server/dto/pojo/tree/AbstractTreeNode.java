@@ -18,6 +18,8 @@ package com.google.light.server.dto.pojo.tree;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNull;
 
+import javax.xml.bind.annotation.XmlAnyElement;
+
 import javax.xml.bind.annotation.XmlElementWrapper;
 
 import com.google.common.collect.Lists;
@@ -40,15 +42,15 @@ public abstract class AbstractTreeNode<T extends AbstractTreeNode<T>> extends Ab
   @JsonProperty(value = "title")
   protected String title;
   
-  @XmlElement(name = "type")
-  @JsonProperty(value = "type")
-  protected TreeNodeType type;
+  @XmlElement(name = "nodeType")
+  @JsonProperty(value = "nodeType")
+  protected TreeNodeType nodeType;
 
   // TODO(arjuns): See if this embedded can be removed. At present both Dto and persistence are using this.
   // This is bad.
   @Embedded
   @XmlElementWrapper(name = "list")
-  @XmlElement(name = "item")
+  @XmlAnyElement
   @JsonProperty(value = "list")
   protected List<T> list;
 
@@ -58,9 +60,9 @@ public abstract class AbstractTreeNode<T extends AbstractTreeNode<T>> extends Ab
   @SuppressWarnings("unchecked")
   @Override
   public T validate() {
-    checkNotNull(type, "type");
+    checkNotNull(nodeType, "type");
     checkNotNull(title, "title");
-    switch (type) {
+    switch (nodeType) {
       case ROOT_NODE:
         break;
 
@@ -72,7 +74,7 @@ public abstract class AbstractTreeNode<T extends AbstractTreeNode<T>> extends Ab
         break;
 
       default:
-        throw new IllegalStateException("Add more validations for unsupported type : " + type);
+        throw new IllegalStateException("Add more validations for unsupported type : " + nodeType);
     }
 
     return ((T) this);
@@ -82,24 +84,28 @@ public abstract class AbstractTreeNode<T extends AbstractTreeNode<T>> extends Ab
     return title;
   }
 
-  public TreeNodeType getType() {
-    return type;
+  public TreeNodeType getNodeType() {
+    return nodeType;
   }
   
   public boolean isLeafNode() {
-    return type == TreeNodeType.LEAF_NODE;
+    return nodeType == TreeNodeType.LEAF_NODE;
+  }
+  
+  public boolean isIntermediateNode() {
+    return nodeType == TreeNodeType.INTERMEDIATE_NODE;
   }
 
   public void addChildren(T treeNode) {
-    if (list == null) {
-      list = Lists.newArrayList();
-    }
-
-    list.add(treeNode);
+    getChildren().add(treeNode);
     validate();
   }
 
   public List<T> getChildren() {
+    if (list == null) {
+      list = Lists.newArrayList();
+    }
+    
     return list;
   }
   
@@ -113,7 +119,7 @@ public abstract class AbstractTreeNode<T extends AbstractTreeNode<T>> extends Ab
   
   @SuppressWarnings("unchecked")
   public List<T> getInOrderTraversalOfLeafNodes() {
-    if (getType() == TreeNodeType.LEAF_NODE) {
+    if (getNodeType() == TreeNodeType.LEAF_NODE) {
       return ((List<T>) Lists.newArrayList(this));
     }
     
@@ -166,7 +172,7 @@ public abstract class AbstractTreeNode<T extends AbstractTreeNode<T>> extends Ab
     }
 
     this.title = builder.title;
-    this.type = builder.type;
+    this.nodeType = builder.type;
     // this.parent = builder.parent;
     this.list = builder.children;
   }

@@ -15,6 +15,10 @@
  */
 package com.google.light.server.dto.module;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import javax.xml.bind.annotation.XmlEnumValue;
+
 /**
  * Enum to encapsulate different possible states for Modules.
  * 
@@ -23,6 +27,34 @@ package com.google.light.server.dto.module;
  * @author Arjun Satyapal
  */
 public enum ModuleState {
-  PUBLISHED,
-  RESERVED;
+  @XmlEnumValue(value = "FAILED")
+  FAILED(ModuleStateCategory.RETRY),
+  
+  @XmlEnumValue(value = "RESERVED")
+  RESERVED(ModuleStateCategory.HOSTED),
+  
+  @XmlEnumValue(value = "IMPORTING")
+  IMPORTING(ModuleStateCategory.HOSTED),
+  
+  @XmlEnumValue(value = "REFRESHING")
+  REFRESHING(ModuleStateCategory.HOSTED),
+  
+  @XmlEnumValue(value = "PUBLISHED")
+  PUBLISHED(ModuleStateCategory.HOSTED),
+  
+//  @XmlEnumValue(value = "UNKNOWN")
+//  UNKNOWN(ModuleStateCategory.RETRY),
+  
+  @XmlEnumValue(value = "NOT_SUPPORTED")
+  NOT_SUPPORTED(ModuleStateCategory.NOT_HOSTED);
+  
+  private ModuleStateCategory category;
+  
+  private ModuleState(ModuleStateCategory category) {
+    this.category = checkNotNull(category, "category");
+  }
+  
+  public ModuleStateCategory getCategory() {
+    return category;
+  }
 }

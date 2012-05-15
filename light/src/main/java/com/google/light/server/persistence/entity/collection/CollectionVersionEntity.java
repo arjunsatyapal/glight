@@ -16,15 +16,18 @@
 package com.google.light.server.persistence.entity.collection;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
 import static com.google.light.server.utils.LightUtils.getWrapper;
 
-import com.google.light.server.dto.pojo.typewrapper.longwrapper.CollectionId;
-import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
+import com.google.light.server.dto.pojo.tree.collection.CollectionTreeNodeDto;
+
+import com.google.light.server.utils.LightUtils;
 
 import com.google.appengine.api.datastore.Text;
 import com.google.light.server.dto.collection.CollectionVersionDto;
-import com.google.light.server.dto.pojo.tree.CollectionTreeNodeDto;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.CollectionId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
 import com.google.light.server.persistence.entity.AbstractPersistenceEntity;
 import com.google.light.server.utils.JsonUtils;
 import com.googlecode.objectify.Key;
@@ -42,9 +45,22 @@ import javax.persistence.Id;
 public class CollectionVersionEntity extends AbstractPersistenceEntity<CollectionVersionEntity, CollectionVersionDto> {
   @Id
   private Long version;
+  private String title;
+  
   @Parent
   private Key<CollectionEntity> collectionKey;
   private Text collectionTreeJson;
+  
+  @Override
+  public CollectionVersionEntity validate() {
+    checkPositiveLong(version, "version");
+    checkNotBlank(title, "title");
+    checkNotNull(collectionKey, "collectionKey");
+    checkNotNull(collectionTreeJson, "collectionTreeJson");
+    return this;
+  }
+  
+  
   /**
    * {@inheritDoc}
    */
@@ -60,13 +76,6 @@ public class CollectionVersionEntity extends AbstractPersistenceEntity<Collectio
     
   }
   
-//  /**
-//   * Method to generate Objectify key for {@link CollectionEntity}.
-//   */
-//  public static Key<CollectionVersionEntity> generateKey(Key<CollectionEntity> collectionKey, Version version) {
-//    return generateKey(collectionKey, version);
-//  }
-  
   public static Key<CollectionVersionEntity> generateKey(CollectionId collectionId, Version version) {
     return generateKey(CollectionEntity.generateKey(collectionId), version);
   }
@@ -78,6 +87,7 @@ public class CollectionVersionEntity extends AbstractPersistenceEntity<Collectio
   public CollectionVersionDto toDto() {
     CollectionVersionDto dto = new CollectionVersionDto.Builder()
       .collectionId(getCollectionId())
+      .title(title)
       .version(getVersion())
       .collectionTree(getCollectionTree())
       .build();
@@ -106,16 +116,13 @@ public class CollectionVersionEntity extends AbstractPersistenceEntity<Collectio
     return getWrapper(collectionKey.getId(), CollectionId.class);
   }
   
-  @Override
-  public CollectionVersionEntity validate() {
-    checkPositiveLong(version, "version");
-    checkNotNull(collectionKey, "collectionKey");
-    checkNotNull(collectionTreeJson, "collectionTreeJson");
-    return this;
+  public String getTitle() {
+    return title;
   }
-
+  
   public static class Builder extends AbstractPersistenceEntity.BaseBuilder<Builder> {
     private Version version;
+    private String title;
     private CollectionTreeNodeDto collectionTree;
     private Key<CollectionEntity> collectionKey;
 
@@ -126,6 +133,11 @@ public class CollectionVersionEntity extends AbstractPersistenceEntity<Collectio
     
     public Builder version(Version version) {
       this.version = version;
+      return this;
+    }
+    
+    public Builder title(String title) {
+      this.title = title;
       return this;
     }
 
@@ -144,13 +156,12 @@ public class CollectionVersionEntity extends AbstractPersistenceEntity<Collectio
   private CollectionVersionEntity(Builder builder) {
     super(builder, true);
     
-    checkNotNull(builder.version, "version");
-    this.version = builder.version.getValue();
-    
+    this.version = LightUtils.getWrapperValue(builder.version);
+
     checkNotNull(builder.collectionTree, "collectionTree");
     this.collectionTreeJson = new Text(builder.collectionTree.toJson());
-    
-    this.collectionKey = checkNotNull(builder.collectionKey, "collectionKey");
+    this.collectionKey = builder.collectionKey;
+    this.title = builder.title;
   }
 
   // For Objectify.

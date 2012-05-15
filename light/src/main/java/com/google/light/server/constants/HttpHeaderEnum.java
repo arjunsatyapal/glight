@@ -100,6 +100,9 @@ public enum HttpHeaderEnum {
   WARNING("Warning"),
   WWW_AUTHENTICATE("WWW-Authenticate"),
 
+  // Additional Headers of Interest
+  X_FRAME_OPTIONS("X-Frame-Options"),
+  
   // Headers set by GAE
   GAE_CITY("X-AppEngine-City"),
   GAE_CITY_LAT_LONG("X-Appengine-CityLatLong"),

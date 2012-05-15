@@ -16,7 +16,8 @@
 package com.google.light.server.persistence.dao;
 
 import com.google.inject.Inject;
-import com.google.light.server.persistence.entity.module.OriginModuleMappingEntity;
+import com.google.light.server.dto.pojo.typewrapper.stringwrapper.ExternalId;
+import com.google.light.server.persistence.entity.module.ExternalIdMappingEntity;
 import com.googlecode.objectify.Objectify;
 import com.googlecode.objectify.ObjectifyService;
 import java.util.logging.Logger;
@@ -26,16 +27,16 @@ import java.util.logging.Logger;
  * 
  * @author Arjun Satyapal
  */
-public class OriginModuleMappingDao extends AbstractBasicDao<Object, OriginModuleMappingEntity> {
-  private static final Logger logger = Logger.getLogger(OriginModuleMappingDao.class.getName());
+public class ExternalIdMappingDao extends AbstractBasicDao<Object, ExternalIdMappingEntity> {
+  private static final Logger logger = Logger.getLogger(ExternalIdMappingDao.class.getName());
 
   static {
-    ObjectifyService.register(OriginModuleMappingEntity.class);
+    ObjectifyService.register(ExternalIdMappingEntity.class);
   }
 
   @Inject
-  public OriginModuleMappingDao() {
-    super(OriginModuleMappingEntity.class);
+  public ExternalIdMappingDao() {
+    super(ExternalIdMappingEntity.class);
   }
 
   /**
@@ -44,9 +45,9 @@ public class OriginModuleMappingDao extends AbstractBasicDao<Object, OriginModul
    * {@inheritDoc}
    */
   @Override
-  public OriginModuleMappingEntity put(Objectify txn, OriginModuleMappingEntity entity) {
-    OriginModuleMappingEntity returnEntity = super.put(txn, entity);
-    String returnMsg = "Created/Updated ModuleEntity[" + returnEntity.getId() + "].";
+  public ExternalIdMappingEntity put(Objectify txn, ExternalIdMappingEntity entity) {
+    ExternalIdMappingEntity returnEntity = super.put(txn, entity);
+    String returnMsg = "Created/Updated ModuleEntity[" + returnEntity.getExternalId() + "].";
 
     return logAndReturn(logger, returnEntity, returnMsg);
   }
@@ -55,7 +56,7 @@ public class OriginModuleMappingDao extends AbstractBasicDao<Object, OriginModul
    * TODO(arjuns): Add test for this.
    * Fetch Module via ModuleId.
    */
-  public OriginModuleMappingEntity get(Objectify ofy, String id) {
-    return super.get(ofy, OriginModuleMappingEntity.generateKey(id));
+  public ExternalIdMappingEntity get(Objectify ofy, ExternalId id) {
+    return super.get(ofy, ExternalIdMappingEntity.generateKey(id));
   }
 }

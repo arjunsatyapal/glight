@@ -166,13 +166,14 @@ public class ModuleEntity extends AbstractPersistenceEntity<ModuleEntity, Module
    * Caller is expected to persist this entity.
    * @param latestVersion
    */
-  public void publishVersion(Version latestPublishVersion, Instant lastEditTime, String etag,
-      ExternalId externalId) {
+  public void publishVersion(Version latestPublishVersion, String title, Instant lastEditTime, 
+      String etag, ExternalId externalId) {
     // Other then builder, all are required to set a positive latestVersion.
     checkVersion(latestPublishVersion);
     
     Long tempVersion = getWrapperValue(latestPublishVersion);
     if (this.latestPublishVersion < tempVersion) {
+      this.title = checkNotBlank(title, "title");
       this.latestPublishVersion = tempVersion;
       this.lastEditTimeInMillis = lastEditTime.getMillis();
       this.etag = etag;
@@ -223,6 +224,13 @@ public class ModuleEntity extends AbstractPersistenceEntity<ModuleEntity, Module
     checkNotBlank(title, "title");
     checkNotNull(moduleState, "moduleState");
     checkNotNull(moduleType, "moduleType");
+    
+    
+    if (moduleType.mapsToCollection()) {
+      throw new IllegalStateException("Module cannot be created with " + moduleType);
+    } else {
+      Preconditions.checkNotNull(getExternalId(), "externalId");
+    }
     checkNonEmptyList(owners, "owners list cannot be empty.");
     checkNotNull(lastEditTimeInMillis, "lastEditTimeInMills");
     

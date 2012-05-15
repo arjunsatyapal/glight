@@ -17,6 +17,8 @@ package com.google.light.server.dto.pojo.typewrapper.stringwrapper;
 
 import static com.google.light.server.utils.LightUtils.getStringWrapper;
 
+import com.google.light.server.dto.module.ModuleTypeProvider;
+
 import com.google.light.server.dto.module.ModuleType;
 import com.google.light.server.dto.pojo.typewrapper.AbstractTypeWrapper;
 import com.google.light.server.dto.pojo.typewrapper.stringwrapper.ExternalId.ExternalIdDeserializer;
@@ -103,7 +105,11 @@ public class ExternalId extends AbstractTypeWrapper<String, ExternalId> {
       return docUrl.getModuleType();
     } 
     
-    return ModuleType.UNKNOWN;
+    return ModuleType.LIGHT_SYNTHETIC_MODULE;
+  }
+
+  public boolean isGoogleDocResource() {
+    return getModuleType().getModuleTypeProvider() == ModuleTypeProvider.GOOGLE_DOC;
   }
 
   // Adding Custom Serializer/Deserializer and XmlAdapter.

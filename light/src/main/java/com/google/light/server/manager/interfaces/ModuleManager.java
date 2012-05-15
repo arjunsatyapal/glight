@@ -1,5 +1,7 @@
 package com.google.light.server.manager.interfaces;
 
+import com.google.light.server.dto.pojo.typewrapper.stringwrapper.ExternalId;
+
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
@@ -10,10 +12,7 @@ import org.joda.time.Instant;
 
 import java.util.List;
 
-import com.google.light.server.dto.module.ModuleType;
-
 import com.google.light.server.dto.module.GSBlobInfo;
-import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocInfoDto;
 import com.google.light.server.persistence.entity.module.ModuleEntity;
 import com.google.light.server.persistence.entity.module.ModuleVersionEntity;
 import com.google.light.server.persistence.entity.module.ModuleVersionResourceEntity;
@@ -60,24 +59,22 @@ public interface ModuleManager {
   public ModuleEntity delete(ModuleId moduleId);
 
   /**
-   * Find Module by originId
-   * 
-   * @param originId
-   * @return
+   * Find Module by externalId
    */
-  public ModuleId findModuleIdByOriginId(Objectify ofy, String originId);
+  public ModuleId findModuleIdByExternalId(Objectify ofy, ExternalId externalId);
 
   /**
-   * Reserve a ModuleId for a OriginId.
+   * Reserve a ModuleId for a ExternalId.
    */
-  public ModuleId reserveModuleId(Objectify ofy, ModuleType moduleType, String externalId,
+  public ModuleId reserveModuleId(Objectify ofy, ExternalId externalId,
       List<PersonId> owners, String title);
   
   public Version reserveModuleVersion(Objectify ofy, ModuleId moduleId, String etag, 
       Instant lastEditTime);
 
   public ModuleVersionEntity publishModuleVersion(Objectify ofy, ModuleId moduleId,
-      Version version, String content, GoogleDocInfoDto docInfo);
+      Version version, ExternalId externalId, String title, String content, String etag, 
+      Instant lastEditTime);
 
   /**
    * Add resources for a Module-Version.

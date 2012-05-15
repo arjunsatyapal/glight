@@ -13,15 +13,19 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.server.dto.module;
+package com.google.light.server.jobs.handlers.modulejobs;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.light.server.utils.LightPreconditions.checkModuleId;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
+import static com.google.light.server.utils.LightPreconditions.checkVersion;
+
+import com.google.light.server.dto.module.ModuleType;
 
 import com.google.light.server.dto.AbstractDto;
-import com.google.light.server.dto.pojo.typewrapper.longwrapper.JobId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
+import com.google.light.server.dto.pojo.typewrapper.stringwrapper.ExternalId;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -30,24 +34,24 @@ import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.annotate.JsonTypeName;
 
 /**
- * This DTO is used to wrap information about an Import operation.
+ * 
  * 
  * TODO(arjuns): Add test for this class.
  * 
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
-@JsonTypeName(value = "importDestination")
-@XmlRootElement(name = "importDestination")
+@JsonTypeName(value = "importModuleSyntheticModuleJobContext")
+@XmlRootElement(name = "importModuleSyntheticModuleJobContext")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class ImportDestinationDto extends AbstractDto<ImportDestinationDto> {
+public class ImportModuleSyntheticModuleJobContext extends AbstractDto<ImportModuleSyntheticModuleJobContext> {
   @XmlElement(name = "externalId")
   @JsonProperty(value = "externalId")
-  private String externalId;
-
-  @XmlElement(name = "moduleType")
-  @JsonProperty(value = "moduleType")
-  private ModuleType moduleType;
+  private ExternalId externalId;
+  
+  @XmlElement(name = "title")
+  @JsonProperty(value = "title")
+  private String title;
 
   @XmlElement(name = "moduleId")
   @JsonProperty(value = "moduleId")
@@ -57,30 +61,30 @@ public class ImportDestinationDto extends AbstractDto<ImportDestinationDto> {
   @JsonProperty(value = "version")
   private Version version;
 
-  @XmlElement(name = "jobId")
-  @JsonProperty(value = "jobId")
-  private JobId jobId;
+  // At present hard coding as there is no other synthetic module. 
+  @XmlElement(name = "moduleType")
+  @JsonProperty(value = "moduleType")
+  private ModuleType moduleType = ModuleType.LIGHT_SYNTHETIC_MODULE;
+
+
 
   /**
    * {@inheritDoc}
    */
   @Override
-  public ImportDestinationDto validate() {
-    checkNotBlank(externalId, "externalId");
-    checkNotNull(moduleType, "moduleType");
-    checkNotNull(moduleId, "moduleId");
-    checkNotNull(version, "version");
-    checkNotNull(jobId, "jobId");
+  public ImportModuleSyntheticModuleJobContext validate() {
+    checkNotBlank(title, "title");
+    checkNotNull(externalId, "externalId");
+    externalId.validate();
 
+    checkModuleId(getModuleId());
+    checkVersion(getVersion());
+    
     return this;
   }
 
-  public String getExternalId() {
+  public ExternalId getExternalId() {
     return externalId;
-  }
-
-  public ModuleType getModuleType() {
-    return moduleType;
   }
 
   public ModuleId getModuleId() {
@@ -90,25 +94,23 @@ public class ImportDestinationDto extends AbstractDto<ImportDestinationDto> {
   public Version getVersion() {
     return version;
   }
-
-  public JobId getJobId() {
-    return jobId;
+  
+  public ModuleType getModuleType() {
+    return moduleType;
+  }
+  
+  public String getTitle() {
+    return title;
   }
 
-  public static class Builder extends AbstractDto.BaseBuilder<Builder> {
-    private String externalId;
-    private ModuleType moduleType;
+  public static class Builder extends AbstractDto.BaseBuilder<Builder>{
+    private ExternalId externalId;
     private ModuleId moduleId;
     private Version version;
-    private JobId jobId;
+    private String title;
 
-    public Builder externalId(String externalId) {
+    public Builder externalId(ExternalId externalId) {
       this.externalId = externalId;
-      return this;
-    }
-
-    public Builder moduleType(ModuleType moduleType) {
-      this.moduleType = moduleType;
       return this;
     }
 
@@ -121,30 +123,28 @@ public class ImportDestinationDto extends AbstractDto<ImportDestinationDto> {
       this.version = version;
       return this;
     }
-
-    public Builder jobId(JobId jobId) {
-      this.jobId = jobId;
+    
+    public Builder title(String title) {
+      this.title = title;
       return this;
     }
 
     @SuppressWarnings("synthetic-access")
-    public ImportDestinationDto build() {
-      return new ImportDestinationDto(this);
+    public ImportModuleSyntheticModuleJobContext build() {
+      return new ImportModuleSyntheticModuleJobContext(this);
     }
   }
 
   @SuppressWarnings("synthetic-access")
-  private ImportDestinationDto(Builder builder) {
+  private ImportModuleSyntheticModuleJobContext(Builder builder) {
     super(builder);
     this.externalId = builder.externalId;
-    this.moduleType = builder.moduleType;
     this.moduleId = builder.moduleId;
     this.version = builder.version;
-    this.jobId = builder.jobId;
+    this.title = builder.title;
   }
-
-  // For Jaxb.
-  private ImportDestinationDto() {
+  
+  private ImportModuleSyntheticModuleJobContext() {
     super(null);
   }
 }

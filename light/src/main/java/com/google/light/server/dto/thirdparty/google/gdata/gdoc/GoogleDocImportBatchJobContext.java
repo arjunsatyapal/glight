@@ -20,25 +20,25 @@ import static com.google.light.server.utils.LightPreconditions.checkNonEmptyList
 import static com.google.light.server.utils.LightPreconditions.checkPersonId;
 import static com.google.light.server.utils.LightUtils.isListEmpty;
 
-import com.google.light.server.annotations.OverrideFieldAnnotationName;
-
-import javax.xml.bind.annotation.XmlAnyElement;
-
-import com.google.light.server.constants.PlacementOrder;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import com.google.light.server.annotations.OverrideFieldAnnotationName;
+import com.google.light.server.constants.PlacementOrder;
 import com.google.light.server.dto.AbstractDto;
-import com.google.light.server.dto.module.ImportDestinationDto;
+import com.google.light.server.dto.importresource.ImportBatchType;
+import com.google.light.server.dto.importresource.ImportExternalIdDto;
 import com.google.light.server.dto.pojo.tree.AbstractTreeNode.TreeNodeType;
 import com.google.light.server.dto.pojo.tree.GoogleDocTree;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.CollectionId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
+import com.google.light.server.dto.pojo.typewrapper.stringwrapper.ExternalId;
 import com.google.light.server.utils.LightUtils;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAnyElement;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -73,7 +73,7 @@ public class GoogleDocImportBatchJobContext extends AbstractDto<GoogleDocImportB
   @XmlElementWrapper(name = "listOfImportDestinations")
   @XmlElement(name = "importDestination")
   @JsonProperty(value = "listOfImportDestinations")
-  private List<ImportDestinationDto> listOfImportDestinations;
+  private List<ImportExternalIdDto> listOfImportDestinations;
 
   @OverrideFieldAnnotationName(value = "To deserialize properly, need to know type of State.")
   @XmlElement(name = "googleDocImportBatchJobState")
@@ -87,7 +87,7 @@ public class GoogleDocImportBatchJobContext extends AbstractDto<GoogleDocImportB
   @OverrideFieldAnnotationName(value = "To deserialize properly, need to know type of State.")
   @XmlElement(name = "googleDocImportBatchJobType")
   @JsonProperty(value = "googleDocImportBatchJobType")
-  private GoogleDocImportBatchType type;
+  private ImportBatchType type;
 
   @XmlElement(name = "collectionId")
   @JsonProperty(value = "collectionId")
@@ -157,20 +157,20 @@ public class GoogleDocImportBatchJobContext extends AbstractDto<GoogleDocImportB
   }
 
   public void setTreeRoot(GoogleDocTree root) {
-    Preconditions.checkArgument(root.getType() == TreeNodeType.ROOT_NODE,
+    Preconditions.checkArgument(root.getNodeType() == TreeNodeType.ROOT_NODE,
         "only root nodes can be set here.");
     this.root = root;
   }
 
-  public List<ImportDestinationDto> getListOfImportDestinations() {
+  public List<ImportExternalIdDto> getListOfImportDestinations() {
     return listOfImportDestinations;
   }
 
-  public void setListOfImportDestinations(List<ImportDestinationDto> importDestinations) {
+  public void setListOfImportDestinations(List<ImportExternalIdDto> importDestinations) {
     this.listOfImportDestinations = importDestinations;
   }
 
-  public void addImportDestination(ImportDestinationDto importDestination) {
+  public void addImportDestination(ImportExternalIdDto importDestination) {
     if (LightUtils.isListEmpty(listOfImportDestinations)) {
       listOfImportDestinations = Lists.newArrayList();
     }
@@ -198,7 +198,7 @@ public class GoogleDocImportBatchJobContext extends AbstractDto<GoogleDocImportB
     return collectionTitle;
   }
 
-  public GoogleDocImportBatchType getType() {
+  public ImportBatchType getType() {
     return type;
   }
 
@@ -222,12 +222,12 @@ public class GoogleDocImportBatchJobContext extends AbstractDto<GoogleDocImportB
     this.version = version;
   }
 
-  public boolean isChildJobCreated(String externalId) {
+  public boolean isChildJobCreated(ExternalId externalId) {
     if (isListEmpty(listOfImportDestinations)) {
       return false;
     }
 
-    for (ImportDestinationDto currDest : listOfImportDestinations) {
+    for (ImportExternalIdDto currDest : listOfImportDestinations) {
       if (currDest.getExternalId().equals(externalId)) {
         return true;
       }
@@ -236,12 +236,12 @@ public class GoogleDocImportBatchJobContext extends AbstractDto<GoogleDocImportB
     return false;
   }
 
-  public ModuleId getModuleIdForExternalId(String externalId) {
+  public ModuleId getModuleIdForExternalId(ExternalId externalId) {
     if (LightUtils.isListEmpty(listOfImportDestinations)) {
       return null;
     }
 
-    for (ImportDestinationDto currDest : listOfImportDestinations) {
+    for (ImportExternalIdDto currDest : listOfImportDestinations) {
       if (currDest.getExternalId().equals(externalId)) {
         return currDest.getModuleId();
       }
@@ -250,7 +250,7 @@ public class GoogleDocImportBatchJobContext extends AbstractDto<GoogleDocImportB
     return null;
   }
 
-  public void setType(GoogleDocImportBatchType type) {
+  public void setType(ImportBatchType type) {
     this.type = type;
   }
 
@@ -258,10 +258,10 @@ public class GoogleDocImportBatchJobContext extends AbstractDto<GoogleDocImportB
     private PersonId ownerId;
     private List<GoogleDocInfoDto> resourceInfoList;
     private GoogleDocTree root;
-    private List<ImportDestinationDto> listOfImportDestinations;
+    private List<ImportExternalIdDto> listOfImportDestinations;
     private GoogleDocImportBatchJobState state;
     private String collectionTitle;
-    private GoogleDocImportBatchType type;
+    private ImportBatchType type;
     private CollectionId collectionId;
     private Version version;
 
@@ -280,7 +280,7 @@ public class GoogleDocImportBatchJobContext extends AbstractDto<GoogleDocImportB
       return this;
     }
 
-    public Builder listOfImportDestinations(List<ImportDestinationDto> listOfImportDestinations) {
+    public Builder listOfImportDestinations(List<ImportExternalIdDto> listOfImportDestinations) {
       this.listOfImportDestinations = listOfImportDestinations;
       return this;
     }
@@ -295,7 +295,7 @@ public class GoogleDocImportBatchJobContext extends AbstractDto<GoogleDocImportB
       return this;
     }
 
-    public Builder type(GoogleDocImportBatchType type) {
+    public Builder type(ImportBatchType type) {
       this.type = type;
       return this;
     }

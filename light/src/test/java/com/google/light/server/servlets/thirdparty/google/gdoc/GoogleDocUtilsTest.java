@@ -20,6 +20,7 @@ import static com.google.light.server.constants.LightConstants.MAX_RESULTS_DEFAU
 import static com.google.light.server.servlets.thirdparty.google.gdoc.GoogleDocUtils.getFolderContentUrl;
 import static org.junit.Assert.assertEquals;
 
+import com.google.light.server.dto.pojo.typewrapper.stringwrapper.ExternalId;
 import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocResourceId;
 import java.net.URL;
 import org.junit.Test;
@@ -87,7 +88,8 @@ public class GoogleDocUtilsTest {
    */
   @Test
   public void test_getResourceAclFeedUrl() throws Exception {
-    GoogleDocResourceId resourceId = new GoogleDocResourceId("document:1234");
+    GoogleDocResourceId resourceId = new GoogleDocResourceId(
+        new ExternalId("https://docs.google.com/a/myopenedu.com/document/d/1234/edit"));
     String expected = "https://docs.google.com/feeds/default/private/full/document:1234/acl";
     URL expectedUrl = new URL(expected);
     assertEquals(expectedUrl, GoogleDocUtils.getResourceAclFeedUrl(resourceId));
@@ -98,7 +100,8 @@ public class GoogleDocUtilsTest {
    */
   @Test
   public void test_getResourceEntryWithFoldersUrl() throws Exception {
-    GoogleDocResourceId resourceId = new GoogleDocResourceId("document:1234");
+    GoogleDocResourceId resourceId = new GoogleDocResourceId(
+        new ExternalId("https://docs.google.com/a/myopenedu.com/document/d/1234/edit"));
     String expected = "https://docs.google.com/feeds/default/private/full/document:1234"
           + "?showroots=true&showfolders=true";
     URL expectedUrl = new URL(expected);
@@ -110,7 +113,8 @@ public class GoogleDocUtilsTest {
    */
   @Test
   public void test_getResourceEntryWithAclFeedUrl() throws Exception {
-    GoogleDocResourceId resourceId = new GoogleDocResourceId("document:1234");
+    GoogleDocResourceId resourceId = new GoogleDocResourceId(
+        new ExternalId("https://docs.google.com/a/myopenedu.com/document/d/1234/edit"));
     String expected = "https://docs.google.com/feeds/default/private/full/document:1234"
           + "?showroots=true&showfolders=true&expand-acl=true";
     URL expectedUrl = new URL(expected);
@@ -122,7 +126,8 @@ public class GoogleDocUtilsTest {
    */
   @Test
   public void test_getResourceEntryUrl() throws Exception {
-    GoogleDocResourceId resourceId = new GoogleDocResourceId("document:1234");
+    GoogleDocResourceId resourceId = new GoogleDocResourceId(
+        new ExternalId("https://docs.google.com/a/myopenedu.com/document/d/1234/edit"));
     String expected = "https://docs.google.com/feeds/default/private/full/document:1234";
     URL expectedUrl = new URL(expected);
     assertEquals(expectedUrl, GoogleDocUtils.getResourceEntryUrl(resourceId));
@@ -143,7 +148,8 @@ public class GoogleDocUtilsTest {
    */
   @Test
   public void test_getFolderContentUrl() throws Exception {
-    GoogleDocResourceId resourceId = new GoogleDocResourceId("folder:1234");
+    GoogleDocResourceId resourceId = new GoogleDocResourceId(
+        new ExternalId("https://drive.google.com/?authuser=0#folders/1234"));
     String expected = "https://docs.google.com/feeds/default/private/full/folder:1234/contents?max-results=1000";
     URL expectedUrl = new URL(expected);
     assertEquals(expectedUrl, getFolderContentUrl(resourceId, GDATA_GDOC_MAX_RESULTS));

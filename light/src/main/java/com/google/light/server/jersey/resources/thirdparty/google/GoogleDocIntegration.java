@@ -15,20 +15,15 @@
  */
 package com.google.light.server.jersey.resources.thirdparty.google;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.light.server.constants.LightConstants.GOOGLE_DOC_IMPORT_BATCH_SIZE_MAX;
 import static com.google.light.server.exception.ExceptionType.SERVER_GUICE_INJECTION;
 import static com.google.light.server.servlets.thirdparty.google.gdoc.GoogleDocUtils.getDocumentFeedWithFolderUrl;
 import static com.google.light.server.servlets.thirdparty.google.gdoc.GoogleDocUtils.getDocumentFeedWithFolderUrlAndFilter;
 import static com.google.light.server.utils.LightPreconditions.checkIntegerIsInRage;
-import static com.google.light.server.utils.LightPreconditions.checkNonEmptyList;
 import static com.google.light.server.utils.LightPreconditions.checkNotNull;
 import static com.google.light.server.utils.LightUtils.encodeToUrlEncodedString;
 import static com.google.light.server.utils.LightUtils.getURL;
-import static com.google.light.server.utils.LightUtils.isListEmpty;
 
 import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Provider;
@@ -36,40 +31,23 @@ import com.google.light.server.constants.JerseyConstants;
 import com.google.light.server.constants.LightConstants;
 import com.google.light.server.constants.LightStringConstants;
 import com.google.light.server.constants.http.ContentTypeConstants;
-import com.google.light.server.constants.http.ContentTypeEnum;
-import com.google.light.server.dto.module.ModuleTypeProvider;
 import com.google.light.server.dto.pages.PageDto;
 import com.google.light.server.dto.pojo.typewrapper.stringwrapper.ExternalId;
-import com.google.light.server.dto.thirdparty.google.gdata.gdoc.ExternalIdListWrapperDto;
-import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocImportBatchJobContext;
-import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocImportBatchType;
 import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocInfoDto;
 import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocResourceId;
-import com.google.light.server.exception.unchecked.httpexception.BadRequestException;
 import com.google.light.server.jersey.resources.AbstractJerseyResource;
 import com.google.light.server.manager.interfaces.JobManager;
-import com.google.light.server.persistence.entity.jobs.JobEntity;
 import com.google.light.server.thirdparty.clients.google.gdata.gdoc.DocsServiceWrapper;
-import com.google.light.server.utils.GuiceUtils;
-import com.google.light.server.utils.JsonUtils;
 import com.google.light.server.utils.LightUtils;
-import com.google.light.server.utils.LocationHeaderUtils;
-import com.google.light.server.utils.XmlUtils;
-import java.net.URI;
 import java.net.URL;
-import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
 import org.apache.commons.lang.StringUtils;
 
 /**
@@ -156,8 +134,9 @@ public class GoogleDocIntegration extends AbstractJerseyResource {
   @Path(JerseyConstants.PATH_GOOGLE_DOC_INFO)
   @Produces({ ContentTypeConstants.APPLICATION_JSON, ContentTypeConstants.APPLICATION_XML })
   public GoogleDocInfoDto getDocInfo(
-      @PathParam(JerseyConstants.PATH_PARAM_EXTERNAL_KEY) String externalKey) {
-    GoogleDocResourceId resourceId = new GoogleDocResourceId(externalKey);
+      @PathParam(JerseyConstants.PATH_PARAM_EXTERNAL_KEY) String externaIdStr) {
+    ExternalId externalId = new ExternalId(externaIdStr);
+    GoogleDocResourceId resourceId = new GoogleDocResourceId(externalId);
     GoogleDocInfoDto dto = docsServiceProvider.get().getGoogleDocInfo(resourceId);
     return dto;
   }
@@ -166,7 +145,7 @@ public class GoogleDocIntegration extends AbstractJerseyResource {
   @Path(JerseyConstants.PATH_GOOGLE_FOLDER_INFO)
   @Produces({ ContentTypeConstants.APPLICATION_JSON, ContentTypeConstants.APPLICATION_XML })
   public PageDto getFolderContents(
-      @PathParam(JerseyConstants.PATH_PARAM_EXTERNAL_KEY) String externalKey,
+      @PathParam(JerseyConstants.PATH_PARAM_EXTERNAL_KEY) String externalIdStr,
       @QueryParam(LightStringConstants.START_INDEX_STR) String startIndex,
       @QueryParam(LightStringConstants.MAX_RESULTS_STR) String maxResultsStr) {
     int maxResult = initializeMaxResults(maxResultsStr);
@@ -179,7 +158,9 @@ public class GoogleDocIntegration extends AbstractJerseyResource {
         return docsServiceProvider.get().getFolderContentWithStartIndex(getURL(startIndex),
             handlerUri);
       }
-      GoogleDocResourceId resourceId = new GoogleDocResourceId(externalKey);
+      
+      ExternalId externalId = new ExternalId(externalIdStr);
+      GoogleDocResourceId resourceId = new GoogleDocResourceId(externalId);
       PageDto pageDto = docsServiceProvider.get().getFolderContentPageWise(
           resourceId, handlerUri, maxResult);
       return pageDto;
@@ -189,99 +170,87 @@ public class GoogleDocIntegration extends AbstractJerseyResource {
     }
   }
 
-  @POST
-  @Consumes(ContentTypeConstants.APPLICATION_URL_ENCODED)
-  @Path(JerseyConstants.PATH_GOOGLE_DOC_IMPORT_POST)
-  public Response importGoogleDocBatchFormPost(
-      @FormParam("json_body") String body) {
-    return importGoogleDocBatchPost(body);
-  }
-
-  @POST
-  @Consumes({ ContentTypeConstants.APPLICATION_JSON, ContentTypeConstants.APPLICATION_XML })
-  @Path(JerseyConstants.PATH_GOOGLE_DOC_IMPORT_POST)
-  public Response importGoogleDocBatchPost(String body) {
-    ContentTypeEnum contentType = ContentTypeEnum.getContentTypeByString(
-        request.getContentType());
-
-    ExternalIdListWrapperDto externalIdListWrapper = null;
-    if (contentType == ContentTypeEnum.APPLICATION_JSON
-        || contentType == ContentTypeEnum.APPLICATION_URL_ENCODED) {
-      externalIdListWrapper = JsonUtils.getDto(body, ExternalIdListWrapperDto.class);
-    } else if (contentType == ContentTypeEnum.APPLICATION_XML) {
-      externalIdListWrapper = XmlUtils.getDto(body);
-    } else {
-      throw new IllegalArgumentException("Invalid contentType : " + contentType);
-    }
-
-    checkNonEmptyList(externalIdListWrapper.getList(),
-        "List should not be empty at this point.");
-    checkIntegerIsInRage(externalIdListWrapper.getList().size(),
-        1, GOOGLE_DOC_IMPORT_BATCH_SIZE_MAX,
-        "Number of docuements that can be downloaded in a batch should be between 1 & " +
-            GOOGLE_DOC_IMPORT_BATCH_SIZE_MAX + ".");
-
-    GoogleDocImportBatchType type = externalIdListWrapper.getGoogleDocImportBatchType();
-
-    // if (resourceIdListWrapper.isCreateCollection()) {
-    // checkArgument(StringUtils.isNotBlank(resourceIdListWrapper.getCollectionTitle()),
-    // "For creating new collection title should not be blank.");
-    // } else if (resourceIdListWrapper.isEditCollection()) {
-    // checkNotNull(resourceIdListWrapper.getCollectionId(), ExceptionType.CLIENT_PARAMETER,
-    // "For editCollection, collectionId should not be null");
-    // CollectionEntity collectionEntity = collectionManager.get(null,
-    // resourceIdListWrapper.getCollectionId());
-    // checkNotNull(collectionEntity, ExceptionType.CLIENT_PARAMETER,
-    // "For editCollection, collectionId should not be null");
-    // }
-
-    // First ensure that all ExternalIds are for google.
-
-    List<GoogleDocResourceId> listOfGDocResourceIds = Lists.newArrayList();
-    for (ExternalId currExternalId : externalIdListWrapper.getList()) {
-      ModuleTypeProvider provider = currExternalId.getModuleType().getModuleTypeProvider();
-      checkArgument(provider == ModuleTypeProvider.GOOGLE_DOC, "Invalid Provider[" + provider
-          + "] for " + currExternalId);
-      listOfGDocResourceIds.add(currExternalId.getGoogleDocURL().getResourceId());
-    }
-
-    // TODO(arjuns) : See this needs max-result or any underlying layer.
-    List<GoogleDocInfoDto> docInfoList = docsServiceProvider.get().getGoogleDocInfoInBatch(
-        listOfGDocResourceIds);
-
-    GoogleDocImportBatchJobContext gdocImportBatchJobContext =
-        new GoogleDocImportBatchJobContext.Builder()
-            .ownerId(GuiceUtils.getOwnerId())
-            .state(GoogleDocImportBatchJobContext.GoogleDocImportBatchJobState.BUILDING)
-            .type(type)
-            .build();
-
-    for (GoogleDocInfoDto currInfo : docInfoList) {
-      if (currInfo.getGoogleDocsResourceId().getModuleType().isSupported()) {
-        gdocImportBatchJobContext.addGoogleDocResource(currInfo);
-      }
-    }
-
-    if (isListEmpty(gdocImportBatchJobContext.get())) {
-      throw new BadRequestException("Did not find any supported GDoc to import");
-    }
-
-    gdocImportBatchJobContext.setState(
-        GoogleDocImportBatchJobContext.GoogleDocImportBatchJobState.ENQUEUED);
-    gdocImportBatchJobContext.setCollectionTitle(externalIdListWrapper.getCollectionTitle());
-    gdocImportBatchJobContext.setCollectionId(externalIdListWrapper.getCollectionId());
-
-    JobEntity jobEntity = jobManager.enqueueGoogleDocImportBatchJob(gdocImportBatchJobContext);
-
-    URI jobLocationUri = LocationHeaderUtils.getJobLocation(jobEntity.getJobId());
-    /*
-     * HtmlBuilder htmlBuilder = new HtmlBuilder();
-     * htmlBuilder.appendHref(null/* id * /, jobLocationUri, "Check Status for : " +
-     * jobEntity.getId());
-     */
-    // TODO(waltercacau): allow JSON responses
-    // TODO(arjuns): Fix Jersey's relative path bug with locationUris.
-    return Response.created(jobLocationUri).entity(JsonUtils.toJson(jobEntity.getJobId()))
-        .type(ContentTypeConstants.APPLICATION_JSON).build();
-  }
+//  @POST
+//  @Consumes(ContentTypeConstants.APPLICATION_URL_ENCODED)
+//  @Path(JerseyConstants.PATH_GOOGLE_DOC_IMPORT_POST)
+//  public Response importGoogleDocBatchFormPost(
+//      @FormParam("json_body") String body) {
+//    return importGoogleDocBatchPost(body);
+//  }
+//
+//  @POST
+//  @Consumes({ ContentTypeConstants.APPLICATION_JSON, ContentTypeConstants.APPLICATION_XML })
+//  @Path(JerseyConstants.PATH_GOOGLE_DOC_IMPORT_POST)
+//  public Response importGoogleDocBatchPost(String body) {
+//    ContentTypeEnum contentType = ContentTypeEnum.getContentTypeByString(
+//        request.getContentType());
+//
+//    ImportBatchWrapper externalIdDtoListWrapper = null;
+//    if (contentType == ContentTypeEnum.APPLICATION_JSON
+//        || contentType == ContentTypeEnum.APPLICATION_URL_ENCODED) {
+//      externalIdDtoListWrapper = JsonUtils.getDto(body, ImportBatchWrapper.class);
+//    } else if (contentType == ContentTypeEnum.APPLICATION_XML) {
+//      externalIdDtoListWrapper = XmlUtils.getDto(body);
+//    } else {
+//      throw new IllegalArgumentException("Invalid contentType : " + contentType);
+//    }
+//
+////    checkNonEmptyList(externalIdDtoListWrapper.getList(),
+////        "List should not be empty at this point.");
+////    checkIntegerIsInRage(externalIdDtoListWrapper.getList().size(),
+////        1, GOOGLE_DOC_IMPORT_BATCH_SIZE_MAX,
+////        "Number of docuements that can be downloaded in a batch should be between 1 & " +
+////            GOOGLE_DOC_IMPORT_BATCH_SIZE_MAX + ".");
+//
+//    ImportBatchType type = externalIdDtoListWrapper.getImportBatchType();
+//
+//    // First ensure that all ExternalIds are for google.
+//    List<GoogleDocResourceId> listOfGDocResourceIds = Lists.newArrayList();
+//    for (ImportModuleDto currExternalIdDto : externalIdDtoListWrapper.getList()) {
+//      ModuleTypeProvider provider = currExternalIdDto.getExternalId().getModuleType().getModuleTypeProvider();
+//      checkArgument(provider == ModuleTypeProvider.GOOGLE_DOC, "Invalid Provider[" + provider
+//          + "] for " + currExternalIdDto.getExternalId());
+//      GoogleDocResourceId gdocResourceId = new GoogleDocResourceId(currExternalIdDto.getExternalId());
+//      listOfGDocResourceIds.add(gdocResourceId);
+//    }
+//
+//    // TODO(arjuns) : See this needs max-result or any underlying layer.
+//    List<GoogleDocInfoDto> docInfoList = docsServiceProvider.get().getGoogleDocInfoInBatch(
+//        listOfGDocResourceIds);
+//
+//    GoogleDocImportBatchJobContext gdocImportBatchJobContext =
+//        new GoogleDocImportBatchJobContext.Builder()
+//            .ownerId(GuiceUtils.getOwnerId())
+//            .state(GoogleDocImportBatchJobContext.GoogleDocImportBatchJobState.BUILDING)
+//            .type(type)
+//            .build();
+//
+//    for (GoogleDocInfoDto currInfo : docInfoList) {
+//      if (currInfo.getModuleType().isSupported()) {
+//        gdocImportBatchJobContext.addGoogleDocResource(currInfo);
+//      }
+//    }
+//
+//    if (isListEmpty(gdocImportBatchJobContext.get())) {
+//      throw new BadRequestException("Did not find any supported GDoc to import");
+//    }
+//
+//    gdocImportBatchJobContext.setState(
+//        GoogleDocImportBatchJobContext.GoogleDocImportBatchJobState.ENQUEUED);
+//    gdocImportBatchJobContext.setCollectionTitle(externalIdDtoListWrapper.getCollectionTitle());
+//    gdocImportBatchJobContext.setCollectionId(externalIdDtoListWrapper.getCollectionId());
+//
+//    JobEntity jobEntity = jobManager.enqueueGoogleDocImportBatchJob(gdocImportBatchJobContext);
+//
+//    URI jobLocationUri = LocationHeaderUtils.getJobLocation(jobEntity.getJobId());
+//    /*
+//     * HtmlBuilder htmlBuilder = new HtmlBuilder();
+//     * htmlBuilder.appendHref(null/* id * /, jobLocationUri, "Check Status for : " +
+//     * jobEntity.getId());
+//     */
+//    // TODO(waltercacau): allow JSON responses
+//    // TODO(arjuns): Fix Jersey's relative path bug with locationUris.
+//    return Response.created(jobLocationUri).entity(JsonUtils.toJson(jobEntity.getJobId()))
+//        .type(ContentTypeConstants.APPLICATION_JSON).build();
+//  }
 }

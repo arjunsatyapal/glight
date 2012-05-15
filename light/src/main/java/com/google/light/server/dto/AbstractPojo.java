@@ -55,7 +55,7 @@ public abstract class AbstractPojo<T> implements Serializable {
   public String toString() {
     return ToStringBuilder.reflectionToString(this);
   }
-  
+
   /**
    * Method to do basic validations for any pojo.
    */

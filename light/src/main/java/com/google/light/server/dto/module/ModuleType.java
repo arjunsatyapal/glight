@@ -20,6 +20,7 @@ import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
 import com.google.light.server.constants.OAuth2ProviderService;
 import com.google.light.server.constants.http.ContentTypeEnum;
+import com.google.light.server.dto.pojo.tree.AbstractTreeNode.TreeNodeType;
 import javax.xml.bind.annotation.XmlEnumValue;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -41,15 +42,17 @@ public enum ModuleType {
                     // TODO(arjuns):See what should be the content type enum for collections.
                     ContentTypeEnum.GOOGLE_DOC,
                     ModuleTypeProvider.GOOGLE_DOC,
+                    TreeNodeType.INTERMEDIATE_NODE,
                     false, true, true),
 
   @XmlEnumValue(value = "GOOGLE_DOC")
   GOOGLE_DOCUMENT(
-             OAuth2ProviderService.GOOGLE_DOC,
-             "document",
-             ContentTypeEnum.GOOGLE_DOC,
-             ModuleTypeProvider.GOOGLE_DOC,
-             true, false, true),
+                  OAuth2ProviderService.GOOGLE_DOC,
+                  "document",
+                  ContentTypeEnum.GOOGLE_DOC,
+                  ModuleTypeProvider.GOOGLE_DOC,
+                  TreeNodeType.LEAF_NODE,
+                  true, false, true),
 
   @XmlEnumValue(value = "GOOGLE_DRAWING")
   GOOGLE_DRAWING(
@@ -57,6 +60,7 @@ public enum ModuleType {
                  "drawing",
                  ContentTypeEnum.GOOGLE_DRAWING,
                  ModuleTypeProvider.GOOGLE_DOC,
+                 TreeNodeType.LEAF_NODE,
                  true, false, false),
 
   @XmlEnumValue(value = "GOOGLE_FILE")
@@ -66,6 +70,7 @@ public enum ModuleType {
               // TODO(arjuns): See what should be the content type.
               ContentTypeEnum.GOOGLE_DOC,
               ModuleTypeProvider.GOOGLE_DOC,
+              TreeNodeType.LEAF_NODE,
               true, false, false),
 
   @XmlEnumValue(value = "GOOGLE_FORM")
@@ -74,6 +79,7 @@ public enum ModuleType {
               "form",
               ContentTypeEnum.GOOGLE_FORM,
               ModuleTypeProvider.GOOGLE_DOC,
+              TreeNodeType.LEAF_NODE,
               true, false, false),
 
   @XmlEnumValue(value = "GOOGLE_PRESENTATION")
@@ -82,6 +88,7 @@ public enum ModuleType {
                       "presentation",
                       ContentTypeEnum.GOOGLE_PRESENTATION,
                       ModuleTypeProvider.GOOGLE_DOC,
+                      TreeNodeType.LEAF_NODE,
                       true, false, false),
 
   @XmlEnumValue(value = "GOOGLE_SPREADSHEET")
@@ -90,25 +97,38 @@ public enum ModuleType {
                      "spreadsheet",
                      ContentTypeEnum.GOOGLE_SPREADSHEET,
                      ModuleTypeProvider.GOOGLE_DOC,
+                     TreeNodeType.LEAF_NODE,
                      true, false, false),
 
   // To be used at places where ModuleType is not known.
   @XmlEnumValue(value = "LIGHT_COLLECTION")
   LIGHT_COLLECTION(OAuth2ProviderService.GOOGLE_DOC,
-                   "root",
+                   "light_collection",
                    ContentTypeEnum.OASIS_DOCUMENT,
                    ModuleTypeProvider.LIGHT,
+                   TreeNodeType.ROOT_NODE,
                    false, true, false),
+
+  @XmlEnumValue(value = "LIGHT_SUB_COLLECTION")
+  LIGHT_SUB_COLLECTION(OAuth2ProviderService.GOOGLE_DOC,
+                       "light_sub_collection",
+                       ContentTypeEnum.OASIS_DOCUMENT,
+                       ModuleTypeProvider.LIGHT,
+                       TreeNodeType.ROOT_NODE,
+                       false, true, false),
+
   LIGHT_SYNTHETIC_MODULE(OAuth2ProviderService.GOOGLE_DOC,
                          "light_synthetic_module",
                          ContentTypeEnum.OASIS_DOCUMENT,
                          ModuleTypeProvider.LIGHT,
+                         TreeNodeType.LEAF_NODE,
                          true, false, false),
   @XmlEnumValue(value = "UNKNOWN")
   UNKNOWN(OAuth2ProviderService.GOOGLE_DOC,
           "root",
           ContentTypeEnum.OASIS_DOCUMENT,
           ModuleTypeProvider.LIGHT,
+          TreeNodeType.LEAF_NODE,
           false, false, false),
 
   ;
@@ -120,6 +140,7 @@ public enum ModuleType {
    */
   private String category;
   private ContentTypeEnum contentType;
+  private TreeNodeType nodeType;
   private boolean supported;
   private boolean mapsToModule;
   private boolean mapsToCollection;
@@ -127,10 +148,12 @@ public enum ModuleType {
 
   private ModuleType(OAuth2ProviderService providerService, String category,
       ContentTypeEnum contentType, ModuleTypeProvider moduleTypeProvider,
+      TreeNodeType nodeType,
       boolean mapsToModule, boolean mapsToCollection, boolean supported) {
     this.providerService = checkNotNull(providerService, "providerService");
     this.category = checkNotBlank(category, "category");
     this.contentType = checkNotNull(contentType, "contentType");
+    this.nodeType = checkNotNull(nodeType, "nodeType");
     this.supported = supported;
     this.mapsToCollection = mapsToCollection;
     this.mapsToModule = mapsToModule;
@@ -152,7 +175,11 @@ public enum ModuleType {
   public ModuleTypeProvider getModuleTypeProvider() {
     return moduleTypeProvider;
   }
-  
+
+  public TreeNodeType getNodeType() {
+    return nodeType;
+  }
+
   public boolean isSupported() {
     return supported;
   }

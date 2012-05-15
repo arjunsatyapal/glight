@@ -17,11 +17,12 @@ package com.google.light.server.persistence.entity.module;
 
 import static com.google.light.server.utils.LightPreconditions.checkModuleId;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
+import static com.google.light.server.utils.LightUtils.getWrapper;
 import static com.google.light.server.utils.LightUtils.getWrapperValue;
 
-import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
-
 import com.google.light.server.dto.module.ModuleDto;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
+import com.google.light.server.dto.pojo.typewrapper.stringwrapper.ExternalId;
 import com.google.light.server.persistence.entity.AbstractPersistenceEntity;
 import com.googlecode.objectify.Key;
 import javax.persistence.Id;
@@ -33,29 +34,29 @@ import javax.persistence.Id;
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
-public class OriginModuleMappingEntity extends
-    AbstractPersistenceEntity<OriginModuleMappingEntity, Object> {
+public class ExternalIdMappingEntity extends
+    AbstractPersistenceEntity<ExternalIdMappingEntity, Object> {
   @Id
-  private String id;
+  private String externalId;
   private Long moduleId;
 
-  public String getId() {
-    return id;
+  public ExternalId getExternalId() {
+    return getWrapper(externalId, ExternalId.class);
   }
 
   /**
    * {@inheritDoc}
    */
   @Override
-  public Key<OriginModuleMappingEntity> getKey() {
-    return generateKey(id);
+  public Key<ExternalIdMappingEntity> getKey() {
+    return generateKey(getExternalId());
   }
 
   /**
    * Method to generate Objectify key for {@link ModuleEntity}.
    */
-  public static Key<OriginModuleMappingEntity> generateKey(String id) {
-    return new Key<OriginModuleMappingEntity>(OriginModuleMappingEntity.class, id);
+  public static Key<ExternalIdMappingEntity> generateKey(ExternalId externalId) {
+    return new Key<ExternalIdMappingEntity>(ExternalIdMappingEntity.class, externalId.getValue());
   }
 
   /**
@@ -67,25 +68,25 @@ public class OriginModuleMappingEntity extends
   }
 
   public ModuleId getModuleId() {
-    return new ModuleId(moduleId);
+    return getWrapper(moduleId, ModuleId.class);
   }
 
   @Override
-  public OriginModuleMappingEntity validate() {
+  public ExternalIdMappingEntity validate() {
     super.validate();
     
-    checkNotBlank(id, "id");
+    checkNotBlank(externalId, "id");
     checkModuleId(getModuleId());
     
     return this;
   }
 
   public static class Builder extends AbstractPersistenceEntity.BaseBuilder<Builder> {
-    private String id;
+    private ExternalId externalId;
     private ModuleId moduleId;
 
-    public Builder id(String id) {
-      this.id = id;
+    public Builder externalId(ExternalId externalId) {
+      this.externalId = externalId;
       return this;
     }
 
@@ -95,20 +96,20 @@ public class OriginModuleMappingEntity extends
     }
 
     @SuppressWarnings("synthetic-access")
-    public OriginModuleMappingEntity build() {
-      return new OriginModuleMappingEntity(this).validate();
+    public ExternalIdMappingEntity build() {
+      return new ExternalIdMappingEntity(this).validate();
     }
   }
 
   @SuppressWarnings("synthetic-access")
-  private OriginModuleMappingEntity(Builder builder) {
+  private ExternalIdMappingEntity(Builder builder) {
     super(builder, true);
-    this.id = builder.id;
+    this.externalId = getWrapperValue(builder.externalId);
     this.moduleId = getWrapperValue(builder.moduleId);
   }
 
   // For Objectify.
-  private OriginModuleMappingEntity() {
+  private ExternalIdMappingEntity() {
     super(null, true);
   }
 }

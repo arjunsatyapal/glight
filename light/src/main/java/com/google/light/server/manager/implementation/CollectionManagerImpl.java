@@ -19,6 +19,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkTxnIsRunning;
 
+import com.google.light.server.dto.pojo.tree.collection.CollectionTreeNodeDto;
+
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
@@ -26,7 +28,6 @@ import com.google.light.server.constants.JerseyConstants;
 import com.google.light.server.dto.collection.CollectionDto;
 import com.google.light.server.dto.collection.CollectionState;
 import com.google.light.server.dto.pages.PageDto;
-import com.google.light.server.dto.pojo.tree.CollectionTreeNodeDto;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.CollectionId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
@@ -100,51 +101,6 @@ public class CollectionManagerImpl implements CollectionManager {
     throw new UnsupportedOperationException();
   }
 
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public CollectionId findCollectionIdByOriginId(Objectify ofy, String originId) {
-    // OriginModuleMappingEntity mapping = originModuleMappingDao.get(ofy, originId);
-    // if (mapping != null) {
-    // return mapping.getModuleId();
-    // }
-    //
-    // return null;
-
-    throw new UnsupportedOperationException();
-  }
-
-  // /**
-  // * {@inheritDoc}
-  // */
-  // @Override
-  // public CollectionEntity reserveCollectionIdForOriginId(Objectify ofy, String originId,
-  // PersonId ownerId) {
-  // CollectionId existingCollectionId = null; // findCollectionIdByOriginId(ofy, originId);
-  // if (existingCollectionId != null) {
-  // return collectionDao.get(ofy, existingCollectionId);
-  // }
-  //
-  // // Now create a new Collection.
-  // // TODO(arjuns): Add a cleanup job for cleaning up MOdules which dont move from Reserved state
-  // // for long time.
-  // CollectionEntity collectionEntity = new CollectionEntity.Builder()
-  // .title("reserved")
-  // .collectionState(CollectionState.RESERVED)
-  // .owners(Lists.newArrayList(ownerId))
-  // .etag("etag")
-  // .build();
-  // CollectionEntity persistedEntity = this.create(ofy, collectionEntity);
-  //
-  // // OriginCollectionMappingEntity mappingEntity = new OriginModuleMappingEntity.Builder()
-  // // .id(originId)
-  // // .moduleId(persistedEntity.getModuleId())
-  // // .build();
-  // // originModuleMappingDao.put(ofy, mappingEntity);
-  //
-  // return persistedEntity;
-  // }
 
   /**
    * {@inheritDoc}
@@ -192,6 +148,7 @@ public class CollectionManagerImpl implements CollectionManager {
 
     CollectionVersionEntity cvEntity = new CollectionVersionEntity.Builder()
         .version(version)
+        .title(collectionRoot.getTitle())
         .collectionKey(collectionEntity.getKey())
         .collectionTree(collectionRoot)
         .creationTime(LightUtils.getNow())
@@ -210,6 +167,8 @@ public class CollectionManagerImpl implements CollectionManager {
 
     // TODO(arjuns): Add support for etag.
     collectionEntity.publishVersion(version, LightUtils.getNow(), null);
+    collectionEntity.setTitle(collectionRoot.getTitle());
+    
     collectionDao.put(ofy, collectionEntity);
 
     return cvEntity;

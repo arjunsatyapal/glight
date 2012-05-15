@@ -59,9 +59,15 @@ public class Version extends AbstractTypeWrapper<Long, Version> {
   @XmlTransient
   @JsonIgnore
   public static final long NO_VERSION = 0L;
+
   @XmlTransient
   @JsonIgnore  
   public static final long DEFAULT_NEXT_VERSION = 1L;
+  
+  @XmlTransient
+  @JsonIgnore  
+  public static final long DEFAULT_FIRST_VERSION = 1L;
+
 
   public Version(String version) {
     super();
@@ -95,6 +101,10 @@ public class Version extends AbstractTypeWrapper<Long, Version> {
     throw new IllegalStateException("Code should not reach here. Reached for : " + getValue());
   }
 
+  public boolean isFirstVersion() {
+    return getValue() == DEFAULT_FIRST_VERSION;
+  }
+  
   public boolean isLatestVersion() {
     return getState() == State.LATEST;
   }

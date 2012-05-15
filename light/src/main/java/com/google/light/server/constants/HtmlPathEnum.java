@@ -27,8 +27,9 @@ import com.google.common.base.Preconditions;
  * @author Arjun Satyapal
  */
 public enum HtmlPathEnum {
-  GOOGLE_DOC_IMPORT("/html/test/thirdparty/google/gdoc/import.html"),
+  GOOGLE_DOC_IMPORT_BATCH("/html/test/thirdparty/google/gdoc/import_gdoc_batch.html"),
   GOOGLE_DOC_INFORMATION("/html/test/thirdparty/google/gdoc/information.html"),
+  IMPORT_BATCH("/html/test/thirdparty/import/batch.html"),
   PUT_OAUTH2_CONSUMER_CREDENTIAL("/html/admin/put_oauth2_consumer_credential.html"),
   REST_CLIENT("/html/test/rest.html"),
   TEST("/test.html");

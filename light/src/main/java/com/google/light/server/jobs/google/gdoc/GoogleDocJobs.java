@@ -66,7 +66,7 @@ public class GoogleDocJobs {
    * @param currResource
    */
   private GoogleDocTree getTreeNode(GoogleDocInfoDto resourceInfo) {
-    GoogleDocResourceId resourceId = resourceInfo.getGoogleDocsResourceId();
+    GoogleDocResourceId resourceId = resourceInfo.getGoogleDocResourceId();
     
     GoogleDocTree.Builder nodeBuilder = new GoogleDocTree.Builder()
         .title(resourceInfo.getTitle())
@@ -92,7 +92,7 @@ public class GoogleDocJobs {
 
     List<GoogleDocInfoDto> listOfSupportedChilds = Lists.newArrayList();
     for (GoogleDocInfoDto currChild : listOfChilds) {
-      if (currChild.getGoogleDocsResourceId().getModuleType().isSupported()) {
+      if (currChild.getModuleType().isSupported()) {
         listOfSupportedChilds.add(currChild);
       }
     }

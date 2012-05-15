@@ -35,7 +35,6 @@ public class HtmlBuilder {
 
   public HtmlBuilder() {
     this.builder = new StringBuilder();
-    appendStart();
   }
   
   @Override
@@ -99,9 +98,67 @@ public class HtmlBuilder {
       builder.append(" ").append(currKey).append("=").append(value);
     }
   }
+  
+  public void appendDoctype() {
+    builder.append("<!DOCTYPE html>");
+    appendAsciiNewLine();
+  }
+  public void appendHeadStart() {
+    appendNodeStart(HtmlNode.HEAD);
+  }
+  
+  public void appendHeadEnd() {
+    appendNodeEnd(HtmlNode.HEAD);
+  }
+  
+  public void appendCanonicalUri(URI uri) {
+    appendLink("canonical", uri);
+  }
+  
+  public void appendStyle(String style) {
+    appendNodeStart(HtmlNode.STYLE);
+    builder.append(style);
+    appendNodeEnd(HtmlNode.STYLE);
+  }
+  
+  public void appendBodyStart() {
+    appendNodeStart(HtmlNode.BODY);
+  }
+  
+  public void appendBodyEnd() {
+    appendNodeEnd(HtmlNode.BODY);
+  }
+  
+  public void appendIFrame(URI uri) {
+    builder.append("<iframe src=")
+           .append(uri.toString())
+           .append(" height=100% width=100%>")
+           .append("</iframe>");
+  }
+  
+  public void appendLink(String rel, URI href) {
+    builder.append("<link rel=\"").append(rel).append("\" href=\"").append(href.toString()).append("\"");
+    appendAsciiNewLine();
+  }
+  
+  public void appendAsciiNewLine() {
+    builder.append("\n");
+  }
+  
+  
+  public void appendNodeStart(HtmlNode htmlNode) {
+    builder.append("<").append(htmlNode.getName()).append(">");
+    appendAsciiNewLine();
+  }
+  
+  public void appendNodeEnd(HtmlNode htmlNode) {
+    builder.append("</").append(htmlNode.getName()).append(">");
+    appendAsciiNewLine();
+  }
+  
 
   private void appendStart() {
-    builder.append("<!DOCTYPE html>");
+    appendDoctype();
     builder.append("<html>");
     builder.append("<head>");
     builder.append("<meta charset=\"UTF-8\">");
@@ -117,7 +174,9 @@ public class HtmlBuilder {
   public static enum HtmlNode {
     ANCHOR("a"),
     BODY("body"),
-    HEAD("head");
+    HEAD("head"),
+    LINK("link"),
+    STYLE("style");
     
 
     private String name;
