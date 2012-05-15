@@ -56,7 +56,7 @@ public class CollectionTreeNodeDto extends AbstractTreeNode<CollectionTreeNodeDt
   public CollectionTreeNodeDto validate() {
     super.validate();
 
-    switch (getType()) {
+    switch (getNodeType()) {
       case LEAF_NODE:
         checkModuleId(getModuleId());
         break;
@@ -96,7 +96,7 @@ public class CollectionTreeNodeDto extends AbstractTreeNode<CollectionTreeNodeDt
   }
 
   public CollectionTreeNodeDto findChildWithModuleId(ModuleId moduleId) {
-    switch (getType()) {
+    switch (getNodeType()) {
       case LEAF_NODE:
         break;
 
@@ -110,7 +110,7 @@ public class CollectionTreeNodeDto extends AbstractTreeNode<CollectionTreeNodeDt
 
         break;
       default:
-        throw new IllegalStateException("Unsupported type : " + getType());
+        throw new IllegalStateException("Unsupported type : " + getNodeType());
     }
 
     return null;
@@ -121,7 +121,7 @@ public class CollectionTreeNodeDto extends AbstractTreeNode<CollectionTreeNodeDt
   }
 
   public CollectionTreeNodeDto findChildByExternalId(String externalId) {
-    switch (getType()) {
+    switch (getNodeType()) {
       case LEAF_NODE:
         break;
 
@@ -135,7 +135,7 @@ public class CollectionTreeNodeDto extends AbstractTreeNode<CollectionTreeNodeDt
         break;
 
       default:
-        throw new IllegalStateException("Unsupported type : " + getType());
+        throw new IllegalStateException("Unsupported type : " + getNodeType());
     }
 
     return null;

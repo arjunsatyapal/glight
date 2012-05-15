@@ -23,6 +23,7 @@ import static com.google.light.server.constants.RequestParamKeyEnum.LOGIN_PROVID
 import static com.google.light.server.constants.RequestParamKeyEnum.PERSON_ID;
 import static com.google.light.server.utils.GuiceUtils.getInstance;
 import static com.google.light.server.utils.GuiceUtils.getKeyForScopeSeed;
+import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkNull;
 import static com.google.light.server.utils.LightPreconditions.checkPersonLoggedIn;
 import static com.google.light.server.utils.LightUtils.getUUIDString;
@@ -63,6 +64,8 @@ import com.google.light.server.persistence.entity.person.PersonEntity;
 import com.google.light.server.servlets.SessionManager;
 import com.google.light.server.utils.LightUtils;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
@@ -71,6 +74,7 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicLong;
@@ -245,7 +249,7 @@ public class TestingUtils {
     when(mockSession.getAttribute(LOGIN_PROVIDER_USER_ID.get())).thenReturn(providerUserId);
 
     if (personId != null) {
-      when(mockSession.getAttribute(PERSON_ID.get())).thenReturn(personId);
+      when(mockSession.getAttribute(PERSON_ID.get())).thenReturn(personId.getValue());
     } else {
       when(mockSession.getAttribute(PERSON_ID.get())).thenReturn(null);
     }
@@ -564,5 +568,19 @@ public class TestingUtils {
     }
 
     return list;
+  }
+
+  public static Properties loadProperties(String filePath) throws FileNotFoundException,
+      IOException {
+    Properties properties = new Properties();
+    properties.load(new FileInputStream(new File(filePath)));
+  
+    return properties;
+  }
+
+  public static void validatePropertiesFile(Properties properties, List<String> keys) {
+    for (String currKey : keys) {
+      checkNotBlank(properties.getProperty(currKey), "missing : " + currKey);
+    }
   }
 }

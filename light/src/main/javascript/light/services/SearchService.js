@@ -17,7 +17,7 @@ define(['dojo/_base/declare', 'dojo', 'light/utils/XHRUtils', 'dojo/_base/lang',
         'light/utils/LanguageUtils', 'light/builders/SearchRequestBuilder'],
         function(declare, dojo, XHRUtils, lang, LanguageUtils,
                  SearchRequestBuilder) {
-  return declare('light.SearchService', null, {
+  return declare('light.services.SearchService', null, {
 
     /**
      * Issues a search request based on a given SearchState
@@ -29,7 +29,7 @@ define(['dojo/_base/declare', 'dojo', 'light/utils/XHRUtils', 'dojo/_base/lang',
      */
     search: function(state) {
       // Adding the clientLanguageCode to the request
-      request = new SearchRequestBuilder(state, true /* may have extra keys */)
+      var request = new SearchRequestBuilder(state, true /* may have extra keys */)
           .clientLanguageCode(LanguageUtils.currentLocale)
           .build();
 

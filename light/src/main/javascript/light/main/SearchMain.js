@@ -16,7 +16,7 @@
 define(['light/views/SearchBarView',
         'light/controllers/SearchBarController',
         'light/controllers/SearchResultListController',
-        'light/views/SearchResultListView', 'light/SearchService',
+        'light/views/SearchResultListView', 'light/services/SearchService',
         'light/views/LoginToolbarView',
         'light/controllers/LoginToolbarController',
         'light/utils/PersonUtils',

@@ -18,6 +18,7 @@ define(['dojo/_base/declare', 'light/views/AbstractLightView',
         'light/utils/TemplateUtils',
         'dojox/html/entities',
         'dojo/_base/lang',
+        'dojo',
         'dojo/string',
         'dojo/dom-construct',
         'light/utils/LanguageUtils',
@@ -27,7 +28,7 @@ define(['dojo/_base/declare', 'light/views/AbstractLightView',
         'dojo/i18n!light/nls/SearchPageMessages',
         'light/widgets/ListWidget'],
         function(declare, AbstractLightView, itemTemplate, TemplateUtils,
-                 htmlEntities, lang, string,
+                 htmlEntities, lang, dojo, string,
                  domConstruct, LanguageUtils, SearchStateBuilder, RouterManager,
                  EventsEnum, messages, ListWidget) {
   return declare('light.views.SearchResultListView', AbstractLightView, {
@@ -71,7 +72,7 @@ define(['dojo/_base/declare', 'light/views/AbstractLightView',
       // Showing items or no results message
       var items = data.items;
       var len = items.length;
-      if (len == 0) {
+      if (len === 0) {
         this.domNode.appendChild(TemplateUtils.toDom(
                 '<div class="searchInfo">${noResults}</div>', messages));
       } else {

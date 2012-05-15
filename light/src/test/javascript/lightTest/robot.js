@@ -13,6 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+/*global Syn:false*/
 define(['dojo/query', 'light/views/AbstractLightView'],
         function($, AbstractLightView) {
   /*
@@ -74,8 +75,9 @@ define(['dojo/query', 'light/views/AbstractLightView'],
      * @param {*} obj Object that corresponds to a DOM element.
      */
     attach: function(obj) {
-      if (typeof obj != 'object')
+      if (typeof obj != 'object') {
         throw new Error('Unsupported type for attach: ' + obj);
+      }
 
       if (obj instanceof HTMLElement) {
         document.body.appendChild(obj);
@@ -116,11 +118,12 @@ define(['dojo/query', 'light/views/AbstractLightView'],
      */
     _toDomElement: function(obj) {
       if (obj) {
-        if (obj instanceof HTMLElement)
+        if (obj instanceof HTMLElement) {
           return obj;
-        AbstractLightView;
-        if (obj.declaredClass && this._toDomElementForClass[obj.declaredClass])
+        }
+        if (obj.declaredClass && this._toDomElementForClass[obj.declaredClass]) {
           return this._toDomElementForClass[obj.declaredClass](obj);
+        }
       }
       throw new Error('Unsupported object: ' + obj);
     },
@@ -138,10 +141,11 @@ define(['dojo/query', 'light/views/AbstractLightView'],
 
       return {
         then: function(cb) {
-          if (isDone)
+          if (isDone) {
             cb();
-          else
+          } else {
             callback = cb;
+          }
         },
         fulfill: function() {
           isDone = true;
@@ -182,10 +186,10 @@ define(['dojo/query', 'light/views/AbstractLightView'],
       Syn.type(this._toDomElement(obj), promise.fulfill);
       return promise;
     },
-    
+
     /**
      * Count's the number of elements that match the given CSS selector query.
-     * 
+     *
      * @param {string} query
      */
     count: function(query) {
@@ -193,11 +197,11 @@ define(['dojo/query', 'light/views/AbstractLightView'],
     }
 
   };
-  
+
   // Avoiding form submissions when clicking
   beforeEach(function() {
     Syn.support.clickSubmits = false;
-  })
+  });
 
   // Registering with jasmine to cleanUp after each test.
   afterEach(function() {

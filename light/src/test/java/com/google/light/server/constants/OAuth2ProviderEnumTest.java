@@ -31,6 +31,6 @@ public class OAuth2ProviderEnumTest implements EnumTestInterface {
   @Test
   @Override
   public void test_count() {
-    assertEquals("Add more tests as required.", 1, OAuth2ProviderEnum.values().length);
+    assertEquals("Add more tests as required.", 2, OAuth2ProviderEnum.values().length);
   }
 }

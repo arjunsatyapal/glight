@@ -21,6 +21,7 @@ import static org.junit.Assert.assertNotNull;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.google.light.server.AbstractLightServerTest;
 import com.google.light.server.constants.LightConstants;
 import com.google.light.server.constants.LightEnvEnum;
 import com.google.light.server.dto.search.SearchRequestDto;
@@ -32,7 +33,7 @@ import com.google.light.testingutils.TestingUtils;
  * 
  * @author Walter Cacau
  */
-public class SearchManagerGSSImplITCase {
+public class SearchManagerGSSImplITCase extends AbstractLightServerTest {
 
   /**
    * This test query needs to be such a generic query that brings enougth results to fill the first
@@ -44,9 +45,9 @@ public class SearchManagerGSSImplITCase {
 
   @Before
   public void setUp() {
-    searchManager =
-        TestingUtils.getInjectorByEnv(LightEnvEnum.DEV_SERVER).getInstance(
-            SearchManagerGSSImpl.class);
+    super.setUp();
+    searchManager = injector.getInstance(
+        SearchManagerGSSImpl.class);
   }
 
   /**

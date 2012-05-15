@@ -43,16 +43,18 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
       } catch (e) {
         // TODO(waltercacau): Maybe inform the user about invalid URL.
       }
-      if (hashData && hashData.redirectPath)
+      if (hashData && hashData.redirectPath) {
         this._redirectPath = hashData.redirectPath;
+      }
     },
 
     /**
      * Callback for when the form is submitted.
      */
     onSubmit: function() {
-      if (!this._view.validate())
+      if (!this._view.validate()) {
         return;
+      }
       var updatedPerson = {};
       lang.mixin(updatedPerson, this._person);
       lang.mixin(updatedPerson, this._view.getData());

@@ -21,5 +21,6 @@ package com.google.light.server.servlets.test;
  * @author Arjun Satyapal
  */
 public enum CredentialStandardEnum {
-  OAUTH2;
+  OAUTH2,
+  CLIENT_LOGIN;
 }

@@ -60,7 +60,7 @@ public class GoogleDocTree extends AbstractTreeNode<GoogleDocTree> {
 
   @Override
   public GoogleDocTree validate() {
-    if (getType() != TreeNodeType.ROOT_NODE) {
+    if (getNodeType() != TreeNodeType.ROOT_NODE) {
       checkNotNull(resourceId, "resourceId");
       checkNotNull(resourceInfo, "resourceId");
     }

@@ -76,7 +76,7 @@ define(['light/controllers/RegisterFormController', 'light/stores/PersonStore',
           controller._person = {
             someOtherField: 'someOtherField'
           };
-          var stubPromise = TestUtils.createStubPromise()
+          var stubPromise = TestUtils.createStubPromise();
 
           view.validate.withArgs().returns(true);
           view.getData.withArgs().returns(SAMPLE_FORM_DATA);

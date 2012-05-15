@@ -91,11 +91,12 @@ define(['light/enums/EventsEnum',
      */
     getByPath: function(path) {
       // For now relying on the pattern applied
-      var pageMatch = path.match(/\/([a-zA-Z0-9-_]+)$/);
+      var pageMatch = path.match(/\/([a-zA-Z0-9\-_]+)$/);
       if (pageMatch) {
         var page = this[pageMatch[1].toUpperCase()];
-        if (page)
+        if (page) {
           return page;
+        }
       }
       return null;
     }

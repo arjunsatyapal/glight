@@ -26,7 +26,7 @@ define(['dojo/_base/declare', 'dojo/_base/xhr',
    * @class
    * @name light.utils.XHRUtils
    */
-  return {
+  var XHRUtils = {
     /** @lends light.utils.XHRUtils */
 
     /**
@@ -44,6 +44,7 @@ define(['dojo/_base/declare', 'dojo/_base/xhr',
       }
       params.headers = headers;
       params.handleAs = params.handleAs || 'json';
+      params.failOk = params.failOk === undefined ? true : params.failOk;
       return xhr(method, params).then(null, function(err) {
         if (err.xhr &&
                 err.xhr.getResponseHeader('Content-Type').split(';')[0] ==
@@ -70,4 +71,5 @@ define(['dojo/_base/declare', 'dojo/_base/xhr',
     }
 
   };
+  return XHRUtils;
 });

@@ -14,10 +14,14 @@
  * the License.
  */
 define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
-        'light/enums/EventsEnum', 'dojo/_base/connect',
-        'light/builders/BrowseContextStateBuilder'],
+        'light/enums/EventsEnum', 'dojo/_base/connect', 'dojo/_base/array',
+        'light/builders/BrowseContextStateBuilder',
+        'light/utils/XHRUtils'],
         function(declare, AbstractLightController, EventsEnum,
-                 connect, BrowseContextStateBuilder) {
+                 connect, array, BrowseContextStateBuilder,
+                 XHRUtils) {
+  var MAX_NUMBER_OF_COLLECTIONS_PER_BULK = 50;
+
   /**
    * @class
    * @name light.controllers.MyDashSidebarController
@@ -34,14 +38,18 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
     watch: function() {
       connect.subscribe(EventsEnum.BROWSE_CONTEXT_STATE_CHANGED, this,
               this._onBrowseContextStateChange);
+      // TODO(waltercacau): rename all watch methods to setup
+      // so it can contain other kinds of logic like this
+      this._fetchCollectionsList();
     },
 
     /**
      * Handler for browse context state change events.
      */
     _onBrowseContextStateChange: function(browseContextState, source) {
-      if (source != this)
+      if (source != this) {
         this._view.setContext(browseContextState);
+      }
     },
 
     /**
@@ -50,6 +58,35 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
     changeContextTo: function(browseContextState) {
       connect.publish(EventsEnum.BROWSE_CONTEXT_STATE_CHANGED,
           [browseContextState, this]);
+    },
+
+    _lastXhr: null,
+    _fetchCollectionsList: function() {
+      var self = this;
+      XHRUtils.get({
+        url: '/rest/collection/me?maxResults=' +
+             MAX_NUMBER_OF_COLLECTIONS_PER_BULK
+      }).then(function(result) {
+        self._view.setCollectionList(result.list);
+        if (result['handlerUri'] && result['startIndex']) {
+          self._fetchRemainingCollectionList(result);
+        }
+      });
+    },
+    _fetchRemainingCollectionList: function(prevResult) {
+      var self = this;
+      XHRUtils.get({
+        url: prevResult['handlerUri'] + '?startIndex=' + prevResult['startIndex'] +
+             '&maxResults=' + MAX_NUMBER_OF_COLLECTIONS_PER_BULK
+      }).then(function(result) {
+        array.forEach(result.list, function(item) {
+          self._view.addToCollectionList(item);
+        });
+        if (result['handlerUri'] && result['startIndex']) {
+          self._fetchRemainingCollectionList(result);
+        }
+      });
+      
     }
 
   });

@@ -157,7 +157,7 @@ public class GoogleDocImportBatchJobContext extends AbstractDto<GoogleDocImportB
   }
 
   public void setTreeRoot(GoogleDocTree root) {
-    Preconditions.checkArgument(root.getType() == TreeNodeType.ROOT_NODE,
+    Preconditions.checkArgument(root.getNodeType() == TreeNodeType.ROOT_NODE,
         "only root nodes can be set here.");
     this.root = root;
   }

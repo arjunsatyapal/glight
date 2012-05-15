@@ -13,6 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+/*global lightPreload: false*/
 define(['dojo/_base/declare', 'light/utils/URLUtils', 'light/enums/PagesEnum',
     'light/builders/RedirectStateBuilder', 'dojo'],
     function(declare, URLUtils, PagesEnum, RedirectStateBuilder, dojo) {

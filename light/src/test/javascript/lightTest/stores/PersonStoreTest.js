@@ -17,7 +17,7 @@ define(['light/stores/PersonStore'], function(PersonStore) {
   describe('light.stores.PersonStore constructor', function() {
     it('should not throw', function() {
       expect(function() {
-        new PersonStore();
+        var personStore = new PersonStore();
       }).not.toThrow();
     });
   });

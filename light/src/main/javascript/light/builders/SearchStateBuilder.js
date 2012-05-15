@@ -36,7 +36,7 @@ define(['light/utils/BuilderUtils',
           if (!(''+ this.page).match(RegexCommon.INTEGER)) {
             throw new Error('Page is not an integer');
           }
-          this.page = parseInt(''+ this.page);
+          this.page = parseInt(''+ this.page, 10);
           if (this.page <= 0) {
             throw new Error('Page is less then 1');
           }

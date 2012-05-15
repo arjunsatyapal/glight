@@ -13,7 +13,8 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-define(['dojo/_base/declare', 'dojo/number'], function(declare, numberUtils) {
+define(['dojo/_base/declare', 'dojo/number', 'dojo'],
+        function(declare, numberUtils, dojo) {
   /**
    * Some utilities for dealing with i18n.
    *
@@ -34,8 +35,9 @@ define(['dojo/_base/declare', 'dojo/number'], function(declare, numberUtils) {
      * @return {Boolean} True if the language is left to right.
      */
     isLeftToRight: function(languageCode) {
-      if (languageCode == undefined)
+      if (languageCode === undefined) {
         languageCode = this.currentLocale;
+      }
       // TODO(waltercacau): find a list of RTL languageCodes or a better way to
       // detect it.
       languageCode = languageCode.split('-')[0];

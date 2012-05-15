@@ -45,7 +45,7 @@
       return true;
     }
     return spec.getFullName().indexOf(paramMap.spec) === 0;
-  }
+  };
 
   /*
    * Patching the methods jasmine.Spec.prototype.waitsFor
@@ -62,8 +62,9 @@
       switch (typeof arg) {
         // LightMod: Adding support for promises
         case 'object':
-          if (typeof arg.then != 'function')
+          if (typeof arg.then != 'function') {
             throw new Error('Object to wait for is not a promise!');
+          }
           latchFunction_ = arg;
           break;
         case 'function':
@@ -93,7 +94,7 @@
       var failFunc = function() {
         this.spec.fail(new Error('Promise failed'));
         onComplete();
-      }
+      };
       try {
         this.latchFunction.then(onComplete, failFunc);
       } catch (e) {

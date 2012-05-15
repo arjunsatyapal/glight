@@ -120,10 +120,11 @@ define(['dojo/_base/declare',
     _modCreator: function() {
       var ret = this.rawCreator.apply(this, arguments);
       if (!ret.node.id) { ret.node.id = dojo.dnd.getUniqueId(); }
-      if (ret.focusNode)
+      if (ret.focusNode) {
         this._focusNodeMap[ret.node.id] = ret.focusNode;
-      else
+      } else {
         this._focusNodeMap[ret.node.id] = ret.node;
+      }
       return ret;
     },
 
@@ -166,7 +167,7 @@ define(['dojo/_base/declare',
      * Focus the first item of this widget.
      */
     focusFirstItem: function() {
-      newAnchor = this.getAllNodes()[0];
+      var newAnchor = this.getAllNodes()[0];
       if (newAnchor) {
         this.selectNone();
         this._setNewAnchor(newAnchor);
@@ -192,7 +193,7 @@ define(['dojo/_base/declare',
       var self = this;
       setTimeout(function() {
         if (!self.anchor) {
-          newAnchor = self.getAllNodes()[0];
+          var newAnchor = self.getAllNodes()[0];
           if (newAnchor) {
             self.selectNone();
             self._setNewAnchor(newAnchor);
@@ -218,7 +219,7 @@ define(['dojo/_base/declare',
     _lastAnchorFocusNode: null,
     _addItemClass: function(node, type) {
       if (type == 'Anchor') {
-        if (this._lastAnchorFocusNode != null) {
+        if (this._lastAnchorFocusNode !== null) {
           throw new Error('You must remove the previous ' +
                           'anchor before adding a new one.');
         }
@@ -233,7 +234,7 @@ define(['dojo/_base/declare',
     },
     _removeItemClass: function(node, type) {
       if (type == 'Anchor') {
-        if (this._lastAnchorFocusNode != null) {
+        if (this._lastAnchorFocusNode !== null) {
           this._lastAnchorFocusNode.setAttribute('tabindex', '-1');
           this._lastAnchorFocusNode = null;
         }

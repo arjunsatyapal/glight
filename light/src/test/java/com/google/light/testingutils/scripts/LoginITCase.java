@@ -49,8 +49,9 @@ import com.google.light.server.utils.LightPreconditions;
 import com.google.light.testingutils.GaeTestingUtils;
 import com.google.light.testingutils.SeleniumUtils;
 import com.google.light.testingutils.TestingConstants;
+import com.google.light.testingutils.TestingUtils;
+
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -87,23 +88,15 @@ public class LoginITCase {
     GaeTestingUtils.cheapEnvSwitch(defaultEnv);
 
     for (OAuth2ProviderEnum currProvider : OAuth2ProviderEnum.values()) {
-      logger.info(getConsumerCredentialFileAbsPath(OAUTH2, currProvider));
-      Properties consumerCredentials = loadProperties(
-          getConsumerCredentialFileAbsPath(OAUTH2, GOOGLE));
+      logger.info(getConsumerCredentialFileAbsPath(currProvider.getCredentialStandard(), currProvider));
+      Properties consumerCredentials = TestingUtils.loadProperties(
+          getConsumerCredentialFileAbsPath(currProvider.getCredentialStandard(), currProvider));
 
-      validatePropertiesFile(consumerCredentials, Lists.newArrayList(
+      TestingUtils.validatePropertiesFile(consumerCredentials, Lists.newArrayList(
           CLIENT_ID.get(), CLIENT_SECRET.get()));
       consumerCredentialsMap.put(currProvider, consumerCredentials);
     }
     assertEquals(OAuth2ProviderEnum.values().length, consumerCredentialsMap.keySet().size());
-  }
-
-  public static Properties loadProperties(String filePath) throws FileNotFoundException,
-      IOException {
-    Properties properties = new Properties();
-    properties.load(new FileInputStream(new File(filePath)));
-
-    return properties;
   }
 
   public static String getEmail(Properties properties) {
@@ -131,16 +124,10 @@ public class LoginITCase {
     return driver;
   }
 
-  public static void validatePropertiesFile(Properties properties, List<String> keys) {
-    for (String currKey : keys) {
-      checkNotBlank(properties.getProperty(currKey), "missing : " + currKey);
-    }
-  }
-
   @Test
   public void test_missingThings() {
     assertEquals("If you add any new enum, then add code for populating the credentials in " +
-        "testLogin.", 1, OAuth2ProviderEnum.values().length);
+        "testLogin.", 2, OAuth2ProviderEnum.values().length);
 
     assertEquals("If you add any new enum, then add code for populating the credentials in " +
         "testLogin.", 2, OAuth2ProviderService.values().length);
@@ -181,10 +168,10 @@ public class LoginITCase {
       this.email = LightPreconditions.checkNotBlank(email, "email");
       logger.info(getOwnerCredentialPasswdFileAbsPath(OAUTH2, email));
 
-      ownerCredentials = loadProperties(
+      ownerCredentials = TestingUtils.loadProperties(
           getOwnerCredentialPasswdFileAbsPath(OAUTH2, email));
 
-      validatePropertiesFile(ownerCredentials,
+      TestingUtils.validatePropertiesFile(ownerCredentials,
           Lists.newArrayList(FULLNAME.get(), EMAIL.get(), PASSWORD.get()));
       getEmail(ownerCredentials);
       getFullName(ownerCredentials);
@@ -347,7 +334,7 @@ public class LoginITCase {
 
       String currElement = RequestParamKeyEnum.OAUTH2_PROVIDER_NAME.get();
       driver.findElement(By.name(currElement)).clear();
-      driver.findElement(By.name(currElement)).sendKeys(GOOGLE.name());
+      driver.findElement(By.name(currElement)).sendKeys(currProvider.name());
 
       currElement = CLIENT_ID.get();
       driver.findElement(By.name(currElement)).clear();

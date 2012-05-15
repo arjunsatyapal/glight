@@ -37,7 +37,7 @@ public class HtmlPathEnumTest implements EnumTestInterface {
   @Override
   public void test_count() {
     Set<String> requiredFiles = findLightHtmlFiles();
-    assertEquals("Add more tests as required.", 5, HtmlPathEnum.values().length);
+    assertEquals("Add more tests as required.", 6, HtmlPathEnum.values().length);
     
     for (String currFile : requiredFiles) {
       int len = currFile.indexOf(WEBAPP) + WEBAPP.length();

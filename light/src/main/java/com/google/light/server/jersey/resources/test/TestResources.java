@@ -91,6 +91,9 @@ public class TestResources extends AbstractJerseyResource {
       appendHtmlPath(builder, HtmlPathEnum.GOOGLE_DOC_INFORMATION);
       appendHtmlPath(builder, HtmlPathEnum.GOOGLE_DOC_IMPORT);
 
+      appendSectionHeader(builder, "CSE/GSS");
+      appendHref(builder, ServletPathEnum.GSS.get(), "Search Admin Credentials");
+
       appendSectionHeader(builder, "Some helper Utils.");
       appendHtmlPath(builder, HtmlPathEnum.REST_CLIENT);
 

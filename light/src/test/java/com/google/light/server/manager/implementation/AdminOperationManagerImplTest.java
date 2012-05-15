@@ -15,17 +15,21 @@
  */
 package com.google.light.server.manager.implementation;
 
+import static com.google.light.server.constants.OAuth2ProviderEnum.GOOGLE;
+import static com.google.light.server.constants.OAuth2ProviderEnum.GSS;
 import static com.google.light.server.utils.GuiceUtils.getInstance;
 import static com.google.light.testingutils.TestingUtils.getRandomString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.util.List;
+
+import org.junit.Test;
+
 import com.google.light.server.AbstractLightServerTest;
 import com.google.light.server.constants.OAuth2ProviderEnum;
 import com.google.light.server.manager.interfaces.AdminOperationManager;
 import com.google.light.server.persistence.entity.admin.OAuth2ConsumerCredentialEntity;
-import java.util.List;
-import org.junit.Test;
 
 /**
  * Test for {@link AdminOperationManagerImpl}
@@ -61,19 +65,19 @@ public class AdminOperationManagerImplTest extends AbstractLightServerTest {
   
   /**
    * Test for
-   * {@link AdminOperationManagerImpl#putOAuth2ConsumerCredential(OAuth2ConsumerCredentialEntity)}
+   * {@link AdminOperationManagerImpl#putOAuth2OAuth2ConsumerCredential(OAuth2ConsumerCredentialEntity)}
    */
   @Test
-  public void test_putOAuth2ConsumerCredential() {
+  public void test_putOAuth2OAuth2ConsumerCredential() {
     do_test_put_get_OAuth2ConsumerCrednetial();
   }
   
   /**
    * Test for
-   * {@link AdminOperationManagerImpl#getOAuth2ConsumerCredential(OAuth2ConsumerCredentialEntity)}
+   * {@link AdminOperationManagerImpl#getOAuth2OAuth2ConsumerCredential(OAuth2ConsumerCredentialEntity)}
    */
   @Test
-  public void test_getOAuth2ConsumerCredential() {
+  public void test_getOAuth2OAuth2ConsumerCredential() {
     do_test_put_get_OAuth2ConsumerCrednetial();
   }
   
@@ -94,18 +98,22 @@ public class AdminOperationManagerImplTest extends AbstractLightServerTest {
   }
   
   /**
-   * Test for
-   * {@link AdminOperationManagerImpl#getAllOAuth2ConsumerCredentials()}
+   * Test for {@link AdminOperationManagerImpl#getAllOAuth2ConsumerCredentials()}
    */
   @Test
   public void test_getAllOAuth2ConsumerCredentials() {
-    assertEquals("Add newly added provider here.", 1, OAuth2ProviderEnum.values().length);
-    OAuth2ConsumerCredentialEntity entity = getEntityBuilder().build();
-    adminOperationManager.putOAuth2ConsumerCredential(entity);
+    assertEquals("Add newly added provider here.", 2, OAuth2ProviderEnum.values().length);
+    OAuth2ConsumerCredentialEntity googleTestEntity =
+        getEntityBuilder().providerName(GOOGLE.name()).build();
+    OAuth2ConsumerCredentialEntity gssTestEntity =
+        getEntityBuilder().providerName(GSS.name()).build();
+    adminOperationManager.putOAuth2ConsumerCredential(googleTestEntity);
+    adminOperationManager.putOAuth2ConsumerCredential(gssTestEntity);
     
     List<OAuth2ConsumerCredentialEntity> entities = 
         adminOperationManager.getAllOAuth2ConsumerCredentials();
-    assertEquals(1, entities.size());
-    assertTrue(entities.contains(entity));
+    assertEquals(2, entities.size());
+    assertTrue(entities.contains(googleTestEntity));
+    assertTrue(entities.contains(gssTestEntity));
   }
 }

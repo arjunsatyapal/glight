@@ -38,9 +38,9 @@ define(['light/views/AbstractLightView', 'dojox/json/schema', 'dojo',
      * @return {Object} Sinon stub of the viewClass.
      */
     stubView: function(viewClass) {
-      function dummyConstructor() {}
-      dummyConstructor.prototype = viewClass.prototype;
-      var stubbed = new dummyConstructor();
+      function DummyConstructor() {}
+      DummyConstructor.prototype = viewClass.prototype;
+      var stubbed = new DummyConstructor();
       this._currentSpec.stub(stubbed);
       return stubbed;
     },
@@ -64,8 +64,9 @@ define(['light/views/AbstractLightView', 'dojox/json/schema', 'dojo',
     getEnumNames: function(_enum) {
       var names = [];
       for (var name in _enum) {
-        if (_enum.hasOwnProperty(name) && name.toUpperCase() == name)
+        if (_enum.hasOwnProperty(name) && name.toUpperCase() == name) {
           names.push(name);
+        }
       }
       return names;
     },
@@ -73,7 +74,6 @@ define(['light/views/AbstractLightView', 'dojox/json/schema', 'dojo',
     expectModuleToExist: function(moduleId) {
       var url = require.toUrl(moduleId+'.js');
       var loaded = false;
-      var error = undefined;
       xhr.get({
         url:url,
         sync: true,
@@ -81,8 +81,9 @@ define(['light/views/AbstractLightView', 'dojox/json/schema', 'dojo',
           loaded = true;
         }
       });
-      if(!loaded)
+      if(!loaded) {
         throw new Error('Contents of module '+moduleId+' could not be loaded');
+      }
     },
     
     createStubPromise: function() {
@@ -90,9 +91,9 @@ define(['light/views/AbstractLightView', 'dojox/json/schema', 'dojo',
         then: function(callback, errback) {
           this.onComplete = callback;
           this.onError = errback;
-        },
-      }
-    },
+        }
+      };
+    }
 
   };
 

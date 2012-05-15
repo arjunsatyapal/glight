@@ -96,13 +96,14 @@ define(['dojo/_base/declare', 'dojo/_base/lang',
             return this;
           };
         } else {
-          proto.normalize = function() {}
+          proto.normalize = function() {};
         }
 
         // Creating getter/setter
         array.forEach(fields, function(field) {
-          if (proto[field])
+          if (proto[field]) {
             throw new Error('Reserved field ' + field);
+          }
           proto[field] = BuilderUtils._createGetterSetterMethod(field);
         });
 
@@ -110,12 +111,12 @@ define(['dojo/_base/declare', 'dojo/_base/lang',
       },
       _createGetterSetterMethod: function(field) {
         return function(value) {
-          if (arguments.length == 0) {
+          if (arguments.length === 0) {
             return this._data[field];
           }
           this._data[field] = value;
           return this;
-        }
+        };
       }
     };
     return BuilderUtils;

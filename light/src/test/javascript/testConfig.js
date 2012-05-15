@@ -36,9 +36,10 @@
     we need to discover our current location.
   */
   var base = (window.jstestdriver ? '' :
-    location.pathname.replace(/\/[^/]+$/, ''));
-  if (base.substr(base.length - 1) != '/')
+    location.pathname.replace(/\/[^\/]+$/, ''));
+  if (base.substr(base.length - 1) != '/') {
     base += '/';
+  }
   
   // If running inside jasmine:test, skipping target/jasmine folder
   // and going direct to the root of the project.
@@ -50,13 +51,13 @@
     has: {
       'config-dojo-loader-catches': true,
       'light-dev': 1,
-      'light-unit-test': 1,
+      'light-unit-test': 1
     },
     // Needed to avoid some browsers from caching the code
     cacheBust: new Date(),
     isDebug: true,
     waitSeconds: 2,
-    deferredOnError: function(e) { console.log(e.message, e.stack) },
+    deferredOnError: function(e) { console.log(e.message, e.stack); },
       packages: [{
           name: 'light',
           location: base + 'src/main/javascript/light'

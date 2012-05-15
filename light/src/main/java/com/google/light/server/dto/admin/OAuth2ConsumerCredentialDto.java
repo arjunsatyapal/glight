@@ -55,6 +55,10 @@ public class OAuth2ConsumerCredentialDto extends
   @JsonProperty(value = "clientSecret")
   private String clientSecret;
 
+  @XmlElement(name = "extraData")
+  @JsonProperty(value = "extraData")
+  private String extraData;
+
   // /**
   // * Constructor.
   // *
@@ -92,6 +96,7 @@ public class OAuth2ConsumerCredentialDto extends
         .clientId(clientId)
         .clientSecret(clientSecret)
         .providerName(provider.name())
+        .extraData(extraData)
         .build();
   }
 
@@ -119,10 +124,15 @@ public class OAuth2ConsumerCredentialDto extends
     return clientSecret;
   }
 
+  public String getExtraData() {
+    return extraData;
+  }
+
   public static class Builder extends AbstractDto.BaseBuilder<Builder> {
     private OAuth2ProviderEnum provider;
     private String clientId;
     private String clientSecret;
+    private String extraData;
 
     public Builder provider(OAuth2ProviderEnum provider) {
       this.provider = provider;
@@ -139,6 +149,11 @@ public class OAuth2ConsumerCredentialDto extends
       return this;
     }
 
+    public Builder extraData(String extraData) {
+      this.extraData = extraData;
+      return this;
+    }
+
     @SuppressWarnings("synthetic-access")
     public OAuth2ConsumerCredentialDto build() {
       return new OAuth2ConsumerCredentialDto(this).validate();
@@ -151,6 +166,7 @@ public class OAuth2ConsumerCredentialDto extends
     this.provider = builder.provider;
     this.clientId = builder.clientId;
     this.clientSecret = builder.clientSecret;
+    this.extraData  = builder.extraData;
   }
 
   // For JAXB

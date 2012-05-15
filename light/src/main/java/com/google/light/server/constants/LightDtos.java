@@ -17,15 +17,7 @@ package com.google.light.server.constants;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocImportJobContext;
-
-import com.google.light.server.dto.notifications.AbstractNotification;
-
-import com.google.light.server.dto.pojo.tree.GoogleDocTree;
-
-import com.google.light.server.dto.notifications.ChildJobCompletionNotification;
-
-import com.google.light.server.dto.module.ImportDestinationDto;
+import java.util.List;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
@@ -38,22 +30,27 @@ import com.google.light.server.dto.RedirectDto;
 import com.google.light.server.dto.admin.OAuth2ConsumerCredentialDto;
 import com.google.light.server.dto.collection.CollectionDto;
 import com.google.light.server.dto.collection.CollectionVersionDto;
+import com.google.light.server.dto.module.ImportDestinationDto;
 import com.google.light.server.dto.module.ModuleDto;
 import com.google.light.server.dto.module.ModuleVersionDto;
+import com.google.light.server.dto.notifications.AbstractNotification;
+import com.google.light.server.dto.notifications.ChildJobCompletionNotification;
 import com.google.light.server.dto.oauth2.owner.OAuth2OwnerTokenDto;
 import com.google.light.server.dto.pages.PageDto;
 import com.google.light.server.dto.person.PersonDto;
-import com.google.light.server.dto.pojo.tree.CollectionTreeNodeDto;
 import com.google.light.server.dto.pojo.tree.AbstractTreeNode;
+import com.google.light.server.dto.pojo.tree.CollectionTreeNodeDto;
+import com.google.light.server.dto.pojo.tree.GoogleDocTree;
+import com.google.light.server.dto.search.GSSClientLoginTokenInfoDto;
 import com.google.light.server.dto.search.SearchRequestDto;
 import com.google.light.server.dto.search.SearchResultDto;
 import com.google.light.server.dto.search.SearchResultItemDto;
+import com.google.light.server.dto.thirdparty.google.gdata.gdoc.ExternalIdListWrapperDto;
 import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocImportBatchJobContext;
+import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocImportJobContext;
 import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocInfoDto;
 import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocResourceId;
-import com.google.light.server.dto.thirdparty.google.gdata.gdoc.ExternalIdListWrapperDto;
 import com.google.light.server.servlets.oauth2.google.pojo.GoogleUserInfo;
-import java.util.List;
 
 /**
  * 
@@ -84,6 +81,8 @@ public enum LightDtos {
   GOOGLE_DOC_INFO_LIST_DTO(GoogleDocImportBatchJobContext.class, "googleDocResourceInfoList"),
   GOOGLE_DOC_TREE(GoogleDocTree.class, "googleDocTree"),
   GOOGLE_USER_INFO(GoogleUserInfo.class, "googleUserInfo"),
+  
+  GSS_CLIENT_LOGIN_TOKEN_INFO_DTO(GSSClientLoginTokenInfoDto.class, "gssClientLoginTokenInfo"),
 
   IMPORT_DESTINATION_DTO(ImportDestinationDto.class, "importDestination"),
 

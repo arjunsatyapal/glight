@@ -47,8 +47,9 @@ define(['dojo/_base/declare', 'dojo/number',
      * @return {string} Text representation.
      */
     asText: function(node) {
-      if (typeof node == 'string')
+      if (typeof node == 'string') {
         node = domConstruct.toDom(node);
+      }
       return node.textContent || node.innerText || '';
     },
 

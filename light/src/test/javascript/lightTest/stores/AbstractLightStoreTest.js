@@ -24,7 +24,7 @@ define(['dojo/_base/declare', 'light/stores/AbstractLightStore'],
           }
         });
         expect(function() {
-          new ResourceStore();
+          var resourceStore = new ResourceStore();
         }).toThrow(new Error('You should specify a target!'));
       });
     });
@@ -40,7 +40,7 @@ define(['dojo/_base/declare', 'light/stores/AbstractLightStore'],
           }
         });
         expect(function() {
-          new ResourceStore();
+          var resourceStore = new ResourceStore();
         }).not.toThrow();
       });
     });

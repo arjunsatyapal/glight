@@ -57,7 +57,7 @@ public abstract class AbstractLightServerTest extends AbstractGAETest {
   protected String testFirstName;
   protected String testLastName;
   
-  private Injector injector;
+  protected Injector injector;
 
   @Before
   public void setUp() {

@@ -31,6 +31,7 @@ public enum HtmlPathEnum {
   GOOGLE_DOC_INFORMATION("/html/test/thirdparty/google/gdoc/information.html"),
   PUT_OAUTH2_CONSUMER_CREDENTIAL("/html/admin/put_oauth2_consumer_credential.html"),
   REST_CLIENT("/html/test/rest.html"),
+  SEARCH_ADMIN_VERIFICATION_HTML_FOR_QA("/google20f6304742ef0623.html"),
   TEST("/test.html");
 
   private String path;

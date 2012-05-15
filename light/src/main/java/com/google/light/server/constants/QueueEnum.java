@@ -26,6 +26,7 @@ import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
  */
 public enum QueueEnum {
   GDOC_INTERACTION("gdoc-interaction"),
+  GSS_PAGEMAP_UPDATE("gss_pagemap_update"),
   LIGHT("light"),
   LIGHT_NOTIFICATIONS("light-notification"),
   LIGHT_POLLING("light-polling");

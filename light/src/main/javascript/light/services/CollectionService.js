@@ -13,5 +13,18 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-var lightMain = 'light/main/SearchMain';
-document.write('<script src="/js/genericLoader.js"></script>');
+define(['dojo/_base/declare', 'light/utils/XHRUtils', 'dojo'],
+        function(declare, XHRUtils, dojo) {
+  return declare('light.services.CollectionService', null, {
+    get: function(collectionId) {
+      return XHRUtils.get({
+        url: '/rest/collection/' + collectionId
+      });
+    },
+    getVersion: function(collectionId, version) {
+      return XHRUtils.get({
+        url: '/rest/collection/' + collectionId + '/' + version
+      });
+    }
+  });
+});

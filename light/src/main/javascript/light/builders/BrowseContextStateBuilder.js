@@ -31,7 +31,7 @@ define(['light/utils/BuilderUtils',
           context: BrowseContextsEnum.ALL
         },
         normalize: function() {
-          if (context == BrowseContextsEnum.COLLECTION) {
+          if (this.context == BrowseContextsEnum.COLLECTION) {
             // we require a string because of a dojo limitation for now
             // in getNodesByItem
             // TODO(waltercacau): check if we can remove this limitation
@@ -41,8 +41,9 @@ define(['light/utils/BuilderUtils',
           }
           // Assuring that we were given a valid context
           for (var context in BrowseContextsEnum) {
-            if (BrowseContextsEnum[context] == this.context)
+            if (BrowseContextsEnum[context] == this.context) {
               return;
+            }
           }
           throw new Error('Context not found');
         }

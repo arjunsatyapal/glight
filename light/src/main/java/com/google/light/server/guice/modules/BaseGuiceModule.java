@@ -15,7 +15,11 @@
  */
 package com.google.light.server.guice.modules;
 
-import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
+import java.util.logging.Logger;
+
+import javax.servlet.http.HttpSession;
+
+import org.joda.time.Instant;
 
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
@@ -30,10 +34,12 @@ import com.google.light.server.annotations.AnotActor;
 import com.google.light.server.annotations.AnotHttpSession;
 import com.google.light.server.annotations.AnotOwner;
 import com.google.light.server.dto.pojo.RequestScopedValues;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
 import com.google.light.server.guice.providers.InstantProvider;
 import com.google.light.server.guice.providers.RequestScopedValuesProvider;
 import com.google.light.server.manager.implementation.AdminOperationManagerImpl;
 import com.google.light.server.manager.implementation.CollectionManagerImpl;
+import com.google.light.server.manager.implementation.GSSClientLoginTokenManagerImpl;
 import com.google.light.server.manager.implementation.JobManagerImpl;
 import com.google.light.server.manager.implementation.ModuleManagerImpl;
 import com.google.light.server.manager.implementation.NotificationManagerImpl;
@@ -46,6 +52,7 @@ import com.google.light.server.manager.implementation.oauth2.owner.OAuth2OwnerTo
 import com.google.light.server.manager.implementation.oauth2.owner.OAuth2OwnerTokenManagerImpl;
 import com.google.light.server.manager.interfaces.AdminOperationManager;
 import com.google.light.server.manager.interfaces.CollectionManager;
+import com.google.light.server.manager.interfaces.GSSClientLoginTokenManager;
 import com.google.light.server.manager.interfaces.JobManager;
 import com.google.light.server.manager.interfaces.ModuleManager;
 import com.google.light.server.manager.interfaces.NotificationManager;
@@ -58,9 +65,6 @@ import com.google.light.server.persistence.dao.OAuth2ConsumerCredentialDao;
 import com.google.light.server.servlets.oauth2.google.OAuth2Helper;
 import com.google.light.server.servlets.oauth2.google.OAuth2HelperFactoryInterface;
 import com.google.light.server.servlets.oauth2.google.OAuth2HelperImpl;
-import java.util.logging.Logger;
-import javax.servlet.http.HttpSession;
-import org.joda.time.Instant;
 
 /**
  * {@link BaseGuiceModule} will do two things : <br>
@@ -111,6 +115,8 @@ public abstract class BaseGuiceModule extends AbstractModule {
 
     bind(CollectionManager.class)
       .to(CollectionManagerImpl.class);
+
+    bind(GSSClientLoginTokenManager.class).to(GSSClientLoginTokenManagerImpl.class);
 
     bind(JobManager.class)
         .to(JobManagerImpl.class);

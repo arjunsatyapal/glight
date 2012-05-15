@@ -13,5 +13,25 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-document.write('<script src="/js/genericLoader.js"></script>');
-document.write('<script defer="defer">require([\'light/main/RegisterMain\']);</script>');
+package com.google.light.server.exception.checked;
+
+@SuppressWarnings("serial")
+public class FailedToIndexException extends LightException {
+
+  public FailedToIndexException() {
+    super();
+  }
+
+  public FailedToIndexException(String message, Throwable cause) {
+    super(message, cause);
+  }
+
+  public FailedToIndexException(String message) {
+    super(message);
+  }
+
+  public FailedToIndexException(Throwable cause) {
+    super(cause);
+  }
+
+}
