@@ -22,6 +22,12 @@ import static com.google.light.server.servlets.path.ServletPathEnum.SEARCH_PAGE;
  * @author Arjun Satyapal
  */
 public class LightConstants {
+
+  public static final int ONE_DAY_IN_MILLIS = 24 * 60 * 60 * 1000;
+  public static final int ONE_WEEK_IN_MILLIS = 7*ONE_DAY_IN_MILLIS;
+  public static final String GSS_CLIENTLOGIN_APPNAME_SUFFIX = ".appspot.com";
+  public static final int GSS_CLIENTLOGIN_TOKEN_TIMEOUT_IN_MILLIS = ONE_WEEK_IN_MILLIS;
+  
   public static int SECONDS_IN_HR = 60 * 60;
   public static int SECONDS_IN_A_DAY = 24 * 60 * 60;
   

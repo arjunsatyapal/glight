@@ -13,14 +13,31 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.server.servlets.test;
+package com.google.light.server.exception.checked;
 
+@SuppressWarnings("serial")
 /**
- * A Enum to wrap different Credential Standards.
+ * Exception thrown when the GSS Client Login Token happens to be invalid
+ * when being validated.
  * 
- * @author Arjun Satyapal
+ * @author Walter Cacau
  */
-public enum CredentialStandardEnum {
-  OAUTH2,
-  CLIENT_LOGIN;
+public class InvalidGSSClientLoginToken extends LightException {
+
+  public InvalidGSSClientLoginToken() {
+    super();
+  }
+
+  public InvalidGSSClientLoginToken(String message, Throwable cause) {
+    super(message, cause);
+  }
+
+  public InvalidGSSClientLoginToken(String message) {
+    super(message);
+  }
+
+  public InvalidGSSClientLoginToken(Throwable cause) {
+    super(cause);
+  }
+
 }

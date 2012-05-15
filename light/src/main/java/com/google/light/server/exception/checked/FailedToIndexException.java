@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Google Inc.
+ * Copyright (C) Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -13,24 +13,25 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.server.constants;
+package com.google.light.server.exception.checked;
 
-import static org.junit.Assert.assertEquals;
-import org.junit.Test;
+@SuppressWarnings("serial")
+public class FailedToIndexException extends LightException {
 
-/**
- * Test for {@link OAuth2ProviderEnum}
- * 
- * @author Arjun Satyapal
- */
-public class OAuth2ProviderEnumTest implements EnumTestInterface {
-
-  /** 
-   * {@inheritDoc}
-   */
-  @Test
-  @Override
-  public void test_count() {
-    assertEquals("Add more tests as required.", 2, OAuth2ProviderEnum.values().length);
+  public FailedToIndexException() {
+    super();
   }
+
+  public FailedToIndexException(String message, Throwable cause) {
+    super(message, cause);
+  }
+
+  public FailedToIndexException(String message) {
+    super(message);
+  }
+
+  public FailedToIndexException(Throwable cause) {
+    super(cause);
+  }
+
 }

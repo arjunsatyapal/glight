@@ -2,6 +2,7 @@ package com.google.light.server.manager.implementation;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import org.jdom.Document;
@@ -19,9 +20,12 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.light.server.constants.GSSSupportedLanguagesEnum;
 import com.google.light.server.constants.LightConstants;
+import com.google.light.server.dto.search.OnDemandIndexingRequest;
 import com.google.light.server.dto.search.SearchRequestDto;
 import com.google.light.server.dto.search.SearchResultDto;
 import com.google.light.server.dto.search.SearchResultItemDto;
+import com.google.light.server.exception.checked.FailedToIndexException;
+import com.google.light.server.manager.interfaces.GSSClientLoginTokenManager;
 import com.google.light.server.manager.interfaces.SearchManager;
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -35,7 +39,7 @@ public class SearchManagerGSSImpl implements SearchManager {
 
   private static final String GSS_CSE_URL = "http://www.google.com/cse";
   // TODO(waltercacau): Extract this to a property file
-  private static final String GSS_CSE_ID = "006574055569862991143:tcyk48xpqx8";
+  private static final String GSS_CSE_ID = "001369170667164983739:xqelsiji0y8";
   private static final String SUGGESTION_QUERY_TAG = "q";
   private static final String SUGGESTION_TAG = "Suggestion";
   private static final String SPELLING_TAG = "Spelling";
@@ -47,8 +51,12 @@ public class SearchManagerGSSImpl implements SearchManager {
   private static final String RESULTS_TAG = "RES";
   private Provider<HttpTransport> httpTransportProvider;
 
+  private GSSClientLoginTokenManager tokenManager;
+
   @Inject
-  public SearchManagerGSSImpl(Provider<HttpTransport> httpTransportProvider) {
+  public SearchManagerGSSImpl(Provider<HttpTransport> httpTransportProvider,
+      GSSClientLoginTokenManager tokenManager) {
+    this.tokenManager = tokenManager;
     this.httpTransportProvider = checkNotNull(httpTransportProvider);
   }
 
@@ -65,7 +73,8 @@ public class SearchManagerGSSImpl implements SearchManager {
             .hasNextPage(false).build();
 
     logger.info("Searching for " + query);
-    int start = (page - LightConstants.FIRST_SEARCH_PAGE_NUMBER) * LightConstants.SEARCH_RESULTS_PER_PAGE;
+    int start =
+        (page - LightConstants.FIRST_SEARCH_PAGE_NUMBER) * LightConstants.SEARCH_RESULTS_PER_PAGE;
 
     HttpTransport httpTransport = this.httpTransportProvider.get();
     GenericUrl url = new GenericUrl(GSS_CSE_URL);
@@ -145,6 +154,20 @@ public class SearchManagerGSSImpl implements SearchManager {
     }
 
     return result;
+  }
+
+  @Override
+  public void index(OnDemandIndexingRequest request) throws FailedToIndexException {
+    // TODO(waltercacau): Finish implementing this method.
+    String currentToken = null;
+    try {
+      currentToken = tokenManager.getCurrentToken();
+      if(currentToken == null) {
+        currentToken = tokenManager.authenticate();
+      }
+    } catch (Exception e) {
+      throw new FailedToIndexException("Failed to authenticate", e);
+    }
   }
 
 }

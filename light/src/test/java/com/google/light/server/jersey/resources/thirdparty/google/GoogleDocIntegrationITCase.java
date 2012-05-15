@@ -45,6 +45,7 @@ import com.google.common.collect.Lists;
 import com.google.light.server.constants.LightEnvEnum;
 import com.google.light.testingutils.GaeTestingUtils;
 import com.google.light.testingutils.TestingConstants;
+import com.google.light.testingutils.TestingUtils;
 import com.google.light.testingutils.scripts.LoginITCase;
 import com.google.light.testingutils.scripts.LoginITCase.ParallelTests;
 import java.util.Properties;
@@ -75,9 +76,9 @@ public class GoogleDocIntegrationITCase {
 
   @Test
   public void test_importGoogleDocs() throws Exception {
-    Properties ownerCredentials = LoginITCase.loadProperties(
+    Properties ownerCredentials = TestingUtils.loadProperties(
         getOwnerCredentialPasswdFileAbsPath(OAUTH2, email));
-    LoginITCase.validatePropertiesFile(ownerCredentials,
+    TestingUtils.validatePropertiesFile(ownerCredentials,
         Lists.newArrayList(FULLNAME.get(), EMAIL.get(), PASSWORD.get()));
 
     LoginITCase.ParallelTests seleniumTest = new ParallelTests(serverUrl, email);

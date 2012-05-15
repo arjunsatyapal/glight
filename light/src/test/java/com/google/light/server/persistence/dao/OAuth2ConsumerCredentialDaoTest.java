@@ -15,6 +15,8 @@
  */
 package com.google.light.server.persistence.dao;
 
+import static com.google.light.server.constants.OAuth2ProviderEnum.GOOGLE;
+import static com.google.light.server.constants.OAuth2ProviderEnum.GSS;
 import static com.google.light.server.utils.GuiceUtils.getInstance;
 import static com.google.light.server.utils.ObjectifyUtils.commitTransaction;
 import static com.google.light.server.utils.ObjectifyUtils.initiateTransaction;
@@ -170,15 +172,20 @@ public class OAuth2ConsumerCredentialDaoTest extends
    */
   @Test
   public void test_getAllOAuth2ConsumerCredentials() {
-    assertEquals("When more providers are added, update this test.", 
-        1, OAuth2ProviderEnum.values().length);
-    
-    OAuth2ConsumerCredentialEntity testEntity = getDefaultEntityBuilder().build();
-    dao.put(testEntity);
-    
+    assertEquals("When more providers are added, update this test.",
+        2, OAuth2ProviderEnum.values().length);
+
+    OAuth2ConsumerCredentialEntity googleTestEntity =
+        getDefaultEntityBuilder().providerName(GOOGLE.name()).build();
+    OAuth2ConsumerCredentialEntity gssTestEntity =
+        getDefaultEntityBuilder().providerName(GSS.name()).build();
+    dao.put(googleTestEntity);
+    dao.put(gssTestEntity);
+
     List<OAuth2ConsumerCredentialEntity> entities = dao.getAllOAuth2ConsumerCredentials();
-    assertEquals(1, entities.size());
-    assertTrue(entities.contains(testEntity));
-    
+    assertEquals(2, entities.size());
+    assertTrue(entities.contains(googleTestEntity));
+    assertTrue(entities.contains(gssTestEntity));
+
   }
 }

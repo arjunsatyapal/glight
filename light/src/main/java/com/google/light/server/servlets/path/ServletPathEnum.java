@@ -15,10 +15,15 @@ package com.google.light.server.servlets.path;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
+import java.util.List;
+
+import javax.servlet.http.HttpServlet;
+
 import com.google.common.collect.Lists;
 import com.google.light.server.constants.LightEnvEnum;
 import com.google.light.server.exception.unchecked.httpexception.NotFoundException;
 import com.google.light.server.servlets.LightGenericJSPServlet;
+import com.google.light.server.servlets.admin.GSSConsumerCredentialServlet;
 import com.google.light.server.servlets.admin.OAuth2ConsumerCredentialServlet;
 import com.google.light.server.servlets.filters.FilterPathEnum;
 import com.google.light.server.servlets.login.LoginServlet;
@@ -36,8 +41,6 @@ import com.google.light.server.servlets.test.TestServlet;
 import com.google.light.server.servlets.test.oauth2.TestCredentialBackupServlet;
 import com.google.light.server.servlets.test.oauth2.login.FakeLoginServlet;
 import com.google.light.server.utils.LightPreconditions;
-import java.util.List;
-import javax.servlet.http.HttpServlet;
 
 /**
  * Enum to Map Servlets with their Paths and URL Patterns.
@@ -51,6 +54,12 @@ public enum ServletPathEnum {
   // TODO(arjuns): Add regex checks here.
   // TODO(arjuns) : Find a way to end URLs without /.
 
+  // Admin
+  GSS(GSSConsumerCredentialServlet.class,
+      "/admin/gss_consumer_credential",
+      true, true, true, true,
+      Lists.newArrayList(FilterPathEnum.API, FilterPathEnum.TEST)),
+
   PERSON(PersonServlet.class, "/api/person",
          true, false, true, true,
          Lists.newArrayList(FilterPathEnum.API, FilterPathEnum.TEST)),
@@ -59,8 +68,8 @@ public enum ServletPathEnum {
            true, false, true, true,
            Lists.newArrayList(FilterPathEnum.API, FilterPathEnum.TEST)),
 
-  LOGIN(LoginServlet.class, "/login", 
-      false, false, true, true,
+  LOGIN(LoginServlet.class, "/login",
+        false, false, true, true,
         Lists.newArrayList(FilterPathEnum.API, FilterPathEnum.TEST)),
   LOGOUT(LogoutServlet.class, "/logout",
          false, false, true, true,
@@ -79,11 +88,11 @@ public enum ServletPathEnum {
                 false, false, true, true,
                 Lists.newArrayList(FilterPathEnum.API, FilterPathEnum.TEST)),
   MYDASH_PAGE(LightGenericJSPServlet.class, "/mydash",
-                false, false, true, true,
-                Lists.newArrayList(FilterPathEnum.API, FilterPathEnum.TEST)),
+              false, false, true, true,
+              Lists.newArrayList(FilterPathEnum.API, FilterPathEnum.TEST)),
   TEST_PAGE(LightGenericJSPServlet.class, "/test",
-                false, false, true, true,
-                Lists.newArrayList(FilterPathEnum.API, FilterPathEnum.TEST)),
+            false, false, true, true,
+            Lists.newArrayList(FilterPathEnum.API, FilterPathEnum.TEST)),
 
   // OAuth2 Related Servlets.
   OAUTH2_GOOGLE_LOGIN(GoogleLoginServlet.class, "/login/google",
@@ -177,8 +186,9 @@ public enum ServletPathEnum {
     LightEnvEnum env = LightEnvEnum.getLightEnv();
 
     switch (env) {
-      case PROD: return allowedInProd;
-      
+      case PROD:
+        return allowedInProd;
+
       case DEV_SERVER:
         //$FALL-THROUGH$
       case QA:

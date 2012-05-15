@@ -10,6 +10,7 @@ import java.io.InputStream;
 import org.junit.Test;
 
 import com.google.api.client.http.HttpTransport;
+import com.google.common.collect.ImmutableMap;
 import com.google.light.server.constants.LightConstants;
 import com.google.light.server.dto.search.SearchRequestDto;
 import com.google.light.testingutils.TestingConstants;
@@ -53,7 +54,7 @@ public class SearchManagerGSSImplTest {
       HttpTransport mockedHttpTransport =
           TestingUtils.createHttpTransportMockForGetRequest(fakeContent);
       SearchManagerGSSImpl searchManager =
-          new SearchManagerGSSImpl(TestingUtils.getMockProviderFor(mockedHttpTransport));
+          new SearchManagerGSSImpl(TestingUtils.getMockProviderFor(mockedHttpTransport), null);
 
       String stringOutput =
           TestingUtils.getResourceAsString(TestingConstants.SAMPLE_GSS_LIST_OUTPUTS.get(i));
@@ -86,4 +87,5 @@ public class SearchManagerGSSImplTest {
           TestingUtils.getResourceAsStream(inputPath), GOOGLE_DTD_URL);
     }
   }
+  
 }

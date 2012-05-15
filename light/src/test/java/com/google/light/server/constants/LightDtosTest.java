@@ -23,6 +23,31 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Logger;
+
+import javax.persistence.Embedded;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAnyElement;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.XmlType;
+
+import org.apache.commons.lang.StringUtils;
+import org.codehaus.jackson.annotate.JsonProperty;
+import org.codehaus.jackson.annotate.JsonTypeName;
+import org.junit.Before;
+import org.junit.Test;
+
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
@@ -35,6 +60,7 @@ import com.google.light.server.dto.notifications.AbstractNotification;
 import com.google.light.server.dto.notifications.ChildJobCompletionNotification;
 import com.google.light.server.dto.pojo.tree.AbstractTreeNode;
 import com.google.light.server.dto.pojo.tree.GoogleDocTree;
+import com.google.light.server.dto.search.GSSClientLoginTokenInfoDto;
 import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocImportBatchJobContext;
 import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocImportJobContext;
 import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocResourceId;
@@ -45,28 +71,6 @@ import com.google.light.server.servlets.oauth2.google.pojo.GoogleUserInfo;
 import com.google.light.server.utils.LightPreconditions;
 import com.google.light.testingutils.GaeTestingUtils;
 import com.google.light.testingutils.TestingUtils;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.logging.Logger;
-import javax.persistence.Embedded;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAnyElement;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.XmlType;
-import org.apache.commons.lang.StringUtils;
-import org.codehaus.jackson.annotate.JsonProperty;
-import org.codehaus.jackson.annotate.JsonTypeName;
-import org.junit.Before;
-import org.junit.Test;
 
 /**
  * Test for {@link LightDtos}

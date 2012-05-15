@@ -15,11 +15,38 @@
  */
 package com.google.light.server.constants;
 
+import com.google.light.server.servlets.test.CredentialStandardEnum;
+
 /**
- * Enum to wrap OAuth2 Providers.
+ * Enum listing external resource provider
+ * (OAuth2 Providers, search providers, ...) to whom
+ * Light needs to authenticate so it can consume
+ * its resources.
  * 
  * @author Arjun Satyapal
+ * 
+ * TODO(waltercacau): Rename this to ConsumerAuthenticationEnum
  */
 public enum OAuth2ProviderEnum {
-  GOOGLE;
+  // OAuth2
+  GOOGLE(CredentialStandardEnum.OAUTH2),
+  
+
+  // Search Providers
+  /**
+   * GSS stands for Google Site Search, which is
+   * the paid version of CSE (Custom Search Engine)
+   */
+  GSS(CredentialStandardEnum.CLIENT_LOGIN);
+  
+  private CredentialStandardEnum credentialStandard;
+
+  private OAuth2ProviderEnum(CredentialStandardEnum credentialStandard) {
+    this.credentialStandard = credentialStandard;
+  }
+
+  public CredentialStandardEnum getCredentialStandard() {
+    return credentialStandard;
+  }
+
 }

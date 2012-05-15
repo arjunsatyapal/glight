@@ -36,6 +36,7 @@ public class OAuth2ConsumerCredentialEntity extends
   private String providerName;
   private String clientId;
   private String clientSecret;
+  private String extraData;
 
   /**
    * {@inheritDoc}
@@ -46,6 +47,7 @@ public class OAuth2ConsumerCredentialEntity extends
         .provider(OAuth2ProviderEnum.valueOf(providerName))
         .clientId(clientId)
         .clientSecret(clientSecret)
+        .extraData(extraData)
         .build();
   }
 
@@ -61,10 +63,15 @@ public class OAuth2ConsumerCredentialEntity extends
     return clientSecret;
   }
 
+  public String getExtraData() {
+    return extraData;
+  }
+
   public static class Builder extends AbstractPersistenceEntity.BaseBuilder<Builder>{
     private String providerName;
     private String clientId;
     private String clientSecret;
+    private String extraData;
 
     public Builder providerName(String providerName) {
       this.providerName = providerName;
@@ -78,6 +85,11 @@ public class OAuth2ConsumerCredentialEntity extends
 
     public Builder clientSecret(String clientSecret) {
       this.clientSecret = clientSecret;
+      return this;
+    }
+
+    public Builder extraData(String extraData) {
+      this.extraData = extraData;
       return this;
     }
 
@@ -96,6 +108,7 @@ public class OAuth2ConsumerCredentialEntity extends
     this.providerName = checkNotBlank(builder.providerName, "providerName");
     this.clientId = checkNotBlank(builder.clientId, "clientId is blank");
     this.clientSecret = checkNotBlank(builder.clientSecret, "clientSecret");
+    this.extraData = builder.extraData;
   }
   
   // For Objectify.

@@ -1,7 +1,9 @@
 package com.google.light.server.manager.interfaces;
 
+import com.google.light.server.dto.search.OnDemandIndexingRequest;
 import com.google.light.server.dto.search.SearchRequestDto;
 import com.google.light.server.dto.search.SearchResultDto;
+import com.google.light.server.exception.checked.FailedToIndexException;
 
 /**
  * Manager for operations related to Search. 
@@ -16,4 +18,6 @@ public interface SearchManager {
      * @return
      */
     public SearchResultDto search(SearchRequestDto searchRequest);
+    
+    public void index(OnDemandIndexingRequest request) throws FailedToIndexException;
 }
