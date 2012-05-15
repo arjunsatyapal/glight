@@ -1,4 +1,5 @@
 /*
+
  * Copyright 2012 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
@@ -13,14 +14,17 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.server.dto.pojo.tree;
+package com.google.light.server.dto.pojo.tree.collection;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkModuleId;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
 import com.google.light.server.dto.module.ModuleType;
+import com.google.light.server.dto.pojo.tree.AbstractTreeNode;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
+import com.google.light.server.dto.pojo.typewrapper.stringwrapper.ExternalId;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -43,14 +47,18 @@ public class CollectionTreeNodeDto extends AbstractTreeNode<CollectionTreeNodeDt
   @XmlElement(name = "moduleId")
   @JsonProperty(value = "moduleId")
   private ModuleId moduleId;
-
+  
+  @XmlElement(name = "version")
+  @JsonProperty(value = "version")
+  private Version version;
+  
   @XmlElement(name = "moduleType")
   @JsonProperty(value = "moduleType")
   private ModuleType moduleType;
 
   @XmlElement(name = "externalId")
   @JsonProperty(value = "externalId")
-  private String externalId;
+  private ExternalId externalId;
 
   @Override
   public CollectionTreeNodeDto validate() {
@@ -59,14 +67,13 @@ public class CollectionTreeNodeDto extends AbstractTreeNode<CollectionTreeNodeDt
     switch (getNodeType()) {
       case LEAF_NODE:
         checkModuleId(getModuleId());
+        checkNotNull(moduleType, "moduleType");
+        checkNotNull(externalId, "externalId");
         break;
-
+        
       default:
         // do nothing.
     }
-
-    checkNotNull(moduleType, "moduleType");
-    checkNotBlank(externalId, "externalId");
 
     return this;
   }
@@ -82,60 +89,44 @@ public class CollectionTreeNodeDto extends AbstractTreeNode<CollectionTreeNodeDt
   public void setModuleId(ModuleId moduleId) {
     this.moduleId = moduleId;
   }
+  
+  public Version getVersion() {
+    return version;
+  }
+  
+  public void setVersion(Version version) {
+    this.version = checkNotNull(version, "version");
+  }
 
   public ModuleType getModuleType() {
     return moduleType;
   }
 
-  public String getExternalId() {
+  public ExternalId getExternalId() {
     return externalId;
   }
-
-  public boolean containsModuleIdAsChildren(ModuleId moduleId) {
-    return findChildWithModuleId(moduleId) != null;
+  
+  public void setTitle(String title) {
+    this.title = checkNotBlank(title, "title");
   }
 
-  public CollectionTreeNodeDto findChildWithModuleId(ModuleId moduleId) {
-    switch (getNodeType()) {
-      case LEAF_NODE:
-        break;
-
-      case ROOT_NODE:
-      case INTERMEDIATE_NODE:
-        for (CollectionTreeNodeDto currChild : getChildren()) {
-          if (currChild.getModuleId().equals(moduleId)) {
-            return currChild;
-          }
-        }
-
-        break;
-      default:
-        throw new IllegalStateException("Unsupported type : " + getNodeType());
+  public boolean containsFirstLevelChildWithExternalId(ExternalId externalId) {
+    if (findFirstLevelChildByExternalId(externalId) != null) {
+      return true;
     }
-
-    return null;
+    
+    return false;
   }
-
-  public boolean containsExternalIdAsChildren(String externalId) {
-    return findChildByExternalId(externalId) != null;
-  }
-
-  public CollectionTreeNodeDto findChildByExternalId(String externalId) {
-    switch (getNodeType()) {
-      case LEAF_NODE:
-        break;
-
-      case ROOT_NODE:
-      case INTERMEDIATE_NODE:
-        for (CollectionTreeNodeDto currChild : getChildren()) {
-          if (currChild.getExternalId().equals(externalId)) {
-            return currChild;
-          }
-        }
-        break;
-
-      default:
-        throw new IllegalStateException("Unsupported type : " + getNodeType());
+  
+  public CollectionTreeNodeDto findFirstLevelChildByExternalId(ExternalId externalId) {
+    if (!hasChildren()) {
+      return null;
+    }
+    
+    for (CollectionTreeNodeDto currChild : getChildren()) {
+      if (currChild.getExternalId().equals(externalId)) {
+        return currChild;
+      }
     }
 
     return null;
@@ -143,11 +134,17 @@ public class CollectionTreeNodeDto extends AbstractTreeNode<CollectionTreeNodeDt
 
   public static class Builder extends AbstractTreeNode.Builder<CollectionTreeNodeDto, Builder> {
     private ModuleId moduleId;
+    private Version version;
     private ModuleType moduleType;
-    private String externalId;
+    private ExternalId externalId;
 
     public Builder moduleId(ModuleId moduleId) {
       this.moduleId = moduleId;
+      return this;
+    }
+    
+    public Builder version(Version version) {
+      this.version = version;
       return this;
     }
 
@@ -156,7 +153,7 @@ public class CollectionTreeNodeDto extends AbstractTreeNode<CollectionTreeNodeDt
       return this;
     }
 
-    public Builder externalId(String externalId) {
+    public Builder externalId(ExternalId externalId) {
       this.externalId = externalId;
       return this;
     }

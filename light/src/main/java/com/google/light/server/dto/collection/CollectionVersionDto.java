@@ -16,11 +16,12 @@
 package com.google.light.server.dto.collection;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
-import com.google.light.server.dto.pojo.typewrapper.longwrapper.CollectionId;
+import com.google.light.server.dto.pojo.tree.collection.CollectionTreeNodeDto;
 
 import com.google.light.server.dto.AbstractDtoToPersistence;
-import com.google.light.server.dto.pojo.tree.CollectionTreeNodeDto;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.CollectionId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
 import com.google.light.server.persistence.entity.collection.CollectionVersionEntity;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -50,6 +51,10 @@ public class CollectionVersionDto extends AbstractDtoToPersistence<CollectionVer
   @JsonProperty(value = "version")
   private Version version;
   
+  @XmlElement(name = "title")
+  @JsonProperty(value = "title")
+  private String title;
+  
   @XmlElement(name = "collectionTree")
   @JsonProperty(value = "collectionTree")
   private CollectionTreeNodeDto collectionTree;
@@ -60,6 +65,7 @@ public class CollectionVersionDto extends AbstractDtoToPersistence<CollectionVer
   @Override
   public CollectionVersionDto validate() {
     checkNotNull(collectionId, "collectionId");
+    checkNotBlank(title, "title");
     checkNotNull(version, "version");
     checkNotNull(collectionTree, "collectionTree");
     return this;
@@ -70,12 +76,7 @@ public class CollectionVersionDto extends AbstractDtoToPersistence<CollectionVer
    */
   @Override
   public CollectionVersionEntity toPersistenceEntity(Long version) {
-    CollectionVersionEntity entity = new CollectionVersionEntity.Builder()
-        .version(new Version(version))
-        .collectionTree(collectionTree)
-        .build();
-
-    return entity;
+    throw new UnsupportedOperationException();
   }
 
   public CollectionTreeNodeDto getCollectionTree() {
@@ -85,14 +86,24 @@ public class CollectionVersionDto extends AbstractDtoToPersistence<CollectionVer
   public Version getVersion() {
     return version;
   }
+  
+  public String getTitle() {
+    return title;
+  }
 
   public static class Builder extends AbstractDtoToPersistence.BaseBuilder<Builder> {
     private CollectionId collectionId;
+    private String title;
     private Version version;
     private CollectionTreeNodeDto collectionTree;
 
     public Builder collectionId(CollectionId collectionId) {
       this.collectionId = collectionId;
+      return this;
+    }
+    
+    public Builder title(String title) {
+      this.title = title;
       return this;
     }
     
@@ -116,6 +127,7 @@ public class CollectionVersionDto extends AbstractDtoToPersistence<CollectionVer
   private CollectionVersionDto(Builder builder) {
     super(builder);
     this.collectionId = builder.collectionId;
+    this.title = builder.title;
     this.version = builder.version;
     this.collectionTree = builder.collectionTree;
   }

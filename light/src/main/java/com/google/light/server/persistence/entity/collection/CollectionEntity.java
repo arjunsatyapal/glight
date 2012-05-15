@@ -97,6 +97,10 @@ public class CollectionEntity extends AbstractPersistenceEntity<CollectionEntity
   public String getTitle() {
     return title;
   }
+  
+  public void setTitle(String title) {
+    this.title = checkNotBlank(title, "title");
+  }
 
   public CollectionState getState() {
     return state;

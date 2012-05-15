@@ -18,14 +18,9 @@ package com.google.light.server.guice.jersey;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Set;
+import com.google.light.server.jersey.resources.thirdparty.google.GoogleDocIntegration;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.core.UriInfo;
+import com.google.light.server.jersey.resources.thirdparty.mixed.ImportResource;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -37,7 +32,13 @@ import com.google.light.server.jersey.resources.admin.gae.GAEAdminResources;
 import com.google.light.server.jersey.resources.job.JobResource;
 import com.google.light.server.jersey.resources.notifications.NotificationResource;
 import com.google.light.server.jersey.resources.test.TestResources;
-import com.google.light.server.jersey.resources.thirdparty.google.GoogleDocIntegration;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Set;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.core.UriInfo;
 
 /**
  * 
@@ -167,6 +168,26 @@ public enum JerseyMethodEnum {
                                 "/rest/gaeadmin/config",
                                 new String[] { "text/html; charset=UTF-8" }),
 
+  // Import Resource Jersey Methods.
+
+  IMPORT_RESOURCE_IMPORT_BATCH_FORM_POST(
+                                         ImportResource.class,
+                                         "importBatchFormPost",
+                                         new Class[] { String.class },
+                                         POST.class,
+                                         "/rest/import/batch",
+                                         new String[] { "application/json; charset=UTF-8",
+                                                 "application/xml; charset=UTF-8" }),
+
+  IMPORT_RESOURCE_IMPORT_BATCH_POST(
+                                    ImportResource.class,
+                                    "importBatchPost",
+                                    new Class[] { String.class },
+                                    POST.class,
+                                    "/rest/import/batch",
+                                    new String[] { "application/json; charset=UTF-8",
+                                            "application/xml; charset=UTF-8" }),
+
   // Module Resource Jersey Methods.
   MODULE_RESOURCE_GET_MODULE(
                              ModuleResource.class,
@@ -223,22 +244,22 @@ public enum JerseyMethodEnum {
                           new String[] { "application/json; charset=UTF-8",
                                   "application/xml; charset=UTF-8" }),
 
-  GOOGLE_DOC_IMPORT_GOOGLE_DOC_BATCH_FROM_POST(
-                                               GoogleDocIntegration.class,
-                                               "importGoogleDocBatchFormPost",
-                                               new Class[] { String.class },
-                                               POST.class,
-                                               "/rest/thirdparty/google/gdoc/import",
-                                               new String[] {}),
-
-  GOOGLE_DOC_IMPORT_GOOGLE_DOC_POST(
-                                    GoogleDocIntegration.class,
-                                    "importGoogleDocBatchPost",
-                                    new Class[] { String.class },
-                                    POST.class,
-                                    "/rest/thirdparty/google/gdoc/import",
-                                    new String[] { "application/json; charset=UTF-8",
-                                            "application/xml; charset=UTF-8" }),
+//  GOOGLE_DOC_IMPORT_GOOGLE_DOC_BATCH_FROM_POST(
+//                                               GoogleDocIntegration.class,
+//                                               "importGoogleDocBatchFormPost",
+//                                               new Class[] { String.class },
+//                                               POST.class,
+//                                               "/rest/thirdparty/google/gdoc/import",
+//                                               new String[] {}),
+//
+//  GOOGLE_DOC_IMPORT_GOOGLE_DOC_POST(
+//                                    GoogleDocIntegration.class,
+//                                    "importGoogleDocBatchPost",
+//                                    new Class[] { String.class },
+//                                    POST.class,
+//                                    "/rest/thirdparty/google/gdoc/import",
+//                                    new String[] { "application/json; charset=UTF-8",
+//                                            "application/xml; charset=UTF-8" }),
 
   GOOGLE_DOC_GET_FOLDER_CONTENTS(
                                  GoogleDocIntegration.class,
@@ -275,6 +296,20 @@ public enum JerseyMethodEnum {
                                                new String[] {}),
 
   // Test Resource Jersey Methods.
+  TEST_RESOURCE_DELETE_ALL(
+                           TestResources.class,
+                           "deleteAll",
+                           new Class[] {},
+                           GET.class,
+                           "/rest/test/deleteall",
+                           new String[] { "text/plain; charset=UTF-8" }),
+  TEST_RESOURCE_PURGE_QUEUE(
+                           TestResources.class,
+                           "purgeQueue",
+                           new Class[] {},
+                           GET.class,
+                           "/rest/test/purgequeues",
+                           new String[] { "text/plain; charset=UTF-8" }),
   TEST_RESOURCE_SESSION(
                         TestResources.class,
                         "getSessionDetails",

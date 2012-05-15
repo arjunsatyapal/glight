@@ -205,7 +205,7 @@ public class DocsServiceWrapper extends DocsService {
         checkArgument(currDto instanceof GoogleDocInfoDto);
         GoogleDocInfoDto currDocInfo = (GoogleDocInfoDto) currDto;
         
-        if (currDocInfo.getGoogleDocsResourceId().getModuleType().isSupported()) {
+        if (currDocInfo.getGoogleDocResourceId().getModuleType().isSupported()) {
           list.add(currDocInfo);
         }
       }

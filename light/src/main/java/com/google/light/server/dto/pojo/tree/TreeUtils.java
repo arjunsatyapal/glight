@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.server.dto.thirdparty.google.gdata.gdoc;
+package com.google.light.server.dto.pojo.tree;
 
 /**
  *
@@ -22,8 +22,5 @@ package com.google.light.server.dto.thirdparty.google.gdata.gdoc;
  *
  * @author Arjun Satyapal
  */
-public enum GoogleDocImportBatchType {
-    MODULE_JOB,
-    CREATE_COLLECTION_JOB,
-    EDIT_COLLECTION_JOB;
+public class TreeUtils {
 }

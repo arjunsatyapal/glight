@@ -78,7 +78,7 @@ public class LightConstants {
    * that Google provides access permissions to whole nested tree. If this changes in future, then
    * this may have to be changed. 
    */
-  public static int GOOGLE_DOC_IMPORT_BATCH_SIZE_MAX = 10;
+  public static int IMPORT_BATCH_SIZE_MAX = 10;
 
   public static final int MAX_RESULTS_MIN = 1;
   public static final int MAX_RESULTS_DEFAULT = 10;

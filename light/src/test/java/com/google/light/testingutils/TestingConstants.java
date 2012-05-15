@@ -18,6 +18,8 @@ package com.google.light.testingutils;
 import static com.google.light.testingutils.TestResourcePaths.GOOGLE_TOKEN_INFO_JSON;
 import static com.google.light.testingutils.TestingUtils.getResourceAsString;
 
+import com.google.light.server.dto.pojo.typewrapper.stringwrapper.ExternalId;
+
 import java.util.ArrayList;
 
 import com.google.api.client.http.GenericUrl;
@@ -66,7 +68,8 @@ public class TestingConstants {
       TestResourcePaths.SEARCH_GSS_ADDITION_QUERY_OUTPUT_JSON.get(),
       TestResourcePaths.SEARCH_GSS_ADDXITION_QUERY_OUTPUT_JSON.get());
   
-  
+  public static ExternalId TEST_EXTERNAL_ID = new ExternalId(
+      "https://docs.google.com/a/myopenedu.com/document/d/1mXX53OtXIhq2XbdQkk-utxO9pHdQ_dQsSsPE_HNtN_s/edit");
   public static final String SERVER_URL = "http://localhost:8080";
 
 }

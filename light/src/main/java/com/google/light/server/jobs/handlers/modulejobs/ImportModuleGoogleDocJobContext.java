@@ -13,12 +13,14 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.server.dto.thirdparty.google.gdata.gdoc;
+package com.google.light.server.jobs.handlers.modulejobs;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkModuleId;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkVersion;
+
+import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocInfoDto;
 
 import com.google.light.server.dto.AbstractDto;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
@@ -43,10 +45,15 @@ import org.codehaus.jackson.annotate.JsonTypeName;
 @JsonTypeName(value = "googleDocImportJobContext")
 @XmlRootElement(name = "googleDocImportJobContext")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class GoogleDocImportJobContext extends AbstractDto<GoogleDocImportJobContext> {
+public class ImportModuleGoogleDocJobContext extends AbstractDto<ImportModuleGoogleDocJobContext> {
   @XmlElement(name = "resourceInfo")
   @JsonProperty(value = "resourceInfo")
   private GoogleDocInfoDto resourceInfo;
+  
+  @XmlElement(name = "title")
+  @JsonProperty(value = "title")
+  private String title;
+  
   
   @XmlElement(name = "moduleId")
   @JsonProperty(value = "moduleId")
@@ -72,13 +79,14 @@ public class GoogleDocImportJobContext extends AbstractDto<GoogleDocImportJobCon
    * {@inheritDoc}
    */
   @Override
-  public GoogleDocImportJobContext validate() {
+  public ImportModuleGoogleDocJobContext validate() {
     checkNotNull(resourceInfo, "resourceInfo");
     resourceInfo.validate();
 
     checkModuleId(getModuleId());
     checkVersion(getVersion());
     checkNotNull(state, "state");
+    checkNotBlank(title, "title");
 
     switch (state) {
       case ARCHIVE_DOWNLOADED:
@@ -99,6 +107,10 @@ public class GoogleDocImportJobContext extends AbstractDto<GoogleDocImportJobCon
     return resourceInfo;
   }
 
+  public String getTitle() {
+    return title;
+  }
+  
   public ModuleId getModuleId() {
     return moduleId;
   }
@@ -134,6 +146,7 @@ public class GoogleDocImportJobContext extends AbstractDto<GoogleDocImportJobCon
 
   public static class Builder extends AbstractDto.BaseBuilder<Builder> {
     private GoogleDocInfoDto resourceInfo;
+    private String title;
     private ModuleId moduleId;
     private Version version;
     public String archiveId;
@@ -145,6 +158,11 @@ public class GoogleDocImportJobContext extends AbstractDto<GoogleDocImportJobCon
       return this;
     }
 
+    public Builder title(String title) {
+      this.title = title;
+      return this;
+    }
+    
     public Builder moduleId(ModuleId moduleId) {
       this.moduleId = moduleId;
       return this;
@@ -171,15 +189,16 @@ public class GoogleDocImportJobContext extends AbstractDto<GoogleDocImportJobCon
     }
 
     @SuppressWarnings("synthetic-access")
-    public GoogleDocImportJobContext build() {
-      return new GoogleDocImportJobContext(this).validate();
+    public ImportModuleGoogleDocJobContext build() {
+      return new ImportModuleGoogleDocJobContext(this).validate();
     }
   }
 
   @SuppressWarnings("synthetic-access")
-  private GoogleDocImportJobContext(Builder builder) {
+  private ImportModuleGoogleDocJobContext(Builder builder) {
     super(builder);
     this.resourceInfo = builder.resourceInfo;
+    this.title = builder.title;
     this.moduleId = builder.moduleId;
     this.version = builder.version;
     this.state = builder.state;
@@ -188,7 +207,7 @@ public class GoogleDocImportJobContext extends AbstractDto<GoogleDocImportJobCon
   }
 
   // For Jaxb.
-  private GoogleDocImportJobContext() {
+  private ImportModuleGoogleDocJobContext() {
     super(null);
   }
 

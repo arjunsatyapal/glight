@@ -19,18 +19,21 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkNull;
+import static com.google.light.server.utils.LightUtils.convertListOfValuesToWrapperList;
+import static com.google.light.server.utils.LightUtils.convertWrapperListToListOfValues;
 import static com.google.light.server.utils.LightUtils.getWrapper;
 import static com.google.light.server.utils.LightUtils.getWrapperValue;
+import static com.google.light.server.utils.LightUtils.isListEmpty;
 
 import com.google.appengine.api.datastore.Text;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.light.server.annotations.ObjectifyQueryField;
 import com.google.light.server.annotations.ObjectifyQueryFieldName;
-import com.google.light.server.constants.PlacementOrder;
+import com.google.light.server.dto.AbstractDto;
 import com.google.light.server.dto.pojo.ChangeLogEntryPojo;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.JobId;
 import com.google.light.server.persistence.entity.AbstractPersistenceEntity;
+import com.google.light.server.utils.JsonUtils;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.Unindexed;
 import java.util.List;
@@ -50,11 +53,13 @@ public class JobEntity extends AbstractPersistenceEntity<JobEntity, Object> {
   private Long jobId;
   private Long parentJobId;
   private Long rootJobId;
+  private List<Long> childJobs;
+  private List<Long> finishedChildJobs;
 
   // This is used in Objectify Query.
   @ObjectifyQueryFieldName(value = "jobHandlerType")
   public static final String OFY_JOB_HANDLER_TYPE = "jobHandlerType";
-  
+
   @ObjectifyQueryField(value = "OFY_JOB_HANDLER_TYPE")
   private JobHandlerType jobHandlerType;
 
@@ -63,14 +68,15 @@ public class JobEntity extends AbstractPersistenceEntity<JobEntity, Object> {
   private TaskType taskType;
   private String taskId;
 
-  // Following values can 
+  // Following values can
   private JobState jobState;
-  
+
   @Unindexed
   private String stopReason;
 
   private Text request;
   private Text context;
+  private Text response;
 
   @Unindexed
   @Embedded
@@ -162,24 +168,92 @@ public class JobEntity extends AbstractPersistenceEntity<JobEntity, Object> {
     changeLogs.add(changeLog);
   }
 
-//  public String getLocation() {
-//    String encodedId = Long.toString(id);
-//    String locationUrl = ServletPathEnum.IMPORT_STAGE_DETAIL_SERVLET.get() + "?"
-//        + RequestParamKeyEnum.JOB_ID.get() + "=" + encodedId;
-//
-//    return locationUrl;
-//  }
+  // public String getLocation() {
+  // String encodedId = Long.toString(id);
+  // String locationUrl = ServletPathEnum.IMPORT_STAGE_DETAIL_SERVLET.get() + "?"
+  // + RequestParamKeyEnum.JOB_ID.get() + "=" + encodedId;
+  //
+  // return locationUrl;
+  // }
 
   public Text getRequest() {
     return request;
   }
-  
+
+  @Deprecated
   public Text getContext() {
+    checkNotNull(context, "Context cannot be null.");
     return context;
   }
   
+  public <D extends AbstractDto<D>> D getContext(Class<D> clazz) {
+    checkNotNull(context, "Context cannot be null.");
+    
+    return JsonUtils.getDto(context.getValue(), clazz);
+  }
+
   public void setContext(Text context) {
-    this.context = Preconditions.checkNotNull(context, "context");
+    this.context = checkNotNull(context, "context");
+  }
+
+  public <D extends AbstractDto<D>> void setContext(D dto) {
+    checkNotNull(dto, "dto");
+    setContext(new Text(dto.toJson()));
+  }
+
+  @Deprecated
+  public Text getResponse() {
+    return response;
+  }
+
+  public <D extends AbstractDto<D>> void setResponse(D responseDto) {
+    Text responseText = new Text(checkNotNull(responseDto).toJson()); 
+    this.response = responseText;
+  }
+  
+  public <D extends AbstractDto<D>> D getResponse(Class<D> clazz) {
+    checkNotNull(response, "response cannot be null.");
+    
+    return JsonUtils.getDto(response.getValue(), clazz);
+  }
+
+  public List<JobId> getPendingChildJobs() {
+    if (isListEmpty(childJobs)) {
+      return Lists.newArrayList();
+    }
+    
+    List<Long> pendingChildJobs = Lists.newArrayList(childJobs);
+    pendingChildJobs.removeAll(getFinishedChildJobs());
+    return convertListOfValuesToWrapperList(pendingChildJobs, JobId.class);
+  }
+  
+  public boolean hasPendingChildJobs() {
+    return !isListEmpty(getPendingChildJobs());
+  }
+
+  public List<JobId> getChildJobs() {
+    return convertListOfValuesToWrapperList(childJobs, JobId.class);
+  }
+  
+  @SuppressWarnings("cast")
+  public void addChildJob(JobId jobId) {
+    if (childJobs == null) {
+      childJobs = Lists.newArrayList();
+    }
+    childJobs.add(((Long)getWrapperValue(jobId)));
+  }
+
+  public List<JobId> getFinishedChildJobs() {
+    return convertListOfValuesToWrapperList(finishedChildJobs, JobId.class);
+  }
+
+  @SuppressWarnings("cast")
+  public void addFinishedChildJob(JobId jobId) {
+    if (finishedChildJobs == null) {
+      finishedChildJobs = Lists.newArrayList();
+    }
+
+    finishedChildJobs.add(((Long)getWrapperValue(jobId)));
   }
 
   @Override
@@ -194,12 +268,12 @@ public class JobEntity extends AbstractPersistenceEntity<JobEntity, Object> {
       case CHILD_JOB:
         checkNotNull(rootJobId, "For childJob, rootJobId cannot be null.");
         checkNotNull(parentJobId, "For childJob, rootJobId cannot be null.");
-        
+
         if (jobId != null) {
           checkArgument(!jobId.equals(rootJobId),
               "For childJob, jobId and rootJobId should be different.");
         }
-        
+
         break;
 
       default:
@@ -212,19 +286,25 @@ public class JobEntity extends AbstractPersistenceEntity<JobEntity, Object> {
     switch (taskType) {
       case IMPORT:
         checkNotNull(taskId, "taskId");
-        checkArgument(jobHandlerType == JobHandlerType.PIPELINE, 
+        checkArgument(jobHandlerType == JobHandlerType.PIPELINE,
             "Import is handled by only Pipeline.");
         break;
 
       case DELETE:
         break;
 
-      case IMPORT_GOOGLE_DOC1 :
+      case IMPORT_BATCH:
+      case IMPORT_GOOGLE_DOC1:
       case IMPORT_GOOGLE_DOC_BATCH:
-        checkNotNull(request, "jobRequest cannot be empty for IMPORT_GOOGLE_DOC");
-        checkArgument(jobHandlerType == JobHandlerType.TASK_QUEUE, 
-            "IMPORT_GOOGLE_DOC_BATCH is handled by only ." + JobHandlerType.TASK_QUEUE);
+      case IMPORT_SYNTHETIC_MODULE :
+      case IMPORT_COLLECTION_GOOGLE_DOC:
+        checkNotNull(request, "jobRequest cannot be empty for " + taskType);
+        checkArgument(jobHandlerType == JobHandlerType.TASK_QUEUE, taskType
+            + " is handled by only ." + JobHandlerType.TASK_QUEUE);
         break;
+
+      
+        
       default:
         throw new IllegalArgumentException("Add more validations for Unsupported JobType : "
             + taskType);
@@ -259,6 +339,10 @@ public class JobEntity extends AbstractPersistenceEntity<JobEntity, Object> {
     private String stopReason;
     private Text request;
     private Text context;
+    private Text response;
+
+    private List<JobId> childJobs;
+    private List<JobId> finishedChildJobs;
 
     public Builder jobId(JobId jobId) {
       this.jobId = jobId;
@@ -309,9 +393,19 @@ public class JobEntity extends AbstractPersistenceEntity<JobEntity, Object> {
       this.request = request;
       return this;
     }
-    
+
     public Builder context(Text context) {
       this.context = context;
+      return this;
+    }
+
+    public Builder childJobs(List<JobId> childJobs) {
+      this.childJobs = childJobs;
+      return this;
+    }
+
+    public Builder finishedChildJobs(List<JobId> finishedChildJobs) {
+      this.finishedChildJobs = finishedChildJobs;
       return this;
     }
 
@@ -337,12 +431,16 @@ public class JobEntity extends AbstractPersistenceEntity<JobEntity, Object> {
 
     this.taskType = builder.taskType;
     this.taskId = builder.taskId;
-    
+
     this.jobState = builder.jobState;
     this.changeLogs = Lists.newArrayList();
     this.request = builder.request;
     this.context = builder.context;
+    this.response = builder.response;
+
     this.stopReason = builder.stopReason;
+    this.childJobs = convertWrapperListToListOfValues(builder.childJobs);
+    this.finishedChildJobs = convertWrapperListToListOfValues(builder.finishedChildJobs);
   }
 
   public static enum JobHandlerType {
@@ -358,48 +456,21 @@ public class JobEntity extends AbstractPersistenceEntity<JobEntity, Object> {
 
   public static enum TaskType {
     DELETE,
+    @Deprecated
     IMPORT,
+    @Deprecated
     IMPORT_GOOGLE_DOC_BATCH,
-    IMPORT_GOOGLE_DOC1;
+    
+    
+    // New ones.
+    IMPORT_GOOGLE_DOC1,
+    IMPORT_BATCH,
+    IMPORT_SYNTHETIC_MODULE,
+    IMPORT_COLLECTION,
+    IMPORT_COLLECTION_GOOGLE_DOC;
   }
 
-  /**
-   * Copy of {@link com.google.appengine.tools.pipeline.JobInfo.State}.
-   * Enum for Encapsulating different JobStates.
-   * TODO(arjuns): Add test for this.
-   * TODO(arjuns): Ensure enum values match.
-   */
-  public static enum JobState {
-    ENQUEUED(100),
-    CREATING_CHILDS(200),
-    WAITING_FOR_CHILD_COMPLETE_NOTIFICATION(300),
-    POLLING_FOR_CHILDS(400),
-    ALL_CHILDS_COMPLETED_SUCCESSFULLY(500),
-    COMPLETE(950),
-    STOPPED_BY_ERROR(1000),
-    STOPPED_BY_REQUEST(1100),
-    READY_FOR_CLEANUP(2000);
-
-    private int level;
-    
-    private JobState(int level) {
-      this.level = level;
-    }
-    
-    public int getLevel() {
-      return level;
-    }
-    
-    public PlacementOrder getPlacement(JobState jobState) {
-      if (this == jobState) {
-        return PlacementOrder.EQUAL;
-      } else if (this.getLevel() < jobState.getLevel()) {
-        return PlacementOrder.BEFORE;
-      } else {
-        return PlacementOrder.AFTER;
-      }
-    }
-  }
+ 
 
   // For objectify.
   private JobEntity() {

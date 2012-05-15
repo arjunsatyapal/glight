@@ -24,6 +24,7 @@ import static com.google.light.server.constants.RequestParamKeyEnum.PERSON_ID;
 import static com.google.light.server.utils.LightUtils.appendKeyValue;
 import static com.google.light.server.utils.LightUtils.appendSectionHeader;
 import static com.google.light.server.utils.LightUtils.getPST8PDTime;
+import static com.google.light.server.utils.LightUtils.replaceInstanceInList;
 import static com.google.light.server.utils.ServletUtils.prepareSession;
 import static com.google.light.testingutils.TestingUtils.getRandomEmail;
 import static com.google.light.testingutils.TestingUtils.getRandomPersonId;
@@ -35,24 +36,18 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.google.common.collect.ImmutableMapBuilder;
+import com.google.common.collect.Lists;
+import com.google.light.server.constants.OAuth2ProviderService;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
-
-
-
-
-
+import java.util.List;
 import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-
 import org.joda.time.DateTime;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-
-import com.google.common.collect.ImmutableMapBuilder;
-import com.google.light.server.constants.OAuth2ProviderService;
 
 /**
  * Test for {@link LightUtils}.
@@ -206,6 +201,17 @@ public class LightUtilsTest {
     } else {
       doAnswer(answer).when(session).setMaxInactiveInterval(SESSION_MAX_INACTIVITY_PERIOD);
     }
+  }
 
+  /**
+   * Test for {@link LightUtils#replaceInstanceInList(List, Object, Object)}
+   */
+  @Test
+  public void test_replaceInstanceInList() {
+    List<Long> original = Lists.newArrayList(new Long(1), new Long(2), new Long(3));
+    List<Long> expectedList = Lists.newArrayList(new Long(1), new Long(4), new Long(3));
+    
+    replaceInstanceInList(original, new Long(2), new Long(4));
+    assertEquals(expectedList, original);
   }
 }

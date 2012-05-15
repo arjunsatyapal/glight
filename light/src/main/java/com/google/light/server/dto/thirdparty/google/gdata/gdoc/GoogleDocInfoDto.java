@@ -17,6 +17,7 @@ package com.google.light.server.dto.thirdparty.google.gdata.gdoc;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.constants.OAuth2ProviderService.GOOGLE_DOC;
+import static com.google.light.server.utils.LightPreconditions.checkExternalIdIsGDocResource;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
 import static com.google.light.server.utils.LightUtils.getWrapper;
@@ -30,7 +31,6 @@ import com.google.gdata.data.acl.AclRole;
 import com.google.gdata.data.acl.AclScope;
 import com.google.gdata.data.acl.AdditionalRole;
 import com.google.gdata.data.docs.DocumentListEntry;
-import com.google.light.server.annotations.OverrideFieldAnnotationName;
 import com.google.light.server.dto.AbstractDto;
 import com.google.light.server.dto.module.ModuleType;
 import com.google.light.server.dto.pojo.typewrapper.stringwrapper.ExternalId;
@@ -64,19 +64,17 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
   @JsonProperty(value = "id")
   private String id;
   
-  @XmlElement(name = "resourceId")
-  @JsonProperty(value = "resourceId")
-  private String resourceId;
+//  @XmlElement(name = "resourceId")
+//  @JsonProperty(value = "resourceId")
+//  private String resourceId;
   
   @XmlElement(name = "lastEditTimeInMillis")
   @JsonProperty(value = "lastEditTimeInMillis")
   private Long lastEditTimeInMillis;
   
-  @OverrideFieldAnnotationName(value = "For proper deserialization, need to know the Type.")
   @XmlElement(name = "moduleType")
   @JsonProperty(value = "moduleType")
-  // TODO(arjuns): Rename this field to moduleType
-  private ModuleType type;
+  private ModuleType moduleType;
   
   @XmlElement(name = "title")
   @JsonProperty(value = "title")
@@ -175,7 +173,8 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
     }
 
     // Required for all configs.
-    checkNotBlank(resourceId, "resourceId");
+    checkNotNull(externalId, "externalId");
+//    checkNotBlank(resourceId, "resourceId");
 
     if (config != Configuration.DTO_FOR_IMPORT) {
       checkNotBlank(etag, "etag");
@@ -186,9 +185,10 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
     }
 
     // Required for all configs.
-    checkNotNull(type, "ModuleType");
+    checkNotNull(moduleType, "ModuleType");
     checkNotBlank(title, "title");
     checkNotNull(externalId, "externalId");
+    checkExternalIdIsGDocResource(externalId);
 
     if (config != Configuration.DTO_FOR_IMPORT) {
 
@@ -221,14 +221,14 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
     return id;
   }
 
-  public String getResourceId() {
-    return resourceId;
-  }
+//  public String getResourceId() {
+//    return resourceId;
+//  }
 
-  public GoogleDocResourceId getGoogleDocsResourceId() {
-    checkNotBlank(resourceId, "resourceId");
-    return new GoogleDocResourceId(resourceId);
-  }
+//  public GoogleDocResourceId getGoogleDocsResourceId() {
+//    checkNotBlank(resourceId, "resourceId");
+//    return new GoogleDocResourceId(resourceId);
+//  }
 
   public String getEtag() {
     return etag;
@@ -242,8 +242,8 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
     return lastEditTimeInMillis;
   }
 
-  public ModuleType getType() {
-    return type;
+  public ModuleType getModuleType() {
+    return moduleType;
   }
 
   public String getTitle() {
@@ -252,6 +252,10 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
 
   public ExternalId getExternalId() {
     return externalId;
+  }
+  
+  public GoogleDocResourceId getGoogleDocResourceId() {
+    return new GoogleDocResourceId(getExternalId());
   }
 
   public String getAclFeedLink() {
@@ -591,10 +595,10 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
   private GoogleDocInfoDto(Builder builder) {
     super(builder);
     this.id = builder.id;
-    this.resourceId = builder.resourceId;
+//    this.resourceId = builder.resourceId;
     this.etag = builder.etag;
     this.lastEditTimeInMillis = builder.lastEditTimeInMillis;
-    this.type = builder.moduleType;
+    this.moduleType = builder.moduleType;
     this.title = builder.title;
     this.externalId = builder.externalId;
     this.aclFeedLink = builder.aclFeedLink;

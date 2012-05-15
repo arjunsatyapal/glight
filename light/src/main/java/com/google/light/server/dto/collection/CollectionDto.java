@@ -18,9 +18,10 @@ package com.google.light.server.dto.collection;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
+import com.google.light.server.dto.pojo.tree.collection.CollectionTreeNodeDto;
+
 import com.google.light.server.dto.AbstractDto;
 import com.google.light.server.dto.AbstractDtoToPersistence;
-import com.google.light.server.dto.pojo.tree.CollectionTreeNodeDto;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.CollectionId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;

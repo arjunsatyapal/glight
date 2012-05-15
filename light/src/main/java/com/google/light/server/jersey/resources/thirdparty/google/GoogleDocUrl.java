@@ -20,7 +20,6 @@ import static com.google.light.server.dto.module.ModuleType.getByProviderService
 
 import com.google.light.server.constants.OAuth2ProviderService;
 import com.google.light.server.dto.module.ModuleType;
-import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocResourceId;
 import java.net.URL;
 
 /**
@@ -36,7 +35,7 @@ public class GoogleDocUrl {
   private String host;
   private String domain;
   private ModuleType moduleType;
-  private GoogleDocResourceId resourceId;
+  private String typedResourceId;
 
   public GoogleDocUrl(URL url) {
     this.scheme = url.getProtocol();
@@ -99,12 +98,12 @@ public class GoogleDocUrl {
     switch (moduleType) {
       case GOOGLE_COLLECTION:
         String folderKey = getFolderKey(ref, url);
-        this.resourceId = new GoogleDocResourceId(moduleType, folderKey);
+        this.typedResourceId = moduleType.getCategory() + ":" + folderKey;
         break;
 
       case GOOGLE_SPREADSHEET:
         String spreadSheetKey = getSpreadSheetKey(url);
-        this.resourceId = new GoogleDocResourceId(moduleType, spreadSheetKey);
+        this.typedResourceId = moduleType.getCategory() + ":" + spreadSheetKey;
         break;
 
       case GOOGLE_DOCUMENT:
@@ -115,7 +114,7 @@ public class GoogleDocUrl {
       case GOOGLE_FILE:
         //$FALL-THROUGH$
       case GOOGLE_PRESENTATION:
-        this.resourceId = new GoogleDocResourceId(moduleType, parts[startIndex + 2]);
+        this.typedResourceId = moduleType.getCategory() + ":" + parts[startIndex + 2];
         break;
       default:
         throw new IllegalArgumentException("Unsupported " + moduleType + " for URL : " + url);
@@ -173,7 +172,7 @@ public class GoogleDocUrl {
     return moduleType;
   }
 
-  public GoogleDocResourceId getResourceId() {
-    return resourceId;
+  public String getTypedResourceId() {
+    return typedResourceId;
   }
 }

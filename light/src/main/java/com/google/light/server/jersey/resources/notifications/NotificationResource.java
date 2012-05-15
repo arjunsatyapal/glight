@@ -20,13 +20,12 @@ import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkNotNull;
 import static com.google.light.server.utils.ServletUtils.getRequestHeaderValue;
 
-import com.google.light.server.constants.PlacementOrder;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.light.server.constants.HttpHeaderEnum;
 import com.google.light.server.constants.JerseyConstants;
 import com.google.light.server.constants.NotificationType;
+import com.google.light.server.constants.PlacementOrder;
 import com.google.light.server.constants.http.ContentTypeConstants;
 import com.google.light.server.dto.notifications.ChildJobCompletionNotification;
 import com.google.light.server.dto.pojo.ChangeLogEntryPojo;
@@ -35,7 +34,7 @@ import com.google.light.server.exception.unchecked.taskqueue.ParentNotReadyForCh
 import com.google.light.server.jersey.resources.AbstractJerseyResource;
 import com.google.light.server.manager.interfaces.JobManager;
 import com.google.light.server.persistence.entity.jobs.JobEntity;
-import com.google.light.server.persistence.entity.jobs.JobEntity.JobState;
+import com.google.light.server.persistence.entity.jobs.JobState;
 import com.google.light.server.utils.JsonUtils;
 import com.google.light.server.utils.ObjectifyUtils;
 import com.googlecode.objectify.Objectify;

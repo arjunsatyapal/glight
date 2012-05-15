@@ -17,11 +17,13 @@ package com.google.light.server.jobs;
 
 import static com.google.light.server.utils.GuiceUtils.getInstance;
 
-import com.google.light.server.dto.pojo.typewrapper.longwrapper.JobId;
-
+import com.google.appengine.api.datastore.Text;
+import com.google.light.server.dto.AbstractDto;
 import com.google.light.server.dto.pojo.ChangeLogEntryPojo;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.JobId;
 import com.google.light.server.manager.interfaces.JobManager;
 import com.google.light.server.persistence.entity.jobs.JobEntity;
+import com.google.light.server.persistence.entity.jobs.JobState;
 import com.googlecode.objectify.Objectify;
 
 /**
@@ -38,5 +40,13 @@ public class JobUtils {
 
     ChangeLogEntryPojo changeLog = new ChangeLogEntryPojo(changeMessage);
     jobManager.put(ofy, jobEntity, changeLog);
+  }
+  
+  // TODO(arjuns) : Move this to a better place.
+  public static <D extends AbstractDto<D>>void updateJobContext(Objectify ofy, JobManager jobManager,
+      JobState jobState, D contextDto, JobEntity jobEntity, String changeLogMsg) {
+    jobEntity.setJobState(jobState);
+    jobEntity.setContext(new Text(contextDto.toJson()));
+    jobManager.put(ofy, jobEntity, new ChangeLogEntryPojo(changeLogMsg));
   }
 }

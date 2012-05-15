@@ -18,6 +18,7 @@ package com.google.light.server.manager.implementation;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkTxnIsRunning;
+import static com.google.light.server.utils.LightUtils.getNow;
 
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
@@ -31,24 +32,26 @@ import com.google.light.server.dto.pages.PageDto;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
-import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocInfoDto;
+import com.google.light.server.dto.pojo.typewrapper.stringwrapper.ExternalId;
 import com.google.light.server.exception.unchecked.IdShouldNotBeSet;
 import com.google.light.server.exception.unchecked.VersionMutabilityViolation;
 import com.google.light.server.exception.unchecked.httpexception.NotFoundException;
 import com.google.light.server.manager.interfaces.ModuleManager;
+import com.google.light.server.persistence.dao.ExternalIdMappingDao;
 import com.google.light.server.persistence.dao.ModuleDao;
 import com.google.light.server.persistence.dao.ModuleVersionDao;
 import com.google.light.server.persistence.dao.ModuleVersionResourceDao;
-import com.google.light.server.persistence.dao.OriginModuleMappingDao;
+import com.google.light.server.persistence.entity.module.ExternalIdMappingEntity;
 import com.google.light.server.persistence.entity.module.ModuleEntity;
 import com.google.light.server.persistence.entity.module.ModuleVersionEntity;
 import com.google.light.server.persistence.entity.module.ModuleVersionResourceEntity;
-import com.google.light.server.persistence.entity.module.OriginModuleMappingEntity;
 import com.google.light.server.serveronlypojos.GAEQueryWrapper;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Objectify;
 import java.util.List;
 import java.util.logging.Logger;
+import org.apache.commons.lang.StringUtils;
+import org.joda.time.DateTime;
 import org.joda.time.Instant;
 
 /**
@@ -65,17 +68,17 @@ public class ModuleManagerImpl implements ModuleManager {
   private final ModuleVersionDao moduleVersionDao;
   private final ModuleVersionResourceDao moduleVersionResourceDao;
 
-  private final OriginModuleMappingDao originModuleMappingDao;
+  private final ExternalIdMappingDao externalIdMappingDao;
 
   @Inject
   public ModuleManagerImpl(ModuleDao moduleDao, ModuleVersionDao moduleVersionDao,
       ModuleVersionResourceDao moduleVersionResourceDao,
-      OriginModuleMappingDao originModuleMappingDao) {
+      ExternalIdMappingDao externalIdMappingDao) {
     this.moduleDao = checkNotNull(moduleDao, "moduleDao");
     this.moduleVersionDao = checkNotNull(moduleVersionDao, "moduleVersionDao");
     this.moduleVersionResourceDao = checkNotNull(moduleVersionResourceDao,
         "moduleVersionResourceDao");
-    this.originModuleMappingDao = checkNotNull(originModuleMappingDao, "originModuleMappingDao");
+    this.externalIdMappingDao = checkNotNull(externalIdMappingDao, "externalIdMappingDao");
   }
 
   /**
@@ -124,8 +127,8 @@ public class ModuleManagerImpl implements ModuleManager {
    * {@inheritDoc}
    */
   @Override
-  public ModuleId findModuleIdByOriginId(Objectify ofy, String originId) {
-    OriginModuleMappingEntity mapping = originModuleMappingDao.get(ofy, originId);
+  public ModuleId findModuleIdByExternalId(Objectify ofy, ExternalId externalId) {
+    ExternalIdMappingEntity mapping = externalIdMappingDao.get(ofy, externalId);
     if (mapping != null) {
       return mapping.getModuleId();
     }
@@ -137,33 +140,41 @@ public class ModuleManagerImpl implements ModuleManager {
    * {@inheritDoc}
    */
   @Override
-  public ModuleId reserveModuleId(Objectify ofy, ModuleType moduleType, String externalId,
+  public ModuleId reserveModuleId(Objectify ofy, ExternalId externalId,
       List<PersonId> owners, String title) {
     checkTxnIsRunning(ofy);
-    checkNotBlank(title, "title");
+    checkNotNull(externalId, "externalId");
 
-    ModuleId existingModuleId = findModuleIdByOriginId(ofy, externalId);
+    ModuleId existingModuleId = findModuleIdByExternalId(ofy, externalId);
     if (existingModuleId != null) {
       return existingModuleId;
     }
 
-    // Now create a new Module.
-    // Creating a dummy module to get Id.
-    // TODO(arjuns): Add a cleanup job for cleaning up MOdules which dont move from Reserved state
-    // for long time.
+    if (StringUtils.isBlank(title)) {
+      title = "Untitled : " + new DateTime(getNow()) + ":" + externalId.getValue();
+    }
+    
+    /*
+     *  Now create a new Dummy module as a placeHolder which will be later updated when content
+     *  is available.
+     * 
+     *  TODO(arjuns): Add a cleanup job for cleaning up MOdules which dont move from Reserved state
+     * for long time.
+     */  
     ModuleEntity moduleEntity = new ModuleEntity.Builder()
         .title(title)
         .moduleState(ModuleState.RESERVED)
-        .moduleType(moduleType)
+        .moduleType(externalId.getModuleType())
+        .externalId(externalId)
         .owners(owners)
         .build();
     ModuleEntity persistedEntity = this.create(ofy, moduleEntity);
 
-    OriginModuleMappingEntity mappingEntity = new OriginModuleMappingEntity.Builder()
-        .id(externalId)
+    ExternalIdMappingEntity mappingEntity = new ExternalIdMappingEntity.Builder()
+        .externalId(externalId)
         .moduleId(persistedEntity.getModuleId())
         .build();
-    originModuleMappingDao.put(ofy, mappingEntity);
+    externalIdMappingDao.put(ofy, mappingEntity);
 
     return persistedEntity.getModuleId();
   }
@@ -173,22 +184,29 @@ public class ModuleManagerImpl implements ModuleManager {
    */
   @Override
   public ModuleVersionEntity publishModuleVersion(Objectify ofy, ModuleId moduleId,
-      Version version, String content, GoogleDocInfoDto docInfo) {
+      Version version, ExternalId externalId, String title, String content, String etag, 
+      Instant lastEditTime) {
     checkTxnIsRunning(ofy);
+    checkNotNull(moduleId, "moduleId");
+    checkNotNull(version, "version");
+    checkNotNull(externalId, "externalId");
+    checkNotBlank(title, "title");
+    checkNotBlank(content, "content");
+    
     ModuleEntity moduleEntity = this.get(ofy, moduleId);
     checkNotNull(moduleEntity, "Module[" + moduleId + "] was not found.");
 
     ModuleVersionEntity fetchedEntity = moduleVersionDao.get(ofy, moduleId, version);
-
+    
     ModuleVersionEntity moduleVersionEntity = new ModuleVersionEntity.Builder()
         .version(version)
         .moduleKey(moduleEntity.getKey())
         .state(ModuleVersionState.PUBLISHED)
-        .title(docInfo.getTitle())
+        .title(title)
         .content(content)
-        .etag(docInfo.getEtag())
-        .externalId(docInfo.getExternalId())
-        .lastEditTime(docInfo.getLastEditTime())
+        .etag(etag)
+        .externalId(externalId)
+        .lastEditTime(lastEditTime)
         .build();
 
     if (fetchedEntity != null) {
@@ -202,8 +220,7 @@ public class ModuleManagerImpl implements ModuleManager {
 
     moduleVersionDao.put(ofy, moduleVersionEntity);
 
-    moduleEntity.publishVersion(version, docInfo.getLastEditTime(), docInfo.getEtag(), 
-        docInfo.getExternalId());
+    moduleEntity.publishVersion(version, title, lastEditTime, etag, externalId);
     moduleDao.put(ofy, moduleEntity);
 
     return moduleVersionEntity;
@@ -296,7 +313,12 @@ public class ModuleManagerImpl implements ModuleManager {
     ModuleEntity moduleEntity = this.get(ofy, moduleId);
     checkNotNull(moduleEntity, "moduleEntity");
 
-    if (moduleEntity.getLastEditTime().isEqual(lastEditTime)
+    if (moduleEntity.getModuleType() == ModuleType.LIGHT_SYNTHETIC_MODULE) {
+      if (moduleEntity.getModuleState() == ModuleState.PUBLISHED) {
+        // There is atleast one version published for this Synthetic module. That is sufficient.
+        return null;
+      }
+    } else if (moduleEntity.getLastEditTime().isEqual(lastEditTime)
         || moduleEntity.getLastEditTime().isAfter(lastEditTime)) {
       // No need to import new version.
       logger.info("Skipping creating version because for [" + moduleEntity.getModuleId()

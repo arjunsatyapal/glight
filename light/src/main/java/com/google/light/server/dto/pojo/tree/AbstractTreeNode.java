@@ -18,6 +18,8 @@ package com.google.light.server.dto.pojo.tree;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNull;
 
+import javax.xml.bind.annotation.XmlAnyElement;
+
 import javax.xml.bind.annotation.XmlElementWrapper;
 
 import com.google.common.collect.Lists;
@@ -48,7 +50,7 @@ public abstract class AbstractTreeNode<T extends AbstractTreeNode<T>> extends Ab
   // This is bad.
   @Embedded
   @XmlElementWrapper(name = "list")
-  @XmlElement(name = "item")
+  @XmlAnyElement
   @JsonProperty(value = "list")
   protected List<T> list;
 
@@ -58,6 +60,7 @@ public abstract class AbstractTreeNode<T extends AbstractTreeNode<T>> extends Ab
   @SuppressWarnings("unchecked")
   @Override
   public T validate() {
+
     checkNotNull(nodeType, "nodeType");
     checkNotNull(title, "title");
     switch (nodeType) {
@@ -89,17 +92,21 @@ public abstract class AbstractTreeNode<T extends AbstractTreeNode<T>> extends Ab
   public boolean isLeafNode() {
     return nodeType == TreeNodeType.LEAF_NODE;
   }
+  
+  public boolean isIntermediateNode() {
+    return nodeType == TreeNodeType.INTERMEDIATE_NODE;
+  }
 
   public void addChildren(T treeNode) {
-    if (list == null) {
-      list = Lists.newArrayList();
-    }
-
-    list.add(treeNode);
+    getChildren().add(treeNode);
     validate();
   }
 
   public List<T> getChildren() {
+    if (list == null) {
+      list = Lists.newArrayList();
+    }
+    
     return list;
   }
   
@@ -166,6 +173,7 @@ public abstract class AbstractTreeNode<T extends AbstractTreeNode<T>> extends Ab
     }
 
     this.title = builder.title;
+
     this.nodeType = builder.nodeType;
     // this.parent = builder.parent;
     this.list = builder.children;

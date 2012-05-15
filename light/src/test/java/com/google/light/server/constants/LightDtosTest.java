@@ -23,6 +23,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -48,6 +49,15 @@ import org.codehaus.jackson.annotate.JsonTypeName;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.google.light.server.jobs.handlers.collectionjobs.ImportCollectionGoogleDocContext;
+
+import com.google.light.server.jobs.handlers.modulejobs.ImportModuleSyntheticModuleJobContext;
+
+import com.google.light.server.dto.importresource.ImportBatchWrapper;
+
+import com.google.light.server.jobs.handlers.modulejobs.ImportModuleGoogleDocJobContext;
+
+
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
@@ -56,13 +66,11 @@ import com.google.light.server.dto.AbstractDto;
 import com.google.light.server.dto.AbstractDtoToPersistence;
 import com.google.light.server.dto.TestAbstractDto;
 import com.google.light.server.dto.module.GSBlobInfo;
-import com.google.light.server.dto.module.ImportDestinationDto;
 import com.google.light.server.dto.notifications.AbstractNotification;
 import com.google.light.server.dto.notifications.ChildJobCompletionNotification;
 import com.google.light.server.dto.pojo.tree.AbstractTreeNode;
 import com.google.light.server.dto.pojo.tree.GoogleDocTree;
 import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocImportBatchJobContext;
-import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocImportJobContext;
 import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocResourceId;
 import com.google.light.server.servlets.oauth2.google.pojo.AbstractOAuth2TokenInfo;
 import com.google.light.server.servlets.oauth2.google.pojo.GoogleLoginTokenInfo;
@@ -91,17 +99,19 @@ public class LightDtosTest implements EnumTestInterface {
       AbstractOAuth2TokenInfo.class.getName(),
       AbstractDtoToPersistence.class.getName(),
       AbstractNotification.class.getName(),
+      AbstractTreeNode.class.getName(),
       ChildJobCompletionNotification.class.getName(),
       GoogleDocResourceId.class.getName(),
       GoogleDocTree.class.getName(),
       GoogleDocImportBatchJobContext.class.getName(),
-      GoogleDocImportJobContext.class.getName(),
+      ImportModuleGoogleDocJobContext.class.getName(),
       GoogleOAuth2TokenInfo.class.getName(),
       GoogleLoginTokenInfo.class.getName(),
       GoogleUserInfo.class.getName(),
       GSBlobInfo.class.getName(),
-      ImportDestinationDto.class.getName(),
-      AbstractTreeNode.class.getName());
+      ImportBatchWrapper.class.getName(),
+      ImportCollectionGoogleDocContext.class.getName(),
+      ImportModuleSyntheticModuleJobContext.class.getName());
 
   /**
    * This test ensures following things :

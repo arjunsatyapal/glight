@@ -141,9 +141,9 @@ public class ModuleResource extends AbstractJerseyResource {
       for (ModuleDto currDto : list) {
         htmlBuilder.append(counter++)
         .append(".&nbsp")
-        .append("<a href=" + "/rest/module/")
+        .append("<a href=" + "/rest/content/general/module/")
         .append(currDto.getModuleId().getValue())
-        .append("/latest/content")
+        .append("/latest")
         .append(">")
         .append(currDto.getTitle())
         .append("</a><br>\n");

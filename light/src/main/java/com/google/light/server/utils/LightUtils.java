@@ -15,14 +15,13 @@
  */
 package com.google.light.server.utils;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.constants.LightConstants.SESSION_MAX_INACTIVITY_PERIOD;
 import static com.google.light.server.constants.RequestParamKeyEnum.DEFAULT_EMAIL;
 import static com.google.light.server.constants.RequestParamKeyEnum.LOGIN_PROVIDER_ID;
 import static com.google.light.server.constants.RequestParamKeyEnum.LOGIN_PROVIDER_USER_ID;
 import static com.google.light.server.constants.RequestParamKeyEnum.PERSON_ID;
-
-import com.google.light.server.dto.pojo.typewrapper.stringwrapper.ExternalId;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
@@ -39,6 +38,7 @@ import com.google.light.server.dto.pojo.typewrapper.longwrapper.JobId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
+import com.google.light.server.dto.pojo.typewrapper.stringwrapper.ExternalId;
 import com.google.light.server.exception.unchecked.httpexception.LightHttpException;
 import com.google.light.server.guice.providers.InstantProvider;
 import java.io.IOException;
@@ -299,8 +299,6 @@ public class LightUtils {
     return instant.getMillis();
   }
 
-
-  
   public static <I, W extends AbstractTypeWrapper<I, W>> I getWrapperValue(W wrapper) {
     if (wrapper == null) {
       return null;
@@ -309,18 +307,10 @@ public class LightUtils {
     return wrapper.getValue();
   }
 
-  public static <I, W extends AbstractTypeWrapper<I, W>> String getWrapperValueAsString(W wrapper) {
-    if (wrapper == null) {
-      return null;
-    }
-
-    return wrapper.getValue().toString();
-  }
-
   public static <E, W extends AbstractTypeWrapper<E, W>>
       List<E> convertWrapperListToListOfValues(List<W> listOfWrappers) {
     if (isListEmpty(listOfWrappers)) {
-      return null;
+      return Lists.newArrayList();
     }
 
     List<E> requiredList = Lists.newArrayListWithCapacity(listOfWrappers.size());
@@ -335,14 +325,15 @@ public class LightUtils {
 
   @VisibleForTesting
   @SuppressWarnings("rawtypes")
-  static Map<String, AbstractTypeWrapper> map = new ImmutableMap.Builder<String, AbstractTypeWrapper>()
-      .put(CollectionId.class.getName(), new CollectionId(Long.MAX_VALUE))
-      .put(ExternalId.class.getName(), new ExternalId("http://google.com"))
-      .put(JobId.class.getName(), new JobId(Long.MAX_VALUE))
-      .put(ModuleId.class.getName(), new ModuleId(Long.MAX_VALUE))
-      .put(PersonId.class.getName(), new PersonId(Long.MAX_VALUE))
-      .put(Version.class.getName(), new Version(1L))
-      .build();
+  static Map<String, AbstractTypeWrapper> map =
+      new ImmutableMap.Builder<String, AbstractTypeWrapper>()
+          .put(CollectionId.class.getName(), new CollectionId(Long.MAX_VALUE))
+          .put(ExternalId.class.getName(), new ExternalId("http://google.com"))
+          .put(JobId.class.getName(), new JobId(Long.MAX_VALUE))
+          .put(ModuleId.class.getName(), new ModuleId(Long.MAX_VALUE))
+          .put(PersonId.class.getName(), new PersonId(Long.MAX_VALUE))
+          .put(Version.class.getName(), new Version(1L))
+          .build();
 
   @SuppressWarnings({ "unchecked", "rawtypes", "deprecation" })
   public static <I, W extends AbstractTypeWrapper<I, W>> W getWrapper(I value, Class<W> clazz) {
@@ -354,18 +345,20 @@ public class LightUtils {
     Preconditions.checkNotNull(instanceCreator, "instanceCreator for : " + clazz.getSimpleName());
     return ((W) instanceCreator.createInstance(value));
   }
-  
+
   @SuppressWarnings({ "cast" })
-  public static <W extends AbstractTypeWrapper<Long, W>> W getLongWrapper(String value, Class<W> clazz) {
+  public static <W extends AbstractTypeWrapper<Long, W>> W getLongWrapper(String value,
+      Class<W> clazz) {
     if (value == null || value.equals("null")) {
       return null;
     }
 
     return ((W) getWrapper(Long.parseLong(value), clazz));
   }
-  
+
   @SuppressWarnings({ "cast" })
-  public static <W extends AbstractTypeWrapper<String, W>> W getStringWrapper(String value, Class<W> clazz) {
+  public static <W extends AbstractTypeWrapper<String, W>> W getStringWrapper(String value,
+      Class<W> clazz) {
     if (value == null || value.equals("null")) {
       return null;
     }
@@ -374,20 +367,48 @@ public class LightUtils {
   }
 
   @SuppressWarnings({ "unchecked", "rawtypes" })
-  public static <I, W extends AbstractTypeWrapper<I, W>> 
-  List<W> convertListOfValuesToWrapperList(List<I> listOfValues, Class<W> clazz) {
+  public static <I, W extends AbstractTypeWrapper<I, W>>
+      List<W> convertListOfValuesToWrapperList(List<I> listOfValues, Class<W> clazz) {
     if (isListEmpty(listOfValues)) {
-      return null;
+      return Lists.newArrayList();
     }
-    
+
     List<W> requiredList = Lists.newArrayListWithCapacity(listOfValues.size());
-    
+
     for (I curr : listOfValues) {
       AbstractTypeWrapper instanceCreator = map.get(clazz.getName());
       W instance = ((W) instanceCreator.createInstance(curr));
       requiredList.add(instance);
     }
-    
+
     return requiredList;
+  }
+
+  public static String generateNameForExternalId(ExternalId externalId) {
+    DateTime dateTime = new DateTime(getNow());
+    StringBuilder builder = new StringBuilder("Untitled : " + externalId.getValue());
+    builder.append(":")
+        .append(dateTime.getYear())
+        .append("/")
+        .append(dateTime.getMonthOfYear())
+        .append("/")
+        .append(dateTime.getDayOfMonth());
+
+    return builder.toString();
+  }
+
+  /**
+   * Method to replace an existing instance with a new Instance of same type in a List.
+   * @param list
+   * @param existingInstance
+   * @param newInstance
+   */
+  public static <D> void replaceInstanceInList(List<D> list, D existingInstance, D newInstance) {
+    checkArgument(!isListEmpty(list), "list cannot be empty.");
+    
+    int index = list.indexOf(existingInstance);
+    checkArgument(index >= 0, "existingInstance was not found in the list.");
+    list.remove(index);
+    list.add(index, newInstance);
   }
 }

@@ -19,6 +19,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkIsRunningUnderQueue;
 import static com.google.light.server.utils.LightPreconditions.checkNotNull;
 
+import com.google.light.server.jobs.handlers.JobHandler;
+
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.JobId;
 
 import com.google.light.server.utils.JsonUtils;
@@ -50,11 +52,13 @@ import javax.ws.rs.core.Response;
 @Path(JerseyConstants.RESOURCE_JOB)
 public class JobResource extends AbstractJerseyResource {
   private JobManager jobManager;
+  private JobHandler jobHandler;
   @Inject
   public JobResource(Injector injector, HttpServletRequest request, HttpServletResponse response,
-      JobManager jobManager) {
+      JobManager jobManager, JobHandler jobHandler) {
     super(injector, request, response);
     this.jobManager = checkNotNull(jobManager, "jobManager");
+    this.jobHandler = checkNotNull(jobHandler, "jobHandler"); 
   }
 
   /**
@@ -68,7 +72,7 @@ public class JobResource extends AbstractJerseyResource {
     checkNotNull(jobIdStr, "jobId cannot be null");
     
     JobId jobId = new JobId(jobIdStr);
-    jobManager.handleJob(jobId);
+    jobHandler.handleJob(jobId);
     return Response.ok().build();
     
   }

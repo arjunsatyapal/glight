@@ -15,6 +15,10 @@
  */
 package com.google.light.server.exception.unchecked.taskqueue;
 
+import com.google.common.collect.Iterables;
+
+import java.util.List;
+
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.JobId;
 
 import com.google.light.server.exception.unchecked.pipelineexceptions.ignore.PipelineIgnoreException;
@@ -35,8 +39,8 @@ public class WaitForChildsToComplete extends PipelineIgnoreException {
   /**
    * {@inheritDoc}
    */
-  public WaitForChildsToComplete(JobId jobId) {
-      super("Waiting for : " + jobId);
+  public WaitForChildsToComplete(List<JobId> jobIds) {
+      super("Waiting for : " + Iterables.toString(jobIds));
   }
   
   public JobId getJobId() {
