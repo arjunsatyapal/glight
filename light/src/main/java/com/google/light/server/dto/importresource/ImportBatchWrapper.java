@@ -108,10 +108,6 @@ public class ImportBatchWrapper extends AbstractDto<ImportBatchWrapper> {
         //$FALL-THROUGH$
 
       case MODULE_JOB:
-        if (getList().size() < 1 || getList().size() > IMPORT_BATCH_SIZE_MAX) {
-          System.out.println(getList().size());
-        }
-        
         checkIntegerIsInRage(getList().size(), 1, IMPORT_BATCH_SIZE_MAX,
             "Number of externalIds that can be downloaded in a batch should be between 1 & " +
                 IMPORT_BATCH_SIZE_MAX + ".");

@@ -14,7 +14,6 @@
 package com.google.light.testingutils.scripts;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.light.server.constants.OAuth2ProviderEnum.GOOGLE;
 import static com.google.light.server.constants.RequestParamKeyEnum.CLIENT_ID;
 import static com.google.light.server.constants.RequestParamKeyEnum.CLIENT_SECRET;
 import static com.google.light.server.constants.RequestParamKeyEnum.EMAIL;

@@ -201,7 +201,6 @@ public class JobEntity extends AbstractPersistenceEntity<JobEntity, Object> {
     setContext(new Text(dto.toJson()));
   }
 
-  @Deprecated
   public Text getResponse() {
     return response;
   }

@@ -18,58 +18,35 @@ package com.google.light.server.manager.implementation;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.exception.ExceptionType.SERVER_GUICE_INJECTION;
-import static com.google.light.server.jobs.JobUtils.updateJobContext;
 import static com.google.light.server.utils.LightPreconditions.checkJobId;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkTxnIsRunning;
 
-import com.google.light.server.jobs.handlers.modulejobs.ImportModuleSyntheticModuleJobContext;
-
 import com.google.appengine.api.datastore.Text;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.light.server.constants.QueueEnum;
 import com.google.light.server.dto.AbstractDto;
 import com.google.light.server.dto.importresource.ImportBatchWrapper;
 import com.google.light.server.dto.importresource.ImportExternalIdDto;
 import com.google.light.server.dto.pojo.ChangeLogEntryPojo;
-import com.google.light.server.dto.pojo.tree.AbstractTreeNode.TreeNodeType;
-import com.google.light.server.dto.pojo.tree.GoogleDocTree;
-import com.google.light.server.dto.pojo.tree.collection.CollectionTreeNodeDto;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.JobId;
-import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
-import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
-import com.google.light.server.dto.pojo.typewrapper.stringwrapper.ExternalId;
-import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocImportBatchJobContext;
-import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocImportBatchJobContext.GoogleDocImportBatchJobState;
-import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocInfoDto;
-import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocResourceId;
-import com.google.light.server.jobs.google.gdoc.GoogleDocJobs;
 import com.google.light.server.jobs.handlers.collectionjobs.ImportCollectionGoogleDocContext;
 import com.google.light.server.jobs.handlers.modulejobs.ImportModuleGoogleDocJobContext;
-import com.google.light.server.manager.interfaces.CollectionManager;
+import com.google.light.server.jobs.handlers.modulejobs.ImportModuleSyntheticModuleJobContext;
 import com.google.light.server.manager.interfaces.JobManager;
-import com.google.light.server.manager.interfaces.ModuleManager;
 import com.google.light.server.manager.interfaces.NotificationManager;
 import com.google.light.server.manager.interfaces.QueueManager;
 import com.google.light.server.persistence.dao.JobDao;
-import com.google.light.server.persistence.entity.collection.CollectionEntity;
 import com.google.light.server.persistence.entity.jobs.JobEntity;
 import com.google.light.server.persistence.entity.jobs.JobEntity.JobHandlerType;
 import com.google.light.server.persistence.entity.jobs.JobEntity.JobType;
 import com.google.light.server.persistence.entity.jobs.JobEntity.TaskType;
 import com.google.light.server.persistence.entity.jobs.JobState;
-import com.google.light.server.thirdparty.clients.google.gdata.gdoc.DocsServiceWrapper;
-import com.google.light.server.utils.GuiceUtils;
 import com.google.light.server.utils.ObjectifyUtils;
 import com.googlecode.objectify.Objectify;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Logger;
 
 /**
@@ -83,29 +60,15 @@ public class JobManagerImpl implements JobManager {
   private static final Logger logger = Logger.getLogger(JobManagerImpl.class.getName());
 
   private JobDao jobDao;
-  private CollectionManager collectionManager;
-  private ModuleManager moduleManager;
   private NotificationManager notificationManager;
   private QueueManager queueManager;
-  private GoogleDocJobs googleDocJobs;
-  private Provider<DocsServiceWrapper> docsServiceProvider;
-
   @Inject
-  public JobManagerImpl(JobDao jobDao, CollectionManager collectionManager,
-      ModuleManager moduleManager,
-      NotificationManager notificationManager,
-      QueueManager queueManager, GoogleDocJobs googleDocJobs,
-      Provider<DocsServiceWrapper> docsServiceProvider) {
+  public JobManagerImpl(JobDao jobDao, NotificationManager notificationManager,
+      QueueManager queueManager) {
     this.jobDao = checkNotNull(jobDao, "jobDao");
-    this.collectionManager =
-        checkNotNull(collectionManager, SERVER_GUICE_INJECTION, "collectionManager");
-    this.moduleManager = checkNotNull(moduleManager, SERVER_GUICE_INJECTION, "moduleManager");
     this.notificationManager = checkNotNull(notificationManager, SERVER_GUICE_INJECTION,
         "notificationManager");
     this.queueManager = checkNotNull(queueManager, SERVER_GUICE_INJECTION, "queueManager");
-    this.googleDocJobs = checkNotNull(googleDocJobs, SERVER_GUICE_INJECTION, "googleDocJobs");
-    this.docsServiceProvider = checkNotNull(docsServiceProvider,
-        SERVER_GUICE_INJECTION, "docsServiceProvider");
   }
 
   /**
@@ -123,36 +86,6 @@ public class JobManagerImpl implements JobManager {
   @Override
   public JobEntity get(Objectify ofy, JobId jobId) {
     return jobDao.get(ofy, jobId);
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public JobEntity enqueueGoogleDocImportBatchJob(GoogleDocImportBatchJobContext jobRequest) {
-    Objectify ofy = ObjectifyUtils.initiateTransaction();
-    try {
-      jobRequest.setState(GoogleDocImportBatchJobState.ENQUEUED);
-      Text jobRequestText = new Text(jobRequest.toJson());
-
-      JobEntity jobEntity = new JobEntity.Builder()
-          .jobType(JobType.ROOT_JOB)
-          .jobHandlerType(JobHandlerType.TASK_QUEUE)
-          .taskType(TaskType.IMPORT_GOOGLE_DOC_BATCH)
-          .jobState(JobState.ENQUEUED)
-          .request(jobRequestText)
-          .context(jobRequestText)
-          .build();
-      JobEntity savedJobEntity = this.put(ofy, jobEntity,
-          new ChangeLogEntryPojo("Enqueuing Request."));
-      queueManager.enqueueGoogleDocInteractionJob(ofy, jobEntity.getJobId());
-      ObjectifyUtils.commitTransaction(ofy);
-
-      logger.info("Successfully created IMPORT_GOOGLE_DOC_BATCH Job[" + savedJobEntity.getJobId());
-      return savedJobEntity;
-    } finally {
-      ObjectifyUtils.rollbackTransactionIfStillActive(ofy);
-    }
   }
 
   /**
@@ -194,88 +127,12 @@ public class JobManagerImpl implements JobManager {
   }
 
   /**
-   * @param possibleNewNode
-   * @param collectionParentNode
-   * @param externalId
-   */
-  private void appendLeafNodeToCollectionTree(
-      GoogleDocImportBatchJobContext gdocImportBatchContext,
-      CollectionTreeNodeDto.Builder newLeafNodeBuilder,
-      CollectionTreeNodeDto collectionParentNode, ExternalId externalId) {
-    ModuleId moduleId = gdocImportBatchContext.getModuleIdForExternalId(externalId);
-    checkNotNull(moduleId, "This should not happen. "
-        + "Could not find moduleId for externalId : " + externalId);
-    CollectionTreeNodeDto newLeafNode = newLeafNodeBuilder.moduleId(moduleId).build();
-    collectionParentNode.addChildren(newLeafNode);
-  }
-
-  private void createNewCollection(GoogleDocImportBatchJobContext gdocImportBatchContext,
-      JobEntity jobEntity) {
-    if (gdocImportBatchContext.getCollectionId() != null) {
-      // No need to create new collection.
-      return;
-    }
-    Objectify ofy = ObjectifyUtils.initiateTransaction();
-    try {
-      List<PersonId> owners = Lists.newArrayList(GuiceUtils.getOwnerId());
-
-      CollectionEntity collectionEntity = collectionManager.reserveCollectionId(ofy,
-          owners, gdocImportBatchContext.getCollectionTitle());
-      gdocImportBatchContext.setCollectionId(collectionEntity.getCollectionId());
-      gdocImportBatchContext.setState(GoogleDocImportBatchJobState.COLLECTION_CREATED);
-
-      updateJobContext(ofy, this, jobEntity.getJobState(), gdocImportBatchContext, jobEntity,
-          "assigning new CollectionId :" + collectionEntity.getCollectionId());
-      ObjectifyUtils.commitTransaction(ofy);
-    } finally {
-      ObjectifyUtils.rollbackTransactionIfStillActive(ofy);
-    }
-  }
-
-  /**
-
-   * @param gdocBatchImportContext
-   */
-  private void updateRootNode(JobEntity jobEntity,
-      GoogleDocImportBatchJobContext gdocBatchImportContext) {
-    GoogleDocTree rootNode = new GoogleDocTree.Builder()
-        .title("root")
-        .nodeType(TreeNodeType.ROOT_NODE)
-        .build();
-    googleDocJobs.addChildTreeToParent(rootNode, gdocBatchImportContext.get());
-    gdocBatchImportContext.setTreeRoot(rootNode);
-
-    updateJobContext(null, this, JobState.CREATING_CHILDS, gdocBatchImportContext, jobEntity,
-        "Updating root and setting state to CreateChilds.");
-  }
-
-  /**
-   * Returns set of ResourceInfo for supported Google Doc Types.
-   * 
-   * @return
-   */
-  private Set<GoogleDocInfoDto> getSetOfSupportedGoogleDocs(
-      List<GoogleDocTree> listOfLeaves) {
-    Map<GoogleDocResourceId, GoogleDocInfoDto> map = Maps.newHashMap();
-
-    for (GoogleDocTree currNode : listOfLeaves) {
-      if (currNode.getResourceInfo().getModuleType().isSupported()) {
-        map.put(currNode.getGoogleDocResourceId(), currNode.getResourceInfo());
-      }
-    }
-
-    return Sets.newHashSet(map.values());
-  }
-
-  /**
    * {@inheritDoc}
    */
   @Override
   public <D extends AbstractDto<D>> JobEntity enqueueCompleteJob(JobId jobId, D responseDto, String message) {
     checkNotBlank(message, "message cannot be null");
     checkNotNull(responseDto, "responseDto cannot be null");
-    System.out.println("\n***Resposne = \n" + responseDto.toJson());
-    
     
     Objectify ofy = ObjectifyUtils.initiateTransaction();
 
@@ -381,7 +238,7 @@ public class JobManagerImpl implements JobManager {
 
     parentJob.addChildJob(childJobId);
 
-    updateParentJobContext(externalIdDto, parentJob, childJobId);
+    updateParentJobContext(externalIdDto, parentJob);
 
     this.put(ofy, parentJob, new ChangeLogEntryPojo("Adding child " + childJobId));
 
@@ -395,6 +252,8 @@ public class JobManagerImpl implements JobManager {
       case LIGHT_POLLING:
         queueManager.enqueueLightJob(ofy, childJobId);
         break;
+      default :
+        throw new IllegalArgumentException("Add more code for queue : " + queue);
     }
   }
 
@@ -402,8 +261,8 @@ public class JobManagerImpl implements JobManager {
    * @param externalIdDto
    * @param parentJob
    */
-  private void updateParentJobContext(ImportExternalIdDto externalIdDto, JobEntity parentJob,
-      JobId childJobId) {
+  @SuppressWarnings("deprecation")
+  private void updateParentJobContext(ImportExternalIdDto externalIdDto, JobEntity parentJob) {
     TaskType taskType = parentJob.getTaskType();
 
     switch (taskType) {
@@ -433,7 +292,6 @@ public class JobManagerImpl implements JobManager {
         // Now update context with new information and then persist it back.
         importCollectionGDocContext.addImportModuleDto(externalIdDto);
         parentJob.setContext(importCollectionGDocContext);
-        System.out.println(parentJob.getContext().getValue());
         break;
 
       default:

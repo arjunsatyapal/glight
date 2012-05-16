@@ -31,7 +31,6 @@ import com.google.light.server.utils.LightUtils;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import org.apache.commons.lang.StringEscapeUtils;
 import org.junit.Test;
 
 /**
@@ -109,6 +108,7 @@ public class DummyTest {
     System.out.println(urlEscaped);
   }
 
+  @SuppressWarnings("unused")
   @Test
   public void test_import_listExternalIdDto() {
     ImportExternalIdDto dtoFolderWithCustomTitle =

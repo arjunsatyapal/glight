@@ -43,6 +43,7 @@ import java.util.regex.Pattern;
  */
 public class LightHttpClient {
   private HttpTransport httpTransport;
+  @SuppressWarnings("unused")
   private JsonFactory jsonFactory;
 
   @Inject

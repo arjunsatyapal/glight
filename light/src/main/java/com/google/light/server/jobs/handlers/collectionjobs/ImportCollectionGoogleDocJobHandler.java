@@ -71,7 +71,6 @@ public class ImportCollectionGoogleDocJobHandler implements JobHandlerInterface 
         jobEntity.getContext(ImportCollectionGoogleDocContext.class);
     checkArgument(context.getExternalId().getModuleType() == ModuleType.GOOGLE_COLLECTION,
         "This handler can handle only Google Collections");
-    System.out.println(context.toJson());
 
     JobState jobState = jobEntity.getJobState();
     switch (jobState) {
@@ -97,7 +96,7 @@ public class ImportCollectionGoogleDocJobHandler implements JobHandlerInterface 
     CollectionTreeNodeDto subCollection = new CollectionTreeNodeDto.Builder()
         .title(context.getTitle())
         .externalId(context.getExternalId())
-        .type(TreeNodeType.INTERMEDIATE_NODE)
+        .nodeType(TreeNodeType.INTERMEDIATE_NODE)
         .moduleType(ModuleType.LIGHT_SUB_COLLECTION)
         .build();
 
@@ -107,24 +106,22 @@ public class ImportCollectionGoogleDocJobHandler implements JobHandlerInterface 
         child = generateCollectionNodeFromChildJob(jobManager, curr.getJobId());
       } else {
         checkArgument(curr.getModuleType().getNodeType() == TreeNodeType.LEAF_NODE,
-            "Intermediate nodes are expected to have created a job. Failed for : " + 
-        curr.getExternalId());
+            "Intermediate nodes are expected to have created a job. Failed for : " +
+                curr.getExternalId());
         child = new CollectionTreeNodeDto.Builder()
             .title(curr.getTitle())
             .externalId(curr.getExternalId())
-            .type(TreeNodeType.LEAF_NODE)
+            .nodeType(TreeNodeType.LEAF_NODE)
             .moduleType(curr.getModuleType())
             .moduleId(curr.getModuleId())
             .version(new Version(Version.LATEST_VERSION))
             .build();
       }
-      
+
       checkNotNull(child, "child should not be null.");
-      System.out.println("\n***child = " + child.toJson());
       subCollection.addChildren(child);
     }
-    
-    System.out.println("\n*** subcollectionRoot = " + subCollection.toJson());
+
     jobManager.enqueueCompleteJob(jobEntity.getJobId(), subCollection, "Marking job as complete");
   }
 
@@ -177,7 +174,7 @@ public class ImportCollectionGoogleDocJobHandler implements JobHandlerInterface 
   public void enqueueCollectionGoogleDocJob(ImportExternalIdDto importExternalIdDto,
       GoogleDocInfoDto gdocInfo, JobId parentJobId, JobId rootJobId) {
     String title = calculateTitle(importExternalIdDto, gdocInfo);
-    
+
     ImportCollectionGoogleDocContext jobRequest = new ImportCollectionGoogleDocContext.Builder()
         .title(title)
         .externalId(importExternalIdDto.getExternalId())
@@ -207,7 +204,7 @@ public class ImportCollectionGoogleDocJobHandler implements JobHandlerInterface 
   private String calculateTitle(ImportExternalIdDto importExternalIdDto, GoogleDocInfoDto gdocInfo) {
     checkNotNull(importExternalIdDto, "importExternalIdDto");
     checkNotNull(gdocInfo, "gdocInfo");
-    
+
     if (StringUtils.isNotBlank(importExternalIdDto.getTitle())) {
       return importExternalIdDto.getTitle();
     } else {

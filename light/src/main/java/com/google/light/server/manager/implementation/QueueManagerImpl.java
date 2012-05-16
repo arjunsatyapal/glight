@@ -168,7 +168,7 @@ public class QueueManagerImpl implements QueueManager {
     RetryOptions retryOptions = getRetryOptions();
 
     TaskOptions taskOptions = getTaskOptions(retryOptions,
-        TaskOptions.Method.POST, ContentTypeConstants.APPLICATION_JSON,
+        TaskOptions.Method.POST, ContentTypeConstants.TEXT_PLAIN,
         notification.toJson(),
         getURI(JerseyConstants.URI_RESOURCE_PATH_NOTIFICATION_JOB));
 

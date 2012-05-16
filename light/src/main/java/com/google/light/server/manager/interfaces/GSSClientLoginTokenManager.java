@@ -15,12 +15,8 @@
  */
 package com.google.light.server.manager.interfaces;
 
-import java.io.IOException;
-
 import com.google.api.client.googleapis.auth.clientlogin.ClientLoginResponseException;
-import com.google.light.server.constants.OAuth2ProviderEnum;
 import com.google.light.server.exception.checked.InvalidGSSClientLoginToken;
-import com.google.light.server.persistence.entity.admin.OAuth2ConsumerCredentialEntity;
 
 /**
  * Interface for the manager that takes care of the whole authentication operations

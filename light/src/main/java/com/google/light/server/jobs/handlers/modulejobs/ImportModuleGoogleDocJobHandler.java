@@ -102,7 +102,6 @@ public class ImportModuleGoogleDocJobHandler implements JobHandlerInterface {
   public void handle(JobEntity jobEntity) {
     ImportModuleGoogleDocJobContext gdocImportContext =
         jobEntity.getContext(ImportModuleGoogleDocJobContext.class);
-    System.out.println("\n\n***GDoc context = " + gdocImportContext.toJson());
 
     switch (gdocImportContext.getState()) {
       case ENQUEUED:
@@ -136,7 +135,7 @@ public class ImportModuleGoogleDocJobHandler implements JobHandlerInterface {
 
     CollectionTreeNodeDto collectionNode = new CollectionTreeNodeDto.Builder()
         .title(moduleEntity.getTitle())
-        .type(TreeNodeType.LEAF_NODE)
+        .nodeType(TreeNodeType.LEAF_NODE)
         .moduleId(gdocImportContext.getModuleId())
         .version(gdocImportContext.getVersion())
         .moduleType(moduleEntity.getModuleType())
@@ -205,8 +204,10 @@ public class ImportModuleGoogleDocJobHandler implements JobHandlerInterface {
         } else {
           moduleState = ModuleState.REFRESHING;
         }
-
         moduleType = gdocInfo.getModuleType();
+
+        logger.info("Module State = " + moduleState);
+        logger.info("ModuleType = " + moduleType);
       } else {
         // Google Document is up to date. So use the latest version as the reserved version.
         ModuleEntity moduleEntity = moduleManager.get(ofy, moduleId);
@@ -214,6 +215,8 @@ public class ImportModuleGoogleDocJobHandler implements JobHandlerInterface {
         moduleState = ModuleState.PUBLISHED;
         title = calculateTitleFromContext(importModuleDto, gdocInfo, moduleEntity, false);
         moduleType = moduleEntity.getModuleType();
+        logger.info("Module State = " + moduleState);
+        logger.info("ModuleType = " + moduleType);
       }
 
       // Verify that values are initialized.
@@ -269,7 +272,6 @@ public class ImportModuleGoogleDocJobHandler implements JobHandlerInterface {
     // GoogleDocArchivePojo archiveInfo = docsService.archiveResource(gdocResourceId);
     // gdocImportContext.setArchiveId(archiveInfo.getArchiveId());
 
-    // System.out.println(archiveInfo.getArchiveId());
     String archiveId =
         "nTSZLtpDRSP5IP11Sol04pDkNbRFv7KVNL55qVoitx7rtrJHru1T6ljtTjMW26L3ygWrvW1tMZHHg6ARCy3UjxZRafUSMAgIFesW90teEkzsHCQ6FK96YLFEU7tKurf2hsM-tVKSUYw";
     gdocImportContext.setArchiveId(archiveId);
@@ -346,8 +348,6 @@ public class ImportModuleGoogleDocJobHandler implements JobHandlerInterface {
         if (zipEntry == null) {
           continue;
         }
-        System.out.println(zipEntry.getName());
-
         // TODO(arjuns): Get contentType from File extension.
         // Storing file on Cloud Storage.
         String nameFromGoogleDoc = zipEntry.getName();
@@ -438,7 +438,7 @@ public class ImportModuleGoogleDocJobHandler implements JobHandlerInterface {
         // Now generating result for this job.
         CollectionTreeNodeDto node = new CollectionTreeNodeDto.Builder()
             .title(gdocImportContext.getResourceInfo().getTitle())
-            .type(TreeNodeType.LEAF_NODE)
+            .nodeType(TreeNodeType.LEAF_NODE)
             .moduleId(gdocImportContext.getModuleId())
             .externalId(gdocImportContext.getResourceInfo().getExternalId())
             .moduleType(gdocImportContext.getResourceInfo().getModuleType())

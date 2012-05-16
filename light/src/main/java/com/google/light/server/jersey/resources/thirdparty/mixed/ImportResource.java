@@ -28,8 +28,6 @@ import com.google.light.server.jobs.handlers.modulejobs.ImportModuleSyntheticMod
 
 import com.google.light.server.dto.pojo.ChangeLogEntryPojo;
 
-import com.google.light.server.dto.AbstractDto;
-
 import com.google.api.client.http.HttpResponse;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
@@ -213,6 +211,7 @@ public class ImportResource extends AbstractJerseyResource {
       jobManager.enqueueLightJob(ofy, jobId);
     }
     jobEntity.setJobState(jobState);
+    logger.info("Setting currenJob[" + jobId + "] to " + jobState);
     jobManager.put(ofy, jobEntity, new ChangeLogEntryPojo("Updating JobState to : " + jobState));
     return jobEntity;
   }

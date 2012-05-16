@@ -23,10 +23,8 @@ import org.junit.Test;
 
 import com.google.light.server.AbstractLightServerTest;
 import com.google.light.server.constants.LightConstants;
-import com.google.light.server.constants.LightEnvEnum;
 import com.google.light.server.dto.search.SearchRequestDto;
 import com.google.light.server.dto.search.SearchResultDto;
-import com.google.light.testingutils.TestingUtils;
 
 /**
  * Integration Test for {@link SearchManagerGSSImpl}.
@@ -43,6 +41,7 @@ public class SearchManagerGSSImplITCase extends AbstractLightServerTest {
   private static final String TEST_LANGUAGE_CODE = "en";
   private SearchManagerGSSImpl searchManager;
 
+  @Override
   @Before
   public void setUp() {
     super.setUp();

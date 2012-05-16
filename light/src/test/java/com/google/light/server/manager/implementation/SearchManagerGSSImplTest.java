@@ -10,7 +10,6 @@ import java.io.InputStream;
 import org.junit.Test;
 
 import com.google.api.client.http.HttpTransport;
-import com.google.common.collect.ImmutableMap;
 import com.google.light.server.constants.LightConstants;
 import com.google.light.server.dto.search.SearchRequestDto;
 import com.google.light.testingutils.TestingConstants;

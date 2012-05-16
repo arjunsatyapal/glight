@@ -39,6 +39,7 @@ public class OnDemandIndexingRequest {
       new ImmutableMap.Builder<Object, Object>().build();
 
   public static class Page {
+    @SuppressWarnings("synthetic-access")
     public Page(String url, Map<Object, Object> metadata) {
       super();
       this.url = url;
@@ -67,9 +68,9 @@ public class OnDemandIndexingRequest {
     return add(url, (Map<Object, Object>) null);
   }
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({ "unchecked", "cast" })
   public <T extends AbstractDto<T>> OnDemandIndexingRequest add(String url, T dto) {
-    return add(url, (Map<Object, Object>) new ObjectMapper().convertValue(dto, Map.class));
+    return add(url, ((Map<Object, Object>) new ObjectMapper().convertValue(dto, Map.class)));
   }
 
   public OnDemandIndexingRequest add(String url, Map<Object, Object> metadata) {

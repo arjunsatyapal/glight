@@ -143,6 +143,7 @@ public class CollectionEntity extends AbstractPersistenceEntity<CollectionEntity
    * Caller is expected to persist this entity.
    * @param latestVersion
    */
+  @SuppressWarnings("unused")
   public void publishVersion(Version latestPublishVersion, Instant lastEditTime, String etag) {
     // Other then builder, all are required to set a positive latestVersion.
     checkVersion(latestPublishVersion);

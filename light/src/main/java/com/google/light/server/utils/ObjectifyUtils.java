@@ -16,7 +16,10 @@
 package com.google.light.server.utils;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.light.server.utils.LightUtils.getStackAsString;
 import static com.google.light.server.utils.LightUtils.isListEmpty;
+
+import com.google.common.base.Throwables;
 
 import com.google.appengine.api.datastore.Cursor;
 import com.google.appengine.api.datastore.QueryResultIterable;
@@ -69,7 +72,7 @@ public class ObjectifyUtils {
     if (ofy.getTxn() != null) {
       if (ofy.getTxn().isActive()) {
         // TODO(arjuns): Add requestId once available.
-        logger.info("Rolling back transaction.");
+          logger.info("Rolling back transaction. Stack = " + getStackAsString());
         ofy.getTxn().rollback();
       }
     }
@@ -84,7 +87,12 @@ public class ObjectifyUtils {
       if (ofy.getTxn() != null) {
         ofy.getTxn().commit();
       }
-    } finally {
+      logger.info("Successfully committed");
+      Thread.sleep(2000);
+    } catch (Exception e) {
+      logger.severe("Exception while committing : " + Throwables.getStackTraceAsString(e));
+      LightUtils.wrapIntoRuntimeExceptionAndThrow(e);
+    }finally {
       if (ofy.getTxn() != null && ofy.getTxn().isActive()) {
         // TODO(arjuns): Add requestId once available.
         logger.severe("Rolling back.");

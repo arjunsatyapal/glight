@@ -23,6 +23,8 @@ import static com.google.light.server.constants.RequestParamKeyEnum.LOGIN_PROVID
 import static com.google.light.server.constants.RequestParamKeyEnum.LOGIN_PROVIDER_USER_ID;
 import static com.google.light.server.constants.RequestParamKeyEnum.PERSON_ID;
 
+import com.google.common.base.Throwables;
+
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
@@ -366,7 +368,7 @@ public class LightUtils {
     return ((W) getWrapper(value, clazz));
   }
 
-  @SuppressWarnings({ "unchecked", "rawtypes" })
+  @SuppressWarnings({ "unchecked", "rawtypes", "deprecation" })
   public static <I, W extends AbstractTypeWrapper<I, W>>
       List<W> convertListOfValuesToWrapperList(List<I> listOfValues, Class<W> clazz) {
     if (isListEmpty(listOfValues)) {
@@ -410,5 +412,13 @@ public class LightUtils {
     checkArgument(index >= 0, "existingInstance was not found in the list.");
     list.remove(index);
     list.add(index, newInstance);
+  }
+  
+  public static String getStackAsString() {
+    try {
+      throw new IllegalArgumentException("Trying to get stack.");
+    } catch (Exception e) {
+      return Throwables.getStackTraceAsString(e);
+    }
   }
 }

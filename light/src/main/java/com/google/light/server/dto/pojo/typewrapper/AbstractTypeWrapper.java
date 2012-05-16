@@ -55,6 +55,7 @@ public abstract class AbstractTypeWrapper<I, T> extends AbstractPojo<T> {
     this.value = value;
   }
   
+  // TODO(arjuns): Get rid of this.
   @Deprecated
   public abstract T createInstance(I value);
 

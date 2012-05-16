@@ -65,7 +65,6 @@ public class JerseyResourcesEnumTest implements EnumTestInterface {
     Set<Class<? extends AbstractJerseyResource>> exhausiveSet =
         JerseyResourcesEnum.getSetOfResources();
     
-    System.out.println(Iterables.toString(exhausiveSet));
     SetView<Class<? extends AbstractJerseyResource>> missingSet =
         Sets.difference(exhausiveSet, existingSet);
 

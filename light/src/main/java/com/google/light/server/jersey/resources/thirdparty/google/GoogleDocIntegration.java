@@ -36,7 +36,6 @@ import com.google.light.server.dto.pojo.typewrapper.stringwrapper.ExternalId;
 import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocInfoDto;
 import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocResourceId;
 import com.google.light.server.jersey.resources.AbstractJerseyResource;
-import com.google.light.server.manager.interfaces.JobManager;
 import com.google.light.server.thirdparty.clients.google.gdata.gdoc.DocsServiceWrapper;
 import com.google.light.server.utils.LightUtils;
 import java.net.URL;
@@ -60,18 +59,14 @@ import org.apache.commons.lang.StringUtils;
 @Path(JerseyConstants.RESOURCE_PATH_THIRD_PARTY_GOOGLE_DOC)
 public class GoogleDocIntegration extends AbstractJerseyResource {
   private Provider<DocsServiceWrapper> docsServiceProvider;
-  private JobManager jobManager;
-
   @Inject
   public GoogleDocIntegration(Injector injector, @Context HttpServletRequest request,
-      @Context HttpServletResponse response, Provider<DocsServiceWrapper> docsServiceProvider,
-      JobManager jobManager) {
+      @Context HttpServletResponse response, Provider<DocsServiceWrapper> docsServiceProvider) {
     super(injector, request, response);
     // Since Doc Service depends on currently logged in person, so its required that parent class
     // is constructed first. Therefore, instead of injecting DocsService directly,
     this.docsServiceProvider = checkNotNull(docsServiceProvider,
         SERVER_GUICE_INJECTION, "docsServiceProvider");
-    this.jobManager = checkNotNull(jobManager, SERVER_GUICE_INJECTION, "jobManager");
   }
 
   @GET

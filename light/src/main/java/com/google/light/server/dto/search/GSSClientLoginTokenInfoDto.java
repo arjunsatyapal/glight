@@ -18,8 +18,6 @@ package com.google.light.server.dto.search;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
 
-import java.util.Date;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -29,7 +27,6 @@ import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.annotate.JsonTypeName;
 
 import com.google.light.server.dto.AbstractDto;
-import com.google.light.server.utils.JsonUtils;
 
 /**
  * Dto for storing the information about ClientLogin Authentication Token
@@ -97,11 +94,13 @@ public class GSSClientLoginTokenInfoDto extends
       return this;
     }
 
+    @SuppressWarnings("synthetic-access")
     public GSSClientLoginTokenInfoDto build() {
       return new GSSClientLoginTokenInfoDto(this).validate();
     }
   }
 
+  @SuppressWarnings("synthetic-access")
   private GSSClientLoginTokenInfoDto(Builder builder) {
     super(builder);
     this.token = builder.token;

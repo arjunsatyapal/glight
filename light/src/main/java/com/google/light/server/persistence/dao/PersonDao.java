@@ -18,11 +18,13 @@ package com.google.light.server.persistence.dao;
 import static com.google.light.server.utils.LightPreconditions.checkPersonId;
 import static com.google.light.server.utils.ObjectifyUtils.assertAndReturnUniqueEntity;
 
+import com.google.light.server.utils.LightUtils;
+
+import com.google.light.server.otxn.DAOT.Transactable;
+
+import com.google.light.server.otxn.DAOT;
+
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
-
-
-
-
 
 import com.google.inject.Inject;
 import com.google.light.server.dto.person.PersonDto;
@@ -100,7 +102,7 @@ public class PersonDao extends AbstractBasicDao<PersonDto, PersonEntity> {
 
     return logAndReturn(logger, returnEntity, returnMsg);
   }
-  
+
   /**
    * TODO(arjuns): Add test for this.
    * Fetch Person via PersonId.
@@ -108,5 +110,24 @@ public class PersonDao extends AbstractBasicDao<PersonDto, PersonEntity> {
   public PersonEntity get(PersonId personId) {
     checkPersonId(personId);
     return super.get(PersonEntity.generateKey(personId));
+  }
+
+  public void testPT() {
+    DAOT.repeatInTransaction(new Transactable() {
+      @Override
+      public void run(Objectify ofy) {
+        PersonEntity personEntity = new PersonEntity.Builder()
+            .acceptedTos(true)
+            .creationTime(LightUtils.getNow())
+            .email("a@gmail.com")
+            .firstName("first name")
+            .lastName("last name")
+            .lastUpdateTime(LightUtils.getNow())
+            .personId(new PersonId(5L))
+            .build();
+
+        put(ofy, personEntity);
+      }
+    });
   }
 }

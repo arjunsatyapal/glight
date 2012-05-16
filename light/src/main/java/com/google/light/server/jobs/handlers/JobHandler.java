@@ -18,6 +18,8 @@ package com.google.light.server.jobs.handlers;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotNull;
 
+import java.util.logging.Logger;
+
 import com.google.common.collect.Iterables;
 import com.google.inject.Inject;
 import com.google.light.server.dto.pojo.ChangeLogEntryPojo;
@@ -36,7 +38,6 @@ import com.google.light.server.utils.ObjectifyUtils;
 import com.googlecode.objectify.Objectify;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 /**
  * 
@@ -47,6 +48,7 @@ import java.util.logging.Logger;
  */
 public class JobHandler {
   private static final Logger logger = Logger.getLogger(JobHandler.class.getName());
+  
   private JobManager jobManager;
   private ImportModuleGoogleDocJobHandler importModuleGDocHandler;
   private ImportModuleSyntheticModuleJobHandler importModuleSyntheticJobHandler;
@@ -69,13 +71,17 @@ public class JobHandler {
 
   }
 
+  @SuppressWarnings("deprecation")
   public void handleJob(JobId jobId) {
-    System.out.println(jobId);
     checkNotNull(jobId, ExceptionType.CLIENT_PARAMETER, "jobId cannot be null");
     jobId.validate();
+    logger.info("Inside Job : " + jobId);
 
     JobEntity jobEntity = jobManager.get(null, jobId);
     checkNotNull(jobId, ExceptionType.CLIENT_PARAMETER, "No job found for : " + jobId);
+    if (jobEntity.getContext() != null) {
+      logger.info(jobEntity.getContext().getValue());
+    }
 
     JobState jobState = jobEntity.getJobState();
     switch (jobState) {
@@ -102,7 +108,6 @@ public class JobHandler {
     }
 
     TaskType taskType = jobEntity.getTaskType();
-    System.out.println(jobEntity.getContext().getValue());
     switch (taskType) {
       case IMPORT_BATCH:
         importBatchJobHandler.handle(jobEntity);

@@ -217,7 +217,6 @@ public class OAuth2OwnerTokenDaoTest extends
     // Negative Testing : Create two different people with same providerUserId.
 
     String email2 = getRandomEmail();
-    System.out.println("email2 = " + email2);
     assertTrue(!email2.equals(testEmail));
 
     TestRequestScopedValuesProvider testRequestScopedValueProvider =

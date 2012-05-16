@@ -40,11 +40,13 @@ public class GSSClientLoginTokenInfoDtoTest extends AbstractDtoToPersistenceTest
         SAMPLE_EXPIRES);
   }
 
+  @Override
   @Test
   public void test_builder() throws Exception {
     // Already tested on validate
   }
 
+  @Override
   @Test
   public void test_toJson() throws Exception {
     assertEquals(
@@ -52,11 +54,13 @@ public class GSSClientLoginTokenInfoDtoTest extends AbstractDtoToPersistenceTest
         getDtoBuilder().build().toJson());
   }
 
+  @Override
   @Test
   public void test_toPersistenceEntity() throws Exception {
     // Not persisted
   }
 
+  @Override
   @Test
   public void test_validate() throws Exception {
     // Positive test
@@ -98,6 +102,7 @@ public class GSSClientLoginTokenInfoDtoTest extends AbstractDtoToPersistenceTest
     }
   }
 
+  @Override
   @Test
   public void test_toXml() throws Exception {
     // Not used as XML

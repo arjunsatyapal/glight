@@ -107,7 +107,7 @@ public class ImportBatchJobHandler implements JobHandlerInterface {
 
     if (importBatchJobContext.getBaseVersion().isNoVersion()) {
       collectionRoot = new CollectionTreeNodeDto.Builder()
-          .type(TreeNodeType.ROOT_NODE)
+          .nodeType(TreeNodeType.ROOT_NODE)
           .title(importBatchJobContext.getCollectionTitle())
           .moduleType(ModuleType.LIGHT_COLLECTION)
           .build();
@@ -119,7 +119,6 @@ public class ImportBatchJobHandler implements JobHandlerInterface {
 
     for (ImportExternalIdDto currDto : importBatchJobContext.getList()) {
       CollectionTreeNodeDto childNode = null;
-      System.out.println(currDto.toJson());
 
       if (currDto.getModuleStateCategory() != ModuleStateCategory.HOSTED) {
         logger.info("Ignoring as it is not hosted : " + currDto.toJson());
@@ -204,7 +203,7 @@ public class ImportBatchJobHandler implements JobHandlerInterface {
         "This should be called only for " + TreeNodeType.INTERMEDIATE_NODE);
 
     CollectionTreeNodeDto collectionRoot = new CollectionTreeNodeDto.Builder()
-        .type(TreeNodeType.INTERMEDIATE_NODE)
+        .nodeType(TreeNodeType.INTERMEDIATE_NODE)
         .title(importExternalIdDto.getTitle())
         .externalId(importExternalIdDto.getExternalId())
         .moduleType(ModuleType.LIGHT_SUB_COLLECTION)
@@ -213,7 +212,6 @@ public class ImportBatchJobHandler implements JobHandlerInterface {
     JobEntity jobEntity = jobManager.get(null, importExternalIdDto.getJobId());
     for (JobId childJobId : jobEntity.getChildJobs()) {
       CollectionTreeNodeDto child = generateCollectionNodeFromChildJob(jobManager, childJobId);
-      System.out.println(child.toJson());
       collectionRoot.addChildren(child);
     }
 
@@ -229,7 +227,7 @@ public class ImportBatchJobHandler implements JobHandlerInterface {
     checkArgument(importExternalIdDto.getModuleType().getNodeType() == TreeNodeType.LEAF_NODE,
         "This should be called only for " + TreeNodeType.LEAF_NODE);
     return new CollectionTreeNodeDto.Builder()
-        .type(TreeNodeType.LEAF_NODE)
+        .nodeType(TreeNodeType.LEAF_NODE)
         .title(importExternalIdDto.getTitle())
         .externalId(importExternalIdDto.getExternalId())
         .moduleId(importExternalIdDto.getModuleId())

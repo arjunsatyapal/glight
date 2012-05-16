@@ -15,6 +15,12 @@
  */
 package com.google.light.server.persistence.dao;
 
+import com.google.light.server.utils.JsonUtils;
+
+import com.google.light.server.utils.LightUtils;
+
+import java.util.logging.Logger;
+
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.JobId;
 
 import com.google.common.collect.Lists;
@@ -36,6 +42,8 @@ import java.util.Map;
  * @author Arjun Satyapal
  */
 public class JobDao extends AbstractBasicDao<Object, JobEntity> {
+  private static final Logger logger = Logger.getLogger(JobDao.class.getName());
+  
   static {
     ObjectifyService.register(JobEntity.class);
   }
@@ -71,5 +79,13 @@ public class JobDao extends AbstractBasicDao<Object, JobEntity> {
     }
     
     return requiredMap;
+  }
+  
+  @Override
+  public JobEntity put(Objectify ofy, JobEntity entity) {
+    logger.info("I got modified : " + entity.getJobId() + " : " + JsonUtils.toJson(entity));
+    JobEntity temp = super.put(ofy, entity);
+    logger.info("Successfully created/updated : " + temp.getJobId());
+    return temp;
   }
 }

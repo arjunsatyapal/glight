@@ -168,6 +168,7 @@ public class CollectionTreeNodeDto extends AbstractTreeNode<CollectionTreeNodeDt
   private CollectionTreeNodeDto(Builder builder) {
     super(builder);
     this.moduleId = builder.moduleId;
+    this.version = builder.version;
     this.moduleType = builder.moduleType;
     this.externalId = builder.externalId;
   }

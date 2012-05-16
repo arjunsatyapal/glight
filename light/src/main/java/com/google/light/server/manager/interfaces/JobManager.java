@@ -15,21 +15,15 @@
  */
 package com.google.light.server.manager.interfaces;
 
-import com.google.light.server.jobs.handlers.modulejobs.ImportModuleSyntheticModuleJobContext;
-
-import com.google.light.server.dto.AbstractDto;
-
-import com.google.light.server.jobs.handlers.collectionjobs.ImportCollectionGoogleDocContext;
-
-import com.google.light.server.jobs.handlers.modulejobs.ImportModuleGoogleDocJobContext;
-
-
 import com.google.light.server.constants.QueueEnum;
+import com.google.light.server.dto.AbstractDto;
 import com.google.light.server.dto.importresource.ImportBatchWrapper;
 import com.google.light.server.dto.importresource.ImportExternalIdDto;
 import com.google.light.server.dto.pojo.ChangeLogEntryPojo;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.JobId;
-import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocImportBatchJobContext;
+import com.google.light.server.jobs.handlers.collectionjobs.ImportCollectionGoogleDocContext;
+import com.google.light.server.jobs.handlers.modulejobs.ImportModuleGoogleDocJobContext;
+import com.google.light.server.jobs.handlers.modulejobs.ImportModuleSyntheticModuleJobContext;
 import com.google.light.server.persistence.entity.jobs.JobEntity;
 import com.googlecode.objectify.Objectify;
 import java.util.List;
@@ -44,12 +38,6 @@ import javax.annotation.Nullable;
  * @author Arjun Satyapal
  */
 public interface JobManager {
-  /**
-   * Enqueues a Batch job for importing Multiple Google Docs.
-   */
-  public JobEntity enqueueGoogleDocImportBatchJob(
-      GoogleDocImportBatchJobContext docImportBatchJobRequest);
-  
   /**
    * This is enqueued by a Batch Job for each google doc that needs to be downloaded and published.
    */

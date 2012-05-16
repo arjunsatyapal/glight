@@ -157,15 +157,6 @@ public class HtmlBuilder {
   }
   
 
-  private void appendStart() {
-    appendDoctype();
-    builder.append("<html>");
-    builder.append("<head>");
-    builder.append("<meta charset=\"UTF-8\">");
-    builder.append("</head>");
-    builder.append("<body>");
-  }
-  
   private void appendEnd() {
     builder.append("</body>");
   }

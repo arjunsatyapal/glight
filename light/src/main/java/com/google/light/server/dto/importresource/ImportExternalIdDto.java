@@ -115,6 +115,7 @@ public class ImportExternalIdDto extends AbstractDto<ImportExternalIdDto> {
    * @deprecated Use setModuleState.
    * @param moduleStateCategory
    */
+  @SuppressWarnings("unused")
   @Deprecated 
   public void setModuleStateCategory(ModuleStateCategory moduleStateCategory) {
     throw new UnsupportedOperationException("Use setModuleState.");
@@ -158,6 +159,10 @@ public class ImportExternalIdDto extends AbstractDto<ImportExternalIdDto> {
 
   public JobState getJobState() {
     return jobState;
+  }
+  
+  public JobStateCategory getJobStateCategory() {
+    return jobStateCategory;
   }
 
   public void setJobDetails(JobEntity jobEntity) {

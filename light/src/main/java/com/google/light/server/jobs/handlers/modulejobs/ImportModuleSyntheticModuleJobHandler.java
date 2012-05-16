@@ -76,7 +76,7 @@ public class ImportModuleSyntheticModuleJobHandler implements JobHandlerInterfac
 
     CollectionTreeNodeDto collectionNode = new CollectionTreeNodeDto.Builder()
         .title(context.getTitle())
-        .type(TreeNodeType.LEAF_NODE)
+        .nodeType(TreeNodeType.LEAF_NODE)
         .moduleId(context.getModuleId())
         .version(context.getVersion())
         .moduleType(context.getModuleType())

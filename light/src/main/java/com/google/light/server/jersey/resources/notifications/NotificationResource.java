@@ -66,7 +66,7 @@ public class NotificationResource extends AbstractJerseyResource {
 
   @Path(JerseyConstants.PATH_NOTIFICATION_JOB)
   @POST
-  @Consumes(ContentTypeConstants.APPLICATION_JSON)
+  @Consumes({ContentTypeConstants.APPLICATION_JSON, ContentTypeConstants.TEXT_PLAIN})
   public Response childCompletionEvent(String body) {
     checkIsRunningUnderQueue(request);
 
