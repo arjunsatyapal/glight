@@ -269,12 +269,12 @@ public class ImportModuleGoogleDocJobHandler implements JobHandlerInterface {
     GoogleDocInfoDto resourceInfo = gdocImportContext.getResourceInfo();
 
     GoogleDocResourceId gdocResourceId = new GoogleDocResourceId(resourceInfo.getExternalId());
-    // GoogleDocArchivePojo archiveInfo = docsService.archiveResource(gdocResourceId);
-    // gdocImportContext.setArchiveId(archiveInfo.getArchiveId());
+     GoogleDocArchivePojo archiveInfo = docsService.archiveResource(gdocResourceId);
+     gdocImportContext.setArchiveId(archiveInfo.getArchiveId());
 
-    String archiveId =
-        "nTSZLtpDRSP5IP11Sol04pDkNbRFv7KVNL55qVoitx7rtrJHru1T6ljtTjMW26L3ygWrvW1tMZHHg6ARCy3UjxZRafUSMAgIFesW90teEkzsHCQ6FK96YLFEU7tKurf2hsM-tVKSUYw";
-    gdocImportContext.setArchiveId(archiveId);
+//    String archiveId =
+//        "nTSZLtpDRSP5IP11Sol04pDkNbRFv7KVNL55qVoitx7rtrJHru1T6ljtTjMW26L3ygWrvW1tMZHHg6ARCy3UjxZRafUSMAgIFesW90teEkzsHCQ6FK96YLFEU7tKurf2hsM-tVKSUYw";
+//    gdocImportContext.setArchiveId(archiveId);
 
     gdocImportContext
         .setState(ImportModuleGoogleDocJobContext.GoogleDocImportJobState.WAITING_FOR_ARCHIVE);
