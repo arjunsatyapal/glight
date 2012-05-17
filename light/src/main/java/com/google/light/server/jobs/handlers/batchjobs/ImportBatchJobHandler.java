@@ -133,7 +133,7 @@ public class ImportBatchJobHandler implements JobHandlerInterface {
         JobEntity jobEntity = jobManager.get(ofy, jobId);
         ImportBatchWrapper importBatchJobContext = jobEntity.getContext(ImportBatchWrapper.class);
 
-        boolean enqueuedAJob = false;
+        JobId enqueuedJobId = null;
         for (ImportExternalIdDto curr : importBatchJobContext.getList()) {
           if (curr.hasJobId()) {
             continue;
@@ -141,27 +141,24 @@ public class ImportBatchJobHandler implements JobHandlerInterface {
 
           switch (curr.getModuleType()) {
             case LIGHT_SYNTHETIC_MODULE:
-              enqueueImportChildSyntheticModule(ofy, curr, jobEntity.getJobId(),
+              enqueuedJobId = enqueueImportChildSyntheticModule(ofy, curr, jobEntity.getJobId(),
                   jobEntity.getRootJobId());
-              enqueuedAJob = true;
               break;
 
             case GOOGLE_DOCUMENT:
-              enqueueImportModuleGoogleDocument(ofy, curr, jobEntity.getJobId(),
+              enqueuedJobId = enqueueImportModuleGoogleDocument(ofy, curr, jobEntity.getJobId(),
                   jobEntity.getRootJobId());
               System.out.println(curr.toJson());
-              enqueuedAJob = true;
               break;
 
             case GOOGLE_COLLECTION:
-              enqueueImportCollectionGDoc(ofy, curr, jobEntity.getJobId(), jobEntity.getRootJobId());
-              enqueuedAJob = true;
+              enqueuedJobId = enqueueImportCollectionGDoc(ofy, curr, jobEntity.getJobId(), jobEntity.getRootJobId());
               break;
             default:
               continue;
           }
 
-          if (enqueuedAJob) {
+          if (enqueuedJobId != null) {
             // Update ParentJob Context and then exit for loop and retry this function for other
             // pending childs.
             jobEntity.setContext(importBatchJobContext);
@@ -173,7 +170,7 @@ public class ImportBatchJobHandler implements JobHandlerInterface {
           }
         }
 
-        if (!enqueuedAJob) {
+        if (enqueuedJobId == null) {
           // All possible childs are created. So this job is now ready for getting child
           // notifications.
           System.out.println(importBatchJobContext.toJson());
@@ -202,7 +199,7 @@ public class ImportBatchJobHandler implements JobHandlerInterface {
     }
   }
 
-  public void enqueueImportChildSyntheticModule(Objectify ofy, ImportExternalIdDto importModuleDto,
+  public JobId enqueueImportChildSyntheticModule(Objectify ofy, ImportExternalIdDto importModuleDto,
       JobId parentJobId, JobId rootJobId) {
     ModuleId moduleId = checkNotNull(importModuleDto.getModuleId(), "moduleId");
     ModuleEntity existingModule = moduleManager.get(ofy, moduleId);
@@ -211,7 +208,7 @@ public class ImportBatchJobHandler implements JobHandlerInterface {
       updateImportExternalIdDtoForModules(importModuleDto, moduleId,
           existingModule.getLatestPublishVersion(),
           ModuleState.PUBLISHED, existingModule.getModuleType(), existingModule.getTitle(), null);
-      return;
+      return null;
     }
 
     /*
@@ -242,19 +239,20 @@ public class ImportBatchJobHandler implements JobHandlerInterface {
         ModuleState.IMPORTING, ModuleType.LIGHT_SYNTHETIC_MODULE, title, childJob);
     jobManager.enqueueImportChildJob(ofy, parentJobId, childJob.getJobId(), importModuleDto,
         QueueEnum.LIGHT);
+    return childJob.getJobId();
   }
 
-  private void enqueueImportCollectionGDoc(Objectify ofy, ImportExternalIdDto importModuleDto,
+  private JobId enqueueImportCollectionGDoc(Objectify ofy, ImportExternalIdDto importModuleDto,
       JobId parentJobId, JobId rootJobId) {
     GoogleDocInfoDto gdocInfo = getGDocInfo(importModuleDto);
-    importCollectionGDocJobHandler.enqueueCollectionGoogleDocJob(ofy,
+    return importCollectionGDocJobHandler.enqueueCollectionGoogleDocJob(ofy,
         importModuleDto, gdocInfo, parentJobId, rootJobId);
   }
 
-  private void enqueueImportModuleGoogleDocument(Objectify ofy,
+  private JobId enqueueImportModuleGoogleDocument(Objectify ofy,
       ImportExternalIdDto importExternalIdDto, JobId parentJobId, JobId rootJobId) {
     GoogleDocInfoDto gdocInfo = getGDocInfo(importExternalIdDto);
-    importModuleGDocJobHandler.enqueueModuleGoogleDocJob(ofy,
+    return importModuleGDocJobHandler.enqueueModuleGoogleDocJob(ofy,
         importExternalIdDto, gdocInfo, parentJobId, rootJobId);
   }
 

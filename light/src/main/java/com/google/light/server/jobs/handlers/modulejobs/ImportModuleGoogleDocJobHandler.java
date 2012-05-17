@@ -27,6 +27,10 @@ import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkNotNull;
 import static com.google.light.server.utils.ObjectifyUtils.repeatInTransaction;
 
+import java.io.ByteArrayInputStream;
+
+import org.apache.commons.io.IOUtils;
+
 import com.google.common.base.Throwables;
 
 import com.google.appengine.api.files.AppEngineFile;
@@ -170,9 +174,8 @@ public class ImportModuleGoogleDocJobHandler implements JobHandlerInterface {
   // }
 
   // TODO(arjuns): Move this inside jobManager.
-  public void enqueueModuleGoogleDocJob(Objectify ofy, ImportExternalIdDto importModuleDto,
+  public JobId enqueueModuleGoogleDocJob(Objectify ofy, ImportExternalIdDto importModuleDto,
       GoogleDocInfoDto gdocInfo, JobId parentJobId, JobId rootJobId) {
-    PersonId ownerId = GuiceUtils.getOwnerId();
     ModuleId moduleId = importModuleDto.getModuleId();
 
     Version reservedVersion = null;
@@ -247,6 +250,9 @@ public class ImportModuleGoogleDocJobHandler implements JobHandlerInterface {
     if (childJob != null) {
       jobManager.enqueueImportChildJob(ofy, parentJobId, childJob.getJobId(), importModuleDto,
           QueueEnum.GDOC_INTERACTION);
+      return childJob.getJobId();
+    } else {
+      return null;
     }
   }
 
@@ -353,7 +359,8 @@ public class ImportModuleGoogleDocJobHandler implements JobHandlerInterface {
       FileReadChannel readChannel = fileService.openReadChannel(file, false /*lock*/);
 
       InputStream inputStream = Channels.newInputStream(readChannel);
-      ZipInputStream zipIn = new ZipInputStream(inputStream);
+      ZipInputStream zipIn = new ZipInputStream(new ByteArrayInputStream(
+          IOUtils.toByteArray(inputStream)));
 
       ZipEntry zipEntry = null;
       do {

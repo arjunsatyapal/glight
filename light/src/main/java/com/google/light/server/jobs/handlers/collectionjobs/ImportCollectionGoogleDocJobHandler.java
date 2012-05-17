@@ -117,7 +117,7 @@ public class ImportCollectionGoogleDocJobHandler implements JobHandlerInterface 
             gdocResourceId, GDATA_GDOC_MAX_RESULTS);
         System.out.println(JsonUtils.toJson(listOfChilds));
 
-        boolean enqueuedAJob = false;
+        JobId enqueuedJobId = null;
         for (GoogleDocInfoDto currChild : listOfChilds) {
           ImportExternalIdDto existing = context.findImportExternalIdDtoByExternalId(
               currChild.getExternalId());
@@ -135,22 +135,20 @@ public class ImportCollectionGoogleDocJobHandler implements JobHandlerInterface 
 
           switch (moduleType) {
             case GOOGLE_COLLECTION:
-              enqueueCollectionGoogleDocJob(ofy, importExternalIdDto,
+              enqueuedJobId = enqueueCollectionGoogleDocJob(ofy, importExternalIdDto,
                   currChild, jobEntity.getJobId(), jobEntity.getRootJobId());
-              enqueuedAJob = true;
               break;
 
             case GOOGLE_DOCUMENT:
-              importGDocModuleJobHandler.enqueueModuleGoogleDocJob(ofy,
+              enqueuedJobId = importGDocModuleJobHandler.enqueueModuleGoogleDocJob(ofy,
                   importExternalIdDto, currChild, jobEntity.getJobId(), jobEntity.getRootJobId());
-              enqueuedAJob = true;
               break;
 
             default:
               throw new IllegalStateException("We should not get this type : " + moduleType);
           }
 
-          if (enqueuedAJob) {
+          if (enqueuedJobId != null) {
             // Update ParentJob Context and then exit for loop and retry this function for other
             // pending childs.
             context.addImportModuleDto(importExternalIdDto);
@@ -164,7 +162,7 @@ public class ImportCollectionGoogleDocJobHandler implements JobHandlerInterface 
           }
         }
 
-        if (!enqueuedAJob) {
+        if (enqueuedJobId == null) {
           
           // All possible childs are created. So this job is now ready for getting child notifications.
           System.out.println(context.toJson());
@@ -232,7 +230,7 @@ public class ImportCollectionGoogleDocJobHandler implements JobHandlerInterface 
   }
 
   // TODO(arjuns) : Move this to JobManager.
-  public void enqueueCollectionGoogleDocJob(Objectify ofy,
+  public JobId enqueueCollectionGoogleDocJob(Objectify ofy,
       final ImportExternalIdDto importExternalIdDto,
       GoogleDocInfoDto gdocInfo, final JobId parentJobId, final JobId rootJobId) {
     final String title = calculateTitle(importExternalIdDto, gdocInfo);
@@ -252,6 +250,7 @@ public class ImportCollectionGoogleDocJobHandler implements JobHandlerInterface 
     jobManager.enqueueImportChildJob(ofy, parentJobId, childJob.getJobId(),
         importExternalIdDto,
         QueueEnum.LIGHT);
+    return childJob.getJobId();
   }
 
   /**
