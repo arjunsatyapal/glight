@@ -19,7 +19,21 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.constants.LightStringConstants.VERSION_LATEST_STR;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
-import com.google.light.server.dto.pojo.tree.collection.CollectionTreeNodeDto;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.UriInfo;
+
+import org.apache.commons.lang.StringEscapeUtils;
 
 import com.google.appengine.api.blobstore.BlobKey;
 import com.google.appengine.api.blobstore.BlobstoreService;
@@ -30,6 +44,7 @@ import com.google.light.server.constants.HttpHeaderEnum;
 import com.google.light.server.constants.JerseyConstants;
 import com.google.light.server.constants.ResourceTypes;
 import com.google.light.server.constants.http.ContentTypeConstants;
+import com.google.light.server.dto.pojo.tree.collection.CollectionTreeNodeDto;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.CollectionId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
@@ -42,17 +57,6 @@ import com.google.light.server.persistence.entity.module.ModuleVersionEntity;
 import com.google.light.server.persistence.entity.module.ModuleVersionResourceEntity;
 import com.google.light.server.utils.LightUtils;
 import com.google.light.server.utils.ServletUtils;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.ws.rs.core.UriInfo;
-import org.apache.commons.lang.StringEscapeUtils;
 
 /**
  * Jersey resource to serve content from collections and
@@ -289,8 +293,21 @@ public class ContentResource extends AbstractJerseyResource {
     if (bodyOpenStartPos == -1 || bodyOpenEndPos == -1 || bodyClosePos == -1) {
       return null;
     }
-    String bodyContent = htmlContent.substring(bodyOpenEndPos + 1, bodyClosePos);
-    return bodyContent;
+    String bodyProperties = htmlContent.substring(bodyOpenStartPos+5,bodyOpenEndPos);
+    
+    // TODO(waltercacau): Do proper CSS parsing / move this to the google docs import flow maybe?
+    // Here we are taking the google docs padding out
+    Pattern p = Pattern.compile("padding\\s*:[^;\"']+([;\"'])");
+    Matcher m = p.matcher(bodyProperties);
+    StringBuffer bodyPropertiesBuilder = new StringBuffer();
+    while (m.find()) {
+        m.appendReplacement(bodyPropertiesBuilder, "margin: 0 auto"+m.group(1));
+    }
+    m.appendTail(bodyPropertiesBuilder);
+    bodyProperties = bodyPropertiesBuilder.toString();
+    
+    String bodyContent = htmlContent.substring(bodyOpenEndPos+1,bodyClosePos);
+    return "<div"+bodyProperties+">"+bodyContent+"</div>";
   }
 
   /**
