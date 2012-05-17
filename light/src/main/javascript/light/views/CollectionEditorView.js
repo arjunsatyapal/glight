@@ -215,7 +215,7 @@ define(['dojo/_base/declare', 'dojo/_base/lang',
           var treeNode = dijit.byNode(target.parentNode);
           return !self._isLeafNode(treeNode.item, 'nodeType');
         },
-
+        onDblClick: lang.hitch(this, '_onDblClickNode'),
         dndController: TreeDndSource
       });
       this._editorFormDiv.appendChild(this._collectionTree.domNode);
@@ -246,6 +246,23 @@ define(['dojo/_base/declare', 'dojo/_base/lang',
     _onModelChange: function() {
       // A change happened, let's enable the save button.
       this._setSaveButtonState(SAVE_BUTTON_STATE.SAVE_ENABLED);
+    },
+    
+    /**
+     * Called when a node in the tree is double clicked
+     */
+    _onDblClickNode: function(item, node, evt) {
+      console.log(item, node, evt);
+      var self = this;
+      DialogUtils.prompt({
+        title: this.messages.renameNodeDialogTitle,
+        okLabel: this.messages.renameNodeOkButtonLabel,
+        label: this.messages.renameNodeTitleTextboxLabel,
+        value: self._nodeStore.getValue(item, 'title'),
+        onOk: function(nodeTitle) {
+          self._nodeStore.setValue(item, 'title', nodeTitle);
+        }
+      });
     },
 
     /**

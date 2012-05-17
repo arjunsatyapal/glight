@@ -15,6 +15,7 @@
  */
 define(['dojo/_base/declare',
         'dojo/_base/lang',
+        'dojo/_base/event',
         'light/utils/TemplateUtils',
         'dojo/text!light/templates/PromptDialogTemplate.html',
         'dojo/text!light/templates/AlertDialogTemplate.html',
@@ -23,7 +24,9 @@ define(['dojo/_base/declare',
         'dijit/Dialog',
         'dijit/form/Button',
         'dijit/form/TextBox'],
-        function(declare, lang, TemplateUtils, PromptDialogTemplate, AlertDialogTemplate, TemplatedLightView, _WidgetsInTemplateMixin) {
+        function(declare, lang, eventUtil, TemplateUtils, PromptDialogTemplate,
+                 AlertDialogTemplate, TemplatedLightView,
+                 _WidgetsInTemplateMixin) {
   var BaseDialog = declare([TemplatedLightView, _WidgetsInTemplateMixin], {
     cleanup: function() {
       var self = this;
@@ -54,7 +57,9 @@ define(['dojo/_base/declare',
     value: '',
 
     templateString: PromptDialogTemplate,
-    _onClickOk: function() {
+    _onClickOk: function(evt) {
+      // This avoids submitting the form
+      eventUtil.stop(evt);
       this.onOk(this._value.get('value'));
       this.cleanup();
     },

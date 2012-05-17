@@ -80,7 +80,7 @@ public class LoginITCase {
       "light-bot@myopenedu.com");
   private Map<OAuth2ProviderEnum, Properties> consumerCredentialsMap = Maps.newHashMap();
 
-  private final String serverUrl = TestingConstants.SERVER_URL;
+  private final String serverUrl = "http://light-demo.appspot.com";
 
   @Before
   public void seleniumSetup() throws Exception {
@@ -134,7 +134,7 @@ public class LoginITCase {
 
   @Test
   public void test_Login() throws Exception {
-    prepareServerForTest();
+    //prepareServerForTest();
 
     List<Thread> listOfThread = Lists.newArrayList();
     for (String email : listOfEmails) {
