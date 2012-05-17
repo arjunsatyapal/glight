@@ -18,6 +18,7 @@ package com.google.light.server.jersey.resources.notifications;
 import static com.google.light.server.utils.LightPreconditions.checkIsRunningUnderQueue;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkNotNull;
+import static com.google.light.server.utils.ObjectifyUtils.repeatInTransaction;
 import static com.google.light.server.utils.ServletUtils.getRequestHeaderValue;
 
 import com.google.inject.Inject;
@@ -36,7 +37,7 @@ import com.google.light.server.manager.interfaces.JobManager;
 import com.google.light.server.persistence.entity.jobs.JobEntity;
 import com.google.light.server.persistence.entity.jobs.JobState;
 import com.google.light.server.utils.JsonUtils;
-import com.google.light.server.utils.ObjectifyUtils;
+import com.google.light.server.utils.Transactable;
 import com.googlecode.objectify.Objectify;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -66,7 +67,7 @@ public class NotificationResource extends AbstractJerseyResource {
 
   @Path(JerseyConstants.PATH_NOTIFICATION_JOB)
   @POST
-  @Consumes({ContentTypeConstants.APPLICATION_JSON, ContentTypeConstants.TEXT_PLAIN})
+  @Consumes({ ContentTypeConstants.APPLICATION_JSON, ContentTypeConstants.TEXT_PLAIN })
   public Response childCompletionEvent(String body) {
     checkIsRunningUnderQueue(request);
 
@@ -90,39 +91,42 @@ public class NotificationResource extends AbstractJerseyResource {
    * 
    */
   private void handlChildJobCompletion(String body) {
-    ChildJobCompletionNotification jobNotification =
+    final ChildJobCompletionNotification jobNotification =
         JsonUtils.getDto(body, ChildJobCompletionNotification.class);
 
-    Objectify ofy = ObjectifyUtils.initiateTransaction();
-    try {
-      JobEntity parentJobEntity = jobManager.get(ofy, jobNotification.getParentJobId());
-      checkNotNull(parentJobEntity, ExceptionType.SERVER,
-          "parentJob :" + jobNotification.getParentJobId() + " was not found");
+    repeatInTransaction(new Transactable<Void>() {
 
-      PlacementOrder placement = parentJobEntity.getJobState().getPlacement(
-          JobState.WAITING_FOR_CHILD_COMPLETE_NOTIFICATION);
+      @SuppressWarnings("synthetic-access")
+      @Override
+      public Void run(Objectify ofy) {
+        JobEntity parentJobEntity = jobManager.get(ofy, jobNotification.getParentJobId());
+        checkNotNull(parentJobEntity, ExceptionType.SERVER,
+            "parentJob :" + jobNotification.getParentJobId() + " was not found");
 
-      switch (placement) {
-        case BEFORE:
-          throw new ParentNotReadyForChildCompleteNotification(" ParentJob.JobState is "
-              + parentJobEntity.getJobState());
+        PlacementOrder placement = parentJobEntity.getJobState().getPlacement(
+            JobState.WAITING_FOR_CHILD_COMPLETE_NOTIFICATION);
 
-        case EQUAL:
-          parentJobEntity.setJobState(JobState.POLLING_FOR_CHILDS);
-          jobManager.put(ofy, parentJobEntity,
-              new ChangeLogEntryPojo("Starting polling for childs"));
-          jobManager.enqueueJobForPolling(ofy, parentJobEntity.getJobId());
-          break;
+        switch (placement) {
+          case BEFORE:
+            throw new ParentNotReadyForChildCompleteNotification(" ParentJob.JobState is "
+                + parentJobEntity.getJobState());
 
-        case AFTER:
-          return;
+          case EQUAL:
+            parentJobEntity.setJobState(JobState.POLLING_FOR_CHILDS);
+            jobManager.put(ofy, parentJobEntity,
+                new ChangeLogEntryPojo("Starting polling for childs"));
+            jobManager.enqueueJobForPolling(ofy, parentJobEntity.getJobId());
+            break;
 
-        default:
-          throw new IllegalArgumentException("Unsupported placement : " + placement);
+          case AFTER:
+            return null;
+
+          default:
+            throw new IllegalArgumentException("Unsupported placement : " + placement);
+        }
+        return null;
       }
-      ObjectifyUtils.commitTransaction(ofy);
-    } finally {
-      ObjectifyUtils.rollbackTransactionIfStillActive(ofy);
-    }
+    });
+
   }
 }

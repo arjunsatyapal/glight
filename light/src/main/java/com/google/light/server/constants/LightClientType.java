@@ -13,9 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.server.dto.collection;
-
-import javax.xml.bind.annotation.XmlEnumValue;
+package com.google.light.server.constants;
 
 /**
  *
@@ -24,13 +22,6 @@ import javax.xml.bind.annotation.XmlEnumValue;
  *
  * @author Arjun Satyapal
  */
-public enum CollectionState {
-  @XmlEnumValue(value="PARTIALLY_PUBLISHED")
-  PARTIALLY_PUBLISHED,
-  
-  @XmlEnumValue(value="PUBLISHED")
-  PUBLISHED,
-  
-  @XmlEnumValue(value="RESERVED")
-  RESERVED;
+public enum LightClientType {
+  BROWSER;
 }

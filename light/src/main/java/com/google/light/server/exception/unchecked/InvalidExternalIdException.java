@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Google Inc.
+ * Copyright (C) Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -13,24 +13,22 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.server.dto.collection;
+package com.google.light.server.exception.unchecked;
 
-import javax.xml.bind.annotation.XmlEnumValue;
+import com.google.light.server.dto.pojo.typewrapper.stringwrapper.ExternalId;
+import com.google.light.server.utils.LightUtils;
 
 /**
- *
+ * This indicates that PersonId is invalid.
  * 
- * TODO(arjuns): Add test for this class.
- *
  * @author Arjun Satyapal
  */
-public enum CollectionState {
-  @XmlEnumValue(value="PARTIALLY_PUBLISHED")
-  PARTIALLY_PUBLISHED,
-  
-  @XmlEnumValue(value="PUBLISHED")
-  PUBLISHED,
-  
-  @XmlEnumValue(value="RESERVED")
-  RESERVED;
+@SuppressWarnings("serial")
+public class InvalidExternalIdException extends LightRuntimeException {
+  /**
+   * {@inheritDoc}
+   */
+  public InvalidExternalIdException(ExternalId externalId) {
+      super("Invalid ExternalId : " + LightUtils.getWrapperValue(externalId));
+  }
 }

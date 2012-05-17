@@ -135,6 +135,38 @@ public class CollectionTreeNodeDto extends AbstractTreeNode<CollectionTreeNodeDt
 
     return null;
   }
+  
+  public void importChildsFrom(CollectionTreeNodeDto source) {
+    if (!source.hasChildren()) {
+      return;
+    }
+    
+    System.out.println(this.toJson());
+    for (CollectionTreeNodeDto currChild : source.getChildren()) {
+      if (currChild.isLeafNode()) {
+        checkNotNull(currChild.getExternalId(), "leaf nodes must have externalId");
+        if(containsFirstLevelChildWithExternalId(currChild.getExternalId())) {
+          // continue as its already present.
+          continue;
+        } else {
+          addChildren(currChild);
+        }
+      } else {
+        // Intermediate node
+        if (currChild.hasExternalId()) {
+          if(containsFirstLevelChildWithExternalId(currChild.getExternalId())) {
+            CollectionTreeNodeDto dest = findFirstLevelChildByExternalId(currChild.getExternalId());
+            dest.importChildsFrom(currChild);
+          } else {
+            addChildren(currChild);
+          }
+        } else {
+          // Source does not have this child. So add curr Chid to dest.
+          addChildren(currChild);
+        }
+      }
+    }
+  }
 
   public static class Builder extends AbstractTreeNode.Builder<CollectionTreeNodeDto, Builder> {
     private ModuleId moduleId;

@@ -220,37 +220,36 @@ public class ImportExternalIdDto extends AbstractDto<ImportExternalIdDto> {
       }
       
       
-      if (moduleType != null && moduleType.mapsToCollection()) {
-        checkNotNull(jobId, "jobId");
-        checkNotNull(jobState, "jobState");
-        return this;
-      }
+//      if (moduleType != null && moduleType.mapsToCollection()) {
+//        checkNotNull(jobId, "jobId");
+//        checkNotNull(jobState, "jobState");
+//        return this;
+//      }
 
-      switch (moduleState) {
-        case FAILED:
-        case NOT_SUPPORTED:
-          checkNull(version, "version should be null.");
-          //$FALL-THROUGH$
-
-        case PUBLISHED:
-          checkNull(jobId, "jobId should be null.");
-          checkNull(jobState, "jobState should be null.");
-
-          break;
-
-        case IMPORTING:
-//        case UNKNOWN:
-        case REFRESHING:
-          checkNotNull(version, "version");
-          checkNotNull(jobId, "jobId");
-          checkNotNull(jobState, "jobState");
-          break;
-
-        case RESERVED:
-          throw new IllegalStateException("Server is not expected to return "
-              + moduleState + " immediately.");
-
-      }
+//      switch (moduleState) {
+//        case FAILED:
+//        case NOT_SUPPORTED:
+//          checkNull(version, "version should be null.");
+//          //$FALL-THROUGH$
+//
+//        case PUBLISHED:
+//          checkNull(jobId, "jobId should be null.");
+//          checkNull(jobState, "jobState should be null.");
+//
+//          break;
+//
+//        case IMPORTING:
+////        case UNKNOWN:
+//        case REFRESHING:
+//          checkNotNull(version, "version");
+//          checkNotNull(jobId, "jobId");
+//          checkNotNull(jobState, "jobState");
+//          break;
+//
+//        case RESERVED:
+//          throw new IllegalStateException("Server is not expected to return "
+//              + moduleState + " immediately.");
+//      }
     }
     
     return this;

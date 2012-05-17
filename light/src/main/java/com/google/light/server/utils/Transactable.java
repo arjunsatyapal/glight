@@ -13,9 +13,9 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.server.dto.collection;
+package com.google.light.server.utils;
 
-import javax.xml.bind.annotation.XmlEnumValue;
+import com.googlecode.objectify.Objectify;
 
 /**
  *
@@ -24,13 +24,7 @@ import javax.xml.bind.annotation.XmlEnumValue;
  *
  * @author Arjun Satyapal
  */
-public enum CollectionState {
-  @XmlEnumValue(value="PARTIALLY_PUBLISHED")
-  PARTIALLY_PUBLISHED,
-  
-  @XmlEnumValue(value="PUBLISHED")
-  PUBLISHED,
-  
-  @XmlEnumValue(value="RESERVED")
-  RESERVED;
+/** Alternate interface to Runnable for executing transactions */
+public interface Transactable<T> {
+  T run(Objectify ofy);
 }

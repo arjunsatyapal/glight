@@ -23,22 +23,7 @@ import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkTxnIsRunning;
 import static com.google.light.server.utils.LightUtils.getNow;
-
-import com.google.light.server.serveronlypojos.GAEQueryWrapper;
-
-import com.google.common.collect.Lists;
-import com.google.light.server.constants.JerseyConstants;
-import com.google.light.server.dto.module.ModuleDto;
-import com.google.light.server.dto.pages.PageDto;
-import com.google.light.server.persistence.entity.module.ModuleEntity;
-
-import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
-
-import java.util.List;
-
-import com.google.light.server.utils.GuiceUtils;
-
-import java.util.Collection;
+import static com.google.light.server.utils.ObjectifyUtils.repeatInTransaction;
 
 import com.google.appengine.api.datastore.Text;
 import com.google.inject.Inject;
@@ -48,6 +33,7 @@ import com.google.light.server.dto.importresource.ImportBatchWrapper;
 import com.google.light.server.dto.importresource.ImportExternalIdDto;
 import com.google.light.server.dto.pojo.ChangeLogEntryPojo;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.JobId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
 import com.google.light.server.jobs.handlers.collectionjobs.ImportCollectionGoogleDocContext;
 import com.google.light.server.jobs.handlers.modulejobs.ImportModuleGoogleDocJobContext;
 import com.google.light.server.jobs.handlers.modulejobs.ImportModuleSyntheticModuleJobContext;
@@ -60,8 +46,11 @@ import com.google.light.server.persistence.entity.jobs.JobEntity.JobHandlerType;
 import com.google.light.server.persistence.entity.jobs.JobEntity.JobType;
 import com.google.light.server.persistence.entity.jobs.JobEntity.TaskType;
 import com.google.light.server.persistence.entity.jobs.JobState;
-import com.google.light.server.utils.ObjectifyUtils;
+import com.google.light.server.serveronlypojos.GAEQueryWrapper;
+import com.google.light.server.utils.GuiceUtils;
+import com.google.light.server.utils.Transactable;
 import com.googlecode.objectify.Objectify;
+import java.util.Collection;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -149,29 +138,32 @@ public class JobManagerImpl implements JobManager {
    * {@inheritDoc}
    */
   @Override
-  public <D extends AbstractDto<D>> JobEntity enqueueCompleteJob(JobId jobId, D responseDto,
-      String message) {
+  public <D extends AbstractDto<D>> JobEntity enqueueCompleteJob(final JobId jobId,
+      final D responseDto,
+      final String message) {
     checkNotBlank(message, "message cannot be null");
     checkNotNull(responseDto, "responseDto cannot be null");
 
-    Objectify ofy = ObjectifyUtils.initiateTransaction();
+    JobEntity jobEntity = repeatInTransaction(new Transactable<JobEntity>() {
+      @SuppressWarnings("synthetic-access")
+      @Override
+      public JobEntity run(Objectify ofy) {
+        JobEntity jobEntity = get(ofy, jobId);
+        jobEntity.setJobState(JobState.COMPLETE);
+        jobEntity.setResponse(responseDto);
+        put(ofy, jobEntity, new ChangeLogEntryPojo(message));
 
-    try {
-      JobEntity jobEntity = this.get(ofy, jobId);
-      jobEntity.setJobState(JobState.COMPLETE);
-      jobEntity.setResponse(responseDto);
-      this.put(ofy, jobEntity, new ChangeLogEntryPojo(message));
+        if (!jobEntity.isRootJob()) {
+          notificationManager.notifyChildCompletionEvent(ofy, jobEntity.getParentJobId(),
+              jobEntity.getJobId());
+        }
 
-      if (!jobEntity.isRootJob()) {
-        notificationManager.notifyChildCompletionEvent(ofy, jobEntity.getParentJobId(),
-            jobEntity.getJobId());
+        return jobEntity;
       }
+    });
 
-      ObjectifyUtils.commitTransaction(ofy);
-      return jobEntity;
-    } finally {
-      ObjectifyUtils.rollbackTransactionIfStillActive(ofy);
-    }
+    return jobEntity;
+
   }
 
   /**
@@ -214,31 +206,27 @@ public class JobManagerImpl implements JobManager {
    * {@inheritDoc}
    */
   @Override
-  public JobId createImportBatchJob(ImportBatchWrapper jobRequest) {
-    Objectify ofy = ObjectifyUtils.initiateTransaction();
-    try {
-      Text jobRequestText = new Text(jobRequest.toJson());
+  public JobId createImportBatchJob(Objectify ofy, final ImportBatchWrapper jobRequest, 
+      JobState jobState) {
+    checkTxnIsRunning(ofy);
+    Text jobRequestText = new Text(jobRequest.toJson());
+    JobEntity jobEntity = new JobEntity.Builder()
+        .jobType(JobType.ROOT_JOB)
+        .jobHandlerType(JobHandlerType.TASK_QUEUE)
+        .taskType(TaskType.IMPORT_BATCH)
+        .jobState(jobState)
+        .request(jobRequestText)
+        .context(jobRequestText)
+        .creationTime(getNow())
+        .ownerId(GuiceUtils.getOwnerId())
+        .build();
+    JobEntity savedJobEntity = put(ofy, jobEntity,
+        new ChangeLogEntryPojo("Creating ImportBatchJob with JobState : " + jobState));
 
-      JobEntity jobEntity = new JobEntity.Builder()
-          .jobType(JobType.ROOT_JOB)
-          .jobHandlerType(JobHandlerType.TASK_QUEUE)
-          .taskType(TaskType.IMPORT_BATCH)
-          .jobState(JobState.PRE_START)
-          .request(jobRequestText)
-          .context(jobRequestText)
-          .creationTime(getNow())
-          .ownerId(GuiceUtils.getOwnerId())
-          .build();
-      JobEntity savedJobEntity = this.put(ofy, jobEntity,
-          new ChangeLogEntryPojo("PreStart Request."));
-      ObjectifyUtils.commitTransaction(ofy);
+    logger.info("Successfully created " + TaskType.IMPORT_BATCH + ""
+        + "Job[" + savedJobEntity.getJobId() + "].");
+    return savedJobEntity.getJobId();
 
-      logger.info("Successfully created " + TaskType.IMPORT_BATCH + ""
-          + "Job[" + savedJobEntity.getJobId() + "].");
-      return savedJobEntity.getJobId();
-    } finally {
-      ObjectifyUtils.rollbackTransactionIfStillActive(ofy);
-    }
   }
 
   /**
@@ -387,12 +375,13 @@ public class JobManagerImpl implements JobManager {
     return savedJobEntity;
   }
 
-  /** 
+  /**
    * {@inheritDoc}
    */
   @Override
-  public GAEQueryWrapper<JobEntity> findJobsCreatedByMe(PersonId ownerId, String startIndex, int maxResults) {
-return jobDao.findJobsByOwnerId(ownerId, startIndex, maxResults);
+  public GAEQueryWrapper<JobEntity> findJobsCreatedByMe(PersonId ownerId, String startIndex,
+      int maxResults) {
+    return jobDao.findJobsByOwnerId(ownerId, startIndex, maxResults);
 
   }
 }

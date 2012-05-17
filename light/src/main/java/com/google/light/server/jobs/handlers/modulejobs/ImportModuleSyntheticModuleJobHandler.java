@@ -19,11 +19,11 @@ import static com.google.light.server.jobs.JobUtils.updateJobContext;
 import static com.google.light.server.utils.LightPreconditions.checkNotNull;
 import static com.google.light.server.utils.LightUtils.getNow;
 import static com.google.light.server.utils.LightUtils.getURI;
-
-import com.google.light.server.dto.pojo.tree.collection.CollectionTreeNodeDto;
+import static com.google.light.server.utils.ObjectifyUtils.repeatInTransaction;
 
 import com.google.inject.Inject;
 import com.google.light.server.dto.pojo.tree.AbstractTreeNode.TreeNodeType;
+import com.google.light.server.dto.pojo.tree.collection.CollectionTreeNodeDto;
 import com.google.light.server.exception.ExceptionType;
 import com.google.light.server.httpclient.LightHttpClient;
 import com.google.light.server.jobs.handlers.JobHandlerInterface;
@@ -32,7 +32,7 @@ import com.google.light.server.manager.interfaces.ModuleManager;
 import com.google.light.server.persistence.entity.jobs.JobEntity;
 import com.google.light.server.persistence.entity.jobs.JobState;
 import com.google.light.server.utils.HtmlBuilder;
-import com.google.light.server.utils.ObjectifyUtils;
+import com.google.light.server.utils.Transactable;
 import com.googlecode.objectify.Objectify;
 import java.net.URI;
 
@@ -57,22 +57,25 @@ public class ImportModuleSyntheticModuleJobHandler implements JobHandlerInterfac
   }
 
   @Override
-  public void handle(JobEntity jobEntity) {
-    ImportModuleSyntheticModuleJobContext context = jobEntity.getContext(ImportModuleSyntheticModuleJobContext.class);
+  public void handle(final JobEntity jobEntity) {
+    final ImportModuleSyntheticModuleJobContext context =
+        jobEntity.getContext(ImportModuleSyntheticModuleJobContext.class);
 
-    String htmlContent = generateHtmlContent(context);
-    Objectify ofy = ObjectifyUtils.initiateTransaction();
-    try {
-      // First publish HTML on Light.
-      moduleManager.publishModuleVersion(ofy, context.getModuleId(), context.getVersion(),
-          context.getExternalId(), context.getTitle(), htmlContent, null, getNow());
+    final String htmlContent = generateHtmlContent(context);
 
-      updateJobContext(ofy, jobManager, JobState.COMPLETE, context, jobEntity,
-          "Published module[" + context.getModuleId() + ":" + context.getVersion());
-      ObjectifyUtils.commitTransaction(ofy);
-    } finally {
-      ObjectifyUtils.rollbackTransactionIfStillActive(ofy);
-    }
+    repeatInTransaction(new Transactable<Void>() {
+      @SuppressWarnings("synthetic-access")
+      @Override
+      public Void run(Objectify ofy) {
+        // First publish HTML on Light.
+        moduleManager.publishModuleVersion(ofy, context.getModuleId(), context.getVersion(),
+            context.getExternalId(), context.getTitle(), htmlContent, null, getNow());
+
+        updateJobContext(ofy, jobManager, JobState.COMPLETE, context, jobEntity,
+            "Published module[" + context.getModuleId() + ":" + context.getVersion());
+        return null;
+      }
+    });
 
     CollectionTreeNodeDto collectionNode = new CollectionTreeNodeDto.Builder()
         .title(context.getTitle())

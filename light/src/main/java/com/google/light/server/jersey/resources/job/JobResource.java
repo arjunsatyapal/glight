@@ -30,8 +30,6 @@ import com.google.light.server.serveronlypojos.GAEQueryWrapper;
 import com.google.light.server.servlets.SessionManager;
 import com.google.light.server.utils.GuiceUtils;
 
-import com.google.light.server.utils.LightUtils;
-
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
@@ -100,7 +98,7 @@ public class JobResource extends AbstractJerseyResource {
       jobHandler.handleJob(jobId);
       return Response.ok().build();
     } catch (TaskQueueRetriableException e) {
-      logger.info("Retry after some time for " + jobId + " due to : " + e.getClass());
+      logger.warning("Retry after some time for " + jobId + " due to : " + e.getClass());
       return Response.status(HttpStatusCodesEnum.PRECONDITIONS_FAILED.getStatusCode()).build();
     }
   }

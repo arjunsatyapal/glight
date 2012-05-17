@@ -20,6 +20,8 @@ import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
 import static com.google.light.server.utils.LightUtils.getWrapper;
 
+import com.google.light.server.dto.collection.CollectionState;
+
 import com.google.light.server.dto.pojo.tree.collection.CollectionTreeNodeDto;
 
 import com.google.light.server.utils.LightUtils;
@@ -46,6 +48,7 @@ public class CollectionVersionEntity extends AbstractPersistenceEntity<Collectio
   @Id
   private Long version;
   private String title;
+  private CollectionState collectionState;
   
   @Parent
   private Key<CollectionEntity> collectionKey;
@@ -57,6 +60,7 @@ public class CollectionVersionEntity extends AbstractPersistenceEntity<Collectio
     checkNotBlank(title, "title");
     checkNotNull(collectionKey, "collectionKey");
     checkNotNull(collectionTreeJson, "collectionTreeJson");
+    checkNotNull(collectionState, "collectionState");
     return this;
   }
   
@@ -90,6 +94,7 @@ public class CollectionVersionEntity extends AbstractPersistenceEntity<Collectio
       .title(title)
       .version(getVersion())
       .collectionTree(getCollectionTree())
+      .collectionState(collectionState)
       .build();
 
     return dto;
@@ -120,11 +125,16 @@ public class CollectionVersionEntity extends AbstractPersistenceEntity<Collectio
     return title;
   }
   
+  public CollectionState getCollectionState() {
+    return collectionState;
+  }
+  
   public static class Builder extends AbstractPersistenceEntity.BaseBuilder<Builder> {
     private Version version;
     private String title;
     private CollectionTreeNodeDto collectionTree;
     private Key<CollectionEntity> collectionKey;
+    private CollectionState collectionState;
 
     public Builder collectionKey(Key<CollectionEntity> collectionKey) {
       this.collectionKey = collectionKey;
@@ -146,6 +156,11 @@ public class CollectionVersionEntity extends AbstractPersistenceEntity<Collectio
       return this;
     }
     
+    public Builder collectionState(CollectionState collectionState) {
+      this.collectionState = collectionState;
+      return this;
+    }
+    
     @SuppressWarnings("synthetic-access")
     public CollectionVersionEntity build() {
       return new CollectionVersionEntity(this).validate();
@@ -162,6 +177,7 @@ public class CollectionVersionEntity extends AbstractPersistenceEntity<Collectio
     this.collectionTreeJson = new Text(builder.collectionTree.toJson());
     this.collectionKey = builder.collectionKey;
     this.title = builder.title;
+    this.collectionState = builder.collectionState;
   }
 
   // For Objectify.

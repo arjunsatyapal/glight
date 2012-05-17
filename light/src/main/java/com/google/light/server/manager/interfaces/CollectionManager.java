@@ -1,5 +1,7 @@
 package com.google.light.server.manager.interfaces;
 
+import com.google.light.server.dto.collection.CollectionState;
+
 import com.google.light.server.dto.pojo.tree.collection.CollectionTreeNodeDto;
 
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.CollectionId;
@@ -56,17 +58,28 @@ public interface CollectionManager {
   /**
    * Reserve a CollectionId.
    */
-  public CollectionEntity reserveCollectionId(Objectify ofy, List<PersonId> owners, String title);
+  public CollectionEntity reserveCollectionId(Objectify ofy, List<PersonId> owners,
+      CollectionTreeNodeDto collectionTree);
 
   /**
    * Add CollectionVersion for GoogleDoc.
    */
   public Version reserveCollectionVersion(Objectify ofy, CollectionId collectionId);
   
-  public CollectionEntity createEmptyCollection(List<PersonId> owners, String title);
+  /**
+   * Add CollectionVersion.
+   */
+  public Version reserveAndPublishAsLatest(Objectify ofy, CollectionId collectionId,
+      CollectionTreeNodeDto collectionRoot, CollectionState collectionState);
+  
+  public CollectionVersionEntity getLatestPublishedVersion(Objectify ofy, CollectionId collectionId);
+  
+  public CollectionEntity createEmptyCollection(Objectify ofy, List<PersonId> owners, 
+      CollectionTreeNodeDto collectionTree);
 
   public CollectionVersionEntity publishCollectionVersion(Objectify ofy,
-      CollectionId collectionId, Version version, CollectionTreeNodeDto collectionRoot);
+      CollectionId collectionId, Version version, CollectionTreeNodeDto collectionRoot, 
+      CollectionState collectionState);
 
   /**
    * Get Collection-Version.

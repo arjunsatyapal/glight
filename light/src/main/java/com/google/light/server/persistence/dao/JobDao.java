@@ -20,8 +20,6 @@ import static com.google.light.server.persistence.entity.jobs.JobEntity.OFY_JOB_
 import static com.google.light.server.utils.LightPreconditions.checkNotNull;
 import static com.google.light.server.utils.LightUtils.getWrapperValue;
 
-import com.google.light.server.utils.LightUtils;
-
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;

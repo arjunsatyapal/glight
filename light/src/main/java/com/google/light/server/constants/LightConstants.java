@@ -95,5 +95,6 @@ public class LightConstants {
   public static final int TASK_AGE_LIMIT_MAX = SECONDS_IN_HR;
   public static final int TASK_RETRY_LIMIT = 3;
   
+  public static final int OBJECTIFY_REPEAT_COUNT = 5;
 
 }

@@ -21,6 +21,14 @@ import static com.google.light.server.constants.LightConstants.MAX_RESULTS_MAX;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPersonLoggedIn;
 import static com.google.light.server.utils.LightUtils.isCollectionEmpty;
+import static com.google.light.server.utils.ObjectifyUtils.repeatInTransaction;
+
+import com.google.light.server.dto.module.ModuleType;
+import com.google.light.server.dto.pojo.tree.AbstractTreeNode.TreeNodeType;
+
+import com.google.light.server.utils.ObjectifyUtils;
+
+import com.google.light.server.dto.collection.CollectionState;
 
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
@@ -44,7 +52,7 @@ import com.google.light.server.persistence.entity.collection.CollectionVersionEn
 import com.google.light.server.servlets.SessionManager;
 import com.google.light.server.utils.GuiceUtils;
 import com.google.light.server.utils.JsonUtils;
-import com.google.light.server.utils.ObjectifyUtils;
+import com.google.light.server.utils.Transactable;
 import com.google.light.server.utils.XmlUtils;
 import com.googlecode.objectify.Objectify;
 import java.util.List;
@@ -119,7 +127,7 @@ public class CollectionResource extends AbstractJerseyResource {
     SessionManager sessionManager = GuiceUtils.getInstance(SessionManager.class);
     checkPersonLoggedIn(sessionManager);
 
-    CollectionId collectionId = new CollectionId(collectionIdStr);
+    final CollectionId collectionId = new CollectionId(collectionIdStr);
     Version version = new Version(versionStr);
 
     ContentTypeEnum contentType = ContentTypeEnum.getContentTypeByString(
@@ -134,30 +142,31 @@ public class CollectionResource extends AbstractJerseyResource {
     } else {
       throw new IllegalArgumentException("Invalid contentType : " + contentType);
     }
-
     checkNotNull(collectionTree, "collectionTree should not be null here.");
 
-    Version publishVersion = version;
+    Version reserveVersion = version;
 
     if (version.isLatestVersion()) {
-      Objectify ofy = ObjectifyUtils.initiateTransaction();
-      try {
-        publishVersion = collectionManager.reserveCollectionVersion(ofy, collectionId);
-        ObjectifyUtils.commitTransaction(ofy);
-      } finally {
-        ObjectifyUtils.rollbackTransactionIfStillActive(ofy);
-      }
+      reserveVersion = repeatInTransaction(new Transactable<Version>() {
+        @SuppressWarnings("synthetic-access")
+        @Override
+        public Version run(Objectify ofy) {
+          return collectionManager.reserveCollectionVersion(ofy, collectionId);
+        }
+      });
     }
 
+    final Version publishVersion = checkNotNull(reserveVersion, "reserveVersion");
+    final CollectionTreeNodeDto collectionTreeToPublish = collectionTree;
     CollectionVersionEntity response = null;
-    Objectify ofy = ObjectifyUtils.initiateTransaction();
-    try {
-      response = collectionManager.publishCollectionVersion(ofy, collectionId, publishVersion,
-          collectionTree);
-      ObjectifyUtils.commitTransaction(ofy);
-    } finally {
-      ObjectifyUtils.rollbackTransactionIfStillActive(ofy);
-    }
+    response = repeatInTransaction(new Transactable<CollectionVersionEntity>() {
+      @SuppressWarnings("synthetic-access")
+      @Override
+      public CollectionVersionEntity run(Objectify ofy) {
+        return collectionManager.publishCollectionVersion(ofy, collectionId, publishVersion,
+            collectionTreeToPublish, CollectionState.PUBLISHED);
+      }
+    });
 
     return response;
   }
@@ -169,12 +178,27 @@ public class CollectionResource extends AbstractJerseyResource {
     SessionManager sessionManager = GuiceUtils.getInstance(SessionManager.class);
     checkPersonLoggedIn(sessionManager);
 
-    PersonId ownerId = sessionManager.getPersonId();
+    final PersonId ownerId = sessionManager.getPersonId();
 
     // TODO(waltercacau): Fix this hack of using the body as the title.
-    String title = body;
+    final String title = body;
 
-    return collectionManager.createEmptyCollection(Lists.newArrayList(ownerId), title);
+    CollectionEntity collectionEntity = repeatInTransaction(new Transactable<CollectionEntity>() {
+
+      @SuppressWarnings("synthetic-access")
+      @Override
+      public CollectionEntity run(Objectify ofy) {
+        CollectionTreeNodeDto collectionTree = new CollectionTreeNodeDto.Builder()
+            .nodeType(TreeNodeType.ROOT_NODE)
+            .title(title)
+            .moduleType(ModuleType.LIGHT_COLLECTION)
+            .build();
+
+        return collectionManager.createEmptyCollection(ofy, Lists.newArrayList(ownerId), collectionTree);
+      }
+
+    });
+    return collectionEntity;
   }
 
   protected CollectionVersionDto getCollectionVersionDto(String collectionIdStr,

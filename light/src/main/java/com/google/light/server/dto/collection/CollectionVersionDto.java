@@ -58,6 +58,10 @@ public class CollectionVersionDto extends AbstractDtoToPersistence<CollectionVer
   @XmlElement(name = "collectionTree")
   @JsonProperty(value = "collectionTree")
   private CollectionTreeNodeDto collectionTree;
+  
+  @XmlElement(name = "collectionState")
+  @JsonProperty(value = "collectionState")
+  private CollectionState collectionState;
 
   /** 
    * {@inheritDoc}
@@ -68,6 +72,7 @@ public class CollectionVersionDto extends AbstractDtoToPersistence<CollectionVer
     checkNotBlank(title, "title");
     checkNotNull(version, "version");
     checkNotNull(collectionTree, "collectionTree");
+    checkNotNull(collectionState, "collectionState");
     return this;
   }
 
@@ -96,6 +101,7 @@ public class CollectionVersionDto extends AbstractDtoToPersistence<CollectionVer
     private String title;
     private Version version;
     private CollectionTreeNodeDto collectionTree;
+    private CollectionState collectionState;
 
     public Builder collectionId(CollectionId collectionId) {
       this.collectionId = collectionId;
@@ -116,6 +122,11 @@ public class CollectionVersionDto extends AbstractDtoToPersistence<CollectionVer
       this.collectionTree = collectionTree;
       return this;
     }
+    
+    public Builder collectionState(CollectionState collectionState) {
+      this.collectionState = collectionState;
+      return this;
+    }
 
     @SuppressWarnings("synthetic-access")
     public CollectionVersionDto build() {
@@ -130,6 +141,7 @@ public class CollectionVersionDto extends AbstractDtoToPersistence<CollectionVer
     this.title = builder.title;
     this.version = builder.version;
     this.collectionTree = builder.collectionTree;
+    this.collectionState = builder.collectionState;
   }
 
   // For JAXB.

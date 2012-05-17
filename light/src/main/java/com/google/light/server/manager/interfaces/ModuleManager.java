@@ -39,7 +39,7 @@ public interface ModuleManager {
    * @param updatedEntity
    * @return
    */
-  public ModuleEntity update(ModuleEntity updatedEntity);
+  public ModuleEntity update(Objectify ofy, ModuleEntity updatedEntity);
 
   /**
    * Get details of an existing Module by ModuleId.
@@ -69,9 +69,12 @@ public interface ModuleManager {
   public ModuleId reserveModuleId(Objectify ofy, ExternalId externalId,
       List<PersonId> owners, String title);
   
+  public ModuleEntity reserveModule(Objectify ofy, ExternalId externalId,
+      List<PersonId> owners, String title);
+  
   public Version reserveModuleVersion(Objectify ofy, ModuleId moduleId, String etag, 
       Instant lastEditTime);
-
+  
   public ModuleVersionEntity publishModuleVersion(Objectify ofy, ModuleId moduleId,
       Version version, ExternalId externalId, String title, String content, String etag, 
       Instant lastEditTime);

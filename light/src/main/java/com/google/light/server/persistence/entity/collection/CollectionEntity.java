@@ -27,6 +27,8 @@ import static com.google.light.server.utils.LightUtils.convertWrapperListToListO
 import static com.google.light.server.utils.LightUtils.getWrapper;
 import static com.google.light.server.utils.LightUtils.getWrapperValue;
 
+import com.google.light.server.constants.LightClientType;
+
 import com.google.light.server.annotations.ObjectifyQueryField;
 import com.google.light.server.annotations.ObjectifyQueryFieldName;
 import com.google.light.server.dto.collection.CollectionDto;
@@ -157,6 +159,19 @@ public class CollectionEntity extends AbstractPersistenceEntity<CollectionEntity
     
     checkArgument(this.latestPublishVersion < this.nextVersion, 
         "latestPublishVersion should be always less then nextVersion");
+  }
+  
+  public Version determineBaseVersionForAppend(Version askedVersion, Version reservedVersion, 
+      LightClientType clientType) {
+    if (askedVersion.isSpecificVersion() || askedVersion.isNoVersion()) {
+      return askedVersion;
+    }
+    
+    if (clientType == LightClientType.BROWSER) {
+      return reservedVersion.getPreviousVersion();
+    }
+    
+    throw new IllegalArgumentException("Invalid askedVersion : " + askedVersion);
   }
 
   /**

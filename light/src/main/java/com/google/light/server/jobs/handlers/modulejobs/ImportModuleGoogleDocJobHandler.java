@@ -21,17 +21,20 @@ import static com.google.light.server.constants.google.cloudstorage.GoogleCloudS
 import static com.google.light.server.exception.ExceptionType.SERVER_GUICE_INJECTION;
 import static com.google.light.server.jersey.resources.thirdparty.mixed.ImportResource.updateImportExternalIdDtoForModules;
 import static com.google.light.server.jobs.JobUtils.updateJobContext;
-import static com.google.light.server.jobs.handlers.modulejobs.ModuleJobUtils.reserveModuleId;
 import static com.google.light.server.utils.GoogleCloudStorageUtils.writeFileOnGCS;
 import static com.google.light.server.utils.GuiceUtils.getInstance;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkNotNull;
+import static com.google.light.server.utils.ObjectifyUtils.repeatInTransaction;
+
+import com.google.common.base.Throwables;
 
 import com.google.appengine.api.files.AppEngineFile;
 import com.google.appengine.api.files.FileReadChannel;
 import com.google.appengine.api.files.FileService;
 import com.google.appengine.api.files.FileServiceFactory;
 import com.google.appengine.api.files.GSFileOptions;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.light.server.constants.FileExtensions;
@@ -65,6 +68,7 @@ import com.google.light.server.utils.GuiceUtils;
 import com.google.light.server.utils.JsonUtils;
 import com.google.light.server.utils.LightUtils;
 import com.google.light.server.utils.ObjectifyUtils;
+import com.google.light.server.utils.Transactable;
 import com.googlecode.objectify.Objectify;
 import java.io.InputStream;
 import java.nio.channels.Channels;
@@ -145,99 +149,104 @@ public class ImportModuleGoogleDocJobHandler implements JobHandlerInterface {
         "Successfully completed Google Doc Job.");
   }
 
-  public void handleGoogleDocModuleJob(JobEntity jobEntity, GoogleDocInfoDto gdocInfo,
-      JobId parentJobId, JobId rootJobId) {
-    ModuleType moduleType = gdocInfo.getModuleType();
-
-    switch (moduleType) {
-      case GOOGLE_DOCUMENT:
-        ImportExternalIdDto importModuleDto = new ImportExternalIdDto.Builder()
-            .title(gdocInfo.getTitle())
-            .externalId(gdocInfo.getExternalId())
-            .build();
-        enqueueModuleGoogleDocJob(importModuleDto, gdocInfo, parentJobId, rootJobId);
-        break;
-
-      default:
-        throw new IllegalStateException("Unsupported moduleType " + moduleType + " for "
-            + jobEntity.getJobId());
-
-    }
-  }
+  // public void handleGoogleDocModuleJob(JobEntity jobEntity, GoogleDocInfoDto gdocInfo,
+  // JobId parentJobId, JobId rootJobId) {
+  // ModuleType moduleType = gdocInfo.getModuleType();
+  //
+  // switch (moduleType) {
+  // case GOOGLE_DOCUMENT:
+  // ImportExternalIdDto importModuleDto = new ImportExternalIdDto.Builder()
+  // .title(gdocInfo.getTitle())
+  // .externalId(gdocInfo.getExternalId())
+  // .build();
+  // enqueueModuleGoogleDocJob(null /*ofy*/,importModuleDto, gdocInfo, parentJobId, rootJobId);
+  // break;
+  //
+  // default:
+  // throw new IllegalStateException("Unsupported moduleType " + moduleType + " for "
+  // + jobEntity.getJobId());
+  //
+  // }
+  // }
 
   // TODO(arjuns): Move this inside jobManager.
-  public void enqueueModuleGoogleDocJob(ImportExternalIdDto importModuleDto,
+  public void enqueueModuleGoogleDocJob(Objectify ofy, ImportExternalIdDto importModuleDto,
       GoogleDocInfoDto gdocInfo, JobId parentJobId, JobId rootJobId) {
     PersonId ownerId = GuiceUtils.getOwnerId();
+    ModuleId moduleId = importModuleDto.getModuleId();
 
-    ModuleId moduleId = reserveModuleId(moduleManager, importModuleDto, ownerId);
-    checkNotNull(moduleId, "moduleId should not be null here.");
-
-    // Now reserving a module version and creating a GDoc Child job that will publish this version.
-    Objectify ofy = ObjectifyUtils.initiateTransaction();
-    try {
-      Version reservedVersion = moduleManager.reserveModuleVersion(ofy, moduleId,
+    Version reservedVersion = null;
+    if (moduleId == null) {
+      ModuleEntity module = moduleManager.reserveModule(ofy, importModuleDto.getExternalId(),
+          Lists.newArrayList(GuiceUtils.getOwnerId()), importModuleDto.getTitle());
+      moduleId = module.getModuleId();
+      importModuleDto.setModuleId(module.getModuleId());
+      reservedVersion = module.reserveVersion();
+      moduleManager.update(ofy, module);
+    } else {
+      // Now reserving a module version and creating a GDoc Child job that will publish this version.
+      reservedVersion = moduleManager.reserveModuleVersion(ofy, moduleId,
           gdocInfo.getEtag(), gdocInfo.getLastEditTime());
-      logger.info("Reserved/created module : [" + moduleId + "], version : " + reservedVersion);
+      
+    }
 
-      JobEntity childJob = null;
-      ModuleState moduleState = null;
-      ModuleType moduleType = importModuleDto.getModuleType();
-      String title = null;
-      if (reservedVersion != null) {
-        // Now creating a child job and adding its reference in Job Context.
+    checkNotNull(importModuleDto.getModuleId());
+    logger.info("Reserved/created module : [" + moduleId + "], version : " + reservedVersion);
 
-        // First enqueuing a child job for this resource.
-        title = calculateTitleFromContext(importModuleDto, gdocInfo, null, true);
-        ImportModuleGoogleDocJobContext childJobContext =
-            new ImportModuleGoogleDocJobContext.Builder()
-                .title(title)
-                .resourceInfo(gdocInfo)
-                .moduleId(moduleId)
-                .version(reservedVersion)
-                .state(ImportModuleGoogleDocJobContext.GoogleDocImportJobState.ENQUEUED)
-                .build();
-        childJob = jobManager.createGoogleDocImportChildJob(ofy,
-            childJobContext, parentJobId, rootJobId);
-        if (reservedVersion.isFirstVersion()) {
-          moduleState = ModuleState.IMPORTING;
-        } else {
-          moduleState = ModuleState.REFRESHING;
-        }
-        moduleType = gdocInfo.getModuleType();
+    JobEntity childJob = null;
+    ModuleState moduleState = null;
+    ModuleType moduleType = importModuleDto.getModuleType();
+    String title = null;
+    if (reservedVersion != null) {
+      // Now creating a child job and adding its reference in Job Context.
 
-        logger.info("Module State = " + moduleState);
-        logger.info("ModuleType = " + moduleType);
+      // First enqueuing a child job for this resource.
+      title = calculateTitleFromContext(importModuleDto, gdocInfo, null, true);
+      ImportModuleGoogleDocJobContext childJobContext =
+          new ImportModuleGoogleDocJobContext.Builder()
+              .title(title)
+              .resourceInfo(gdocInfo)
+              .moduleId(moduleId)
+              .version(reservedVersion)
+              .state(ImportModuleGoogleDocJobContext.GoogleDocImportJobState.ENQUEUED)
+              .build();
+      childJob = jobManager.createGoogleDocImportChildJob(ofy,
+          childJobContext, parentJobId, rootJobId);
+      if (reservedVersion.isFirstVersion()) {
+        moduleState = ModuleState.IMPORTING;
       } else {
-        // Google Document is up to date. So use the latest version as the reserved version.
-        ModuleEntity moduleEntity = moduleManager.get(ofy, moduleId);
-        reservedVersion = moduleEntity.getLatestPublishVersion();
-        moduleState = ModuleState.PUBLISHED;
-        title = calculateTitleFromContext(importModuleDto, gdocInfo, moduleEntity, false);
-        moduleType = moduleEntity.getModuleType();
-        logger.info("Module State = " + moduleState);
-        logger.info("ModuleType = " + moduleType);
+        moduleState = ModuleState.REFRESHING;
       }
+      moduleType = gdocInfo.getModuleType();
 
-      // Verify that values are initialized.
-      checkNotNull(moduleState, "moduleState cannot be null here.");
-      checkNotNull(moduleType, "moduleType cannot be null here.");
-      checkNotBlank(title, "title cannot be empty here.");
-      /*
-       * Now saving details about ModuleId and version as part of ExternalIdDto that will be
-       * eventually sent to the client. Also this will be stored as part of the parent Batch Job
-       * which can be useful for Debugging later.
-       */
-      updateImportExternalIdDtoForModules(importModuleDto, moduleId, reservedVersion, moduleState,
-          moduleType, title, childJob);
+      logger.info("Module State = " + moduleState);
+      logger.info("ModuleType = " + moduleType);
+    } else {
+      // Google Document is up to date. So use the latest version as the reserved version.
+      ModuleEntity moduleEntity = moduleManager.get(ofy, moduleId);
+      reservedVersion = moduleEntity.getLatestPublishVersion();
+      moduleState = ModuleState.PUBLISHED;
+      title = calculateTitleFromContext(importModuleDto, gdocInfo, moduleEntity, false);
+      moduleType = moduleEntity.getModuleType();
+      logger.info("Module State = " + moduleState);
+      logger.info("ModuleType = " + moduleType);
+    }
 
-      if (childJob != null) {
-        jobManager.enqueueImportChildJob(ofy, parentJobId, childJob.getJobId(), importModuleDto,
-            QueueEnum.GDOC_INTERACTION);
-      }
-      ObjectifyUtils.commitTransaction(ofy);
-    } finally {
-      ObjectifyUtils.rollbackTransactionIfStillActive(ofy);
+    // Verify that values are initialized.
+    checkNotNull(moduleState, "moduleState cannot be null here.");
+    checkNotNull(moduleType, "moduleType cannot be null here.");
+    checkNotBlank(title, "title cannot be empty here.");
+    /*
+     * Now saving details about ModuleId and version as part of ExternalIdDto that will be
+     * eventually sent to the client. Also this will be stored as part of the parent Batch Job
+     * which can be useful for Debugging later.
+     */
+    updateImportExternalIdDtoForModules(importModuleDto, moduleId, reservedVersion, moduleState,
+        moduleType, title, childJob);
+
+    if (childJob != null) {
+      jobManager.enqueueImportChildJob(ofy, parentJobId, childJob.getJobId(), importModuleDto,
+          QueueEnum.GDOC_INTERACTION);
     }
   }
 
@@ -262,40 +271,42 @@ public class ImportModuleGoogleDocJobHandler implements JobHandlerInterface {
    * @param gdocImportContext
    * @param jobEntity
    */
-  private void startArchivingGoogleDoc(ImportModuleGoogleDocJobContext gdocImportContext,
-      JobEntity jobEntity) {
+  private void startArchivingGoogleDoc(final ImportModuleGoogleDocJobContext gdocImportContext,
+      final JobEntity jobEntity) {
     DocsServiceWrapper docsService = GuiceUtils.getInstance(DocsServiceWrapper.class);
 
     GoogleDocInfoDto resourceInfo = gdocImportContext.getResourceInfo();
 
     GoogleDocResourceId gdocResourceId = new GoogleDocResourceId(resourceInfo.getExternalId());
-     GoogleDocArchivePojo archiveInfo = docsService.archiveResource(gdocResourceId);
-     gdocImportContext.setArchiveId(archiveInfo.getArchiveId());
+    GoogleDocArchivePojo archiveInfo = docsService.archiveResource(gdocResourceId);
+    gdocImportContext.setArchiveId(archiveInfo.getArchiveId());
 
-//    String archiveId =
-//        "nTSZLtpDRSP5IP11Sol04pDkNbRFv7KVNL55qVoitx7rtrJHru1T6ljtTjMW26L3ygWrvW1tMZHHg6ARCy3UjxZRafUSMAgIFesW90teEkzsHCQ6FK96YLFEU7tKurf2hsM-tVKSUYw";
-//    gdocImportContext.setArchiveId(archiveId);
+    // String archiveId =
+    // "nTSZLtpDRSP5IP11Sol04pDkNbRFv7KVNL55qVoitx7rtrJHru1T6ljtTjMW26L3ygWrvW1tMZHHg6ARCy3UjxZRafUSMAgIFesW90teEkzsHCQ6FK96YLFEU7tKurf2hsM-tVKSUYw";
+    // gdocImportContext.setArchiveId(archiveId);
 
     gdocImportContext
         .setState(ImportModuleGoogleDocJobContext.GoogleDocImportJobState.WAITING_FOR_ARCHIVE);
 
-    Objectify ofy = ObjectifyUtils.initiateTransaction();
-    try {
-      updateJobContext(null, jobManager, jobEntity.getJobState(), gdocImportContext, jobEntity,
-          "Waiting for Archive");
-      jobManager.enqueueGoogleDocInteractionJob(ofy, jobEntity.getJobId());
-      ObjectifyUtils.commitTransaction(ofy);
-    } finally {
-      ObjectifyUtils.rollbackTransactionIfStillActive(ofy);
-    }
+    repeatInTransaction(new Transactable<Void>() {
+
+      @SuppressWarnings("synthetic-access")
+      @Override
+      public Void run(Objectify ofy) {
+        updateJobContext(null, jobManager, jobEntity.getJobState(), gdocImportContext, jobEntity,
+            "Waiting for Archive");
+        jobManager.enqueueGoogleDocInteractionJob(ofy, jobEntity.getJobId());
+        return null;
+      }
+    });
   }
 
   /**
    * @param gdocImportContext
    * @param jobEntity
    */
-  private void downloadArchiveIfReady(ImportModuleGoogleDocJobContext gdocImportContext,
-      JobEntity jobEntity) {
+  private void downloadArchiveIfReady(final ImportModuleGoogleDocJobContext gdocImportContext,
+      final JobEntity jobEntity) {
     DocsServiceWrapper docsService = GuiceUtils.getInstance(DocsServiceWrapper.class);
 
     String archiveId = gdocImportContext.getArchiveId();
@@ -313,23 +324,25 @@ public class ImportModuleGoogleDocJobHandler implements JobHandlerInterface {
         .setState(ImportModuleGoogleDocJobContext.GoogleDocImportJobState.ARCHIVE_DOWNLOADED);
     gdocImportContext.setGCSArchiveLocation(gcsArchiveLocation);
 
-    Objectify ofy = ObjectifyUtils.initiateTransaction();
-    try {
-      updateJobContext(ofy, jobManager, jobEntity.getJobState(), gdocImportContext, jobEntity,
-          "archive downloaded.");
-      jobManager.enqueueLightJob(ofy, jobEntity.getJobId());
-      ObjectifyUtils.commitTransaction(ofy);
-    } finally {
-      ObjectifyUtils.rollbackTransactionIfStillActive(ofy);
-    }
+    repeatInTransaction(new Transactable<Void>() {
+      @SuppressWarnings("synthetic-access")
+      @Override
+      public Void run(Objectify ofy) {
+        updateJobContext(ofy, jobManager, jobEntity.getJobState(), gdocImportContext, jobEntity,
+            "archive downloaded.");
+        jobManager.enqueueLightJob(ofy, jobEntity.getJobId());
+        return null;
+      }
+    });
+
   }
 
   /**
    * @param gdocImportContext
    * @param jobEntity
    */
-  private void
-      publishModule(ImportModuleGoogleDocJobContext gdocImportContext, JobEntity jobEntity) {
+  private void publishModule(ImportModuleGoogleDocJobContext gdocImportContext,
+      JobEntity jobEntity) {
     ModuleId moduleId = gdocImportContext.getModuleId();
     Version version = gdocImportContext.getVersion();
     try {
@@ -337,7 +350,7 @@ public class ImportModuleGoogleDocJobHandler implements JobHandlerInterface {
       Map<String, GSBlobInfo> resourceMap = Maps.newConcurrentMap();
 
       AppEngineFile file = new AppEngineFile(gdocImportContext.getGCSArchiveLocation());
-      FileReadChannel readChannel = fileService.openReadChannel(file, true /* lock */);
+      FileReadChannel readChannel = fileService.openReadChannel(file, false /*lock*/);
 
       InputStream inputStream = Channels.newInputStream(readChannel);
       ZipInputStream zipIn = new ZipInputStream(inputStream);
@@ -453,6 +466,7 @@ public class ImportModuleGoogleDocJobHandler implements JobHandlerInterface {
         ObjectifyUtils.rollbackTransactionIfStillActive(ofy);
       }
     } catch (Exception e) {
+      logger.warning(Throwables.getStackTraceAsString(e));
       throw new GoogleDocException(e);
     }
   }

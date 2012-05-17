@@ -17,8 +17,7 @@ package com.google.light.server.jobs.handlers;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotNull;
-
-import java.util.Set;
+import static com.google.light.server.utils.ObjectifyUtils.repeatInTransaction;
 
 import com.google.common.collect.Iterables;
 import com.google.inject.Inject;
@@ -34,9 +33,10 @@ import com.google.light.server.manager.interfaces.JobManager;
 import com.google.light.server.persistence.entity.jobs.JobEntity;
 import com.google.light.server.persistence.entity.jobs.JobEntity.TaskType;
 import com.google.light.server.persistence.entity.jobs.JobState;
-import com.google.light.server.utils.ObjectifyUtils;
+import com.google.light.server.utils.Transactable;
 import com.googlecode.objectify.Objectify;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
 /**
@@ -48,7 +48,7 @@ import java.util.logging.Logger;
  */
 public class JobHandler {
   private static final Logger logger = Logger.getLogger(JobHandler.class.getName());
-  
+
   private JobManager jobManager;
   private ImportModuleGoogleDocJobHandler importModuleGDocHandler;
   private ImportModuleSyntheticModuleJobHandler importModuleSyntheticJobHandler;
@@ -84,6 +84,7 @@ public class JobHandler {
     }
 
     JobState jobState = jobEntity.getJobState();
+    System.out.println("Jobstate : " + jobState + ", TaskType : " + jobEntity.getTaskType());
     switch (jobState) {
       case POLLING_FOR_CHILDS:
         pollForChilds(jobEntity);
@@ -130,7 +131,7 @@ public class JobHandler {
     }
   }
 
-  private void pollForChilds(JobEntity jobEntity) {
+  private void pollForChilds(final JobEntity jobEntity) {
     Set<JobId> listOfChildJobIds = jobEntity.getPendingChildJobs();
     Map<JobId, JobEntity> map = jobManager.findListOfJobs(listOfChildJobIds);
 
@@ -143,22 +144,24 @@ public class JobHandler {
       }
     }
 
-    Objectify ofy = ObjectifyUtils.initiateTransaction();
-    try {
-      String changeLog = null;
-      if (allChildsComplete) {
-        jobEntity.setJobState(JobState.ALL_CHILDS_COMPLETED);
-        jobManager.enqueueLightJob(ofy, jobEntity.getJobId());
-        changeLog = "All Childs complete";
-      } else {
-        changeLog = "Waiting for childs : " + Iterables.toString(jobEntity.getPendingChildJobs());
-      }
+    final boolean markAllChildsComplete = allChildsComplete;
+    repeatInTransaction(new Transactable<Void>() {
+      @SuppressWarnings("synthetic-access")
+      @Override
+      public Void run(Objectify ofy) {
+        String changeLog = null;
+        if (markAllChildsComplete) {
+          jobEntity.setJobState(JobState.ALL_CHILDS_COMPLETED);
+          jobManager.enqueueLightJob(ofy, jobEntity.getJobId());
+          changeLog = "All Childs complete";
+        } else {
+          changeLog = "Waiting for childs : " + Iterables.toString(jobEntity.getPendingChildJobs());
+        }
 
-      jobManager.put(ofy, jobEntity, new ChangeLogEntryPojo(changeLog));
-      ObjectifyUtils.commitTransaction(ofy);
-    } finally {
-      ObjectifyUtils.rollbackTransactionIfStillActive(ofy);
-    }
+        jobManager.put(ofy, jobEntity, new ChangeLogEntryPojo(changeLog));
+        return null;
+      }
+    });
 
     if (!allChildsComplete) {
       throw new WaitForChildsToComplete(jobEntity.getPendingChildJobs());

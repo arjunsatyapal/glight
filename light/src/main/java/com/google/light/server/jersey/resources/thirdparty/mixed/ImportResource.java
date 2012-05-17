@@ -17,59 +17,49 @@ package com.google.light.server.jersey.resources.thirdparty.mixed;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.constants.http.ContentTypeEnum.getContentTypeByString;
-import static com.google.light.server.httpclient.LightHttpClient.getHeaderValueFromResponse;
-import static com.google.light.server.jobs.handlers.modulejobs.ModuleJobUtils.reserveModuleId;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkPersonLoggedIn;
-import static com.google.light.server.utils.LightUtils.getURI;
+import static com.google.light.server.utils.ObjectifyUtils.repeatInTransaction;
 
-import com.google.light.server.jobs.handlers.modulejobs.ImportModuleSyntheticModuleJobContext;
-
-import com.google.light.server.dto.pojo.ChangeLogEntryPojo;
-
-import com.google.api.client.http.HttpResponse;
-import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-import com.google.light.server.constants.HttpHeaderEnum;
 import com.google.light.server.constants.JerseyConstants;
-import com.google.light.server.constants.QueueEnum;
+import com.google.light.server.constants.LightClientType;
 import com.google.light.server.constants.http.ContentTypeConstants;
 import com.google.light.server.constants.http.ContentTypeEnum;
+import com.google.light.server.dto.collection.CollectionState;
 import com.google.light.server.dto.importresource.ImportBatchType;
 import com.google.light.server.dto.importresource.ImportBatchWrapper;
 import com.google.light.server.dto.importresource.ImportExternalIdDto;
 import com.google.light.server.dto.module.ModuleState;
 import com.google.light.server.dto.module.ModuleType;
+import com.google.light.server.dto.pojo.tree.AbstractTreeNode.TreeNodeType;
+import com.google.light.server.dto.pojo.tree.collection.CollectionTreeNodeDto;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.JobId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
-import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocInfoDto;
-import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocResourceId;
 import com.google.light.server.exception.ExceptionType;
-import com.google.light.server.httpclient.LightHttpClient;
+import com.google.light.server.exception.unchecked.InvalidExternalIdException;
 import com.google.light.server.jersey.resources.AbstractJerseyResource;
-import com.google.light.server.jobs.handlers.collectionjobs.ImportCollectionGoogleDocJobHandler;
-import com.google.light.server.jobs.handlers.modulejobs.ImportModuleGoogleDocJobHandler;
 import com.google.light.server.manager.interfaces.CollectionManager;
 import com.google.light.server.manager.interfaces.JobManager;
 import com.google.light.server.manager.interfaces.ModuleManager;
 import com.google.light.server.persistence.entity.collection.CollectionEntity;
+import com.google.light.server.persistence.entity.collection.CollectionVersionEntity;
 import com.google.light.server.persistence.entity.jobs.JobEntity;
 import com.google.light.server.persistence.entity.jobs.JobState;
-import com.google.light.server.persistence.entity.module.ModuleEntity;
 import com.google.light.server.servlets.SessionManager;
-import com.google.light.server.thirdparty.clients.google.gdata.gdoc.DocsServiceWrapper;
 import com.google.light.server.utils.GuiceUtils;
 import com.google.light.server.utils.JsonUtils;
+import com.google.light.server.utils.ModuleUtils;
 import com.google.light.server.utils.ObjectifyUtils;
+import com.google.light.server.utils.Transactable;
 import com.google.light.server.utils.XmlUtils;
 import com.googlecode.objectify.Objectify;
-import java.io.IOException;
-import java.net.URI;
+import java.util.List;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -91,33 +81,18 @@ import org.apache.commons.lang.StringUtils;
 public class ImportResource extends AbstractJerseyResource {
   private static final Logger logger = Logger.getLogger(ImportResource.class.getName());
 
-  private LightHttpClient httpClient;
   private JobManager jobManager;
   private ModuleManager moduleManager;
   private CollectionManager collectionManager;
-  private ImportCollectionGoogleDocJobHandler importCollectionGDocJobHandler;
-  private ImportModuleGoogleDocJobHandler importGoogleDocModuleJobHandler;
-
   @Inject
   public ImportResource(Injector injector, HttpServletRequest request,
       HttpServletResponse response, JobManager jobManager, CollectionManager collectionManager,
-      ModuleManager moduleManager,
-      ImportCollectionGoogleDocJobHandler importCollectionGDocJobHandler,
-      ImportModuleGoogleDocJobHandler importGoogleDocModuleJob,
-      LightHttpClient httpClient) {
+      ModuleManager moduleManager) {
     super(injector, request, response);
     this.jobManager = checkNotNull(jobManager, ExceptionType.SERVER_GUICE_INJECTION, "jobManager");
     this.collectionManager = checkNotNull(collectionManager, "collectionManager");
     this.moduleManager = checkNotNull(
         moduleManager, ExceptionType.SERVER_GUICE_INJECTION, "moduleManager");
-
-    this.importCollectionGDocJobHandler = checkNotNull(importCollectionGDocJobHandler,
-        ExceptionType.SERVER_GUICE_INJECTION, "importCollectionGDocJobHandler");
-    
-    this.importGoogleDocModuleJobHandler = checkNotNull(importGoogleDocModuleJob,
-        ExceptionType.SERVER_GUICE_INJECTION, "importGoogleDocModuleJob");
-    
-    this.httpClient = checkNotNull(httpClient, ExceptionType.SERVER_GUICE_INJECTION, "httpClient");
   }
 
   @POST
@@ -152,309 +127,190 @@ public class ImportResource extends AbstractJerseyResource {
     // Validate all child requests.
     importBatchWrapper.requestValidation();
     ImportBatchType type = importBatchWrapper.getImportBatchType();
-
-    JobId rootJobId = jobManager.createImportBatchJob(importBatchWrapper);
-    JobId parentJobId = rootJobId;
+    //
+    // JobId parentJobId = rootJobId;
     switch (type) {
       case APPEND_COLLECTION_JOB:
         checkNotNull(importBatchWrapper.getBaseVersion(), "BaseVersion cannot be null.");
-        //$FALL-THROUGH$
-        
-      case CREATE_COLLECTION_JOB:
-        reserveCollectionVersion(importBatchWrapper);
-        //$FALL-THROUGH$
-        
-      case MODULE_JOB:
-        for (ImportExternalIdDto importModuleDto : importBatchWrapper.getList()) {
-          enqueueImportChildJob(importModuleDto, parentJobId, rootJobId);
-        }
+        checkNotNull(importBatchWrapper.getCollectionId(), "CollectionId cannot be null.");
         break;
+
+      case CREATE_COLLECTION_JOB:
+        checkNotBlank(importBatchWrapper.getCollectionTitle(), "collectionTitle cannot be null.");
+        break;
+
+      case MODULE_JOB:
+        break;
+      // for (ImportExternalIdDto importModuleDto : importBatchWrapper.getList()) {
+      // enqueueImportChildJob(importModuleDto, parentJobId, rootJobId);
+      // }
+      // break;
 
       default:
         throw new IllegalArgumentException("Unsupported type :" + type);
     }
-    Objectify ofy = ObjectifyUtils.initiateTransaction();
-    try {
-      JobEntity rootJobEntity = updateCurrentJobAccordingToChildJobs(ofy, jobManager, 
-          rootJobId);
-      
-      rootJobEntity.setContext(importBatchWrapper);
-      jobManager.put(ofy, rootJobEntity, new ChangeLogEntryPojo("Updating state and context."));
 
-      ObjectifyUtils.commitTransaction(ofy);
+    // Now reserve ModuleIds for each of the externalIds.
+    List<PersonId> owners = Lists.newArrayList(GuiceUtils.getOwnerId());
+    reserveModuleIdAndUpdateWrapper(importBatchWrapper, owners);
+
+    return handleCollectionAndRelatedJob(importBatchWrapper);
+  }
+
+  /**
+   * @param importBatchWrapper
+   * @return
+   */
+  private ImportBatchWrapper handleCollectionAndRelatedJob(
+      final ImportBatchWrapper importBatchWrapper) {
+    repeatInTransaction(new Transactable<Void>() {
+      @SuppressWarnings("synthetic-access")
+      @Override
+      public Void run(Objectify ofy) {
+        List<PersonId> owners = Lists.newArrayList(GuiceUtils.getOwnerId());
+
+        CollectionTreeNodeDto dummyRoot = getDummyRootFromImportBatchWrapper(importBatchWrapper);
+        CollectionEntity collectionEntity = null;
+        switch (importBatchWrapper.getImportBatchType()) {
+          case CREATE_COLLECTION_JOB:
+            collectionEntity = collectionManager.createEmptyCollection(ofy, owners, dummyRoot);
+            Version reservVersion = collectionEntity.reserveVersion();
+            collectionManager.update(ofy, collectionEntity);
+            
+            importBatchWrapper.setCollectionId(collectionEntity.getCollectionId());
+            importBatchWrapper.setBaseVersion(collectionEntity.getLatestPublishVersion());
+            importBatchWrapper.setVersion(reservVersion);
+            break;
+
+          case APPEND_COLLECTION_JOB:
+            CollectionVersionEntity cvEntity = collectionManager.getLatestPublishedVersion(
+                ofy, importBatchWrapper.getCollectionId());
+            checkNotNull(cvEntity, "cvEntity should not be null here.");
+            CollectionTreeNodeDto rootToBeUpdated = cvEntity.getCollectionTree();
+            rootToBeUpdated.importChildsFrom(dummyRoot);
+            
+            Version publishVersion = collectionManager.reserveAndPublishAsLatest(ofy,  
+                importBatchWrapper.getCollectionId(),  rootToBeUpdated, 
+                CollectionState.PARTIALLY_PUBLISHED);
+            importBatchWrapper.setBaseVersion(publishVersion);
+            importBatchWrapper.setVersion(publishVersion);
+            break;
+
+          case MODULE_JOB:
+            break;
+
+          default:
+            throw new IllegalStateException("Add support for : "
+                + importBatchWrapper.getImportBatchType());
+        }
+
+        JobState jobState = JobState.ENQUEUED;
+        JobId rootJobId = jobManager.createImportBatchJob(
+            ofy, importBatchWrapper, JobState.ENQUEUED);
+        importBatchWrapper.setJobState(jobState);
+        importBatchWrapper.setJobId(rootJobId);
+        jobManager.enqueueLightJob(ofy, rootJobId);
+
+        return null;
+      }
+    });
+
+    importBatchWrapper.responseValidation();
+    return importBatchWrapper;
+  }
+
+  /**
+   * @param importBatchWrapper
+   * @return
+   */
+  private static CollectionTreeNodeDto getDummyRootFromImportBatchWrapper(
+      final ImportBatchWrapper importBatchWrapper) {
+    CollectionTreeNodeDto dummyRoot = new CollectionTreeNodeDto.Builder()
+        .title(importBatchWrapper.getCollectionTitle())
+        .nodeType(TreeNodeType.ROOT_NODE)
+        .moduleType(ModuleType.LIGHT_COLLECTION)
+        .build();
+    
+    
+    for (ImportExternalIdDto currExternalIdDto : importBatchWrapper.getList()) {
+      CollectionTreeNodeDto newChild = new CollectionTreeNodeDto.Builder()
+          .title(currExternalIdDto.getTitle())
+          .moduleType(currExternalIdDto.getModuleType())
+          .externalId(currExternalIdDto.getExternalId())
+          .nodeType(currExternalIdDto.getModuleType().getNodeType())
+          .moduleId(currExternalIdDto.getModuleId())
+          .build();
       
-      importBatchWrapper.setJobDetails(rootJobEntity);
-      importBatchWrapper.responseValidation();
-      
-      return importBatchWrapper;
-    } finally {
-      ObjectifyUtils.rollbackTransactionIfStillActive(ofy);
+      dummyRoot.addChildren(newChild);
+    }
+    return dummyRoot;
+  }
+  
+  /**
+   * @param importBatchWrapper
+   */
+  private void reserveModuleIdAndUpdateWrapper(ImportBatchWrapper importBatchWrapper,
+      final List<PersonId> owners) {
+    // TODO(arjuns) : Replace this with multithreaded once available.
+    for (final ImportExternalIdDto currExternalIdDto : importBatchWrapper.getList()) {
+      currExternalIdDto.setModuleType(currExternalIdDto.getExternalId().getModuleType());
+      try {
+        // Predicting title does two things :
+        // 1. Fetches the title.
+        // 2. Ensures that its a valid module.
+        final String predictedTitle = ModuleUtils.getTitleForExternalId(
+            currExternalIdDto.getExternalId());
+        if (StringUtils.isBlank(currExternalIdDto.getTitle())) {
+          currExternalIdDto.setTitle(predictedTitle);
+        }
+
+        if (currExternalIdDto.getModuleType().mapsToModule()) {
+          // Now reserve ModuleIds.
+          repeatInTransaction(new Transactable<Void>() {
+            @SuppressWarnings("synthetic-access")
+            @Override
+            public Void run(Objectify ofy) {
+              ModuleId moduleId = moduleManager.reserveModuleId
+                  (ofy, currExternalIdDto.getExternalId(), owners, currExternalIdDto.getTitle());
+              currExternalIdDto.setModuleId(moduleId);
+              return null;
+            }
+          });
+        }
+
+        currExternalIdDto.setModuleState(ModuleState.IMPORTING);
+      } catch (InvalidExternalIdException e) {
+        logger.info("Ignoring externalId : " + currExternalIdDto.getExternalId());
+        currExternalIdDto.setModuleState(ModuleState.FAILED);
+      }
     }
   }
 
   /**
    * @param importBatchWrapper
-   * @param rootJobId
-   * @param ofy
-   * @return
+   * @param collectionEntity
    */
-  public static  JobEntity updateCurrentJobAccordingToChildJobs(Objectify ofy, 
-      JobManager jobManager, JobId jobId) {
-    
-    // Now set the status of Root Job depending on childs.
-    JobEntity jobEntity = jobManager.get(ofy, jobId);
-    JobState jobState = null;
-    if (jobEntity.hasPendingChildJobs()) {
-      jobState = JobState.WAITING_FOR_CHILD_COMPLETE_NOTIFICATION;
-    } else {
-      jobState = JobState.ALL_CHILDS_COMPLETED;
-      jobManager.enqueueLightJob(ofy, jobId);
-    }
-    jobEntity.setJobState(jobState);
-    logger.info("Setting currenJob[" + jobId + "] to " + jobState);
-    jobManager.put(ofy, jobEntity, new ChangeLogEntryPojo("Updating JobState to : " + jobState));
-    return jobEntity;
-  }
+  private void reserveCollectionVersionForAppendCollectionJob(
+      final ImportBatchWrapper importBatchWrapper) {
+    ObjectifyUtils.repeatInTransaction(new Transactable<Void>() {
 
-  private void reserveCollectionVersion(ImportBatchWrapper importBatchWrapper) {
-    PersonId ownerId = GuiceUtils.getOwnerId();
-    ImportBatchType type = importBatchWrapper.getImportBatchType();
+      @SuppressWarnings("synthetic-access")
+      @Override
+      public Void run(Objectify ofy) {
+        CollectionEntity collectionEntity = collectionManager.get(
+            ofy, importBatchWrapper.getCollectionId());
+        checkNotNull(collectionEntity, "collectionEntity should not be null here.");
+        Version reservedVersion = collectionManager.reserveCollectionVersion(
+            ofy, importBatchWrapper.getCollectionId());
+        importBatchWrapper.setVersion(reservedVersion);
 
-    Objectify ofy = null;
-    CollectionEntity collectionEntity = null;
-    switch (type) {
-      case MODULE_JOB:
-        throw new IllegalStateException("Code should not reach here but reached for "
-            + importBatchWrapper.toJson());
+        Version baseVersion = collectionEntity.determineBaseVersionForAppend(
+            importBatchWrapper.getBaseVersion(), reservedVersion, LightClientType.BROWSER);
 
-      case CREATE_COLLECTION_JOB:
-        ofy = ObjectifyUtils.initiateTransaction();
-        try {
-          collectionEntity = collectionManager.reserveCollectionId(
-              ofy, Lists.newArrayList(ownerId), importBatchWrapper.getCollectionTitle());
-          importBatchWrapper.setCollectionId(collectionEntity.getCollectionId());
-          ObjectifyUtils.commitTransaction(ofy);
-        } finally {
-          ObjectifyUtils.rollbackTransactionIfStillActive(ofy);
-        }
-        
-        importBatchWrapper.setBaseVersion(new Version(Version.NO_VERSION));
-        
-        //$FALL-THROUGH$
-
-      case APPEND_COLLECTION_JOB:
-        ofy = ObjectifyUtils.initiateTransaction();
-        try {
-          if (collectionEntity == null) {
-            collectionEntity = collectionManager.get(ofy, importBatchWrapper.getCollectionId());
-          }
-          checkNotNull(collectionEntity, "collectionEntity should not be null here.");
-          Version version = collectionManager.reserveCollectionVersion(
-              ofy, importBatchWrapper.getCollectionId());
-
-          importBatchWrapper.setVersion(version);
-          ObjectifyUtils.commitTransaction(ofy);
-        } finally {
-          ObjectifyUtils.rollbackTransactionIfStillActive(ofy);
-        }
-    }
-  }
-
-  /**
-   * @param parentJob
-   * @param currExternalId
-   */
-  private void enqueueImportChildJob(
-      ImportExternalIdDto importModuleDto, JobId parentJobId, JobId rootJobId) {
-    ModuleType moduleType = importModuleDto.getExternalId().getModuleType();
-
-    if (moduleType.mapsToCollection()) {
-      handleChildsMappingToCollection(importModuleDto, moduleType, parentJobId, rootJobId);
-    } else {
-      handlineChildsMappingToModules(importModuleDto, moduleType, parentJobId, rootJobId);
-    }
-  }
-
-  /**
-   * 
-   */
-  private void handlineChildsMappingToModules(ImportExternalIdDto importModuleDto,
-      ModuleType moduleType, JobId parentJobId, JobId rootJobId) {
-    switch (moduleType) {
-      case GOOGLE_DOCUMENT:
-        enqueueImportChildGoogleDocJob(importModuleDto, parentJobId, rootJobId);
-        break;
-
-      case GOOGLE_DRAWING:
-      case GOOGLE_FILE:
-      case GOOGLE_FORM:
-      case GOOGLE_PRESENTATION:
-      case GOOGLE_SPREADSHEET:
-      case LIGHT_SYNTHETIC_MODULE:
-        try {
-          enqueueImportChildSyntheticModule(importModuleDto, parentJobId, rootJobId);
-        } catch (Exception e) {
-          logger.info("Failed to import : " + importModuleDto.getExternalId() + ". Reason : "
-              + Throwables.getStackTraceAsString(e));
-          updateImportExternalIdDtoForModulesForFailure(importModuleDto, ModuleState.FAILED);
-        }
-        break;
-
-      default:
-        throw new UnsupportedOperationException(moduleType + " is currently not supported.");
-    }
-  }
-
-  /**
-   * @param importModuleDto
-   * @return
-   */
-  private GoogleDocInfoDto getGDocInfo(ImportExternalIdDto importModuleDto) {
-    DocsServiceWrapper docsService = GuiceUtils.getInstance(DocsServiceWrapper.class);
-    GoogleDocResourceId resourceId = new GoogleDocResourceId(importModuleDto.getExternalId());
-    GoogleDocInfoDto gdocInfo = docsService.getGoogleDocInfo(resourceId);
-    return gdocInfo;
-  }
-
-  /**
-   * @param externalIdDto
-   * @param parentJobId
-   * @param rootJobId
-   */
-  public void enqueueImportChildSyntheticModule(ImportExternalIdDto importModuleDto,
-      JobId parentJobId, JobId rootJobId) throws IOException {
-
-    ModuleId moduleId = moduleManager.findModuleIdByExternalId(null,
-        importModuleDto.getExternalId());
-
-    if (moduleId != null) {
-      ModuleEntity existingModule = moduleManager.get(null, moduleId);
-      if (existingModule != null && existingModule.getModuleState() == ModuleState.PUBLISHED) {
-        // No need to publish new version for this synthetic module.
-        updateImportExternalIdDtoForModules(importModuleDto, moduleId,
-            existingModule.getLatestPublishVersion(),
-            ModuleState.PUBLISHED, existingModule.getModuleType(), existingModule.getTitle(), null);
-        return;
+        importBatchWrapper.setBaseVersion(baseVersion);
+        return null;
       }
-    }
-    
-    // First see if this ExternalId is suitable for Synthetic Module.
-    URI uri = getURI(importModuleDto.getExternalId().getValue());
-    HttpResponse response = httpClient.get(uri);
-
-    if (!response.isSuccessStatusCode()) {
-      updateImportExternalIdDtoForModulesForFailure(importModuleDto, ModuleState.FAILED);
-    }
-
-    String xFrameHeader = getHeaderValueFromResponse(response, HttpHeaderEnum.X_FRAME_OPTIONS);
-    if (xFrameHeader != null) {
-      // This module cannot be embedded inside iFrame so it is not allowed for synthetic module.
-      updateImportExternalIdDtoForModulesForFailure(importModuleDto, ModuleState.NOT_SUPPORTED);
-      return;
-    }
-
-
-    // Current ExternalId is suitable for Synthetic Module.
-    PersonId ownerId = GuiceUtils.getOwnerId();
-    checkNotNull(ownerId, "ownerId should not be null here.");
-
-    if (moduleId == null) {
-      moduleId = reserveModuleId(moduleManager, importModuleDto, ownerId);
-    }
-    checkNotNull(moduleId, "moduleId should not be null here.");
-    
-//    if (moduleId != null) {
-//      throw new IllegalStateException();
-//    }
-    
-
-    /*
-     * Now reserving a module version and creating a Synthetic Module Child job that will
-     * publish this version.
-     */
-    Objectify ofy = ObjectifyUtils.initiateTransaction();
-    try {
-      Version reservedVersion = moduleManager.reserveModuleVersion(ofy, moduleId, null /* etag */,
-          null /* last edit time */);
-
-      if (reservedVersion == null) {
-        // Since this is a synthetic module, so only one version is enough.
-        updateImportExternalIdDtoForModules(importModuleDto, moduleId, new Version(Version.LATEST_VERSION),
-            ModuleState.PUBLISHED, ModuleType.LIGHT_SYNTHETIC_MODULE, importModuleDto.getTitle(),
-            null);
-        return;
-      }
-
-      String title = null;
-
-      if (StringUtils.isNotBlank(importModuleDto.getTitle())) {
-        title = importModuleDto.getTitle();
-      } else {
-        title = httpClient.getTitle(response, importModuleDto.getExternalId());
-      }
-
-      ImportModuleSyntheticModuleJobContext jobContext = new ImportModuleSyntheticModuleJobContext.Builder()
-          .title(title)
-          .externalId(importModuleDto.getExternalId())
-          .moduleId(moduleId)
-          .version(reservedVersion)
-          .build();
-
-      JobEntity childJob = jobManager.createSyntheticModuleJob(
-          ofy, jobContext, parentJobId, rootJobId);
-
-      /*
-       * Now saving details about ModuleId and version as part of ExternalIdDto that will be
-       * eventually sent to the client. Also this will be stored as part of the parent Batch Job
-       * which can be useful for Debugging later.
-       */
-      updateImportExternalIdDtoForModules(importModuleDto, moduleId, reservedVersion,
-          ModuleState.IMPORTING, ModuleType.LIGHT_SYNTHETIC_MODULE, title, childJob);
-      jobManager.enqueueImportChildJob(ofy, parentJobId, childJob.getJobId(), importModuleDto,
-          QueueEnum.LIGHT);
-      ObjectifyUtils.commitTransaction(ofy);
-    } finally {
-      ObjectifyUtils.rollbackTransactionIfStillActive(ofy);
-    }
-  }
-
-  /**
-   * @param parentJob
-   * @param externalIdDto
-   */
-  private void enqueueImportChildGoogleDocJob(ImportExternalIdDto importExternalIdDto,
-      JobId parentJobId,
-      JobId rootJobId) {
-    GoogleDocInfoDto gdocInfo = getGDocInfo(importExternalIdDto);
-
-    ModuleType moduleType = gdocInfo.getModuleType();
-    switch (moduleType) {
-      case GOOGLE_DOCUMENT:
-        importGoogleDocModuleJobHandler.enqueueModuleGoogleDocJob(
-            importExternalIdDto, gdocInfo, parentJobId, rootJobId);
-        break;
-
-      case GOOGLE_COLLECTION:
-        throw new IllegalStateException("Code should not reach here but reached for "
-            + gdocInfo.toJson());
-
-      default:
-        throw new IllegalArgumentException("Unsupported type " + moduleType);
-    }
-  }
-  
-  private void handleChildsMappingToCollection(ImportExternalIdDto importModuleDto,
-      ModuleType moduleType, JobId parentJobId, JobId rootJobId) {
-    switch (moduleType) {
-      case GOOGLE_COLLECTION:
-        GoogleDocInfoDto gdocInfo = getGDocInfo(importModuleDto);
-        importCollectionGDocJobHandler.enqueueCollectionGoogleDocJob(
-            importModuleDto, gdocInfo, parentJobId, rootJobId);
-        break;
-
-      default:
-        throw new IllegalStateException("Add support for " + moduleType);
-    }
+    });
   }
 
   /**
@@ -479,12 +335,14 @@ public class ImportResource extends AbstractJerseyResource {
     }
   }
 
-  public static void updateImportExternalIdDtoForModulesForFailure(ImportExternalIdDto externalIdDto,
+  public static void updateImportExternalIdDtoForModulesForFailure(
+      ImportExternalIdDto externalIdDto,
       ModuleState moduleState) {
     externalIdDto.setModuleState(moduleState);
   }
-  
-  public static void updateImportExternalIdDtoForCollections(ImportExternalIdDto importExternalIdDto,
+
+  public static void updateImportExternalIdDtoForCollections(
+      ImportExternalIdDto importExternalIdDto,
       ModuleType moduleType, ModuleState moduleState, String title, JobEntity childJob) {
     importExternalIdDto.setModuleType(checkNotNull(moduleType, "moduleType"));
     importExternalIdDto.setTitle(checkNotBlank(title, "title"));

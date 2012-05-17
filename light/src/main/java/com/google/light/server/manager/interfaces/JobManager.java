@@ -15,11 +15,11 @@
  */
 package com.google.light.server.manager.interfaces;
 
+import com.google.light.server.persistence.entity.jobs.JobState;
+
 import com.google.light.server.serveronlypojos.GAEQueryWrapper;
 
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
-
-import java.util.List;
 
 import java.util.Collection;
 
@@ -84,7 +84,7 @@ public interface JobManager {
   public Map<JobId, JobEntity> findListOfJobs(Collection<JobId> setOfJobIds);
   
   // For using externalIds.
-  public JobId createImportBatchJob(ImportBatchWrapper jobRequest);
+  public JobId createImportBatchJob(Objectify ofy, ImportBatchWrapper jobRequest, JobState jobState);
   
   public JobEntity createImportCollectionGoogleCollectionJob(Objectify ofy, ImportCollectionGoogleDocContext jobRequest,
       JobId parentJobId, JobId rootJobId);

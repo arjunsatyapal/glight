@@ -32,7 +32,6 @@ import com.google.light.server.dto.pojo.typewrapper.longwrapper.JobId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
 import com.google.light.server.dto.pojo.typewrapper.stringwrapper.ExternalId;
 import com.google.light.server.exception.unchecked.httpexception.BadRequestException;
-import com.google.light.server.persistence.entity.jobs.JobEntity;
 import com.google.light.server.persistence.entity.jobs.JobState;
 import com.google.light.server.persistence.entity.jobs.JobStateCategory;
 import java.util.List;
@@ -195,20 +194,22 @@ public class ImportBatchWrapper extends AbstractDto<ImportBatchWrapper> {
   public JobId getJobId() {
     return jobId;
   }
+  
+  public void setJobId(JobId jobId) {
+    this.jobId = checkNotNull(jobId, "jobId");
+  }
 
   public JobState getJobState() {
     return jobState;
   }
+  
+  public void setJobState(JobState jobState) {
+    this.jobState = checkNotNull(jobState, "jobState");
+    this.jobStateCategory = jobState.getCategory();
+  }
 
   public JobStateCategory getJobStateCategory() {
     return jobStateCategory;
-  }
-
-  public void setJobDetails(JobEntity jobEntity) {
-    checkNotNull(jobEntity, "jobEntity");
-    this.jobId = jobEntity.getJobId();
-    this.jobState = jobEntity.getJobState();
-    this.jobStateCategory = jobState.getCategory();
   }
 
   public ImportBatchType getImportBatchType() {

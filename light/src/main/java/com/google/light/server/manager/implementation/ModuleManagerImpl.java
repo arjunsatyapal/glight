@@ -101,9 +101,8 @@ public class ModuleManagerImpl implements ModuleManager {
    * {@inheritDoc}
    */
   @Override
-  public ModuleEntity update(ModuleEntity updatedEntity) {
-    // TODO(arjuns): Auto-generated method stub
-    throw new UnsupportedOperationException();
+  public ModuleEntity update(Objectify ofy, ModuleEntity updatedEntity) {
+    return moduleDao.put(ofy, updatedEntity);
   }
 
   /**
@@ -136,31 +135,36 @@ public class ModuleManagerImpl implements ModuleManager {
     return null;
   }
 
+  @Override
+  public ModuleId reserveModuleId(Objectify ofy, ExternalId externalId,
+      List<PersonId> owners, String title) {
+    return reserveModule(ofy, externalId, owners, title).getModuleId();
+  }
+
   /**
    * {@inheritDoc}
    */
   @Override
-  public ModuleId reserveModuleId(Objectify ofy, ExternalId externalId,
+  public ModuleEntity reserveModule(Objectify ofy, ExternalId externalId,
       List<PersonId> owners, String title) {
     checkTxnIsRunning(ofy);
     checkNotNull(externalId, "externalId");
 
     ModuleId existingModuleId = findModuleIdByExternalId(ofy, externalId);
     if (existingModuleId != null) {
-      return existingModuleId;
+      return get(ofy, existingModuleId);
     }
 
     if (StringUtils.isBlank(title)) {
       title = "Untitled : " + new DateTime(getNow()) + ":" + externalId.getValue();
     }
-    
+
     /*
-     *  Now create a new Dummy module as a placeHolder which will be later updated when content
-     *  is available.
-     * 
-     *  TODO(arjuns): Add a cleanup job for cleaning up MOdules which dont move from Reserved state
+     * Now create a new Dummy module as a placeHolder which will be later updated when content
+     * is available.
+     * TODO(arjuns): Add a cleanup job for cleaning up MOdules which dont move from Reserved state
      * for long time.
-     */  
+     */
     ModuleEntity moduleEntity = new ModuleEntity.Builder()
         .title(title)
         .moduleState(ModuleState.RESERVED)
@@ -176,7 +180,7 @@ public class ModuleManagerImpl implements ModuleManager {
         .build();
     externalIdMappingDao.put(ofy, mappingEntity);
 
-    return persistedEntity.getModuleId();
+    return persistedEntity;
   }
 
   /**
@@ -184,7 +188,7 @@ public class ModuleManagerImpl implements ModuleManager {
    */
   @Override
   public ModuleVersionEntity publishModuleVersion(Objectify ofy, ModuleId moduleId,
-      Version version, ExternalId externalId, String title, String content, String etag, 
+      Version version, ExternalId externalId, String title, String content, String etag,
       Instant lastEditTime) {
     checkTxnIsRunning(ofy);
     checkNotNull(moduleId, "moduleId");
@@ -192,12 +196,12 @@ public class ModuleManagerImpl implements ModuleManager {
     checkNotNull(externalId, "externalId");
     checkNotBlank(title, "title");
     checkNotBlank(content, "content");
-    
+
     ModuleEntity moduleEntity = this.get(ofy, moduleId);
     checkNotNull(moduleEntity, "Module[" + moduleId + "] was not found.");
 
     ModuleVersionEntity fetchedEntity = moduleVersionDao.get(ofy, moduleId, version);
-    
+
     ModuleVersionEntity moduleVersionEntity = new ModuleVersionEntity.Builder()
         .version(version)
         .moduleKey(moduleEntity.getKey())

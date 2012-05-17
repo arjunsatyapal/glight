@@ -18,6 +18,9 @@ package com.google.light.server.utils;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightUtils.getStackAsString;
 import static com.google.light.server.utils.LightUtils.isCollectionEmpty;
+
+import com.google.light.server.constants.LightConstants;
+
 import com.google.common.base.Throwables;
 
 import com.google.appengine.api.datastore.Cursor;
@@ -89,7 +92,7 @@ public class ObjectifyUtils {
         ofy.getTxn().commit();
       }
       logger.info("Successfully committed");
-      Thread.sleep(2000);
+      // Thread.sleep(2000);
     } catch (Exception e) {
       logger.severe("Exception while committing : " + Throwables.getStackTraceAsString(e));
       LightUtils.wrapIntoRuntimeExceptionAndThrow(e);
@@ -227,8 +230,7 @@ public class ObjectifyUtils {
 
     GAEQueryWrapper<T> wrapper = new GAEQueryWrapper<T>();
 
-    
-    if(!isCollectionEmpty(listOfRecords) && iterator.hasNext()) {
+    if (!isCollectionEmpty(listOfRecords) && iterator.hasNext()) {
 
       wrapper.setStartIndex(iterator.getCursor().toWebSafeString());
     }
@@ -236,7 +238,7 @@ public class ObjectifyUtils {
 
     return wrapper;
   }
-  
+
   public static <T, O> GAEQueryWrapper<T> findQueryResultsByPageForField(Objectify ofy,
       Class<T> clazz, String filterKey, O filterValue, String startIndex, int maxResults) {
     Query<T> query = ofy.query(clazz).filter(filterKey, filterValue);
@@ -254,19 +256,13 @@ public class ObjectifyUtils {
 
     GAEQueryWrapper<T> wrapper = new GAEQueryWrapper<T>();
 
-    
-    if(!isCollectionEmpty(listOfRecords) && iterator.hasNext()) {
+    if (!isCollectionEmpty(listOfRecords) && iterator.hasNext()) {
 
       wrapper.setStartIndex(iterator.getCursor().toWebSafeString());
     }
     wrapper.setList(listOfRecords);
 
     return wrapper;
-  }
-
-  /** Alternate interface to Runnable for executing transactions */
-  public static interface Transactable<T> {
-    T run(Objectify ofy);
   }
 
   /** Create a default DAOT and run the transaction through it */
@@ -291,17 +287,17 @@ public class ObjectifyUtils {
    */
   public static <T> T repeatInTransaction(Transactable<T> t) {
     T toReturn = null;
-    for (int i = 5; i >= 0; i--) {
+    for (int count = LightConstants.OBJECTIFY_REPEAT_COUNT; count >= 0; count--) {
       try {
         toReturn = runInTransaction(t);
         break;
       } catch (ConcurrentModificationException ex) {
-        if (i == 0) {
+        if (count == 0) {
           throw ex;
         } else {
           logger.warning("Optimistic concurrency failure for " + t + ": " + ex);
           try {
-            Thread.sleep(i * 500);
+            Thread.sleep(count * 500);
           } catch (InterruptedException e) {
             // ignoring ...
           }

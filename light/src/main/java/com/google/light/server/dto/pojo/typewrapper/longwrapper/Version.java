@@ -19,6 +19,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
 
+import com.google.common.base.Preconditions;
+
 import com.google.light.server.constants.LightStringConstants;
 import com.google.light.server.dto.pojo.typewrapper.AbstractTypeWrapper;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version.VersionDeserializer;
@@ -86,6 +88,12 @@ public class Version extends AbstractTypeWrapper<Long, Version> {
 
   public Version getNextVersion() {
     return new Version(getValue() + 1);
+  }
+  
+  public Version getPreviousVersion() {
+    Preconditions.checkArgument(getValue() > NO_VERSION, 
+        "This should be called for values > " + NO_VERSION);
+    return new Version(getValue() - 1);
   }
 
   public State getState() {
