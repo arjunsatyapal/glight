@@ -42,7 +42,7 @@ public class JerseyUtils {
     
     Method m = jerseyMethodEnum.getMethod();
     path = m.getAnnotation(Path.class);
-    String methodPath = path.value();
+    String methodPath = path != null ? path.value() : "";
     
     return contextPath + classPath + methodPath;
   }

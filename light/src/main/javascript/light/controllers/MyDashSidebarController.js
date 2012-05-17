@@ -18,8 +18,7 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
         'light/builders/BrowseContextStateBuilder',
         'light/utils/XHRUtils'],
         function(declare, AbstractLightController, EventsEnum,
-                 connect, array, BrowseContextStateBuilder,
-                 XHRUtils) {
+                 connect, array, BrowseContextStateBuilder, XHRUtils) {
   var MAX_NUMBER_OF_COLLECTIONS_PER_BULK = 50;
 
   /**
@@ -30,6 +29,10 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
           AbstractLightController, {
 
     /** @lends light.controllers.MyDashSidebarController# */
+    constructor: function(collectionService, importService) {
+      this._collectionService = collectionService;
+      this._importService = importService;
+    },
 
     /**
      * Wire's this object to the dojo event system so it can
@@ -62,6 +65,8 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
 
     _lastXhr: null,
     _fetchCollectionsList: function() {
+      // TODO(waltercacau): Extract this to a pagination utility and move the
+      // XHRUtils calls to the services layer.
       var self = this;
       XHRUtils.get({
         url: '/rest/collection/me?maxResults=' +
@@ -86,7 +91,20 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
           self._fetchRemainingCollectionList(result);
         }
       });
-      
+
+    },
+
+    createCollection: function(collectionTitle) {
+      var self = this;
+      this._collectionService.create({
+        title: collectionTitle
+      }).then(function(collection) {
+        self._view.addToCollectionList(collection);
+      });
+    },
+    addToCollection: function(list, collectionId, collectionTitle) {
+      // TODO(waltercacau): Remove the collectionTitle requirement
+      this._importService.addToCollection(list, collectionId, collectionTitle);
     }
 
   });

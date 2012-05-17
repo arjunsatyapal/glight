@@ -205,7 +205,7 @@ define(['dojo/_base/connect', 'dojo/_base/declare', 'dojo/_base/lang',
       if (!version) {
         version = LightConstantsEnum.LATEST_VERSION_STR;
       }
-      return '/rest/content/general/module/' + moduleId + '/' + version + '/';
+      return URLUtils.getOrigin() + '/rest/content/general/module/' + moduleId + '/' + version + '/';
     },
 
 
@@ -214,16 +214,16 @@ define(['dojo/_base/connect', 'dojo/_base/declare', 'dojo/_base/lang',
       if (!version) {
         version = LightConstantsEnum.LATEST_VERSION_STR;
       }
-      return '/rest/content/general/collection/' + collectionId +
-          '/' + version + '/' + moduleId + '/';
+      return URLUtils.getOrigin() + '/rest/content/general/collection/' +
+          collectionId + '/' + version + '/' + moduleId + '/';
     },
 
     buildLinkForCollectionContent: function(collectionId, version) {
       if (!version) {
         version = LightConstantsEnum.LATEST_VERSION_STR;
       }
-      return '/rest/content/general/collection/' + collectionId +
-          '/' + version;
+      return URLUtils.getOrigin() + '/rest/content/general/collection/' +
+          collectionId + '/' + version;
     }
 
   };

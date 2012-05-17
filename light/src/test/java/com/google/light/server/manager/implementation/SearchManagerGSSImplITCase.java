@@ -37,7 +37,7 @@ public class SearchManagerGSSImplITCase extends AbstractLightServerTest {
    * This test query needs to be such a generic query that brings enougth results to fill the first
    * and second pages
    */
-  private static final String TEST_QUERY = "Addition";
+  private static final String TEST_QUERY = "asd";
   private static final String TEST_LANGUAGE_CODE = "en";
   private SearchManagerGSSImpl searchManager;
 

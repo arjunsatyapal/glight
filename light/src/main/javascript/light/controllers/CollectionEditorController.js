@@ -48,6 +48,8 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
      * Handler for browse context state change events.
      */
     _onBrowseContextStateChange: function(browseContextState, source) {
+      // TODO(waltercacau): Prompt the user when he is leaving this view
+      // if he has unsaved changes.
       this._view.hide();
       this._collectionId = null;
       if (browseContextState.context == BrowseContextsEnum.COLLECTION) {
@@ -71,7 +73,7 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
               // This is quite a hack. If you simple pass a canceler to
               // the deferred and then cancel the individual promises
               // you will get nasty messages in the console about
-              // the deferred being already resolved. 
+              // the deferred being already resolved.
               getCollection.cancel();
               getCollectionVersion.cancel();
             };
@@ -82,10 +84,31 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
           } else {
             self._collection = results[0][1];
             self._collectionVersion = results[1][1];
-            self._view.showEditor(self._collectionVersion.collectionTree);
+            self._view.showEditor(self._collectionId,
+                    self._collectionVersion.collectionTree);
           }
         });
       }
+    },
+    saveCollection: function(collectionTree) {
+      var self = this;
+      // TODO(waltercacau): Find a way to easily detect that
+      // a promise was cancelled
+      self._wasSaving = false;
+      this._singlePromiseContainer.handle(function() {
+        self._wasSaving = true;
+        return self._collectionService.updateLatest(
+                self._collectionId, collectionTree);
+      }).then(function() {
+        self._view.savedSuccessfully();
+      },function() {
+        // Avoiding cancelling errors if the user presses more then once
+        if (self._wasSaving) {
+          self._wasSaving = false;
+          self._view.failedToSave();
+        }
+      });
     }
   });
+
 });

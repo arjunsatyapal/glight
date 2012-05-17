@@ -31,7 +31,8 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
      * @extends light.controllers.AbstractLightController
      * @constructs
      */
-    constructor: function() {
+    constructor: function(importService) {
+      this._importService = importService;
       this._gdocPageLinks = [
         '/rest/thirdparty/google/gdoc/list?' + dojo.objectToQuery({
           'max-results': NUMBER_OF_ITEMS_PER_PAGE
@@ -106,19 +107,13 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
       }));
     },
 
-    /**
-     *
-     */
     importGdocs: function(items) {
       var list = [];
       for (var i = 0, len = items.length; i < len; i++) {
-        list.push(items[i].externalId);
+        list.push({ 'externalId' : items[i].externalId });
       }
       var self = this;
-      XHRUtils.post({
-        url: '/rest/thirdparty/google/gdoc/import',
-        postData: JSON.stringify({'list': list})
-      }).then(function() {
+      this._importService.import_(list).then(function() {
         self._view.alertSuccessfullyStartedGdocsImport();
       });
     }

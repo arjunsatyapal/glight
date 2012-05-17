@@ -12,16 +12,15 @@ define(['dojo/_base/declare', 'dojo/_base/array',
         'light/builders/BrowseContextStateBuilder',
         'light/utils/TemplateUtils',
         'dojo/_base/event',
-        'light/utils/DialogUtils'
-        ],
+        'light/utils/DialogUtils',
+        'light/enums/DndConstantsEnum'],
         function(declare, array, TemplatedLightView, _WidgetsInTemplateMixin,
                 DOMUtils, Tree, TreeDndSource, TreeDndSelector,
                 ItemFileWriteStore, ItemFileReadStore, DataStore, TreeStoreModel,
                 ForestStoreModel, lang, dojo, dijit, BrowseContextsEnum,
                 BrowseContextStateBuilder, TemplateUtils, eventUtil,
-                DialogUtils) {
+                DialogUtils, DndConstantsEnum) {
   var TREE_NODE_TYPE = 'treeNode';
-  var SEARCH_RESULT_TYPE = 'searchResult';
 
   /**
    * @class
@@ -97,7 +96,7 @@ define(['dojo/_base/declare', 'dojo/_base/array',
           } else if (this == self._collectionTree.dndController) {
             if (!newSelection[0].item.root) {
               var collectionId = self._collectionStore.store
-                  .getValue(newSelection[0].item, "collectionId");
+                  .getValue(newSelection[0].item, 'collectionId');
               self._controller.changeContextTo(
                       new BrowseContextStateBuilder()
                           .context(BrowseContextsEnum.COLLECTION)
@@ -157,7 +156,6 @@ define(['dojo/_base/declare', 'dojo/_base/array',
       this._synchronizedSelectionTrees.push(this._dummyMenuTree);
 
       // Collection's tree stuff
-      this._collectionStoreNextId = 4;
       // Encapsulating the store that will be used by the tree in the new
       // dojo.store api, which is much cleaner to use
       this._collectionStore = new DataStore({
@@ -193,10 +191,7 @@ define(['dojo/_base/declare', 'dojo/_base/array',
           rootLabel: 'My Collections',
           query: {}, // TODO(waltercacau): remove this if possible
           newItem: function(item, parent, insertIndex) {
-            console.log(item);
-            // TODO(waltercacau): Trigger the insertion of a module in a
-            // collection when dropped (or move maybe).
-            //ForestStoreModel.prototype.newItem.apply(this, arguments);
+            // nothing to do here, the import part is aleady done in the itemCreator.
           }
       });
 
@@ -226,24 +221,47 @@ define(['dojo/_base/declare', 'dojo/_base/array',
           return !treeNode.item.root;
         },
         checkAcceptance: function(source, nodes) {
-          return source.type == 'searchResultDndSource';
+          return source.type == DndConstantsEnum.MODULE_SOURCE_TYPE;
         },
         itemCreator: function(nodes, target, source) {
-          // TODO(waltercacau): Create the proper item to be consumed
-          // by our custom ForestStoreModel.newItem method
-          return array.map(nodes, function(node) {
+
+          // Figuring out what to import/add to collection
+          var importList = [];
+          var returnList = [];
+          array.forEach(nodes, function(node) {
+            returnList.push(null);
             var item = source.getItem(node.id);
-            if (array.indexOf(item.type, TREE_NODE_TYPE) != -1) {
+            if (array.indexOf(item.type,
+                    DndConstantsEnum.MODULE_TYPE) != -1) {
+              importList.push({
+                'externalId': item.data.externalId,
+                'title': item.data.title
+              });
+            }
+            /*if (array.indexOf(item.type, TREE_NODE_TYPE) != -1) {
               return item.data;
-            }
-            if (array.indexOf(item.type, SEARCH_RESULT_TYPE) != -1) {
-              return {
-                title: DOMUtils.asText(item.data.title),
-                link: item.data.link
-              };
-            }
-            throw new Error('Non accepted types ' + item.type);
+            }*/
           });
+
+          // If there is somthing to add to the collection ...
+          if (importList.length > 0) {
+            var collectionItem = dijit.byNode(target.parentNode).item;
+            var collectionId = self._collectionStore
+                .store.getValue(collectionItem, 'collectionId');
+            var collectionTitle = self._collectionStore
+                .store.getValue(collectionItem, 'title');
+            if (collectionId === undefined) {
+              throw new Error('Could not figure out collection id');
+            }
+            if (collectionTitle === undefined) {
+              throw new Error('Could not figure out collection title');
+            }
+            // TODO(waltercacau): Remove the collectionTitle requirement
+            self._controller.addToCollection(importList,
+                    collectionId, collectionTitle);
+          }
+
+          return returnList;
         }
       });
 
@@ -287,10 +305,7 @@ define(['dojo/_base/declare', 'dojo/_base/array',
         okLabel: 'Create',
         label: 'Title',
         onOk: function(collectionName) {
-          self._collectionStore.put({
-            collectionId: '' + (self._collectionStoreNextId++),
-            title: collectionName
-          });
+          self._controller.createCollection(collectionName);
         }
       });
     },
@@ -304,6 +319,7 @@ define(['dojo/_base/declare', 'dojo/_base/array',
         self._collectionStore.put(item);
       });
     },
+
     addToCollectionList: function(item) {
       this._collectionStore.put(item);
     }

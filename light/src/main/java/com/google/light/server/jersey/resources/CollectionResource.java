@@ -18,10 +18,12 @@ package com.google.light.server.jersey.resources;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.constants.LightConstants.MAX_RESULTS_MAX;
+import static com.google.light.server.constants.LightStringConstants.VERSION_LATEST_STR;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPersonLoggedIn;
 import static com.google.light.server.utils.LightUtils.isListEmpty;
 
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.light.server.constants.JerseyConstants;
@@ -31,9 +33,12 @@ import com.google.light.server.constants.http.ContentTypeConstants;
 import com.google.light.server.constants.http.ContentTypeEnum;
 import com.google.light.server.dto.collection.CollectionDto;
 import com.google.light.server.dto.collection.CollectionVersionDto;
+import com.google.light.server.dto.module.ModuleType;
 import com.google.light.server.dto.pages.PageDto;
+import com.google.light.server.dto.pojo.tree.AbstractTreeNode.TreeNodeType;
 import com.google.light.server.dto.pojo.tree.collection.CollectionTreeNodeDto;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.CollectionId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
 import com.google.light.server.exception.unchecked.httpexception.NotFoundException;
 import com.google.light.server.manager.interfaces.CollectionManager;
@@ -50,6 +55,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -115,7 +121,7 @@ public class CollectionResource extends AbstractJerseyResource {
       String body) {
     SessionManager sessionManager = GuiceUtils.getInstance(SessionManager.class);
     checkPersonLoggedIn(sessionManager);
-    
+
     CollectionId collectionId = new CollectionId(collectionIdStr);
     Version version = new Version(versionStr);
 
@@ -131,11 +137,11 @@ public class CollectionResource extends AbstractJerseyResource {
     } else {
       throw new IllegalArgumentException("Invalid contentType : " + contentType);
     }
-    
+
     checkNotNull(collectionTree, "collectionTree should not be null here.");
-    
+
     Version publishVersion = version;
-    
+
     if (version.isLatestVersion()) {
       Objectify ofy = ObjectifyUtils.initiateTransaction();
       try {
@@ -145,7 +151,7 @@ public class CollectionResource extends AbstractJerseyResource {
         ObjectifyUtils.rollbackTransactionIfStillActive(ofy);
       }
     }
-    
+
     CollectionVersionEntity response = null;
     Objectify ofy = ObjectifyUtils.initiateTransaction();
     try {
@@ -155,8 +161,23 @@ public class CollectionResource extends AbstractJerseyResource {
     } finally {
       ObjectifyUtils.rollbackTransactionIfStillActive(ofy);
     }
-    
+
     return response;
+  }
+
+  @POST
+  @Consumes({ ContentTypeConstants.APPLICATION_JSON, ContentTypeConstants.APPLICATION_XML })
+  @Produces({ ContentTypeConstants.APPLICATION_JSON, ContentTypeConstants.APPLICATION_XML })
+  public CollectionEntity postCollection(String body) {
+    SessionManager sessionManager = GuiceUtils.getInstance(SessionManager.class);
+    checkPersonLoggedIn(sessionManager);
+
+    PersonId ownerId = sessionManager.getPersonId();
+
+    // TODO(waltercacau): Fix this hack of using the body as the title.
+    String title = body;
+
+    return collectionManager.createEmptyCollection(Lists.newArrayList(ownerId), title);
   }
 
   protected CollectionVersionDto getCollectionVersionDto(String collectionIdStr,

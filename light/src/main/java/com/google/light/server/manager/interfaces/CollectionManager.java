@@ -62,6 +62,8 @@ public interface CollectionManager {
    * Add CollectionVersion for GoogleDoc.
    */
   public Version reserveCollectionVersion(Objectify ofy, CollectionId collectionId);
+  
+  public CollectionEntity createEmptyCollection(List<PersonId> owners, String title);
 
   public CollectionVersionEntity publishCollectionVersion(Objectify ofy,
       CollectionId collectionId, Version version, CollectionTreeNodeDto collectionRoot);

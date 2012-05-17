@@ -30,7 +30,7 @@ define({
     seeImportedButton: 'Imported Modules',
     importOtherModulesButton: 'Import Other Modules',
     gdocListLabel: 'The following are your Google Documents.',
-    gdocItemObservation: 'Items with a line through are not yet supported by light, so you cannot import them.',
+    gdocItemObservation: 'Items with a line through are not yet supported by light, so you cannot import them. Also, folders cannot be imported direclty using the Import Selected button, but you can drag them to your collections.',
     importListLabel: 'The following modules where imported by you into Light.'
   }
 });

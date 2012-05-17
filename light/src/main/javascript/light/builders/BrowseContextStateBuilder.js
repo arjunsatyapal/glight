@@ -35,7 +35,7 @@ define(['light/utils/BuilderUtils',
             // we require a string because of a dojo limitation for now
             // in getNodesByItem
             // TODO(waltercacau): check if we can remove this limitation
-            if (typeof this.subcontext != 'string') {
+            if (typeof this.subcontext != 'string' && typeof this.subcontext != 'number') {
               throw new Error('subcontext should be specified for collection');
             }
           }

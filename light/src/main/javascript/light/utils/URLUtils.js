@@ -77,6 +77,10 @@ define(['dojo/_base/declare', 'dojo/hash'], function(declare, dojoHash) {
      */
     getPathWithHash: function() {
       return this.getPath() + '#' + this.getHash();
+    },
+
+    getOrigin: function() {
+      return window.location.origin;
     }
 
   };

@@ -18,9 +18,16 @@ define({
     createSubcollectionDialogTitle: 'Create a subcollection',
     createSubcollectionOkButtonLabel: 'Create',
     createSubcollectionTitleTextboxLabel: 'Title',
-    saveButton: 'Save',
+    saveButtonLabel: 'Save',
+    savedButtonLabel: 'Saved!',
+    savingButtonLabel: 'Saving ...',
     newSubcollectionButton: 'New Subcollection',
     deleteSelectedButton: 'Delete Selected',
-    couldNotLoad: 'Could not load this collection.'
+    couldNotLoad: 'Could not load this collection.',
+    shareCollectionButton: 'Share',
+    collectionLinkTextBoxLabel: 'Link',
+    viewLastSaved: 'View last saved',
+    errorSavingDialogTitle: 'Error Saving',
+    errorSavingDialogContent: 'Could not save the collection. Please try again.'
   }
 });

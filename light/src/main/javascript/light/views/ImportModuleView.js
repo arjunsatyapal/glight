@@ -28,17 +28,18 @@ define(['dojo/_base/declare', 'light/views/TemplatedLightView',
         'light/widgets/PaginatedListWidget',
         'light/utils/TemplateUtils',
         'light/utils/DialogUtils',
+        'light/enums/DndConstantsEnum',
+        'light/builders/ModuleDndTypeBuilder',
         'dijit/form/Button'],
         function(declare, TemplatedLightView, template, GDocListItemTemplate,
                 messages, DOMUtils, URLUtils, LanguageUtils,
                 RouterManager, dojo, string,
                 domConstruct, _WidgetsInTemplateMixin, PaginatedListWidget, 
-                TemplateUtils, DialogUtils, Button) {
+                TemplateUtils, DialogUtils, DndConstantsEnum, ModuleDndTypeBuilder,
+                Button) {
   var SUPPORTED_GDOC_MODULE_TYPES_TO_IMPORT = {
-          'GOOGLE_DOCUMENT': true
-          // TODO(waltercacau): Fix import of folders giving
-          // the option to create collections. 
-          //, 'GOOGLE_COLLECTION': true
+          'GOOGLE_DOCUMENT': true,
+          'GOOGLE_COLLECTION': true
   };
 
 
@@ -57,7 +58,7 @@ define(['dojo/_base/declare', 'light/views/TemplatedLightView',
       var self = this;
       this._gdocPaginatedListWidget = new PaginatedListWidget({
         listOptions: {
-          type: 'gdocDndSource',
+          type: DndConstantsEnum.MODULE_SOURCE_TYPE,
           rawCreator: function(item) {
             var additionalClasses = '';
             if (!SUPPORTED_GDOC_MODULE_TYPES_TO_IMPORT[item.moduleType]) {
@@ -72,9 +73,13 @@ define(['dojo/_base/declare', 'light/views/TemplatedLightView',
 
             return {
               node: node,
-              data: item,
+              data: new ModuleDndTypeBuilder()
+                      .title(item.title)
+                      .externalId(item.externalId)
+                      .rawData(item)
+                      .build(),
               focusNode: dojo.query('a', node)[0],
-              type: ['gdoc']
+              type: [DndConstantsEnum.MODULE_TYPE]
             };
           }
         },
@@ -86,7 +91,7 @@ define(['dojo/_base/declare', 'light/views/TemplatedLightView',
 
       this._importedPaginatedListWidget = new PaginatedListWidget({
         listOptions: {
-          //type: 'gdocDndSource',
+          type: DndConstantsEnum.MODULE_SOURCE_TYPE,
           rawCreator: function(item) {
             var node = TemplateUtils.toDom('<div class="gdocListItem"><a href="${link}" target="_blank" tabindex="-1">${title}</a></div>', {
               title: item.title,
@@ -94,9 +99,13 @@ define(['dojo/_base/declare', 'light/views/TemplatedLightView',
             });
             return {
               node: node,
-              data: item,
+              data: new ModuleDndTypeBuilder()
+                      .title(item.title)
+                      .externalId(RouterManager.buildLinkForModuleContent(item.moduleId))
+                      .rawData(item)
+                      .build(),
               focusNode: dojo.query('a', node)[0],
-              type: ['gdoc']
+              type: [DndConstantsEnum.MODULE_TYPE]
             };
           }
         },
@@ -193,8 +202,10 @@ define(['dojo/_base/declare', 'light/views/TemplatedLightView',
     _importSelectedGdocs: function() {
       var selected = [];
       this._gdocPaginatedListWidget.forInSelectedItems(function(item) {
-        if (SUPPORTED_GDOC_MODULE_TYPES_TO_IMPORT[item.data.moduleType]) {
-          selected.push(item.data);
+        var data = item.data.rawData;
+        if (SUPPORTED_GDOC_MODULE_TYPES_TO_IMPORT[data.moduleType] &&
+                data.moduleType != 'GOOGLE_COLLECTION') {
+          selected.push(data);
         }
       });
       if (selected.length > 0) {

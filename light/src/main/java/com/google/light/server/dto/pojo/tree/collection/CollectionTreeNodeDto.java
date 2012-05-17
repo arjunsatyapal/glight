@@ -106,6 +106,10 @@ public class CollectionTreeNodeDto extends AbstractTreeNode<CollectionTreeNodeDt
     return externalId;
   }
   
+  public boolean hasExternalId() {
+    return externalId != null;
+  }
+  
   public void setTitle(String title) {
     this.title = checkNotBlank(title, "title");
   }
@@ -124,7 +128,7 @@ public class CollectionTreeNodeDto extends AbstractTreeNode<CollectionTreeNodeDt
     }
     
     for (CollectionTreeNodeDto currChild : getChildren()) {
-      if (currChild.getExternalId().equals(externalId)) {
+      if (currChild.hasExternalId() && currChild.getExternalId().equals(externalId)) {
         return currChild;
       }
     }

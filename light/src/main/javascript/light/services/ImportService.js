@@ -15,28 +15,25 @@
  */
 define(['dojo/_base/declare', 'light/utils/XHRUtils', 'dojo'],
         function(declare, XHRUtils, dojo) {
-  return declare('light.services.CollectionService', null, {
-    get: function(collectionId) {
-      return XHRUtils.get({
-        url: '/rest/collection/' + collectionId
-      });
-    },
-    getVersion: function(collectionId, version) {
-      return XHRUtils.get({
-        url: '/rest/collection/' + collectionId + '/' + version
-      });
-    },
-    create: function(collection) {
-      // TODO(waltercacau): Fix this hack of using the body as the title.
+  return declare('light.services.ImportService', null, {
+    import_: function(list) {
       return XHRUtils.post({
-        url: '/rest/collection',
-        postData: collection.title
+        url: '/rest/import/batch',
+        jsonData: {
+          list: list
+        }
       });
     },
-    updateLatest: function(collectionId, collectionVersion) {
-      return XHRUtils.put({
-        url: '/rest/collection/' + collectionId + '/latest',
-        jsonData: collectionVersion
+    addToCollection: function(list, collectionId, collectionTitle) {
+      // TODO(waltercacau): Remove the collectionTitle requirement
+      return XHRUtils.post({
+        url: '/rest/import/batch',
+        jsonData: {
+          list: list,
+          collectionId: collectionId,
+          collectionTitle: collectionTitle,
+          baseVersion: -1
+        }
       });
     }
   });

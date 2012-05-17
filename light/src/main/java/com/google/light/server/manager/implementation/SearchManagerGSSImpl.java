@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
@@ -146,10 +147,22 @@ public class SearchManagerGSSImpl implements SearchManager {
     }
 
     for (Element resultTag : (List<Element>) (resultsTag.getChildren(RESULT_TAG))) {
-      items.add(new SearchResultItemDto.Builder()
-          .title(resultTag.getChild(TITLE_OF_RESULT_TAG).getText())
+      SearchResultItemDto.Builder builder = new SearchResultItemDto.Builder();
+
+      String link = resultTag.getChild(LINK_OF_RESULT_TAG).getText();
+
+      // Google CSE might not return the title tag, so we need to figure
+      // out a title to show.
+      Element titleTag = resultTag.getChild(TITLE_OF_RESULT_TAG);
+      if (titleTag != null) {
+        builder.title(titleTag.getText());
+      } else {
+        builder.title(StringEscapeUtils.escapeHtml(link));
+      }
+
+      items.add(builder
           .description(resultTag.getChild(SNIPPET_OF_RESULT_TAG).getText())
-          .link(resultTag.getChild(LINK_OF_RESULT_TAG).getText()).build());
+          .link(link).build());
     }
 
     return result;
@@ -161,7 +174,7 @@ public class SearchManagerGSSImpl implements SearchManager {
     String currentToken = null;
     try {
       currentToken = tokenManager.getCurrentToken();
-      if(currentToken == null) {
+      if (currentToken == null) {
         currentToken = tokenManager.authenticate();
       }
     } catch (Exception e) {

@@ -14,7 +14,7 @@
  * the License.
  */
 define(['dojo/_base/declare', 'dojo/_base/xhr',
-        'dojo/_base/lang', 'dojo/_base/json'],
+        'dojo/_base/lang', 'dojo/json'],
         function(declare, xhr, lang, json) {
   /**
    * Utilities for issuing XML HTTP Requests.
@@ -31,6 +31,8 @@ define(['dojo/_base/declare', 'dojo/_base/xhr',
 
     /**
      * Return's the current path + '#' + current hash.
+     *
+     * TODO(waltercacau): Document custom parameters
      */
     send: function(method, params) {
       // TODO(waltercacau): Add CSFR protection here
@@ -42,6 +44,14 @@ define(['dojo/_base/declare', 'dojo/_base/xhr',
       if (params.headers) {
         lang.mixin(headers, params.headers);
       }
+      if (params.jsonData) {
+        var data = json.stringify(params.jsonData);
+        if (method == 'PUT') {
+          params.putData = data;
+        } else if (method == 'POST') {
+          params.postData = data;
+        }
+      }
       params.headers = headers;
       params.handleAs = params.handleAs || 'json';
       params.failOk = params.failOk === undefined ? true : params.failOk;
@@ -49,7 +59,7 @@ define(['dojo/_base/declare', 'dojo/_base/xhr',
         if (err.xhr &&
                 err.xhr.getResponseHeader('Content-Type').split(';')[0] ==
                   'application/json') {
-          err.response = json.fromJson(err.xhr.responseText || null);
+          err.response = json.parse(err.xhr.responseText || null);
         }
         throw err;
       });
@@ -68,6 +78,20 @@ define(['dojo/_base/declare', 'dojo/_base/xhr',
      */
     post: function(params) {
       return this.send('POST', params);
+    },
+
+    /**
+     * Alias for send('PUT', ...)
+     */
+    put: function(params) {
+      return this.send('PUT', params);
+    },
+
+    /**
+     * Alias for send('DELETE', ...)
+     */
+    delete_: function(params) {
+      return this.send('DELETE', params);
     }
 
   };

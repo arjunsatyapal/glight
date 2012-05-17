@@ -31,7 +31,7 @@ define(['dojo/_base/declare', 'light/utils/URLUtils', 'light/enums/PagesEnum',
      * Return's the current logged person or null if there is no person logged
      * in.
      *
-     * @return Current hash
+     * @return Current hash.
      */
     getCurrent: function() {
       return lightPreload.person ? lightPreload.person : null;

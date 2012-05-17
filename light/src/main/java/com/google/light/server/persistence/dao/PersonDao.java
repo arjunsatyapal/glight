@@ -18,23 +18,17 @@ package com.google.light.server.persistence.dao;
 import static com.google.light.server.utils.LightPreconditions.checkPersonId;
 import static com.google.light.server.utils.ObjectifyUtils.assertAndReturnUniqueEntity;
 
-import com.google.light.server.utils.LightUtils;
-
-import com.google.light.server.otxn.DAOT.Transactable;
-
-import com.google.light.server.otxn.DAOT;
-
-import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
+import java.util.logging.Logger;
 
 import com.google.inject.Inject;
 import com.google.light.server.dto.person.PersonDto;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
 import com.google.light.server.exception.unchecked.EmailInUseException;
 import com.google.light.server.persistence.entity.person.PersonEntity;
 import com.google.light.server.utils.ObjectifyUtils;
 import com.googlecode.objectify.Objectify;
 import com.googlecode.objectify.ObjectifyService;
 import com.googlecode.objectify.Query;
-import java.util.logging.Logger;
 
 /**
  * DAO for {@link PersonEntity}.
@@ -112,22 +106,4 @@ public class PersonDao extends AbstractBasicDao<PersonDto, PersonEntity> {
     return super.get(PersonEntity.generateKey(personId));
   }
 
-  public void testPT() {
-    DAOT.repeatInTransaction(new Transactable() {
-      @Override
-      public void run(Objectify ofy) {
-        PersonEntity personEntity = new PersonEntity.Builder()
-            .acceptedTos(true)
-            .creationTime(LightUtils.getNow())
-            .email("a@gmail.com")
-            .firstName("first name")
-            .lastName("last name")
-            .lastUpdateTime(LightUtils.getNow())
-            .personId(new PersonId(5L))
-            .build();
-
-        put(ofy, personEntity);
-      }
-    });
-  }
 }

@@ -57,6 +57,14 @@ public enum JerseyMethodEnum {
                                      "/rest/collection/{collection_id}",
                                      new String[] { "application/json; charset=UTF-8, application/xml; charset=UTF-8" }),
 
+  COLLECTION_RESOURCE_POST_COLLECTION(
+                                      CollectionResource.class,
+                                      "postCollection",
+                                      new Class[] { String.class },
+                                      POST.class,
+                                      "/rest/collection",
+                                      new String[] { "application/json; charset=UTF-8, application/xml; charset=UTF-8" }),
+
   COLLECTION_RESOURCE_GET_COLLECTION_VERSION(
                                              CollectionResource.class,
                                              "getCollectionVersion",
@@ -244,22 +252,22 @@ public enum JerseyMethodEnum {
                           new String[] { "application/json; charset=UTF-8",
                                   "application/xml; charset=UTF-8" }),
 
-//  GOOGLE_DOC_IMPORT_GOOGLE_DOC_BATCH_FROM_POST(
-//                                               GoogleDocIntegration.class,
-//                                               "importGoogleDocBatchFormPost",
-//                                               new Class[] { String.class },
-//                                               POST.class,
-//                                               "/rest/thirdparty/google/gdoc/import",
-//                                               new String[] {}),
-//
-//  GOOGLE_DOC_IMPORT_GOOGLE_DOC_POST(
-//                                    GoogleDocIntegration.class,
-//                                    "importGoogleDocBatchPost",
-//                                    new Class[] { String.class },
-//                                    POST.class,
-//                                    "/rest/thirdparty/google/gdoc/import",
-//                                    new String[] { "application/json; charset=UTF-8",
-//                                            "application/xml; charset=UTF-8" }),
+  // GOOGLE_DOC_IMPORT_GOOGLE_DOC_BATCH_FROM_POST(
+  // GoogleDocIntegration.class,
+  // "importGoogleDocBatchFormPost",
+  // new Class[] { String.class },
+  // POST.class,
+  // "/rest/thirdparty/google/gdoc/import",
+  // new String[] {}),
+  //
+  // GOOGLE_DOC_IMPORT_GOOGLE_DOC_POST(
+  // GoogleDocIntegration.class,
+  // "importGoogleDocBatchPost",
+  // new Class[] { String.class },
+  // POST.class,
+  // "/rest/thirdparty/google/gdoc/import",
+  // new String[] { "application/json; charset=UTF-8",
+  // "application/xml; charset=UTF-8" }),
 
   GOOGLE_DOC_GET_FOLDER_CONTENTS(
                                  GoogleDocIntegration.class,
@@ -304,12 +312,12 @@ public enum JerseyMethodEnum {
                            "/rest/test/deleteall",
                            new String[] { "text/plain; charset=UTF-8" }),
   TEST_RESOURCE_PURGE_QUEUE(
-                           TestResources.class,
-                           "purgeQueue",
-                           new Class[] {},
-                           GET.class,
-                           "/rest/test/purgequeues",
-                           new String[] { "text/plain; charset=UTF-8" }),
+                            TestResources.class,
+                            "purgeQueue",
+                            new Class[] {},
+                            GET.class,
+                            "/rest/test/purgequeues",
+                            new String[] { "text/plain; charset=UTF-8" }),
   TEST_RESOURCE_SESSION(
                         TestResources.class,
                         "getSessionDetails",

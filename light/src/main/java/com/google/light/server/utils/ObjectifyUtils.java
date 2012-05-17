@@ -33,6 +33,8 @@ import com.googlecode.objectify.ObjectifyOpts;
 import com.googlecode.objectify.ObjectifyService;
 import com.googlecode.objectify.Query;
 import com.googlecode.objectify.impl.conv.joda.JodaTimeConverters;
+
+import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.logging.Logger;
 import org.apache.commons.lang.StringUtils;
@@ -72,7 +74,7 @@ public class ObjectifyUtils {
     if (ofy.getTxn() != null) {
       if (ofy.getTxn().isActive()) {
         // TODO(arjuns): Add requestId once available.
-          logger.info("Rolling back transaction. Stack = " + getStackAsString());
+        logger.info("Rolling back transaction. Stack = " + getStackAsString());
         ofy.getTxn().rollback();
       }
     }
@@ -92,7 +94,7 @@ public class ObjectifyUtils {
     } catch (Exception e) {
       logger.severe("Exception while committing : " + Throwables.getStackTraceAsString(e));
       LightUtils.wrapIntoRuntimeExceptionAndThrow(e);
-    }finally {
+    } finally {
       if (ofy.getTxn() != null && ofy.getTxn().isActive()) {
         // TODO(arjuns): Add requestId once available.
         logger.severe("Rolling back.");
@@ -209,32 +211,81 @@ public class ObjectifyUtils {
     return query.fetch();
   }
 
-  public static <T, O> GAEQueryWrapper<T> findQueryResultsByPage(Objectify ofy, 
+  public static <T, O> GAEQueryWrapper<T> findQueryResultsByPage(Objectify ofy,
       Class<T> clazz, String filterKey, List<O> listOfValues, String startIndex, int maxResults) {
     Query<T> query = ofy.query(clazz).filter(filterKey, listOfValues);
-    
+
     if (StringUtils.isNotBlank(startIndex)) {
       query.startCursor(Cursor.fromWebSafeString(startIndex));
     }
-    
+
     QueryResultIterator<T> iterator = query.fetch().iterator();
-    
+
     List<T> listOfRecords = Lists.newArrayList();
     for (int counter = 1; counter <= maxResults && iterator.hasNext(); counter++) {
       listOfRecords.add(iterator.next());
     }
 
     GAEQueryWrapper<T> wrapper = new GAEQueryWrapper<T>();
-    
-    if(!isListEmpty(listOfRecords) && iterator.hasNext()) {
+
+    if (!isListEmpty(listOfRecords) && iterator.hasNext()) {
       wrapper.setStartIndex(iterator.getCursor().toWebSafeString());
     }
     wrapper.setList(listOfRecords);
-    
+
     return wrapper;
+  }
+
+  /** Alternate interface to Runnable for executing transactions */
+  public static interface Transactable<T> {
+    T run(Objectify ofy);
+  }
+
+  /** Create a default DAOT and run the transaction through it */
+  // TODO(waltercacau): Add test for this
+  public static <T> T runInTransaction(Transactable<T> t) {
+    Objectify ofy = ObjectifyUtils.initiateTransaction();
+    T toReturn = null;
+    try {
+      toReturn = t.run(ofy);
+      ObjectifyUtils.commitTransaction(ofy);
+    } finally {
+      ObjectifyUtils.rollbackTransactionIfStillActive(ofy);
+    }
+    return toReturn;
+  }
+
+  /**
+   * Run this task through transactions until it succeeds without an optimistic
+   * concurrency failure.
+   * 
+   * TODO(waltercacau): Add test for this
+   */
+  public static <T> T repeatInTransaction(Transactable<T> t) {
+    T toReturn = null;
+    for (int i = 5; i >= 0; i--) {
+      try {
+        toReturn = runInTransaction(t);
+        break;
+      } catch (ConcurrentModificationException ex) {
+        if (i == 0) {
+          throw ex;
+        } else {
+          logger.warning("Optimistic concurrency failure for " + t + ": " + ex);
+          try {
+            Thread.sleep(i * 500);
+          } catch (InterruptedException e) {
+            // ignoring ...
+          }
+        }
+      }
+    }
+
+    return toReturn;
   }
 
   // Utility class.
   private ObjectifyUtils() {
   }
+
 }

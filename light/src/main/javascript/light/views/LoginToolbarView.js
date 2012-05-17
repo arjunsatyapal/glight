@@ -32,6 +32,7 @@ define(['dojo/_base/declare', 'light/views/TemplatedLightView',
     /** @lends light.views.LoginToolbarView# */
     templateString: template,
     messages: messages,
+    // The following is needed for the Tooltip to work
     _earlyTemplatedStartup: true,
 
     postCreate: function() {

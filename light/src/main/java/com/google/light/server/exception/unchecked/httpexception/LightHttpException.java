@@ -17,10 +17,13 @@ package com.google.light.server.exception.unchecked.httpexception;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+import org.apache.commons.lang.StringEscapeUtils;
+
 import com.google.light.server.constants.http.HttpStatusCodesEnum;
-
-import com.google.light.server.exception.unchecked.LightRuntimeException;
-
 
 /**
  * Exceptions for covering HTTP Codes.
@@ -28,14 +31,17 @@ import com.google.light.server.exception.unchecked.LightRuntimeException;
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
-public class LightHttpException extends LightRuntimeException {
+public class LightHttpException extends WebApplicationException {
   private HttpStatusCodesEnum httpCode;
-  
+
   public LightHttpException(HttpStatusCodesEnum httpCode, String errString) {
-    super(errString);
+    // TODO(waltercacau): Create a Dto for returning errors to the client
+    super(Response.status(httpCode.getStatusCode())
+        .entity("\"" + StringEscapeUtils.escapeJavaScript(errString) + "\"")
+        .type(MediaType.APPLICATION_JSON).build());
     this.httpCode = checkNotNull(httpCode);
   }
-  
+
   public HttpStatusCodesEnum getHttpCode() {
     return httpCode;
   }

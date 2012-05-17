@@ -60,13 +60,16 @@ public class TestingConstants {
    */
   public static final ArrayList<String> SAMPLE_GSS_LIST_QUERIES = Lists.newArrayList(
       "addition_query",
-      "addxition_query");
+      "addxition_query",
+      "asd_query");
   public static final ArrayList<String> SAMPLE_GSS_LIST_INPUTS = Lists.newArrayList(
       TestResourcePaths.SEARCH_GSS_ADDITION_QUERY_INPUT_XML.get(),
-      TestResourcePaths.SEARCH_GSS_ADDXITION_QUERY_INPUT_XML.get());
+      TestResourcePaths.SEARCH_GSS_ADDXITION_QUERY_INPUT_XML.get(),
+      TestResourcePaths.SEARCH_GSS_ASD_QUERY_INPUT_XML.get());
   public static final ArrayList<String> SAMPLE_GSS_LIST_OUTPUTS = Lists.newArrayList(
       TestResourcePaths.SEARCH_GSS_ADDITION_QUERY_OUTPUT_JSON.get(),
-      TestResourcePaths.SEARCH_GSS_ADDXITION_QUERY_OUTPUT_JSON.get());
+      TestResourcePaths.SEARCH_GSS_ADDXITION_QUERY_OUTPUT_JSON.get(),
+      TestResourcePaths.SEARCH_GSS_ASD_QUERY_OUTPUT_JSON.get());
   
   public static ExternalId TEST_EXTERNAL_ID = new ExternalId(
       "https://docs.google.com/a/myopenedu.com/document/d/1mXX53OtXIhq2XbdQkk-utxO9pHdQ_dQsSsPE_HNtN_s/edit");

@@ -28,7 +28,7 @@ define(['dojo/_base/declare'], function(declare) {
      * Handles the creation of a new promise.
      * If there is a pending promise, it will be cancelled and replaced
      * by the one computed by func.
-     * 
+     *
      * <p> Note that instead of passing a function, one could think this function
      * could be designed as receiving a new promise and canceling the older one.
      * The problem is some promises generators that perform some kind of caching of
@@ -38,7 +38,7 @@ define(['dojo/_base/declare'], function(declare) {
      * cancelled the old one we would be canceling the new one too.
      *
      * @param {Function} func Function that computes and returns a new promise.
-     * @returns {dojo.Deferred} The given promise.
+     * @return {dojo.Deferred} The given promise.
      */
     handle: function(func) {
       if (this._lastPromise !== null) {

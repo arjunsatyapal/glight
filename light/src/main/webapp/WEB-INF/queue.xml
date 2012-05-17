@@ -18,7 +18,7 @@
   </queue>
 
 <!--   <queue>
-    <name>gss_pagemap_update</name>
+    <name>gss-pagemap-update</name>
     <rate>20/s</rate>
     <bucket-size>100</bucket-size>
     <max-concurrent-requests>100</max-concurrent-requests>

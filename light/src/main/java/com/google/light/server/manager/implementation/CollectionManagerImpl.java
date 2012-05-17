@@ -19,8 +19,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkTxnIsRunning;
 
+import com.google.light.server.dto.module.ModuleType;
+import com.google.light.server.dto.pojo.tree.AbstractTreeNode.TreeNodeType;
 import com.google.light.server.dto.pojo.tree.collection.CollectionTreeNodeDto;
 
+import com.google.appengine.api.taskqueue.Transaction;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
@@ -38,11 +41,16 @@ import com.google.light.server.manager.interfaces.CollectionManager;
 import com.google.light.server.persistence.dao.CollectionDao;
 import com.google.light.server.persistence.dao.CollectionVersionDao;
 import com.google.light.server.persistence.entity.collection.CollectionEntity;
+import com.google.light.server.persistence.entity.collection.CollectionEntity.Builder;
 import com.google.light.server.persistence.entity.collection.CollectionVersionEntity;
 import com.google.light.server.serveronlypojos.GAEQueryWrapper;
 import com.google.light.server.utils.LightUtils;
+import com.google.light.server.utils.ObjectifyUtils;
+import com.google.light.server.utils.ObjectifyUtils.Transactable;
 import com.googlecode.objectify.Objectify;
 import java.util.List;
+
+import org.joda.time.Instant;
 
 /**
  * Implementation class for {@link ModuleManager}.
@@ -101,7 +109,6 @@ public class CollectionManagerImpl implements CollectionManager {
     throw new UnsupportedOperationException();
   }
 
-
   /**
    * {@inheritDoc}
    */
@@ -126,7 +133,7 @@ public class CollectionManagerImpl implements CollectionManager {
   public Version reserveCollectionVersion(Objectify ofy, CollectionId collectionId) {
     checkTxnIsRunning(ofy);
     checkNotNull(collectionId, "collectionId");
-    
+
     CollectionEntity collectionEntity = this.get(ofy, collectionId);
     checkNotNull(collectionEntity, "collectionEntity");
 
@@ -140,10 +147,10 @@ public class CollectionManagerImpl implements CollectionManager {
   public CollectionVersionEntity publishCollectionVersion(Objectify ofy,
       CollectionId collectionId, Version version, CollectionTreeNodeDto collectionRoot) {
     checkTxnIsRunning(ofy);
-    
-    CollectionEntity collectionEntity = this.get(ofy, collectionId); 
+
+    CollectionEntity collectionEntity = this.get(ofy, collectionId);
     checkNotNull(collectionEntity, "Collection[" + collectionId + "] was not found.");
-    
+
     CollectionVersionEntity fetchedEntity = collectionVersionDao.get(ofy, collectionId, version);
 
     CollectionVersionEntity cvEntity = new CollectionVersionEntity.Builder()
@@ -154,13 +161,13 @@ public class CollectionManagerImpl implements CollectionManager {
         .creationTime(LightUtils.getNow())
         .lastUpdateTime(LightUtils.getNow())
         .build();
-    
+
     if (fetchedEntity != null) {
       if (fetchedEntity.equals(cvEntity)) {
         return fetchedEntity;
       } else {
-        throw new VersionMutabilityViolation("Tried to modify : " + collectionId + ":" 
-            + version); 
+        throw new VersionMutabilityViolation("Tried to modify : " + collectionId + ":"
+            + version);
       }
     }
     collectionVersionDao.put(ofy, cvEntity);
@@ -168,7 +175,7 @@ public class CollectionManagerImpl implements CollectionManager {
     // TODO(arjuns): Add support for etag.
     collectionEntity.publishVersion(version, LightUtils.getNow(), null);
     collectionEntity.setTitle(collectionRoot.getTitle());
-    
+
     collectionDao.put(ofy, collectionEntity);
 
     return cvEntity;
@@ -182,6 +189,10 @@ public class CollectionManagerImpl implements CollectionManager {
       Version version) {
     Version requiredVersion =
         convertLatestToLatestPublishedVersionForCollection(collectionId, version);
+
+    if (requiredVersion.isNoVersion()) {
+      return null;
+    }
 
     CollectionVersionEntity cvEntity = collectionVersionDao.get(ofy, collectionId, requiredVersion);
     return cvEntity;
@@ -220,5 +231,46 @@ public class CollectionManagerImpl implements CollectionManager {
         .build();
 
     return pageDto;
+  }
+
+  @Override
+  public CollectionEntity createEmptyCollection(final List<PersonId> owners, final String title) {
+    CollectionEntity toReturn =
+        ObjectifyUtils.repeatInTransaction(new Transactable<CollectionEntity>() {
+
+          @Override
+          public CollectionEntity run(Objectify ofy) {
+            Instant now = LightUtils.getNow();
+
+            CollectionEntity collectionEntity = new CollectionEntity.Builder()
+                .title(title)
+                .collectionState(CollectionState.RESERVED)
+                .owners(owners).build();
+            Version publishedVersion = collectionEntity.reserveVersion();
+            collectionEntity.publishVersion(publishedVersion, now, null);
+
+            collectionEntity = create(ofy, collectionEntity);
+
+            CollectionTreeNodeDto collectionTree = new CollectionTreeNodeDto.Builder()
+                .nodeType(TreeNodeType.ROOT_NODE)
+                .title(title)
+                .moduleType(ModuleType.LIGHT_COLLECTION)
+                .build();
+
+            CollectionVersionEntity cvEntity = new CollectionVersionEntity.Builder()
+                .version(publishedVersion)
+                .title(title)
+                .collectionKey(collectionEntity.getKey())
+                .collectionTree(collectionTree)
+                .creationTime(now)
+                .lastUpdateTime(now)
+                .build();
+
+            collectionVersionDao.put(ofy, cvEntity);
+
+            return collectionEntity;
+          }
+        });
+    return toReturn;
   }
 }

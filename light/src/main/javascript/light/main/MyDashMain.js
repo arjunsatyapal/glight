@@ -27,6 +27,7 @@ define(['light/views/SearchBarView',
         'light/views/CollectionEditorView',
         'light/controllers/CollectionEditorController',
         'light/services/CollectionService',
+        'light/services/ImportService',
         'light/utils/PersonUtils',
         'light/utils/URLUtils',
         'light/enums/PagesEnum',
@@ -38,7 +39,8 @@ define(['light/views/SearchBarView',
                  LoginToolbarView, LoginToolbarController,
                  MyDashSidebarView, MyDashSidebarController,
                  CollectionEditorView, CollectionEditorController,
-                 CollectionService, PersonUtils, URLUtils, PagesEnum) {
+                 CollectionService, ImportService, PersonUtils,
+                 URLUtils, PagesEnum) {
 
   // Going to the anonymous search page
   if (!PersonUtils.isLogged()) {
@@ -65,13 +67,14 @@ define(['light/views/SearchBarView',
   loginToolbarView.setController(loginToolbarController);
   loginToolbarController.setup();
 
+  var collectionService = new CollectionService();
+  var importService = new ImportService();
   var myDashSidebarView = new MyDashSidebarView({}, 'sidebar');
-  var myDashSidebarController = new MyDashSidebarController();
+  var myDashSidebarController = new MyDashSidebarController(collectionService, importService);
   myDashSidebarController.setView(myDashSidebarView);
   myDashSidebarView.setController(myDashSidebarController);
   myDashSidebarController.watch();
-  
-  var collectionService = new CollectionService();
+
   var collectionEditorView = new CollectionEditorView({}, 'collectionEditor');
   var collectionEditorController = new CollectionEditorController(collectionService);
   collectionEditorController.setView(collectionEditorView);
@@ -79,7 +82,7 @@ define(['light/views/SearchBarView',
   collectionEditorController.watch();
 
   var importModuleView = new ImportModuleView({}, 'importModule');
-  var importModuleController = new ImportModuleController();
+  var importModuleController = new ImportModuleController(importService);
   importModuleController.setView(importModuleView);
   importModuleView.setController(importModuleController);
   importModuleController.watch();

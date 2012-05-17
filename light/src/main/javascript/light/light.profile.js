@@ -69,7 +69,7 @@ var profile = (function() {
      * It is encapsulated in a function so we can add some
      * runtime logic.
      */
-    userConfig: '('+ function() {
+    userConfig: '(' + function() {
 
       var config = {
         // Packages as seen by the runtime enviroment

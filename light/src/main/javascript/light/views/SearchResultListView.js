@@ -20,17 +20,21 @@ define(['dojo/_base/declare', 'light/views/AbstractLightView',
         'dojo/_base/lang',
         'dojo',
         'dojo/string',
+        'light/utils/DOMUtils',
         'dojo/dom-construct',
         'light/utils/LanguageUtils',
         'light/builders/SearchStateBuilder',
         'light/utils/RouterManager',
         'light/enums/EventsEnum',
         'dojo/i18n!light/nls/SearchPageMessages',
-        'light/widgets/ListWidget'],
+        'light/widgets/ListWidget',
+        'light/builders/ModuleDndTypeBuilder',
+        'light/enums/DndConstantsEnum'],
         function(declare, AbstractLightView, itemTemplate, TemplateUtils,
-                 htmlEntities, lang, dojo, string,
+                 htmlEntities, lang, dojo, string, DOMUtils,
                  domConstruct, LanguageUtils, SearchStateBuilder, RouterManager,
-                 EventsEnum, messages, ListWidget) {
+                 EventsEnum, messages, ListWidget, ModuleDndTypeBuilder,
+                 DndConstantsEnum) {
   return declare('light.views.SearchResultListView', AbstractLightView, {
     _searchResultList: null,
     destroy: function() {
@@ -82,7 +86,7 @@ define(['dojo/_base/declare', 'light/views/AbstractLightView',
 
         this._searchResultList = new ListWidget(searchResultListDomNode, {
           accept: [],
-          type: 'searchResultDndSource',
+          type: DndConstantsEnum.MODULE_SOURCE_TYPE,
           selfAccept: false,
           copyOnly: true,
           selfCopy: false,
@@ -90,9 +94,13 @@ define(['dojo/_base/declare', 'light/views/AbstractLightView',
             var node = TemplateUtils.toDom(itemTemplate, item);
             return {
               node: node,
-              data: item,
+              data: new ModuleDndTypeBuilder()
+                  .title(DOMUtils.asText(item.title))
+                  .externalId(item.link)
+                  .rawData(item)
+                  .build(),
               focusNode: dojo.query('a', node)[0],
-              type: ['searchResult']
+              type: [DndConstantsEnum.MODULE_TYPE]
             };
           }
         });

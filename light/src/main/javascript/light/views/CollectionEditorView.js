@@ -16,9 +16,11 @@
 define(['dojo/_base/declare', 'dojo/_base/lang',
         'light/views/TemplatedLightView',
         'dijit/_WidgetsInTemplateMixin',
+        'light/utils/URLUtils',
         'light/utils/DOMUtils',
         'light/utils/DialogUtils',
         'light/utils/BuilderUtils',
+        'light/utils/RouterManager',
         'dojo/text!light/templates/CollectionEditorTemplate.html',
         'dojo/i18n!light/nls/CollectionEditorMessages',
         'dijit/Tree',
@@ -27,20 +29,34 @@ define(['dojo/_base/declare', 'dojo/_base/lang',
         'dojo/store/DataStore',
         'dijit/tree/TreeStoreModel',
         'dijit',
+        'dijit/focus',
         'dijit/form/Button'],
         function(declare, lang, TemplatedLightView, _WidgetsInTemplateMixin,
-                DOMUtils, DialogUtils, BuilderUtils, CollectionEditorTemplate,
-                CollectionEditorMessages,
+                URLUtils, DOMUtils, DialogUtils, BuilderUtils, RouterManager,
+                CollectionEditorTemplate, CollectionEditorMessages,
                 Tree, TreeDndSource, ItemFileWriteStore, DataStore,
-                TreeStoreModel, dijit) {
+                TreeStoreModel, dijit, focusUtil) {
 
   /**
    * Builder for items in the internal nodeStore of this view.
    */
+  var COMMON_ATTRIBUTES = ['externalId', 'moduleId', 'moduleType', 'title', 'nodeType'];
   var NodeBuilder = BuilderUtils.createBuilderClass(
           'light.views.CollectionEditorView._NodeBuilder',
           ['externalId', 'moduleId', 'moduleType', 'title', 'nodeType',
            'id', 'children', 'parent'], {});
+  var CollectionTreeNodeBuilder = BuilderUtils.createBuilderClass(
+          'light.views.CollectionEditorView._CollectionTreeNodeBuilder',
+          ['externalId', 'moduleId', 'moduleType', 'title', 'nodeType',
+           'list'], {});
+
+
+  var SAVE_BUTTON_STATE = {
+    SAVED_DISABLED: 'SAVED_DISABLED',
+    SAVING_ENABLED: 'SAVING_ENABLED',
+    SAVE_ENABLED: 'SAVE_ENABLED',
+    SAVE_DISABLED: 'SAVE_DISABLED'
+  };
 
   /**
    * @class
@@ -51,12 +67,21 @@ define(['dojo/_base/declare', 'dojo/_base/lang',
     /** @lends light.views.CollectionEditorView# */
     templateString: CollectionEditorTemplate,
     messages: CollectionEditorMessages,
+    _earlyTemplatedStartup: true,
     _NodeBuilder: NodeBuilder,
 
     hide: function() {
       DOMUtils.hide(this._editorFormDiv);
       DOMUtils.hide(this._couldNotLoadFormDiv);
       this._destroyEditor();
+    },
+
+    postCreate: function() {
+      var self = this;
+      this._collectionLinkDialog.onShow = function() {
+        focusUtil.focus(self._collectionLinkTextBox.focusNode);
+        self._collectionLinkTextBox.focusNode.select();
+      };
     },
 
     _collectionTree: null,
@@ -105,11 +130,38 @@ define(['dojo/_base/declare', 'dojo/_base/lang',
       return item;
     },
 
+    _getCollectionTreeInNodeStore: function(root) {
+      var list = [];
+      var children = this._nodeStore.getValues(root, 'children');
+      for (var i = 0, len = children.length; i < len; i++) {
+        list.push(this._getCollectionTreeInNodeStore(children[i]));
+      }
+
+      var rawItem = {};
+      for (i = 0; i < COMMON_ATTRIBUTES.length; i++) {
+        if (this._nodeStore.hasAttribute(root, COMMON_ATTRIBUTES[i])) {
+          rawItem[COMMON_ATTRIBUTES[i]] =
+            this._nodeStore.getValue(root, COMMON_ATTRIBUTES[i]);
+        }
+      }
+
+      var builder = new CollectionTreeNodeBuilder(rawItem, true);
+      if (list.length > 0) {
+        builder.list(list);
+      }
+      return builder.build();
+    },
+
     /**
      * Shows the editor for the given collectionTree
      * @param {Object} root A CollectionTreeNode.
      */
-    showEditor: function(collectionTree) {
+    showEditor: function(collectionId, collectionTree) {
+      var _collectionLink =
+          RouterManager.buildLinkForCollectionContent(collectionId);
+      this._collectionLinkA.href = _collectionLink;
+      this._collectionLinkTextBox.set('value', _collectionLink);
+
       // TODO(waltercacau): Show link to be shared with students
       // (GMaps has a good solution for it with tooltip and a textbox).
       DOMUtils.show(this._editorFormDiv);
@@ -131,7 +183,7 @@ define(['dojo/_base/declare', 'dojo/_base/lang',
               'id');
 
       // Disabling save until we have any tree change
-      this._saveButton.set('disabled', true);
+      this._setSaveButtonState(SAVE_BUTTON_STATE.SAVE_DISABLED);
       var onModelChange = lang.hitch(this, '_onModelChange');
 
       this._nodeTreeModel = new TreeStoreModel({
@@ -169,12 +221,31 @@ define(['dojo/_base/declare', 'dojo/_base/lang',
       this._editorFormDiv.appendChild(this._collectionTree.domNode);
     },
 
+    _setSaveButtonState: function(state) {
+      this._saveButtonState = state;
+      if (state == SAVE_BUTTON_STATE.SAVE_ENABLED) {
+        this._saveButton.set('label', this.messages.saveButtonLabel);
+        this._saveButton.set('disabled', false);
+      } else if (state == SAVE_BUTTON_STATE.SAVE_DISABLED) {
+        this._saveButton.set('label', this.messages.saveButtonLabel);
+        this._saveButton.set('disabled', true);
+      } else if (state == SAVE_BUTTON_STATE.SAVED_DISABLED) {
+        this._saveButton.set('label', this.messages.savedButtonLabel);
+        this._saveButton.set('disabled', true);
+      } else if (state == SAVE_BUTTON_STATE.SAVING_ENABLED) {
+        this._saveButton.set('label', this.messages.savingButtonLabel);
+        this._saveButton.set('disabled', false);
+      } else {
+        throw new Error('Unknown state ' + state);
+      }
+    },
+
     /**
      * Called when any change happens in the tree.
      */
     _onModelChange: function() {
       // A change happened, let's enable the save button.
-      this._saveButton.set('disabled', false);
+      this._setSaveButtonState(SAVE_BUTTON_STATE.SAVE_ENABLED);
     },
 
     /**
@@ -186,18 +257,32 @@ define(['dojo/_base/declare', 'dojo/_base/lang',
       DOMUtils.show(this._couldNotLoadFormDiv);
     },
 
+    savedSuccessfully: function() {
+      if (this._saveButtonState == SAVE_BUTTON_STATE.SAVING_ENABLED) {
+        this._setSaveButtonState(SAVE_BUTTON_STATE.SAVED_DISABLED);
+      }
+    },
+    failedToSave: function() {
+      this._setSaveButtonState(SAVE_BUTTON_STATE.SAVE_ENABLED);
+      DialogUtils.alert({
+        title: this.messages.errorSavingDialogTitle,
+        content: this.messages.errorSavingDialogContent
+      });
+    },
+
     /**
      * Starts the saving process.
      */
     _save: function() {
-      // TODO(waltercacau): implement
+      this._setSaveButtonState(SAVE_BUTTON_STATE.SAVING_ENABLED);
+      this._controller.saveCollection(
+              this._getCollectionTreeInNodeStore(this._rootItem));
     },
 
     /**
      * Takes care of the new subcollection flow.
      */
     _newSubcollection: function() {
-      // TODO(waltercacau): implement
       var self = this;
       DialogUtils.prompt({
         title: this.messages.createSubcollectionDialogTitle,
@@ -262,6 +347,10 @@ define(['dojo/_base/declare', 'dojo/_base/lang',
       func(root);
     },
 
+    _viewLastSaved: function() {
+
+    },
+
     /**
      * Delete selected items in the tree.
      */
@@ -280,7 +369,10 @@ define(['dojo/_base/declare', 'dojo/_base/lang',
         });
       });
       for (var i = 0, len = itemsToDelete.length; i < len; i++) {
-        self._nodeStore.deleteItem(itemsToDelete[i]);
+        // Avoiding root deletion
+        if (itemsToDelete[i] != this._rootItem) {
+          self._nodeStore.deleteItem(itemsToDelete[i]);
+        }
       }
     }
   });
