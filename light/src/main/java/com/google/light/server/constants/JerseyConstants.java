@@ -147,6 +147,9 @@ public class JerseyConstants {
   // Path for Job Resource
   public static final String RESOURCE_JOB = "/job";
   public static final String URI_RESOURCE_JOB = JERSEY_CONTEXT + RESOURCE_JOB;
+  
+  
+  public static final String URI_RESOURCE_PATH_JOBS_ME = URI_RESOURCE_JOB + PATH_ME;
 
   // Path for Module Resources.
   public static final String RESOURCE_PATH_MODULE = "/module";

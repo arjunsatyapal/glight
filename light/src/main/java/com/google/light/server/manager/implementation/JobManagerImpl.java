@@ -22,6 +22,23 @@ import static com.google.light.server.utils.LightPreconditions.checkJobId;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkTxnIsRunning;
+import static com.google.light.server.utils.LightUtils.getNow;
+
+import com.google.light.server.serveronlypojos.GAEQueryWrapper;
+
+import com.google.common.collect.Lists;
+import com.google.light.server.constants.JerseyConstants;
+import com.google.light.server.dto.module.ModuleDto;
+import com.google.light.server.dto.pages.PageDto;
+import com.google.light.server.persistence.entity.module.ModuleEntity;
+
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
+
+import java.util.List;
+
+import com.google.light.server.utils.GuiceUtils;
+
+import java.util.Collection;
 
 import com.google.appengine.api.datastore.Text;
 import com.google.inject.Inject;
@@ -45,7 +62,6 @@ import com.google.light.server.persistence.entity.jobs.JobEntity.TaskType;
 import com.google.light.server.persistence.entity.jobs.JobState;
 import com.google.light.server.utils.ObjectifyUtils;
 import com.googlecode.objectify.Objectify;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -62,6 +78,7 @@ public class JobManagerImpl implements JobManager {
   private JobDao jobDao;
   private NotificationManager notificationManager;
   private QueueManager queueManager;
+
   @Inject
   public JobManagerImpl(JobDao jobDao, NotificationManager notificationManager,
       QueueManager queueManager) {
@@ -110,6 +127,8 @@ public class JobManagerImpl implements JobManager {
         .jobState(JobState.ENQUEUED)
         .request(text)
         .context(text)
+        .creationTime(getNow())
+        .ownerId(GuiceUtils.getOwnerId())
         .build();
     JobEntity savedJobEntity = this.put(ofy, jobEntity,
         new ChangeLogEntryPojo("Enqueuing Request."));
@@ -130,10 +149,11 @@ public class JobManagerImpl implements JobManager {
    * {@inheritDoc}
    */
   @Override
-  public <D extends AbstractDto<D>> JobEntity enqueueCompleteJob(JobId jobId, D responseDto, String message) {
+  public <D extends AbstractDto<D>> JobEntity enqueueCompleteJob(JobId jobId, D responseDto,
+      String message) {
     checkNotBlank(message, "message cannot be null");
     checkNotNull(responseDto, "responseDto cannot be null");
-    
+
     Objectify ofy = ObjectifyUtils.initiateTransaction();
 
     try {
@@ -167,7 +187,7 @@ public class JobManagerImpl implements JobManager {
    * {@inheritDoc}
    */
   @Override
-  public Map<JobId, JobEntity> findListOfJobs(List<JobId> listOfJobIds) {
+  public Map<JobId, JobEntity> findListOfJobs(Collection<JobId> listOfJobIds) {
     return jobDao.findListOfJobs(listOfJobIds);
   }
 
@@ -206,6 +226,8 @@ public class JobManagerImpl implements JobManager {
           .jobState(JobState.PRE_START)
           .request(jobRequestText)
           .context(jobRequestText)
+          .creationTime(getNow())
+          .ownerId(GuiceUtils.getOwnerId())
           .build();
       JobEntity savedJobEntity = this.put(ofy, jobEntity,
           new ChangeLogEntryPojo("PreStart Request."));
@@ -252,7 +274,7 @@ public class JobManagerImpl implements JobManager {
       case LIGHT_POLLING:
         queueManager.enqueueLightJob(ofy, childJobId);
         break;
-      default :
+      default:
         throw new IllegalArgumentException("Add more code for queue : " + queue);
     }
   }
@@ -286,7 +308,7 @@ public class JobManagerImpl implements JobManager {
 
         // Get existing context from Parent Job Entity.
         ImportCollectionGoogleDocContext importCollectionGDocContext = parentJob.getContext(
-                ImportCollectionGoogleDocContext.class);
+            ImportCollectionGoogleDocContext.class);
 
         checkNotNull(importCollectionGDocContext, "importCollectionGDocContext should not be null.");
         // Now update context with new information and then persist it back.
@@ -303,7 +325,8 @@ public class JobManagerImpl implements JobManager {
    * {@inheritDoc}
    */
   @Override
-  public JobEntity createSyntheticModuleJob(Objectify ofy, ImportModuleSyntheticModuleJobContext context,
+  public JobEntity createSyntheticModuleJob(Objectify ofy,
+      ImportModuleSyntheticModuleJobContext context,
       JobId parentJobId, JobId rootJobId) {
     checkTxnIsRunning(ofy);
     checkJobId(parentJobId);
@@ -320,6 +343,8 @@ public class JobManagerImpl implements JobManager {
         .jobState(JobState.ENQUEUED)
         .request(text)
         .context(text)
+        .creationTime(getNow())
+        .ownerId(GuiceUtils.getOwnerId())
         .build();
     JobEntity savedJobEntity = this.put(ofy, jobEntity,
         new ChangeLogEntryPojo("Enqueuing Synthetic Module Request."));
@@ -351,6 +376,8 @@ public class JobManagerImpl implements JobManager {
         .jobState(JobState.ENQUEUED)
         .request(text)
         .context(text)
+        .creationTime(getNow())
+        .ownerId(GuiceUtils.getOwnerId())
         .build();
     JobEntity savedJobEntity = this.put(ofy, jobEntity,
         new ChangeLogEntryPojo("Enqueuing " + TaskType.IMPORT_COLLECTION_GOOGLE_DOC + " job"));
@@ -358,5 +385,14 @@ public class JobManagerImpl implements JobManager {
     logger.info("Successfully created Job[" + savedJobEntity.getJobId() + "] for ["
         + TaskType.IMPORT_COLLECTION_GOOGLE_DOC + "].");
     return savedJobEntity;
+  }
+
+  /** 
+   * {@inheritDoc}
+   */
+  @Override
+  public GAEQueryWrapper<JobEntity> findJobsCreatedByMe(PersonId ownerId, String startIndex, int maxResults) {
+return jobDao.findJobsByOwnerId(ownerId, startIndex, maxResults);
+
   }
 }

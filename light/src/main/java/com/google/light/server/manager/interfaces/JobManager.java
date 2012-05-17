@@ -15,6 +15,14 @@
  */
 package com.google.light.server.manager.interfaces;
 
+import com.google.light.server.serveronlypojos.GAEQueryWrapper;
+
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
+
+import java.util.List;
+
+import java.util.Collection;
+
 import com.google.light.server.constants.QueueEnum;
 import com.google.light.server.dto.AbstractDto;
 import com.google.light.server.dto.importresource.ImportBatchWrapper;
@@ -26,7 +34,6 @@ import com.google.light.server.jobs.handlers.modulejobs.ImportModuleGoogleDocJob
 import com.google.light.server.jobs.handlers.modulejobs.ImportModuleSyntheticModuleJobContext;
 import com.google.light.server.persistence.entity.jobs.JobEntity;
 import com.googlecode.objectify.Objectify;
-import java.util.List;
 import java.util.Map;
 import javax.annotation.Nullable;
 
@@ -74,7 +81,7 @@ public interface JobManager {
   
   public JobEntity get(Objectify ofy, JobId jobId);
   
-  public Map<JobId, JobEntity> findListOfJobs(List<JobId> listOfJobIds);
+  public Map<JobId, JobEntity> findListOfJobs(Collection<JobId> setOfJobIds);
   
   // For using externalIds.
   public JobId createImportBatchJob(ImportBatchWrapper jobRequest);
@@ -87,4 +94,6 @@ public interface JobManager {
   
   public JobEntity createSyntheticModuleJob(Objectify ofy, ImportModuleSyntheticModuleJobContext context, 
       JobId parentJobId, JobId rootJobId);
+  
+  public GAEQueryWrapper<JobEntity> findJobsCreatedByMe(PersonId ownerId, String startIndex, int maxResults); 
 }

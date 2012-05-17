@@ -47,9 +47,7 @@ import com.google.light.server.servlets.path.ServletPathEnum;
 import com.google.light.server.utils.LightPreconditions;
 import com.google.light.testingutils.GaeTestingUtils;
 import com.google.light.testingutils.SeleniumUtils;
-import com.google.light.testingutils.TestingConstants;
 import com.google.light.testingutils.TestingUtils;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -80,7 +78,7 @@ public class LoginITCase {
       "light-bot@myopenedu.com");
   private Map<OAuth2ProviderEnum, Properties> consumerCredentialsMap = Maps.newHashMap();
 
-  private final String serverUrl = "http://light-demo.appspot.com";
+  private final String serverUrl = "http://localhost:8080";
 
   @Before
   public void seleniumSetup() throws Exception {
@@ -134,7 +132,7 @@ public class LoginITCase {
 
   @Test
   public void test_Login() throws Exception {
-    //prepareServerForTest();
+    prepareServerForTest();
 
     List<Thread> listOfThread = Lists.newArrayList();
     for (String email : listOfEmails) {
@@ -217,8 +215,6 @@ public class LoginITCase {
 
       // Now revoking access
       driver.get("https://accounts.google.com/b/0/IssuedAuthSubTokens?hl=en");
-//      driver.findElement(By.cssSelector("#nav-security > div.IurIzb")).click();
-//      driver.findElement(By.xpath("//div[5]/div[2]/a/div")).click();
       while(driver.getPageSource().contains("Revoke Access")) {
         if (!SeleniumUtils.clickIfExists(driver, By.linkText("Revoke Access")))
           break;

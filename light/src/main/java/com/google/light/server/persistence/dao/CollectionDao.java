@@ -76,7 +76,7 @@ private static final Logger logger = Logger.getLogger(CollectionDao.class.getNam
 
     ArrayList<Long> listOfValues = Lists.newArrayList(ownerId.getValue());
 
-    GAEQueryWrapper<CollectionEntity> listOfCollections = ObjectifyUtils.findQueryResultsByPage(
+    GAEQueryWrapper<CollectionEntity> listOfCollections = ObjectifyUtils.findQueryResultsByPageForListField(
         ofy, CollectionEntity.class, CollectionEntity.OFY_COLLECTION_OWNER_QUERY_STRING, listOfValues, 
         startIndex, maxResults);
     return listOfCollections;

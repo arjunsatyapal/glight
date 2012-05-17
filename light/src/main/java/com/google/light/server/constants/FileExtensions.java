@@ -29,6 +29,7 @@ import com.google.light.server.constants.http.ContentTypeEnum;
  */
 public enum FileExtensions {
   HTML("html", ContentTypeEnum.TEXT_HTML),
+  JPG("jpg", ContentTypeEnum.IMAGE_JPEG),
   JPEG("jpeg", ContentTypeEnum.IMAGE_JPEG),
   PNG("png", ContentTypeEnum.IMAGE_PNG),
   ZIP("zip", ContentTypeEnum.APPLICATION_ZIP);

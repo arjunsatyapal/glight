@@ -21,7 +21,7 @@ import static com.google.light.server.constants.LightConstants.IMPORT_BATCH_SIZE
 import static com.google.light.server.utils.LightPreconditions.checkIntegerIsInRage;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkNull;
-import static com.google.light.server.utils.LightUtils.isListEmpty;
+import static com.google.light.server.utils.LightUtils.isCollectionEmpty;
 import static com.google.light.server.utils.LightUtils.replaceInstanceInList;
 
 import com.google.common.collect.Lists;
@@ -35,7 +35,6 @@ import com.google.light.server.exception.unchecked.httpexception.BadRequestExcep
 import com.google.light.server.persistence.entity.jobs.JobEntity;
 import com.google.light.server.persistence.entity.jobs.JobState;
 import com.google.light.server.persistence.entity.jobs.JobStateCategory;
-import com.google.light.server.utils.LightUtils;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -232,7 +231,7 @@ public class ImportBatchWrapper extends AbstractDto<ImportBatchWrapper> {
   }
 
   private boolean listContainsFolder() {
-    if (LightUtils.isListEmpty(list)) {
+    if (isCollectionEmpty(list)) {
       return false;
     }
 
@@ -247,7 +246,7 @@ public class ImportBatchWrapper extends AbstractDto<ImportBatchWrapper> {
   }
 
   public List<ImportExternalIdDto> getList() {
-    if (isListEmpty(list)) {
+    if (isCollectionEmpty(list)) {
       list = Lists.newArrayList();
     }
 

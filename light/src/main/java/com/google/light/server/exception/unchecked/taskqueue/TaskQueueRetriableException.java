@@ -13,9 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.server.exception.unchecked.pipelineexceptions.pause;
-
-
+package com.google.light.server.exception.unchecked.taskqueue;
 
 /**
  * This indicates that there was some JSON exception while serializing/de-serializing.
@@ -23,35 +21,33 @@ package com.google.light.server.exception.unchecked.pipelineexceptions.pause;
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
-public class PipelineStopException extends RuntimeException {
-  private final String pipelineId;
-  
-  public String getPipelineId() {
-    return pipelineId;
+public class TaskQueueRetriableException extends RuntimeException {
+  /**
+   * {@inheritDoc}
+   */
+  public TaskQueueRetriableException() {
+      super();
   }
-  
+
   /**
    * {@inheritDoc}
    * @param message
    */
-  public PipelineStopException(String pipelineId, String message) {
+  public TaskQueueRetriableException(String message) {
       super(message);
-      this.pipelineId = pipelineId;
   }
 
   /**
    * {@inheritDoc}
    */
-  public PipelineStopException(String pipelineId, String message, Throwable cause) {
+  public TaskQueueRetriableException(String message, Throwable cause) {
       super(message, cause);
-      this.pipelineId = pipelineId;
   }
 
   /**
    * {@inheritDoc}
    */
-  public PipelineStopException(String pipelineId, Throwable cause) {
+  public TaskQueueRetriableException(Throwable cause) {
       super(cause);
-      this.pipelineId = pipelineId;
   }
 }

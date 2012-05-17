@@ -21,6 +21,7 @@ import static com.google.light.server.utils.LightPreconditions.checkNotNull;
 import com.google.common.collect.ImmutableMap;
 import com.google.light.server.exception.ExceptionType;
 import java.net.URI;
+import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -43,6 +44,10 @@ public class HtmlBuilder {
     return builder.toString();
   }
   
+  
+  public void appendString(String str) {
+    builder.append(str);
+  }
   
 
   public void appendHref(String id, URI uri, String text) {
@@ -111,6 +116,10 @@ public class HtmlBuilder {
     appendNodeEnd(HtmlNode.HEAD);
   }
   
+  public void appendSectionHeader(String sectionHeader) {
+    builder.append("<br><br><b>").append(sectionHeader).append(": </b><br>");
+  }
+  
   public void appendCanonicalUri(URI uri) {
     appendLink("canonical", uri);
   }
@@ -136,6 +145,30 @@ public class HtmlBuilder {
            .append("</iframe>");
   }
   
+  public void appendTableStart(String style) {
+    builder.append("<table style=" + style + ">");
+  }
+  
+  public void appendTableEnd() {
+    appendNodeEnd(HtmlNode.TABLE);
+  }
+  
+  public void appendTableHeaderRow(Collection<String> tableHeaders) {
+    for (String curr : tableHeaders) {
+      builder.append("<th>").append(curr).append("</th>");
+      appendAsciiNewLine();
+    }
+  }
+  
+  public void appendTableRow(Collection<Object> tableRowValues) {
+    builder.append("<tr>");
+    for (Object curr : tableRowValues) {
+      builder.append("<td>").append(curr).append("</td>");
+    }
+    builder.append("</tr>");
+    appendAsciiNewLine();
+  }
+  
   public void appendLink(String rel, URI href) {
     builder.append("<link rel=\"").append(rel).append("\" href=\"").append(href.toString()).append("\"");
     appendAsciiNewLine();
@@ -143,6 +176,11 @@ public class HtmlBuilder {
   
   public void appendAsciiNewLine() {
     builder.append("\n");
+  }
+  
+  public void appendNewLine() {
+    builder.append("<br/>");
+    appendAsciiNewLine();
   }
   
   
@@ -156,6 +194,10 @@ public class HtmlBuilder {
     appendAsciiNewLine();
   }
   
+  public void appendOL(String item) {
+    builder.append("<ol>").append(item).append("</ol>");
+    appendNewLine();
+  }
 
   private void appendEnd() {
     builder.append("</body>");
@@ -167,7 +209,8 @@ public class HtmlBuilder {
     BODY("body"),
     HEAD("head"),
     LINK("link"),
-    STYLE("style");
+    STYLE("style"),
+    TABLE("table");
     
 
     private String name;

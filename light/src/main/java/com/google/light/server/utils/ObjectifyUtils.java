@@ -17,8 +17,7 @@ package com.google.light.server.utils;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightUtils.getStackAsString;
-import static com.google.light.server.utils.LightUtils.isListEmpty;
-
+import static com.google.light.server.utils.LightUtils.isCollectionEmpty;
 import com.google.common.base.Throwables;
 
 import com.google.appengine.api.datastore.Cursor;
@@ -211,7 +210,7 @@ public class ObjectifyUtils {
     return query.fetch();
   }
 
-  public static <T, O> GAEQueryWrapper<T> findQueryResultsByPage(Objectify ofy,
+  public static <T, O> GAEQueryWrapper<T> findQueryResultsByPageForListField(Objectify ofy,
       Class<T> clazz, String filterKey, List<O> listOfValues, String startIndex, int maxResults) {
     Query<T> query = ofy.query(clazz).filter(filterKey, listOfValues);
 
@@ -228,7 +227,36 @@ public class ObjectifyUtils {
 
     GAEQueryWrapper<T> wrapper = new GAEQueryWrapper<T>();
 
-    if (!isListEmpty(listOfRecords) && iterator.hasNext()) {
+    
+    if(!isCollectionEmpty(listOfRecords) && iterator.hasNext()) {
+
+      wrapper.setStartIndex(iterator.getCursor().toWebSafeString());
+    }
+    wrapper.setList(listOfRecords);
+
+    return wrapper;
+  }
+  
+  public static <T, O> GAEQueryWrapper<T> findQueryResultsByPageForField(Objectify ofy,
+      Class<T> clazz, String filterKey, O filterValue, String startIndex, int maxResults) {
+    Query<T> query = ofy.query(clazz).filter(filterKey, filterValue);
+
+    if (StringUtils.isNotBlank(startIndex)) {
+      query.startCursor(Cursor.fromWebSafeString(startIndex));
+    }
+
+    QueryResultIterator<T> iterator = query.fetch().iterator();
+
+    List<T> listOfRecords = Lists.newArrayList();
+    for (int counter = 1; counter <= maxResults && iterator.hasNext(); counter++) {
+      listOfRecords.add(iterator.next());
+    }
+
+    GAEQueryWrapper<T> wrapper = new GAEQueryWrapper<T>();
+
+    
+    if(!isCollectionEmpty(listOfRecords) && iterator.hasNext()) {
+
       wrapper.setStartIndex(iterator.getCursor().toWebSafeString());
     }
     wrapper.setList(listOfRecords);

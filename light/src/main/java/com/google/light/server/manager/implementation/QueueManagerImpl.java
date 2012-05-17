@@ -21,11 +21,6 @@ import static com.google.light.server.utils.LightPreconditions.checkTxnIsRunning
 import static com.google.light.server.utils.LightUtils.getURI;
 import static com.google.light.server.utils.LocationHeaderUtils.getJobLocation;
 
-import com.google.light.server.dto.pojo.typewrapper.longwrapper.JobId;
-import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
-
-import java.util.logging.Logger;
-
 import com.google.appengine.api.taskqueue.Queue;
 import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.RetryOptions;
@@ -37,14 +32,17 @@ import com.google.light.server.constants.LightConstants;
 import com.google.light.server.constants.QueueEnum;
 import com.google.light.server.constants.http.ContentTypeConstants;
 import com.google.light.server.dto.notifications.AbstractNotification;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.JobId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
 import com.google.light.server.manager.interfaces.QueueManager;
 import com.google.light.server.utils.GuiceUtils;
 import com.google.light.server.utils.JsonUtils;
 import com.googlecode.objectify.Objectify;
 import java.net.URI;
+import java.util.logging.Logger;
 
 /**
- * 
+ * Implementation for {@link QueueManager}
  * 
  * TODO(arjuns): Add test for this class.
  * 
@@ -60,9 +58,7 @@ public class QueueManagerImpl implements QueueManager {
   public void enqueueGoogleDocInteractionJob(Objectify ofy, JobId jobId) {
     checkTxnIsRunning(ofy);
 
-    RetryOptions retryOptions = getRetryOptions();
-
-    TaskOptions taskOptions = getTaskOptions(retryOptions,
+    TaskOptions taskOptions = getTaskOptions(QueueEnum.GDOC_INTERACTION.getRetryOptions(),
         TaskOptions.Method.PUT, ContentTypeConstants.TEXT_PLAIN,
         Long.toString(jobId.getValue()), getJobLocation(jobId));
 
@@ -95,28 +91,13 @@ public class QueueManagerImpl implements QueueManager {
   }
 
   /**
-   * @return
-   */
-  private RetryOptions getRetryOptions() {
-    RetryOptions retryOptions = RetryOptions.Builder.withDefaults();
-    retryOptions.maxBackoffSeconds(LightConstants.TASK_MAX_BACKOFF_SEC);
-    retryOptions.maxDoublings(LightConstants.TASK_MAX_DOUBLINGS);
-    retryOptions.minBackoffSeconds(LightConstants.TASK_MIN_BACKOFF_SECONDS);
-    retryOptions.taskAgeLimitSeconds(LightConstants.TASK_MAX_AGE);
-    retryOptions.taskRetryLimit(LightConstants.TASK_RETRY_LIMIT);
-    return retryOptions;
-  }
-
-  /**
    * {@inheritDoc}
    */
   @Override
   public void enqueuePollingJob(Objectify ofy, JobId jobId) {
     checkTxnIsRunning(ofy);
 
-    RetryOptions retryOptions = getRetryOptions();
-
-    TaskOptions taskOptions = getTaskOptions(retryOptions,
+    TaskOptions taskOptions = getTaskOptions(QueueEnum.LIGHT_POLLING.getRetryOptions(),
         TaskOptions.Method.PUT, ContentTypeConstants.TEXT_PLAIN,
         Long.toString(jobId.getValue()), getJobLocation(jobId));
 
@@ -131,9 +112,7 @@ public class QueueManagerImpl implements QueueManager {
   @Override
   public void enqueueLightJob(Objectify ofy, JobId jobId) {
     checkTxnIsRunning(ofy);
-    RetryOptions retryOptions = getRetryOptions();
-
-    TaskOptions taskOptions = getTaskOptions(retryOptions,
+    TaskOptions taskOptions = getTaskOptions(QueueEnum.LIGHT.getRetryOptions(),
         TaskOptions.Method.PUT, ContentTypeConstants.TEXT_PLAIN,
         Long.toString(jobId.getValue()), getJobLocation(jobId));
 
@@ -147,9 +126,7 @@ public class QueueManagerImpl implements QueueManager {
    */
   @Override
   public void enqueueLightJobWithoutTxn(JobId jobId) {
-    RetryOptions retryOptions = getRetryOptions();
-
-    TaskOptions taskOptions = getTaskOptions(retryOptions,
+    TaskOptions taskOptions = getTaskOptions(QueueEnum.LIGHT.getRetryOptions(),
         TaskOptions.Method.PUT, ContentTypeConstants.TEXT_PLAIN,
         Long.toString(jobId.getValue()), getJobLocation(jobId));
 
@@ -165,9 +142,7 @@ public class QueueManagerImpl implements QueueManager {
   public <T extends AbstractNotification<T>> void enqueueNotification(
       Objectify ofy, T notification) {
     checkTxnIsRunning(ofy);
-    RetryOptions retryOptions = getRetryOptions();
-
-    TaskOptions taskOptions = getTaskOptions(retryOptions,
+    TaskOptions taskOptions = getTaskOptions(QueueEnum.LIGHT_NOTIFICATIONS.getRetryOptions(),
         TaskOptions.Method.POST, ContentTypeConstants.TEXT_PLAIN,
         notification.toJson(),
         getURI(JerseyConstants.URI_RESOURCE_PATH_NOTIFICATION_JOB));

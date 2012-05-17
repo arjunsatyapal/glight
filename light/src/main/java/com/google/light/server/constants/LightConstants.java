@@ -28,6 +28,10 @@ public class LightConstants {
   public static final String GSS_CLIENTLOGIN_APPNAME_SUFFIX = ".appspot.com";
   public static final int GSS_CLIENTLOGIN_TOKEN_TIMEOUT_IN_MILLIS = ONE_WEEK_IN_MILLIS;
   
+  public static int SECOND = 1;
+  public static int SECOND_FIVE = 5;
+  public static int SECOND_TEN = 10;
+  public static int SECONDS_IN_MIN = 60;
   public static int SECONDS_IN_HR = 60 * 60;
   public static int SECONDS_IN_A_DAY = 24 * 60 * 60;
   
@@ -88,7 +92,7 @@ public class LightConstants {
   public static final int TASK_MAX_BACKOFF_SEC = SECONDS_IN_HR;
   public static final int TASK_MAX_DOUBLINGS = 5;
   public static final int TASK_MIN_BACKOFF_SECONDS = 2;
-  public static final int TASK_MAX_AGE = SECONDS_IN_HR;
+  public static final int TASK_AGE_LIMIT_MAX = SECONDS_IN_HR;
   public static final int TASK_RETRY_LIMIT = 3;
   
 

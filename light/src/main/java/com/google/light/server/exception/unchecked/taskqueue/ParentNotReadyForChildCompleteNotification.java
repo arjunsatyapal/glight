@@ -15,7 +15,6 @@
  */
 package com.google.light.server.exception.unchecked.taskqueue;
 
-import com.google.light.server.exception.unchecked.pipelineexceptions.ignore.PipelineIgnoreException;
 
 
 
@@ -27,7 +26,7 @@ import com.google.light.server.exception.unchecked.pipelineexceptions.ignore.Pip
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
-public class ParentNotReadyForChildCompleteNotification extends PipelineIgnoreException {
+public class ParentNotReadyForChildCompleteNotification extends TaskQueueRetriableException {
   /**
    * {@inheritDoc}
    */

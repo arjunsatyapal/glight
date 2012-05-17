@@ -41,15 +41,23 @@ public abstract class AbstractPersistenceEntity<P, D> extends AbstractPojo<P> im
   protected Boolean needsCreationTime;
 
   // Transient avoids comparison for equals.
-  protected transient Instant creationTime;
-  protected transient Instant lastUpdateTime;
+  protected transient Long creationTimeInMillis;
+  protected transient Long lastUpdateTimeInMillis;
 
   public Instant getCreationTime() {
-    return creationTime;
+    if (creationTimeInMillis != null) {
+      return new Instant(creationTimeInMillis);
+    }
+
+    return null;
   }
 
   public Instant getLastUpdateTime() {
-    return lastUpdateTime;
+    if (lastUpdateTimeInMillis != null) {
+      return new Instant(lastUpdateTimeInMillis);
+    }
+    
+    return null;
   }
 
   public boolean needsCreationTime() {
@@ -60,10 +68,10 @@ public abstract class AbstractPersistenceEntity<P, D> extends AbstractPojo<P> im
   @PrePersist
   protected void prePersist() {
     Instant now = LightUtils.getNow();
-    this.lastUpdateTime = now;
+    this.lastUpdateTimeInMillis = now.getMillis();
 
-    // TODO(arjuns): Fix creationTime.
-    this.creationTime = null;
+//    // TODO(arjuns): Fix creationTime.
+//    this.creationTimeInMillis = null;
 
   }
 
@@ -108,7 +116,13 @@ public abstract class AbstractPersistenceEntity<P, D> extends AbstractPojo<P> im
     if (builder == null) {
       return;
     }
-    this.creationTime = builder.creationTime;
-    this.lastUpdateTime = builder.lastUpdateTime;
+
+    if (builder.creationTime != null) {
+      this.creationTimeInMillis = builder.creationTime.getMillis();
+    }
+
+    if (builder.lastUpdateTime != null) {
+      this.lastUpdateTimeInMillis = builder.lastUpdateTime.getMillis();
+    }
   }
 }

@@ -23,14 +23,14 @@ import static com.google.light.server.constants.RequestParamKeyEnum.LOGIN_PROVID
 import static com.google.light.server.constants.RequestParamKeyEnum.LOGIN_PROVIDER_USER_ID;
 import static com.google.light.server.constants.RequestParamKeyEnum.PERSON_ID;
 
-import com.google.common.base.Throwables;
-
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.common.io.CharStreams;
 import com.google.light.server.constants.FileExtensions;
 import com.google.light.server.constants.OAuth2ProviderService;
@@ -52,9 +52,11 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpSession;
@@ -285,8 +287,8 @@ public class LightUtils {
     return Iterables.toString(list);
   }
 
-  public static boolean isListEmpty(List<?> list) {
-    if (list == null || list.size() == 0) {
+  public static boolean isCollectionEmpty(Collection<?> collection) {
+    if (collection == null || collection.size() == 0) {
       return true;
     }
 
@@ -311,7 +313,7 @@ public class LightUtils {
 
   public static <E, W extends AbstractTypeWrapper<E, W>>
       List<E> convertWrapperListToListOfValues(List<W> listOfWrappers) {
-    if (isListEmpty(listOfWrappers)) {
+    if (isCollectionEmpty(listOfWrappers)) {
       return Lists.newArrayList();
     }
 
@@ -323,6 +325,22 @@ public class LightUtils {
     }
 
     return requiredList;
+  }
+
+  public static <E, W extends AbstractTypeWrapper<E, W>>
+      Set<E> convertWrapperSetToSetOfValues(Set<W> setOfWrappers) {
+    if (isCollectionEmpty(setOfWrappers)) {
+      return Sets.newHashSet();
+    }
+
+    Set<E> requiredSet = Sets.newHashSet();
+
+    for (W curr : setOfWrappers) {
+      E wrappedValue = getWrapperValue(curr);
+      requiredSet.add(wrappedValue);
+    }
+
+    return requiredSet;
   }
 
   @VisibleForTesting
@@ -371,7 +389,7 @@ public class LightUtils {
   @SuppressWarnings({ "unchecked", "rawtypes", "deprecation" })
   public static <I, W extends AbstractTypeWrapper<I, W>>
       List<W> convertListOfValuesToWrapperList(List<I> listOfValues, Class<W> clazz) {
-    if (isListEmpty(listOfValues)) {
+    if (isCollectionEmpty(listOfValues)) {
       return Lists.newArrayList();
     }
 
@@ -384,6 +402,24 @@ public class LightUtils {
     }
 
     return requiredList;
+  }
+
+  @SuppressWarnings({ "rawtypes", "unchecked", "deprecation" })
+  public static <I, W extends AbstractTypeWrapper<I, W>>
+      Set<W> convertSetOfValuesToWrapperSet(Set<I> setOfValues, Class<W> clazz) {
+    if (isCollectionEmpty(setOfValues)) {
+      return Sets.newHashSet();
+    }
+
+    Set<W> requiredSet = Sets.newHashSet();
+
+    for (I curr : setOfValues) {
+      AbstractTypeWrapper instanceCreator = map.get(clazz.getName());
+      W instance = ((W) instanceCreator.createInstance(curr));
+      requiredSet.add(instance);
+    }
+
+    return requiredSet;
   }
 
   public static String generateNameForExternalId(ExternalId externalId) {
@@ -401,19 +437,20 @@ public class LightUtils {
 
   /**
    * Method to replace an existing instance with a new Instance of same type in a List.
+   * 
    * @param list
    * @param existingInstance
    * @param newInstance
    */
   public static <D> void replaceInstanceInList(List<D> list, D existingInstance, D newInstance) {
-    checkArgument(!isListEmpty(list), "list cannot be empty.");
-    
+    checkArgument(!isCollectionEmpty(list), "list cannot be empty.");
+
     int index = list.indexOf(existingInstance);
     checkArgument(index >= 0, "existingInstance was not found in the list.");
     list.remove(index);
     list.add(index, newInstance);
   }
-  
+
   public static String getStackAsString() {
     try {
       throw new IllegalArgumentException("Trying to get stack.");

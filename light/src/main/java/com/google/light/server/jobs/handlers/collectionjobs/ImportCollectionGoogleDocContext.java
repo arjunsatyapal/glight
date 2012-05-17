@@ -17,6 +17,7 @@ package com.google.light.server.jobs.handlers.collectionjobs;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
+import static com.google.light.server.utils.LightUtils.isCollectionEmpty;
 import static com.google.light.server.utils.LightUtils.replaceInstanceInList;
 
 import com.google.common.collect.Lists;
@@ -24,7 +25,6 @@ import com.google.light.server.dto.AbstractDto;
 import com.google.light.server.dto.importresource.ImportExternalIdDto;
 import com.google.light.server.dto.pojo.typewrapper.stringwrapper.ExternalId;
 import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocInfoDto;
-import com.google.light.server.utils.LightUtils;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -87,7 +87,7 @@ public class ImportCollectionGoogleDocContext extends AbstractDto<ImportCollecti
   }
   
   public List<ImportExternalIdDto> getList() {
-    if (LightUtils.isListEmpty(list)) {
+    if (isCollectionEmpty(list)) {
       list = Lists.newArrayList();
     }
     

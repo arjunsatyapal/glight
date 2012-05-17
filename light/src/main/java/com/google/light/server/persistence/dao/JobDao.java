@@ -15,24 +15,30 @@
  */
 package com.google.light.server.persistence.dao;
 
-import com.google.light.server.utils.JsonUtils;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.light.server.persistence.entity.jobs.JobEntity.OFY_JOB_OWNER_QUERY_STRING;
+import static com.google.light.server.utils.LightPreconditions.checkNotNull;
+import static com.google.light.server.utils.LightUtils.getWrapperValue;
 
 import com.google.light.server.utils.LightUtils;
-
-import java.util.logging.Logger;
-
-import com.google.light.server.dto.pojo.typewrapper.longwrapper.JobId;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.JobId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
+import com.google.light.server.exception.ExceptionType;
 import com.google.light.server.persistence.entity.jobs.JobEntity;
+import com.google.light.server.serveronlypojos.GAEQueryWrapper;
+import com.google.light.server.utils.JsonUtils;
 import com.google.light.server.utils.ObjectifyUtils;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Objectify;
 import com.googlecode.objectify.ObjectifyService;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * 
@@ -61,7 +67,7 @@ public class JobDao extends AbstractBasicDao<Object, JobEntity> {
     return super.get(ofy, key);
   }
 
-  public Map<JobId, JobEntity> findListOfJobs(List<JobId> listOfJobIds) {
+  public Map<JobId, JobEntity> findListOfJobs(Collection<JobId> listOfJobIds) {
     List<Key<JobEntity>> listOfKeys = Lists.newArrayListWithCapacity(listOfJobIds.size());
     
     for (JobId currJobId : listOfJobIds) {
@@ -84,8 +90,20 @@ public class JobDao extends AbstractBasicDao<Object, JobEntity> {
   @Override
   public JobEntity put(Objectify ofy, JobEntity entity) {
     logger.info("I got modified : " + entity.getJobId() + " : " + JsonUtils.toJson(entity));
+    checkNotNull(entity.getCreationTime(), "creationTime cannot be null. Happened for " + entity.getJobId());
     JobEntity temp = super.put(ofy, entity);
     logger.info("Successfully created/updated : " + temp.getJobId());
     return temp;
+  }
+  
+  public GAEQueryWrapper<JobEntity> findJobsByOwnerId(PersonId ownerId, 
+      String startIndex, int maxResults) {
+    checkNotNull(ownerId, ExceptionType.SERVER,
+        "OwnerId should not be null. Callers of this method should ensure that.");
+
+    Objectify ofy = ObjectifyUtils.nonTransaction();
+    GAEQueryWrapper<JobEntity> listOfModules = ObjectifyUtils.findQueryResultsByPageForField(
+        ofy, JobEntity.class, OFY_JOB_OWNER_QUERY_STRING, getWrapperValue(ownerId), startIndex, maxResults);
+    return listOfModules;
   }
 }

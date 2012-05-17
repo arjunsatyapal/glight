@@ -15,13 +15,12 @@
  */
 package com.google.light.server.exception.unchecked.taskqueue;
 
-import com.google.common.collect.Iterables;
+import java.util.Set;
 
-import java.util.List;
+import com.google.common.collect.Iterables;
 
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.JobId;
 
-import com.google.light.server.exception.unchecked.pipelineexceptions.ignore.PipelineIgnoreException;
 
 
 
@@ -33,13 +32,13 @@ import com.google.light.server.exception.unchecked.pipelineexceptions.ignore.Pip
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
-public class WaitForChildsToComplete extends PipelineIgnoreException {
+public class WaitForChildsToComplete extends TaskQueueRetriableException {
   private JobId jobId;
   
   /**
    * {@inheritDoc}
    */
-  public WaitForChildsToComplete(List<JobId> jobIds) {
+  public WaitForChildsToComplete(Set<JobId> jobIds) {
       super("Waiting for : " + Iterables.toString(jobIds));
   }
   

@@ -79,7 +79,7 @@ public class ModuleDao extends AbstractBasicDao<ModuleDto, ModuleEntity> {
     Objectify ofy = ObjectifyUtils.nonTransaction();
     ArrayList<Long> listOfValues = Lists.newArrayList(ownerId.getValue());
 
-    GAEQueryWrapper<ModuleEntity> listOfModules = ObjectifyUtils.findQueryResultsByPage(
+    GAEQueryWrapper<ModuleEntity> listOfModules = ObjectifyUtils.findQueryResultsByPageForListField(
         ofy, ModuleEntity.class, OFY_MODULE_OWNER_QUERY_STRING, listOfValues, startIndex, maxResults);
     return listOfModules;
   }

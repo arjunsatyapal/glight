@@ -18,7 +18,7 @@ package com.google.light.server.dto.thirdparty.google.gdata.gdoc;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNonEmptyList;
 import static com.google.light.server.utils.LightPreconditions.checkPersonId;
-import static com.google.light.server.utils.LightUtils.isListEmpty;
+import static com.google.light.server.utils.LightUtils.isCollectionEmpty;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -34,7 +34,6 @@ import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
 import com.google.light.server.dto.pojo.typewrapper.stringwrapper.ExternalId;
-import com.google.light.server.utils.LightUtils;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -171,7 +170,7 @@ public class GoogleDocImportBatchJobContext extends AbstractDto<GoogleDocImportB
   }
 
   public void addImportDestination(ImportExternalIdDto importDestination) {
-    if (LightUtils.isListEmpty(listOfImportDestinations)) {
+    if (isCollectionEmpty(listOfImportDestinations)) {
       listOfImportDestinations = Lists.newArrayList();
     }
 
@@ -223,7 +222,7 @@ public class GoogleDocImportBatchJobContext extends AbstractDto<GoogleDocImportB
   }
 
   public boolean isChildJobCreated(ExternalId externalId) {
-    if (isListEmpty(listOfImportDestinations)) {
+    if (isCollectionEmpty(listOfImportDestinations)) {
       return false;
     }
 
@@ -237,7 +236,7 @@ public class GoogleDocImportBatchJobContext extends AbstractDto<GoogleDocImportB
   }
 
   public ModuleId getModuleIdForExternalId(ExternalId externalId) {
-    if (LightUtils.isListEmpty(listOfImportDestinations)) {
+    if (isCollectionEmpty(listOfImportDestinations)) {
       return null;
     }
 

@@ -23,7 +23,6 @@ import com.google.light.server.dto.module.ModuleType;
 import com.google.light.server.dto.pojo.tree.AbstractTreeNode.TreeNodeType;
 import com.google.light.server.dto.pojo.tree.collection.CollectionTreeNodeDto;
 
-import com.google.appengine.api.taskqueue.Transaction;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
@@ -41,7 +40,6 @@ import com.google.light.server.manager.interfaces.CollectionManager;
 import com.google.light.server.persistence.dao.CollectionDao;
 import com.google.light.server.persistence.dao.CollectionVersionDao;
 import com.google.light.server.persistence.entity.collection.CollectionEntity;
-import com.google.light.server.persistence.entity.collection.CollectionEntity.Builder;
 import com.google.light.server.persistence.entity.collection.CollectionVersionEntity;
 import com.google.light.server.serveronlypojos.GAEQueryWrapper;
 import com.google.light.server.utils.LightUtils;
@@ -238,6 +236,7 @@ public class CollectionManagerImpl implements CollectionManager {
     CollectionEntity toReturn =
         ObjectifyUtils.repeatInTransaction(new Transactable<CollectionEntity>() {
 
+          @SuppressWarnings("synthetic-access")
           @Override
           public CollectionEntity run(Objectify ofy) {
             Instant now = LightUtils.getNow();

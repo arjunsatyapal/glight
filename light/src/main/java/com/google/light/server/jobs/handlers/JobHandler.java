@@ -18,7 +18,7 @@ package com.google.light.server.jobs.handlers;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotNull;
 
-import java.util.logging.Logger;
+import java.util.Set;
 
 import com.google.common.collect.Iterables;
 import com.google.inject.Inject;
@@ -36,8 +36,8 @@ import com.google.light.server.persistence.entity.jobs.JobEntity.TaskType;
 import com.google.light.server.persistence.entity.jobs.JobState;
 import com.google.light.server.utils.ObjectifyUtils;
 import com.googlecode.objectify.Objectify;
-import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * 
@@ -112,11 +112,7 @@ public class JobHandler {
       case IMPORT_BATCH:
         importBatchJobHandler.handle(jobEntity);
         break;
-      // //
-      // // case IMPORT_GOOGLE_DOC_BATCH:
-      // // handleImporgGoogleDocBatch(jobEntity);
-      // // break;
-      // //
+
       case IMPORT_GOOGLE_DOC1:
         importModuleGDocHandler.handle(jobEntity);
         break;
@@ -135,7 +131,7 @@ public class JobHandler {
   }
 
   private void pollForChilds(JobEntity jobEntity) {
-    List<JobId> listOfChildJobIds = jobEntity.getPendingChildJobs();
+    Set<JobId> listOfChildJobIds = jobEntity.getPendingChildJobs();
     Map<JobId, JobEntity> map = jobManager.findListOfJobs(listOfChildJobIds);
 
     boolean allChildsComplete = true;

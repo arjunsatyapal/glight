@@ -17,10 +17,6 @@ package com.google.light.server.persistence.dao;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.light.server.utils.LightUtils.wrapIntoRuntimeExceptionAndThrow;
-
-import com.google.light.server.utils.LightUtils;
-
 import com.google.common.annotations.VisibleForTesting;
 import com.google.light.server.exception.unchecked.IllegalKeyTypeException;
 import com.google.light.server.exception.unchecked.ObjectifyTxnShouldBeRunningException;

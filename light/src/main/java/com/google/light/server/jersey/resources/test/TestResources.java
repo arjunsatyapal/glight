@@ -96,7 +96,7 @@ public class TestResources extends AbstractJerseyResource {
       appendSectionHeader(builder, "Admin Utilities");
       appendHtmlPath(builder, HtmlPathEnum.PUT_OAUTH2_CONSUMER_CREDENTIAL);
       appendHref(builder, JerseyConstants.URI_MISC_ADMIN_CONFIG, "Config");
-      appendHref(builder, JerseyConstants.URI_RESOURCE_JOB + "/0", "Job");
+      appendHref(builder, JerseyConstants.URI_RESOURCE_PATH_JOBS_ME, "Jobs by me");
       appendHref(builder, JerseyConstants.URI_TEST_DELETE_ALL, "DeleteAll");
       appendHref(builder, JerseyConstants.URI_TEST_PURGE_QUEUES, "PurgeQueues");
 
@@ -110,7 +110,6 @@ public class TestResources extends AbstractJerseyResource {
       appendSectionHeader(builder, "Google Doc Integration");
       appendHref(builder, JerseyConstants.URI_GOOGLE_DOC_LIST, "Google Doc List");
       appendHtmlPath(builder, HtmlPathEnum.GOOGLE_DOC_INFORMATION);
-      appendHtmlPath(builder, HtmlPathEnum.GOOGLE_DOC_IMPORT_BATCH);
 
       appendSectionHeader(builder, "CSE/GSS");
       appendHref(builder, ServletPathEnum.GSS.get(), "Search Admin Credentials");

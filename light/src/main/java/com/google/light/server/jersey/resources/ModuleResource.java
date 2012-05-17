@@ -5,7 +5,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.constants.LightConstants.MAX_RESULTS_MAX;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPersonLoggedIn;
-import static com.google.light.server.utils.LightUtils.isListEmpty;
+import static com.google.light.server.utils.LightUtils.isCollectionEmpty;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -136,7 +136,7 @@ public class ModuleResource extends AbstractJerseyResource {
     StringBuilder htmlBuilder = new StringBuilder("Modules created by me : <br>");
     
     List<ModuleDto> list = ((List<ModuleDto>) pageDto.getList());
-    if (!isListEmpty(list)) {
+    if (!isCollectionEmpty(list)) {
       int counter = 1;
       for (ModuleDto currDto : list) {
         htmlBuilder.append(counter++)

@@ -18,10 +18,9 @@ package com.google.light.server.jersey.resources;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.constants.LightConstants.MAX_RESULTS_MAX;
-import static com.google.light.server.constants.LightStringConstants.VERSION_LATEST_STR;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPersonLoggedIn;
-import static com.google.light.server.utils.LightUtils.isListEmpty;
+import static com.google.light.server.utils.LightUtils.isCollectionEmpty;
 
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
@@ -33,9 +32,7 @@ import com.google.light.server.constants.http.ContentTypeConstants;
 import com.google.light.server.constants.http.ContentTypeEnum;
 import com.google.light.server.dto.collection.CollectionDto;
 import com.google.light.server.dto.collection.CollectionVersionDto;
-import com.google.light.server.dto.module.ModuleType;
 import com.google.light.server.dto.pages.PageDto;
-import com.google.light.server.dto.pojo.tree.AbstractTreeNode.TreeNodeType;
 import com.google.light.server.dto.pojo.tree.collection.CollectionTreeNodeDto;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.CollectionId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
@@ -233,7 +230,7 @@ public class CollectionResource extends AbstractJerseyResource {
     StringBuilder htmlBuilder = new StringBuilder("Collections created by me : <br>");
 
     List<CollectionDto> list = ((List<CollectionDto>) pageDto.getList());
-    if (!isListEmpty(list)) {
+    if (!isCollectionEmpty(list)) {
       int counter = 1;
       for (CollectionDto currDto : list) {
         htmlBuilder.append(counter++)
