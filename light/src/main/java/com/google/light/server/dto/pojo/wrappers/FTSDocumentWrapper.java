@@ -110,7 +110,7 @@ public class FTSDocumentWrapper {
   /**
    * @param builder
    */
-  @SuppressWarnings("synthetic-access")
+  @SuppressWarnings({ "synthetic-access", "cast" })
   public FTSDocumentWrapper(Builder builder) {
     this.ftsDocumentId = checkNotNull(builder.ftsDocumentId, "ftsDocumentId");
     this.title = checkNotBlank(builder.title, "title");
@@ -137,7 +137,7 @@ public class FTSDocumentWrapper {
     
     
     documentBuilder.addField(FTSUtils.createPublishedField(publishTime));
-    documentBuilder.setId(getWrapperValue(ftsDocumentId));
+    documentBuilder.setId(((String)getWrapperValue(ftsDocumentId)));
 
     this.document = documentBuilder.build();
   }

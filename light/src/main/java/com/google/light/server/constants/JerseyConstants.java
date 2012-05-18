@@ -128,7 +128,7 @@ public class JerseyConstants {
       RESOURCE_PATH_THIRD_PARTY_GOOGLE_DOC + PATH_GOOGLE_DOC_LIST;
 
   public static final String PATH_GOOGLE_DOC_INFO = "/info";
-  public static final String PATH_GOOGLE_FOLDER_INFO = "/info/folder" + PATH_EXTERNAL_ID;
+  public static final String PATH_GOOGLE_FOLDER_INFO = "/info/folder";
 
   public static final String PATH_GOOGLE_DOC_IMPORT_POST = "/import";
   public static final String URI_GOOGLE_DOC_IMPORT_POST = URI_RESOURCE_PATH_THIRD_PARTH_GOOGLE_DOC

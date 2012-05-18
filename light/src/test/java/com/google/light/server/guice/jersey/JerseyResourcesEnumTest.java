@@ -97,7 +97,8 @@ public class JerseyResourcesEnumTest implements EnumTestInterface {
 
         // Now validating Method Type Annotation.
         Map<String, Annotation> mapOfAnnotation = convertAnnotations(listOfAnnotations);
-        assertTrue(mapOfAnnotation.keySet().contains(myenum.getJerseyMethodAnnotation().getName()));
+        assertTrue(myenum + " : Invalid Annotation : " + myenum.getJerseyMethodAnnotation().getName(), 
+            mapOfAnnotation.keySet().contains(myenum.getJerseyMethodAnnotation().getName()));
         assertEquals("Failed for enum : " + myenum, myenum.getPath(), JerseyUtils.getPath(myenum));
 
         // Now validating Method Produces.

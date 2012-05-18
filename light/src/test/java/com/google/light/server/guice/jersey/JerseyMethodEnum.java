@@ -190,19 +190,19 @@ public enum JerseyMethodEnum {
                           GoogleDocIntegration.class,
                           "getDocInfo",
                           new Class[] { String.class },
-                          GET.class,
-                          "/rest/thirdparty/google/gdoc/info/{external_key}",
+                          POST.class,
+                          "/rest/thirdparty/google/gdoc/info",
                           new String[] { "application/json; charset=UTF-8",
                                   "application/xml; charset=UTF-8" }),
 
-  GOOGLE_DOC_GET_FOLDER_CONTENTS(
-                                 GoogleDocIntegration.class,
-                                 "getFolderContents",
-                                 new Class[] { String.class, String.class, String.class },
-                                 GET.class,
-                                 "/rest/thirdparty/google/gdoc/info/folder/{external_key}",
-                                 new String[] { "application/json; charset=UTF-8",
-                                         "application/xml; charset=UTF-8" }),
+//  GOOGLE_DOC_GET_FOLDER_CONTENTS(
+//                                 GoogleDocIntegration.class,
+//                                 "getFolderContents",
+//                                 new Class[] { String.class, String.class, String.class },
+//                                 GET.class,
+//                                 "/rest/thirdparty/google/gdoc/info/folder",
+//                                 new String[] { "application/json; charset=UTF-8",
+//                                         "application/xml; charset=UTF-8" }),
 
   // Import Resource Jersey Methods.
 
@@ -242,12 +242,12 @@ public enum JerseyMethodEnum {
                               new String[] { "text/html; charset=UTF-8" }),
 
   JOB_RESOURCE_GET_JOBS_CREATED_BY_ME(
-                              JobResource.class,
-                              "getJobsCreatedByMe",
-                              new Class[] { },
-                              GET.class,
-                              "/rest/job/me",
-                              new String[] { "text/html; charset=UTF-8" }),
+                                      JobResource.class,
+                                      "getRootJobByMe",
+                                      new Class[] {},
+                                      GET.class,
+                                      "/rest/job/me",
+                                      new String[] { "text/html; charset=UTF-8" }),
 
   // Module Resource Jersey Methods.
   MODULE_RESOURCE_GET_MODULE(
@@ -267,6 +267,15 @@ public enum JerseyMethodEnum {
                                      GET.class,
                                      "/rest/module/{module_id}/{version}",
 
+                                     new String[] { "application/json; charset=UTF-8",
+                                             "application/xml; charset=UTF-8" }),
+
+  MODULE_RESOURCE_GET_MODULE_MATCHING_FILTER(
+                                     ModuleResource.class,
+                                     "getModulesMatchingFilter",
+                                     new Class[] { String.class, String.class, String.class },
+                                     GET.class,
+                                     "/rest/module/search",
                                      new String[] { "application/json; charset=UTF-8",
                                              "application/xml; charset=UTF-8" }),
 

@@ -28,6 +28,7 @@ import com.google.common.base.Preconditions;
  */
 public enum HtmlPathEnum {
   GOOGLE_DOC_INFORMATION("/html/test/thirdparty/google/gdoc/information.html"),
+  GOOGLE_DOC_FOLDER_INFORMATION("/html/test/thirdparty/google/gdoc/folderContents.html"),
   IMPORT_BATCH("/html/test/thirdparty/import/batch.html"),
   PUT_OAUTH2_CONSUMER_CREDENTIAL("/html/admin/put_oauth2_consumer_credential.html"),
   REST_CLIENT("/html/test/rest.html"),

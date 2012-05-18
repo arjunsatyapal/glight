@@ -18,8 +18,6 @@ package com.google.light.server.utils;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
-import static com.google.light.server.utils.LightUtils.encodeToUrlEncodedString;
-
 import com.google.light.server.constants.LightStringConstants;
 
 import com.google.appengine.api.search.Consistency;

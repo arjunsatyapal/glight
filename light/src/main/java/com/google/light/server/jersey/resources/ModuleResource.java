@@ -160,7 +160,7 @@ public class ModuleResource extends AbstractJerseyResource {
   @GET
   @Path(JerseyConstants.PATH_MODULE_SEARCH)
   @Produces({ ContentTypeConstants.APPLICATION_JSON, ContentTypeConstants.APPLICATION_XML })
-  public PageDto getModulesMatchingCriteria(
+  public PageDto getModulesMatchingFilter(
       @QueryParam(LightStringConstants.FILTER) String filterStr,
       @QueryParam(LightStringConstants.START_INDEX_STR) String startIndexStr,
       @QueryParam(LightStringConstants.MAX_RESULTS_STR)String maxResultsStr) {
