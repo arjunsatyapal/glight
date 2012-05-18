@@ -26,6 +26,8 @@ import static com.google.light.server.utils.GoogleCloudStorageUtils.writeFileOnG
 import static com.google.light.server.utils.GuiceUtils.getInstance;
 import static com.google.light.server.utils.LightUtils.getURL;
 
+import com.google.light.server.utils.JsonUtils;
+
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpHeaders;
 import com.google.api.client.http.HttpRequest;
@@ -65,6 +67,7 @@ import com.google.light.server.utils.XmlUtils;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -186,8 +189,8 @@ public class DocsServiceWrapper extends DocsService {
   }
 
   @SuppressWarnings("rawtypes")
-  public List<GoogleDocInfoDto> getFolderContentWhichAreSupported(GoogleDocResourceId resourceId, 
-      int maxResult) {
+  public List<GoogleDocInfoDto> getFolderContentWhichAreSupportedInAlphabeticalOrder(
+      GoogleDocResourceId resourceId, int maxResult) {
     String randomString = LightUtils.getUUIDString();
 
     List<GoogleDocInfoDto> list = Lists.newArrayList();
@@ -211,6 +214,9 @@ public class DocsServiceWrapper extends DocsService {
       }
     } while (pageDto.getStartIndex() != null);
 
+    Collections.sort(list);
+    System.out.println(JsonUtils.toJson(list));
+    
     return list;
   }
 

@@ -20,6 +20,7 @@ import static com.google.light.server.persistence.entity.jobs.JobEntity.OFY_JOB_
 import static com.google.light.server.utils.LightPreconditions.checkNotNull;
 import static com.google.light.server.utils.LightUtils.getWrapperValue;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
@@ -27,6 +28,7 @@ import com.google.light.server.dto.pojo.typewrapper.longwrapper.JobId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
 import com.google.light.server.exception.ExceptionType;
 import com.google.light.server.persistence.entity.jobs.JobEntity;
+import com.google.light.server.persistence.entity.jobs.JobEntity.JobType;
 import com.google.light.server.serveronlypojos.GAEQueryWrapper;
 import com.google.light.server.utils.JsonUtils;
 import com.google.light.server.utils.ObjectifyUtils;
@@ -94,14 +96,19 @@ public class JobDao extends AbstractBasicDao<Object, JobEntity> {
     return temp;
   }
   
-  public GAEQueryWrapper<JobEntity> findJobsByOwnerId(PersonId ownerId, 
+  public GAEQueryWrapper<JobEntity> findRootJobsByOwnerId(PersonId ownerId, 
       String startIndex, int maxResults) {
     checkNotNull(ownerId, ExceptionType.SERVER,
         "OwnerId should not be null. Callers of this method should ensure that.");
 
+    Map<String, Object> mapOfFilterKeyValues = new ImmutableMap.Builder<String, Object>()
+        .put(OFY_JOB_OWNER_QUERY_STRING, getWrapperValue(ownerId))
+        .put(JobEntity.OFY_JOB_TYPE_QUERY_STRING, JobType.ROOT_JOB)
+        .build();
+    
     Objectify ofy = ObjectifyUtils.nonTransaction();
-    GAEQueryWrapper<JobEntity> listOfModules = ObjectifyUtils.findQueryResultsByPageForField(
-        ofy, JobEntity.class, OFY_JOB_OWNER_QUERY_STRING, getWrapperValue(ownerId), startIndex, maxResults);
+    GAEQueryWrapper<JobEntity> listOfModules = ObjectifyUtils.findQueryResults(
+        ofy, JobEntity.class, mapOfFilterKeyValues, startIndex, maxResults);
     return listOfModules;
   }
 }

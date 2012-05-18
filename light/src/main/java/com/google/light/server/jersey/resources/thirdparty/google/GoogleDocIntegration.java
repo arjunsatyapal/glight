@@ -15,6 +15,7 @@
  */
 package com.google.light.server.jersey.resources.thirdparty.google;
 
+import static com.google.light.server.constants.LightConstants.GDATA_GDOC_MAX_RESULTS;
 import static com.google.light.server.exception.ExceptionType.SERVER_GUICE_INJECTION;
 import static com.google.light.server.servlets.thirdparty.google.gdoc.GoogleDocUtils.getDocumentFeedWithFolderUrl;
 import static com.google.light.server.servlets.thirdparty.google.gdoc.GoogleDocUtils.getDocumentFeedWithFolderUrlAndFilter;
@@ -31,22 +32,28 @@ import com.google.light.server.constants.JerseyConstants;
 import com.google.light.server.constants.LightConstants;
 import com.google.light.server.constants.LightStringConstants;
 import com.google.light.server.constants.http.ContentTypeConstants;
+import com.google.light.server.dto.module.ModuleType;
 import com.google.light.server.dto.pages.PageDto;
 import com.google.light.server.dto.pojo.typewrapper.stringwrapper.ExternalId;
 import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocInfoDto;
 import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocResourceId;
 import com.google.light.server.jersey.resources.AbstractJerseyResource;
 import com.google.light.server.thirdparty.clients.google.gdata.gdoc.DocsServiceWrapper;
+import com.google.light.server.utils.JsonUtils;
 import com.google.light.server.utils.LightUtils;
 import java.net.URL;
+import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
 import org.apache.commons.lang.StringUtils;
 
 /**
@@ -125,22 +132,37 @@ public class GoogleDocIntegration extends AbstractJerseyResource {
     return maxResult;
   }
 
-  @GET
+  @SuppressWarnings("unchecked")
+  @POST
   @Path(JerseyConstants.PATH_GOOGLE_DOC_INFO)
-  @Produces({ ContentTypeConstants.APPLICATION_JSON, ContentTypeConstants.APPLICATION_XML })
-  public GoogleDocInfoDto getDocInfo(
-      @PathParam(JerseyConstants.PATH_PARAM_EXTERNAL_KEY) String externaIdStr) {
-    ExternalId externalId = new ExternalId(externaIdStr);
+  @Produces({ ContentTypeConstants.TEXT_PLAIN })
+  public Response getDocInfo(
+      @FormParam(JerseyConstants.PATH_PARAM_EXTERNAL_ID) String externalIdStr) {
+    ExternalId externalId = new ExternalId(externalIdStr);
     GoogleDocResourceId resourceId = new GoogleDocResourceId(externalId);
     GoogleDocInfoDto dto = docsServiceProvider.get().getGoogleDocInfo(resourceId);
-    return dto;
+
+    StringBuilder builder = new StringBuilder();
+    builder.append("Info for : " + externalIdStr + "\n").append(dto.toJson());
+    
+    
+    if (dto.getModuleType() == ModuleType.GOOGLE_COLLECTION) {
+      PageDto pageDto = getFolderContents(externalIdStr, null, 
+          Long.toString(LightConstants.MAX_RESULTS_MAX));
+
+      List<GoogleDocInfoDto> list = ((List<GoogleDocInfoDto>) pageDto.getList());
+      java.util.Collections.sort(list);
+      
+      builder.append("\n Folder Contents : \n").append(JsonUtils.toJson(list));
+    }
+    return Response.ok(builder.toString()).build();
   }
 
   @GET
   @Path(JerseyConstants.PATH_GOOGLE_FOLDER_INFO)
   @Produces({ ContentTypeConstants.APPLICATION_JSON, ContentTypeConstants.APPLICATION_XML })
   public PageDto getFolderContents(
-      @PathParam(JerseyConstants.PATH_PARAM_EXTERNAL_KEY) String externalIdStr,
+      @PathParam(JerseyConstants.PATH_PARAM_EXTERNAL_ID) String externalIdStr,
       @QueryParam(LightStringConstants.START_INDEX_STR) String startIndex,
       @QueryParam(LightStringConstants.MAX_RESULTS_STR) String maxResultsStr) {
     int maxResult = initializeMaxResults(maxResultsStr);

@@ -92,6 +92,7 @@ public class TestResources extends AbstractJerseyResource {
     try {
       StringBuilder builder = new StringBuilder();
       appendServletPath(builder, ServletPathEnum.OAUTH2_GOOGLE_LOGIN);
+      appendHref(builder, "/", "Home");
 
       appendSectionHeader(builder, "Admin Utilities");
       appendHtmlPath(builder, HtmlPathEnum.PUT_OAUTH2_CONSUMER_CREDENTIAL);

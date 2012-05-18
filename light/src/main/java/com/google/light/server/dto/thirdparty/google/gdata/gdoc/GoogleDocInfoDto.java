@@ -58,7 +58,7 @@ import org.joda.time.Instant;
 @JsonTypeName(value = "googleDocInfo")
 @XmlRootElement(name = "googleDocInfo")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
+public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> implements Comparable<GoogleDocInfoDto>{
   private static final Logger logger = Logger.getLogger(GoogleDocInfoDto.class.getName());
   @XmlElement(name = "id")
   @JsonProperty(value = "id")
@@ -312,6 +312,14 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> {
 
   public Configuration getConfig() {
     return config;
+  }
+  
+  /** 
+   * {@inheritDoc}
+   */
+  @Override
+  public int compareTo(GoogleDocInfoDto other) {
+    return this.getTitle().compareTo(other.getTitle());
   }
 
   public static class Builder extends AbstractDto.BaseBuilder<Builder> {

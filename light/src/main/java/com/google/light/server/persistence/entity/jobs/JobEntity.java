@@ -19,8 +19,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkNull;
-import static com.google.light.server.utils.LightUtils.convertSetOfValuesToWrapperSet;
-import static com.google.light.server.utils.LightUtils.convertWrapperSetToSetOfValues;
+import static com.google.light.server.utils.LightUtils.convertListOfValuesToWrapperList;
+import static com.google.light.server.utils.LightUtils.convertWrapperListToListOfValues;
 import static com.google.light.server.utils.LightUtils.getWrapper;
 import static com.google.light.server.utils.LightUtils.getWrapperValue;
 import static com.google.light.server.utils.LightUtils.isCollectionEmpty;
@@ -56,22 +56,22 @@ public class JobEntity extends AbstractPersistenceEntity<JobEntity, Object> {
   private Long jobId;
   private Long parentJobId;
   private Long rootJobId;
-  private Set<Long> childJobs;
-  private Set<Long> finishedChildJobs;
-  
+  private List<Long> childJobs;
+  private List<Long> finishedChildJobs;
+
   @ObjectifyQueryFieldName("ownerId")
   public static final String OFY_JOB_OWNER_QUERY_STRING = "ownerId = ";
-  
+
   @ObjectifyQueryField("OFY_JOB_OWNER_QUERY_STRING")
   private Long ownerId;
 
   // This is used in Objectify Query.
-  @ObjectifyQueryFieldName(value = "jobHandlerType")
-  public static final String OFY_JOB_HANDLER_TYPE = "jobHandlerType";
-
-  @ObjectifyQueryField(value = "OFY_JOB_HANDLER_TYPE")
   private JobHandlerType jobHandlerType;
 
+  @ObjectifyQueryFieldName("jobType")
+  public static final String OFY_JOB_TYPE_QUERY_STRING = "jobType = ";
+
+  @ObjectifyQueryField("OFY_JOB_TYPE_QUERY_STRING")
   private JobType jobType;
 
   private TaskType taskType;
@@ -222,19 +222,19 @@ public class JobEntity extends AbstractPersistenceEntity<JobEntity, Object> {
       return Sets.newHashSet();
     }
 
-    Set<Long> pendingChildJobs = Sets.newHashSet(childJobs);
+    Set<JobId> pendingChildJobs = Sets.newHashSet(getChildJobs());
     pendingChildJobs.removeAll(getFinishedChildJobs());
-    return convertSetOfValuesToWrapperSet(pendingChildJobs, JobId.class);
+    return pendingChildJobs;
   }
 
   public boolean hasPendingChildJobs() {
     return !isCollectionEmpty(getPendingChildJobs());
   }
 
-  public Set<JobId> getChildJobs() {
-    return convertSetOfValuesToWrapperSet(childJobs, JobId.class);
+  public List<JobId> getChildJobs() {
+    return convertListOfValuesToWrapperList(childJobs, JobId.class);
   }
-  
+
   public boolean hasChildJobs() {
     return !isCollectionEmpty(getChildJobs());
   }
@@ -242,26 +242,29 @@ public class JobEntity extends AbstractPersistenceEntity<JobEntity, Object> {
   @SuppressWarnings("cast")
   public void addChildJob(JobId jobId) {
     if (childJobs == null) {
-      childJobs = Sets.newHashSet();
+      childJobs = Lists.newArrayList();
     }
-    childJobs.add(((Long) getWrapperValue(jobId)));
+
+    if (!childJobs.contains(getWrapperValue(jobId))) {
+      childJobs.add(((Long) getWrapperValue(jobId)));
+    }
   }
 
-  public Set<JobId> getFinishedChildJobs() {
-    return convertSetOfValuesToWrapperSet(finishedChildJobs, JobId.class);
+  public List<JobId> getFinishedChildJobs() {
+    return convertListOfValuesToWrapperList(finishedChildJobs, JobId.class);
   }
 
   @SuppressWarnings("cast")
   public void addFinishedChildJob(JobId jobId) {
     if (finishedChildJobs == null) {
-      finishedChildJobs = Sets.newHashSet();
+      finishedChildJobs = Lists.newArrayList();
     }
 
     if (!finishedChildJobs.contains(getWrapperValue(jobId))) {
       finishedChildJobs.add(((Long) getWrapperValue(jobId)));
     }
   }
-  
+
   public PersonId getOwnerId() {
     return getWrapper(ownerId, PersonId.class);
   }
@@ -295,13 +298,10 @@ public class JobEntity extends AbstractPersistenceEntity<JobEntity, Object> {
 
     checkNotNull(taskType, "taskType");
     switch (taskType) {
-      case DELETE:
-        break;
-
       case IMPORT_BATCH:
-      case IMPORT_GOOGLE_DOC1:
+      case IMPORT_GOOGLE_DOCUMENT:
       case IMPORT_SYNTHETIC_MODULE:
-      case IMPORT_COLLECTION_GOOGLE_DOC:
+      case IMPORT_COLLECTION_GOOGLE_COLLECTION:
         checkNotNull(request, "jobRequest cannot be empty for " + taskType);
         checkArgument(jobHandlerType == JobHandlerType.TASK_QUEUE, taskType
             + " is handled by only ." + JobHandlerType.TASK_QUEUE);
@@ -343,8 +343,8 @@ public class JobEntity extends AbstractPersistenceEntity<JobEntity, Object> {
     private Text context;
     private Text response;
 
-    private Set<JobId> childJobs;
-    private Set<JobId> finishedChildJobs;
+    private List<JobId> childJobs;
+    private List<JobId> finishedChildJobs;
     private PersonId ownerId;
 
     public Builder jobId(JobId jobId) {
@@ -402,16 +402,16 @@ public class JobEntity extends AbstractPersistenceEntity<JobEntity, Object> {
       return this;
     }
 
-    public Builder childJobs(Set<JobId> childJobs) {
+    public Builder childJobs(List<JobId> childJobs) {
       this.childJobs = childJobs;
       return this;
     }
 
-    public Builder finishedChildJobs(Set<JobId> finishedChildJobs) {
+    public Builder finishedChildJobs(List<JobId> finishedChildJobs) {
       this.finishedChildJobs = finishedChildJobs;
       return this;
     }
-    
+
     public Builder ownerId(PersonId ownerId) {
       this.ownerId = ownerId;
       return this;
@@ -447,8 +447,8 @@ public class JobEntity extends AbstractPersistenceEntity<JobEntity, Object> {
     this.response = builder.response;
 
     this.stopReason = builder.stopReason;
-    this.childJobs = convertWrapperSetToSetOfValues(builder.childJobs);
-    this.finishedChildJobs = convertWrapperSetToSetOfValues(builder.finishedChildJobs);
+    this.childJobs = convertWrapperListToListOfValues(builder.childJobs);
+    this.finishedChildJobs = convertWrapperListToListOfValues(builder.finishedChildJobs);
     this.ownerId = getWrapperValue(builder.ownerId);
   }
 
@@ -464,14 +464,20 @@ public class JobEntity extends AbstractPersistenceEntity<JobEntity, Object> {
   }
 
   public static enum TaskType {
-    DELETE,
-
-    // New ones.
-    IMPORT_GOOGLE_DOC1,
+    // Task for importing a batch of ExternalIds.
     IMPORT_BATCH,
-    IMPORT_SYNTHETIC_MODULE,
+
+    // Task for Importing a Collection.
     IMPORT_COLLECTION,
-    IMPORT_COLLECTION_GOOGLE_DOC;
+
+    // Task for Importing a Google Collection.
+    IMPORT_COLLECTION_GOOGLE_COLLECTION,
+
+    // Task for Importing Google Document.
+    IMPORT_GOOGLE_DOCUMENT,
+
+    // Task for Importing a Synthetic Module.
+    IMPORT_SYNTHETIC_MODULE;
   }
 
   // For objectify.

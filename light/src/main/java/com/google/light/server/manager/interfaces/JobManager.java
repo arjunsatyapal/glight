@@ -95,5 +95,5 @@ public interface JobManager {
   public JobEntity createSyntheticModuleJob(Objectify ofy, ImportModuleSyntheticModuleJobContext context, 
       JobId parentJobId, JobId rootJobId);
   
-  public GAEQueryWrapper<JobEntity> findJobsCreatedByMe(PersonId ownerId, String startIndex, int maxResults); 
+  public GAEQueryWrapper<JobEntity> findRootJobsCreatedByMe(PersonId ownerId, String startIndex, int maxResults); 
 }

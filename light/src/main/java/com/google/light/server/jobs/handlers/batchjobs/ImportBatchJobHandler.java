@@ -102,6 +102,8 @@ public class ImportBatchJobHandler implements JobHandlerInterface {
       case CREATING_CHILDS:
         createChilds(jobEntity.getJobId());
         return;
+      default :
+        break;
     }
 
     switch (type) {
@@ -298,6 +300,7 @@ public class ImportBatchJobHandler implements JobHandlerInterface {
           null, collectionId, importBatchJobContext.getBaseVersion());
       collectionRoot = collectionEntity.getCollectionTree();
     }
+    System.out.println("\n***CollectionRoot = " + collectionRoot.toJson());
 
     for (ImportExternalIdDto currDto : importBatchJobContext.getList()) {
       CollectionTreeNodeDto childNode = null;
@@ -400,6 +403,7 @@ public class ImportBatchJobHandler implements JobHandlerInterface {
       collectionRoot.addChildren(child);
     }
 
+    System.out.println("\n***Subcollection root : " + collectionRoot.toJson());
     return collectionRoot;
   }
 

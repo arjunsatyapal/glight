@@ -87,7 +87,7 @@ public class GoogleDocJobs {
     // This is a folder. So adding child Tree into current node.
     nodeBuilder.nodeType(TreeNodeType.INTERMEDIATE_NODE);
     List<GoogleDocInfoDto> listOfChilds = 
-        docsServiceProvider.get().getFolderContentWhichAreSupported(
+        docsServiceProvider.get().getFolderContentWhichAreSupportedInAlphabeticalOrder(
             resourceId, GDATA_GDOC_MAX_RESULTS);
 
     List<GoogleDocInfoDto> listOfSupportedChilds = Lists.newArrayList();

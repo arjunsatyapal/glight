@@ -112,7 +112,7 @@ public class JobManagerImpl implements JobManager {
         .parentJobId(parentJobId)
         .rootJobId(rootJobId)
         .jobHandlerType(JobHandlerType.TASK_QUEUE)
-        .taskType(TaskType.IMPORT_GOOGLE_DOC1)
+        .taskType(TaskType.IMPORT_GOOGLE_DOCUMENT)
         .jobState(JobState.ENQUEUED)
         .request(text)
         .context(text)
@@ -124,7 +124,7 @@ public class JobManagerImpl implements JobManager {
     // queueManager.enqueueGoogleDocInteractionJob(ofy, jobEntity.getJobId());
 
     logger.info("Successfully created Job[" + savedJobEntity.getJobId() + "] for ["
-        + TaskType.IMPORT_GOOGLE_DOC1 + "].");
+        + TaskType.IMPORT_GOOGLE_DOCUMENT + "].");
     return savedJobEntity;
   }
 
@@ -242,9 +242,9 @@ public class JobManagerImpl implements JobManager {
     JobEntity parentJob = this.get(ofy, parentJobId);
     checkNotNull(parentJob, "Parent[" + parentJobId + "] was not found.");
     checkArgument(parentJob.getTaskType() == TaskType.IMPORT_BATCH ||
-        parentJob.getTaskType() == TaskType.IMPORT_COLLECTION_GOOGLE_DOC,
+        parentJob.getTaskType() == TaskType.IMPORT_COLLECTION_GOOGLE_COLLECTION,
         "Parent job was expected to be of type : " + TaskType.IMPORT_BATCH + "/"
-            + TaskType.IMPORT_COLLECTION_GOOGLE_DOC);
+            + TaskType.IMPORT_COLLECTION_GOOGLE_COLLECTION);
 
     parentJob.addChildJob(childJobId);
 
@@ -292,7 +292,7 @@ public class JobManagerImpl implements JobManager {
         parentJob.setContext(importBatchContext);
         break;
 
-      case IMPORT_COLLECTION_GOOGLE_DOC:
+      case IMPORT_COLLECTION_GOOGLE_COLLECTION:
 
         // Get existing context from Parent Job Entity.
         ImportCollectionGoogleDocContext importCollectionGDocContext = parentJob.getContext(
@@ -360,7 +360,7 @@ public class JobManagerImpl implements JobManager {
         .parentJobId(parentJobId)
         .rootJobId(rootJobId)
         .jobHandlerType(JobHandlerType.TASK_QUEUE)
-        .taskType(TaskType.IMPORT_COLLECTION_GOOGLE_DOC)
+        .taskType(TaskType.IMPORT_COLLECTION_GOOGLE_COLLECTION)
         .jobState(JobState.ENQUEUED)
         .request(text)
         .context(text)
@@ -368,10 +368,10 @@ public class JobManagerImpl implements JobManager {
         .ownerId(GuiceUtils.getOwnerId())
         .build();
     JobEntity savedJobEntity = this.put(ofy, jobEntity,
-        new ChangeLogEntryPojo("Enqueuing " + TaskType.IMPORT_COLLECTION_GOOGLE_DOC + " job"));
+        new ChangeLogEntryPojo("Enqueuing " + TaskType.IMPORT_COLLECTION_GOOGLE_COLLECTION + " job"));
 
     logger.info("Successfully created Job[" + savedJobEntity.getJobId() + "] for ["
-        + TaskType.IMPORT_COLLECTION_GOOGLE_DOC + "].");
+        + TaskType.IMPORT_COLLECTION_GOOGLE_COLLECTION + "].");
     return savedJobEntity;
   }
 
@@ -379,9 +379,9 @@ public class JobManagerImpl implements JobManager {
    * {@inheritDoc}
    */
   @Override
-  public GAEQueryWrapper<JobEntity> findJobsCreatedByMe(PersonId ownerId, String startIndex,
+  public GAEQueryWrapper<JobEntity> findRootJobsCreatedByMe(PersonId ownerId, String startIndex,
       int maxResults) {
-    return jobDao.findJobsByOwnerId(ownerId, startIndex, maxResults);
+    return jobDao.findRootJobsByOwnerId(ownerId, startIndex, maxResults);
 
   }
 }

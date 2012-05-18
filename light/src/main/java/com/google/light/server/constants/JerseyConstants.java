@@ -29,8 +29,8 @@ public class JerseyConstants {
   private static final String GAE_ADMIN_CONTEXT = "/gaeadmin";
   private static final String THIRD_PARTY_CONTEXT = "/thirdparty";
 
-  public static final String PATH_PARAM_EXTERNAL_KEY = "external_key";
-  public static final String PATH_EXTERNAL_KEY = "/{" + PATH_PARAM_EXTERNAL_KEY + "}";
+  public static final String PATH_PARAM_EXTERNAL_ID = "externalId";
+  public static final String PATH_EXTERNAL_ID = "/{" + PATH_PARAM_EXTERNAL_ID + "}";
 
   public static final String PATH_PARAM_COLLECTION_ID = "collection_id";
   public static final String PATH_COLLECTION_ID = "/{" + PATH_PARAM_COLLECTION_ID + "}";
@@ -127,15 +127,15 @@ public class JerseyConstants {
   public static final String URI_GOOGLE_DOC_LIST = JERSEY_CONTEXT +
       RESOURCE_PATH_THIRD_PARTY_GOOGLE_DOC + PATH_GOOGLE_DOC_LIST;
 
-  public static final String PATH_GOOGLE_DOC_INFO = "/info" + PATH_EXTERNAL_KEY;
-  public static final String PATH_GOOGLE_FOLDER_INFO = "/info/folder" + PATH_EXTERNAL_KEY;
+  public static final String PATH_GOOGLE_DOC_INFO = "/info";
+  public static final String PATH_GOOGLE_FOLDER_INFO = "/info/folder" + PATH_EXTERNAL_ID;
 
   public static final String PATH_GOOGLE_DOC_IMPORT_POST = "/import";
   public static final String URI_GOOGLE_DOC_IMPORT_POST = URI_RESOURCE_PATH_THIRD_PARTH_GOOGLE_DOC
       + PATH_GOOGLE_DOC_IMPORT_POST;
 
   public static final String PATH_GOOGLE_DOC_IMPORT_PUT = PATH_GOOGLE_DOC_IMPORT_POST
-      + PATH_EXTERNAL_KEY;
+      + PATH_EXTERNAL_ID;
 
   // Path for Import Resource
   public static final String RESOURCE_IMPORT = "/import";

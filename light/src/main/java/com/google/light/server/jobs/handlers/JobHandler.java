@@ -114,7 +114,7 @@ public class JobHandler {
         importBatchJobHandler.handle(jobEntity);
         break;
 
-      case IMPORT_GOOGLE_DOC1:
+      case IMPORT_GOOGLE_DOCUMENT:
         importModuleGDocHandler.handle(jobEntity);
         break;
 
@@ -122,7 +122,7 @@ public class JobHandler {
         importModuleSyntheticJobHandler.handle(jobEntity);
         break;
 
-      case IMPORT_COLLECTION_GOOGLE_DOC:
+      case IMPORT_COLLECTION_GOOGLE_COLLECTION:
         importCollectionGDocHandler.handle(jobEntity);
         break;
 

@@ -15,6 +15,7 @@
  */
 package com.google.light.server.jersey.resources.job;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkIsRunningUnderQueue;
 import static com.google.light.server.utils.LightPreconditions.checkNotNull;
@@ -22,6 +23,8 @@ import static com.google.light.server.utils.LightPreconditions.checkPersonLogged
 import static com.google.light.server.utils.LightUtils.getNow;
 import static com.google.light.server.utils.LightUtils.getURI;
 import static com.google.light.server.utils.LightUtils.getWrapperValue;
+
+import com.google.common.base.Preconditions;
 
 import com.google.light.server.persistence.entity.jobs.JobEntity.JobType;
 
@@ -72,7 +75,8 @@ public class JobResource extends AbstractJerseyResource {
   private JobHandler jobHandler;
 
   List<String> listOfHeaders = Lists.newArrayList("JobId", "TaskType", "State", "CreationTime",
-      "LastUpdateTime", "TimeToCompleteion(s)", "JobType", "ParentJob", "ChildJobs", "RootJob", "Owner");
+      "LastUpdateTime", "TimeToCompleteion(s)", "JobType", "ParentJob", "ChildJobs", 
+      "PendingChildJobs", "RootJob");
 
   @Inject
   public JobResource(Injector injector, HttpServletRequest request, HttpServletResponse response,
@@ -121,6 +125,7 @@ public class JobResource extends AbstractJerseyResource {
 
     htmlBuilder.appendBodyStart();
 
+    htmlBuilder.appendString("<b>OwnerId : " + GuiceUtils.getOwnerId() + "</b>");
     // Appending Parent.
     htmlBuilder.appendSectionHeader("Parent");
     appendParent(jobEntity, htmlBuilder);
@@ -218,8 +223,8 @@ public class JobResource extends AbstractJerseyResource {
     list.add(jobEntity.getJobType());
     list.add(jobEntity.getParentJobId());
     list.add(Iterables.toString(jobEntity.getChildJobs()));
+    list.add(Iterables.toString(jobEntity.getPendingChildJobs()));
     list.add(getWrapperValue(jobEntity.getRootJobId()));
-    list.add(getWrapperValue(jobEntity.getOwnerId()));
 
     htmlBuilder.appendTableRow(list);
   }
@@ -245,27 +250,54 @@ public class JobResource extends AbstractJerseyResource {
   @GET
   @Produces(ContentTypeConstants.TEXT_HTML)
   @Path(JerseyConstants.PATH_ME)
-  public String getJobsCreatedByMe() {
+  public String getRootJobByMe() {
     SessionManager sessionManager = GuiceUtils.getInstance(SessionManager.class);
     checkPersonLoggedIn(sessionManager);
     
-    GAEQueryWrapper<JobEntity> wrapper = jobManager.findJobsCreatedByMe(
+    GAEQueryWrapper<JobEntity> wrapper = jobManager.findRootJobsCreatedByMe(
         GuiceUtils.getOwnerId(), null, 5000);
     
     HtmlBuilder htmlBuilder = new HtmlBuilder();
+    htmlBuilder.appendBodyStart();
     htmlBuilder.appendSectionHeader("My Jobs : ");
 
     int counter = 0;
     for (JobEntity curr : wrapper.getList()) {
+      checkArgument(JobType.ROOT_JOB == curr.getJobType(), 
+          "Expected jobType == " + JobType.ROOT_JOB);
       Long value = getWrapperValue(curr.getJobId());
-      String item = "" + value;
+      StringBuilder  lineItemBuilder = new StringBuilder(Long.toString(value)).append(" (root) ");
       if (curr.getJobType() == JobType.ROOT_JOB) {
-        item = item + " (root)";
+        JobState jobState = curr.getJobState();
+        switch(jobState) {
+          case ALL_CHILDS_COMPLETED:
+          case CREATING_CHILDS:
+          case ENQUEUED:
+          case POLLING_FOR_CHILDS:
+          case PRE_START:
+          case WAITING_FOR_CHILD_COMPLETE_NOTIFICATION:
+            lineItemBuilder.append("<font color=\"00FF66\">(running)</font>");
+            break;
+            
+
+          case COMPLETE:
+          case READY_FOR_CLEANUP:
+            lineItemBuilder.append("<font color=\"FF00FF\">(complete)</font>");
+            break;
+
+          case STOPPED_BY_ERROR:
+          case STOPPED_BY_REQUEST:
+            lineItemBuilder.append("<font color=\"FF0033\">(stopped)</font>");
+            break;
+            
+          default :
+            throw new IllegalStateException("Add support for " + jobState);
+        }
       }
       
       counter++;
       htmlBuilder.appendString("" + counter);
-      htmlBuilder.appendHref(null, getURI("/rest/job/" + value), item);
+      htmlBuilder.appendHref(null, getURI("/rest/job/" + value), lineItemBuilder.toString());
       htmlBuilder.appendNewLine();
     }
     

@@ -20,12 +20,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.constants.LightConstants.GDATA_GDOC_MAX_RESULTS;
 import static com.google.light.server.dto.pojo.tree.collection.CollectionTreeUtils.generateCollectionNodeFromChildJob;
 import static com.google.light.server.jersey.resources.thirdparty.mixed.ImportResource.updateImportExternalIdDtoForCollections;
-
-import com.google.light.server.utils.LightUtils;
-
-import com.google.light.server.utils.JsonUtils;
-
-import com.google.light.server.manager.interfaces.ModuleManager;
+import static com.google.light.server.utils.LightUtils.isCollectionEmpty;
 
 import com.google.common.collect.Iterables;
 import com.google.inject.Inject;
@@ -43,10 +38,13 @@ import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocResourc
 import com.google.light.server.jobs.handlers.JobHandlerInterface;
 import com.google.light.server.jobs.handlers.modulejobs.ImportModuleGoogleDocJobHandler;
 import com.google.light.server.manager.interfaces.JobManager;
+import com.google.light.server.manager.interfaces.ModuleManager;
 import com.google.light.server.persistence.entity.jobs.JobEntity;
 import com.google.light.server.persistence.entity.jobs.JobState;
 import com.google.light.server.thirdparty.clients.google.gdata.gdoc.DocsServiceWrapper;
 import com.google.light.server.utils.GuiceUtils;
+import com.google.light.server.utils.JsonUtils;
+import com.google.light.server.utils.LightUtils;
 import com.google.light.server.utils.ObjectifyUtils;
 import com.google.light.server.utils.Transactable;
 import com.googlecode.objectify.Objectify;
@@ -113,8 +111,9 @@ public class ImportCollectionGoogleDocJobHandler implements JobHandlerInterface 
 
         GoogleDocResourceId gdocResourceId = new GoogleDocResourceId(context.getExternalId());
         DocsServiceWrapper docsService = GuiceUtils.getInstance(DocsServiceWrapper.class);
-        List<GoogleDocInfoDto> listOfChilds = docsService.getFolderContentWhichAreSupported(
-            gdocResourceId, GDATA_GDOC_MAX_RESULTS);
+        List<GoogleDocInfoDto> listOfChilds = 
+            docsService.getFolderContentWhichAreSupportedInAlphabeticalOrder(
+                gdocResourceId, GDATA_GDOC_MAX_RESULTS);
         System.out.println(JsonUtils.toJson(listOfChilds));
 
         JobId enqueuedJobId = null;
@@ -168,7 +167,7 @@ public class ImportCollectionGoogleDocJobHandler implements JobHandlerInterface 
           System.out.println(context.toJson());
           System.out.println("\n****" + Iterables.toString(jobEntity.getChildJobs()));
           JobState jobState = null;
-          if (LightUtils.isCollectionEmpty(jobEntity.getChildJobs())) {
+          if (isCollectionEmpty(jobEntity.getChildJobs())) {
             // This means all the childs were ignored.
             jobState = JobState.ALL_CHILDS_COMPLETED;
             // So re-enqueue this job.
@@ -177,9 +176,11 @@ public class ImportCollectionGoogleDocJobHandler implements JobHandlerInterface 
             jobState = JobState.WAITING_FOR_CHILD_COMPLETE_NOTIFICATION;
           }
           
+          System.out.println(jobEntity.getContext().getValue());
           jobEntity.setJobState(jobState);
           jobManager.put(ofy, jobEntity, new ChangeLogEntryPojo(
               "getting ready for " + jobState));
+          
           
         }
         return false;
@@ -197,14 +198,17 @@ public class ImportCollectionGoogleDocJobHandler implements JobHandlerInterface 
    */
   private void handleChildCompletions(ImportCollectionGoogleDocContext context,
       JobEntity jobEntity) {
+    System.out.println(jobEntity.getContext().getValue());
     CollectionTreeNodeDto subCollection = new CollectionTreeNodeDto.Builder()
         .title(context.getTitle())
         .externalId(context.getExternalId())
         .nodeType(TreeNodeType.INTERMEDIATE_NODE)
         .moduleType(ModuleType.LIGHT_SUB_COLLECTION)
         .build();
+    int x = 3;
 
     for (ImportExternalIdDto curr : context.getList()) {
+      System.out.println(curr.getTitle());
       CollectionTreeNodeDto child = null;
       if (curr.hasJobId()) {
         child = generateCollectionNodeFromChildJob(jobManager, curr.getJobId());
@@ -224,6 +228,7 @@ public class ImportCollectionGoogleDocJobHandler implements JobHandlerInterface 
 
       checkNotNull(child, "child should not be null.");
       subCollection.addChildren(child);
+      System.out.println("\n***SubCollection = " + JsonUtils.toJson(subCollection));
     }
 
     jobManager.enqueueCompleteJob(jobEntity.getJobId(), subCollection, "Marking job as complete");

@@ -19,14 +19,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightUtils.getStackAsString;
 import static com.google.light.server.utils.LightUtils.isCollectionEmpty;
 
-import com.google.light.server.constants.LightConstants;
-
-import com.google.common.base.Throwables;
-
 import com.google.appengine.api.datastore.Cursor;
 import com.google.appengine.api.datastore.QueryResultIterable;
 import com.google.appengine.api.datastore.QueryResultIterator;
+import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
+import com.google.light.server.constants.LightConstants;
 import com.google.light.server.persistence.entity.AbstractPersistenceEntity;
 import com.google.light.server.serveronlypojos.GAEQueryWrapper;
 import com.googlecode.objectify.Key;
@@ -35,9 +33,9 @@ import com.googlecode.objectify.ObjectifyOpts;
 import com.googlecode.objectify.ObjectifyService;
 import com.googlecode.objectify.Query;
 import com.googlecode.objectify.impl.conv.joda.JodaTimeConverters;
-
 import java.util.ConcurrentModificationException;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 import org.apache.commons.lang.StringUtils;
 
@@ -239,9 +237,14 @@ public class ObjectifyUtils {
     return wrapper;
   }
 
-  public static <T, O> GAEQueryWrapper<T> findQueryResultsByPageForField(Objectify ofy,
-      Class<T> clazz, String filterKey, O filterValue, String startIndex, int maxResults) {
-    Query<T> query = ofy.query(clazz).filter(filterKey, filterValue);
+  public static <T> GAEQueryWrapper<T> findQueryResults(Objectify ofy,
+      Class<T> clazz, Map<String, Object> mapOfFilterKeyValue, String startIndex, int maxResults) {
+    checkNotNull(mapOfFilterKeyValue, "map of filters.");
+    Query<T> query = ofy.query(clazz);
+
+    for(String currKey : mapOfFilterKeyValue.keySet()) {
+      query = query.filter(currKey, mapOfFilterKeyValue.get(currKey));
+    }
 
     if (StringUtils.isNotBlank(startIndex)) {
       query.startCursor(Cursor.fromWebSafeString(startIndex));
