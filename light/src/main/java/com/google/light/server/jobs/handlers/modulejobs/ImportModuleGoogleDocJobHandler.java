@@ -27,17 +27,12 @@ import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkNotNull;
 import static com.google.light.server.utils.ObjectifyUtils.repeatInTransaction;
 
-import java.io.ByteArrayInputStream;
-
-import org.apache.commons.io.IOUtils;
-
-import com.google.common.base.Throwables;
-
 import com.google.appengine.api.files.AppEngineFile;
 import com.google.appengine.api.files.FileReadChannel;
 import com.google.appengine.api.files.FileService;
 import com.google.appengine.api.files.FileServiceFactory;
 import com.google.appengine.api.files.GSFileOptions;
+import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
@@ -55,7 +50,6 @@ import com.google.light.server.dto.pojo.tree.AbstractTreeNode.TreeNodeType;
 import com.google.light.server.dto.pojo.tree.collection.CollectionTreeNodeDto;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.JobId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
-import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
 import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocInfoDto;
 import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocResourceId;
@@ -74,12 +68,14 @@ import com.google.light.server.utils.LightUtils;
 import com.google.light.server.utils.ObjectifyUtils;
 import com.google.light.server.utils.Transactable;
 import com.googlecode.objectify.Objectify;
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.channels.Channels;
 import java.util.Map;
 import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 
 /**
@@ -371,9 +367,20 @@ public class ImportModuleGoogleDocJobHandler implements JobHandlerInterface {
         // TODO(arjuns): Get contentType from File extension.
         // Storing file on Cloud Storage.
         String nameFromGoogleDoc = zipEntry.getName();
+        logger.info(nameFromGoogleDoc);
+        System.out.println(nameFromGoogleDoc);
 
         checkArgument(nameFromGoogleDoc.contains("/"), "Unexpected name from GoogleDoc : "
             + nameFromGoogleDoc);
+        
+        /*
+         * Structure of zip entry name is as follows :
+         * <document title>/<50 char long title for html file.>
+         *     In case title is too big, html file may not even contain .html extension.
+         * <document title/images/images<0-n>.jpg
+         * 
+         * In case documentTitle has '/', then it gets converted to '-'
+         */
         String parts[] = nameFromGoogleDoc.split("/");
 
         String newFileName = "";
@@ -381,6 +388,9 @@ public class ImportModuleGoogleDocJobHandler implements JobHandlerInterface {
         if (parts.length == 2) {
           // This will be true for HTML file.
           newFileName = parts[1];
+          
+          newFileName = FileExtensions.appendExtensionToFileName(newFileName, FileExtensions.HTML);
+          System.out.println("HTML File = " + newFileName);
         } else {
           checkArgument(parts.length == 3, "Google Docs will return files " +
               "name of format <pretty title/images/image names>");

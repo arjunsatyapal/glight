@@ -98,7 +98,7 @@ public class JobResource extends AbstractJerseyResource {
       jobHandler.handleJob(jobId);
       return Response.ok().build();
     } catch (TaskQueueRetriableException e) {
-      logger.warning("Retry after some time for " + jobId + " due to : " + e.getClass());
+      logger.warning(e.getClass().getSimpleName() + " : Retry after some time for " + jobId);
       return Response.status(HttpStatusCodesEnum.PRECONDITIONS_FAILED.getStatusCode()).build();
     }
   }

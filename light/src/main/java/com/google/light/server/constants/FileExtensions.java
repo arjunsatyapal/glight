@@ -59,4 +59,16 @@ public enum FileExtensions {
     
     throw new IllegalArgumentException("Unsupported fileType : " + fileName);
   }
+  
+  public static String appendExtensionToFileName(String fileName, FileExtensions requiredExt) {
+    String requiredSuffix = "." + requiredExt.get();
+    if (fileName.endsWith(requiredSuffix)) {
+      return fileName;
+    } else {
+      return fileName + requiredSuffix;
+    }
+      
+    
+    
+  }
 }
