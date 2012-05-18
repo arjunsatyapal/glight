@@ -71,19 +71,19 @@ public class SearchResultItemDto extends AbstractDto<SearchResultItemDto> {
     this.link = link;
   }
 
-  @Override
-  public String toJson() {
-    throw new UnsupportedOperationException(
-        "This DTO is not meant to be directly serialized."
-            + "Use SearchResultDto to wrap it instead.");
-  }
-
-  @Override
-  public String toXml() {
-    throw new UnsupportedOperationException(
-        "This DTO is not meant to be directly serialized."
-            + "Use SearchResultDto to wrap it instead.");
-  }
+//  @Override
+//  public String toJson() {
+//    throw new UnsupportedOperationException(
+//        "This DTO is not meant to be directly serialized."
+//            + "Use SearchResultDto to wrap it instead.");
+//  }
+//
+//  @Override
+//  public String toXml() {
+//    throw new UnsupportedOperationException(
+//        "This DTO is not meant to be directly serialized."
+//            + "Use SearchResultDto to wrap it instead.");
+//  }
 
   @Override
   public SearchResultItemDto validate() {

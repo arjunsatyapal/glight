@@ -15,11 +15,13 @@
  */
 package com.google.light.server.persistence.dao;
 
-import com.google.light.server.dto.pojo.typewrapper.longwrapper.CollectionId;
-import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.light.server.utils.LightPreconditions.checkTxnIsRunning;
 
 import com.google.inject.Inject;
 import com.google.light.server.dto.collection.CollectionVersionDto;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.CollectionId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
 import com.google.light.server.persistence.entity.collection.CollectionEntity;
 import com.google.light.server.persistence.entity.collection.CollectionVersionEntity;
 import com.googlecode.objectify.Key;
@@ -51,6 +53,9 @@ public class CollectionVersionDao extends AbstractBasicDao<CollectionVersionDto,
    */
   @Override
   public CollectionVersionEntity put(Objectify ofy, CollectionVersionEntity entity) {
+    checkTxnIsRunning(ofy);
+    checkNotNull(entity.getCreationTime(), "creationTime for CollectionVersionEntity is mandatory");
+
     CollectionVersionEntity returnEntity = super.put(ofy, entity);
     String returnMsg = "Created/Updated CollectionVersionEntity[" + returnEntity.getVersion() 
         + "], for Collection[" + returnEntity.getKey().getId() + "].";

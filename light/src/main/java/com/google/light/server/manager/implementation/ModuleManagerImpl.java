@@ -20,6 +20,8 @@ import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkTxnIsRunning;
 import static com.google.light.server.utils.LightUtils.getNow;
 
+import com.google.light.server.utils.LightUtils;
+
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.light.server.constants.JerseyConstants;
@@ -211,6 +213,7 @@ public class ModuleManagerImpl implements ModuleManager {
         .etag(etag)
         .externalId(externalId)
         .lastEditTime(lastEditTime)
+        .creationTime(LightUtils.getNow())
         .build();
 
     if (fetchedEntity != null) {

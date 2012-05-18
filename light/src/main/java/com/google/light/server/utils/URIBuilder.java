@@ -24,10 +24,10 @@ import org.apache.commons.lang.StringUtils;
 import java.net.URI;
 
 /**
- *
+ * 
  * 
  * TODO(arjuns): Add test for this class.
- *
+ * 
  * @author Arjun Satyapal
  */
 public class URIBuilder {
@@ -35,27 +35,32 @@ public class URIBuilder {
   private String server = "";
   private String port = "";
   private String uri = "";
-  
+
   public URIBuilder() {
   }
-  
+
+  @Override
+  public String toString() {
+    return build().toString();
+  }
+
   public URIBuilder(HttpServletRequest request) {
     Preconditions.checkNotNull(request, "request");
     this.scheme = request.getScheme();
     this.server = request.getServerName();
-    
+
     if (GaeUtils.isDevServer()) {
       this.port = "" + request.getServerPort();
     }
-    
+
     this.uri = request.getRequestURI();
   }
-  
+
   public URIBuilder withScheme(String scheme) {
     this.scheme = scheme;
     return this;
   }
-  
+
   public URIBuilder withServer(String server) {
     if (server.endsWith("/")) {
       this.server = server.substring(0, server.length() - 1);
@@ -64,17 +69,17 @@ public class URIBuilder {
     }
     return this;
   }
-  
+
   public URIBuilder withPort(String port) {
     this.port = port;
     return this;
   }
-  
+
   public URIBuilder withUri(String uri) {
     this.uri = uri;
     return this;
   }
-  
+
   public URIBuilder append(String path) {
     if (uri == null) {
       uri = "";
@@ -83,31 +88,34 @@ public class URIBuilder {
     if (!uri.endsWith("/")) {
       uri = uri + "/";
     }
-    
+
     if (path.startsWith("/")) {
       uri = uri + path.substring(1);
-    } else { 
+    } else {
       uri = uri + path;
     }
-    
+
     return this;
   }
-  
+
   public URI build() {
     StringBuilder builder = new StringBuilder();
-    
+
     if (StringUtils.isNotBlank(scheme)) {
-      builder.append(scheme).append("://");
+      builder.append(scheme).append(":/");
+
+      if (!server.startsWith("/")) {
+        builder.append("/");
+      }
     }
-    
     builder.append(server);
-    
+
     if (StringUtils.isNotBlank(port)) {
       builder.append(":").append(port);
     }
-    
+
     builder.append("/");
-    
+
     if (uri.startsWith("/")) {
       builder.append(uri.substring(1));
     } else {

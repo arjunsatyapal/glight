@@ -44,7 +44,6 @@ import com.google.light.server.persistence.entity.jobs.JobState;
 import com.google.light.server.thirdparty.clients.google.gdata.gdoc.DocsServiceWrapper;
 import com.google.light.server.utils.GuiceUtils;
 import com.google.light.server.utils.JsonUtils;
-import com.google.light.server.utils.LightUtils;
 import com.google.light.server.utils.ObjectifyUtils;
 import com.google.light.server.utils.Transactable;
 import com.googlecode.objectify.Objectify;
@@ -198,17 +197,14 @@ public class ImportCollectionGoogleDocJobHandler implements JobHandlerInterface 
    */
   private void handleChildCompletions(ImportCollectionGoogleDocContext context,
       JobEntity jobEntity) {
-    System.out.println(jobEntity.getContext().getValue());
     CollectionTreeNodeDto subCollection = new CollectionTreeNodeDto.Builder()
         .title(context.getTitle())
         .externalId(context.getExternalId())
         .nodeType(TreeNodeType.INTERMEDIATE_NODE)
         .moduleType(ModuleType.LIGHT_SUB_COLLECTION)
         .build();
-    int x = 3;
 
     for (ImportExternalIdDto curr : context.getList()) {
-      System.out.println(curr.getTitle());
       CollectionTreeNodeDto child = null;
       if (curr.hasJobId()) {
         child = generateCollectionNodeFromChildJob(jobManager, curr.getJobId());

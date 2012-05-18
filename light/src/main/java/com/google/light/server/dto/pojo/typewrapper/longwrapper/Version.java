@@ -58,6 +58,7 @@ public class Version extends AbstractTypeWrapper<Long, Version> {
   @XmlTransient
   @JsonIgnore
   public static final long LATEST_VERSION = -1L;
+  
   @XmlTransient
   @JsonIgnore
   public static final long NO_VERSION = 0L;

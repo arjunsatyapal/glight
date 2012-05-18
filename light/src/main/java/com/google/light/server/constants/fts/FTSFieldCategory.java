@@ -13,27 +13,29 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.server.utils;
+package com.google.light.server.constants.fts;
 
-import com.google.light.server.dto.pojo.typewrapper.longwrapper.JobId;
-
-import com.google.light.server.constants.JerseyConstants;
-import java.net.URI;
+import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
 /**
- *
+ * 
  * 
  * TODO(arjuns): Add test for this class.
- *
+ * 
  * @author Arjun Satyapal
  */
-public class LocationHeaderUtils {
-  public static URI getJobLocation(JobId jobId) {
-    String location = JerseyConstants.URI_RESOURCE_JOB + "/" + jobId.getValue();
-    return LightUtils.getURI(location);
+public enum FTSFieldCategory {
+  CONTENT("content"),
+  PUBLISHED("published"),
+  TITLE("title");
+
+  private String name;
+
+  private FTSFieldCategory(String name) {
+    this.name = checkNotBlank(name, "name");
   }
-  
-  public static enum LocationType {
-    JOB;
+
+  public String getName() {
+    return name;
   }
 }

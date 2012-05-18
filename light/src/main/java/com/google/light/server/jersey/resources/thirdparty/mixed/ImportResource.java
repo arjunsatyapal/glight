@@ -26,7 +26,6 @@ import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.light.server.constants.JerseyConstants;
-import com.google.light.server.constants.LightClientType;
 import com.google.light.server.constants.http.ContentTypeConstants;
 import com.google.light.server.constants.http.ContentTypeEnum;
 import com.google.light.server.dto.collection.CollectionState;
@@ -55,7 +54,6 @@ import com.google.light.server.servlets.SessionManager;
 import com.google.light.server.utils.GuiceUtils;
 import com.google.light.server.utils.JsonUtils;
 import com.google.light.server.utils.ModuleUtils;
-import com.google.light.server.utils.ObjectifyUtils;
 import com.google.light.server.utils.Transactable;
 import com.google.light.server.utils.XmlUtils;
 import com.googlecode.objectify.Objectify;
@@ -142,10 +140,6 @@ public class ImportResource extends AbstractJerseyResource {
 
       case MODULE_JOB:
         break;
-      // for (ImportExternalIdDto importModuleDto : importBatchWrapper.getList()) {
-      // enqueueImportChildJob(importModuleDto, parentJobId, rootJobId);
-      // }
-      // break;
 
       default:
         throw new IllegalArgumentException("Unsupported type :" + type);
@@ -292,32 +286,32 @@ public class ImportResource extends AbstractJerseyResource {
     }
   }
 
-  /**
-   * @param importBatchWrapper
-   * @param collectionEntity
-   */
-  private void reserveCollectionVersionForAppendCollectionJob(
-      final ImportBatchWrapper importBatchWrapper) {
-    ObjectifyUtils.repeatInTransaction(new Transactable<Void>() {
-
-      @SuppressWarnings("synthetic-access")
-      @Override
-      public Void run(Objectify ofy) {
-        CollectionEntity collectionEntity = collectionManager.get(
-            ofy, importBatchWrapper.getCollectionId());
-        checkNotNull(collectionEntity, "collectionEntity should not be null here.");
-        Version reservedVersion = collectionManager.reserveCollectionVersion(
-            ofy, importBatchWrapper.getCollectionId());
-        importBatchWrapper.setVersion(reservedVersion);
-
-        Version baseVersion = collectionEntity.determineBaseVersionForAppend(
-            importBatchWrapper.getBaseVersion(), reservedVersion, LightClientType.BROWSER);
-
-        importBatchWrapper.setBaseVersion(baseVersion);
-        return null;
-      }
-    });
-  }
+//  /**
+//   * @param importBatchWrapper
+//   * @param collectionEntity
+//   */
+//  private void reserveCollectionVersionForAppendCollectionJob(
+//      final ImportBatchWrapper importBatchWrapper) {
+//    ObjectifyUtils.repeatInTransaction(new Transactable<Void>() {
+//
+//      @SuppressWarnings("synthetic-access")
+//      @Override
+//      public Void run(Objectify ofy) {
+//        CollectionEntity collectionEntity = collectionManager.get(
+//            ofy, importBatchWrapper.getCollectionId());
+//        checkNotNull(collectionEntity, "collectionEntity should not be null here.");
+//        Version reservedVersion = collectionManager.reserveCollectionVersion(
+//            ofy, importBatchWrapper.getCollectionId());
+//        importBatchWrapper.setVersion(reservedVersion);
+//
+//        Version baseVersion = collectionEntity.determineBaseVersionForAppend(
+//            importBatchWrapper.getBaseVersion(), reservedVersion, LightClientType.BROWSER);
+//
+//        importBatchWrapper.setBaseVersion(baseVersion);
+//        return null;
+//      }
+//    });
+//  }
 
   /**
    * @param externalIdDto

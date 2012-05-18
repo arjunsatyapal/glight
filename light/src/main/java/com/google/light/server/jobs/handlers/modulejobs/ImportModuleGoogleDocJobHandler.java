@@ -18,13 +18,11 @@ package com.google.light.server.jobs.handlers.modulejobs;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.constants.google.cloudstorage.GoogleCloudStorageBuckets.CONTENT;
-import static com.google.light.server.exception.ExceptionType.SERVER_GUICE_INJECTION;
 import static com.google.light.server.jersey.resources.thirdparty.mixed.ImportResource.updateImportExternalIdDtoForModules;
 import static com.google.light.server.jobs.JobUtils.updateJobContext;
 import static com.google.light.server.utils.GoogleCloudStorageUtils.writeFileOnGCS;
 import static com.google.light.server.utils.GuiceUtils.getInstance;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
-import static com.google.light.server.utils.LightPreconditions.checkNotNull;
 import static com.google.light.server.utils.ObjectifyUtils.repeatInTransaction;
 
 import com.google.appengine.api.files.AppEngineFile;
@@ -56,6 +54,8 @@ import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocResourc
 import com.google.light.server.exception.unchecked.GoogleDocException;
 import com.google.light.server.exception.unchecked.taskqueue.GoogleDocArchivalWaitingException;
 import com.google.light.server.jobs.handlers.JobHandlerInterface;
+import com.google.light.server.jobs.handlers.modulejobs.ImportModuleGoogleDocJobContext.GoogleDocImportJobState;
+import com.google.light.server.manager.interfaces.FTSManager;
 import com.google.light.server.manager.interfaces.JobManager;
 import com.google.light.server.manager.interfaces.ModuleManager;
 import com.google.light.server.persistence.entity.jobs.JobEntity;
@@ -90,13 +90,16 @@ public class ImportModuleGoogleDocJobHandler implements JobHandlerInterface {
       .getName());
 
   private JobManager jobManager;
+  private FTSManager ftsManager;
   private ModuleManager moduleManager;
+  
 
   @Inject
-  public ImportModuleGoogleDocJobHandler(JobManager jobManager,
+  public ImportModuleGoogleDocJobHandler(JobManager jobManager, FTSManager ftsManager,
       ModuleManager moduleManager) {
-    this.jobManager = checkNotNull(jobManager, SERVER_GUICE_INJECTION, "jobManager");
-    this.moduleManager = checkNotNull(moduleManager, SERVER_GUICE_INJECTION, "moduleManager");
+    this.ftsManager = checkNotNull(ftsManager, "ftsManager");
+    this.jobManager = checkNotNull(jobManager, "jobManager");
+    this.moduleManager = checkNotNull(moduleManager, "moduleManager");
   }
 
   /**
@@ -120,6 +123,10 @@ public class ImportModuleGoogleDocJobHandler implements JobHandlerInterface {
         publishModule(gdocImportContext, jobEntity);
         break;
 
+      case MODULE_VERSION_PUBLISHED :
+        indexModule(gdocImportContext, jobEntity);
+        break;
+        
       case COMPLETE:
         handleImportModuleGDocComplete(gdocImportContext, jobEntity);
         break;
@@ -127,6 +134,27 @@ public class ImportModuleGoogleDocJobHandler implements JobHandlerInterface {
       default:
         throw new IllegalStateException("Unsupported State : " + gdocImportContext.getState());
     }
+  }
+
+  /**
+   * @param gdocImportContext
+   * @param jobEntity
+   */
+  private void indexModule(final ImportModuleGoogleDocJobContext gdocImportContext, 
+      final JobEntity jobEntity) {
+    ftsManager.indexModule(gdocImportContext.getModuleId());
+    gdocImportContext.setState(GoogleDocImportJobState.COMPLETE);
+    
+    repeatInTransaction(new Transactable<Void>() {
+      @SuppressWarnings("synthetic-access")
+      @Override
+      public Void run(Objectify ofy) {
+        updateJobContext(ofy, jobManager, jobEntity.getJobState(), gdocImportContext, jobEntity,
+            "module indexed.");
+        jobManager.enqueueLightJob(ofy, jobEntity.getJobId());
+        return null;
+      }
+    });
   }
 
   /**
@@ -462,8 +490,8 @@ public class ImportModuleGoogleDocJobHandler implements JobHandlerInterface {
               gsBlobInfo);
         }
 
-        gdocImportContext
-            .setState(ImportModuleGoogleDocJobContext.GoogleDocImportJobState.COMPLETE);
+        gdocImportContext.setState(
+            ImportModuleGoogleDocJobContext.GoogleDocImportJobState.MODULE_VERSION_PUBLISHED);
 
         // Now generating result for this job.
         CollectionTreeNodeDto node = new CollectionTreeNodeDto.Builder()

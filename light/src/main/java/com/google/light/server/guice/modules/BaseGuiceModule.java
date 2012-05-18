@@ -15,6 +15,10 @@
  */
 package com.google.light.server.guice.modules;
 
+import com.google.light.server.manager.implementation.FTSManagerImpl;
+
+import com.google.light.server.manager.interfaces.FTSManager;
+
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpSession;
@@ -114,21 +118,26 @@ public abstract class BaseGuiceModule extends AbstractModule {
         .to(AdminOperationManagerImpl.class);
 
     bind(CollectionManager.class)
-      .to(CollectionManagerImpl.class);
+        .to(CollectionManagerImpl.class);
 
-    bind(GSSClientLoginTokenManager.class).to(GSSClientLoginTokenManagerImpl.class);
+    bind(FTSManager.class)
+        .to(FTSManagerImpl.class);
+
+    bind(GSSClientLoginTokenManager.class)
+        .to(GSSClientLoginTokenManagerImpl.class);
 
     bind(JobManager.class)
         .to(JobManagerImpl.class);
 
     bind(ModuleManager.class)
         .to(ModuleManagerImpl.class);
-    
+
     bind(NotificationManager.class)
-      .to(NotificationManagerImpl.class);
+        .to(NotificationManagerImpl.class);
 
     bind(PersonManager.class)
         .to(PersonManagerImpl.class);
+    
     bind(QueueManager.class)
         .to(QueueManagerImpl.class);
 

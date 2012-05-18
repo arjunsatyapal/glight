@@ -18,10 +18,12 @@ package com.google.light.server.utils;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.constants.LightConstants.SESSION_MAX_INACTIVITY_PERIOD;
+import static com.google.light.server.constants.LightStringConstants.FTS_MODULE_ID_KEY;
 import static com.google.light.server.constants.RequestParamKeyEnum.DEFAULT_EMAIL;
 import static com.google.light.server.constants.RequestParamKeyEnum.LOGIN_PROVIDER_ID;
 import static com.google.light.server.constants.RequestParamKeyEnum.LOGIN_PROVIDER_USER_ID;
 import static com.google.light.server.constants.RequestParamKeyEnum.PERSON_ID;
+import static com.google.light.server.utils.LightPreconditions.checkIntegerIsInRage;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
@@ -33,6 +35,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.io.CharStreams;
 import com.google.light.server.constants.FileExtensions;
+import com.google.light.server.constants.LightConstants;
 import com.google.light.server.constants.OAuth2ProviderService;
 import com.google.light.server.dto.pojo.typewrapper.AbstractTypeWrapper;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.CollectionId;
@@ -41,6 +44,7 @@ import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
 import com.google.light.server.dto.pojo.typewrapper.stringwrapper.ExternalId;
+import com.google.light.server.dto.pojo.typewrapper.stringwrapper.FTSDocumentId;
 import com.google.light.server.exception.unchecked.httpexception.LightHttpException;
 import com.google.light.server.guice.providers.InstantProvider;
 import java.io.IOException;
@@ -60,6 +64,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpSession;
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Instant;
@@ -72,6 +77,8 @@ import org.joda.time.Instant;
  */
 public class LightUtils {
   private static final Logger logger = Logger.getLogger(LightUtils.class.getName());
+  
+  public static final Version LATEST_VERSION = new Version(Version.LATEST_VERSION);
 
   public static String getInputStreamAsString(InputStream is) throws IOException {
     checkNotNull(is);
@@ -458,4 +465,40 @@ public class LightUtils {
       return Throwables.getStackTraceAsString(e);
     }
   }
+  
+  /**
+   * @param maxResultsStr
+   * @return
+   */
+  public static int initializeMaxResults(String maxResultsStr) {
+    int maxResult = LightConstants.MAX_RESULTS_DEFAULT;
+    if (maxResultsStr != null) {
+      maxResult = Integer.parseInt(maxResultsStr);
+      checkIntegerIsInRage(maxResult, LightConstants.MAX_RESULTS_MIN,
+          LightConstants.MAX_RESULTS_MAX, "Invalid value for maxResult[" + maxResult + "].");
+    }
+    return maxResult;
+  }
+  
+  /**
+   * @param queryStr
+   * @return
+   */
+  public static String initializeFilterStr(String queryStr) {
+    if (StringUtils.isBlank(queryStr)) {
+      return null;
+    }
+
+    return encodeToUrlEncodedString(queryStr);
+  }
+  
+  public static FTSDocumentId convertModuleIdToFtsDocumentId(ModuleId moduleId) {
+    return new FTSDocumentId(FTS_MODULE_ID_KEY + getWrapperValue(moduleId));
+  }
+  
+  public static ModuleId convertFTSDocumentIdToModuleId(FTSDocumentId ftsDocumentId) {
+    checkArgument(ftsDocumentId.getValue().startsWith(FTS_MODULE_ID_KEY));
+    return new ModuleId(ftsDocumentId.getValue().substring(FTS_MODULE_ID_KEY.length()));
+  }
+
 }

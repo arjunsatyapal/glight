@@ -15,14 +15,13 @@
  */
 package com.google.light.server.jersey.resources.thirdparty.google;
 
-import static com.google.light.server.constants.LightConstants.GDATA_GDOC_MAX_RESULTS;
 import static com.google.light.server.exception.ExceptionType.SERVER_GUICE_INJECTION;
 import static com.google.light.server.servlets.thirdparty.google.gdoc.GoogleDocUtils.getDocumentFeedWithFolderUrl;
 import static com.google.light.server.servlets.thirdparty.google.gdoc.GoogleDocUtils.getDocumentFeedWithFolderUrlAndFilter;
-import static com.google.light.server.utils.LightPreconditions.checkIntegerIsInRage;
 import static com.google.light.server.utils.LightPreconditions.checkNotNull;
-import static com.google.light.server.utils.LightUtils.encodeToUrlEncodedString;
 import static com.google.light.server.utils.LightUtils.getURL;
+import static com.google.light.server.utils.LightUtils.initializeMaxResults;
+import static com.google.light.server.utils.LightUtils.initializeFilterStr;
 
 import com.google.common.base.Strings;
 import com.google.inject.Inject;
@@ -82,10 +81,10 @@ public class GoogleDocIntegration extends AbstractJerseyResource {
   public PageDto getDocList(
       @QueryParam(LightStringConstants.START_INDEX_STR) String startIndexStr,
       @QueryParam(LightStringConstants.MAX_RESULTS_STR) String maxResultsStr,
-      @QueryParam(LightStringConstants.FILTER) String queryStr) {
+      @QueryParam(LightStringConstants.FILTER) String filterStr) {
     // TODO(arjuns): Test maxResult.
     int maxResults = initializeMaxResults(maxResultsStr);
-    String query = initializeQueryStr(queryStr);
+    String query = initializeFilterStr(filterStr);
 
     URL url = null;
     if (!StringUtils.isBlank(startIndexStr)) {
@@ -106,33 +105,6 @@ public class GoogleDocIntegration extends AbstractJerseyResource {
     return pageDto;
   }
 
-  /**
-   * @param queryStr
-   * @return
-   */
-  private String initializeQueryStr(String queryStr) {
-    if (StringUtils.isBlank(queryStr)) {
-      return null;
-    }
-
-    return encodeToUrlEncodedString(queryStr);
-  }
-
-  /**
-   * @param maxResultsStr
-   * @return
-   */
-  private int initializeMaxResults(String maxResultsStr) {
-    int maxResult = LightConstants.MAX_RESULTS_DEFAULT;
-    if (maxResultsStr != null) {
-      maxResult = Integer.parseInt(maxResultsStr);
-      checkIntegerIsInRage(maxResult, LightConstants.MAX_RESULTS_MIN,
-          LightConstants.MAX_RESULTS_MAX, "Invalid value for maxResult[" + maxResult + "].");
-    }
-    return maxResult;
-  }
-
-  @SuppressWarnings("unchecked")
   @POST
   @Path(JerseyConstants.PATH_GOOGLE_DOC_INFO)
   @Produces({ ContentTypeConstants.TEXT_PLAIN })

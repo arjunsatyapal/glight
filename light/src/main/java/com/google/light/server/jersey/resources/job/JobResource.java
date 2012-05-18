@@ -24,8 +24,6 @@ import static com.google.light.server.utils.LightUtils.getNow;
 import static com.google.light.server.utils.LightUtils.getURI;
 import static com.google.light.server.utils.LightUtils.getWrapperValue;
 
-import com.google.common.base.Preconditions;
-
 import com.google.light.server.persistence.entity.jobs.JobEntity.JobType;
 
 import com.google.light.server.serveronlypojos.GAEQueryWrapper;

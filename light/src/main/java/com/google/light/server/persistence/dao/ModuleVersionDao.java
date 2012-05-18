@@ -15,8 +15,8 @@
  */
 package com.google.light.server.persistence.dao;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.light.server.utils.LightPreconditions.checkTxnIsRunning;
 
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
@@ -54,8 +54,9 @@ public class ModuleVersionDao extends AbstractBasicDao<ModuleVersionDto, ModuleV
    */
   @Override
   public ModuleVersionEntity put(Objectify ofy, ModuleVersionEntity entity) {
-    checkNotNull(ofy, "Txn should not be null");
-    checkArgument(ofy.getTxn().isActive(), "Txn should be active for ModuleVersionEntity.");
+    checkTxnIsRunning(ofy);
+    checkNotNull(entity.getCreationTime(), "creationTime for ModuleVersionEntity is mandatory");
+    
 
     ModuleVersionEntity returnEntity = super.put(ofy, entity);
     String returnMsg = "Created/Updated ModuleVersionEntity[" + returnEntity.getVersion() 

@@ -218,6 +218,7 @@ public class ImportModuleGoogleDocJobContext extends AbstractDto<ImportModuleGoo
     MODULE_CREATED,
     MODULE_VERSION_RESERVED,
     MODULE_VERSION_PUBLISHED,
+    MODULE_INDEXED,
     COMPLETE;
   }
 }

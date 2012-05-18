@@ -163,6 +163,11 @@ public class JerseyConstants {
       + CONTENT;
   public static final String PATH_MODULE_VERSION_RESOURCE = PATH_MODULE_VERSION + PATH_RESOURCE_TYPE
       + PATH_RESOURCE;
+  
+  public static final String PATH_MODULE_SEARCH = "/search";
+  public static final String URI_MODULE_SEARCH = URI_RESOURCE_PATH_MODULE + PATH_MODULE_SEARCH;
+  
+
 
   // Path for Notification Resources.
   public static final String RESOURCE_PATH_NOTIFICATION = "/notification";

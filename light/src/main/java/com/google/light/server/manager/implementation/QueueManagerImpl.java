@@ -19,7 +19,7 @@ import static com.google.common.base.Charsets.UTF_8;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkTxnIsRunning;
 import static com.google.light.server.utils.LightUtils.getURI;
-import static com.google.light.server.utils.LocationHeaderUtils.getJobLocation;
+import static com.google.light.server.utils.LocationUtils.getJobLocation;
 
 import com.google.appengine.api.taskqueue.Queue;
 import com.google.appengine.api.taskqueue.QueueFactory;

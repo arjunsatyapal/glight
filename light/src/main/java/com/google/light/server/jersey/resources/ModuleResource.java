@@ -5,6 +5,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.constants.LightConstants.MAX_RESULTS_MAX;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPersonLoggedIn;
+import static com.google.light.server.utils.LightUtils.initializeMaxResults;
 import static com.google.light.server.utils.LightUtils.isCollectionEmpty;
 
 import com.google.inject.Inject;
@@ -19,6 +20,7 @@ import com.google.light.server.dto.pages.PageDto;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
 import com.google.light.server.exception.unchecked.httpexception.NotFoundException;
+import com.google.light.server.manager.interfaces.FTSManager;
 import com.google.light.server.manager.interfaces.ModuleManager;
 import com.google.light.server.persistence.entity.module.ModuleEntity;
 import com.google.light.server.persistence.entity.module.ModuleVersionEntity;
@@ -46,11 +48,13 @@ import org.apache.commons.lang.StringUtils;
 @Path(JerseyConstants.RESOURCE_PATH_MODULE)
 public class ModuleResource extends AbstractJerseyResource {
   private final ModuleManager moduleManager;
+  private final FTSManager ftsManager;
 
   @Inject
   public ModuleResource(Injector injector, @Context HttpServletRequest request,
-      @Context HttpServletResponse response, ModuleManager moduleManager) {
+      @Context HttpServletResponse response, FTSManager ftsManager, ModuleManager moduleManager) {
     super(injector, request, response);
+    this.ftsManager = checkNotNull(ftsManager, "ftsManager");
     this.moduleManager = checkNotNull(moduleManager, "moduleManager");
   }
 
@@ -151,5 +155,22 @@ public class ModuleResource extends AbstractJerseyResource {
     }
     
     return htmlBuilder.toString();
+  }
+  
+  @GET
+  @Path(JerseyConstants.PATH_MODULE_SEARCH)
+  @Produces({ ContentTypeConstants.APPLICATION_JSON, ContentTypeConstants.APPLICATION_XML })
+  public PageDto getModulesMatchingCriteria(
+      @QueryParam(LightStringConstants.FILTER) String filterStr,
+      @QueryParam(LightStringConstants.START_INDEX_STR) String startIndexStr,
+      @QueryParam(LightStringConstants.MAX_RESULTS_STR)String maxResultsStr) {
+    
+    if (StringUtils.isBlank(filterStr)) {
+      checkNotBlank(startIndexStr, "startIndexStr");
+    }
+    
+    int maxResults = initializeMaxResults(maxResultsStr);
+    
+    return ftsManager.searchForModule(filterStr, maxResults, startIndexStr);
   }
 }
