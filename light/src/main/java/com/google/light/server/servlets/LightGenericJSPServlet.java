@@ -25,6 +25,7 @@ import com.google.light.server.constants.http.ContentTypeEnum;
 import com.google.light.server.dto.JSVariablesPreloadDto;
 import com.google.light.server.manager.interfaces.PersonManager;
 import com.google.light.server.persistence.entity.person.PersonEntity;
+import com.google.light.server.servlets.path.ServletPathEnum;
 import com.google.light.server.utils.ServletUtils;
 import java.io.IOException;
 import java.util.Collections;
@@ -63,6 +64,8 @@ public class LightGenericJSPServlet extends HttpServlet {
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException,
       IOException {
+    String path = req.getServletPath();
+
     // Making cache policy private
     resp.setHeader("Cache-Control", "private");
 
@@ -74,8 +77,18 @@ public class LightGenericJSPServlet extends HttpServlet {
     } catch (ProvisionException e) {
       // expected when user is not logged in
     }
-    if (personEntity != null)
+    if (personEntity != null) {
       dtoBuilder.person(personEntity.toDto());
+    }
+
+    // Multiplexing home page in mydash/search page templates
+    if (path.equals(ServletPathEnum.HOME_PAGE.get())) {
+      if (personEntity != null) {
+        path = "/mydash";
+      } else {
+        path = "/search";
+      }
+    }
 
     // For now, just trusting the request headers
     // TODO(waltercacau): Add support for user defined language.
@@ -90,7 +103,6 @@ public class LightGenericJSPServlet extends HttpServlet {
     builder.append(";\n</script>");
     req.setAttribute("preload", builder.toString());
 
-    String path = req.getServletPath();
     checkArgument(path.startsWith("/"));
     ServletUtils.forward(req, resp, "/WEB-INF/pages" + path + ".jsp");
   }

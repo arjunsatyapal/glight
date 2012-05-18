@@ -201,6 +201,14 @@ public class CollectionResource extends AbstractJerseyResource {
 
   protected CollectionVersionDto getCollectionVersionDto(String collectionIdStr,
       String versionStr) {
+    synchronized (this) {
+      try {
+        wait(5000);
+      } catch (InterruptedException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+    }
     checkNotBlank(collectionIdStr, "Invalid CollectionId.");
     checkNotBlank(versionStr, "Invalid version.");
     CollectionId collectionId = new CollectionId(collectionIdStr);

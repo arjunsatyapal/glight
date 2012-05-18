@@ -13,7 +13,7 @@
 package com.google.light.server.constants;
 
 
-import static com.google.light.server.servlets.path.ServletPathEnum.SEARCH_PAGE;
+import static com.google.light.server.servlets.path.ServletPathEnum.HOME_PAGE;
 
 
 /**
@@ -52,7 +52,7 @@ public class LightConstants {
   public static int HTTP_CONNECTION_TIMEOUT_IN_MILLIS = 10 * 1000;
 
 
-  public static String REDIRECT_PATH_AFTER_LOGOUT = SEARCH_PAGE.get();
+  public static String REDIRECT_PATH_AFTER_LOGOUT = HOME_PAGE.get();
 
 
   public static final int SEARCH_RESULTS_PER_PAGE = 10;

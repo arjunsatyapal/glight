@@ -18,10 +18,10 @@
  * load the correct Main.js file depending on the host html page.
  */
 define(['dojo/has', 'dojo/query', 'dojo/dom-construct', 'dojo',
-        'light/utils/URLUtils', 'light/utils/PersonUtils',
+        'light/utils/PersonUtils',
         'light/enums/PagesEnum',
         'light/utils/RouterManager'],
-        function(has, $, domConstruct, dojo, URLUtils, PersonUtils,
+        function(has, $, domConstruct, dojo, PersonUtils,
                  PagesEnum, RouterManager) {
 
   function loadMainFor(page) {
@@ -32,7 +32,7 @@ define(['dojo/has', 'dojo/query', 'dojo/dom-construct', 'dojo',
     });
   }
 
-  var page = PagesEnum.getByPath(URLUtils.getPath());
+  var page = PagesEnum.getCurrentPage();
   if (page) {
 
     // Checking if the Person has accepted the Terms of Service.

@@ -28,12 +28,6 @@ define(['light/views/SearchBarView',
                  SearchService, LoginToolbarView, LoginToolbarController,
                  PersonUtils, URLUtils, PagesEnum) {
 
-  // Going to the anonymous search page
-  // TODO(waltercacau): optimize the login somehow to go directly to MYDASH.
-  if (PersonUtils.isLogged()) {
-    URLUtils.replace(PagesEnum.MYDASH.getPath());
-  }
-
   var searchResultListView = new SearchResultListView({}, 'searchResults');
   var searchResultListController =
     new SearchResultListController(new SearchService());

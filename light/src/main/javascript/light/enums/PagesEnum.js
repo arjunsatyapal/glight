@@ -19,13 +19,18 @@
  * @class
  * @name light.enums.PagesEnum
  */
-define(['light/enums/EventsEnum',
+define(['exports',
+        'dojo/_base/lang',
+        'light/enums/EventsEnum',
         'light/builders/SearchStateBuilder',
         'light/builders/BrowseContextStateBuilder',
         'light/builders/RedirectStateBuilder',
-        'light/utils/RouterManager'],
-        function(EventsEnum, SearchStateBuilder, BrowseContextStateBuilder,
-                 RedirectStateBuilder, RouterManager) {
+        'light/utils/RouterManager',
+        'light/utils/PersonUtils',
+        'light/utils/URLUtils'],
+        function(exports, lang, EventsEnum, SearchStateBuilder,
+                 BrowseContextStateBuilder, RedirectStateBuilder,
+                 RouterManager, PersonUtils, URLUtils) {
     function toHash(statesOrHash) {
       if (typeof statesOrHash == 'undefined') {
         return '';
@@ -36,40 +41,42 @@ define(['light/enums/EventsEnum',
         return RouterManager._hashForStates(statesOrHash);
       }
     }
-
-    return {
-    /** @lends light.enums.PagesEnum */
-
-    REGISTER: {
+    
+    var REGISTER = {
       build: 'register',
       main: 'RegisterMain',
-      getPath: function(statesOrHash) {
+      getPathWithHash: function(statesOrHash) {
         return '/register#' + toHash(statesOrHash);
       },
+      pathRegex: /^\/register(\/|$)/,
       states: [{
         changeEvent: EventsEnum.REDIRECT_STATE_CHANGED,
         Builder: RedirectStateBuilder
       }]
-    },
-    SEARCH: {
+    };
+    var SEARCH = {
       build: 'search',
       main: 'SearchMain',
-      getPath: function(statesOrHash) {
-        return '/search#' + toHash(statesOrHash);
+      getPathWithHash: function(statesOrHash) {
+        return '/#' + toHash(statesOrHash);
       },
+      pathRegex: /^\/(\/|$)/,
+      onlyForUnloggedUsers: true,
       states: [
         {
           changeEvent: EventsEnum.SEARCH_STATE_CHANGED,
           Builder: SearchStateBuilder
         }
       ]
-    },
-    MYDASH: {
+    };
+    var MYDASH = {
       build: 'mydash',
       main: 'MyDashMain',
-      getPath: function(statesOrHash) {
-        return '/mydash#' + toHash(statesOrHash);
+      getPathWithHash: function(statesOrHash) {
+        return '/#' + toHash(statesOrHash);
       },
+      pathRegex: /^\/(\/|$)/,
+      onlyForLoggedUsers: true,
       states: [
         {
           changeEvent: EventsEnum.BROWSE_CONTEXT_STATE_CHANGED,
@@ -80,25 +87,29 @@ define(['light/enums/EventsEnum',
           Builder: SearchStateBuilder
         }
       ]
-    },
+    };
 
-    /**
-     * Get's the page for a given path.
-     *
-     * @param {string} path Path.
-     * @return {?light.enums.PagesEnum} The enum value for
-     *    the page or null if not found.
-     */
-    getByPath: function(path) {
-      // For now relying on the pattern applied
-      var pageMatch = path.match(/\/([a-zA-Z0-9\-_]+)$/);
-      if (pageMatch) {
-        var page = this[pageMatch[1].toUpperCase()];
-        if (page) {
-          return page;
+    return lang.mixin(exports, {
+      /** @lends light.enums.PagesEnum */
+  
+      SEARCH: SEARCH,
+      MYDASH: MYDASH,
+      REGISTER: REGISTER,
+      values: [REGISTER, SEARCH, MYDASH],
+  
+      getCurrentPage: function() {
+        var path = URLUtils.getPath();
+        var loggedIn = PersonUtils.isLogged();
+        for(var i=0, len=this.values.length; i < len; i++) {
+          var value = this.values[i];
+          if(!(value.onlyForUnloggedUsers && loggedIn) &&
+             !(value.onlyForLoggedUsers && !loggedIn) &&
+             value.pathRegex.test(path)) {
+            return value;
+          }
         }
+        throw new Error('Could not figure out the current page.');
       }
-      return null;
-    }
-  };
+  
+    });
 });

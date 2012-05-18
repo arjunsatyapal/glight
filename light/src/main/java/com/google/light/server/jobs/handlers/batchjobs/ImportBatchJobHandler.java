@@ -135,7 +135,7 @@ public class ImportBatchJobHandler implements JobHandlerInterface {
 
         JobId enqueuedJobId = null;
         for (ImportExternalIdDto curr : importBatchJobContext.getList()) {
-          if (curr.hasJobId()) {
+          if (curr.getModuleState() == ModuleState.FAILED || curr.hasJobId()) {
             continue;
           }
 

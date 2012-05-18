@@ -32,7 +32,8 @@ define(['dojo/_base/declare', 'dojo/_base/xhr',
     /**
      * Return's the current path + '#' + current hash.
      *
-     * TODO(waltercacau): Document custom parameters
+     * TODO(waltercacau): Document custom parameters and
+     * extra fields in the errors (eg lightCancelled)
      */
     send: function(method, params) {
       // TODO(waltercacau): Add CSFR protection here
@@ -61,6 +62,10 @@ define(['dojo/_base/declare', 'dojo/_base/xhr',
                   'application/json') {
           err.response = json.parse(err.xhr.responseText || null);
         }
+        
+        // Informing a cancellation
+        err.lightCancelled = err.dojoType == "cancel";
+        
         throw err;
       });
     },

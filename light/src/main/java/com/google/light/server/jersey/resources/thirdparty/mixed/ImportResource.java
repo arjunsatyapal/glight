@@ -84,6 +84,7 @@ public class ImportResource extends AbstractJerseyResource {
   private JobManager jobManager;
   private ModuleManager moduleManager;
   private CollectionManager collectionManager;
+
   @Inject
   public ImportResource(Injector injector, HttpServletRequest request,
       HttpServletResponse response, JobManager jobManager, CollectionManager collectionManager,
@@ -176,7 +177,7 @@ public class ImportResource extends AbstractJerseyResource {
             collectionEntity = collectionManager.createEmptyCollection(ofy, owners, dummyRoot);
             Version reservVersion = collectionEntity.reserveVersion();
             collectionManager.update(ofy, collectionEntity);
-            
+
             importBatchWrapper.setCollectionId(collectionEntity.getCollectionId());
             importBatchWrapper.setBaseVersion(collectionEntity.getLatestPublishVersion());
             importBatchWrapper.setVersion(reservVersion);
@@ -188,9 +189,9 @@ public class ImportResource extends AbstractJerseyResource {
             checkNotNull(cvEntity, "cvEntity should not be null here.");
             CollectionTreeNodeDto rootToBeUpdated = cvEntity.getCollectionTree();
             rootToBeUpdated.importChildsFrom(dummyRoot);
-            
-            Version publishVersion = collectionManager.reserveAndPublishAsLatest(ofy,  
-                importBatchWrapper.getCollectionId(),  rootToBeUpdated, 
+
+            Version publishVersion = collectionManager.reserveAndPublishAsLatest(ofy,
+                importBatchWrapper.getCollectionId(), rootToBeUpdated,
                 CollectionState.PARTIALLY_PUBLISHED);
             importBatchWrapper.setBaseVersion(publishVersion);
             importBatchWrapper.setVersion(publishVersion);
@@ -230,9 +231,14 @@ public class ImportResource extends AbstractJerseyResource {
         .nodeType(TreeNodeType.ROOT_NODE)
         .moduleType(ModuleType.LIGHT_COLLECTION)
         .build();
-    
-    
+
     for (ImportExternalIdDto currExternalIdDto : importBatchWrapper.getList()) {
+
+      // Ignoring the ones that failed
+      if (currExternalIdDto.getModuleState() == ModuleState.FAILED) {
+        continue;
+      }
+
       CollectionTreeNodeDto newChild = new CollectionTreeNodeDto.Builder()
           .title(currExternalIdDto.getTitle())
           .moduleType(currExternalIdDto.getModuleType())
@@ -240,12 +246,12 @@ public class ImportResource extends AbstractJerseyResource {
           .nodeType(currExternalIdDto.getModuleType().getNodeType())
           .moduleId(currExternalIdDto.getModuleId())
           .build();
-      
+
       dummyRoot.addChildren(newChild);
     }
     return dummyRoot;
   }
-  
+
   /**
    * @param importBatchWrapper
    */

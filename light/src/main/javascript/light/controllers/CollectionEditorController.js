@@ -80,7 +80,12 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
             return dfd;
         }).then(function(results) {
           if (!results[0][0] || !results[1][0]) {
-            self._view.showCouldNotLoad();
+            // If something failed to load and it wasn't because it was
+            // cancelled, then we really failed.
+            if((!results[0][0] && !results[0][1].lightCancelled) ||
+                    (!results[1][0] && !results[1][1].lightCancelled)) {
+              self._view.showCouldNotLoad();
+            }
           } else {
             self._collection = results[0][1];
             self._collectionVersion = results[1][1];
@@ -92,19 +97,14 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
     },
     saveCollection: function(collectionTree) {
       var self = this;
-      // TODO(waltercacau): Find a way to easily detect that
-      // a promise was cancelled
-      self._wasSaving = false;
       this._singlePromiseContainer.handle(function() {
-        self._wasSaving = true;
         return self._collectionService.updateLatest(
                 self._collectionId, collectionTree);
       }).then(function() {
         self._view.savedSuccessfully();
-      },function() {
+      },function(error) {
         // Avoiding cancelling errors if the user presses more then once
-        if (self._wasSaving) {
-          self._wasSaving = false;
+        if (!error.lightCancelled) {
           self._view.failedToSave();
         }
       });

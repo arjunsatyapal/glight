@@ -101,15 +101,19 @@ public class LightServletModule extends ServletModule {
     // First registering filters for current Servlet Path.
     for (FilterPathEnum currFilter : servletPath.getListOfFilters()) {
       initFilters(currFilter, servletPath.get());
-      initFilters(currFilter, servletPath.getRoot());
+      if(!servletPath.get().equals(servletPath.getRoot())) {
+        initFilters(currFilter, servletPath.getRoot());
+      }
     }
 
     // Now binding Servlet to correct Path.
     logger.finest("Binding [" + servletPath.get() + "] to Servlet [" + servletPath.getClazz()
         + "].");
     serve(servletPath.get()).with(servletPath.getClazz());
-    logger.finest("Binding [" + servletPath.getRoot() + "] to Servlet [" + servletPath.getClazz()
-        + "].");
-    serve(servletPath.getRoot()).with(servletPath.getClazz());
+    if(!servletPath.get().equals(servletPath.getRoot())) {
+      logger.finest("Binding [" + servletPath.getRoot() + "] to Servlet [" + servletPath.getClazz()
+          + "].");
+      serve(servletPath.getRoot()).with(servletPath.getClazz());
+    }
   }
 }

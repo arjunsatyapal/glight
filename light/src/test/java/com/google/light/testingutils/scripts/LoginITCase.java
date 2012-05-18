@@ -244,9 +244,9 @@ public class LoginITCase {
       String fullName = getFullName(ownerCredentials);
       
 
-      // Now trigger open a light page (eg. SEARCH_PAGE) and start GOOGLE_LOGIN OAuth2 flow for
+      // Now trigger open a light page (eg. HOME_PAGE) and start GOOGLE_LOGIN OAuth2 flow for
       // Owner.
-      driver.get(serverUrl + ServletPathEnum.SEARCH_PAGE.get());
+      driver.get(serverUrl + ServletPathEnum.HOME_PAGE.get());
       clickAtCenter(driver, By.id("loginToolbar_loginButton"));
       clickAtCenter(driver, By.id("loginToolbar_googleLoginProviderButton"));
       // Accepting
@@ -257,11 +257,7 @@ public class LoginITCase {
       clickAtCenter(driver, By.id("registerForm_tosCheckbox"));
       clickAtCenter(driver, By.id("registerForm_submitButton"));
 
-      // javascript redirects are making selenium to have some race conditions internally.
-      // for now correcting it with a simple sleep
-      // TODO(waltercacau):
-      Thread.sleep(2000);
-      assertTrue(driver.getCurrentUrl().startsWith(serverUrl + ServletPathEnum.MYDASH_PAGE.get()));
+      assertTrue(driver.getCurrentUrl().startsWith(serverUrl + ServletPathEnum.HOME_PAGE.get()));
       assertEquals(fullName, driver.findElement(By.id("loginToolbar_personNameSpan")).getText());
     }
 
@@ -270,7 +266,7 @@ public class LoginITCase {
     }
     
     public void logoutFromLight() {
-      driver.get(serverUrl + ServletPathEnum.SEARCH_PAGE.get());
+      driver.get(serverUrl + ServletPathEnum.HOME_PAGE.get());
       clickAtCenter(driver, By.id("loginToolbar_logoutButton"));
     }
 

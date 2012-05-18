@@ -14,9 +14,10 @@
  * the License.
  */
 /*global lightPreload: false*/
-define(['dojo/_base/declare', 'light/utils/URLUtils', 'light/enums/PagesEnum',
-    'light/builders/RedirectStateBuilder', 'dojo'],
-    function(declare, URLUtils, PagesEnum, RedirectStateBuilder, dojo) {
+define(['exports',  'dojo/_base/lang', 'light/utils/URLUtils',
+        'light/enums/PagesEnum', 'light/builders/RedirectStateBuilder',
+        'dojo'],
+    function(exports, lang, URLUtils, PagesEnum, RedirectStateBuilder, dojo) {
   /**
    * Utilities for handling with the logged person. TODO(waltercacau): add test
    * for this class
@@ -24,7 +25,7 @@ define(['dojo/_base/declare', 'light/utils/URLUtils', 'light/enums/PagesEnum',
    * @class
    * @name light.utils.PersonUtils
    */
-  return {
+  return lang.mixin(exports, {
     /** @lends light.utils.PersonUtils */
 
     /**
@@ -57,7 +58,7 @@ define(['dojo/_base/declare', 'light/utils/URLUtils', 'light/enums/PagesEnum',
 
       var person = this.getCurrent();
       if (person && !person.acceptedTos) {
-        URLUtils.redirect(PagesEnum.REGISTER.getPath([
+        URLUtils.redirect(PagesEnum.REGISTER.getPathWithHash([
                 new RedirectStateBuilder()
                     .redirectPath(URLUtils.getPathWithHash())
                     .build()
@@ -77,5 +78,5 @@ define(['dojo/_base/declare', 'light/utils/URLUtils', 'light/enums/PagesEnum',
       return this.getCurrent() ? true : false;
     }
 
-  };
+  });
 });

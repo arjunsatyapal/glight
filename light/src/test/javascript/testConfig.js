@@ -47,11 +47,12 @@
     
 
   dojoConfig = {
-    //'dojo-undef-api': true, 'dojo-publish-privates': true,
     has: {
       'config-dojo-loader-catches': true,
       'light-dev': 1,
-      'light-unit-test': 1
+      'light-unit-test': 1,
+      'dojo-undef-api': true,
+      'dojo-publish-privates': true
     },
     // Needed to avoid some browsers from caching the code
     cacheBust: new Date(),

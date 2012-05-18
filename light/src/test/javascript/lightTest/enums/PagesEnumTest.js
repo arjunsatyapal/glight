@@ -13,8 +13,9 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
- define(['light/enums/PagesEnum', 'lightTest/TestUtils'],
-        function(PagesEnum, TestUtils) {
+ define(['light/enums/PagesEnum', 'lightTest/TestUtils',
+         'light/utils/PersonUtils', 'light/utils/URLUtils'],
+        function(PagesEnum, TestUtils, PersonUtils, URLUtils) {
    var SAMPLE_UNKOWN_PATH = 'SAMPLE_UNKOWN_PATH';
 
    var enumNames = TestUtils.getEnumNames(PagesEnum);
@@ -24,6 +25,7 @@
     describe('count', function() {
       it('should be ...', function() {
         expect(enumNames.length).toBe(3);
+        expect(enumNames.length).toBe(PagesEnum.values.length);
       });
     });
 
@@ -50,21 +52,62 @@
       });
     });
 
-
-
-    describe('getByPath', function() {
-      describe('when called with a known path', function() {
+    describe('getCurrentPage', function() {
+      describe('when called with a known path and the user is logged', function() {
         it('should map to the correct enum value', function() {
+          function expectToThrowOrNotToBe(page) {
+            var foundPage = null;
+            try {
+              foundPage = PagesEnum.getCurrentPath();
+            } catch(err) {
+              return;
+            }
+            expect(foundPage).not.toBe(page);
+          }
+
+          var getPathStub, isLoggedStub;
           for (var i = 0, len = enumNames.length; i < len; i++) {
             var page = PagesEnum[enumNames[i]];
-            expect(PagesEnum.getByPath(page.getPath().split("#")[0])).toBe(page);
+
+            getPathStub = this.stub(URLUtils, 'getPath');
+            getPathStub.withArgs()
+                .returns(page.getPathWithHash().split('#')[0]);
+
+            // Testing when logged
+            isLoggedStub = this.stub(PersonUtils, 'isLogged');
+            isLoggedStub.withArgs().returns(true);
+
+            if (page.onlyForUnloggedUsers) {
+              expectToThrowOrNotToBe(page);
+            } else {
+              expect(PagesEnum.getCurrentPage()).toBe(page);
+            }
+
+            isLoggedStub.restore();
+
+            // Testing when not logged
+            isLoggedStub = this.stub(PersonUtils, 'isLogged');
+            isLoggedStub.withArgs().returns(false);
+
+            if (page.onlyForLoggedUsers) {
+              expectToThrowOrNotToBe(page);
+            } else {
+              expect(PagesEnum.getCurrentPage()).toBe(page);
+            }
+
+            isLoggedStub.restore();
+
+            getPathStub.restore();
           }
         });
       });
 
       describe('when called with a unknown path', function() {
-        it('should return null', function() {
-          expect(PagesEnum.getByPath(SAMPLE_UNKOWN_PATH)).toBe(null);
+        it('should throw', function() {
+          this.stub(URLUtils, 'getPath').withArgs().returns(SAMPLE_UNKOWN_PATH);
+          expect(function() {
+            PagesEnum.getCurrentPath();
+          }).toThrow();
         });
       });
     });

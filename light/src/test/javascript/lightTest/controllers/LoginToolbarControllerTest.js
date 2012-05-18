@@ -17,11 +17,12 @@
          'light/views/LoginToolbarView',
          'light/utils/URLUtils',
          'light/utils/PersonUtils',
+         'light/enums/PagesEnum',
          'lightTest/TestUtils',
          'dojo/text!testResources/person/json/create_person_response.json',
          'dojo/_base/json'],
          function(LoginToolbarController, LoginToolbarView, URLUtils,
-                  PersonUtils, TestUtils, SAMPLE_PERSON, JSON) {
+                  PersonUtils, PagesEnum, TestUtils, SAMPLE_PERSON, JSON) {
 
    describe('light.controllers.LoginToolbarController', function() {
      var controller, view;
@@ -62,6 +63,7 @@
        it('should redirect to the proper servlet', function() {
          this.stub(URLUtils, 'getPathWithHash').withArgs().returns('path#hash');
          this.stub(URLUtils, 'redirect');
+         this.stub(PagesEnum, 'getCurrentPage').withArgs().returns(PagesEnum.REGISTER);
 
          controller.login('google');
 

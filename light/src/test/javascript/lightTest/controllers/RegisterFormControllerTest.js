@@ -53,7 +53,7 @@ define(['light/controllers/RegisterFormController', 'light/stores/PersonStore',
 
           controller.setup();
 
-          expect(controller._redirectPath).toBe(PagesEnum.SEARCH.getPath());
+          expect(controller._redirectPath).toBe(PagesEnum.SEARCH.getPathWithHash());
         });
       });
 

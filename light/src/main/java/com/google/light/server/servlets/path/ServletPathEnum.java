@@ -81,15 +81,12 @@ public enum ServletPathEnum {
          Lists.newArrayList(FilterPathEnum.API, FilterPathEnum.TEST)),
 
   // Client Side pages
-  SEARCH_PAGE(LightGenericJSPServlet.class, "/search",
-              false, false, true, true,
-              Lists.newArrayList(FilterPathEnum.API, FilterPathEnum.TEST)),
+  HOME_PAGE(LightGenericJSPServlet.class, "/",
+            false, false, true, true,
+            Lists.newArrayList(FilterPathEnum.API, FilterPathEnum.TEST)),
   REGISTER_PAGE(LightGenericJSPServlet.class, "/register",
                 false, false, true, true,
                 Lists.newArrayList(FilterPathEnum.API, FilterPathEnum.TEST)),
-  MYDASH_PAGE(LightGenericJSPServlet.class, "/mydash",
-              false, false, true, true,
-              Lists.newArrayList(FilterPathEnum.API, FilterPathEnum.TEST)),
   TEST_PAGE(LightGenericJSPServlet.class, "/test",
             false, false, true, true,
             Lists.newArrayList(FilterPathEnum.API, FilterPathEnum.TEST)),
@@ -156,8 +153,12 @@ public enum ServletPathEnum {
       boolean allowedInNonProd, List<FilterPathEnum> listOfFilters) {
     this.clazz = clazz;
     this.servletPath = checkNotBlank(servletPath, "servletPath");
-    checkArgument(!servletPath.endsWith("/"));
-    this.servletRoot = checkNotBlank(servletPath + "/", "servletPath/");
+    if ("/".equals(servletPath)) {
+      this.servletRoot = "/";
+    } else {
+      checkArgument(!servletPath.endsWith("/"));
+      this.servletRoot = checkNotBlank(servletPath + "/", "servletPath/");
+    }
     this.requiresLogin = requireLogin;
 
     if (!requireLogin && requireAdminPrivilege) {
@@ -216,8 +217,10 @@ public enum ServletPathEnum {
 
   // TODO(arjuns): Add test for this.
   public static ServletPathEnum getServletPathEnum(String requestUri) {
-    String uri = requestUri.endsWith("/") ? requestUri.substring(0, requestUri.length() - 1)
-        : requestUri;
+    String uri =
+        requestUri.endsWith("/") && !"/".equals(requestUri) ? requestUri.substring(0,
+            requestUri.length() - 1)
+            : requestUri;
 
     for (ServletPathEnum currServletPath : ServletPathEnum.values()) {
       if (currServletPath.get().equals(uri)) {
