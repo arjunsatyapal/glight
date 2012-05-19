@@ -49,6 +49,8 @@ import java.net.URI;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
+
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.Instant;
@@ -188,7 +190,7 @@ public class FTSUtils {
       SearchResultItemDto item = new SearchResultItemDto.Builder()
           .link(uri.toString())
           .description(expression.getHTML())
-          .title(textField.getText())
+          .title(StringEscapeUtils.escapeHtml(textField.getText()))
           .build();
       listOfResults.add(item);
     }

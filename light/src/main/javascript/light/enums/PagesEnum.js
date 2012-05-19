@@ -89,13 +89,13 @@ define(['exports',
       ]
     };
 
-    var COLLECTION_VIEWER = {
-      build: 'collection_viewer',
-      main: 'CollectionViewerMain',
+    var CONTENT_VIEWER = {
+      build: 'content_viewer',
+      main: 'ContentViewerMain',
       getPathWithHash: function(statesOrHash) {
         return '/rest/content/general/collection/SAMPLE#' + toHash(statesOrHash);
       },
-      pathRegex: /^\/rest\/content\/general\/collection(\/|$)/,
+      pathRegex: /^\/rest\/content\/general\/(collection|module)(\/|$)/,
       states: []
     };
 
@@ -105,8 +105,8 @@ define(['exports',
       SEARCH: SEARCH,
       MYDASH: MYDASH,
       REGISTER: REGISTER,
-      COLLECTION_VIEWER: COLLECTION_VIEWER,
-      values: [REGISTER, SEARCH, MYDASH, COLLECTION_VIEWER],
+      COLLECTION_VIEWER: CONTENT_VIEWER,
+      values: [REGISTER, SEARCH, MYDASH, CONTENT_VIEWER],
   
       getCurrentPage: function() {
         var path = URLUtils.getPath();

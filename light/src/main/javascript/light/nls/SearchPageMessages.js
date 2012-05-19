@@ -20,7 +20,8 @@ define({
     noResults: 'No results for this search',
     pageInfo: 'Page ${page}',
     next: 'Next',
-    previous: 'Previous'
+    previous: 'Previous',
+    recentSearchLabel: 'Recently published on Light'
   },
   'pt-br': true,
   'fa': true

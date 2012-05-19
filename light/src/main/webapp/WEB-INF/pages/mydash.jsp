@@ -143,6 +143,38 @@
         padding: 10px;
         text-align: center;
     }
+    .claro .warnButton .dijitButtonNode {
+        color: white;
+        border: 0;
+        background-color: #D14836;
+        background-image: -webkit-linear-gradient(top, #DD4B39, #D14836);
+        background-image: -moz-linear-gradient(top, #DD4B39, #D14836);
+        background-image: -ms-linear-gradient(top, #DD4B39, #D14836);
+        background-image: -o-linear-gradient(top, #DD4B39, #D14836);
+        background-image: linear-gradient(top, #DD4B39, #D14836);
+    }
+    .withRecentSearchResults .searchResultsList {
+        width: 60%;
+    }
+    .withRecentSearchResults .recentSearchResultsBox {
+        width: 40%;
+    }
+    .recentSearchResultsBoxLabel {
+        text-align: center;
+        padding-top: 3px;
+        padding-bottom: 3px;
+    }
+    .recentSearchResultsBox {
+        position: absolute;
+        top: 0;
+    }
+    body[dir="rtl"] .recentSearchResultsBox {
+        left: 0;
+    }
+    body[dir="ltr"] .recentSearchResultsBox {
+        right: 0;
+    }
+    
     </style>
     <!--<link rel="stylesheet/less" type="text/css" href="/css/search.less">
     <script src="/js/external/less-1.3.0.min.js" type="text/javascript"></script>-->

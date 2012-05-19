@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-define(['dojo/i18n!light/nls/CollectionViewerMessages', 'dojo/query',
+define(['dojo/i18n!light/nls/ContentViewerMessages', 'dojo/query',
         'light/utils/DOMUtils',
         'dojo/domReady!'],
         function(messages, $, DOMUtils) {

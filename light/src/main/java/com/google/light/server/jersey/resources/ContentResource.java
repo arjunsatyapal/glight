@@ -355,7 +355,7 @@ public class ContentResource extends AbstractJerseyResource {
     Matcher m = p.matcher(bodyProperties);
     StringBuffer bodyPropertiesBuilder = new StringBuffer();
     while (m.find()) {
-      m.appendReplacement(bodyPropertiesBuilder, "margin: 0 auto" + m.group(1));
+      m.appendReplacement(bodyPropertiesBuilder, "margin: 0 auto;padding-top:1em" + m.group(1));
     }
     m.appendTail(bodyPropertiesBuilder);
     bodyProperties = bodyPropertiesBuilder.toString();

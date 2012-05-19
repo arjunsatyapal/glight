@@ -194,6 +194,12 @@ var profile = (function() {
         ],
         exclude: ['light/build/loader', 'light/build/core']
       },
+      'light/build/content_viewer': {
+        include: [
+          'light/main/ContentViewerMain'
+        ],
+        exclude: ['light/build/loader', 'light/build/core']
+      },
       'light/build/search': {
         include: [
           'light/main/SearchMain'

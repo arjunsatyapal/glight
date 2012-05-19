@@ -58,6 +58,27 @@
     body {
         font-size: 20px;
     }
+    .withRecentSearchResults .searchResultsList {
+        width: 60%;
+    }
+    .withRecentSearchResults .recentSearchResultsBox {
+        width: 40%;
+    }
+    .recentSearchResultsBoxLabel {
+        text-align: center;
+        padding-top: 3px;
+        padding-bottom: 3px;
+    }
+    .recentSearchResultsBox {
+        position: absolute;
+        top: 70px;
+    }
+    body[dir="rtl"] .recentSearchResultsBox {
+        left: 0;
+    }
+    body[dir="ltr"] .recentSearchResultsBox {
+        right: 0;
+    }
     
     
     </style>

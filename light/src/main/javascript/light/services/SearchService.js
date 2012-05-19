@@ -33,22 +33,17 @@ define(['dojo/_base/declare', 'dojo', 'light/utils/XHRUtils', 'dojo/_base/lang',
           .clientLanguageCode(LanguageUtils.currentLocale)
           .build();
 
-      return this._lastXhr = XHRUtils.get({
+      return XHRUtils.get({
         url: '/api/search?' + dojo.objectToQuery(request)
-      }).then(null, function() {
-        this._lastXhr = null;
       });
     },
-
-    /**
-     * Cancel's the last issued search request if there is any
-     * and if it didn't succeed yet.
-     */
-    cancelLastSearch: function() {
-      if (this._lastXhr) {
-        this._lastXhr.cancel();
-        this._lastXhr = null;
-      }
+    
+    searchRecent: function(state) {
+      return XHRUtils.get({
+        url: '/rest/module/search?' + dojo.objectToQuery({
+          filter: state.query
+        })
+      });
     }
   });
 });
