@@ -255,13 +255,18 @@ define(['dojo/_base/declare',
       this.inherited(arguments);
     },
     
+
     /*
      * Currently the only reliable way to figure out if the
      * selectio changed is to hook up in the _addItemClass and
      * _removeItemClass methods.
      */
     _selectionChangeTimeout: null,
+    _skipSelectionChangeTrigger: false,
     _triggerPossibleSelectionChange: function() {
+      if(this._skipSelectionChangeTrigger) {
+        return;
+      }
       var self = this;
       if(this._selectionChangeTimeout === null) {
         this._selectionChangeTimeout = setTimeout(function() {
@@ -270,8 +275,14 @@ define(['dojo/_base/declare',
         }, 0);
       }
     },
+    /**
+     * Empties the selection without triggering the onSelectionChange
+     * callback.
+     */
     selectNoneWithoutTrigger: function() {
-      
+      this._skipSelectionChangeTrigger = true;
+      this.selectNone();
+      this._skipSelectionChangeTrigger = false;
     }
   });
 });

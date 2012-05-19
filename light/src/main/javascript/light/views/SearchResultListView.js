@@ -73,20 +73,14 @@ define(['dojo/_base/declare',
       domConstruct.empty(this._recentSearchResultsNode);
       DOMUtils.hide(this._recentSearchResultsBoxNode);
     },
-    _turnSelectionIntoNone: function(listWidget) {
-      var onSelectionChange = listWidget.onSelectionChange;
-      listWidget.onSelectionChange = function() {};
-      listWidget.selectNone();
-      listWidget.onSelectionChange = onSelectionChange;
-    },
     _removeSelectionFromRecentSearchResultList: function() {
       if(this._recentSearchResultList !== null) {
-        this._turnSelectionIntoNone(this._recentSearchResultList);
+        this._recentSearchResultList.selectNoneWithoutTrigger();
       }
     },
     _removeSelectionFromSearchResultList: function() {
       if(this._searchResultList !== null) {
-        this._turnSelectionIntoNone(this._searchResultList);
+        this._searchResultList.selectNoneWithoutTrigger();
       }
     },
     showRecent: function(data) {
