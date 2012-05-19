@@ -93,6 +93,8 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
                     self._collectionVersion.collectionTree);
           }
         });
+      } else {
+        this._singlePromiseContainer.cancel();
       }
     },
     saveCollection: function(collectionTree) {

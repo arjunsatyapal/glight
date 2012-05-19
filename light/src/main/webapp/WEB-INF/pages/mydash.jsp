@@ -4,6 +4,7 @@
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
     <title>Light</title>
+    <link type="text/css" rel="stylesheet" href="/css/base.css">
     ${preload}
     <script src="/js/light/build/loader.js"></script>
     <!-- TODO(waltercacau): move this into a CSS -->
@@ -142,7 +143,6 @@
         padding: 10px;
         text-align: center;
     }
-    
     </style>
     <!--<link rel="stylesheet/less" type="text/css" href="/css/search.less">
     <script src="/js/external/less-1.3.0.min.js" type="text/javascript"></script>-->

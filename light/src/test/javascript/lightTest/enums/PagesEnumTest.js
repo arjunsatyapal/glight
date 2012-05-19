@@ -24,7 +24,7 @@
 
     describe('count', function() {
       it('should be ...', function() {
-        expect(enumNames.length).toBe(3);
+        expect(enumNames.length).toBe(4);
         expect(enumNames.length).toBe(PagesEnum.values.length);
       });
     });
@@ -35,7 +35,8 @@
           var pageName = enumNames[i];
           var page = PagesEnum[enumNames[i]];
           expect(page.build).toBe(pageName.toLowerCase());
-          expect(page.main.toLowerCase()).toBe(pageName.toLowerCase() + 'main');
+          expect(page.main.toLowerCase())
+              .toBe(pageName.toLowerCase().replace('_','') + 'main');
           TestUtils.expectModuleToExist('light/main/' + page.main);
         }
       });

@@ -95,13 +95,7 @@ public class LightGenericJSPServlet extends HttpServlet {
     dtoBuilder.locale(SupportedLanguagesEnum.getClosestPrefferedLanguage(
         Collections.list(req.getLocales())).getClientLanguageCode());
 
-    resp.setContentType(ContentTypeEnum.TEXT_JAVASCRIPT.get());
-    StringBuilder builder = new StringBuilder();
-    builder.append("<script>\n");
-    builder.append("var lightPreload = ");
-    builder.append(dtoBuilder.build().toJson());
-    builder.append(";\n</script>");
-    req.setAttribute("preload", builder.toString());
+    req.setAttribute("preload", dtoBuilder.build().toHtml());
 
     checkArgument(path.startsWith("/"));
     ServletUtils.forward(req, resp, "/WEB-INF/pages" + path + ".jsp");

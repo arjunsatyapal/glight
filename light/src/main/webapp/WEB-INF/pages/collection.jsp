@@ -4,22 +4,11 @@
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
     <title>${collectionTitle}</title>
+    <link type="text/css" rel="stylesheet" href="/css/base.css">
+    ${preload}
+    <script src="/js/light/build/loader.js"></script>
+    <link type="text/css" rel="stylesheet" href="/css/servebase.css">
     <style>
-    html, body {
-        margin: 0;
-        padding: 0;
-        height: 100%;
-    }
-    body {
-        font: 100% "Open Sans", sans-serif;
-        background-color: #666;
-    }
-    .container {
-        margin: -4px auto;
-        padding: 2px 1em 1em 1em;
-        max-width: 55em;
-        background-color: white;
-    }
     .collectionContent ol {
       counter-reset: section;
       list-style-type: none;
@@ -31,9 +20,11 @@
     </style>
   </head>
   <body>
-    <div class="container">
-        <h1 class="collectionTitle">${collectionTitle}</h1>
-        <div class="collectionContent">${collectionContent}</div>
+    <div class="outerContainer">
+        <div class="innerContainer hiddenNode">
+            <h1 class="collectionTitle">${collectionTitle}</h1>
+            <div class="collectionContent">${collectionContent}</div>
+        </div>
     </div>
   </body>
 </html>

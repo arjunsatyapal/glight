@@ -89,13 +89,24 @@ define(['exports',
       ]
     };
 
+    var COLLECTION_VIEWER = {
+      build: 'collection_viewer',
+      main: 'CollectionViewerMain',
+      getPathWithHash: function(statesOrHash) {
+        return '/rest/content/general/collection/SAMPLE#' + toHash(statesOrHash);
+      },
+      pathRegex: /^\/rest\/content\/general\/collection(\/|$)/,
+      states: []
+    };
+
     return lang.mixin(exports, {
       /** @lends light.enums.PagesEnum */
   
       SEARCH: SEARCH,
       MYDASH: MYDASH,
       REGISTER: REGISTER,
-      values: [REGISTER, SEARCH, MYDASH],
+      COLLECTION_VIEWER: COLLECTION_VIEWER,
+      values: [REGISTER, SEARCH, MYDASH, COLLECTION_VIEWER],
   
       getCurrentPage: function() {
         var path = URLUtils.getPath();
