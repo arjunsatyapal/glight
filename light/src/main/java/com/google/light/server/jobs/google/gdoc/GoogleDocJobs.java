@@ -19,15 +19,17 @@ import static com.google.light.server.constants.LightConstants.GDATA_GDOC_MAX_RE
 import static com.google.light.server.utils.LightPreconditions.checkNotNull;
 import static com.google.light.server.utils.LightUtils.isCollectionEmpty;
 
+import com.google.light.server.dto.thirdparty.google.gdoc.GoogleDocInfoDto;
+import com.google.light.server.dto.thirdparty.google.gdoc.GoogleDocResourceId;
+
+import com.google.light.server.thirdparty.clients.google.gdoc.DocsServiceWrapper;
+
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.light.server.dto.pojo.tree.AbstractTreeNode.TreeNodeType;
 import com.google.light.server.dto.pojo.tree.GoogleDocTree;
-import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocInfoDto;
-import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocResourceId;
 import com.google.light.server.exception.ExceptionType;
-import com.google.light.server.thirdparty.clients.google.gdata.gdoc.DocsServiceWrapper;
 import java.util.List;
 import java.util.logging.Logger;
 

@@ -46,6 +46,8 @@ public interface QueueManager {
   
   public void enqueueLightJobWithoutTxn(JobId jobId);
   
+  public void enqueueSearchIndexTask(Objectify ofy);
+  
   public <T extends AbstractNotification<T>> void enqueueNotification(
       Objectify ofy, T notification);
 }

@@ -69,7 +69,8 @@ public class ImportModuleSyntheticModuleJobHandler implements JobHandlerInterfac
       public Void run(Objectify ofy) {
         // First publish HTML on Light.
         moduleManager.publishModuleVersion(ofy, context.getModuleId(), context.getVersion(),
-            context.getExternalId(), context.getTitle(), htmlContent, null, getNow());
+            context.getExternalId(), context.getTitle(), htmlContent, 
+            context.getModuleType().getDefaultLicenses(), null, getNow());
 
         updateJobContext(ofy, jobManager, JobState.COMPLETE, context, jobEntity,
             "Published module[" + context.getModuleId() + ":" + context.getVersion());

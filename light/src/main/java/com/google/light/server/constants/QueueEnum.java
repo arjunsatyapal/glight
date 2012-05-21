@@ -16,6 +16,7 @@
 package com.google.light.server.constants;
 
 import static com.google.light.server.constants.LightConstants.SECOND;
+import static com.google.light.server.constants.LightConstants.SECONDS_IN_TEN_MIN;
 import static com.google.light.server.constants.LightConstants.SECOND_FIVE;
 import static com.google.light.server.constants.LightConstants.SECOND_TEN;
 import static com.google.light.server.constants.LightConstants.TASK_AGE_LIMIT_MAX;
@@ -37,7 +38,19 @@ public enum QueueEnum {
 //  GSS_PAGEMAP_UPDATE("gss_pagemap_update"),
   LIGHT("light", SECOND_TEN, 2, SECOND, TASK_AGE_LIMIT_MAX, 10),
   LIGHT_NOTIFICATIONS("light-notification", SECOND_TEN, 2, SECOND, TASK_AGE_LIMIT_MAX, 100),
-  LIGHT_POLLING("light-polling", SECOND_FIVE, 2, SECOND, TASK_AGE_LIMIT_MAX, 100);
+  LIGHT_POLLING("light-polling", SECOND_FIVE, 2, SECOND, TASK_AGE_LIMIT_MAX, 100),
+  SEARCH_INDEX("search-index", SECOND, 1, SECOND, SECONDS_IN_TEN_MIN, 1),
+  
+  // Queues from AppEngine
+  /*
+   * This queue is used to schedule cron tasks by AppEngine. This is required so that Light's
+   * Queue Framework can use this enum. 
+   * 
+   * TOOD(arjuns): Add test to simulate this so that cron task headers are set and ensure that it
+   * will work in production.
+   */
+  GAE_CRON_QUEUE("__cron", SECOND, 1, SECOND, SECOND, 1);
+
   
   private String name;
   private RetryOptions retryOptions;

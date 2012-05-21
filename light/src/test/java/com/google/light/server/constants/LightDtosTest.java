@@ -23,7 +23,42 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+import com.google.inject.Inject;
+import com.google.light.server.annotations.OverrideFieldAnnotationName;
+import com.google.light.server.dto.AbstractDto;
+import com.google.light.server.dto.AbstractDtoToPersistence;
+import com.google.light.server.dto.NeedsDtoValidation;
+import com.google.light.server.dto.TestAbstractDto;
+import com.google.light.server.dto.importresource.ImportBatchWrapper;
+import com.google.light.server.dto.module.GSBlobInfo;
+import com.google.light.server.dto.notifications.AbstractNotification;
+import com.google.light.server.dto.notifications.ChildJobCompletionNotification;
+import com.google.light.server.dto.pojo.tree.AbstractTreeNode;
+import com.google.light.server.dto.pojo.tree.GoogleDocTree;
+import com.google.light.server.dto.pojo.typewrapper.AbstractTypeWrapper;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.CollectionId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.JobId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
+import com.google.light.server.dto.pojo.typewrapper.stringwrapper.ExternalId;
+import com.google.light.server.dto.pojo.typewrapper.stringwrapper.FTSDocumentId;
+import com.google.light.server.dto.thirdparty.google.gdoc.GoogleDocImportBatchJobContext;
+import com.google.light.server.dto.thirdparty.google.gdoc.GoogleDocResourceId;
+import com.google.light.server.dto.thirdparty.google.youtube.ContentLicense;
+import com.google.light.server.dto.thirdparty.google.youtube.YouTubeResourceId;
+import com.google.light.server.jobs.handlers.collectionjobs.ImportCollectionGoogleDocContext;
+import com.google.light.server.jobs.handlers.modulejobs.ImportModuleGoogleDocJobContext;
+import com.google.light.server.jobs.handlers.modulejobs.ImportModuleSyntheticModuleJobContext;
+import com.google.light.server.servlets.oauth2.google.pojo.AbstractOAuth2TokenInfo;
+import com.google.light.server.servlets.oauth2.google.pojo.GoogleLoginTokenInfo;
+import com.google.light.server.servlets.oauth2.google.pojo.GoogleOAuth2TokenInfo;
+import com.google.light.server.servlets.oauth2.google.pojo.GoogleUserInfo;
+import com.google.light.server.utils.LightPreconditions;
+import com.google.light.testingutils.GaeTestingUtils;
+import com.google.light.testingutils.TestingUtils;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -33,52 +68,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
-
 import javax.persistence.Embedded;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAnyElement;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlEnumValue;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
-
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import org.apache.commons.lang.StringUtils;
+import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.annotate.JsonTypeName;
+import org.codehaus.jackson.map.annotate.JsonDeserialize;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.junit.Before;
 import org.junit.Test;
-
-import com.google.light.server.jobs.handlers.collectionjobs.ImportCollectionGoogleDocContext;
-
-import com.google.light.server.jobs.handlers.modulejobs.ImportModuleSyntheticModuleJobContext;
-
-import com.google.light.server.dto.importresource.ImportBatchWrapper;
-
-import com.google.light.server.jobs.handlers.modulejobs.ImportModuleGoogleDocJobContext;
-
-
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-import com.google.inject.Inject;
-import com.google.light.server.annotations.OverrideFieldAnnotationName;
-import com.google.light.server.dto.AbstractDto;
-import com.google.light.server.dto.AbstractDtoToPersistence;
-import com.google.light.server.dto.TestAbstractDto;
-import com.google.light.server.dto.module.GSBlobInfo;
-import com.google.light.server.dto.notifications.AbstractNotification;
-import com.google.light.server.dto.notifications.ChildJobCompletionNotification;
-import com.google.light.server.dto.pojo.tree.AbstractTreeNode;
-import com.google.light.server.dto.pojo.tree.GoogleDocTree;
-import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocImportBatchJobContext;
-import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocResourceId;
-import com.google.light.server.servlets.oauth2.google.pojo.AbstractOAuth2TokenInfo;
-import com.google.light.server.servlets.oauth2.google.pojo.GoogleLoginTokenInfo;
-import com.google.light.server.servlets.oauth2.google.pojo.GoogleOAuth2TokenInfo;
-import com.google.light.server.servlets.oauth2.google.pojo.GoogleUserInfo;
-import com.google.light.server.utils.LightPreconditions;
-import com.google.light.testingutils.GaeTestingUtils;
-import com.google.light.testingutils.TestingUtils;
 
 /**
  * Test for {@link LightDtos}
@@ -100,18 +107,28 @@ public class LightDtosTest implements EnumTestInterface {
       AbstractDtoToPersistence.class.getName(),
       AbstractNotification.class.getName(),
       AbstractTreeNode.class.getName(),
+      AbstractTypeWrapper.class.getName(),
       ChildJobCompletionNotification.class.getName(),
+      CollectionId.class.getName(),
+      ContentLicense.class.getName(),
+      ExternalId.class.getName(),
+      FTSDocumentId.class.getName(),
       GoogleDocResourceId.class.getName(),
       GoogleDocTree.class.getName(),
       GoogleDocImportBatchJobContext.class.getName(),
-      ImportModuleGoogleDocJobContext.class.getName(),
       GoogleOAuth2TokenInfo.class.getName(),
       GoogleLoginTokenInfo.class.getName(),
       GoogleUserInfo.class.getName(),
       GSBlobInfo.class.getName(),
+      ImportModuleGoogleDocJobContext.class.getName(),
       ImportBatchWrapper.class.getName(),
       ImportCollectionGoogleDocContext.class.getName(),
-      ImportModuleSyntheticModuleJobContext.class.getName());
+      ImportModuleSyntheticModuleJobContext.class.getName(),
+      JobId.class.getName(),
+      ModuleId.class.getName(),
+      PersonId.class.getName(),
+      Version.class.getName(),
+      YouTubeResourceId.class.getName());
 
   /**
    * This test ensures following things :
@@ -132,6 +149,11 @@ public class LightDtosTest implements EnumTestInterface {
 
     // Ensure that all the classes listed in LightDto are present in this list.
     for (Class currClass : LightDtos.getListOfDtoClasses()) {
+      // TODO(arjuns): Fix this.
+      if (currClass.isEnum()) {
+        continue;
+      }
+
       String className = currClass.getSimpleName();
       assertTrue(className + " was not found in calculated List.",
           dtoClasses.contains(currClass));
@@ -150,18 +172,39 @@ public class LightDtosTest implements EnumTestInterface {
       }
 
       assertTrue(className + " should extend from " + AbstractDto.class,
-          AbstractDto.class.isAssignableFrom(currClass));
+          NeedsDtoValidation.class.isAssignableFrom(currClass));
 
-      validateClassAnnotations(currClass, lightDtoEnum);
+      if (!currClass.isEnum()) {
+        validateClassAnnotations(currClass, lightDtoEnum);
+      }
+
       validateMethodAnnotations(currClass);
-      validateFieldAnnotations(currClass);
+
+      if (currClass.isEnum()) {
+        validateEnumAnnotations(currClass);
+      } else {
+        validateFieldAnnotations(currClass);
+      }
+
+    }
+  }
+
+  /**
+   * @param currClass
+   */
+  private void validateEnumAnnotations(Class currClass) {
+    for (Field currEnum : currClass.getDeclaredFields()) {
+      System.out.println(currEnum);
     }
   }
 
   private static Set<String> allowedAnnotationsForClasses = Sets.newHashSet(
       SuppressWarnings.class.getName(),
       JsonTypeName.class.getName(),
+      JsonSerialize.class.getName(),
+      JsonDeserialize.class.getName(),
       XmlAccessorType.class.getName(),
+      XmlJavaTypeAdapter.class.getName(),
       XmlRootElement.class.getName(),
       XmlType.class.getName());
 
@@ -212,10 +255,13 @@ public class LightDtosTest implements EnumTestInterface {
       // TODO(arjuns): Fix this.
       Embedded.class.getName(),
       JsonProperty.class.getName(),
+      JsonIgnore.class.getName(),
       OverrideFieldAnnotationName.class.getName(),
       XmlAnyElement.class.getName(),
       XmlElement.class.getName(),
-      XmlElementWrapper.class.getName());
+      XmlElementWrapper.class.getName(),
+      XmlEnumValue.class.getName(),
+      XmlTransient.class.getName());
 
   /**
    * @param field
@@ -223,15 +269,16 @@ public class LightDtosTest implements EnumTestInterface {
   @SuppressWarnings("rawtypes")
   private void validateFieldAnnotations(Class currClass) {
     String className = currClass.getSimpleName();
-    
+
     Map<String, Field> mapOfJsonPropertyNameToField = Maps.newConcurrentMap();
-    
+
     for (Field currField : currClass.getDeclaredFields()) {
       String fieldNameForErr = className + "#" + currField.getName();
-      
+
       // Ensure that all the annotations are permitted.
       for (Annotation currAnnotation : currField.getAnnotations()) {
-        assertTrue(fieldNameForErr + " : Annotation " + currAnnotation.annotationType().getSimpleName()
+        assertTrue(fieldNameForErr + " : Annotation "
+            + currAnnotation.annotationType().getSimpleName()
             + " is not allowed",
             allowedAnnotationsForFields.contains(currAnnotation.annotationType().getName()));
       }
@@ -255,6 +302,7 @@ public class LightDtosTest implements EnumTestInterface {
         xmlElementWrapperName = getXmlElementWrappertName(currField.getAnnotations());
       }
 
+      
       // Check for XmlElement/XmlElementWrapper Annotation.
       if (StringUtils.isNotBlank(xmlElementWrapperName)) {
         assertTrue(
@@ -267,20 +315,26 @@ public class LightDtosTest implements EnumTestInterface {
               containsAnnotation(XmlAnyElement.class, currField.getAnnotations()));
         }
       } else {
-        assertTrue(
-            fieldNameForErr + " should be annotated with " + XmlElement.class.getSimpleName(),
-            containsAnnotation(XmlElement.class, currField.getAnnotations()));
-        xmlElementName = getXmlElementName(currField.getAnnotations());
-        
-        LightPreconditions.checkNotBlank(xmlElementName, 
-            fieldNameForErr + " has empty XmlElement.");
-      }
 
-      String errorMsg = fieldNameForErr + " needs to have overriden names for both "
-          + "Json and Xml and these overridden names should be same and should match fieldName."
-          + "For Xml, if its a list, then use both" + XmlElementWrapper.class.getSimpleName() + " & "
-          + XmlElement.class.getSimpleName() + " and for Json use "
-          + JsonProperty.class.getSimpleName();
+       
+
+          assertTrue(
+              fieldNameForErr + " should be annotated with " + XmlElement.class.getSimpleName(),
+              containsAnnotation(XmlElement.class, currField.getAnnotations()));
+          xmlElementName = getXmlElementName(currField.getAnnotations());
+
+          LightPreconditions.checkNotBlank(xmlElementName,
+              fieldNameForErr + " has empty XmlElement.");
+        }
+
+      String errorMsg =
+          fieldNameForErr
+              + " needs to have overriden names for both "
+              + "Json and Xml and these overridden names should be same and should match fieldName."
+              + "For Xml, if its a list, then use both" + XmlElementWrapper.class.getSimpleName()
+              + " & "
+              + XmlElement.class.getSimpleName() + " and for Json use "
+              + JsonProperty.class.getSimpleName();
 
       assertTrue(fieldNameForErr + " should be annotated with @JsonProperty.",
           containsAnnotation(JsonProperty.class, currField.getAnnotations()));
@@ -293,15 +347,15 @@ public class LightDtosTest implements EnumTestInterface {
       } else {
         assertEquals(errorMsg, xmlElementName, jsonPropertyValue);
       }
-      
+
       if (!containsAnnotation(OverrideFieldAnnotationName.class, currField.getAnnotations())) {
         assertEquals(errorMsg, jsonPropertyValue, currField.getName());
       }
-      
+
       // Now ensure that it is unqiue in this class so that deserialization can work.
       Field tempField = mapOfJsonPropertyNameToField.get(jsonPropertyValue);
       if (tempField != null) {
-        String dupErrMsg = "For class " + currClass.getSimpleName() 
+        String dupErrMsg = "For class " + currClass.getSimpleName()
             + ", Found more then one field annotated with " + jsonPropertyValue + " and they are "
             + "#" + tempField.getName() + " and #" + currField.getName();
 
@@ -369,7 +423,7 @@ public class LightDtosTest implements EnumTestInterface {
   }
 
   private boolean isIgnorableField(Field field) {
-    if (field.isSynthetic()) {
+    if (field.isSynthetic() || Modifier.isTransient(field.getModifiers())) {
       return true;
     }
 
@@ -427,7 +481,7 @@ public class LightDtosTest implements EnumTestInterface {
   private boolean isDtoClass(Class currClass) {
     String className = currClass.getName().toLowerCase();
     if (className.endsWith("dto") ||
-        AbstractDto.class.isAssignableFrom(currClass)) {
+        NeedsDtoValidation.class.isAssignableFrom(currClass)) {
       return true;
     }
 

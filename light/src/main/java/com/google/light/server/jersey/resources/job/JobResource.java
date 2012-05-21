@@ -17,19 +17,12 @@ package com.google.light.server.jersey.resources.job;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.light.server.utils.LightPreconditions.checkIsRunningUnderQueue;
+import static com.google.light.server.utils.LightPreconditions.checkIsUnderTaskQueue;
 import static com.google.light.server.utils.LightPreconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkPersonLoggedIn;
 import static com.google.light.server.utils.LightUtils.getNow;
 import static com.google.light.server.utils.LightUtils.getURI;
 import static com.google.light.server.utils.LightUtils.getWrapperValue;
-
-import com.google.light.server.persistence.entity.jobs.JobEntity.JobType;
-
-import com.google.light.server.serveronlypojos.GAEQueryWrapper;
-
-import com.google.light.server.servlets.SessionManager;
-import com.google.light.server.utils.GuiceUtils;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -45,8 +38,13 @@ import com.google.light.server.jersey.resources.AbstractJerseyResource;
 import com.google.light.server.jobs.handlers.JobHandler;
 import com.google.light.server.manager.interfaces.JobManager;
 import com.google.light.server.persistence.entity.jobs.JobEntity;
+import com.google.light.server.persistence.entity.jobs.JobEntity.JobType;
 import com.google.light.server.persistence.entity.jobs.JobState;
+import com.google.light.server.serveronlypojos.GAEQueryWrapper;
+import com.google.light.server.servlets.SessionManager;
+import com.google.light.server.utils.GuiceUtils;
 import com.google.light.server.utils.HtmlBuilder;
+import com.google.light.server.utils.JsonUtils;
 import java.util.List;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
@@ -92,7 +90,7 @@ public class JobResource extends AbstractJerseyResource {
   @PUT
   @Path(JerseyConstants.PATH_JOB_ID)
   public Response startJob(String jobIdStr) {
-    checkIsRunningUnderQueue(request);
+    checkIsUnderTaskQueue(request);
     checkNotNull(jobIdStr, "jobId cannot be null");
 
     JobId jobId = new JobId(jobIdStr);
@@ -108,7 +106,7 @@ public class JobResource extends AbstractJerseyResource {
   @GET
   @Produces(ContentTypeConstants.TEXT_HTML)
   @Path(JerseyConstants.PATH_JOB_ID)
-  public String getJobStatus(
+  public String getJobTree(
       @PathParam(JerseyConstants.PATH_PARAM_JOB_ID) String jobIdStr) {
     JobId jobId = new JobId(jobIdStr);
     JobEntity jobEntity = jobManager.get(null, jobId);
@@ -136,9 +134,21 @@ public class JobResource extends AbstractJerseyResource {
     htmlBuilder.appendSectionHeader("Childs");
     appendChilds(jobId, htmlBuilder);
 
+    htmlBuilder.appendString(jobEntity.getContext().getValue());
+    
     htmlBuilder.appendBodyEnd();
 
     return htmlBuilder.toString();
+  }
+  
+  @GET
+  @Produces(ContentTypeConstants.TEXT_PLAIN)
+  @Path(JerseyConstants.PATH_JOB_DETAIL)
+  public String getJobDetails(
+      @PathParam(JerseyConstants.PATH_PARAM_JOB_ID) String jobIdStr) {
+    JobId jobId = new JobId(jobIdStr);
+    JobEntity jobEntity = jobManager.get(null, jobId);
+    return JsonUtils.toJson(jobEntity);
   }
 
   /**

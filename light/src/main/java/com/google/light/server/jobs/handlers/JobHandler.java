@@ -75,10 +75,12 @@ public class JobHandler {
   public void handleJob(JobId jobId) {
     checkNotNull(jobId, ExceptionType.CLIENT_PARAMETER, "jobId cannot be null");
     jobId.validate();
-    logger.info("Inside Job : " + jobId);
 
     JobEntity jobEntity = jobManager.get(null, jobId);
-    checkNotNull(jobId, ExceptionType.CLIENT_PARAMETER, "No job found for : " + jobId);
+    checkNotNull(jobEntity, ExceptionType.CLIENT_PARAMETER, "No job found for : " + jobId);
+
+    logger.info("Inside job[" + jobId + "], jobState[" + jobEntity.getJobState()
+        + "], taskType[" + jobEntity.getTaskType() + "].");
     if (jobEntity.getContext() != null) {
       logger.info(jobEntity.getContext().getValue());
     }

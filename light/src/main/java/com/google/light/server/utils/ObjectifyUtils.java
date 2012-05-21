@@ -211,6 +211,7 @@ public class ObjectifyUtils {
     return query.fetch();
   }
 
+  @Deprecated
   public static <T, O> GAEQueryWrapper<T> findQueryResultsByPageForListField(Objectify ofy,
       Class<T> clazz, String filterKey, List<O> listOfValues, String startIndex, int maxResults) {
     Query<T> query = ofy.query(clazz).filter(filterKey, listOfValues);
@@ -266,6 +267,19 @@ public class ObjectifyUtils {
     wrapper.setList(listOfRecords);
 
     return wrapper;
+  }
+  
+  public static <T> QueryResultIterator<Key<T>> findQueryIterablesForKeys(Objectify ofy,
+      Class<T> clazz, Map<String, Object> mapOfFilterKeyValue) {
+    checkNotNull(mapOfFilterKeyValue, "map of filters.");
+    Query<T> query = ofy.query(clazz);
+
+    for(String currKey : mapOfFilterKeyValue.keySet()) {
+      query = query.filter(currKey, mapOfFilterKeyValue.get(currKey));
+    }
+
+    QueryResultIterator<Key<T>> iterator = query.fetchKeys().iterator();
+    return iterator;
   }
 
   /** Create a default DAOT and run the transaction through it */

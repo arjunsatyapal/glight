@@ -13,16 +13,15 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.server.dto.module;
+package com.google.light.server.dto;
 
 /**
- * Enum to encapsulate different possible states for Module Versions..
+ *
  * 
  * TODO(arjuns): Add test for this class.
  *
  * @author Arjun Satyapal
  */
-public enum ModuleVersionState {
-  PUBLISHED,
-  RESERVED;
+public interface NeedsDtoValidation {
+
 }

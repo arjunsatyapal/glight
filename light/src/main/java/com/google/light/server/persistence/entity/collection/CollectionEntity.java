@@ -17,9 +17,9 @@ package com.google.light.server.persistence.entity.collection;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.light.server.utils.LightPreconditions.checkNonEmptyList;
 import static com.google.light.server.utils.LightPreconditions.checkNonNegativeLong;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
+import static com.google.light.server.utils.LightPreconditions.checkNotEmptyCollection;
 import static com.google.light.server.utils.LightPreconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkVersion;
 import static com.google.light.server.utils.LightUtils.convertListOfValuesToWrapperList;
@@ -27,15 +27,15 @@ import static com.google.light.server.utils.LightUtils.convertWrapperListToListO
 import static com.google.light.server.utils.LightUtils.getWrapper;
 import static com.google.light.server.utils.LightUtils.getWrapperValue;
 
-import com.google.light.server.constants.LightClientType;
-
 import com.google.light.server.annotations.ObjectifyQueryField;
 import com.google.light.server.annotations.ObjectifyQueryFieldName;
+import com.google.light.server.constants.LightClientType;
 import com.google.light.server.dto.collection.CollectionDto;
 import com.google.light.server.dto.collection.CollectionState;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.CollectionId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
+import com.google.light.server.dto.thirdparty.google.youtube.ContentLicense;
 import com.google.light.server.exception.ExceptionType;
 import com.google.light.server.persistence.entity.AbstractPersistenceEntity;
 import com.googlecode.objectify.Key;
@@ -55,6 +55,7 @@ public class CollectionEntity extends AbstractPersistenceEntity<CollectionEntity
   @Id
   private Long collectionId;
   private String title;
+  private List<ContentLicense> contentLicenses;
   private CollectionState state;
   @ObjectifyQueryFieldName("owners")
   public static final String OFY_COLLECTION_OWNER_QUERY_STRING = "owners IN";
@@ -70,12 +71,16 @@ public class CollectionEntity extends AbstractPersistenceEntity<CollectionEntity
   public CollectionEntity validate() {
     super.validate();
     checkNotBlank(title, "title");
+    checkNotEmptyCollection(contentLicenses, "contentLicenses");
     checkNotNull(state, "collectionState");
-    checkNonEmptyList(owners, "owners");
+    checkNotEmptyCollection(owners, "owners");
+    
 
     // TODO(arjuns): Add validation for etag.
     checkNonNegativeLong(latestPublishVersion, "latestVersion");
     checkNonNegativeLong(nextVersion, "nextVersion");
+    
+    checkNotNull(creationTimeInMillis, "creationTimeInMillis");
     return this;
   }
 
@@ -102,6 +107,10 @@ public class CollectionEntity extends AbstractPersistenceEntity<CollectionEntity
   
   public void setTitle(String title) {
     this.title = checkNotBlank(title, "title");
+  }
+
+  public List<ContentLicense> getContentLicenses() {
+    return contentLicenses;
   }
 
   public CollectionState getState() {
@@ -192,6 +201,7 @@ public class CollectionEntity extends AbstractPersistenceEntity<CollectionEntity
   public static class Builder extends AbstractPersistenceEntity.BaseBuilder<Builder> {
     private Long id;
     private String title;
+    private List<ContentLicense> contentLicenses;
     private CollectionState state;
     private List<PersonId> owners;
     private String etag;
@@ -205,6 +215,11 @@ public class CollectionEntity extends AbstractPersistenceEntity<CollectionEntity
 
     public Builder title(String title) {
       this.title = title;
+      return this;
+    }
+    
+    public Builder contentLicenses(List<ContentLicense> contentLicenses) {
+      this.contentLicenses = contentLicenses;
       return this;
     }
 
@@ -239,6 +254,7 @@ public class CollectionEntity extends AbstractPersistenceEntity<CollectionEntity
     super(builder, true);
     this.collectionId = builder.id;
     this.title = builder.title;
+    this.contentLicenses = builder.contentLicenses;
     this.state = builder.state;
     this.owners = convertWrapperListToListOfValues(builder.owners);
     this.etag = builder.etag;

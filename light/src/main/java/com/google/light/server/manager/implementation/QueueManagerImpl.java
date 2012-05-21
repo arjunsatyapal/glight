@@ -34,7 +34,9 @@ import com.google.light.server.constants.http.ContentTypeConstants;
 import com.google.light.server.dto.notifications.AbstractNotification;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.JobId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
+import com.google.light.server.manager.interfaces.PersonManager;
 import com.google.light.server.manager.interfaces.QueueManager;
+import com.google.light.server.persistence.entity.person.PersonEntity;
 import com.google.light.server.utils.GuiceUtils;
 import com.google.light.server.utils.JsonUtils;
 import com.googlecode.objectify.Objectify;
@@ -58,7 +60,8 @@ public class QueueManagerImpl implements QueueManager {
   public void enqueueGoogleDocInteractionJob(Objectify ofy, JobId jobId) {
     checkTxnIsRunning(ofy);
 
-    TaskOptions taskOptions = getTaskOptions(QueueEnum.GDOC_INTERACTION.getRetryOptions(),
+    TaskOptions taskOptions = getTaskOptions(GuiceUtils.getOwnerId(),
+        QueueEnum.GDOC_INTERACTION.getRetryOptions(),
         TaskOptions.Method.PUT, ContentTypeConstants.TEXT_PLAIN,
         Long.toString(jobId.getValue()), getJobLocation(jobId));
 
@@ -74,19 +77,23 @@ public class QueueManagerImpl implements QueueManager {
    * @param retryOptions
    * @return
    */
-  private TaskOptions getTaskOptions(RetryOptions retryOptions,
+  private TaskOptions getTaskOptions(PersonId ownerId, RetryOptions retryOptions,
       TaskOptions.Method method, String contentType, String payLoad, URI uri) {
-    PersonId ownerId = GuiceUtils.getOwnerId();
     checkNotNull(ownerId, "OwnerId cannot be null here.");
 
-    TaskOptions taskOptions = TaskOptions.Builder.withDefaults()
-        .countdownMillis(LightConstants.TASK_COUNTDOWN_MILLIS)
-        .header(HttpHeaderEnum.LIGHT_OWNER_HEADER.get(), JsonUtils.toJson(ownerId, false))
-        .header(HttpHeaderEnum.CONTENT_TYPE.get(), contentType)
-        .method(method)
-        .payload(payLoad.getBytes(UTF_8), UTF_8.displayName())
-        .retryOptions(retryOptions)
-        .url(uri.toString());
+    TaskOptions taskOptions = TaskOptions.Builder.withDefaults();
+    taskOptions.method(method);
+    
+    if (method != TaskOptions.Method.GET) {
+      taskOptions.header(HttpHeaderEnum.CONTENT_TYPE.get(), contentType);
+      taskOptions.payload(payLoad.getBytes(UTF_8), UTF_8.displayName());  
+    }
+    
+    taskOptions.countdownMillis(LightConstants.TASK_COUNTDOWN_MILLIS);
+    taskOptions.header(HttpHeaderEnum.LIGHT_OWNER_HEADER.get(), JsonUtils.toJson(ownerId, false));
+    taskOptions.retryOptions(retryOptions);
+    taskOptions.url(uri.toString());
+    
     return taskOptions;
   }
 
@@ -97,7 +104,8 @@ public class QueueManagerImpl implements QueueManager {
   public void enqueuePollingJob(Objectify ofy, JobId jobId) {
     checkTxnIsRunning(ofy);
 
-    TaskOptions taskOptions = getTaskOptions(QueueEnum.LIGHT_POLLING.getRetryOptions(),
+    TaskOptions taskOptions = getTaskOptions(GuiceUtils.getOwnerId(),
+        QueueEnum.LIGHT_POLLING.getRetryOptions(),
         TaskOptions.Method.PUT, ContentTypeConstants.TEXT_PLAIN,
         Long.toString(jobId.getValue()), getJobLocation(jobId));
 
@@ -112,7 +120,8 @@ public class QueueManagerImpl implements QueueManager {
   @Override
   public void enqueueLightJob(Objectify ofy, JobId jobId) {
     checkTxnIsRunning(ofy);
-    TaskOptions taskOptions = getTaskOptions(QueueEnum.LIGHT.getRetryOptions(),
+    TaskOptions taskOptions = getTaskOptions(GuiceUtils.getOwnerId(),
+        QueueEnum.LIGHT.getRetryOptions(),
         TaskOptions.Method.PUT, ContentTypeConstants.TEXT_PLAIN,
         Long.toString(jobId.getValue()), getJobLocation(jobId));
 
@@ -126,7 +135,8 @@ public class QueueManagerImpl implements QueueManager {
    */
   @Override
   public void enqueueLightJobWithoutTxn(JobId jobId) {
-    TaskOptions taskOptions = getTaskOptions(QueueEnum.LIGHT.getRetryOptions(),
+    TaskOptions taskOptions = getTaskOptions(GuiceUtils.getOwnerId(),
+        QueueEnum.LIGHT.getRetryOptions(),
         TaskOptions.Method.PUT, ContentTypeConstants.TEXT_PLAIN,
         Long.toString(jobId.getValue()), getJobLocation(jobId));
 
@@ -142,7 +152,8 @@ public class QueueManagerImpl implements QueueManager {
   public <T extends AbstractNotification<T>> void enqueueNotification(
       Objectify ofy, T notification) {
     checkTxnIsRunning(ofy);
-    TaskOptions taskOptions = getTaskOptions(QueueEnum.LIGHT_NOTIFICATIONS.getRetryOptions(),
+    TaskOptions taskOptions = getTaskOptions(GuiceUtils.getOwnerId(),
+        QueueEnum.LIGHT_NOTIFICATIONS.getRetryOptions(),
         TaskOptions.Method.POST, ContentTypeConstants.TEXT_PLAIN,
         notification.toJson(),
         getURI(JerseyConstants.URI_RESOURCE_PATH_NOTIFICATION_JOB));
@@ -153,5 +164,26 @@ public class QueueManagerImpl implements QueueManager {
     TaskHandle taskHandle = queue.add(taskOptions);
     logger.info("Enqueued enqueueNotification " + notification.getType()
         + " with TaskHandle : " + taskHandle);
+  }
+
+  /** 
+   * {@inheritDoc}
+   */
+  @Override
+  public void enqueueSearchIndexTask(Objectify ofy) {
+    checkTxnIsRunning(ofy);
+
+    PersonManager personManager = GuiceUtils.getInstance(PersonManager.class);
+    PersonEntity lightBot = personManager.findByEmail(LightConstants.LIGHT_BOT_EMAIL);
+    checkNotNull(lightBot, "lightBot is missing");
+    
+    RetryOptions retryOptions = QueueEnum.SEARCH_INDEX.getRetryOptions();
+    TaskOptions taskOptions = getTaskOptions(lightBot.getPersonId(),
+        retryOptions, TaskOptions.Method.GET, ContentTypeConstants.TEXT_PLAIN, null,
+        getURI(JerseyConstants.URI_SEARCH_INDEX_UPDATE_INDICES));
+
+    Queue queue = QueueFactory.getQueue(QueueEnum.SEARCH_INDEX.getName());
+    TaskHandle taskHandle = queue.add(taskOptions);
+    logger.info("Enqueued searchIndexTask " + " with TaskHandle : " + taskHandle);
   }
 }

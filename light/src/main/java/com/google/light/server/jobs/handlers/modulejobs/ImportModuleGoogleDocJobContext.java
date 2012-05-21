@@ -20,7 +20,8 @@ import static com.google.light.server.utils.LightPreconditions.checkModuleId;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkVersion;
 
-import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocInfoDto;
+import com.google.light.server.dto.thirdparty.google.gdoc.GoogleDocInfoDto;
+
 
 import com.google.light.server.dto.AbstractDto;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;

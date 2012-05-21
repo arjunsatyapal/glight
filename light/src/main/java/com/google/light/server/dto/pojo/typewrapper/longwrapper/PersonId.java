@@ -16,6 +16,12 @@
 package com.google.light.server.dto.pojo.typewrapper.longwrapper;
 
 import static com.google.light.server.utils.LightPreconditions.checkPersonId;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import org.codehaus.jackson.annotate.JsonTypeName;
+
+import javax.xml.bind.annotation.XmlAccessorType;
+
 import com.google.inject.Inject;
 import com.google.light.server.dto.pojo.typewrapper.AbstractTypeWrapper;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId.PersonIdDeserializer;
@@ -44,7 +50,9 @@ import org.codehaus.jackson.map.annotate.JsonSerialize;
 @JsonSerialize(using = PersonIdSerializer.class)
 @JsonDeserialize(using = PersonIdDeserializer.class)
 @XmlJavaTypeAdapter(PersonIdXmlAdapter.class)
+@JsonTypeName(value = "personId")
 @XmlRootElement(name = "personId")
+@XmlAccessorType(XmlAccessType.FIELD)
 public class PersonId extends AbstractTypeWrapper<Long, PersonId> {
   public PersonId(Long id) {
     super(id);

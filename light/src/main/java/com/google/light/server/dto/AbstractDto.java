@@ -37,7 +37,7 @@ import org.joda.time.Instant;
  *         Satyapal
  */
 @SuppressWarnings("serial")
-public abstract class AbstractDto<D> extends AbstractPojo<D>  {
+public abstract class AbstractDto<D> extends AbstractPojo<D>  implements NeedsDtoValidation {
   @XmlElement(name = "creationTimeInMillis")
   @JsonProperty(value = "creationTimeInMillis")
   protected final Long creationTimeInMillis = null;

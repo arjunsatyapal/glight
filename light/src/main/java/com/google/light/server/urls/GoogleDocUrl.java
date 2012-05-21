@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.server.jersey.resources.thirdparty.google;
+package com.google.light.server.urls;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.light.server.dto.module.ModuleType.getByProviderServiceAndCategory;
@@ -29,7 +29,7 @@ import java.net.URL;
  * 
  * @author Arjun Satyapal
  */
-public class GoogleDocUrl {
+public class GoogleDocUrl implements ExternalIdUrlInterface {
   private String scheme;
   private int port;
   private String host;
@@ -168,6 +168,7 @@ public class GoogleDocUrl {
     return domain;
   }
 
+  @Override
   public ModuleType getModuleType() {
     return moduleType;
   }

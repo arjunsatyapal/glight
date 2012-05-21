@@ -16,18 +16,20 @@
 package com.google.light.server.dto.module;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.light.server.utils.LightPreconditions.checkNonEmptyList;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
+import static com.google.light.server.utils.LightPreconditions.checkNotEmptyCollection;
 
 import com.google.light.server.dto.AbstractDtoToPersistence;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
 import com.google.light.server.dto.pojo.typewrapper.stringwrapper.ExternalId;
+import com.google.light.server.dto.thirdparty.google.youtube.ContentLicense;
 import com.google.light.server.persistence.entity.module.ModuleEntity;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAnyElement;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -67,6 +69,11 @@ public class ModuleDto extends AbstractDtoToPersistence<ModuleDto, ModuleEntity,
   @XmlElement(name = "personId")
   @JsonProperty(value = "owners")
   private List<PersonId> owners;
+  
+  @XmlElementWrapper(name = "contentLicenses")
+  @XmlAnyElement
+  @JsonProperty(value = "contentLicenses")
+  private List<ContentLicense> contentLicenses;
 
   @XmlElement(name = "latestPublishVersion")
   @JsonProperty(value = "latestPublishVersion")
@@ -88,7 +95,9 @@ public class ModuleDto extends AbstractDtoToPersistence<ModuleDto, ModuleEntity,
     checkNotBlank(title, "title");
     checkNotNull(moduleState, "moduleState");
     checkNotNull(moduleType, "moduleType");
-    checkNonEmptyList(owners, "owner list cannot be empty");
+    checkNotEmptyCollection(owners, "owner list cannot be empty");
+    checkNotEmptyCollection(contentLicenses, "contentLicenses list cannot be empty");
+    
     // Version can be zero when module is in process of import.
     checkNotNull(latestPublishVersion, "version");
     checkNotNull(externalId, "externalId");
@@ -110,6 +119,10 @@ public class ModuleDto extends AbstractDtoToPersistence<ModuleDto, ModuleEntity,
   public List<PersonId> getOwners() {
 //    return convertListOfValuesToWrapperList(owners, PersonId.class);
     return owners;
+  }
+
+  public List<ContentLicense> getContentLicenses() {
+    return contentLicenses;
   }
 
   public Version getLatestPublishVersion() {
@@ -144,6 +157,7 @@ public class ModuleDto extends AbstractDtoToPersistence<ModuleDto, ModuleEntity,
     private ModuleType moduleType;
     private ModuleState moduleState;
     private List<PersonId> owners;
+    private List<ContentLicense> contentLicenses;
     private Version latestPublishVersion;
     private Version nextVersion;
     private ExternalId externalId;
@@ -170,6 +184,11 @@ public class ModuleDto extends AbstractDtoToPersistence<ModuleDto, ModuleEntity,
 
     public Builder owners(List<PersonId> owners) {
       this.owners = owners;
+      return this;
+    }
+    
+    public Builder contentLicenses(List<ContentLicense> contentLicenses) {
+      this.contentLicenses = contentLicenses;
       return this;
     }
 
@@ -201,7 +220,8 @@ public class ModuleDto extends AbstractDtoToPersistence<ModuleDto, ModuleEntity,
     this.title = builder.title;
     this.moduleType = builder.moduleType;
     this.moduleState = builder.moduleState;
-    this.owners = /*convertWrapperListToListOfValues(builder.owners);*/ builder.owners;
+    this.owners = builder.owners;
+    this.contentLicenses = builder.contentLicenses;
     this.latestPublishVersion = builder.latestPublishVersion;
     this.nextVersion = builder.nextVersion;
     this.externalId = builder.externalId;

@@ -18,6 +18,11 @@ package com.google.light.server.dto.pojo.typewrapper.longwrapper;
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
 import static com.google.light.server.utils.LightUtils.getLongWrapper;
 
+import org.codehaus.jackson.annotate.JsonTypeName;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+
 import com.google.light.server.dto.pojo.typewrapper.AbstractTypeWrapper;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.CollectionId.CollectionIdDeserializer;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.CollectionId.CollectionIdSerializer;
@@ -47,7 +52,9 @@ import org.codehaus.jackson.map.annotate.JsonSerialize;
 @JsonSerialize(using = CollectionIdSerializer.class)
 @JsonDeserialize(using = CollectionIdDeserializer.class)
 @XmlJavaTypeAdapter(CollectionIdXmlAdapter.class)
+@JsonTypeName(value = "collectionId")
 @XmlRootElement(name = "collectionId")
+@XmlAccessorType(XmlAccessType.FIELD)
 public class CollectionId extends AbstractTypeWrapper<Long, CollectionId> {
   /**
    * @param value

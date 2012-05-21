@@ -106,12 +106,15 @@ public enum HttpHeaderEnum {
   // Headers set by GAE
   GAE_CITY("X-AppEngine-City"),
   GAE_CITY_LAT_LONG("X-Appengine-CityLatLong"),
-  GAE_QUEUE_NAME("X-AppEngine-QueueName"),
   GAE_REGION("X-AppEngine-Region"),
+  
+  GAE_QUEUE_NAME("X-AppEngine-QueueName"),
   GAE_TASK_NAME("X-AppEngine-TaskName"),
   GAE_TASK_RETRY_COUNT("X-AppEngine-TaskRetryCount"),
   GAE_FAILFAST("X-AppEngine-FailFast"),
   GAE_TASK_ETA("X-AppEngine-TaskETA"),
+  
+  GAE_CRON("X-AppEngine-Cron"),
 
   // TODO(arjuns) : See what this does.
   // Headers set by Light.

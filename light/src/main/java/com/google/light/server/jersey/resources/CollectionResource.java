@@ -18,10 +18,13 @@ package com.google.light.server.jersey.resources;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.constants.LightConstants.MAX_RESULTS_MAX;
+import static com.google.light.server.dto.thirdparty.google.youtube.ContentLicense.DEFAULT_LIGHT_CONTENT_LICENSES;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPersonLoggedIn;
 import static com.google.light.server.utils.LightUtils.isCollectionEmpty;
 import static com.google.light.server.utils.ObjectifyUtils.repeatInTransaction;
+
+import com.google.light.server.dto.thirdparty.google.youtube.ContentLicense;
 
 import com.google.light.server.dto.module.ModuleType;
 import com.google.light.server.dto.pojo.tree.AbstractTreeNode.TreeNodeType;
@@ -124,6 +127,8 @@ public class CollectionResource extends AbstractJerseyResource {
       String body) {
     SessionManager sessionManager = GuiceUtils.getInstance(SessionManager.class);
     checkPersonLoggedIn(sessionManager);
+    
+    // TODO(arjuns): Validate that person trying to publish collection is same.
 
     final CollectionId collectionId = new CollectionId(collectionIdStr);
     Version version = new Version(versionStr);
@@ -149,7 +154,8 @@ public class CollectionResource extends AbstractJerseyResource {
         @SuppressWarnings("synthetic-access")
         @Override
         public Version run(Objectify ofy) {
-          return collectionManager.reserveCollectionVersion(ofy, collectionId);
+          return collectionManager.reserveCollectionVersion(ofy, collectionId, 
+              DEFAULT_LIGHT_CONTENT_LICENSES);
         }
       });
     }
@@ -179,7 +185,7 @@ public class CollectionResource extends AbstractJerseyResource {
     final PersonId ownerId = sessionManager.getPersonId();
 
     // TODO(waltercacau): Fix this hack of using the body as the title.
-    final String title = body;
+    final String title = checkNotBlank(body, "Body is used as title and title cannot be blank.");
 
     CollectionEntity collectionEntity = repeatInTransaction(new Transactable<CollectionEntity>() {
 
@@ -192,7 +198,8 @@ public class CollectionResource extends AbstractJerseyResource {
             .moduleType(ModuleType.LIGHT_COLLECTION)
             .build();
 
-        return collectionManager.createEmptyCollection(ofy, Lists.newArrayList(ownerId), collectionTree);
+        return collectionManager.createEmptyCollection(ofy, Lists.newArrayList(ownerId),
+            collectionTree, ContentLicense.DEFAULT_LIGHT_CONTENT_LICENSES);
       }
 
     });
@@ -201,14 +208,6 @@ public class CollectionResource extends AbstractJerseyResource {
 
   protected CollectionVersionDto getCollectionVersionDto(String collectionIdStr,
       String versionStr) {
-    synchronized (this) {
-      try {
-        wait(5000);
-      } catch (InterruptedException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      }
-    }
     checkNotBlank(collectionIdStr, "Invalid CollectionId.");
     checkNotBlank(versionStr, "Invalid version.");
     CollectionId collectionId = new CollectionId(collectionIdStr);

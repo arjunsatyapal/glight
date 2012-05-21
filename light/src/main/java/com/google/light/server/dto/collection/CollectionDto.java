@@ -17,16 +17,15 @@ package com.google.light.server.dto.collection;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
-
-import com.google.light.server.dto.pojo.tree.collection.CollectionTreeNodeDto;
+import static com.google.light.server.utils.LightPreconditions.checkNotEmptyCollection;
 
 import com.google.light.server.dto.AbstractDto;
 import com.google.light.server.dto.AbstractDtoToPersistence;
+import com.google.light.server.dto.pojo.tree.collection.CollectionTreeNodeDto;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.CollectionId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
 import com.google.light.server.persistence.entity.collection.CollectionEntity;
-import com.google.light.server.utils.LightPreconditions;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -95,7 +94,7 @@ public class CollectionDto extends
     checkNotBlank(title, "title");
     checkNotNull(state, "collectionState");
     
-    LightPreconditions.checkNonEmptyList(owners, "owners");
+    checkNotEmptyCollection(owners, "owners");
 
     checkNotNull(latestPublishedVersion, "latestPublishedVersion");
     checkNotNull(nextVersion, "nextVersion");

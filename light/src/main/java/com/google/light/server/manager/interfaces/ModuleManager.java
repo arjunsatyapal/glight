@@ -1,5 +1,9 @@
 package com.google.light.server.manager.interfaces;
 
+import com.google.light.server.dto.thirdparty.google.youtube.ContentLicense;
+
+import com.google.light.server.serveronlypojos.GAEQueryWrapper;
+
 import com.google.light.server.dto.pojo.typewrapper.stringwrapper.ExternalId;
 
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
@@ -39,7 +43,7 @@ public interface ModuleManager {
    * @param updatedEntity
    * @return
    */
-  public ModuleEntity update(Objectify ofy, ModuleEntity updatedEntity);
+  public ModuleEntity put(Objectify ofy, ModuleEntity updatedEntity);
 
   /**
    * Get details of an existing Module by ModuleId.
@@ -67,17 +71,19 @@ public interface ModuleManager {
    * Reserve a ModuleId for a ExternalId.
    */
   public ModuleId reserveModuleId(Objectify ofy, ExternalId externalId,
-      List<PersonId> owners, String title);
-  
+      List<PersonId> owners, String title, List<ContentLicense> contentLicenses);
+
   public ModuleEntity reserveModule(Objectify ofy, ExternalId externalId,
-      List<PersonId> owners, String title);
+      List<PersonId> owners, String title, List<ContentLicense> contentLicenses);
+
+  public Version reserveModuleVersion(Objectify ofy, ModuleId moduleId, String etag,
+      Instant lastEditTime, List<ContentLicense> contentLicenses);
   
-  public Version reserveModuleVersion(Objectify ofy, ModuleId moduleId, String etag, 
-      Instant lastEditTime);
-  
+  public Version reserveModuleVersionFirst(Objectify ofy, ModuleEntity moduleEntity);
+
   public ModuleVersionEntity publishModuleVersion(Objectify ofy, ModuleId moduleId,
-      Version version, ExternalId externalId, String title, String content, String etag, 
-      Instant lastEditTime);
+      Version version, ExternalId externalId, String title, String content, 
+      List<ContentLicense> contentLicenses, String etag, Instant lastEditTime);
 
   /**
    * Add resources for a Module-Version.
@@ -87,7 +93,7 @@ public interface ModuleManager {
    * @param resourceInfo
    * @return
    */
-  public ModuleVersionResourceEntity publishModuleResource(Objectify ofy, ModuleId moduleId, 
+  public ModuleVersionResourceEntity publishModuleResource(Objectify ofy, ModuleId moduleId,
       Version version, String resourceId, GSBlobInfo resourceInfo);
 
   /**
@@ -107,8 +113,11 @@ public interface ModuleManager {
    * @param resourceKey
    */
   public ModuleVersionResourceEntity getModuleResource(Objectify ofy, ModuleId moduleId,
-      Version version,
-      String resourceId);
-  
+      Version version, String resourceId);
+
   public PageDto findModulesByOwnerId(PersonId ownerId, String startIndex, int maxResults);
+
+  public GAEQueryWrapper<ModuleVersionEntity> findModuleVersionsForFTSIndexUpdate(int maxResults,
+      String startIndex);
+
 }

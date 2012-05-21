@@ -20,13 +20,8 @@ import static com.google.light.server.constants.RequestParamKeyEnum.LOGIN_PROVID
 import static com.google.light.server.constants.RequestParamKeyEnum.PERSON_ID;
 import static com.google.light.server.utils.LightPreconditions.checkEmail;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
+import static com.google.light.server.utils.LightPreconditions.checkNotEmptyCollection;
 import static com.google.light.server.utils.LightPreconditions.checkPersonId;
-
-import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
-
-
-
-
 
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpHeaders;
@@ -39,8 +34,8 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.light.server.constants.OAuth2ProviderService;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
 import com.google.light.server.servlets.path.ServletPathEnum;
-import com.google.light.server.utils.LightPreconditions;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
@@ -92,7 +87,7 @@ public class FakeLoginHelper {
     HttpHeaders headers = response.getHeaders();
     @SuppressWarnings("unchecked")
     ArrayList<String> cookieValues = (ArrayList<String>) headers.get("Set-Cookie");
-    LightPreconditions.checkNonEmptyList(cookieValues, "cookievalues");
+    checkNotEmptyCollection(cookieValues, "cookievalues");
     return cookieValues.get(0).split(";")[0];
   }
 

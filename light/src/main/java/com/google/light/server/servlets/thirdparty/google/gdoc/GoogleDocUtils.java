@@ -19,9 +19,10 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.light.server.constants.LightConstants.GDATA_GDOC_MAX_RESULTS;
 import static com.google.light.server.utils.LightUtils.getURL;
 
+import com.google.light.server.dto.thirdparty.google.gdoc.GoogleDocResourceId;
+
 import com.google.common.base.Preconditions;
 import com.google.light.server.constants.LightConstants;
-import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocResourceId;
 import java.net.URL;
 import java.util.logging.Logger;
 

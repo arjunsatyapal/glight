@@ -15,11 +15,12 @@
  */
 package com.google.light.server.dto.pojo.typewrapper;
 
+import org.codehaus.jackson.annotate.JsonProperty;
+
 import com.google.inject.Inject;
-
-import javax.xml.bind.annotation.XmlElement;
-
 import com.google.light.server.dto.AbstractPojo;
+import com.google.light.server.dto.NeedsDtoValidation;
+import javax.xml.bind.annotation.XmlElement;
 
 /**
  * I : Type of Primitive Type.
@@ -31,8 +32,9 @@ import com.google.light.server.dto.AbstractPojo;
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
-public abstract class AbstractTypeWrapper<I, T> extends AbstractPojo<T> {
-  @XmlElement(nillable=true)
+public abstract class AbstractTypeWrapper<I, T> extends AbstractPojo<T> implements NeedsDtoValidation{
+  @XmlElement(name = "value", nillable=true)
+  @JsonProperty(value = "value")
   private I value;
 
   protected AbstractTypeWrapper(I value) {
@@ -45,7 +47,6 @@ public abstract class AbstractTypeWrapper<I, T> extends AbstractPojo<T> {
   protected AbstractTypeWrapper() {
   }
   
-  // Deliberately protected so that child classes can have their own getter name.
   public I getValue() {
     return value;
   }

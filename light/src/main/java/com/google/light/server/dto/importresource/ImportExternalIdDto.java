@@ -15,9 +15,13 @@
  */
 package com.google.light.server.dto.importresource;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
+import static com.google.light.server.utils.LightPreconditions.checkNotEmptyCollection;
 import static com.google.light.server.utils.LightPreconditions.checkNull;
+
+import com.google.light.server.constants.LightConstants;
 
 import com.google.light.server.dto.AbstractDto;
 import com.google.light.server.dto.module.ModuleState;
@@ -27,12 +31,16 @@ import com.google.light.server.dto.pojo.typewrapper.longwrapper.JobId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
 import com.google.light.server.dto.pojo.typewrapper.stringwrapper.ExternalId;
+import com.google.light.server.dto.thirdparty.google.youtube.ContentLicense;
 import com.google.light.server.persistence.entity.jobs.JobEntity;
 import com.google.light.server.persistence.entity.jobs.JobState;
 import com.google.light.server.persistence.entity.jobs.JobStateCategory;
+import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAnyElement;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.annotate.JsonTypeName;
@@ -72,6 +80,11 @@ public class ImportExternalIdDto extends AbstractDto<ImportExternalIdDto> {
   @XmlElement(name = "moduleType")
   @JsonProperty(value = "moduleType")
   private ModuleType moduleType;
+
+  @XmlElementWrapper(name = "contentLicenses")
+  @XmlAnyElement
+  @JsonProperty(value = "contentLicenses")
+  private List<ContentLicense> contentLicenses;
 
   @XmlElement(name = "title")
   @JsonProperty(value = "title")
@@ -129,6 +142,14 @@ public class ImportExternalIdDto extends AbstractDto<ImportExternalIdDto> {
     this.moduleType = checkNotNull(moduleType, "moduleType");
   }
 
+  public List<ContentLicense> getContentLicenses() {
+    return contentLicenses;
+  }
+
+  public void setContentLicenses(List<ContentLicense> contentLicenses) {
+    this.contentLicenses = contentLicenses;
+  }
+
   public void setModuleId(ModuleId moduleId) {
     this.moduleId = checkNotNull(moduleId, "moduleId");
   }
@@ -156,6 +177,15 @@ public class ImportExternalIdDto extends AbstractDto<ImportExternalIdDto> {
   public boolean hasJobId() {
     return getJobId() != null;
   }
+  
+  public boolean needsNewJobId() {
+    boolean alreadyComplete = 
+        this.getModuleState() == ModuleState.FAILED
+        || this.getModuleState() == ModuleState.PUBLISHED
+        || this.hasJobId();
+    
+    return !alreadyComplete;
+  }
 
   public JobState getJobState() {
     return jobState;
@@ -178,6 +208,22 @@ public class ImportExternalIdDto extends AbstractDto<ImportExternalIdDto> {
   @Override
   public ImportExternalIdDto validate() {
     return this;
+  }
+  
+  public static void doValidationForList(List<ImportExternalIdDto> list, boolean isRequest) {
+
+    if (isRequest) {
+      // Request size is limited. Response can be bigger.
+      checkArgument(list.size() <= LightConstants.IMPORT_BATCH_SIZE_MAX);
+    }
+    
+    for (ImportExternalIdDto curr : list) {
+      if (isRequest) {
+        curr.requestValidation();
+      } else {
+        curr.responseValidation();
+      }
+    }
   }
 
   /**
@@ -217,6 +263,7 @@ public class ImportExternalIdDto extends AbstractDto<ImportExternalIdDto> {
       
       if (moduleStateCategory == ModuleStateCategory.HOSTED) {
         checkNotNull(moduleType, "moduleType");
+        checkNotEmptyCollection(contentLicenses, "contentLicenses");
       }
       
       
@@ -260,11 +307,18 @@ public class ImportExternalIdDto extends AbstractDto<ImportExternalIdDto> {
     private ModuleId moduleId;
     private ModuleState moduleState;
     private ModuleType moduleType;
+    private List<ContentLicense> contentLicenses;
     private String title;
     private Version version;
     private JobId jobId;
     private JobState jobState;
 
+    public Builder contentLicenses(List<ContentLicense> contentLicenses) {
+      this.contentLicenses = contentLicenses;
+      return this;
+    }
+
+    
     public Builder externalId(ExternalId externalId) {
       this.externalId = externalId;
       return this;
@@ -306,7 +360,7 @@ public class ImportExternalIdDto extends AbstractDto<ImportExternalIdDto> {
     }
 
     @SuppressWarnings("synthetic-access")
-    public ImportExternalIdDto build() {
+    public ImportExternalIdDto build1() {
       return new ImportExternalIdDto(this).validate();
     }
   }
@@ -323,6 +377,7 @@ public class ImportExternalIdDto extends AbstractDto<ImportExternalIdDto> {
     }
     
     this.moduleType = builder.moduleType;
+    this.contentLicenses = builder.contentLicenses;
     this.title = builder.title;
     this.jobId = builder.jobId;
     this.jobState = builder.jobState;

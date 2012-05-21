@@ -19,14 +19,19 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.httpclient.LightHttpClient.getHeaderValueFromResponse;
 import static com.google.light.server.utils.LightUtils.getURI;
 
+import com.google.light.server.dto.thirdparty.google.gdoc.GoogleDocInfoDto;
+import com.google.light.server.dto.thirdparty.google.gdoc.GoogleDocResourceId;
+
+import com.google.light.server.thirdparty.clients.google.gdoc.DocsServiceWrapper;
+
 import com.google.api.client.http.HttpResponse;
 import com.google.light.server.constants.HttpHeaderEnum;
 import com.google.light.server.dto.pojo.typewrapper.stringwrapper.ExternalId;
-import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocInfoDto;
-import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocResourceId;
 import com.google.light.server.exception.unchecked.InvalidExternalIdException;
 import com.google.light.server.httpclient.LightHttpClient;
-import com.google.light.server.thirdparty.clients.google.gdata.gdoc.DocsServiceWrapper;
+import com.google.light.server.manager.interfaces.ModuleManager;
+import com.google.light.server.persistence.entity.module.ModuleEntity;
+import com.google.light.server.urls.LightUrl;
 import java.net.URI;
 
 /**
@@ -43,6 +48,9 @@ public class ModuleUtils {
       case GOOGLE_COLLECTION:
       case GOOGLE_DOCUMENT:
         return getTitleForGDocResource(externalId);
+        
+      case LIGHT_HOSTED_MODULE:
+        return lihtModuleTitle(externalId);
 
       case LIGHT_SYNTHETIC_MODULE:
         return getTitleForSyntheticModule(externalId);
@@ -51,6 +59,22 @@ public class ModuleUtils {
         throw new InvalidExternalIdException(externalId);
 
     }
+  }
+
+  /**
+   * @param externalId
+   * @return
+   */
+  private static String lihtModuleTitle(ExternalId externalId) {
+    LightUrl lightUrl = externalId.getLightUrl();
+    ModuleManager moduleManager = GuiceUtils.getInstance(ModuleManager.class);
+    ModuleEntity module = moduleManager.get(null, lightUrl.getModuleId());
+    
+    if (module == null) {
+      throw new InvalidExternalIdException(externalId);
+    }
+    
+    return module.getTitle();
   }
 
   /**

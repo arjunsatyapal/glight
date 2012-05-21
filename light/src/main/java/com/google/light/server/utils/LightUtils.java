@@ -25,6 +25,11 @@ import static com.google.light.server.constants.RequestParamKeyEnum.LOGIN_PROVID
 import static com.google.light.server.constants.RequestParamKeyEnum.PERSON_ID;
 import static com.google.light.server.utils.LightPreconditions.checkIntegerIsInRage;
 
+import com.google.light.server.dto.importresource.ImportExternalIdDto;
+import com.google.light.server.persistence.entity.jobs.JobState;
+
+import javax.annotation.Nullable;
+
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
@@ -37,6 +42,11 @@ import com.google.common.io.CharStreams;
 import com.google.light.server.constants.FileExtensions;
 import com.google.light.server.constants.LightConstants;
 import com.google.light.server.constants.OAuth2ProviderService;
+import com.google.light.server.dto.collection.CollectionState;
+import com.google.light.server.dto.module.ModuleState;
+import com.google.light.server.dto.module.ModuleType;
+import com.google.light.server.dto.pojo.tree.AbstractTreeNode.TreeNodeType;
+import com.google.light.server.dto.pojo.tree.collection.CollectionTreeNodeDto;
 import com.google.light.server.dto.pojo.typewrapper.AbstractTypeWrapper;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.CollectionId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.JobId;
@@ -45,8 +55,15 @@ import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
 import com.google.light.server.dto.pojo.typewrapper.stringwrapper.ExternalId;
 import com.google.light.server.dto.pojo.typewrapper.stringwrapper.FTSDocumentId;
+import com.google.light.server.dto.thirdparty.google.youtube.ContentLicense;
 import com.google.light.server.exception.unchecked.httpexception.LightHttpException;
 import com.google.light.server.guice.providers.InstantProvider;
+import com.google.light.server.persistence.entity.collection.CollectionEntity;
+import com.google.light.server.persistence.entity.collection.CollectionVersionEntity;
+import com.google.light.server.persistence.entity.module.ModuleEntity;
+import com.google.light.server.persistence.entity.module.ModuleVersionEntity;
+import com.google.light.server.persistence.entity.module.SearchIndexStatus;
+import com.googlecode.objectify.Key;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -77,7 +94,7 @@ import org.joda.time.Instant;
  */
 public class LightUtils {
   private static final Logger logger = Logger.getLogger(LightUtils.class.getName());
-  
+
   public static final Version LATEST_VERSION = new Version(Version.LATEST_VERSION);
 
   public static String getInputStreamAsString(InputStream is) throws IOException {
@@ -465,7 +482,7 @@ public class LightUtils {
       return Throwables.getStackTraceAsString(e);
     }
   }
-  
+
   /**
    * @param maxResultsStr
    * @return
@@ -479,7 +496,7 @@ public class LightUtils {
     }
     return maxResult;
   }
-  
+
   /**
    * @param queryStr
    * @return
@@ -491,14 +508,119 @@ public class LightUtils {
 
     return encodeToUrlEncodedString(queryStr);
   }
-  
+
   public static FTSDocumentId convertModuleIdToFtsDocumentId(ModuleId moduleId) {
     return new FTSDocumentId(FTS_MODULE_ID_KEY + getWrapperValue(moduleId));
   }
-  
+
   public static ModuleId convertFTSDocumentIdToModuleId(FTSDocumentId ftsDocumentId) {
     checkArgument(ftsDocumentId.getValue().startsWith(FTS_MODULE_ID_KEY));
     return new ModuleId(ftsDocumentId.getValue().substring(FTS_MODULE_ID_KEY.length()));
   }
 
+  public static CollectionTreeNodeDto getDummyCollectionRoot(String title, String description) {
+    CollectionTreeNodeDto dummyRoot =
+        new CollectionTreeNodeDto.Builder()
+            .children(null)
+            .description(description)
+            .externalId(null)
+            .moduleType(ModuleType.LIGHT_COLLECTION)
+            .nodeId(getUUIDString())
+            .nodeType(TreeNodeType.ROOT_NODE)
+            .title(title)
+            .build();
+
+    return dummyRoot;
+  }
+
+  public static ModuleEntity createModuleEntity(List<ContentLicense> contentLicenses,
+      Instant creationTime, ExternalId externalId, ModuleState moduleState, ModuleType moduleType,
+      List<PersonId> owners, SearchIndexStatus searchIndexStatus, String title) {
+    ModuleEntity moduleEntity = new ModuleEntity.Builder()
+        .contentLicenses(contentLicenses)
+        .creationTime(creationTime)
+        .externalId(externalId)
+        .moduleState(moduleState)
+        .moduleType(moduleType)
+        .owners(owners)
+        .searchIndexStatus(searchIndexStatus)
+        .title(title)
+        .build();
+
+    return moduleEntity;
+  }
+
+  public static ModuleVersionEntity createModuleVersionEntity(String htmlContent,
+      List<ContentLicense> contentLicenses, Instant creationTime, @Nullable String etag,
+      ExternalId externalId, @Nullable Instant lastEditTime,
+      Key<ModuleEntity> moduleKey, ModuleState moduleState, String title, Version version) {
+
+    if (lastEditTime == null) {
+      // Hack to bypass positive lastEditTime.
+      lastEditTime = new DateTime(1).toInstant();
+    }
+
+    ModuleVersionEntity moduleVersionEntity = new ModuleVersionEntity.Builder()
+        .content(htmlContent)
+        .contentLicenses(contentLicenses)
+        .creationTime(creationTime)
+        .etag(etag)
+        .externalId(externalId)
+        .lastEditTime(lastEditTime)
+        .moduleKey(moduleKey)
+        .moduleState(moduleState)
+        .title(title)
+        .version(version)
+        .build();
+
+    return moduleVersionEntity;
+  }
+
+  public static CollectionEntity createCollectionEntity(CollectionState collectionState,
+      Instant creationTime, List<PersonId> owners, String title,
+      List<ContentLicense> contentLicenses) {
+    CollectionEntity collectionEntity = new CollectionEntity.Builder()
+        .collectionState(collectionState)
+        .contentLicenses(contentLicenses)
+        .creationTime(creationTime)
+        .owners(owners)
+        .title(title)
+        .build();
+
+    return collectionEntity;
+  }
+
+  public static CollectionVersionEntity createCollectionVersionEntity(
+      Key<CollectionEntity> collectionKey,
+      CollectionState collectionState, CollectionTreeNodeDto collectionTree,
+      List<ContentLicense> contentLicenses, Instant creationTime,
+      Version version) {
+    CollectionVersionEntity cvEntity = new CollectionVersionEntity.Builder()
+        .collectionKey(collectionKey)
+        .collectionState(collectionState)
+        .collectionTree(collectionTree)
+        .contentLicenses(contentLicenses)
+        .creationTime(creationTime)
+        .version(version)
+        .build();
+
+    return cvEntity;
+  }
+
+  public static ImportExternalIdDto createImportExternalIdDto(List<ContentLicense> contentLicenses,
+      ExternalId externalId, JobId jobId, JobState jobState, ModuleId moduleId, 
+      ModuleType moduleType, ModuleState moduleState, String title, Version version) {
+    ImportExternalIdDto dto = new ImportExternalIdDto.Builder()
+        .contentLicenses(contentLicenses)
+        .externalId(externalId)
+        .jobId(jobId)
+        .jobState(jobState)
+        .moduleId(moduleId)
+        .moduleState(moduleState)
+        .moduleType(moduleType)
+        .title(title)
+        .version(version)
+        .build1();
+    return dto;
+  }
 }

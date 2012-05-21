@@ -18,10 +18,10 @@ package com.google.light.server.utils;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
-import com.google.light.server.constants.LightStringConstants;
 
 import com.google.appengine.api.search.Consistency;
 import com.google.appengine.api.search.Cursor;
+import com.google.appengine.api.search.Document;
 import com.google.appengine.api.search.Field;
 import com.google.appengine.api.search.Field.FieldType;
 import com.google.appengine.api.search.Index;
@@ -38,6 +38,7 @@ import com.google.appengine.api.search.SortExpression;
 import com.google.appengine.api.search.SortOptions;
 import com.google.common.collect.Lists;
 import com.google.light.server.constants.JerseyConstants;
+import com.google.light.server.constants.LightStringConstants;
 import com.google.light.server.constants.fts.FTSFieldCategory;
 import com.google.light.server.constants.fts.FTSIndex;
 import com.google.light.server.dto.pages.PageDto;
@@ -117,10 +118,33 @@ public class FTSUtils {
    * @param ftsDocument
    * @param module
    */
-  public static void addDocumentToIndex(FTSDocumentWrapper ftsDocumentWrapper, FTSIndex ftsIndex) {
+  @Deprecated
+  public static void indexDocument(FTSDocumentWrapper ftsDocumentWrapper, FTSIndex ftsIndex) {
     Index index = getIndex(ftsIndex);
     index.add(ftsDocumentWrapper.getDocument());
     logger.info("Added " + ftsDocumentWrapper.getFtsDocumentId() + " for FTS indexing.");
+  }
+  
+  /**
+   * @param ftsDocument
+   * @param module
+   */
+  public static void indexDocuments(List<FTSDocumentWrapper> listOfftsDocumentWrapper, FTSIndex ftsIndex) {
+    StringBuilder strBuilder = new StringBuilder(
+        "Successfully added following moduleIds on FTS Index : ");
+    
+    List<Document> listOfDocuments = Lists.newArrayListWithExpectedSize(
+        listOfftsDocumentWrapper.size());
+    
+    for (FTSDocumentWrapper curr : listOfftsDocumentWrapper) {
+      strBuilder.append(" " + curr.getFtsDocumentId());
+      listOfDocuments.add(curr.getDocument());
+    }
+    
+    Index index = getIndex(ftsIndex);
+    index.add(listOfDocuments);
+    
+    logger.info(strBuilder.toString());
   }
 
   public static void removeDocumentsFromIndex(List<FTSDocumentId> listOfIds, FTSIndex ftsIndex) {

@@ -57,9 +57,9 @@ import com.google.light.testingutils.TestingUtils;
  * 
  */
 public class ControlGSSTestScript {
-  // CSE Owned by waltercacau@google.com
-  private static final String CSE_ID = "xqelsiji0y8";
-  private static final String CSE_OWNER_ID = "001369170667164983739";
+  // CSE Owned by search-admin@myopenedu.com
+  private static final String CSE_ID = "tpzezwcekzm";
+  private static final String CSE_OWNER_ID = "010876134375682122369";
 
   /*
    * // CSE Owned by search-admin@myopenedu.org
@@ -87,7 +87,7 @@ public class ControlGSSTestScript {
             consumerCredentials.getProperty(CLIENT_SECRET.get()), null, null);
 
     String contentString = new OnDemandIndexingRequest()
-        .add("http://light-qa.appspot.com/rest/content/general/module/69001/latest/")
+        .add("http://light-demo.appspot.com/rest/content/general/module/25005/latest/")
         .toXmlString();
     InputStream stream = new ByteArrayInputStream(contentString.getBytes("UTF-8"));
     HttpContent content = new InputStreamContent("application/xml; charset=utf-8", stream);
@@ -123,7 +123,5 @@ public class ControlGSSTestScript {
     System.out.println(new XMLOutputter(Format.getPrettyFormat()).outputString(doc));
     Element root = doc.getRootElement();
     Assert.assertEquals("SUCCESS", root.getAttribute("refresh_status").getValue());
-
   }
-
 }

@@ -18,9 +18,8 @@ package com.google.light.server.utils;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.light.server.utils.LightUtils.isCollectionEmpty;
 import static com.google.light.server.utils.ServletUtils.getRequestHeaderValue;
-
-import com.google.light.server.dto.module.ModuleTypeProvider;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
@@ -28,6 +27,7 @@ import com.google.common.collect.Lists;
 import com.google.light.server.constants.HttpHeaderEnum;
 import com.google.light.server.constants.LightEnvEnum;
 import com.google.light.server.constants.OAuth2ProviderService;
+import com.google.light.server.dto.module.ModuleTypeProvider;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.CollectionId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.JobId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
@@ -52,7 +52,7 @@ import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Objectify;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.List;
+import java.util.Collection;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.validator.routines.EmailValidator;
@@ -125,6 +125,13 @@ public class LightPreconditions {
     return collectionId;
   }
 
+//  TODO(arjuns): Add test for this.
+  public static <T, C extends Collection<T>> C
+      checkNotEmptyCollection(C collection, String message) {
+    checkArgument(!isCollectionEmpty(collection), message);
+    return collection;
+  }
+
   /**
    * Ensures that ModuleId is valid.
    * TODO(arjuns): Add test for this.
@@ -161,18 +168,6 @@ public class LightPreconditions {
   public static Key<PersonEntity> checkPersonKey(Key<PersonEntity> personKey) {
     checkPersonId(new PersonId(personKey.getId()));
     return personKey;
-  }
-
-  /**
-   * Ensures that the list passed to the referenced method is not empty.
-   * 
-   * @param list
-   * @return
-   */
-  public static <T> List<T> checkNonEmptyList(List<T> list, String message) {
-    Preconditions.checkNotNull(list, message);
-    checkArgument(list.size() > 0, message);
-    return list;
   }
 
   /**
@@ -226,7 +221,7 @@ public class LightPreconditions {
       throw new UnauthorizedException("Admin priviliges required.");
     }
   }
-  
+
   /**
    * Ensures that the the given String is a valid URI.
    * 
@@ -237,7 +232,7 @@ public class LightPreconditions {
     new URI(uri);
     return uri;
   }
-  
+
   /**
    * Ensures that given object was instantiated in one of the allowedEnvs.
    * 
@@ -334,9 +329,14 @@ public class LightPreconditions {
     checkArgument(ofy.getTxn().isActive(), "txn is inactive.");
   }
 
-  public static void checkIsRunningUnderQueue(HttpServletRequest request) {
+  public static void checkIsUnderTaskQueue(HttpServletRequest request) {
     String queueName = getRequestHeaderValue(request, HttpHeaderEnum.GAE_QUEUE_NAME);
-    Preconditions.checkNotNull(queueName, "Currently request is not running under queue.");
+    Preconditions.checkNotNull(queueName, "Currently request is not running under TaskQueue.");
+  }
+
+  public static void checkIsUnderCron(HttpServletRequest request) {
+    String cronHeader = getRequestHeaderValue(request, HttpHeaderEnum.GAE_CRON);
+    Preconditions.checkNotNull(cronHeader, "Current Request was not invoked by Cron.");
   }
 
   public static <T> T checkNotNull(T object, ExceptionType type, String message) {
@@ -348,7 +348,7 @@ public class LightPreconditions {
 
     throw new IllegalStateException("Code should not reach here.");
   }
-  
+
   /**
    * Javadoc is same as for {{@link #checkNotBlank(String)}. This throws an exception with cause as
    * errorString.
@@ -394,12 +394,12 @@ public class LightPreconditions {
         throw new IllegalArgumentException("Unsupported type : " + exceptionType);
     }
   }
-  
+
   public static ExternalId checkExternalIdIsGDocResource(ExternalId externalId) {
     checkArgument(externalId.getModuleType().getModuleTypeProvider() == ModuleTypeProvider.GOOGLE_DOC);
     return externalId;
   }
-  
+
   // Utility class.
   private LightPreconditions() {
   }

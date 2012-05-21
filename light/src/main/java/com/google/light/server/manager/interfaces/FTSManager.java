@@ -16,8 +16,8 @@
 package com.google.light.server.manager.interfaces;
 
 import com.google.light.server.dto.pages.PageDto;
-
-import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
+import com.google.light.server.persistence.entity.module.ModuleVersionEntity;
+import java.util.List;
 
 /**
  * Interface to provide utilities related to Appengine's Full Text Search.
@@ -25,7 +25,7 @@ import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
  * @author Arjun Satyapal
  */
 public interface FTSManager {
-  public void indexModule(ModuleId moduleId);
-
+  public void indexModules(List<ModuleVersionEntity> listOfModuleVersions);
+  
   public PageDto searchForModule(String query, int maxResults, String startIndex);
 }

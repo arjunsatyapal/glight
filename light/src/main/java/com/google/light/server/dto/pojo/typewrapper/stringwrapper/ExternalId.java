@@ -17,6 +17,22 @@ package com.google.light.server.dto.pojo.typewrapper.stringwrapper;
 
 import static com.google.light.server.utils.LightUtils.getStringWrapper;
 
+import org.codehaus.jackson.annotate.JsonTypeName;
+
+import javax.xml.bind.annotation.XmlAccessType;
+
+import javax.xml.bind.annotation.XmlAccessorType;
+
+import com.google.light.server.urls.YouTubeUrl;
+
+import org.codehaus.jackson.annotate.JsonIgnore;
+
+import com.google.light.server.urls.LightUrl;
+
+import com.google.light.server.urls.GoogleDocUrl;
+
+import com.google.light.server.utils.GaeUtils;
+
 import com.google.light.server.dto.module.ModuleTypeProvider;
 
 import com.google.light.server.dto.module.ModuleType;
@@ -24,7 +40,6 @@ import com.google.light.server.dto.pojo.typewrapper.AbstractTypeWrapper;
 import com.google.light.server.dto.pojo.typewrapper.stringwrapper.ExternalId.ExternalIdDeserializer;
 import com.google.light.server.dto.pojo.typewrapper.stringwrapper.ExternalId.ExternalIdSerializer;
 import com.google.light.server.dto.pojo.typewrapper.stringwrapper.ExternalId.ExternalIdXmlAdapter;
-import com.google.light.server.jersey.resources.thirdparty.google.GoogleDocUrl;
 import com.google.light.server.utils.LightUtils;
 import java.io.IOException;
 import java.net.URL;
@@ -52,8 +67,13 @@ import org.codehaus.jackson.map.annotate.JsonSerialize;
 @JsonSerialize(using = ExternalIdSerializer.class)
 @JsonDeserialize(using = ExternalIdDeserializer.class)
 @XmlJavaTypeAdapter(ExternalIdXmlAdapter.class)
+@JsonTypeName(value = "externalId")
 @XmlRootElement(name = "externalId")
+@XmlAccessorType(XmlAccessType.FIELD)
 public class ExternalId extends AbstractTypeWrapper<String, ExternalId> {
+  @JsonIgnore
+  private transient URL url;
+  
   /**
    * @param value
    */
@@ -90,7 +110,10 @@ public class ExternalId extends AbstractTypeWrapper<String, ExternalId> {
   }
   
   private URL getURL() {
-    return LightUtils.getURL(getValue());
+    if (url == null) {
+      url = LightUtils.getURL(getValue()); 
+    }
+    return url;
   }
   
   
@@ -98,18 +121,77 @@ public class ExternalId extends AbstractTypeWrapper<String, ExternalId> {
     return new GoogleDocUrl(getURL());
   }
   
+  public LightUrl getLightUrl() {
+    return new LightUrl(getURL());
+  }
+  
+  public YouTubeUrl getYouTubeUrl() {
+    return new YouTubeUrl(getURL());
+  }
+  
   public  ModuleType getModuleType() {
-    if (getURL().getHost().equals("docs.google.com")
-        || getURL().getHost().equals("drive.google.com")) {
+    if (isLightUrl()) {
+      return getLightUrl().getModuleType();
+    } else if (isGDocUrl()) {
       GoogleDocUrl docUrl = getGoogleDocURL();
       return docUrl.getModuleType();
-    } 
+    } else if (isYouTubeUrl()) {
+      
+    }
     
     return ModuleType.LIGHT_SYNTHETIC_MODULE;
   }
 
+  /**
+   * @return
+   */
+  private boolean isYouTubeUrl() {
+    if (getURL().getHost().equals("youtube.com")) {
+      return true;
+    }
+    
+    return false;
+  }
+
+  /**
+   * @return
+   */
+  private boolean isGDocUrl() {
+    return getURL().getHost().equals("docs.google.com")
+        || getURL().getHost().equals("drive.google.com");
+  }
+
+  /**
+   * @return
+   */
+  private boolean isLightUrl() {
+    String host = getURL().getHost();
+    String appId = GaeUtils.getAppId();
+    
+    
+    if (host.equals("localhost")) {
+      if (GaeUtils.isDevServer()) { 
+        // Allowing localhost URLs on DevServer only.
+        return true;
+      } else {
+        throw new IllegalStateException("URLs pointing to local host are not allowed.");
+      }
+    } else {
+      String appSpotAddress = appId + ".appspot.com";
+      if (host.endsWith(appSpotAddress)) {
+        return true;
+      }
+    }
+    
+    return false;
+  }
+
   public boolean isGoogleDocResource() {
     return getModuleType().getModuleTypeProvider() == ModuleTypeProvider.GOOGLE_DOC;
+  }
+  
+  public boolean isYouTubeResource() {
+    return getModuleType() == ModuleType.YOU_TUBE_VIDEO;
   }
 
   // Adding Custom Serializer/Deserializer and XmlAdapter.

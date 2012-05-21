@@ -106,6 +106,14 @@ public class JerseyConstants {
   public static final String RESOURCE_PATH_CONTENT = "/content/general";
   public static final String URI_RESOURCE_PATH_CONTENT = "/rest/content/general";
 
+  // Path for Cron Resource.
+  public static final String RESOURCE_PATH_CRON = GAE_ADMIN_CONTEXT + "/cron";
+  public static final String URI_RESOURCE_PATH_CRON = JERSEY_CONTEXT + RESOURCE_PATH_CRON;
+
+  public static final String PATH_CRON_SEARCH_INDEX_REFRESH = "/searchIndexRefresh";
+  public static final String URI_CRON_SEARCH_INDEX_REFRESH = URI_RESOURCE_PATH_CRON
+      + PATH_CRON_SEARCH_INDEX_REFRESH;
+
   // Path for Miscallaneous Admin Resource.
   public static final String RESOURCE_PATH_MISC_ADMIN = GAE_ADMIN_CONTEXT;
   public static final String URI_RESOURCE_PATH_MISC_ADMIN = JERSEY_CONTEXT
@@ -119,7 +127,8 @@ public class JerseyConstants {
       + RESOURCE_PATH_GAE_PIPELINE;
 
   // Path for Gogole Doc Integration.
-  public static final String RESOURCE_PATH_THIRD_PARTY_GOOGLE_DOC = THIRD_PARTY_CONTEXT + "/google/gdoc";
+  public static final String RESOURCE_PATH_THIRD_PARTY_GOOGLE_DOC = THIRD_PARTY_CONTEXT
+      + "/google/gdoc";
   public static final String URI_RESOURCE_PATH_THIRD_PARTH_GOOGLE_DOC = JERSEY_CONTEXT
       + RESOURCE_PATH_THIRD_PARTY_GOOGLE_DOC;
 
@@ -147,9 +156,11 @@ public class JerseyConstants {
   // Path for Job Resource
   public static final String RESOURCE_JOB = "/job";
   public static final String URI_RESOURCE_JOB = JERSEY_CONTEXT + RESOURCE_JOB;
-  
-  
+
   public static final String URI_RESOURCE_PATH_JOBS_ME = URI_RESOURCE_JOB + PATH_ME;
+
+  public static final String PATH_JOB_DETAIL = PATH_JOB_ID + "/detail";
+  public static final String URI_JOB_DETAIL = URI_RESOURCE_JOB + "/0/detail";
 
   // Path for Module Resources.
   public static final String RESOURCE_PATH_MODULE = "/module";
@@ -157,17 +168,16 @@ public class JerseyConstants {
   public static final String URI_RESOURCE_PATH_MODULE_ME = URI_RESOURCE_PATH_MODULE + PATH_ME;
   public static final String URI_RESOURCE_PATH_MODULE_ME_HTML = URI_RESOURCE_PATH_MODULE
       + PATH_ME_HTML;
-  
+
   public static final String PATH_MODULE_VERSION = PATH_MODULE_ID + PATH_VERSION;
   public static final String PATH_MODULE_VERSION_CONTENT = PATH_MODULE_VERSION + "/"
       + CONTENT;
-  public static final String PATH_MODULE_VERSION_RESOURCE = PATH_MODULE_VERSION + PATH_RESOURCE_TYPE
+  public static final String PATH_MODULE_VERSION_RESOURCE = PATH_MODULE_VERSION
+      + PATH_RESOURCE_TYPE
       + PATH_RESOURCE;
-  
+
   public static final String PATH_MODULE_SEARCH = "/search";
   public static final String URI_MODULE_SEARCH = URI_RESOURCE_PATH_MODULE + PATH_MODULE_SEARCH;
-  
-
 
   // Path for Notification Resources.
   public static final String RESOURCE_PATH_NOTIFICATION = "/notification";
@@ -191,13 +201,28 @@ public class JerseyConstants {
 
   public static final String PATH_TEST_LINKS = "/links";
   public static final String URI_TEST_LINKS = URI_RESOURCE_PATH_TEST + PATH_TEST_LINKS;
-  
-  public static final String PATH_TEST_DELETE_ALL = "/deleteall";
-  public static final String URI_TEST_DELETE_ALL = URI_RESOURCE_PATH_TEST + PATH_TEST_DELETE_ALL;
-  
-  public static final String PATH_TEST_PURGE_QUEUES = "/purgequeues";
-  public static final String URI_TEST_PURGE_QUEUES = URI_RESOURCE_PATH_TEST + PATH_TEST_PURGE_QUEUES;
 
+  // Path for Test Admin Resource
+  public static final String RESOURCE_PATH_TEST_ADMIN = GAE_ADMIN_CONTEXT + "/test";
+  public static final String URI_RESOURCE_PATH_TEST_ADMIN = JERSEY_CONTEXT
+      + RESOURCE_PATH_TEST_ADMIN;
+
+  public static final String PATH_TEST_DELETE_ALL = "/deleteall";
+  public static final String URI_TEST_ADMIN_DELETE_ALL = URI_RESOURCE_PATH_TEST_ADMIN
+      + PATH_TEST_DELETE_ALL;
+
+  public static final String PATH_TEST_ADMIN_PURGE_QUEUES = "/purgequeues";
+  public static final String URI_TEST_ADMIN_PURGE_QUEUES = URI_RESOURCE_PATH_TEST_ADMIN
+      + PATH_TEST_ADMIN_PURGE_QUEUES;
+
+  // Path for Search Resource
+  public static final String RESOURCE_PATH_SEARCH_INDEX = GAE_ADMIN_CONTEXT + "/search";
+  public static final String URI_RESOURCE_PATH_SEARCH_INDEX = JERSEY_CONTEXT
+      + RESOURCE_PATH_SEARCH_INDEX;
+
+  public static final String PATH_SEARCH_INDEX_UPDATE_INDICES = "/updateIndices";
+  public static final String URI_SEARCH_INDEX_UPDATE_INDICES =
+      URI_RESOURCE_PATH_SEARCH_INDEX + PATH_SEARCH_INDEX_UPDATE_INDICES;
 
   // Some getter methods.
   public static String getJerseyContext() {

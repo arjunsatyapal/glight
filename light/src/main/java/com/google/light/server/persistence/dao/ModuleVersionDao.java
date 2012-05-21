@@ -18,16 +18,19 @@ package com.google.light.server.persistence.dao;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkTxnIsRunning;
 
-import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
-import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
-
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.light.server.dto.module.ModuleVersionDto;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
 import com.google.light.server.persistence.entity.module.ModuleEntity;
 import com.google.light.server.persistence.entity.module.ModuleVersionEntity;
+import com.google.light.server.utils.ObjectifyUtils;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Objectify;
 import com.googlecode.objectify.ObjectifyService;
+import java.util.Collection;
+import java.util.List;
 import java.util.logging.Logger;
 
 /**
@@ -77,24 +80,11 @@ public class ModuleVersionDao extends AbstractBasicDao<ModuleVersionDto, ModuleV
     return super.get(ofy, ModuleVersionEntity.generateKey(moduleKey, version));
   }
   
-//  public ModuleVersionEntity findByModuleIdAndLastEditTime(Objectify ofy, ModuleId moduleId, 
-//      Instant lastEditTime ) {
-//    
-//    // No record was found with etag filter. So now searching on all childs.
-//    QueryResultIterable<ModuleVersionEntity> versionsIterable = ObjectifyUtils.getAllChildren(
-//        ofy, ModuleEntity.generateKey(moduleId), ModuleVersionEntity.class);
-//    QueryResultIterator<ModuleVersionEntity> iterator = versionsIterable.iterator();
-//    
-//    while(iterator.hasNext()) {
-//      ModuleVersionEntity moduleVersion = iterator.next();
-//      
-//      
-//      if (moduleVersion.getEtag().equals(etag)) {
-//        return moduleVersion;
-//      }
-//    }
-//    
-//    // No version was found with given Etag.
-//    return null;
-//  }
+  public List<ModuleVersionEntity> findModuleVersionsByKeys(
+      List<Key<ModuleVersionEntity>> listOfModuleVersionKeys) {
+    Objectify ofy = ObjectifyUtils.nonTransaction();
+    Collection<ModuleVersionEntity> collection = ofy.get(listOfModuleVersionKeys).values();
+
+    return Lists.newArrayList(collection);
+  }
 }

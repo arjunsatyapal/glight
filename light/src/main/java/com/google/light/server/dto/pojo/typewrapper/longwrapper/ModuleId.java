@@ -17,6 +17,11 @@ package com.google.light.server.dto.pojo.typewrapper.longwrapper;
 
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
 
+import org.codehaus.jackson.annotate.JsonTypeName;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+
 import com.google.light.server.dto.pojo.typewrapper.AbstractTypeWrapper;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId.ModuleIdDeserializer;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId.ModuleIdSerializer;
@@ -46,7 +51,9 @@ import org.codehaus.jackson.map.annotate.JsonSerialize;
 @JsonSerialize(using = ModuleIdSerializer.class)
 @JsonDeserialize(using = ModuleIdDeserializer.class)
 @XmlJavaTypeAdapter(ModuleIdXmlAdapter.class)
+@JsonTypeName(value = "moduleId")
 @XmlRootElement(name = "moduleId")
+@XmlAccessorType(XmlAccessType.FIELD)
 public class ModuleId extends AbstractTypeWrapper<Long, ModuleId> {
   public ModuleId(Long value) {
     super(value);

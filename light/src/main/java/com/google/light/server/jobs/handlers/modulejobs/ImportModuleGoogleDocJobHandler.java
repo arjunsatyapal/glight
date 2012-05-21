@@ -48,19 +48,19 @@ import com.google.light.server.dto.pojo.tree.AbstractTreeNode.TreeNodeType;
 import com.google.light.server.dto.pojo.tree.collection.CollectionTreeNodeDto;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.JobId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
-import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocInfoDto;
-import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocResourceId;
+import com.google.light.server.dto.thirdparty.google.gdoc.GoogleDocInfoDto;
+import com.google.light.server.dto.thirdparty.google.gdoc.GoogleDocResourceId;
 import com.google.light.server.exception.unchecked.GoogleDocException;
 import com.google.light.server.exception.unchecked.taskqueue.GoogleDocArchivalWaitingException;
 import com.google.light.server.jobs.handlers.JobHandlerInterface;
-import com.google.light.server.jobs.handlers.modulejobs.ImportModuleGoogleDocJobContext.GoogleDocImportJobState;
 import com.google.light.server.manager.interfaces.FTSManager;
 import com.google.light.server.manager.interfaces.JobManager;
 import com.google.light.server.manager.interfaces.ModuleManager;
 import com.google.light.server.persistence.entity.jobs.JobEntity;
 import com.google.light.server.persistence.entity.module.ModuleEntity;
-import com.google.light.server.thirdparty.clients.google.gdata.gdoc.DocsServiceWrapper;
+import com.google.light.server.thirdparty.clients.google.gdoc.DocsServiceWrapper;
 import com.google.light.server.utils.GoogleCloudStorageUtils;
 import com.google.light.server.utils.GuiceUtils;
 import com.google.light.server.utils.JsonUtils;
@@ -71,6 +71,7 @@ import com.googlecode.objectify.Objectify;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.channels.Channels;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
@@ -123,10 +124,6 @@ public class ImportModuleGoogleDocJobHandler implements JobHandlerInterface {
         publishModule(gdocImportContext, jobEntity);
         break;
 
-      case MODULE_VERSION_PUBLISHED :
-        indexModule(gdocImportContext, jobEntity);
-        break;
-        
       case COMPLETE:
         handleImportModuleGDocComplete(gdocImportContext, jobEntity);
         break;
@@ -134,27 +131,6 @@ public class ImportModuleGoogleDocJobHandler implements JobHandlerInterface {
       default:
         throw new IllegalStateException("Unsupported State : " + gdocImportContext.getState());
     }
-  }
-
-  /**
-   * @param gdocImportContext
-   * @param jobEntity
-   */
-  private void indexModule(final ImportModuleGoogleDocJobContext gdocImportContext, 
-      final JobEntity jobEntity) {
-    ftsManager.indexModule(gdocImportContext.getModuleId());
-    gdocImportContext.setState(GoogleDocImportJobState.COMPLETE);
-    
-    repeatInTransaction(new Transactable<Void>() {
-      @SuppressWarnings("synthetic-access")
-      @Override
-      public Void run(Objectify ofy) {
-        updateJobContext(ofy, jobManager, jobEntity.getJobState(), gdocImportContext, jobEntity,
-            "module indexed.");
-        jobManager.enqueueLightJob(ofy, jobEntity.getJobId());
-        return null;
-      }
-    });
   }
 
   /**
@@ -177,44 +153,31 @@ public class ImportModuleGoogleDocJobHandler implements JobHandlerInterface {
         "Successfully completed Google Doc Job.");
   }
 
-  // public void handleGoogleDocModuleJob(JobEntity jobEntity, GoogleDocInfoDto gdocInfo,
-  // JobId parentJobId, JobId rootJobId) {
-  // ModuleType moduleType = gdocInfo.getModuleType();
-  //
-  // switch (moduleType) {
-  // case GOOGLE_DOCUMENT:
-  // ImportExternalIdDto importModuleDto = new ImportExternalIdDto.Builder()
-  // .title(gdocInfo.getTitle())
-  // .externalId(gdocInfo.getExternalId())
-  // .build();
-  // enqueueModuleGoogleDocJob(null /*ofy*/,importModuleDto, gdocInfo, parentJobId, rootJobId);
-  // break;
-  //
-  // default:
-  // throw new IllegalStateException("Unsupported moduleType " + moduleType + " for "
-  // + jobEntity.getJobId());
-  //
-  // }
-  // }
-
   // TODO(arjuns): Move this inside jobManager.
   public JobId enqueueModuleGoogleDocJob(Objectify ofy, ImportExternalIdDto importModuleDto,
       GoogleDocInfoDto gdocInfo, JobId parentJobId, JobId rootJobId) {
     ModuleId moduleId = importModuleDto.getModuleId();
 
+    List<PersonId> owners = Lists.newArrayList(GuiceUtils.getOwnerId());
     Version reservedVersion = null;
     if (moduleId == null) {
-      ModuleEntity module = moduleManager.reserveModule(ofy, importModuleDto.getExternalId(),
-          Lists.newArrayList(GuiceUtils.getOwnerId()), importModuleDto.getTitle());
-      moduleId = module.getModuleId();
-      importModuleDto.setModuleId(module.getModuleId());
-      reservedVersion = module.reserveVersion();
-      moduleManager.update(ofy, module);
-    } else {
-      // Now reserving a module version and creating a GDoc Child job that will publish this version.
-      reservedVersion = moduleManager.reserveModuleVersion(ofy, moduleId,
-          gdocInfo.getEtag(), gdocInfo.getLastEditTime());
+      // Either this GDoc is being imported for the first time, or is part of a sub collection.
+      ModuleEntity moduleEntity = moduleManager.reserveModule(ofy, importModuleDto.getExternalId(),
+          owners, importModuleDto.getTitle(), importModuleDto.getContentLicenses());
+      moduleId = moduleEntity.getModuleId();
+      importModuleDto.setModuleId(moduleEntity.getModuleId());
       
+      if (moduleEntity.getNextVersion().isFirstVersion()) {
+        // This document is imported for the first time.
+        reservedVersion = moduleManager.reserveModuleVersionFirst(ofy, moduleEntity);
+      }
+    } 
+    
+    if (reservedVersion == null) {
+      // Now reserving a module version and creating a GDoc Child job that will publish this version.
+      // Control will reach here only when it is not the first version.
+      reservedVersion = moduleManager.reserveModuleVersion(ofy, moduleId,
+          gdocInfo.getEtag(), gdocInfo.getLastEditTime(), importModuleDto.getContentLicenses());
     }
 
     checkNotNull(importModuleDto.getModuleId());
@@ -475,6 +438,7 @@ public class ImportModuleGoogleDocJobHandler implements JobHandlerInterface {
         // First publish HTML on Light.
         moduleManager.publishModuleVersion(ofy, moduleId, version,
             resourceInfo.getExternalId(), gdocImportContext.getTitle(), htmlContent,
+            resourceInfo.getModuleType().getDefaultLicenses(),
             resourceInfo.getEtag(), resourceInfo.getLastEditTime());
 
         // Now publishing associated resources.
@@ -491,7 +455,7 @@ public class ImportModuleGoogleDocJobHandler implements JobHandlerInterface {
         }
 
         gdocImportContext.setState(
-            ImportModuleGoogleDocJobContext.GoogleDocImportJobState.MODULE_VERSION_PUBLISHED);
+            ImportModuleGoogleDocJobContext.GoogleDocImportJobState.COMPLETE);
 
         // Now generating result for this job.
         CollectionTreeNodeDto node = new CollectionTreeNodeDto.Builder()
@@ -500,6 +464,7 @@ public class ImportModuleGoogleDocJobHandler implements JobHandlerInterface {
             .moduleId(gdocImportContext.getModuleId())
             .externalId(gdocImportContext.getResourceInfo().getExternalId())
             .moduleType(gdocImportContext.getResourceInfo().getModuleType())
+            .version(LightUtils.LATEST_VERSION)
             .build();
         jobEntity.setResponse(node);
 

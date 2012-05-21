@@ -15,7 +15,7 @@
  */
 package com.google.light.server.jersey.resources.notifications;
 
-import static com.google.light.server.utils.LightPreconditions.checkIsRunningUnderQueue;
+import static com.google.light.server.utils.LightPreconditions.checkIsUnderTaskQueue;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkNotNull;
 import static com.google.light.server.utils.ObjectifyUtils.repeatInTransaction;
@@ -69,7 +69,7 @@ public class NotificationResource extends AbstractJerseyResource {
   @POST
   @Consumes({ ContentTypeConstants.APPLICATION_JSON, ContentTypeConstants.TEXT_PLAIN })
   public Response childCompletionEvent(String body) {
-    checkIsRunningUnderQueue(request);
+    checkIsUnderTaskQueue(request);
 
     String typeStr = getRequestHeaderValue(request, HttpHeaderEnum.LIGHT_NOTIIFCATION_TYPE);
     checkNotBlank(typeStr, ExceptionType.SERVER, "Notification Type is not set.");

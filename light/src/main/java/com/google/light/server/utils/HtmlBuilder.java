@@ -49,6 +49,12 @@ public class HtmlBuilder {
     builder.append(str);
   }
   
+  public void appendPre(String str) {
+    appendNodeStart(HtmlNode.PRE);
+    builder.append(str);
+    appendNodeEnd(HtmlNode.PRE);
+  }
+  
 
   public void appendHref(String id, URI uri, String text) {
     checkNotNull(uri, ExceptionType.SERVER, "uri cannot be null");
@@ -209,6 +215,7 @@ public class HtmlBuilder {
     BODY("body"),
     HEAD("head"),
     LINK("link"),
+    PRE("pre"),
     STYLE("style"),
     TABLE("table");
     

@@ -77,7 +77,7 @@ public class GSSClientLoginTokenManagerImpl implements GSSClientLoginTokenManage
               GSSClientLoginTokenInfoDto.class).validate();
     } catch (Exception e) {
       // TODO(arjuns): Remove this validation when JsonUtils incorporates it.
-      logger.log(Level.SEVERE, Throwables.getStackTraceAsString(e));
+      logger.log(Level.SEVERE, "Failed due to : " + Throwables.getStackTraceAsString(e));
       return null;
     }
     

@@ -19,6 +19,11 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
 
+import org.codehaus.jackson.annotate.JsonTypeName;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+
 import com.google.common.base.Preconditions;
 
 import com.google.light.server.constants.LightStringConstants;
@@ -53,7 +58,10 @@ import org.codehaus.jackson.map.annotate.JsonSerialize;
 @JsonSerialize(using = VersionSerializer.class)
 @JsonDeserialize(using = VersionDeserializer.class)
 @XmlJavaTypeAdapter(VersionXmlAdapter.class)
+@JsonTypeName(value = "version")
 @XmlRootElement(name = "version")
+@XmlAccessorType(XmlAccessType.FIELD)
+
 public class Version extends AbstractTypeWrapper<Long, Version> {
   @XmlTransient
   @JsonIgnore

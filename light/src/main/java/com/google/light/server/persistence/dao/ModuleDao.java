@@ -15,15 +15,16 @@
  */
 package com.google.light.server.persistence.dao;
 
-import static com.google.light.server.persistence.entity.module.ModuleEntity.OFY_MODULE_OWNER_QUERY_STRING;
 import static com.google.light.server.utils.LightPreconditions.checkNotNull;
 
-import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
-import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
+import com.google.light.server.persistence.entity.module.SearchIndexStatus;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.light.server.dto.module.ModuleDto;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
 import com.google.light.server.exception.ExceptionType;
 import com.google.light.server.persistence.entity.module.ModuleEntity;
 import com.google.light.server.serveronlypojos.GAEQueryWrapper;
@@ -31,6 +32,7 @@ import com.google.light.server.utils.ObjectifyUtils;
 import com.googlecode.objectify.Objectify;
 import com.googlecode.objectify.ObjectifyService;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -57,6 +59,7 @@ public class ModuleDao extends AbstractBasicDao<ModuleDto, ModuleEntity> {
    */
   @Override
   public ModuleEntity put(Objectify ofy, ModuleEntity entity) {
+    entity.validate();
     ModuleEntity returnEntity = super.put(ofy, entity);
     String returnMsg = "Created/Updated ModuleEntity[" + returnEntity.getModuleId() + "].";
 
@@ -79,8 +82,25 @@ public class ModuleDao extends AbstractBasicDao<ModuleDto, ModuleEntity> {
     Objectify ofy = ObjectifyUtils.nonTransaction();
     ArrayList<Long> listOfValues = Lists.newArrayList(ownerId.getValue());
 
-    GAEQueryWrapper<ModuleEntity> listOfModules = ObjectifyUtils.findQueryResultsByPageForListField(
-        ofy, ModuleEntity.class, OFY_MODULE_OWNER_QUERY_STRING, listOfValues, startIndex, maxResults);
-    return listOfModules;
+    Map<String, Object> map = new ImmutableMap.Builder<String, Object>()
+        .put(ModuleEntity.OFY_MODULE_OWNER_QUERY_STRING,listOfValues)
+        .build();
+    
+    GAEQueryWrapper<ModuleEntity> queryWrapper = ObjectifyUtils.findQueryResults(
+        ofy, ModuleEntity.class, map, startIndex, maxResults);
+    return queryWrapper;
+  }
+  
+  public GAEQueryWrapper<ModuleEntity> findModulesForFTSIndexUpdate(int maxResults, String startIndex) {
+    Objectify ofy = ObjectifyUtils.nonTransaction();
+    
+    Map<String, Object> map = new ImmutableMap.Builder<String, Object>()
+        .put(SearchIndexStatus.OFY_MODULE_INDEX_FOR_FTS_QUERY_STRING, new Boolean(true))
+        .build();
+          
+    GAEQueryWrapper<ModuleEntity> queryWrapper = ObjectifyUtils.findQueryResults(
+        ofy, ModuleEntity.class, map, startIndex, maxResults);
+    
+    return queryWrapper;
   }
 }

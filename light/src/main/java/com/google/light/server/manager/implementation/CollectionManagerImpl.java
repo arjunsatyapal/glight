@@ -17,7 +17,9 @@ package com.google.light.server.manager.implementation;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.light.server.dto.thirdparty.google.youtube.ContentLicense.DEFAULT_LIGHT_CONTENT_LICENSES;
 import static com.google.light.server.utils.LightPreconditions.checkTxnIsRunning;
+import static com.google.light.server.utils.LightUtils.createCollectionVersionEntity;
 
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
@@ -29,6 +31,7 @@ import com.google.light.server.dto.pojo.tree.collection.CollectionTreeNodeDto;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.CollectionId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
+import com.google.light.server.dto.thirdparty.google.youtube.ContentLicense;
 import com.google.light.server.exception.unchecked.IdShouldNotBeSet;
 import com.google.light.server.exception.unchecked.VersionMutabilityViolation;
 import com.google.light.server.exception.unchecked.httpexception.NotFoundException;
@@ -105,32 +108,24 @@ public class CollectionManagerImpl implements CollectionManager {
    */
   @Override
   public CollectionEntity reserveCollectionId(Objectify ofy, List<PersonId> owners,
-      CollectionTreeNodeDto collectionTree) {
+      CollectionTreeNodeDto collectionTree, List<ContentLicense> contentLicenses) {
     checkTxnIsRunning(ofy);
     checkNotNull(collectionTree, "collectionTree");
 
+    Instant now = LightUtils.getNow();
+    CollectionState collectionState = CollectionState.RESERVED;
     // Now create a new Collection.
-    CollectionEntity collectionEntity = new CollectionEntity.Builder()
-        .title(collectionTree.getTitle())
-        .collectionState(CollectionState.RESERVED)
-        .owners(owners)
-        .build();
+    CollectionEntity collectionEntity = LightUtils.createCollectionEntity(
+        collectionState, now, owners, collectionTree.getTitle(), contentLicenses);
     this.create(ofy, collectionEntity);
 
     Version reservedVersion = collectionEntity.reserveVersion();
+    this.update(ofy, collectionEntity);
 
-    Instant now = LightUtils.getNow();
-    CollectionVersionEntity cvEntity = new CollectionVersionEntity.Builder()
-        .version(reservedVersion)
-        .title(collectionTree.getTitle())
-        .collectionKey(collectionEntity.getKey())
-        .collectionTree(collectionTree)
-        .creationTime(now)
-        .lastUpdateTime(now)
-        .collectionState(CollectionState.RESERVED)
-        .build();
-
-    doPublishVersion(ofy, reservedVersion, collectionTree, collectionEntity, cvEntity);
+    CollectionVersionEntity cvEntity = LightUtils.createCollectionVersionEntity(
+        collectionEntity.getKey(), collectionState, collectionTree, contentLicenses, now,
+        reservedVersion);
+    collectionVersionDao.put(ofy, cvEntity);
 
     return collectionEntity;
   }
@@ -139,7 +134,8 @@ public class CollectionManagerImpl implements CollectionManager {
    * {@inheritDoc} TODO(arjuns): Make this better once we have other Docs.
    */
   @Override
-  public Version reserveCollectionVersion(Objectify ofy, CollectionId collectionId) {
+  public Version reserveCollectionVersion(Objectify ofy, CollectionId collectionId,
+      List<ContentLicense> contentLicenses) {
     checkTxnIsRunning(ofy);
     checkNotNull(collectionId, "collectionId");
 
@@ -147,8 +143,40 @@ public class CollectionManagerImpl implements CollectionManager {
     checkNotNull(collectionEntity, "collectionEntity");
 
     Version reservedVersion = collectionEntity.reserveVersion();
+    
+    CollectionTreeNodeDto dummyRoot = LightUtils.getDummyCollectionRoot(
+        collectionEntity.getTitle(), "No Description");
+    
+    Instant now = LightUtils.getNow();
+    // Reserving a dummy collection Version.
+    CollectionVersionEntity cvEntity = LightUtils.createCollectionVersionEntity(
+        collectionEntity.getKey(), CollectionState.RESERVED, dummyRoot, contentLicenses, now,
+        reservedVersion);
+    
+    collectionVersionDao.put(ofy, cvEntity);
     collectionDao.put(ofy, collectionEntity);
 
+    return reservedVersion;
+  }
+  
+  /**
+   * {@inheritDoc} TODO(arjuns): Make this better once we have other Docs.
+   */
+  @Override
+  public Version reserveCollectionVersionFirst(Objectify ofy, CollectionEntity collectionEntity) {
+    checkTxnIsRunning(ofy);
+    checkNotNull(collectionEntity, "collectionEntity");
+    checkArgument(collectionEntity.getState() == CollectionState.RESERVED, 
+        "This method is a helper method so that first version can be reserved in same transaction "
+            + "where collection was created and therefore expected state is : " 
+            + CollectionState.RESERVED);
+
+    checkNotNull(collectionEntity, "collectionEntity");
+
+//    collectionEntity.reserveVersion();
+//    this.update(ofy, collectionEntity);
+
+    Version reservedVersion = new Version(Version.DEFAULT_FIRST_VERSION);
     return reservedVersion;
   }
 
@@ -162,19 +190,15 @@ public class CollectionManagerImpl implements CollectionManager {
     checkNotNull(collectionEntity, "Collection[" + collectionId + "] was not found.");
 
     CollectionVersionEntity fetchedEntity = collectionVersionDao.get(ofy, collectionId, version);
+    checkNotNull(fetchedEntity, "There should be atleast a dummy version.");
 
-    CollectionVersionEntity cvEntity = new CollectionVersionEntity.Builder()
-        .version(version)
-        .title(collectionRoot.getTitle())
-        .collectionKey(collectionEntity.getKey())
-        .collectionTree(collectionRoot)
-        .creationTime(LightUtils.getNow())
-        .lastUpdateTime(LightUtils.getNow())
-        .collectionState(collectionState)
-        .build();
+    Instant now = LightUtils.getNow();
+    
+    CollectionVersionEntity cvEntity = LightUtils.createCollectionVersionEntity(
+        collectionEntity.getKey(), collectionState, collectionRoot, 
+        fetchedEntity.getContentLicenses(), now, version);
 
-    if (fetchedEntity != null &&
-        fetchedEntity.getCollectionState() != CollectionState.PARTIALLY_PUBLISHED) {
+    if (fetchedEntity != null && !fetchedEntity.isMutable()) {
       if (fetchedEntity.equals(cvEntity)) {
         return fetchedEntity;
       } else {
@@ -196,10 +220,11 @@ public class CollectionManagerImpl implements CollectionManager {
   private CollectionVersionEntity doPublishVersion(Objectify ofy, Version version,
       CollectionTreeNodeDto collectionRoot, CollectionEntity collectionEntity,
       CollectionVersionEntity cvEntity) {
+    checkTxnIsRunning(ofy);
     collectionVersionDao.put(ofy, cvEntity);
 
     // TODO(arjuns): Add support for etag.
-    collectionEntity.publishVersion(version, LightUtils.getNow(), null);
+    collectionEntity.publishVersion(version, LightUtils.getNow(), null/*etag*/);
     collectionEntity.setTitle(collectionRoot.getTitle());
 
     collectionDao.put(ofy, collectionEntity);
@@ -261,29 +286,20 @@ public class CollectionManagerImpl implements CollectionManager {
 
   @Override
   public CollectionEntity createEmptyCollection(Objectify ofy, final List<PersonId> owners,
-      CollectionTreeNodeDto collectionTree) {
+      CollectionTreeNodeDto collectionTree, List<ContentLicense> contentLicenses) {
     Instant now = LightUtils.getNow();
 
-    CollectionEntity collectionEntity = new CollectionEntity.Builder()
-        .title(collectionTree.getTitle())
-        .collectionState(CollectionState.RESERVED)
-        .owners(owners).build();
-    Version publishedVersion = collectionEntity.reserveVersion();
-    collectionEntity.publishVersion(publishedVersion, now, null);
+    
+    CollectionEntity collectionEntity = this.reserveCollectionId(
+        ofy, owners, collectionTree, contentLicenses);
+    Version reservedVersion = this.reserveCollectionVersionFirst(ofy, collectionEntity);
+    
+    collectionEntity.publishVersion(reservedVersion, now, null);
+    this.update(ofy, collectionEntity);
 
-    collectionEntity = create(ofy, collectionEntity);
-
-
-    CollectionVersionEntity cvEntity = new CollectionVersionEntity.Builder()
-        .version(publishedVersion)
-        .title(collectionTree.getTitle())
-        .collectionKey(collectionEntity.getKey())
-        .collectionTree(collectionTree)
-        .creationTime(now)
-        .lastUpdateTime(now)
-        .collectionState(CollectionState.PUBLISHED)
-        .build();
-
+    CollectionVersionEntity cvEntity = createCollectionVersionEntity(
+        collectionEntity.getKey(), CollectionState.PUBLISHED, collectionTree, 
+        contentLicenses, now, reservedVersion);
     collectionVersionDao.put(ofy, cvEntity);
 
     return collectionEntity;
@@ -294,7 +310,7 @@ public class CollectionManagerImpl implements CollectionManager {
    */
   @Override
   public Version reserveAndPublishAsLatest(Objectify ofy, CollectionId collectionId,
-      CollectionTreeNodeDto collectionRoot, CollectionState collectionState) {
+      CollectionTreeNodeDto collectionTree, CollectionState collectionState) {
     checkTxnIsRunning(ofy);
 
     Instant now = LightUtils.getNow();
@@ -303,18 +319,10 @@ public class CollectionManagerImpl implements CollectionManager {
 
     this.update(ofy, collectionEntity);
 
-    CollectionVersionEntity cvEntity = new CollectionVersionEntity.Builder()
-        .version(reserveVersion)
-        .title(collectionRoot.getTitle())
-        .collectionKey(collectionEntity.getKey())
-        .collectionTree(collectionRoot)
-        .creationTime(now)
-        .lastUpdateTime(now)
-        .collectionState(collectionState)
-        .build();
-
-    System.out.println(collectionRoot.toJson());
-    this.doPublishVersion(ofy, reserveVersion, collectionRoot, collectionEntity, cvEntity);
+    CollectionVersionEntity cvEntity = LightUtils.createCollectionVersionEntity(
+        collectionEntity.getKey(), collectionState, collectionTree, DEFAULT_LIGHT_CONTENT_LICENSES,
+        now, reserveVersion);
+    this.doPublishVersion(ofy, reserveVersion, collectionTree, collectionEntity, cvEntity);
     return reserveVersion;
   }
 
@@ -322,8 +330,8 @@ public class CollectionManagerImpl implements CollectionManager {
    * {@inheritDoc}
    */
   @Override
-  public CollectionVersionEntity
-      getLatestPublishedVersion(Objectify ofy, CollectionId collectionId) {
+  public CollectionVersionEntity getLatestPublishedVersion(
+      Objectify ofy, CollectionId collectionId) {
     checkTxnIsRunning(ofy);
     CollectionEntity collectionEntity = this.get(ofy, collectionId);
     return this.getCollectionVersion(ofy, collectionId, collectionEntity.getLatestPublishVersion());

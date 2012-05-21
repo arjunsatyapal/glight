@@ -13,14 +13,11 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.server.dto.thirdparty.google.gdata.gdoc;
+package com.google.light.server.dto.thirdparty.google.youtube;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
-import static com.google.light.server.utils.LightUtils.decodeFromUrlEncodedString;
-
-import com.google.light.server.jersey.resources.thirdparty.google.GoogleDocUrl;
+import com.google.light.server.urls.YouTubeUrl;
 
 import com.google.light.server.dto.pojo.typewrapper.stringwrapper.ExternalId;
 
@@ -41,68 +38,56 @@ import org.codehaus.jackson.annotate.JsonTypeName;
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
-@JsonTypeName(value = "googleDocResourceId")
-@XmlRootElement(name = "googleDocResourceId")
+@JsonTypeName(value = "youTubeResourceId")
+@XmlRootElement(name = "youTubeResourceId")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class GoogleDocResourceId extends AbstractDto<GoogleDocResourceId> {
+public class YouTubeResourceId extends AbstractDto<YouTubeResourceId> {
   @XmlElement(name = "moduleType")
   @JsonProperty(value = "moduleType")
   private ModuleType moduleType;
 
-  @XmlElement(name = "typedResourceId")
-  @JsonProperty(value = "typedResourceId")
-  private String typedResourceId;
+  @XmlElement(name = "resourceId")
+  @JsonProperty(value = "resourceId")
+  private String resourceId;
 
   @XmlElement(name = "externalId")
   @JsonProperty(value = "externalId")
   private ExternalId externalId;
 
-  // public GoogleDocResourceId(ModuleType moduleType, String key) {
-  // this(moduleType.getCategory() + ":" + key);
-  // }
-
-  public GoogleDocResourceId(ExternalId externalId) {
+  public YouTubeResourceId(ExternalId externalId) {
     super(null);
     this.externalId = checkNotNull(externalId, "externalId");
-    checkArgument(externalId.isGoogleDocResource(), "Invalid GoogleDocResource : " + externalId);
-    GoogleDocUrl gdocUrl = externalId.getGoogleDocURL();
+    checkArgument(externalId.isYouTubeResource(), "Invalid YouTubeResource : " + externalId);
+    YouTubeUrl ytUrl = externalId.getYouTubeUrl();
+//
+//    this.moduleType = ytUrl.getModuleType();
+//    this.typedResourceId = checkNotBlank(ytUrl.getTypedResourceId(), 
+//        "Invalid GoogleDocResource : " + externalId);
 
-    this.moduleType = gdocUrl.getModuleType();
-    this.typedResourceId = checkNotBlank(gdocUrl.getTypedResourceId(), 
-        "Invalid GoogleDocResource : " + externalId);
-
-    String decodedString = decodeFromUrlEncodedString(typedResourceId);
-    String errMsg = "invalid typedResourceId[" + typedResourceId + "].";
-    checkArgument(decodedString.contains(":"), errMsg);
-
-    String[] parts = decodedString.split(":");
-    checkArgument(parts.length == 2, errMsg);
-
-    validate();
+//    String decodedString = decodeFromUrlEncodedString(typedResourceId);
+//    String errMsg = "invalid typedResourceId[" + typedResourceId + "].";
+//    checkArgument(decodedString.contains(":"), errMsg);
+//
+//    String[] parts = decodedString.split(":");
+//    checkArgument(parts.length == 2, errMsg);
+//
+//    validate();
   }
 
   /**
    * {@inheritDoc}
    */
   @Override
-  public GoogleDocResourceId validate() {
-    checkNotBlank(typedResourceId, "typedResourceId");
-    checkNotNull(moduleType, "moduleType");
+  public YouTubeResourceId validate() {
+//    checkNotBlank(typedResourceId, "typedResourceId");
+//    checkNotNull(moduleType, "moduleType");
 
     return this;
   }
 
   @Override
   public String toString() {
-    return getTypedResourceId();
-  }
-
-  public String getTypedResourceId() {
-    return typedResourceId;
-  }
-
-  public String getTypeResourceId() {
-    return typedResourceId;
+    return resourceId;
   }
 
   public ExternalId getExternalId() {
@@ -114,7 +99,7 @@ public class GoogleDocResourceId extends AbstractDto<GoogleDocResourceId> {
   }
 
   // For JAXB and Pipeline and Guice.
-  private GoogleDocResourceId() {
+  private YouTubeResourceId() {
     super(null);
   }
 }

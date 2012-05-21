@@ -13,11 +13,12 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.server.thirdparty.clients.google.gdata.gdoc;
+package com.google.light.server.thirdparty.clients.google.gdoc;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.constants.LightConstants.HTTP_CONNECTION_TIMEOUT_IN_MILLIS;
+import static com.google.light.server.constants.LightStringConstants.LIGHT_APPLICATION_NAME;
 import static com.google.light.server.constants.OAuth2ProviderService.GOOGLE_DOC;
 import static com.google.light.server.constants.google.cloudstorage.GoogleCloudStorageBuckets.WORKSPACE;
 import static com.google.light.server.servlets.thirdparty.google.gdoc.GoogleDocUtils.getFolderContentUrl;
@@ -25,6 +26,9 @@ import static com.google.light.server.utils.GoogleCloudStorageUtils.getAbsoluteP
 import static com.google.light.server.utils.GoogleCloudStorageUtils.writeFileOnGCS;
 import static com.google.light.server.utils.GuiceUtils.getInstance;
 import static com.google.light.server.utils.LightUtils.getURL;
+
+import com.google.light.server.dto.thirdparty.google.gdoc.GoogleDocInfoDto;
+import com.google.light.server.dto.thirdparty.google.gdoc.GoogleDocResourceId;
 
 import com.google.light.server.utils.JsonUtils;
 
@@ -53,8 +57,6 @@ import com.google.light.server.constants.http.ContentTypeEnum;
 import com.google.light.server.dto.AbstractDto;
 import com.google.light.server.dto.pages.PageDto;
 import com.google.light.server.dto.pojo.GoogleDocArchivePojo;
-import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocInfoDto;
-import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocResourceId;
 import com.google.light.server.exception.unchecked.GoogleDocException;
 import com.google.light.server.exception.unchecked.httpexception.NotFoundException;
 import com.google.light.server.manager.implementation.oauth2.owner.OAuth2OwnerTokenManagerFactory;
@@ -90,7 +92,7 @@ public class DocsServiceWrapper extends DocsService {
   @Inject
   public DocsServiceWrapper(OAuth2OwnerTokenManagerFactory ownerTokenManagerFactory) {
     // TODO(arjuns): Inject application Name.
-    super("light");
+    super(LIGHT_APPLICATION_NAME);
     OAuth2OwnerTokenManagerFactory tokenManagerFactory = checkNotNull(
         ownerTokenManagerFactory, "ownerTokenManagerFactory");
     OAuth2OwnerTokenManager googDocTokenManager = tokenManagerFactory.create(GOOGLE_DOC);

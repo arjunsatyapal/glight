@@ -21,7 +21,14 @@ import static com.google.light.server.constants.JerseyConstants.URI_RESOURCE_PAT
 import static com.google.light.server.constants.JerseyConstants.URI_RESOURCE_PATH_NOTIFICATION;
 import static com.google.light.server.constants.JerseyConstants.URI_RESOURCE_PATH_TEST;
 import static com.google.light.server.constants.JerseyConstants.URI_RESOURCE_PATH_THIRD_PARTH_GOOGLE_DOC;
+import static com.google.light.server.constants.JerseyConstants.URI_RESOURCE_PATH_SEARCH_INDEX;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
+
+import com.google.light.server.jersey.resources.admin.gae.CronResource;
+
+import com.google.light.server.jersey.resources.test.TestAdminResources;
+
+import com.google.light.server.jersey.resources.search.SearchIndexResource;
 
 import com.google.common.collect.Sets;
 import com.google.light.server.constants.JerseyConstants;
@@ -47,13 +54,16 @@ import java.util.Set;
 public enum JerseyResourcesEnum {
   COLLECTION_RESOURCE(CollectionResource.class, JerseyConstants.URI_RESOURCE_PATH_COLLECTION),
   CONTENT_RESOURCE(ContentResource.class, JerseyConstants.URI_RESOURCE_PATH_CONTENT),
+  CRON_RESOURCE(CronResource.class, JerseyConstants.URI_RESOURCE_PATH_CRON),
   GOOGLE_DOC_RESOURCE(GoogleDocIntegration.class, URI_RESOURCE_PATH_THIRD_PARTH_GOOGLE_DOC),
   IMPORT_RESOURCE(ImportResource.class, JerseyConstants.URI_IMPORT_BATCH),
   JOB_RESOURCE(JobResource.class, JerseyConstants.URI_RESOURCE_JOB),
   MISC_ADMIN_RESOURCES(GAEAdminResources.class, URI_RESOURCE_PATH_MISC_ADMIN),
   MODULE_RESOURCE(ModuleResource.class, URI_RESOURCE_PATH_MODULE),
   NOTIFICATION_RESOURCE(NotificationResource.class, URI_RESOURCE_PATH_NOTIFICATION),
-  TEST_RESOURCES(TestResources.class, URI_RESOURCE_PATH_TEST);
+  SEARCH_RESOURCE(SearchIndexResource.class, URI_RESOURCE_PATH_SEARCH_INDEX),
+  TEST_RESOURCES(TestResources.class, URI_RESOURCE_PATH_TEST),
+  TEST_ADMIN_RESOURCES(TestAdminResources.class, JerseyConstants.URI_RESOURCE_PATH_TEST_ADMIN);
 
   private Class<? extends AbstractJerseyResource> clazz;
   private String lightUri;
