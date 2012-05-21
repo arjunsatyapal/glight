@@ -27,6 +27,8 @@ import com.google.light.server.dto.search.SearchResultItemDto;
 import com.google.light.server.exception.checked.FailedToIndexException;
 import com.google.light.server.manager.interfaces.GSSClientLoginTokenManager;
 import com.google.light.server.manager.interfaces.SearchManager;
+import com.google.light.server.utils.LightUtils;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
