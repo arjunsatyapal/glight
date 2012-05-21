@@ -33,11 +33,6 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
      */
     constructor: function(importService) {
       this._importService = importService;
-      this._gdocPageLinks = [
-        '/rest/thirdparty/google/gdoc/list?' + dojo.objectToQuery({
-          'max-results': NUMBER_OF_ITEMS_PER_PAGE
-        })
-      ];
     },
 
     /**
@@ -56,8 +51,6 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
       if (browseContextState.context == BrowseContextsEnum.IMPORT) {
         if (browseContextState.subcontext == 'gdoc') {
           this._view.showGdocListForm('/rest/thirdparty/google/gdoc/list');
-        } else if (browseContextState.subcontext == 'me') {
-          this._view.showImportedListForm('/rest/module/me');
         } else {
           this._view.showFirstForm();
         }
@@ -83,8 +76,8 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
     seeImported: function() {
       PubSubUtils.publish(EventsEnum.BROWSE_CONTEXT_STATE_CHANGED, [
            new BrowseContextStateBuilder()
-               .context(BrowseContextsEnum.IMPORT)
-               .subcontext('me').build(), this]);
+               .context(BrowseContextsEnum.IMPORTED_BY_ME)
+               .build(), this]);
     },
 
     /**

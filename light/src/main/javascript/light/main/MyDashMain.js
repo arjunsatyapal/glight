@@ -17,6 +17,8 @@ define(['light/views/SearchBarView',
         'light/controllers/SearchBarController',
         'light/views/ImportModuleView',
         'light/controllers/ImportModuleController',
+        'light/views/ImportedByMeView',
+        'light/controllers/ImportedByMeController',
         'light/views/SearchResultListView',
         'light/controllers/SearchResultListController',
         'light/services/SearchService',
@@ -33,7 +35,8 @@ define(['light/views/SearchBarView',
         'light/enums/PagesEnum',
         'dojo/domReady!'],
         function(SearchBarView, SearchBarController,
-                 ImportModuleView, ImportModuleController,
+                ImportModuleView, ImportModuleController,
+                ImportedByMeView, ImportedByMeController,
                  SearchResultListView, SearchResultListController,
                  SearchService,
                  LoginToolbarView, LoginToolbarController,
@@ -81,4 +84,10 @@ define(['light/views/SearchBarView',
   importModuleController.setView(importModuleView);
   importModuleView.setController(importModuleController);
   importModuleController.watch();
+
+  var importedByMeView = new ImportedByMeView({}, 'importedByMe');
+  var importedByMeController = new ImportedByMeController();
+  importedByMeController.setView(importedByMeView);
+  importedByMeView.setController(importedByMeController);
+  importedByMeController.watch();
 });

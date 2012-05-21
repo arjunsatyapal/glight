@@ -137,7 +137,9 @@ define(['dojo/_base/declare', 'dojo/_base/array',
                        { context: BrowseContextsEnum.ALL,
                          title: 'All modules' },
                        { context: BrowseContextsEnum.IMPORT,
-                         title: 'Import' }
+                         title: 'Import' },
+                       { context: BrowseContextsEnum.IMPORTED_BY_ME,
+                         title: 'Imported by me' }
                       ]
             }
           }),

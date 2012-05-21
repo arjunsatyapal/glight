@@ -104,8 +104,7 @@
     .gdocListItemNotSupported {
         text-decoration: line-through;
     }
-    #importModule .dojoDndItemSelected, #importModule .dojoDndItemAnchor,
-    #searchResults .dojoDndItemSelected, #searchResults .dojoDndItemAnchor {
+    #content .dojoDndItemSelected, #content .dojoDndItemAnchor {
       background-repeat: repeat-x;
       background-color: #cfe5fa;
       background-image: url("/js/external/djk/dijit/themes/claro/images/commonHighlight.png");
@@ -188,6 +187,7 @@
     <div id="content">
         <div id="searchResults"></div>
         <div id="importModule"></div>
+        <div id="importedByMe"></div>
         <div id="collectionEditor"></div>
     </div>
   </body>

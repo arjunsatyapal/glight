@@ -89,7 +89,7 @@ define(['dojo/_base/declare',
 
       this.events.push(
         dojo.connect(this.node, 'onkeypress', this, '_onKeyPress'),
-        on(this.node, 'focusin', dojo.hitch(this, this._onFocus))
+        dojo.connect(this.node, 'focusin', this, this._onFocus)
       );
 
       // Making the list widget focusable initially

@@ -21,7 +21,7 @@ define(['dojo/_base/declare', 'light/views/TemplatedLightView',
         'light/utils/URLUtils',
         'light/utils/LanguageUtils',
         'light/utils/RouterManager',
-        'dojo',
+        'dojo/query',
         'dojo/string',
         'dojo/dom-construct',
         'dijit/_WidgetsInTemplateMixin',
@@ -33,7 +33,7 @@ define(['dojo/_base/declare', 'light/views/TemplatedLightView',
         'dijit/form/Button'],
         function(declare, TemplatedLightView, template, GDocListItemTemplate,
                 messages, DOMUtils, URLUtils, LanguageUtils,
-                RouterManager, dojo, string,
+                RouterManager, $, string,
                 domConstruct, _WidgetsInTemplateMixin, PaginatedListWidget, 
                 TemplateUtils, DialogUtils, DndConstantsEnum, ModuleDndTypeBuilder,
                 Button) {
@@ -78,7 +78,7 @@ define(['dojo/_base/declare', 'light/views/TemplatedLightView',
                       .externalId(item.externalId)
                       .rawData(item)
                       .build(),
-              focusNode: dojo.query('a', node)[0],
+              focusNode: $('a', node)[0],
               type: [DndConstantsEnum.MODULE_TYPE]
             };
           }
@@ -88,34 +88,6 @@ define(['dojo/_base/declare', 'light/views/TemplatedLightView',
           self.showGdocAuthRequiredForm();
         }
       }, this._gdocPaginatedListWidgetDiv);
-
-      this._importedPaginatedListWidget = new PaginatedListWidget({
-        listOptions: {
-          type: DndConstantsEnum.MODULE_SOURCE_TYPE,
-          rawCreator: function(item) {
-            var node = TemplateUtils.toDom('<div class="gdocListItem"><a href="${link}" target="_blank" tabindex="-1">${title}</a></div>', {
-              title: item.title,
-              link: RouterManager.buildLinkForModuleContent(item.moduleId)
-            });
-            return {
-              node: node,
-              data: new ModuleDndTypeBuilder()
-                      .title(item.title)
-                      .externalId(RouterManager.buildLinkForModuleContent(item.moduleId))
-                      .rawData(item)
-                      .build(),
-              focusNode: dojo.query('a', node)[0],
-              type: [DndConstantsEnum.MODULE_TYPE]
-            };
-          }
-        },
-        onError: function() {
-          // TODO(waltercacau): Check if it was really because of missing auth.
-          self.showGdocAuthRequiredForm();
-        }
-      }, this._importedPaginatedListWidgetDiv);
-
-
       this.inherited(arguments);
       this.hide();
     },
@@ -126,7 +98,7 @@ define(['dojo/_base/declare', 'light/views/TemplatedLightView',
      * <p>Each item of this list has a correspondent div element
      * in the template.
      */
-    _forms: ['first', 'gdocList', 'gdocAuthRequired', 'importedList'],
+    _forms: ['first', 'gdocList', 'gdocAuthRequired'],
 
     /**
      * Hides all form's of this view.
@@ -169,14 +141,6 @@ define(['dojo/_base/declare', 'light/views/TemplatedLightView',
       this._gdocPaginatedListWidget.getFirstPage(link);
     },
 
-    /**
-     * Show a list of imported modules
-     */
-    showImportedListForm: function(link) {
-      this._showForm('importedList');
-      this._importedPaginatedListWidget.getFirstPage(link);
-    },
-
 
     /**
      * Shows explanation to the user that he needs to grant authorization
@@ -212,11 +176,11 @@ define(['dojo/_base/declare', 'light/views/TemplatedLightView',
         this._controller.importGdocs(selected);
       }
     },
-    _seeImported: function() {
-      this._controller.seeImported();
-    },
     _importOtherModules: function() {
       this._controller.importModules();
+    },
+    _seeImported: function() {
+      this._controller.seeImported();
     }
   });
 

@@ -14,9 +14,7 @@
  * the License.
  */
 define({
-  ALL: 'all',
-  IMPORTED_BY_ME: 'importedbyme',
-  IMPORT: 'import',
-  MY_COLLECTIONS: 'mycollections',
-  COLLECTION: 'collection'
+  root: {
+    listLabel: 'The following modules where imported by you into Light.'
+  }
 });
