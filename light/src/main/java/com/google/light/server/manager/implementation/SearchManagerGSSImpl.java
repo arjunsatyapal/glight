@@ -82,7 +82,7 @@ public class SearchManagerGSSImpl implements SearchManager {
     url.put("output", "xml_no_dtd");
     url.put("num", LightConstants.SEARCH_RESULTS_PER_PAGE);
     url.put("start", start);
-    url.put("q", escapeQuery(query));
+    url.put("q", query);
     url.put("hl", GSSSupportedLanguagesEnum.getClosestGSSSupportedLanguage(
         searchRequest.getClientLanguageCode()).getLanguageCode());
 
@@ -105,10 +105,6 @@ public class SearchManagerGSSImpl implements SearchManager {
     logger.info(new XMLOutputter().outputString(doc));
 
     return buildResultListFromDOM(doc, start);
-  }
-
-  protected String escapeQuery(String unescaped) {
-    return unescaped.replaceAll("\\s+", "+");
   }
 
   @SuppressWarnings("unchecked")
