@@ -35,8 +35,8 @@ define(['dojo/_base/declare', 'light/views/TemplatedLightView',
                 messages, DOMUtils, URLUtils, LanguageUtils,
                 RouterManager, $, string,
                 domConstruct, _WidgetsInTemplateMixin, PaginatedListWidget, 
-                TemplateUtils, DialogUtils, DndConstantsEnum, ModuleDndTypeBuilder,
-                Button) {
+                TemplateUtils, DialogUtils, DndConstantsEnum,
+                ModuleDndTypeBuilder, Button) {
   var SUPPORTED_GDOC_MODULE_TYPES_TO_IMPORT = {
           'GOOGLE_DOCUMENT': true,
           'GOOGLE_COLLECTION': true
@@ -83,9 +83,12 @@ define(['dojo/_base/declare', 'light/views/TemplatedLightView',
             };
           }
         },
-        onError: function() {
-          // TODO(waltercacau): Check if it was really because of missing auth.
-          self.showGdocAuthRequiredForm();
+        onError: function(err) {
+          if (!err.lightCancelled) {
+            // TODO(waltercacau): Check if it was really because of
+            // missing auth.
+            self.showGdocAuthRequiredForm();
+          }
         }
       }, this._gdocPaginatedListWidgetDiv);
       this.inherited(arguments);

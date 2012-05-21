@@ -67,8 +67,10 @@ define(['dojo/_base/declare', 'light/views/TemplatedLightView',
             };
           }
         },
-        onError: function() {
-          // TODO(waltercacau): Deal with this error
+        onError: function(err) {
+          //if(!err.lightCancelled) {
+            // TODO(waltercacau): Deal with this error
+          //}
         }
       }, this._listWidgetDiv);
 

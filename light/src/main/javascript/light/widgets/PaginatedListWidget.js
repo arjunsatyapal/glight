@@ -21,6 +21,7 @@ define(['dojo/_base/declare',
         'light/widgets/ListWidget',
         'light/views/TemplatedLightView',
         'dijit/_WidgetsInTemplateMixin',
+        'light/utils/SinglePromiseContainer',
         'dojo/i18n!light/nls/PaginatedListWidgetMessages',
         'dojo/text!light/templates/PaginatedListWidgetTemplate.html',
         'light/utils/LanguageUtils',
@@ -30,6 +31,7 @@ define(['dojo/_base/declare',
         function(declare, lang, dojo, string, domConstruct, ListWidget, 
                  TemplatedLightView,
                  _WidgetsInTemplateMixin,
+                 SinglePromiseContainer,
                  PaginatedListWidgetMessages,
                  PaginatedListWidgetTemplate,
                  LanguageUtils, DOMUtils, XHRUtils) {
@@ -86,6 +88,7 @@ define(['dojo/_base/declare',
       lang.mixin(this.messages, options.messages || {});
 
       this._pageLinks = [];
+      this._singlePromiseContainer = new SinglePromiseContainer();
     },
 
     forInSelectedItems: function(func) {
@@ -139,8 +142,10 @@ define(['dojo/_base/declare',
       // TODO(waltercacau): Encapsulate this kind of XHR in some utility
       // so everything that needs to talk to a service that returns a PageDto
       // can simply use it.
-      XHRUtils.get({
-        url: this._pageLinks[this._currentPage]
+      this._singlePromiseContainer.handle(function() {
+        return XHRUtils.get({
+          url: self._pageLinks[self._currentPage]
+        });
       }).then(function(result) {
         if (result['handlerUri'] && result['startIndex']) {
           self._pageLinks[self._currentPage + 1] =
