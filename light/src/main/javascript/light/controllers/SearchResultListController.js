@@ -16,23 +16,27 @@
 define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
         'light/enums/EventsEnum', 'dojo/_base/connect',
         'light/RegexCommon',
+        'light/utils/SinglePromiseContainer',
         'light/enums/BrowseContextsEnum'],
         function(declare, AbstractLightController, EventsEnum,
-                 connect, RegexCommon, BrowseContextsEnum) {
+                 connect, RegexCommon, SinglePromiseContainer,
+                 BrowseContextsEnum) {
 
   return declare('light.controller.SearchResultListController',
           AbstractLightController, {
     /** @lends light.controller.SearchResultListController# */
 
-    lastSearchState: null,
-    enabled: true,
+    _lastSearchState: null,
+    _enabled: true,
 
     /**
      * @extends light.controllers.AbstractLightController
      * @constructs
      */
     constructor: function(searchService) {
-      this.searchService = searchService;
+      this._searchService = searchService;
+      this._searchPromiseContainer = new SinglePromiseContainer();
+      this._searchRecentPromiseContainer = new SinglePromiseContainer();
     },
 
     /**
@@ -52,23 +56,34 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
     _onSearchStateChange: function(searchState) {
 
       // Canceling last search
-      this.searchService.cancelLastSearch();
-      this.lastSearchState = searchState;
+      this._lastSearchState = searchState;
 
-      if (!this.enabled) {
+      if (!this._enabled) {
         return;
       }
 
-      var view = this._view;
       if (searchState.query.match(RegexCommon.SPACES_ONLY)) {
-        view.clear();
+        this._view.clear();
+        this._cancelCurrentSearches();
       } else {
-        this.searchService.search(searchState)
-            .then(function(data) {
-              view.show(searchState, data);
-            });
+        var self = this;
+        this._searchPromiseContainer.handle(function() {
+          return self._searchService.search(searchState);
+        }).then(function(data) {
+          self._view.show(searchState, data);
+        });
+        this._searchRecentPromiseContainer.handle(function() {
+          return self._searchService.searchRecent(searchState);
+        }).then(function(data) {
+          self._view.showRecent(data);
+        });
       }
 
+    },
+    
+    _cancelCurrentSearches: function() {
+      this._searchPromiseContainer.cancel();
+      this._searchRecentPromiseContainer.cancel();
     },
 
     /**
@@ -76,13 +91,13 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
      */
     _onBrowseContextStateChange: function(browseContextState, source) {
       if (browseContextState.context == BrowseContextsEnum.ALL) {
-        this.enabled = true;
-        if (this.lastSearchState) {
-          this._onSearchStateChange(this.lastSearchState);
+        this._enabled = true;
+        if (this._lastSearchState) {
+          this._onSearchStateChange(this._lastSearchState);
         }
       } else {
-        this.enabled = false;
-        this.searchService.cancelLastSearch();
+        this._enabled = false;
+        this._cancelCurrentSearches();
         this._view.clear();
       }
     }

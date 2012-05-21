@@ -46,6 +46,15 @@ define(['dojo/_base/declare'], function(declare) {
       }
       this._lastPromise = func();
       return this._lastPromise;
+    },
+    
+    /**
+     * Cancels the last running one if is still pending
+     */
+    cancel: function() {
+      if (this._lastPromise !== null) {
+        this._lastPromise.cancel();
+      }
     }
   });
 });

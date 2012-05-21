@@ -4,6 +4,7 @@
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
     <title>Light</title>
+    <link type="text/css" rel="stylesheet" href="/css/base.css">
     ${preload}
     <script src="/js/light/build/loader.js"></script>
     <!-- TODO(waltercacau): move this into a CSS -->
@@ -56,6 +57,27 @@
     }
     body {
         font-size: 20px;
+    }
+    .withRecentSearchResults .searchResultsList {
+        width: 60%;
+    }
+    .withRecentSearchResults .recentSearchResultsBox {
+        width: 40%;
+    }
+    .recentSearchResultsBoxLabel {
+        text-align: center;
+        padding-top: 3px;
+        padding-bottom: 3px;
+    }
+    .recentSearchResultsBox {
+        position: absolute;
+        top: 70px;
+    }
+    body[dir="rtl"] .recentSearchResultsBox {
+        left: 0;
+    }
+    body[dir="ltr"] .recentSearchResultsBox {
+        right: 0;
     }
     
     

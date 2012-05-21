@@ -89,13 +89,24 @@ define(['exports',
       ]
     };
 
+    var CONTENT_VIEWER = {
+      build: 'content_viewer',
+      main: 'ContentViewerMain',
+      getPathWithHash: function(statesOrHash) {
+        return '/rest/content/general/collection/SAMPLE#' + toHash(statesOrHash);
+      },
+      pathRegex: /^\/rest\/content\/general\/(collection|module)(\/|$)/,
+      states: []
+    };
+
     return lang.mixin(exports, {
       /** @lends light.enums.PagesEnum */
   
       SEARCH: SEARCH,
       MYDASH: MYDASH,
       REGISTER: REGISTER,
-      values: [REGISTER, SEARCH, MYDASH],
+      COLLECTION_VIEWER: CONTENT_VIEWER,
+      values: [REGISTER, SEARCH, MYDASH, CONTENT_VIEWER],
   
       getCurrentPage: function() {
         var path = URLUtils.getPath();

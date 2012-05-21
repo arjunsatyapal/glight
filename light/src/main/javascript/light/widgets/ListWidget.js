@@ -94,6 +94,7 @@ define(['dojo/_base/declare',
 
       // Making the list widget focusable initially
       this.node.setAttribute('tabindex', '0');
+      this.parent = node;
     },
 
     /**
@@ -201,6 +202,11 @@ define(['dojo/_base/declare',
         }
       }, 0);
     },
+    
+    /**
+     * Callback which can be overridden in the constructor params.
+     */
+    onSelectionChange: function() {},
 
     /*
      * Overriding the css functions so we can properly
@@ -218,6 +224,9 @@ define(['dojo/_base/declare',
      */
     _lastAnchorFocusNode: null,
     _addItemClass: function(node, type) {
+      if (type == 'Anchor' || type == 'Selected') {
+        this._triggerPossibleSelectionChange();
+      }
       if (type == 'Anchor') {
         if (this._lastAnchorFocusNode !== null) {
           throw new Error('You must remove the previous ' +
@@ -233,6 +242,9 @@ define(['dojo/_base/declare',
       this.inherited(arguments);
     },
     _removeItemClass: function(node, type) {
+      if (type == 'Anchor' || type == 'Selected') {
+        this._triggerPossibleSelectionChange();
+      }
       if (type == 'Anchor') {
         if (this._lastAnchorFocusNode !== null) {
           this._lastAnchorFocusNode.setAttribute('tabindex', '-1');
@@ -241,6 +253,36 @@ define(['dojo/_base/declare',
         this.node.setAttribute('tabindex', '0');
       }
       this.inherited(arguments);
+    },
+    
+
+    /*
+     * Currently the only reliable way to figure out if the
+     * selectio changed is to hook up in the _addItemClass and
+     * _removeItemClass methods.
+     */
+    _selectionChangeTimeout: null,
+    _skipSelectionChangeTrigger: false,
+    _triggerPossibleSelectionChange: function() {
+      if(this._skipSelectionChangeTrigger) {
+        return;
+      }
+      var self = this;
+      if(this._selectionChangeTimeout === null) {
+        this._selectionChangeTimeout = setTimeout(function() {
+          self._selectionChangeTimeout = null;
+          self.onSelectionChange();
+        }, 0);
+      }
+    },
+    /**
+     * Empties the selection without triggering the onSelectionChange
+     * callback.
+     */
+    selectNoneWithoutTrigger: function() {
+      this._skipSelectionChangeTrigger = true;
+      this.selectNone();
+      this._skipSelectionChangeTrigger = false;
     }
   });
 });

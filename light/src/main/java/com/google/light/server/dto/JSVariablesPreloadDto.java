@@ -52,6 +52,16 @@ public class JSVariablesPreloadDto extends AbstractDto<JSVariablesPreloadDto> {
     checkNotBlank(locale, "locale");
     return this;
   }
+  
+  public String toHtml() {
+    // TODO(waltercacau): Add test
+    StringBuilder htmlBuilder = new StringBuilder();
+    htmlBuilder.append("<script>\n");
+    htmlBuilder.append("var lightPreload = ");
+    htmlBuilder.append(toJson());
+    htmlBuilder.append(";\n</script>");
+    return htmlBuilder.toString();
+  }
 
   public String getLocale() {
     return locale;

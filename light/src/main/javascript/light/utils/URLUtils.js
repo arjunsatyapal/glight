@@ -80,7 +80,7 @@ define(['dojo/_base/declare', 'dojo/hash'], function(declare, dojoHash) {
     },
 
     getOrigin: function() {
-      return window.location.origin;
+      return window.location.protocol+'//'+window.location.host;
     }
 
   };

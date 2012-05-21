@@ -18,6 +18,7 @@ define(['dojo/_base/declare', 'dojo/_base/lang',
         'dijit/_WidgetsInTemplateMixin',
         'light/utils/URLUtils',
         'light/utils/DOMUtils',
+        'dojo/dom-class',
         'light/utils/DialogUtils',
         'light/utils/BuilderUtils',
         'light/utils/RouterManager',
@@ -32,7 +33,8 @@ define(['dojo/_base/declare', 'dojo/_base/lang',
         'dijit/focus',
         'dijit/form/Button'],
         function(declare, lang, TemplatedLightView, _WidgetsInTemplateMixin,
-                URLUtils, DOMUtils, DialogUtils, BuilderUtils, RouterManager,
+                URLUtils, DOMUtils, domClass, DialogUtils, BuilderUtils,
+                RouterManager,
                 CollectionEditorTemplate, CollectionEditorMessages,
                 Tree, TreeDndSource, ItemFileWriteStore, DataStore,
                 TreeStoreModel, dijit, focusUtil) {
@@ -226,15 +228,19 @@ define(['dojo/_base/declare', 'dojo/_base/lang',
       if (state == SAVE_BUTTON_STATE.SAVE_ENABLED) {
         this._saveButton.set('label', this.messages.saveButtonLabel);
         this._saveButton.set('disabled', false);
+        domClass.add(this._saveButton.domNode, 'warnButton');
       } else if (state == SAVE_BUTTON_STATE.SAVE_DISABLED) {
         this._saveButton.set('label', this.messages.saveButtonLabel);
         this._saveButton.set('disabled', true);
+        domClass.remove(this._saveButton.domNode, 'warnButton');
       } else if (state == SAVE_BUTTON_STATE.SAVED_DISABLED) {
         this._saveButton.set('label', this.messages.savedButtonLabel);
         this._saveButton.set('disabled', true);
+        domClass.remove(this._saveButton.domNode, 'warnButton');
       } else if (state == SAVE_BUTTON_STATE.SAVING_ENABLED) {
         this._saveButton.set('label', this.messages.savingButtonLabel);
         this._saveButton.set('disabled', false);
+        domClass.remove(this._saveButton.domNode, 'warnButton');
       } else {
         throw new Error('Unknown state ' + state);
       }

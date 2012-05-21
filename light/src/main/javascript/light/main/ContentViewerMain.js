@@ -13,16 +13,17 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-define({
-  root: {
-    searchButtonLabel: 'Search',
-    didYouMeanBox: 'Did you mean ${suggestion}?',
-    noResults: 'No results for this search',
-    pageInfo: 'Page ${page}',
-    next: 'Next',
-    previous: 'Previous',
-    recentSearchLabel: 'Recently published on Light'
-  },
-  'pt-br': true,
-  'fa': true
+define(['dojo/i18n!light/nls/ContentViewerMessages', 'dojo/query',
+        'light/utils/DOMUtils',
+        'dojo/domReady!'],
+        function(messages, $, DOMUtils) {
+  $("a.previousLink").forEach(function(node) {
+    DOMUtils.setText(node, messages.previous);
+  });
+  $("a.nextLink").forEach(function(node) {
+    DOMUtils.setText(node, messages.next);
+  });
+  $(".hiddenNode").forEach(function(node) {
+    DOMUtils.show(node);
+  });
 });

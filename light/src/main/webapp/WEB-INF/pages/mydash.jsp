@@ -4,6 +4,7 @@
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
     <title>Light</title>
+    <link type="text/css" rel="stylesheet" href="/css/base.css">
     ${preload}
     <script src="/js/light/build/loader.js"></script>
     <!-- TODO(waltercacau): move this into a CSS -->
@@ -141,6 +142,37 @@
     #importModule .firstForm {
         padding: 10px;
         text-align: center;
+    }
+    .claro .warnButton .dijitButtonNode {
+        color: white;
+        border: 0;
+        background-color: #D14836;
+        background-image: -webkit-linear-gradient(top, #DD4B39, #D14836);
+        background-image: -moz-linear-gradient(top, #DD4B39, #D14836);
+        background-image: -ms-linear-gradient(top, #DD4B39, #D14836);
+        background-image: -o-linear-gradient(top, #DD4B39, #D14836);
+        background-image: linear-gradient(top, #DD4B39, #D14836);
+    }
+    .withRecentSearchResults .searchResultsList {
+        width: 60%;
+    }
+    .withRecentSearchResults .recentSearchResultsBox {
+        width: 40%;
+    }
+    .recentSearchResultsBoxLabel {
+        text-align: center;
+        padding-top: 3px;
+        padding-bottom: 3px;
+    }
+    .recentSearchResultsBox {
+        position: absolute;
+        top: 0;
+    }
+    body[dir="rtl"] .recentSearchResultsBox {
+        left: 0;
+    }
+    body[dir="ltr"] .recentSearchResultsBox {
+        right: 0;
     }
     
     </style>

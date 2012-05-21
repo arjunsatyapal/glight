@@ -77,9 +77,9 @@ define(['dojo/has', 'dojo/query', 'dojo/dom-construct', 'dojo',
   require(['dojo/domReady!'], function() {
 
     // Loading CSS
-    load_css('/css/base.css');
+    //load_css('/css/base.css');
     load_css(require.toUrl('dijit/themes/claro/claro.css'));
-    load_css(require.toUrl('dojo/resources/dojo.css'));
+    //load_css(require.toUrl('/css/dojo.css'));
 
     // Adding the dojo theme class to the body element
     var body = $('body')[0];

@@ -19,6 +19,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.constants.LightStringConstants.VERSION_LATEST_STR;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -43,7 +46,9 @@ import com.google.inject.Injector;
 import com.google.light.server.constants.HttpHeaderEnum;
 import com.google.light.server.constants.JerseyConstants;
 import com.google.light.server.constants.ResourceTypes;
+import com.google.light.server.constants.SupportedLanguagesEnum;
 import com.google.light.server.constants.http.ContentTypeConstants;
+import com.google.light.server.dto.JSVariablesPreloadDto;
 import com.google.light.server.dto.pojo.tree.collection.CollectionTreeNodeDto;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.CollectionId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
@@ -70,17 +75,21 @@ public class ContentResource extends AbstractJerseyResource {
 
   /**
    * Utility class to contain a CollectionVersionEntity, a
-   * ModuleVersionEntity and the corresponding node in the CollectionVersionEntity tree.
+   * ModuleVersionEntity and the data related to them.
    * 
    * While being constructed it will do all necessary validation.
    * 
    * @author Walter Cacau
    */
-  private static class ModuleCollectionNodeTriple {
+  private static class ModuleCollectionNodeData {
 
     private ModuleVersionEntity moduleVersionEntity;
     private CollectionVersionEntity collectionVersionEntity;
     private CollectionTreeNodeDto treeNode;
+    private CollectionTreeNodeDto treeNodePrevious;
+    private CollectionTreeNodeDto treeNodeNext;
+    private int navIndex;
+    private int numberOfLeafs;
 
     /**
      * Constructs this class and do all the necessary validation related to the existence
@@ -92,18 +101,38 @@ public class ContentResource extends AbstractJerseyResource {
      * @param collectionVersionStr
      * @param moduleIdStr
      */
-    private ModuleCollectionNodeTriple(ContentResource resource, String collectionIdStr,
+    private ModuleCollectionNodeData(ContentResource resource, String collectionIdStr,
         String collectionVersionStr, String moduleIdStr) {
       collectionVersionEntity = resource.getCollectionVersionEntity(
           collectionIdStr, collectionVersionStr);
 
       checkNotBlank(moduleIdStr, "Invalid ModuleId.");
       ModuleId moduleId = new ModuleId(moduleIdStr);
-      treeNode = resource.findModule(moduleId, collectionVersionEntity.getCollectionTree());
-      if (treeNode == null) {
+
+      CollectionTreeNodeDto treeRootNode = collectionVersionEntity.getCollectionTree();
+
+      // We ignore the first
+      List<CollectionTreeNodeDto> leafNodesList = getLeafNodeList(treeRootNode);
+      numberOfLeafs = leafNodesList.size();
+      for (navIndex = 0; navIndex < numberOfLeafs; navIndex++) {
+        CollectionTreeNodeDto node = leafNodesList.get(navIndex);
+        if (node.hasModuleId() && node.getModuleId().equals(moduleId)) {
+          break;
+        }
+      }
+
+      if (navIndex == numberOfLeafs) {
         throw new NotFoundException("Could not find " + moduleIdStr + " in collection "
             + collectionIdStr + ":" + collectionVersionStr);
       }
+
+      if (navIndex > 0) {
+        treeNodePrevious = leafNodesList.get(navIndex - 1);
+      }
+      if (navIndex + 1 < numberOfLeafs) {
+        treeNodeNext = leafNodesList.get(navIndex + 1);
+      }
+      treeNode = leafNodesList.get(navIndex);
 
       // TODO(waltercacau): Use the specified version when available
       moduleVersionEntity = resource.getModuleVersionEntity(moduleIdStr, VERSION_LATEST_STR);
@@ -132,7 +161,7 @@ public class ContentResource extends AbstractJerseyResource {
     String uri = uriInfo.getPath() + "/" + VERSION_LATEST_STR;
     return Response.seeOther(LightUtils.getURI(uri)).build();
   }
-  
+
   /**
    * Get on a ModuleId will redirect to Latest Version for that CollectionId.
    */
@@ -162,6 +191,7 @@ public class ContentResource extends AbstractJerseyResource {
 
     request.setAttribute("collectionTitle", StringEscapeUtils.escapeHtml(tree.getTitle()));
     request.setAttribute("collectionContent", contentBuilder.toString());
+    setJSVariablesPreload(request);
 
     ServletUtils.forward(request, response, "/WEB-INF/pages/collection.jsp");
 
@@ -177,8 +207,8 @@ public class ContentResource extends AbstractJerseyResource {
       @PathParam(JerseyConstants.PATH_PARAM_RESOURCE_TYPE) String resourceTypeStr,
       @PathParam(JerseyConstants.PATH_PARAM_RESOURCE) String resourceStr) {
 
-    ModuleCollectionNodeTriple triple =
-        new ModuleCollectionNodeTriple(this, collectionIdStr, versionStr, moduleIdStr);
+    ModuleCollectionNodeData data =
+        new ModuleCollectionNodeData(this, collectionIdStr, versionStr, moduleIdStr);
 
     checkNotBlank(resourceTypeStr, "resourceType");
     checkNotBlank(resourceStr, "resource");
@@ -186,11 +216,11 @@ public class ContentResource extends AbstractJerseyResource {
 
     String resourceId = resourceType.name() + "/" + resourceStr;
 
-    Version moduleVersion = triple.moduleVersionEntity.getVersion();
-    ModuleId moduleId = triple.moduleVersionEntity.getModuleId();
+    Version moduleVersion = data.moduleVersionEntity.getVersion();
+    ModuleId moduleId = data.moduleVersionEntity.getModuleId();
     return buildResponseForAndServeModuleResource(resourceId, moduleVersion, moduleId);
   }
-  
+
   @GET
   @Path(JerseyConstants.PATH_CONTENT_MODULE_VERSION_RESOURCE)
   public Response getModuleVersionResource(
@@ -206,7 +236,7 @@ public class ContentResource extends AbstractJerseyResource {
     ModuleId moduleId = new ModuleId(moduleIdStr);
     Version moduleVersion = new Version(versionStr);
     String resourceId = resourceType.name() + "/" + resourceStr;
-    
+
     return buildResponseForAndServeModuleResource(resourceId, moduleVersion, moduleId);
   }
 
@@ -219,38 +249,59 @@ public class ContentResource extends AbstractJerseyResource {
       @PathParam(JerseyConstants.PATH_PARAM_MODULE_ID) String moduleIdStr) {
 
     // TODO(waltercacau): Figure out how to deal with duplicate modules
-    
-    ModuleCollectionNodeTriple triple =
-        new ModuleCollectionNodeTriple(this, collectionIdStr, versionStr, moduleIdStr);
 
-    String htmlContent = triple.moduleVersionEntity.getContent();
+    ModuleCollectionNodeData data =
+        new ModuleCollectionNodeData(this, collectionIdStr, versionStr, moduleIdStr);
+
+    String htmlContent = data.moduleVersionEntity.getContent();
     String bodyContent = extractBodyContent(htmlContent);
     if (bodyContent == null) {
-      throw new InternalServerErrorException("Could not serve module " + moduleIdStr + " in collection "
+      throw new InternalServerErrorException("Could not serve module " + moduleIdStr
+          + " in collection "
           + collectionIdStr + ":" + versionStr);
     }
 
     // Here we respect the title the collection author gave to the module.
     request.setAttribute("moduleTitle",
-        StringEscapeUtils.escapeHtml(triple.treeNode.getTitle()));
+        StringEscapeUtils.escapeHtml(data.treeNode.getTitle()));
 
     request.setAttribute("moduleContent", bodyContent);
 
-    CollectionTreeNodeDto tree = triple.collectionVersionEntity.getCollectionTree();
+    CollectionTreeNodeDto tree = data.collectionVersionEntity.getCollectionTree();
     StringBuilder contentBuilder = new StringBuilder();
     contentBuilder.append("<ol>\n");
-    appendCurrNode(tree, contentBuilder, 2, true, "/collection/" + collectionIdStr + "/"
-        + versionStr);
+    String collectionUri = "/rest/content/general/collection/" + collectionIdStr + "/" + versionStr;
+    appendCurrNode(tree, contentBuilder, 2, true, collectionUri);
     contentBuilder.append("\n</ol>");
 
     request.setAttribute("collectionTitle", StringEscapeUtils.escapeHtml(tree.getTitle()));
     request.setAttribute("collectionContent", contentBuilder.toString());
 
+    StringBuilder navigationBarBuilder = new StringBuilder();
+    if (data.treeNodePrevious != null) {
+      navigationBarBuilder.append("<a href=\"");
+      navigationBarBuilder.append(StringEscapeUtils.escapeHtml(buildModuleInCollectionLink(
+          data.treeNodePrevious, collectionUri)));
+      navigationBarBuilder.append("\" class=\"previousLink\" >Previous</a> | ");
+    }
+    navigationBarBuilder.append(StringEscapeUtils.escapeHtml((data.navIndex + 1) + "/"
+        + data.numberOfLeafs));
+    if (data.treeNodeNext != null) {
+      navigationBarBuilder.append(" | <a href=\"");
+      navigationBarBuilder.append(StringEscapeUtils.escapeHtml(buildModuleInCollectionLink(
+          data.treeNodeNext, collectionUri)));
+      navigationBarBuilder.append("\" class=\"nextLink\" >Next</a>");
+    }
+
+    request.setAttribute("navigationBar", navigationBarBuilder.toString());
+    request.setAttribute("usesIframe", bodyContent.indexOf("<iframe") != -1 ? "true" : "false");
+    setJSVariablesPreload(request);
+
     ServletUtils.forward(request, response, "/WEB-INF/pages/moduleInCollection.jsp");
 
     return Response.ok().build();
   }
-  
+
   @GET
   @Path(JerseyConstants.PATH_CONTENT_MODULE_VERSION_WITH_SLASH)
   @Produces(ContentTypeConstants.TEXT_HTML)
@@ -258,16 +309,19 @@ public class ContentResource extends AbstractJerseyResource {
       @PathParam(JerseyConstants.PATH_PARAM_MODULE_ID) String moduleIdStr,
       @PathParam(JerseyConstants.PATH_PARAM_VERSION) String versionStr) {
     ModuleVersionEntity moduleEntity = getModuleVersionEntity(moduleIdStr, versionStr);
-    
+
     String bodyContent = extractBodyContent(moduleEntity.getContent());
     if (bodyContent == null) {
-      throw new InternalServerErrorException("Could not serve module " + moduleIdStr + ":" + versionStr);
+      throw new InternalServerErrorException("Could not serve module " + moduleIdStr + ":"
+          + versionStr);
     }
 
     request.setAttribute("moduleTitle",
         StringEscapeUtils.escapeHtml(moduleEntity.getTitle()));
 
     request.setAttribute("moduleContent", bodyContent);
+    request.setAttribute("usesIframe", bodyContent.indexOf("<iframe") != -1 ? "true" : "false");
+    setJSVariablesPreload(request);
 
     ServletUtils.forward(request, response, "/WEB-INF/pages/module.jsp");
 
@@ -293,21 +347,21 @@ public class ContentResource extends AbstractJerseyResource {
     if (bodyOpenStartPos == -1 || bodyOpenEndPos == -1 || bodyClosePos == -1) {
       return null;
     }
-    String bodyProperties = htmlContent.substring(bodyOpenStartPos+5,bodyOpenEndPos);
-    
+    String bodyProperties = htmlContent.substring(bodyOpenStartPos + 5, bodyOpenEndPos);
+
     // TODO(waltercacau): Do proper CSS parsing / move this to the google docs import flow maybe?
     // Here we are taking the google docs padding out
     Pattern p = Pattern.compile("padding\\s*:[^;\"']+([;\"'])");
     Matcher m = p.matcher(bodyProperties);
     StringBuffer bodyPropertiesBuilder = new StringBuffer();
     while (m.find()) {
-        m.appendReplacement(bodyPropertiesBuilder, "margin: 0 auto"+m.group(1));
+      m.appendReplacement(bodyPropertiesBuilder, "margin: 0 auto;padding-top:1em" + m.group(1));
     }
     m.appendTail(bodyPropertiesBuilder);
     bodyProperties = bodyPropertiesBuilder.toString();
-    
-    String bodyContent = htmlContent.substring(bodyOpenEndPos+1,bodyClosePos);
-    return "<div"+bodyProperties+">"+bodyContent+"</div>";
+
+    String bodyContent = htmlContent.substring(bodyOpenEndPos + 1, bodyClosePos);
+    return "<div" + bodyProperties + ">" + bodyContent + "</div>";
   }
 
   /**
@@ -345,22 +399,28 @@ public class ContentResource extends AbstractJerseyResource {
       sp += " ";
     }
     if (node.isLeafNode()) {
-      String uri = collectionUri + "/" + node.getModuleId().getValue() + "/";
+      String uri = buildModuleInCollectionLink(node, collectionUri);
       builder.append(sp).append("<li><a href=").append(StringEscapeUtils.escapeHtml(uri))
           .append(">")
           .append(StringEscapeUtils.escapeHtml(node.getTitle())).append("</a></li>\n");
     } else {
-      if (!isRoot)
+      if (!isRoot) {
         builder.append(sp).append("<li>").append(StringEscapeUtils.escapeHtml(node.getTitle()))
             .append("<ol>\n");
+      }
       if (node.hasChildren()) {
         for (CollectionTreeNodeDto currChild : node.getChildren()) {
           appendCurrNode(currChild, builder, space + 4, false, collectionUri);
         }
       }
-      if (!isRoot)
+      if (!isRoot) {
         builder.append(sp).append("</ol></li>\n");
+      }
     }
+  }
+
+  private String buildModuleInCollectionLink(CollectionTreeNodeDto node, String collectionUri) {
+    return collectionUri + "/" + node.getModuleId().getValue() + "/";
   }
 
   protected CollectionVersionEntity getCollectionVersionEntity(String collectionIdStr,
@@ -433,4 +493,35 @@ public class ContentResource extends AbstractJerseyResource {
     return responseBuilder.build();
   }
 
+  private static List<CollectionTreeNodeDto> getLeafNodeList(CollectionTreeNodeDto root) {
+    List<CollectionTreeNodeDto> list = new ArrayList<CollectionTreeNodeDto>();
+    addLeafNodesToListInPreorder(list, root);
+    return list;
+  }
+
+  private static void addLeafNodesToListInPreorder(List<CollectionTreeNodeDto> list,
+      CollectionTreeNodeDto node) {
+    if (node.isLeafNode()) {
+      list.add(node);
+    }
+    if (node.hasChildren()) {
+      for (CollectionTreeNodeDto child : node.getChildren()) {
+        addLeafNodesToListInPreorder(list, child);
+      }
+    }
+  }
+
+  /**
+   * Sets the JSVariablesPreload in the request with information
+   * about the user/browser locale, but without any other user data.
+   */
+  private static void setJSVariablesPreload(HttpServletRequest request) {
+    // TODO(waltercacau): Move this to a utility class.
+    @SuppressWarnings("unchecked")
+    JSVariablesPreloadDto.Builder dtoBuilder = new JSVariablesPreloadDto.Builder()
+        .locale(SupportedLanguagesEnum.getClosestPrefferedLanguage(
+            Collections.list(request.getLocales())).getClientLanguageCode());
+
+    request.setAttribute("preload", dtoBuilder.build().toHtml());
+  }
 }
