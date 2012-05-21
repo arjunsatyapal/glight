@@ -17,60 +17,59 @@ package com.google.light.server.manager.implementation;
 
 import static com.google.light.server.utils.LightUtils.convertModuleIdToFtsDocumentId;
 
-import com.google.light.server.dto.pages.PageDto;
+import com.google.light.server.persistence.entity.module.ModuleVersionEntity;
 
-import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.light.server.constants.fts.FTSIndex;
 import com.google.light.server.constants.http.ContentTypeEnum;
-import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
+import com.google.light.server.dto.pages.PageDto;
 import com.google.light.server.dto.pojo.typewrapper.stringwrapper.FTSDocumentId;
 import com.google.light.server.dto.pojo.wrappers.FTSDocumentWrapper;
 import com.google.light.server.manager.interfaces.FTSManager;
-import com.google.light.server.manager.interfaces.ModuleManager;
-import com.google.light.server.persistence.entity.module.ModuleVersionEntity;
 import com.google.light.server.utils.FTSUtils;
-import com.google.light.server.utils.LightUtils;
+import java.util.List;
 
 /**
  * Implementation for @link {@link GAESearchManager}.
  * 
  * TODO(arjuns): Add test for this class.
- *
+ * 
  * @author Arjun Satyapal
  */
 public class FTSManagerImpl implements FTSManager {
-  private ModuleManager moduleManager;
-  
   @Inject
-  public FTSManagerImpl(ModuleManager moduleManager) {
-    this.moduleManager = Preconditions.checkNotNull(moduleManager, "moduleManager");
-    
+  public FTSManagerImpl() {
   }
-  /** 
-   * {@inheritDoc}
-   */
-  @Override
-  public void indexModule(ModuleId moduleId) {
-    ModuleVersionEntity mvEntity = moduleManager.getModuleVersion(
-        null, moduleId, LightUtils.LATEST_VERSION);
-    
-    FTSDocumentId ftsDocumentId = convertModuleIdToFtsDocumentId(moduleId);
-    FTSDocumentWrapper ftsDocumentWrapper = new FTSDocumentWrapper.Builder()
-          .ftsDocumentId(ftsDocumentId)
-          .title(mvEntity.getTitle())
-          .content(mvEntity.getContent())
-          .contentType(ContentTypeEnum.TEXT_HTML)
-          .publishTime(mvEntity.getCreationTime())
-          .build();
-    
-    FTSUtils.addDocumentToIndex(ftsDocumentWrapper, FTSIndex.module);
-  }
-  /** 
+
+  /**
    * {@inheritDoc}
    */
   @Override
   public PageDto searchForModule(String query, int maxResults, String startIndex) {
     return FTSUtils.findDocuments(query, maxResults, startIndex, FTSIndex.module);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void indexModules(List<ModuleVersionEntity> listOfModuleVersions) {
+    List<FTSDocumentWrapper> listOfFTSDocuments = Lists.newArrayListWithExpectedSize(
+        listOfModuleVersions.size());
+
+    for (ModuleVersionEntity currModuleVersion : listOfModuleVersions) {
+      FTSDocumentId ftsDocumentId = convertModuleIdToFtsDocumentId(currModuleVersion.getModuleId());
+      FTSDocumentWrapper ftsDocumentWrapper = new FTSDocumentWrapper.Builder()
+          .ftsDocumentId(ftsDocumentId)
+          .title(currModuleVersion.getTitle())
+          .content(currModuleVersion.getContent())
+          .contentType(ContentTypeEnum.TEXT_HTML)
+          .publishTime(currModuleVersion.getCreationTime())
+          .build();
+      listOfFTSDocuments.add(ftsDocumentWrapper);
+    }
+    
+    FTSUtils.indexDocuments(listOfFTSDocuments, FTSIndex.module);
   }
 }

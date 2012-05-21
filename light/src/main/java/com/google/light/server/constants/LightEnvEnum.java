@@ -16,12 +16,12 @@
 package com.google.light.server.constants;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.light.server.utils.LightPreconditions.checkNotEmptyCollection;
 
 import com.google.appengine.api.utils.SystemProperty;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.light.server.exception.unchecked.ServerConfigurationException;
 import com.google.light.server.utils.GaeUtils;
-import com.google.light.server.utils.LightPreconditions;
 import java.util.List;
 
 /**
@@ -42,7 +42,7 @@ public enum LightEnvEnum {
   private List<String> appIds;
   
   private LightEnvEnum(List<String> appIds) {
-    this.appIds = LightPreconditions.checkNonEmptyList(appIds, "appIds");
+    this.appIds = checkNotEmptyCollection(appIds, "appIds");
   }
   
   public List<String> getAppIds() {

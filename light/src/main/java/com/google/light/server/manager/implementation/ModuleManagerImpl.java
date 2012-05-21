@@ -15,12 +15,13 @@
  */
 package com.google.light.server.manager.implementation;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkTxnIsRunning;
-import static com.google.light.server.utils.LightUtils.getNow;
+import static com.google.light.server.utils.LightUtils.createModuleVersionEntity;
 
-import com.google.light.server.utils.LightUtils;
+import com.google.light.server.manager.interfaces.QueueManager;
 
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
@@ -29,12 +30,12 @@ import com.google.light.server.dto.module.GSBlobInfo;
 import com.google.light.server.dto.module.ModuleDto;
 import com.google.light.server.dto.module.ModuleState;
 import com.google.light.server.dto.module.ModuleType;
-import com.google.light.server.dto.module.ModuleVersionState;
 import com.google.light.server.dto.pages.PageDto;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
 import com.google.light.server.dto.pojo.typewrapper.stringwrapper.ExternalId;
+import com.google.light.server.dto.thirdparty.google.youtube.ContentLicense;
 import com.google.light.server.exception.unchecked.IdShouldNotBeSet;
 import com.google.light.server.exception.unchecked.VersionMutabilityViolation;
 import com.google.light.server.exception.unchecked.httpexception.NotFoundException;
@@ -47,7 +48,9 @@ import com.google.light.server.persistence.entity.module.ExternalIdMappingEntity
 import com.google.light.server.persistence.entity.module.ModuleEntity;
 import com.google.light.server.persistence.entity.module.ModuleVersionEntity;
 import com.google.light.server.persistence.entity.module.ModuleVersionResourceEntity;
+import com.google.light.server.persistence.entity.module.SearchIndexStatus;
 import com.google.light.server.serveronlypojos.GAEQueryWrapper;
+import com.google.light.server.utils.LightUtils;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Objectify;
 import java.util.List;
@@ -69,18 +72,19 @@ public class ModuleManagerImpl implements ModuleManager {
   private final ModuleDao moduleDao;
   private final ModuleVersionDao moduleVersionDao;
   private final ModuleVersionResourceDao moduleVersionResourceDao;
-
   private final ExternalIdMappingDao externalIdMappingDao;
+  private final QueueManager queueManager;
 
   @Inject
   public ModuleManagerImpl(ModuleDao moduleDao, ModuleVersionDao moduleVersionDao,
       ModuleVersionResourceDao moduleVersionResourceDao,
-      ExternalIdMappingDao externalIdMappingDao) {
+      ExternalIdMappingDao externalIdMappingDao, QueueManager queueManager) {
     this.moduleDao = checkNotNull(moduleDao, "moduleDao");
     this.moduleVersionDao = checkNotNull(moduleVersionDao, "moduleVersionDao");
     this.moduleVersionResourceDao = checkNotNull(moduleVersionResourceDao,
         "moduleVersionResourceDao");
     this.externalIdMappingDao = checkNotNull(externalIdMappingDao, "externalIdMappingDao");
+    this.queueManager = checkNotNull(queueManager, "queueManager");
   }
 
   /**
@@ -103,7 +107,7 @@ public class ModuleManagerImpl implements ModuleManager {
    * {@inheritDoc}
    */
   @Override
-  public ModuleEntity update(Objectify ofy, ModuleEntity updatedEntity) {
+  public ModuleEntity put(Objectify ofy, ModuleEntity updatedEntity) {
     return moduleDao.put(ofy, updatedEntity);
   }
 
@@ -139,8 +143,8 @@ public class ModuleManagerImpl implements ModuleManager {
 
   @Override
   public ModuleId reserveModuleId(Objectify ofy, ExternalId externalId,
-      List<PersonId> owners, String title) {
-    return reserveModule(ofy, externalId, owners, title).getModuleId();
+      List<PersonId> owners, String title, List<ContentLicense> contentLicenses) {
+    return reserveModule(ofy, externalId, owners, title, contentLicenses).getModuleId();
   }
 
   /**
@@ -148,9 +152,11 @@ public class ModuleManagerImpl implements ModuleManager {
    */
   @Override
   public ModuleEntity reserveModule(Objectify ofy, ExternalId externalId,
-      List<PersonId> owners, String title) {
+      List<PersonId> owners, String title, List<ContentLicense> contentLicenses) {
     checkTxnIsRunning(ofy);
     checkNotNull(externalId, "externalId");
+
+    Instant now = LightUtils.getNow();
 
     ModuleId existingModuleId = findModuleIdByExternalId(ofy, externalId);
     if (existingModuleId != null) {
@@ -158,23 +164,28 @@ public class ModuleManagerImpl implements ModuleManager {
     }
 
     if (StringUtils.isBlank(title)) {
-      title = "Untitled : " + new DateTime(getNow()) + ":" + externalId.getValue();
+      title = "Untitled : " + new DateTime(now) + ":" + externalId.getValue();
     }
 
+    ModuleType moduleType = externalId.getModuleType();
     /*
      * Now create a new Dummy module as a placeHolder which will be later updated when content
      * is available.
-     * TODO(arjuns): Add a cleanup job for cleaning up MOdules which dont move from Reserved state
+     * TODO(arjuns): Add a cleanup job for cleaning up Modules which dont move from Reserved state
      * for long time.
      */
-    ModuleEntity moduleEntity = new ModuleEntity.Builder()
-        .title(title)
-        .moduleState(ModuleState.RESERVED)
-        .moduleType(externalId.getModuleType())
-        .externalId(externalId)
-        .owners(owners)
-        .build();
+    ModuleEntity moduleEntity = LightUtils.createModuleEntity(contentLicenses, now,
+        externalId, ModuleState.RESERVED, moduleType, owners, SearchIndexStatus.forReserveVersion,
+        title);
     ModuleEntity persistedEntity = this.create(ofy, moduleEntity);
+
+    // Version reservedVersion = moduleEntity.reserveVersion();
+    // this.put(ofy, moduleEntity);
+    //
+    // ModuleVersionEntity moduleVersionEntity = LightUtils.createModuleVersionEntity("No Content",
+    // contentLicenses, now, null /*etag*/, externalId, null /*lastEditTime*/,
+    // moduleEntity.getKey(), ModuleState.RESERVED, title, reservedVersion);
+    // moduleVersionDao.put(ofy, moduleVersionEntity);
 
     ExternalIdMappingEntity mappingEntity = new ExternalIdMappingEntity.Builder()
         .externalId(externalId)
@@ -190,33 +201,28 @@ public class ModuleManagerImpl implements ModuleManager {
    */
   @Override
   public ModuleVersionEntity publishModuleVersion(Objectify ofy, ModuleId moduleId,
-      Version version, ExternalId externalId, String title, String content, String etag,
-      Instant lastEditTime) {
+      Version version, ExternalId externalId, String title, String htmlContent,
+      List<ContentLicense> contentLicenses, String etag, Instant lastEditTime) {
     checkTxnIsRunning(ofy);
     checkNotNull(moduleId, "moduleId");
     checkNotNull(version, "version");
     checkNotNull(externalId, "externalId");
     checkNotBlank(title, "title");
-    checkNotBlank(content, "content");
+    checkNotBlank(htmlContent, "htmlContent");
 
     ModuleEntity moduleEntity = this.get(ofy, moduleId);
     checkNotNull(moduleEntity, "Module[" + moduleId + "] was not found.");
 
     ModuleVersionEntity fetchedEntity = moduleVersionDao.get(ofy, moduleId, version);
+    checkNotNull(fetchedEntity, "Failed for [" + moduleId + "], Version [" + version + "]. " +
+        ". There should be atleast a dummy version.");
 
-    ModuleVersionEntity moduleVersionEntity = new ModuleVersionEntity.Builder()
-        .version(version)
-        .moduleKey(moduleEntity.getKey())
-        .state(ModuleVersionState.PUBLISHED)
-        .title(title)
-        .content(content)
-        .etag(etag)
-        .externalId(externalId)
-        .lastEditTime(lastEditTime)
-        .creationTime(LightUtils.getNow())
-        .build();
+    Instant now = LightUtils.getNow();
+    ModuleVersionEntity moduleVersionEntity = createModuleVersionEntity(
+        htmlContent, contentLicenses, now, etag, externalId, lastEditTime, moduleEntity.getKey(),
+        ModuleState.PUBLISHED, title, version);
 
-    if (fetchedEntity != null) {
+    if (fetchedEntity != null && !fetchedEntity.isMutable()) {
       if (fetchedEntity.equals(moduleVersionEntity)) {
         return fetchedEntity;
       } else {
@@ -227,8 +233,11 @@ public class ModuleManagerImpl implements ModuleManager {
 
     moduleVersionDao.put(ofy, moduleVersionEntity);
 
-    moduleEntity.publishVersion(version, title, lastEditTime, etag, externalId);
+    moduleEntity.publishVersion(version, title, lastEditTime, now, etag, externalId);
     moduleDao.put(ofy, moduleEntity);
+    
+    // Enqueue a task so that searchIndices can be updated.
+    queueManager.enqueueSearchIndexTask(ofy);
 
     return moduleVersionEntity;
   }
@@ -315,7 +324,7 @@ public class ModuleManagerImpl implements ModuleManager {
    */
   @Override
   public Version reserveModuleVersion(Objectify ofy, ModuleId moduleId,
-      String etag, Instant lastEditTime) {
+      String etag, Instant lastEditTime, List<ContentLicense> contentLicenses) {
     checkTxnIsRunning(ofy);
     ModuleEntity moduleEntity = this.get(ofy, moduleId);
     checkNotNull(moduleEntity, "moduleEntity");
@@ -334,8 +343,41 @@ public class ModuleManagerImpl implements ModuleManager {
       return null;
     }
 
+    Instant now = LightUtils.getNow();
     Version reservedVersion = moduleEntity.reserveVersion();
-    moduleDao.put(ofy, moduleEntity);
+    this.put(ofy, moduleEntity);
+
+    ModuleVersionEntity moduleVersion = createModuleVersionEntity(
+        null/* content */, moduleEntity.getContentLicenses(), now, null/* etag */,
+        moduleEntity.getExternalId(), null /* lastEditTime */, moduleEntity.getKey(),
+        ModuleState.RESERVED, moduleEntity.getTitle(), reservedVersion);
+    moduleVersionDao.put(ofy, moduleVersion);
+
+    return reservedVersion;
+  }
+
+  @Override
+  public Version reserveModuleVersionFirst(Objectify ofy, ModuleEntity moduleEntity) {
+    checkTxnIsRunning(ofy);
+    checkNotNull(moduleEntity, "moduleEntity");
+    checkArgument(
+        moduleEntity.getModuleState() == ModuleState.RESERVED,
+        "Failed for "
+            + moduleEntity.getModuleId() + ". This method is a helper method so that first version "
+            + "can be reserved in same transaction where module was created and therefore "
+            + "expected state is : " + ModuleState.RESERVED);
+
+    // This is not symmetrical to Collection Manager.
+    // TODO(arjuns): Fix this.
+    Version reservedVersion = moduleEntity.reserveVersion();
+    this.put(ofy, moduleEntity);
+
+    Instant now = LightUtils.getNow();
+    ModuleVersionEntity moduleVersion = createModuleVersionEntity(
+        null/* content */, moduleEntity.getContentLicenses(), now, null/* etag */,
+        moduleEntity.getExternalId(), null /* lastEditTime */, moduleEntity.getKey(),
+        ModuleState.RESERVED, moduleEntity.getTitle(), reservedVersion);
+    moduleVersionDao.put(ofy, moduleVersion);
 
     return reservedVersion;
   }
@@ -360,5 +402,30 @@ public class ModuleManagerImpl implements ModuleManager {
         .build();
 
     return pageDto;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public GAEQueryWrapper<ModuleVersionEntity> findModuleVersionsForFTSIndexUpdate(int maxResults,
+      String startIndex) {
+    GAEQueryWrapper<ModuleEntity> moduleListWrapper =
+        moduleDao.findModulesForFTSIndexUpdate(maxResults, startIndex);
+
+    List<Key<ModuleVersionEntity>> listOfKeys = Lists.newArrayList();
+    for (ModuleEntity curr : moduleListWrapper.getList()) {
+      Key<ModuleVersionEntity> key = ModuleVersionEntity.generateKey(
+          curr.getKey(), curr.getLatestPublishVersion());
+      listOfKeys.add(key);
+    }
+
+    List<ModuleVersionEntity> listOfModuleVersions = moduleVersionDao.findModuleVersionsByKeys(
+        listOfKeys);
+
+    GAEQueryWrapper<ModuleVersionEntity> mvWrapper = new GAEQueryWrapper<ModuleVersionEntity>();
+    mvWrapper.setStartIndex(moduleListWrapper.getStartIndex());
+    mvWrapper.setList(listOfModuleVersions);
+    return mvWrapper;
   }
 }

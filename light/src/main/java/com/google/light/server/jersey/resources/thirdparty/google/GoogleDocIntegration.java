@@ -19,8 +19,8 @@ import static com.google.light.server.exception.ExceptionType.SERVER_GUICE_INJEC
 import static com.google.light.server.servlets.thirdparty.google.gdoc.GoogleDocUtils.getDocumentFeedWithFolderUrl;
 import static com.google.light.server.servlets.thirdparty.google.gdoc.GoogleDocUtils.getDocumentFeedWithFolderUrlAndFilter;
 import static com.google.light.server.utils.LightPreconditions.checkNotNull;
-import static com.google.light.server.utils.LightUtils.initializeMaxResults;
 import static com.google.light.server.utils.LightUtils.initializeFilterStr;
+import static com.google.light.server.utils.LightUtils.initializeMaxResults;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -30,10 +30,10 @@ import com.google.light.server.constants.LightStringConstants;
 import com.google.light.server.constants.http.ContentTypeConstants;
 import com.google.light.server.dto.pages.PageDto;
 import com.google.light.server.dto.pojo.typewrapper.stringwrapper.ExternalId;
-import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocInfoDto;
-import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocResourceId;
+import com.google.light.server.dto.thirdparty.google.gdoc.GoogleDocInfoDto;
+import com.google.light.server.dto.thirdparty.google.gdoc.GoogleDocResourceId;
 import com.google.light.server.jersey.resources.AbstractJerseyResource;
-import com.google.light.server.thirdparty.clients.google.gdata.gdoc.DocsServiceWrapper;
+import com.google.light.server.thirdparty.clients.google.gdoc.DocsServiceWrapper;
 import com.google.light.server.utils.LightUtils;
 import java.net.URL;
 import javax.servlet.http.HttpServletRequest;
@@ -45,7 +45,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
 import org.apache.commons.lang.StringUtils;
 
 /**
@@ -93,7 +92,7 @@ public class GoogleDocIntegration extends AbstractJerseyResource {
     }
 
     PageDto pageDto = docsServiceProvider.get().getDocumentFeedWithFolders(
-        url, JerseyConstants.URI_GOOGLE_DOC_LIST);
+        url, JerseyConstants.URI_GOOGLE_DOC_LIST, GoogleDocInfoDto.Configuration.DTO_FOR_IMPORT);
 
     return pageDto;
   }
@@ -101,11 +100,12 @@ public class GoogleDocIntegration extends AbstractJerseyResource {
   @POST
   @Path(JerseyConstants.PATH_GOOGLE_DOC_INFO)
   @Produces({ ContentTypeConstants.APPLICATION_JSON, ContentTypeConstants.APPLICATION_XML })
-  public Response getDocInfo(
+  public GoogleDocInfoDto getDocInfo(
       @FormParam(JerseyConstants.PATH_PARAM_EXTERNAL_ID) String externalIdStr) {
     ExternalId externalId = new ExternalId(externalIdStr);
     GoogleDocResourceId resourceId = new GoogleDocResourceId(externalId);
-    GoogleDocInfoDto dto = docsServiceProvider.get().getGoogleDocInfo(resourceId);
+    GoogleDocInfoDto dto = docsServiceProvider.get().getGoogleDocInfo(resourceId, 
+        GoogleDocInfoDto.Configuration.DTO_FOR_DEBUGGING);
 
     StringBuilder builder = new StringBuilder();
     builder.append("Info for : " + externalIdStr + "\n").append(dto.toJson());
@@ -120,7 +120,7 @@ public class GoogleDocIntegration extends AbstractJerseyResource {
 //      
 //      builder.append("\n Folder Contents : \n").append(JsonUtils.toJson(list));
 //    }
-    return Response.ok(builder.toString()).build();
+    return dto;
   }
 
 //  @POST

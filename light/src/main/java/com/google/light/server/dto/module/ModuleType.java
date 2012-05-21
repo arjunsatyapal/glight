@@ -16,11 +16,15 @@
 package com.google.light.server.dto.module;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
+import static com.google.light.server.utils.LightPreconditions.checkNotEmptyCollection;
 
 import com.google.light.server.constants.OAuth2ProviderService;
 import com.google.light.server.constants.http.ContentTypeEnum;
 import com.google.light.server.dto.pojo.tree.AbstractTreeNode.TreeNodeType;
+import com.google.light.server.dto.thirdparty.google.youtube.ContentLicense;
+import java.util.List;
 import javax.xml.bind.annotation.XmlEnumValue;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -43,7 +47,8 @@ public enum ModuleType {
                     ContentTypeEnum.GOOGLE_DOC,
                     ModuleTypeProvider.GOOGLE_DOC,
                     TreeNodeType.INTERMEDIATE_NODE,
-                    false, true, true),
+                    newArrayList(ContentLicense.CC),
+                    false, true, false, true),
 
   @XmlEnumValue(value = "GOOGLE_DOC")
   GOOGLE_DOCUMENT(
@@ -52,7 +57,8 @@ public enum ModuleType {
                   ContentTypeEnum.GOOGLE_DOC,
                   ModuleTypeProvider.GOOGLE_DOC,
                   TreeNodeType.LEAF_NODE,
-                  true, false, true),
+                  newArrayList(ContentLicense.CC),
+                  true, false, true, true),
 
   @XmlEnumValue(value = "GOOGLE_DRAWING")
   GOOGLE_DRAWING(
@@ -61,7 +67,8 @@ public enum ModuleType {
                  ContentTypeEnum.GOOGLE_DRAWING,
                  ModuleTypeProvider.GOOGLE_DOC,
                  TreeNodeType.LEAF_NODE,
-                 true, false, false),
+                 newArrayList(ContentLicense.CC),
+                 true, false, false, false),
 
   @XmlEnumValue(value = "GOOGLE_FILE")
   GOOGLE_FILE(
@@ -71,7 +78,8 @@ public enum ModuleType {
               ContentTypeEnum.GOOGLE_DOC,
               ModuleTypeProvider.GOOGLE_DOC,
               TreeNodeType.LEAF_NODE,
-              true, false, false),
+              newArrayList(ContentLicense.UNKNOWN),
+              true, false, false, false),
 
   @XmlEnumValue(value = "GOOGLE_FORM")
   GOOGLE_FORM(
@@ -80,7 +88,8 @@ public enum ModuleType {
               ContentTypeEnum.GOOGLE_FORM,
               ModuleTypeProvider.GOOGLE_DOC,
               TreeNodeType.LEAF_NODE,
-              true, false, false),
+              newArrayList(ContentLicense.CC),
+              true, false, false, false),
 
   @XmlEnumValue(value = "GOOGLE_PRESENTATION")
   GOOGLE_PRESENTATION(
@@ -89,7 +98,8 @@ public enum ModuleType {
                       ContentTypeEnum.GOOGLE_PRESENTATION,
                       ModuleTypeProvider.GOOGLE_DOC,
                       TreeNodeType.LEAF_NODE,
-                      true, false, false),
+                      newArrayList(ContentLicense.CC),
+                      true, false, false, false),
 
   @XmlEnumValue(value = "GOOGLE_SPREADSHEET")
   GOOGLE_SPREADSHEET(
@@ -98,17 +108,51 @@ public enum ModuleType {
                      ContentTypeEnum.GOOGLE_SPREADSHEET,
                      ModuleTypeProvider.GOOGLE_DOC,
                      TreeNodeType.LEAF_NODE,
-                     true, false, false),
+                     newArrayList(ContentLicense.CC),
+                     true, false, false, false),
 
-  // To be used at places where ModuleType is not known.
+  @XmlEnumValue(value = "YOU_TUBE_VIDEO")
+  YOU_TUBE_VIDEO(
+                 OAuth2ProviderService.GOOGLE_DOC,
+                 "youtube",
+                 ContentTypeEnum.OASIS_DOCUMENT,
+                 ModuleTypeProvider.LIGHT,
+                 TreeNodeType.LEAF_NODE,
+                 newArrayList(ContentLicense.YOUTUBE),
+                 true, false, false, true),
+
+  @XmlEnumValue(value = "YOU_TUBE_PLAYLIST")
+  YOU_TUBE_PLAYLIST(
+                 OAuth2ProviderService.GOOGLE_DOC,
+                 "youtube_playlist",
+                 ContentTypeEnum.OASIS_DOCUMENT,
+                 ModuleTypeProvider.LIGHT,
+                 TreeNodeType.INTERMEDIATE_NODE,
+                 newArrayList(ContentLicense.YOUTUBE),
+                 false, true, false, true),
+
   @XmlEnumValue(value = "LIGHT_COLLECTION")
   LIGHT_COLLECTION(OAuth2ProviderService.GOOGLE_DOC,
                    "light_collection",
                    ContentTypeEnum.OASIS_DOCUMENT,
                    ModuleTypeProvider.LIGHT,
                    TreeNodeType.INTERMEDIATE_NODE,
-                   false, true, true),
+                   newArrayList(ContentLicense.CC),
+                   false, true, false, true),
 
+  /*
+   * To be used at places where Module is hosted on Light. It is a generic type. In future
+   * if Light has native editor, it should use a different moduleType. This value should
+   * never be persisted in DB.
+   */
+  @XmlEnumValue(value = "LIGHT_HOSTED_MODULE")
+  LIGHT_HOSTED_MODULE(OAuth2ProviderService.GOOGLE_DOC,
+                      "light_hosted_module",
+                      ContentTypeEnum.OASIS_DOCUMENT,
+                      ModuleTypeProvider.LIGHT,
+                      TreeNodeType.LEAF_NODE,
+                      newArrayList(ContentLicense.CC),
+                      true, false, true, true),
 
   @XmlEnumValue(value = "LIGHT_SUB_COLLECTION")
   LIGHT_SUB_COLLECTION(OAuth2ProviderService.GOOGLE_DOC,
@@ -116,22 +160,26 @@ public enum ModuleType {
                        ContentTypeEnum.OASIS_DOCUMENT,
                        ModuleTypeProvider.LIGHT,
                        TreeNodeType.ROOT_NODE,
-                       false, true, false),
-
+                       newArrayList(ContentLicense.CC),
+                       false, true, false, false),
 
   LIGHT_SYNTHETIC_MODULE(OAuth2ProviderService.GOOGLE_DOC,
                          "light_synthetic_module",
                          ContentTypeEnum.OASIS_DOCUMENT,
                          ModuleTypeProvider.LIGHT,
                          TreeNodeType.LEAF_NODE,
-                         true, false, false),
+                         newArrayList(ContentLicense.UNKNOWN),
+                         true, false, false, false),
+
+  // To be used at places where ModuleType is not known.
   @XmlEnumValue(value = "UNKNOWN")
   UNKNOWN(OAuth2ProviderService.GOOGLE_DOC,
           "root",
           ContentTypeEnum.OASIS_DOCUMENT,
           ModuleTypeProvider.LIGHT,
           TreeNodeType.LEAF_NODE,
-          false, false, false),
+          newArrayList(ContentLicense.UNKNOWN),
+          false, false, false, false),
 
   ;
 
@@ -143,22 +191,28 @@ public enum ModuleType {
   private String category;
   private ContentTypeEnum contentType;
   private TreeNodeType nodeType;
-  private boolean supported;
+  private List<ContentLicense> defaultLicenses;
   private boolean mapsToModule;
   private boolean mapsToCollection;
+  private boolean isSearchable;
+  private boolean supported;
   private ModuleTypeProvider moduleTypeProvider;
 
   private ModuleType(OAuth2ProviderService providerService, String category,
       ContentTypeEnum contentType, ModuleTypeProvider moduleTypeProvider,
-      TreeNodeType nodeType,
-      boolean mapsToModule, boolean mapsToCollection, boolean supported) {
+      TreeNodeType nodeType, List<ContentLicense> defaultLicenses,
+      boolean mapsToModule, boolean mapsToCollection, boolean isSearchable, boolean supported) {
     this.providerService = checkNotNull(providerService, "providerService");
     this.category = checkNotBlank(category, "category");
     this.contentType = checkNotNull(contentType, "contentType");
+    this.defaultLicenses = checkNotEmptyCollection(defaultLicenses, "defaultLicenses");
     this.nodeType = checkNotNull(nodeType, "nodeType");
-    this.supported = supported;
+
     this.mapsToCollection = mapsToCollection;
     this.mapsToModule = mapsToModule;
+    this.isSearchable = isSearchable;
+    this.supported = supported;
+
     this.moduleTypeProvider = checkNotNull(moduleTypeProvider);
   }
 
@@ -174,12 +228,28 @@ public enum ModuleType {
     return contentType;
   }
 
+  public List<ContentLicense> getDefaultLicenses() {
+    return defaultLicenses;
+  }
+
+  public boolean isMapsToModule() {
+    return mapsToModule;
+  }
+
+  public boolean isMapsToCollection() {
+    return mapsToCollection;
+  }
+
   public ModuleTypeProvider getModuleTypeProvider() {
     return moduleTypeProvider;
   }
 
   public TreeNodeType getNodeType() {
     return nodeType;
+  }
+
+  public boolean isSearchable() {
+    return isSearchable;
   }
 
   public boolean isSupported() {

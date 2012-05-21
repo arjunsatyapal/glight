@@ -17,6 +17,11 @@ package com.google.light.server.dto.pojo.typewrapper.longwrapper;
 
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+
+import org.codehaus.jackson.annotate.JsonTypeName;
+
 import com.google.light.server.dto.pojo.typewrapper.AbstractTypeWrapper;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.JobId.JobIdDeserializer;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.JobId.JobIdSerializer;
@@ -46,7 +51,9 @@ import org.codehaus.jackson.map.annotate.JsonSerialize;
 @JsonSerialize(using = JobIdSerializer.class)
 @JsonDeserialize(using = JobIdDeserializer.class)
 @XmlJavaTypeAdapter(JobIdXmlAdapter.class)
+@JsonTypeName(value = "jobId")
 @XmlRootElement(name = "jobId")
+@XmlAccessorType(XmlAccessType.FIELD)
 public class JobId extends AbstractTypeWrapper<Long, JobId> {
 
   public JobId(String value) {

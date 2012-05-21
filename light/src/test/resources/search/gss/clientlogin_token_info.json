@@ -1,4 +1,4 @@
 {
-  "expiresInMillis" : 10,
+  "expiresInMillis" : "10",
   "token" : "SAMPLE_TOKEN"
 }

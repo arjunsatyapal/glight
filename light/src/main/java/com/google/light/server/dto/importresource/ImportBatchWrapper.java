@@ -15,7 +15,6 @@
  */
 package com.google.light.server.dto.importresource;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.constants.LightConstants.IMPORT_BATCH_SIZE_MAX;
 import static com.google.light.server.utils.LightPreconditions.checkIntegerIsInRage;
@@ -25,7 +24,6 @@ import static com.google.light.server.utils.LightUtils.isCollectionEmpty;
 import static com.google.light.server.utils.LightUtils.replaceInstanceInList;
 
 import com.google.common.collect.Lists;
-import com.google.light.server.constants.LightConstants;
 import com.google.light.server.dto.AbstractDto;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.CollectionId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.JobId;
@@ -129,7 +127,7 @@ public class ImportBatchWrapper extends AbstractDto<ImportBatchWrapper> {
   }
 
   private void doValidation(boolean isRequest) {
-    doValidationForListMembers(isRequest);
+    ImportExternalIdDto.doValidationForList(getList(), isRequest);
 
     if (isRequest) {
       checkNull(jobId, "jobId should not be set by client.");
@@ -140,22 +138,6 @@ public class ImportBatchWrapper extends AbstractDto<ImportBatchWrapper> {
       checkNotNull(jobId, "jobId");
       checkNotNull(jobState, "jobState");
       checkNotNull(jobStateCategory, "jobStateCategory");
-    }
-  }
-
-  private void doValidationForListMembers(boolean isRequest) {
-
-    if (isRequest) {
-      // Request size is limited. Response can be bigger.
-      checkArgument(list.size() <= LightConstants.IMPORT_BATCH_SIZE_MAX);
-    }
-    
-    for (ImportExternalIdDto curr : getList()) {
-      if (isRequest) {
-        curr.requestValidation();
-      } else {
-        curr.responseValidation();
-      }
     }
   }
 

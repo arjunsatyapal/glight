@@ -17,11 +17,13 @@ package com.google.light.server.jersey.resources.thirdparty.mixed;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.constants.http.ContentTypeEnum.getContentTypeByString;
+import static com.google.light.server.dto.thirdparty.google.youtube.ContentLicense.DEFAULT_LIGHT_CONTENT_LICENSES;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkPersonLoggedIn;
 import static com.google.light.server.utils.ObjectifyUtils.repeatInTransaction;
 
+import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -36,12 +38,16 @@ import com.google.light.server.dto.module.ModuleState;
 import com.google.light.server.dto.module.ModuleType;
 import com.google.light.server.dto.pojo.tree.AbstractTreeNode.TreeNodeType;
 import com.google.light.server.dto.pojo.tree.collection.CollectionTreeNodeDto;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.CollectionId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.JobId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
+import com.google.light.server.dto.pojo.typewrapper.stringwrapper.ExternalId;
+import com.google.light.server.dto.thirdparty.google.youtube.ContentLicense;
 import com.google.light.server.exception.ExceptionType;
 import com.google.light.server.exception.unchecked.InvalidExternalIdException;
+import com.google.light.server.exception.unchecked.httpexception.NotFoundException;
 import com.google.light.server.jersey.resources.AbstractJerseyResource;
 import com.google.light.server.manager.interfaces.CollectionManager;
 import com.google.light.server.manager.interfaces.JobManager;
@@ -50,9 +56,12 @@ import com.google.light.server.persistence.entity.collection.CollectionEntity;
 import com.google.light.server.persistence.entity.collection.CollectionVersionEntity;
 import com.google.light.server.persistence.entity.jobs.JobEntity;
 import com.google.light.server.persistence.entity.jobs.JobState;
+import com.google.light.server.persistence.entity.module.ModuleEntity;
 import com.google.light.server.servlets.SessionManager;
+import com.google.light.server.urls.LightUrl;
 import com.google.light.server.utils.GuiceUtils;
 import com.google.light.server.utils.JsonUtils;
+import com.google.light.server.utils.LightUtils;
 import com.google.light.server.utils.ModuleUtils;
 import com.google.light.server.utils.Transactable;
 import com.google.light.server.utils.XmlUtils;
@@ -126,12 +135,17 @@ public class ImportResource extends AbstractJerseyResource {
     // Validate all child requests.
     importBatchWrapper.requestValidation();
     ImportBatchType type = importBatchWrapper.getImportBatchType();
-    //
-    // JobId parentJobId = rootJobId;
+
+    // Doing basic validations depending on type of job.
     switch (type) {
       case APPEND_COLLECTION_JOB:
         checkNotNull(importBatchWrapper.getBaseVersion(), "BaseVersion cannot be null.");
         checkNotNull(importBatchWrapper.getCollectionId(), "CollectionId cannot be null.");
+        CollectionId collectionId = importBatchWrapper.getCollectionId();
+        CollectionEntity collectionEntity = collectionManager.get(null, collectionId);
+        if (collectionEntity == null) {
+          throw new NotFoundException("Collection [" + collectionId + "] was not found.");
+        }
         break;
 
       case CREATE_COLLECTION_JOB:
@@ -164,20 +178,24 @@ public class ImportResource extends AbstractJerseyResource {
       public Void run(Objectify ofy) {
         List<PersonId> owners = Lists.newArrayList(GuiceUtils.getOwnerId());
 
-        CollectionTreeNodeDto dummyRoot = getDummyRootFromImportBatchWrapper(importBatchWrapper);
+        CollectionTreeNodeDto dummyRoot = null;
         CollectionEntity collectionEntity = null;
         switch (importBatchWrapper.getImportBatchType()) {
           case CREATE_COLLECTION_JOB:
-            collectionEntity = collectionManager.createEmptyCollection(ofy, owners, dummyRoot);
-            Version reservVersion = collectionEntity.reserveVersion();
-            collectionManager.update(ofy, collectionEntity);
+            dummyRoot = getDummyRootFromImportBatchWrapper(importBatchWrapper);
+            collectionEntity = collectionManager.reserveCollectionId(ofy, owners, dummyRoot,
+                DEFAULT_LIGHT_CONTENT_LICENSES);
+
+            Version reservedVersion = collectionManager.reserveCollectionVersionFirst(
+                ofy, collectionEntity);
 
             importBatchWrapper.setCollectionId(collectionEntity.getCollectionId());
             importBatchWrapper.setBaseVersion(collectionEntity.getLatestPublishVersion());
-            importBatchWrapper.setVersion(reservVersion);
+            importBatchWrapper.setVersion(reservedVersion);
             break;
 
           case APPEND_COLLECTION_JOB:
+            dummyRoot = getDummyRootFromImportBatchWrapper(importBatchWrapper);
             CollectionVersionEntity cvEntity = collectionManager.getLatestPublishedVersion(
                 ofy, importBatchWrapper.getCollectionId());
             checkNotNull(cvEntity, "cvEntity should not be null here.");
@@ -186,7 +204,7 @@ public class ImportResource extends AbstractJerseyResource {
 
             Version publishVersion = collectionManager.reserveAndPublishAsLatest(ofy,
                 importBatchWrapper.getCollectionId(), rootToBeUpdated,
-                CollectionState.PARTIALLY_PUBLISHED);
+                CollectionState.PARTIALLY_PUBLISHED, DEFAULT_LIGHT_CONTENT_LICENSES);
             importBatchWrapper.setBaseVersion(publishVersion);
             importBatchWrapper.setVersion(publishVersion);
             break;
@@ -239,6 +257,7 @@ public class ImportResource extends AbstractJerseyResource {
           .externalId(currExternalIdDto.getExternalId())
           .nodeType(currExternalIdDto.getModuleType().getNodeType())
           .moduleId(currExternalIdDto.getModuleId())
+          .version(LightUtils.LATEST_VERSION)
           .build();
 
       dummyRoot.addChildren(newChild);
@@ -258,60 +277,61 @@ public class ImportResource extends AbstractJerseyResource {
         // Predicting title does two things :
         // 1. Fetches the title.
         // 2. Ensures that its a valid module.
-        final String predictedTitle = ModuleUtils.getTitleForExternalId(
+
+        String predictedTitle = ModuleUtils.getTitleForExternalId(
             currExternalIdDto.getExternalId());
         if (StringUtils.isBlank(currExternalIdDto.getTitle())) {
           currExternalIdDto.setTitle(predictedTitle);
         }
 
-        if (currExternalIdDto.getModuleType().mapsToModule()) {
-          // Now reserve ModuleIds.
-          repeatInTransaction(new Transactable<Void>() {
-            @SuppressWarnings("synthetic-access")
-            @Override
-            public Void run(Objectify ofy) {
-              ModuleId moduleId = moduleManager.reserveModuleId
-                  (ofy, currExternalIdDto.getExternalId(), owners, currExternalIdDto.getTitle());
-              currExternalIdDto.setModuleId(moduleId);
-              return null;
+        ModuleType moduleType = currExternalIdDto.getModuleType();
+        final List<ContentLicense> contentLicenses = moduleType.getDefaultLicenses();
+
+        if (moduleType.mapsToModule()) {
+          if (currExternalIdDto.getModuleType() == ModuleType.LIGHT_HOSTED_MODULE) {
+            // This will be true for Light URLs.
+            LightUrl lightUrl = currExternalIdDto.getExternalId().getLightUrl();
+            ModuleEntity moduleEntity = moduleManager.get(null, lightUrl.getModuleId());
+
+            if (moduleEntity == null) {
+              throw new InvalidExternalIdException(currExternalIdDto.getExternalId());
             }
-          });
+
+            currExternalIdDto.setModuleId(lightUrl.getModuleId());
+            currExternalIdDto.setModuleState(ModuleState.PUBLISHED);
+            currExternalIdDto.setModuleType(moduleEntity.getModuleType());
+            currExternalIdDto.setVersion(LightUtils.LATEST_VERSION);
+          } else {
+            // Now reserve ModuleIds.
+            repeatInTransaction(new Transactable<Void>() {
+              @SuppressWarnings("synthetic-access")
+              @Override
+              public Void run(Objectify ofy) {
+                ExternalId externalId = currExternalIdDto.getExternalId();
+                ModuleId moduleId = moduleManager.reserveModuleId(ofy,
+                    currExternalIdDto.getExternalId(), owners, currExternalIdDto.getTitle(),
+                    contentLicenses);
+                currExternalIdDto.setModuleId(moduleId);
+                currExternalIdDto.setContentLicenses(contentLicenses);
+                System.out.println(currExternalIdDto.toJson());
+                return null;
+              }
+            });
+            currExternalIdDto.setModuleState(ModuleState.IMPORTING);
+          }
+        } else {
+          // This is a collection. So changing state to importing.
+          currExternalIdDto.setModuleState(ModuleState.IMPORTING);
         }
 
-        currExternalIdDto.setModuleState(ModuleState.IMPORTING);
+        currExternalIdDto.setContentLicenses(contentLicenses);
       } catch (InvalidExternalIdException e) {
-        logger.info("Ignoring externalId : " + currExternalIdDto.getExternalId());
+        logger.info("Ignoring externalId : " + currExternalIdDto.getExternalId() + " due to : "
+            + Throwables.getStackTraceAsString(e));
         currExternalIdDto.setModuleState(ModuleState.FAILED);
       }
     }
   }
-
-//  /**
-//   * @param importBatchWrapper
-//   * @param collectionEntity
-//   */
-//  private void reserveCollectionVersionForAppendCollectionJob(
-//      final ImportBatchWrapper importBatchWrapper) {
-//    ObjectifyUtils.repeatInTransaction(new Transactable<Void>() {
-//
-//      @SuppressWarnings("synthetic-access")
-//      @Override
-//      public Void run(Objectify ofy) {
-//        CollectionEntity collectionEntity = collectionManager.get(
-//            ofy, importBatchWrapper.getCollectionId());
-//        checkNotNull(collectionEntity, "collectionEntity should not be null here.");
-//        Version reservedVersion = collectionManager.reserveCollectionVersion(
-//            ofy, importBatchWrapper.getCollectionId());
-//        importBatchWrapper.setVersion(reservedVersion);
-//
-//        Version baseVersion = collectionEntity.determineBaseVersionForAppend(
-//            importBatchWrapper.getBaseVersion(), reservedVersion, LightClientType.BROWSER);
-//
-//        importBatchWrapper.setBaseVersion(baseVersion);
-//        return null;
-//      }
-//    });
-//  }
 
   /**
    * @param externalIdDto

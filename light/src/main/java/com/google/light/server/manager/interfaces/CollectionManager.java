@@ -1,5 +1,7 @@
 package com.google.light.server.manager.interfaces;
 
+import com.google.light.server.dto.thirdparty.google.youtube.ContentLicense;
+
 import com.google.light.server.dto.collection.CollectionState;
 
 import com.google.light.server.dto.pojo.tree.collection.CollectionTreeNodeDto;
@@ -59,23 +61,27 @@ public interface CollectionManager {
    * Reserve a CollectionId.
    */
   public CollectionEntity reserveCollectionId(Objectify ofy, List<PersonId> owners,
-      CollectionTreeNodeDto collectionTree);
+      CollectionTreeNodeDto collectionTree, List<ContentLicense> contentLicenses);
 
   /**
    * Add CollectionVersion for GoogleDoc.
    */
-  public Version reserveCollectionVersion(Objectify ofy, CollectionId collectionId);
+  public Version reserveCollectionVersion(Objectify ofy, CollectionId collectionId, 
+      List<ContentLicense> contentLicenses);
+  
+  public Version reserveCollectionVersionFirst(Objectify ofy, CollectionEntity collectionEntity); 
   
   /**
    * Add CollectionVersion.
    */
   public Version reserveAndPublishAsLatest(Objectify ofy, CollectionId collectionId,
-      CollectionTreeNodeDto collectionRoot, CollectionState collectionState);
+      CollectionTreeNodeDto collectionRoot, CollectionState collectionState, 
+      List<ContentLicense> contentLicenses);
   
   public CollectionVersionEntity getLatestPublishedVersion(Objectify ofy, CollectionId collectionId);
   
   public CollectionEntity createEmptyCollection(Objectify ofy, List<PersonId> owners, 
-      CollectionTreeNodeDto collectionTree);
+      CollectionTreeNodeDto collectionTree, List<ContentLicense> contentLicenses);
 
   public CollectionVersionEntity publishCollectionVersion(Objectify ofy,
       CollectionId collectionId, Version version, CollectionTreeNodeDto collectionRoot, 

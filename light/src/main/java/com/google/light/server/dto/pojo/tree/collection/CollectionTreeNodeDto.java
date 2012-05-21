@@ -69,6 +69,7 @@ public class CollectionTreeNodeDto extends AbstractTreeNode<CollectionTreeNodeDt
         checkModuleId(getModuleId());
         checkNotNull(moduleType, "moduleType");
         checkNotNull(externalId, "externalId");
+        checkNotNull(version, "version");
         break;
         
       default:

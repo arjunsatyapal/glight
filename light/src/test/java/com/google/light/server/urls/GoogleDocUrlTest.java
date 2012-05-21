@@ -13,10 +13,12 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.server.jersey.resources.thirdparty.google;
+package com.google.light.server.urls;
 
 import static com.google.light.server.utils.LightUtils.getURL;
 import static org.junit.Assert.assertEquals;
+
+import com.google.light.server.urls.GoogleDocUrl;
 
 import com.google.common.collect.Lists;
 import com.google.light.server.dto.module.ModuleType;

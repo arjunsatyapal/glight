@@ -20,8 +20,11 @@ import static com.google.light.server.constants.LightConstants.MAX_RESULTS_DEFAU
 import static com.google.light.server.servlets.thirdparty.google.gdoc.GoogleDocUtils.getFolderContentUrl;
 import static org.junit.Assert.assertEquals;
 
+import com.google.light.server.AbstractLightServerTest;
+
+import com.google.light.server.dto.thirdparty.google.gdoc.GoogleDocResourceId;
+
 import com.google.light.server.dto.pojo.typewrapper.stringwrapper.ExternalId;
-import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocResourceId;
 import java.net.URL;
 import org.junit.Test;
 
@@ -30,7 +33,8 @@ import org.junit.Test;
  * 
  * @author Arjun Satyapal
  */
-public class GoogleDocUtilsTest {
+public class GoogleDocUtilsTest extends AbstractLightServerTest {
+  
   /**
    * Test for {@link GoogleDocUtils#getArchiveStatusUrl(String)}.
    * 

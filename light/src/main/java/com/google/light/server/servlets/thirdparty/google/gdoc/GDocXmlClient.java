@@ -20,13 +20,14 @@ import static com.google.light.server.constants.OAuth2ProviderService.GOOGLE_DOC
 import static com.google.light.server.servlets.thirdparty.google.gdoc.GoogleDocUtils.getResourceEntryWithFoldersUrl;
 import static com.google.light.server.utils.GuiceUtils.getInstance;
 
+import com.google.light.server.dto.thirdparty.google.gdoc.GoogleDocResourceId;
+
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpHeaders;
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.HttpTransport;
 import com.google.inject.Inject;
-import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocResourceId;
 import com.google.light.server.manager.implementation.oauth2.owner.OAuth2OwnerTokenManagerFactory;
 import com.google.light.server.manager.interfaces.OAuth2OwnerTokenManager;
 import com.google.light.server.persistence.entity.oauth2.owner.OAuth2OwnerTokenEntity;

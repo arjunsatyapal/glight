@@ -22,8 +22,8 @@ import static com.google.light.server.utils.LightPreconditions.checkEmail;
 import static com.google.light.server.utils.LightPreconditions.checkIntegerIsInRage;
 import static com.google.light.server.utils.LightPreconditions.checkIsEnv;
 import static com.google.light.server.utils.LightPreconditions.checkIsNotEnv;
-import static com.google.light.server.utils.LightPreconditions.checkNonEmptyList;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
+import static com.google.light.server.utils.LightPreconditions.checkNotEmptyCollection;
 import static com.google.light.server.utils.LightPreconditions.checkNull;
 import static com.google.light.server.utils.LightPreconditions.checkPersonId;
 import static com.google.light.server.utils.LightPreconditions.checkPersonIsGaeAdmin;
@@ -34,21 +34,19 @@ import static com.google.light.server.utils.LightPreconditions.checkValidUri;
 import static com.google.light.server.utils.LightUtils.getUUIDString;
 import static com.google.light.testingutils.TestingUtils.gaeSetup;
 import static com.google.light.testingutils.TestingUtils.getMockSessionForTesting;
-import static com.google.light.testingutils.TestingUtils.getRequestScopedValueProvider;
 import static com.google.light.testingutils.TestingUtils.getRandomEmail;
 import static com.google.light.testingutils.TestingUtils.getRandomPersonId;
 import static com.google.light.testingutils.TestingUtils.getRandomProviderUserId;
 import static com.google.light.testingutils.TestingUtils.getRandomString;
+import static com.google.light.testingutils.TestingUtils.getRequestScopedValueProvider;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
-import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
-
 
 import com.google.common.collect.Lists;
 import com.google.inject.Injector;
 import com.google.light.server.constants.LightEnvEnum;
 import com.google.light.server.constants.OAuth2ProviderService;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
 import com.google.light.server.exception.unchecked.BlankStringException;
 import com.google.light.server.exception.unchecked.InvalidPersonIdException;
 import com.google.light.server.exception.unchecked.InvalidSessionException;
@@ -235,18 +233,19 @@ public class LightPreconditionsTest {
    */
   @Test
   public void test_checkNonEmptyList() {
-    checkNonEmptyList(Lists.newArrayList(1L), "");
+    checkNotEmptyCollection(Lists.newArrayList(1L), "");
 
     // Negative : List = null.
     try {
-      checkNonEmptyList(null, "null expected");
+      List<Object> tempList = null;
+      checkNotEmptyCollection(tempList, "null expected");
       fail("should have failed.");
-    } catch (NullPointerException e) {
+    } catch (IllegalArgumentException e) {
       // expected.
     }
 
     try {
-      checkNonEmptyList(Lists.newArrayList(), "empty list");
+      checkNotEmptyCollection(Lists.newArrayList(), "empty list");
       fail("should have failed.");
     } catch (IllegalArgumentException e) {
       // expected.

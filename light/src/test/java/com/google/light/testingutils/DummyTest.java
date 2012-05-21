@@ -17,6 +17,24 @@ package com.google.light.testingutils;
 
 import static org.junit.Assert.assertEquals;
 
+import com.google.light.server.dto.thirdparty.google.youtube.ContentLicense;
+
+import com.google.light.server.dto.module.ModuleState;
+
+import com.google.light.server.persistence.entity.jobs.JobState;
+
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.JobId;
+
+import com.google.light.server.utils.XmlUtils;
+
+import com.google.gdata.data.youtube.VideoEntry;
+
+import com.google.light.server.thirdparty.clients.google.youtube.YouTubeServiceWrapper;
+
+import java.util.regex.Matcher;
+
+import java.util.regex.Pattern;
+
 import com.google.common.base.Charsets;
 import com.google.light.server.dto.importresource.ImportBatchWrapper;
 import com.google.light.server.dto.importresource.ImportExternalIdDto;
@@ -54,6 +72,7 @@ public class DummyTest {
         .title("child0")
         .nodeType(TreeNodeType.LEAF_NODE)
         .moduleId(new ModuleId(1234L))
+        .version(new Version(5678L))
         .moduleType(ModuleType.GOOGLE_DOCUMENT)
         .externalId(TestingConstants.TEST_EXTERNAL_ID)
         .build();
@@ -117,21 +136,21 @@ public class DummyTest {
                 new ExternalId(
                     "https://drive.google.com/a/myopenedu.com/?pli=1#folders/0B15KDir5QLAcYXBRMzJCWUhYWEE"))
             .title("Google Folder with Custom Title")
-            .build();
+            .build1();
     
     ImportExternalIdDto dtoFolderWithoutTitle =
         new ImportExternalIdDto.Builder()
             .externalId(
                 new ExternalId(
                     "https://drive.google.com/a/myopenedu.com/?pli=1#folders/0B15KDir5QLAcQlpiM1hVS25RUUdxcVAwQlNYcXZDQQ"))
-            .build();
+            .build1();
     
     ImportExternalIdDto dtoEmptyFolderWithoutTitle =
         new ImportExternalIdDto.Builder()
             .externalId(
                 new ExternalId(
                     "https://drive.google.com/a/myopenedu.com/?pli=1#folders/0B15KDir5QLAceG9zeVVPNDBlWnc"))
-            .build();
+            .build1();
     
     ImportExternalIdDto dtoEmptyFolderWithTitle =
         new ImportExternalIdDto.Builder()
@@ -139,7 +158,7 @@ public class DummyTest {
                 new ExternalId(
                     "https://drive.google.com/a/myopenedu.com/?pli=1#folders/0B15KDir5QLAceG9zeVVPNDBlWnc"))
             .title("Empty Google Folder with Custom Title.")
-            .build();
+            .build1();
 
     ImportExternalIdDto dtoDocumentWithCustomTitle =
         new ImportExternalIdDto.Builder()
@@ -147,14 +166,14 @@ public class DummyTest {
                 new ExternalId(
                     "https://docs.google.com/a/myopenedu.com/document/d/1tJZGzv_2sjMpvs4jtwxg18PGuSG-6nlfmx8Hlqa-_58/edit"))
             .title("Google Document with custom title")
-            .build();
+            .build1();
 
     ImportExternalIdDto dtoDocumentWithoutTitle =
         new ImportExternalIdDto.Builder()
             .externalId(
                 new ExternalId(
                     "https://docs.google.com/a/myopenedu.com/document/d/1SpnvIapiaT9MfvD2gmEFpz6vtHahwdzexMgX1tR5LyM/edit?pli=1"))
-            .build();
+            .build1();
 
     ImportExternalIdDto dtoPresentation =
         new ImportExternalIdDto.Builder()
@@ -162,18 +181,18 @@ public class DummyTest {
                 new ExternalId(
                     "https://docs.google.com/a/myopenedu.com/presentation/d/16PiVnXJvg1CbIB2jwvv73B0nwmpNwk584jMjW-wsPY8/edit#slide=id.p"))
             .title("Some presentation")
-            .build();
+            .build1();
 
     ImportExternalIdDto dtoSyntheticWithCustomTitle =
         new ImportExternalIdDto.Builder()
             .externalId(new ExternalId("http://en.wikipedia.org/wiki/Google"))
             .title("Synthetic module with custom title")
-            .build();
+            .build1();
 
     ImportExternalIdDto dtoSyntheticWithoutTitle =
         new ImportExternalIdDto.Builder()
             .externalId(new ExternalId("http://en.wikipedia.org/wiki/Gmail"))
-            .build();
+            .build1();
 
     ImportBatchWrapper listWrapper = new ImportBatchWrapper();
     listWrapper.addImportModuleDto(dtoFolderWithCustomTitle);
@@ -190,5 +209,79 @@ public class DummyTest {
     listWrapper.setBaseVersion(new Version(Version.LATEST_VERSION));
 
     System.out.println(JsonUtils.toJson(listWrapper));
+  }
+  
+  @Test
+  public void test_lightUrl() {
+//    String MODULE_IDENTIFIER = "/rest/content/general/module/";
+//    String pattern = "^" + MODULE_IDENTIFIER + "(\\d+)/((latest)|(\\d+)){1}";
+//    System.out.println("modulePattern = " + pattern);
+//    Pattern modulePattern = Pattern.compile(pattern);
+//    
+//    String url = MODULE_IDENTIFIER + "1234/latest";
+//    Matcher matcher = modulePattern.matcher(url);
+//    System.out.println(url + " : " + matcher.matches());
+//    System.out.println("GroupCount = " + matcher.groupCount());
+//    for (int i = 0; i < matcher.groupCount(); i++) {
+//      System.out.println(matcher.group(i));
+//    }
+//
+//    
+//    url = MODULE_IDENTIFIER + "1234/5678";
+//    matcher = modulePattern.matcher(url);
+//    System.out.println("\n" + url + " : " + matcher.matches());
+//    System.out.println("GroupCount = " + matcher.groupCount());
+//    for (int i = 0; i < matcher.groupCount(); i++) {
+//      System.out.println(matcher.group(i));
+//    }
+    
+    String COLLECTION_IDENTIFIER = "/rest/content/general/collection/";
+    String pattern2 =  COLLECTION_IDENTIFIER + "(\\d+)/(latest|\\d+)/((\\d+))";
+    System.out.println("collectionPattern = " + pattern2);
+    Pattern collectionPattern = Pattern.compile(pattern2);
+    System.out.println(collectionPattern);
+    
+    String url2 = COLLECTION_IDENTIFIER + "1234/9875/5678";
+    Matcher matcher2 = collectionPattern.matcher(url2);
+    System.out.println("\n" + url2 + " : " + matcher2.matches());
+    System.out.println("GroupCount = " + matcher2.groupCount());
+    for (int i = 0; i < matcher2.groupCount(); i++) {
+      System.out.println(matcher2.group(i));
+    }
+  }
+  
+  @Test
+  public void test_matcher() {
+    String pattern = "foo/(\\d+)/(\\d+)/(\\d+)";
+    Pattern pt = Pattern.compile(pattern);
+    
+    Matcher matcher = pt.matcher("foo/11/12/13");
+    System.out.println(matcher.matches());
+  }
+  
+  @Test
+  public void test_youtube() throws Exception {
+    YouTubeServiceWrapper ytService = new YouTubeServiceWrapper();
+    VideoEntry entry = ytService.getEntry(new URL("http://gdata.youtube.com/feeds/api/videos/4FSdMqhQvBI"), VideoEntry.class);
+    System.out.println(XmlUtils.getXmlEntry(entry));
+    ytService.printVideoEntry(entry, true);
+  }
+  
+  @Test
+  public void test_importExternalId() {
+    ImportExternalIdDto dto = LightUtils.createImportExternalIdDto(
+        ContentLicense.DEFAULT_LIGHT_CONTENT_LICENSES,
+        new ExternalId("http://gdata.youtube.com/feeds/api/videos/4FSdMqhQvBI"),
+        new JobId(1234L),
+        JobState.ALL_CHILDS_COMPLETED,
+        new ModuleId(1234L),
+        ModuleType.YOU_TUBE_VIDEO,
+        ModuleState.IMPORTING,
+        "random",
+        new Version(1234L));
+    
+    System.out.println(XmlUtils.toXml(dto));
+    
+    System.out.println(JsonUtils.toJson(dto));
   }
 }

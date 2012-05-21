@@ -13,10 +13,10 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.server.dto.thirdparty.google.gdata.gdoc;
+package com.google.light.server.dto.thirdparty.google.gdoc;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.light.server.utils.LightPreconditions.checkNonEmptyList;
+import static com.google.light.server.utils.LightPreconditions.checkNotEmptyCollection;
 import static com.google.light.server.utils.LightPreconditions.checkPersonId;
 import static com.google.light.server.utils.LightUtils.isCollectionEmpty;
 
@@ -118,7 +118,7 @@ public class GoogleDocImportBatchJobContext extends AbstractDto<GoogleDocImportB
         //$FALL-THROUGH$
 
       case ENQUEUED:
-        checkNonEmptyList(resourceInfoList, "resourceInfoList");
+        checkNotEmptyCollection(resourceInfoList, "resourceInfoList");
         break;
 
       case BUILDING:
@@ -126,7 +126,7 @@ public class GoogleDocImportBatchJobContext extends AbstractDto<GoogleDocImportB
 
       default:
         checkNotNull(root, "root");
-        checkNonEmptyList(listOfImportDestinations, "listOfImportDestinations");
+        checkNotEmptyCollection(listOfImportDestinations, "listOfImportDestinations");
     }
     return this;
   }

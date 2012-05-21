@@ -20,6 +20,7 @@ import com.google.light.server.dto.AbstractDto;
 import com.google.light.server.dto.AbstractPojo;
 import com.google.light.server.exception.unchecked.JsonException;
 import java.io.StringReader;
+import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.annotate.JsonAutoDetect;
 import org.codehaus.jackson.map.AnnotationIntrospector;
 import org.codehaus.jackson.map.DeserializationConfig;
@@ -95,10 +96,10 @@ public class JsonUtils {
    */
   public static  ObjectMapper getJsonMapper() {
     ObjectMapper mapper = new ObjectMapper();
+    mapper.configure(JsonGenerator.Feature.WRITE_NUMBERS_AS_STRINGS, true);
     mapper.configure(SerializationConfig.Feature.INDENT_OUTPUT, true);
     mapper.configure(SerializationConfig.Feature.SORT_PROPERTIES_ALPHABETICALLY, true);
     mapper.setSerializationInclusion(JsonSerialize.Inclusion.NON_NULL);
-    
 
     mapper.setVisibilityChecker(mapper.getSerializationConfig().getDefaultVisibilityChecker()
         .withFieldVisibility(JsonAutoDetect.Visibility.ANY)

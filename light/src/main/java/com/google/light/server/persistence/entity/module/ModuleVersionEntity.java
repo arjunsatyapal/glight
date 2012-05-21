@@ -17,20 +17,23 @@ package com.google.light.server.persistence.entity.module;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
+import static com.google.light.server.utils.LightPreconditions.checkNotEmptyCollection;
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
 import static com.google.light.server.utils.LightUtils.getWrapper;
 import static com.google.light.server.utils.LightUtils.getWrapperValue;
 
 import com.google.light.server.annotations.ObjectifyQueryField;
 import com.google.light.server.annotations.ObjectifyQueryFieldName;
+import com.google.light.server.dto.module.ModuleState;
 import com.google.light.server.dto.module.ModuleVersionDto;
-import com.google.light.server.dto.module.ModuleVersionState;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
 import com.google.light.server.dto.pojo.typewrapper.stringwrapper.ExternalId;
+import com.google.light.server.dto.thirdparty.google.youtube.ContentLicense;
 import com.google.light.server.persistence.entity.AbstractPersistenceEntity;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.Parent;
+import java.util.List;
 import javax.persistence.Id;
 import org.joda.time.Instant;
 
@@ -48,12 +51,14 @@ public class ModuleVersionEntity extends
   private Long version;
   @Parent
   private Key<ModuleEntity> moduleKey;
-  private ModuleVersionState state;
+  private ModuleState moduleState;
   private String title;
+  private String description;
   private String content;
+  private List<ContentLicense> contentLicenses;
   private String etag;
   private String externalId;
-//  private Text
+  // private Text
 
   // TODO(arjuns): Add a test to ensure this string matches with field name.
   @ObjectifyQueryFieldName("lastEditTimeInMillis")
@@ -81,8 +86,8 @@ public class ModuleVersionEntity extends
     return generateKey(ModuleEntity.generateKey(moduleId), version);
   }
 
-  public ModuleVersionState getState() {
-    return state;
+  public ModuleState getModuleState() {
+    return moduleState;
   }
 
   /**
@@ -91,13 +96,16 @@ public class ModuleVersionEntity extends
   @Override
   public ModuleVersionDto toDto() {
     ModuleVersionDto dto = new ModuleVersionDto.Builder()
-        .moduleId(getModuleId())
-        .version(getVersion())
         .content(content)
+        .contentLicenses(getContentLicenses())
+        .description(description)
         .externalId(getExternalId())
+        .moduleId(getModuleId())
+        .title(title)
+        .version(getVersion())
         .build();
 
-    return dto;
+    return dto.validate();
   }
 
   public Version getVersion() {
@@ -111,23 +119,35 @@ public class ModuleVersionEntity extends
   public String getTitle() {
     return title;
   }
-  
+
   public void setTitle(String title) {
     this.title = checkNotBlank(title, "title");
   }
-  
+
+  public String getDescription() {
+    return description;
+  }
+
+  public void setDescription(String description) {
+    this.description = description;
+  }
+
   public String getContent() {
     return content;
   }
-  
+
   public void setContent(String content) {
     this.content = checkNotBlank(content, "content");
+  }
+
+  public List<ContentLicense> getContentLicenses() {
+    return contentLicenses;
   }
 
   public Key<ModuleEntity> getModuleKey() {
     return moduleKey;
   }
-  
+
   public ModuleId getModuleId() {
     return getWrapper(moduleKey.getId(), ModuleId.class);
   }
@@ -135,11 +155,11 @@ public class ModuleVersionEntity extends
   public String getEtag() {
     return etag;
   }
-  
+
   public void setEtag(String etag) {
     this.etag = etag;
   }
-  
+
   public ExternalId getExternalId() {
     return getWrapper(externalId, ExternalId.class);
   }
@@ -152,8 +172,8 @@ public class ModuleVersionEntity extends
   public ModuleVersionEntity validate() {
     checkPositiveLong(version, "version");
 
-    checkNotNull(state, "state");
-    switch (state) {
+    checkNotNull(moduleState, "state");
+    switch (moduleState) {
       case RESERVED:
         break;
 
@@ -161,19 +181,27 @@ public class ModuleVersionEntity extends
         checkNotBlank(content, "content");
     }
 
+    checkNotBlank(title, "title");
     checkNotNull(moduleKey, "moduleKey");
+    checkNotEmptyCollection(contentLicenses, "contentLicenses");
 
     checkPositiveLong(lastEditTimeInMillis, "lastEditTime");
 
     return this;
   }
 
+  public boolean isMutable() {
+    return getModuleState() == ModuleState.RESERVED;
+  }
+
   public static class Builder extends AbstractPersistenceEntity.BaseBuilder<Builder> {
     private Version version;
     private String title;
+    private String description;
     private String content;
+    private List<ContentLicense> contentLicenses;
     private Key<ModuleEntity> moduleKey;
-    private ModuleVersionState state;
+    private ModuleState moduleState;
     private String etag;
     private Instant lastEditTime;
     private ExternalId externalId;
@@ -192,14 +220,24 @@ public class ModuleVersionEntity extends
       this.title = title;
       return this;
     }
-    
+
+    public Builder description(String description) {
+      this.description = description;
+      return this;
+    }
+
     public Builder content(String content) {
       this.content = content;
       return this;
     }
 
-    public Builder state(ModuleVersionState state) {
-      this.state = state;
+    public Builder contentLicenses(List<ContentLicense> contentLicenses) {
+      this.contentLicenses = contentLicenses;
+      return this;
+    }
+
+    public Builder moduleState(ModuleState moduleState) {
+      this.moduleState = moduleState;
       return this;
     }
 
@@ -212,7 +250,7 @@ public class ModuleVersionEntity extends
       this.lastEditTime = lastEditTime;
       return this;
     }
-    
+
     public Builder externalId(ExternalId externalId) {
       this.externalId = externalId;
       return this;
@@ -228,15 +266,17 @@ public class ModuleVersionEntity extends
   private ModuleVersionEntity(Builder builder) {
     super(builder, true);
     this.version = getWrapperValue(builder.version);
-    
+
     this.title = builder.title;
+    this.description = builder.description;
     this.content = builder.content;
-    
+    this.contentLicenses = builder.contentLicenses;
+
     this.moduleKey = builder.moduleKey;
-    this.state = builder.state;
+    this.moduleState = builder.moduleState;
     this.etag = builder.etag;
     this.externalId = getWrapperValue(builder.externalId);
-    
+
     if (builder.lastEditTime != null) {
       this.lastEditTimeInMillis = builder.lastEditTime.getMillis();
     }

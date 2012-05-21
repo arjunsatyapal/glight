@@ -18,15 +18,13 @@ package com.google.light.server.dto.pojo.tree;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNull;
 
-import javax.xml.bind.annotation.XmlAnyElement;
-
-import javax.xml.bind.annotation.XmlElementWrapper;
-
 import com.google.common.collect.Lists;
 import com.google.light.server.dto.AbstractDto;
 import java.util.List;
 import javax.persistence.Embedded;
+import javax.xml.bind.annotation.XmlAnyElement;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 /**
@@ -41,12 +39,21 @@ public abstract class AbstractTreeNode<T extends AbstractTreeNode<T>> extends Ab
   @XmlElement(name = "title")
   @JsonProperty(value = "title")
   protected String title;
-  
+
+  @XmlElement(name = "description")
+  @JsonProperty(value = "description")
+  protected String description;
+
+  @XmlElement(name = "nodeId")
+  @JsonProperty(value = "nodeId")
+  protected String nodeId;
+
   @XmlElement(name = "nodeType")
   @JsonProperty(value = "nodeType")
   protected TreeNodeType nodeType;
 
-  // TODO(arjuns): See if this embedded can be removed. At present both Dto and persistence are using this.
+  // TODO(arjuns): See if this embedded can be removed. At present both Dto and persistence are
+  // using this.
   // This is bad.
   @Embedded
   @XmlElementWrapper(name = "list")
@@ -85,14 +92,22 @@ public abstract class AbstractTreeNode<T extends AbstractTreeNode<T>> extends Ab
     return title;
   }
 
+  public String getDescription() {
+    return description;
+  }
+
+  public String getNodeId() {
+    return nodeId;
+  }
+
   public TreeNodeType getNodeType() {
     return nodeType;
   }
-  
+
   public boolean isLeafNode() {
     return nodeType == TreeNodeType.LEAF_NODE;
   }
-  
+
   public boolean isIntermediateNode() {
     return nodeType == TreeNodeType.INTERMEDIATE_NODE;
   }
@@ -106,32 +121,32 @@ public abstract class AbstractTreeNode<T extends AbstractTreeNode<T>> extends Ab
     if (list == null) {
       list = Lists.newArrayList();
     }
-    
+
     return list;
   }
-  
+
   public boolean hasChildren() {
     if (list == null || list.size() == 0) {
       return false;
     }
-    
+
     return true;
   }
-  
+
   @SuppressWarnings("unchecked")
   public List<T> getInOrderTraversalOfLeafNodes() {
     if (getNodeType() == TreeNodeType.LEAF_NODE) {
       return ((List<T>) Lists.newArrayList(this));
     }
-    
+
     List<T> list = Lists.newArrayList();
-    
+
     if (hasChildren()) {
       for (T currChild : getChildren()) {
         list.addAll(currChild.getInOrderTraversalOfLeafNodes());
       }
     }
-    
+
     return list;
   }
 
@@ -139,6 +154,9 @@ public abstract class AbstractTreeNode<T extends AbstractTreeNode<T>> extends Ab
   public static class Builder<N extends AbstractTreeNode, T extends Builder> extends
       AbstractDto.BaseBuilder<Builder> {
     private String title;
+    private String description;
+    private String nodeId;
+
     private TreeNodeType nodeType;
     // private N parent;
     private List<N> children;
@@ -148,15 +166,20 @@ public abstract class AbstractTreeNode<T extends AbstractTreeNode<T>> extends Ab
       return ((T) this);
     }
 
+    public T description(String description) {
+      this.description = description;
+      return ((T) this);
+    }
+
+    public T nodeId(String nodeId) {
+      this.nodeId = nodeId;
+      return ((T) this);
+    }
+
     public T nodeType(TreeNodeType nodeType) {
       this.nodeType = nodeType;
       return ((T) this);
     }
-
-    // public T parent(N parent) {
-    // this.parent = parent;
-    // return ((T) this);
-    // }
 
     public T children(List<N> children) {
       this.children = children;
@@ -173,6 +196,8 @@ public abstract class AbstractTreeNode<T extends AbstractTreeNode<T>> extends Ab
     }
 
     this.title = builder.title;
+    this.description = builder.description;
+    this.nodeId = builder.nodeId;
 
     this.nodeType = builder.nodeType;
     // this.parent = builder.parent;

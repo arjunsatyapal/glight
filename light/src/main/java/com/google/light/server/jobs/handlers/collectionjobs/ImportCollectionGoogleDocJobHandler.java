@@ -33,17 +33,18 @@ import com.google.light.server.dto.pojo.tree.AbstractTreeNode.TreeNodeType;
 import com.google.light.server.dto.pojo.tree.collection.CollectionTreeNodeDto;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.JobId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
-import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocInfoDto;
-import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocResourceId;
+import com.google.light.server.dto.thirdparty.google.gdoc.GoogleDocInfoDto;
+import com.google.light.server.dto.thirdparty.google.gdoc.GoogleDocResourceId;
 import com.google.light.server.jobs.handlers.JobHandlerInterface;
 import com.google.light.server.jobs.handlers.modulejobs.ImportModuleGoogleDocJobHandler;
 import com.google.light.server.manager.interfaces.JobManager;
 import com.google.light.server.manager.interfaces.ModuleManager;
 import com.google.light.server.persistence.entity.jobs.JobEntity;
 import com.google.light.server.persistence.entity.jobs.JobState;
-import com.google.light.server.thirdparty.clients.google.gdata.gdoc.DocsServiceWrapper;
+import com.google.light.server.thirdparty.clients.google.gdoc.DocsServiceWrapper;
 import com.google.light.server.utils.GuiceUtils;
 import com.google.light.server.utils.JsonUtils;
+import com.google.light.server.utils.LightUtils;
 import com.google.light.server.utils.ObjectifyUtils;
 import com.google.light.server.utils.Transactable;
 import com.googlecode.objectify.Objectify;
@@ -83,7 +84,7 @@ public class ImportCollectionGoogleDocJobHandler implements JobHandlerInterface 
       case ALL_CHILDS_COMPLETED:
         handleChildCompletions(context, jobEntity);
         break;
-        
+
       case ENQUEUED:
         createChilds(jobEntity.getJobId());
         break;
@@ -112,24 +113,24 @@ public class ImportCollectionGoogleDocJobHandler implements JobHandlerInterface 
         DocsServiceWrapper docsService = GuiceUtils.getInstance(DocsServiceWrapper.class);
         List<GoogleDocInfoDto> listOfChilds = 
             docsService.getFolderContentWhichAreSupportedInAlphabeticalOrder(
-                gdocResourceId, GDATA_GDOC_MAX_RESULTS);
+                gdocResourceId, GDATA_GDOC_MAX_RESULTS,
+                GoogleDocInfoDto.Configuration.DTO_FOR_DEBUGGING);
         System.out.println(JsonUtils.toJson(listOfChilds));
 
         JobId enqueuedJobId = null;
         for (GoogleDocInfoDto currChild : listOfChilds) {
           ImportExternalIdDto existing = context.findImportExternalIdDtoByExternalId(
               currChild.getExternalId());
-          if (existing != null && existing.hasJobId()) {
-            // For current child, job is already created.
+          if (existing != null && !existing.needsNewJobId()) {
+            // For current child, job is already created or not required.
             continue;
           }
 
           ModuleType moduleType = currChild.getModuleType();
-          ImportExternalIdDto importExternalIdDto = new ImportExternalIdDto.Builder()
-              .externalId(currChild.getExternalId())
-              .title(currChild.getTitle())
-              .moduleType(currChild.getModuleType())
-              .build();
+          ImportExternalIdDto importExternalIdDto = LightUtils.createImportExternalIdDto(
+              context.getContentLicenses(), currChild.getExternalId(), null /*jobId*/, null /*jobState*/,
+                  null /*moduleId*/, moduleType, ModuleState.IMPORTING, currChild.getTitle(), 
+                  LightUtils.LATEST_VERSION);
 
           switch (moduleType) {
             case GOOGLE_COLLECTION:
@@ -146,25 +147,32 @@ public class ImportCollectionGoogleDocJobHandler implements JobHandlerInterface 
               throw new IllegalStateException("We should not get this type : " + moduleType);
           }
 
+          context.addImportModuleDto(importExternalIdDto);
+          jobEntity.setContext(context);
+          
           if (enqueuedJobId != null) {
             // Update ParentJob Context and then exit for loop and retry this function for other
             // pending childs.
-            context.addImportModuleDto(importExternalIdDto);
-            jobEntity.setContext(context);
+            context.validate();
             jobEntity.addChildJob(checkNotNull(importExternalIdDto.getJobId(),
                 "jobId cannot be null."));
             System.out.println(context.toJson());
             jobManager.put(ofy, jobEntity, new ChangeLogEntryPojo(
                 "enqueued child : " + importExternalIdDto.getJobId()));
-            return true;
+          } else {
+            jobManager.put(ofy, jobEntity, new ChangeLogEntryPojo(
+                "child upto date : " + importExternalIdDto.getExternalId()));
           }
+          return true;
         }
 
         if (enqueuedJobId == null) {
-          
-          // All possible childs are created. So this job is now ready for getting child notifications.
+
+          // All possible childs are created. So this job is now ready for getting child
+          // notifications.
           System.out.println(context.toJson());
           System.out.println("\n****" + Iterables.toString(jobEntity.getChildJobs()));
+          context.validate();
           JobState jobState = null;
           if (isCollectionEmpty(jobEntity.getChildJobs())) {
             // This means all the childs were ignored.
@@ -174,13 +182,12 @@ public class ImportCollectionGoogleDocJobHandler implements JobHandlerInterface 
           } else {
             jobState = JobState.WAITING_FOR_CHILD_COMPLETE_NOTIFICATION;
           }
-          
+
           System.out.println(jobEntity.getContext().getValue());
           jobEntity.setJobState(jobState);
           jobManager.put(ofy, jobEntity, new ChangeLogEntryPojo(
               "getting ready for " + jobState));
-          
-          
+
         }
         return false;
       }
@@ -239,6 +246,7 @@ public class ImportCollectionGoogleDocJobHandler implements JobHandlerInterface 
     final ImportCollectionGoogleDocContext jobRequest =
         new ImportCollectionGoogleDocContext.Builder()
             .title(title)
+            .contentLicenses(importExternalIdDto.getContentLicenses())
             .externalId(importExternalIdDto.getExternalId())
             .gdocInfo(gdocInfo)
             .build();

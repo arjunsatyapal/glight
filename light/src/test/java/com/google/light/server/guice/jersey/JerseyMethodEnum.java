@@ -18,6 +18,12 @@ package com.google.light.server.guice.jersey;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
+import com.google.light.server.jersey.resources.admin.gae.CronResource;
+
+import com.google.light.server.jersey.resources.search.SearchIndexResource;
+
+import com.google.light.server.jersey.resources.test.TestAdminResources;
+
 import com.google.light.server.jersey.resources.thirdparty.google.GoogleDocIntegration;
 
 import com.google.light.server.jersey.resources.thirdparty.mixed.ImportResource;
@@ -167,6 +173,16 @@ public enum JerseyMethodEnum {
                                                             new String[] { "text/html; charset=UTF-8" }
   ),
 
+  // Cron Resource
+  CRON_RESROUCE_REFRESH_SEARCH_INDEX(
+                                     CronResource.class,
+                                     "refreshSearchIndex",
+                                     new Class[] {},
+                                     GET.class,
+                                     "/rest/gaeadmin/cron/searchIndexRefresh",
+                                     new String[] {}
+  ),
+
   // GAEAdmin Resource Jersey Methods.
   GAE_ADMIN_RESOURCE_GET_CONFIG(
                                 GAEAdminResources.class,
@@ -195,14 +211,14 @@ public enum JerseyMethodEnum {
                           new String[] { "application/json; charset=UTF-8",
                                   "application/xml; charset=UTF-8" }),
 
-//  GOOGLE_DOC_GET_FOLDER_CONTENTS(
-//                                 GoogleDocIntegration.class,
-//                                 "getFolderContents",
-//                                 new Class[] { String.class, String.class, String.class },
-//                                 GET.class,
-//                                 "/rest/thirdparty/google/gdoc/info/folder",
-//                                 new String[] { "application/json; charset=UTF-8",
-//                                         "application/xml; charset=UTF-8" }),
+  // GOOGLE_DOC_GET_FOLDER_CONTENTS(
+  // GoogleDocIntegration.class,
+  // "getFolderContents",
+  // new Class[] { String.class, String.class, String.class },
+  // GET.class,
+  // "/rest/thirdparty/google/gdoc/info/folder",
+  // new String[] { "application/json; charset=UTF-8",
+  // "application/xml; charset=UTF-8" }),
 
   // Import Resource Jersey Methods.
 
@@ -233,13 +249,13 @@ public enum JerseyMethodEnum {
                          "/rest/job/{job_id}",
                          new String[] {}),
 
-  JOB_RESOURCE_GET_JOB_STATUS(
+  JOB_RESOURCE_GET_JOB_DETAILS(
                               JobResource.class,
-                              "getJobStatus",
+                              "getJobDetails",
                               new Class[] { String.class },
                               GET.class,
-                              "/rest/job/{job_id}",
-                              new String[] { "text/html; charset=UTF-8" }),
+                              "/rest/job/{job_id}/detail",
+                              new String[] { "text/plain; charset=UTF-8" }),
 
   JOB_RESOURCE_GET_JOBS_CREATED_BY_ME(
                                       JobResource.class,
@@ -248,6 +264,14 @@ public enum JerseyMethodEnum {
                                       GET.class,
                                       "/rest/job/me",
                                       new String[] { "text/html; charset=UTF-8" }),
+
+  JOB_RESOURCE_GET_JOB_TREE(
+                            JobResource.class,
+                            "getJobTree",
+                            new Class[] { String.class },
+                            GET.class,
+                            "/rest/job/{job_id}",
+                            new String[] { "text/html; charset=UTF-8" }),
 
   // Module Resource Jersey Methods.
   MODULE_RESOURCE_GET_MODULE(
@@ -271,13 +295,13 @@ public enum JerseyMethodEnum {
                                              "application/xml; charset=UTF-8" }),
 
   MODULE_RESOURCE_GET_MODULE_MATCHING_FILTER(
-                                     ModuleResource.class,
-                                     "getModulesMatchingFilter",
-                                     new Class[] { String.class, String.class, String.class },
-                                     GET.class,
-                                     "/rest/module/search",
-                                     new String[] { "application/json; charset=UTF-8",
-                                             "application/xml; charset=UTF-8" }),
+                                             ModuleResource.class,
+                                             "getModulesMatchingFilter",
+                                             new Class[] { String.class, String.class, String.class },
+                                             GET.class,
+                                             "/rest/module/search",
+                                             new String[] { "application/json; charset=UTF-8",
+                                                     "application/xml; charset=UTF-8" }),
 
   MODULE_RESOURCE_MODULES_PUBLISHED_BY_ME(
                                           ModuleResource.class,
@@ -305,21 +329,30 @@ public enum JerseyMethodEnum {
                                                "/rest/notification/job",
                                                new String[] {}),
 
+  // Search Index Resource
+  SEARCH_INDEX_RESOURCE_UPDATE_INDICES(
+                                       SearchIndexResource.class,
+                                       "updateIndices",
+                                       new Class[] {},
+                                       GET.class,
+                                       "/rest/gaeadmin/search/updateIndices",
+                                       new String[] { "text/plain; charset=UTF-8" }),
+
   // Test Resource Jersey Methods.
-  TEST_RESOURCE_DELETE_ALL(
-                           TestResources.class,
-                           "deleteAll",
-                           new Class[] {},
-                           GET.class,
-                           "/rest/test/deleteall",
-                           new String[] { "text/plain; charset=UTF-8" }),
-  TEST_RESOURCE_PURGE_QUEUE(
-                            TestResources.class,
-                            "purgeQueue",
-                            new Class[] {},
-                            GET.class,
-                            "/rest/test/purgequeues",
-                            new String[] { "text/plain; charset=UTF-8" }),
+  TEST_ADMIN_RESOURCE_DELETE_ALL(
+                                 TestAdminResources.class,
+                                 "deleteAll",
+                                 new Class[] {},
+                                 GET.class,
+                                 "/rest/gaeadmin/test/deleteall",
+                                 new String[] { "text/plain; charset=UTF-8" }),
+  TEST_ADMIN_RESOURCE_PURGE_QUEUE(
+                                  TestAdminResources.class,
+                                  "purgeQueue",
+                                  new Class[] {},
+                                  GET.class,
+                                  "/rest/gaeadmin/test/purgequeues",
+                                  new String[] { "text/plain; charset=UTF-8" }),
   TEST_RESOURCE_SESSION(
                         TestResources.class,
                         "getSessionDetails",

@@ -17,7 +17,6 @@ package com.google.light.server.utils;
 
 import static com.google.light.server.utils.LightUtils.getWrapperValue;
 
-import com.google.appengine.api.utils.SystemProperty;
 import com.google.light.server.constants.JerseyConstants;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.JobId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
@@ -46,7 +45,7 @@ public class LocationUtils {
       uriBuilder.withServer("localhost");
       uriBuilder.withPort("8080");
     } else {
-      String appId = SystemProperty.applicationId.get();
+      String appId = GaeUtils.getAppId();
       String appSpot = appId + ".appspot.com";
       uriBuilder.withServer(appSpot);
     }

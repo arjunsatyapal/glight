@@ -16,7 +16,7 @@
 package com.google.light.server.constants;
 
 import static com.google.light.server.constants.LightEnvEnum.getLightEnvByAppId;
-import static com.google.light.server.utils.LightPreconditions.checkNonEmptyList;
+import static com.google.light.server.utils.LightPreconditions.checkNotEmptyCollection;
 import static com.google.light.testingutils.TestingUtils.getRandomString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -110,7 +110,7 @@ public class LightEnvEnumTest implements EnumTestInterface {
   public void test_getAppIds() {
     // We are just testing for Prod, but others can be similar.
     List<String> appIdList = LightEnvEnum.PROD.getAppIds();
-    checkNonEmptyList(appIdList, "appIdList");
+    checkNotEmptyCollection(appIdList, "appIdList");
     assertEquals(1, appIdList.size());
     assertTrue(appIdList.contains("light-prod"));
   }

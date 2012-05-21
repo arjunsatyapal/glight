@@ -17,15 +17,20 @@ package com.google.light.server.dto.module;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
+import static com.google.light.server.utils.LightPreconditions.checkNotEmptyCollection;
 
 import com.google.light.server.dto.AbstractDtoToPersistence;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
 import com.google.light.server.dto.pojo.typewrapper.stringwrapper.ExternalId;
+import com.google.light.server.dto.thirdparty.google.youtube.ContentLicense;
 import com.google.light.server.persistence.entity.module.ModuleVersionEntity;
+import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAnyElement;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.annotate.JsonTypeName;
@@ -49,11 +54,24 @@ public class ModuleVersionDto extends AbstractDtoToPersistence<ModuleVersionDto,
   @XmlElement(name = "version")
   @JsonProperty(value = "version")
   private Version version;
-  
+
+  @XmlElement(name = "title")
+  @JsonProperty(value = "title")
+  private String title;
+
+  @XmlElement(name = "description")
+  @JsonProperty(value = "description")
+  private String description;
+
   @XmlElement(name = "content")
   @JsonProperty(value = "content")
   private String content;
-  
+
+  @XmlElementWrapper(name = "contentLicenses")
+  @XmlAnyElement
+  @JsonProperty(value = "contentLicenses")
+  private List<ContentLicense> contentLicenses;
+
   @XmlElement(name = "externalId")
   @JsonProperty(value = "externalId")
   private ExternalId externalId;
@@ -66,6 +84,7 @@ public class ModuleVersionDto extends AbstractDtoToPersistence<ModuleVersionDto,
     checkNotNull(moduleId, "moduleId");
     checkNotNull(version, "version");
     checkNotBlank(content, "content");
+    checkNotEmptyCollection(contentLicenses, "contentLicenses");
     checkNotNull(externalId, "externalId");
     return this;
   }
@@ -83,10 +102,25 @@ public class ModuleVersionDto extends AbstractDtoToPersistence<ModuleVersionDto,
     return entity;
   }
 
+  public ModuleId getModuleId() {
+    return moduleId;
+  }
+
+  public String getTitle() {
+    return title;
+  }
+
+  public String getDescription() {
+    return description;
+  }
+
   public String getContent() {
     return content;
   }
-
+  
+  public List<ContentLicense> getContentLicenses() {
+    return contentLicenses;
+  }
   public Version getVersion() {
     return version;
   }
@@ -98,7 +132,10 @@ public class ModuleVersionDto extends AbstractDtoToPersistence<ModuleVersionDto,
   public static class Builder extends AbstractDtoToPersistence.BaseBuilder<Builder> {
     private ModuleId moduleId;
     private Version version;
+    private String title;
+    private String description;
     private String content;
+    private List<ContentLicense> contentLicenses;
     private ExternalId externalId;
 
     public Builder moduleId(ModuleId moduleId) {
@@ -111,8 +148,23 @@ public class ModuleVersionDto extends AbstractDtoToPersistence<ModuleVersionDto,
       return this;
     }
 
+    public Builder title(String title) {
+      this.title = title;
+      return this;
+    }
+    
+    public Builder description(String description) {
+      this.description = description;
+      return this;
+    }
+    
     public Builder content(String content) {
       this.content = content;
+      return this;
+    }
+    
+    public Builder contentLicenses(List<ContentLicense> contentLicenses) {
+      this.contentLicenses = contentLicenses;
       return this;
     }
     
@@ -132,7 +184,10 @@ public class ModuleVersionDto extends AbstractDtoToPersistence<ModuleVersionDto,
     super(builder);
     this.moduleId = builder.moduleId;
     this.version = builder.version;
+    this.title = builder.title;
+    this.description = builder.description;
     this.content = builder.content;
+    this.contentLicenses = builder.contentLicenses;
     this.externalId = builder.externalId;
   }
 

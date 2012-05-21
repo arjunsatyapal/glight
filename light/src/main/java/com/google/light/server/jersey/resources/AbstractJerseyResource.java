@@ -18,14 +18,9 @@ package com.google.light.server.jersey.resources;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.GuiceUtils.getInstance;
 import static com.google.light.server.utils.GuiceUtils.seedEntityInRequestScope;
-import static com.google.light.server.utils.LightPreconditions.checkIsRunningUnderQueue;
+import static com.google.light.server.utils.LightPreconditions.checkIsUnderTaskQueue;
 import static com.google.light.server.utils.ServletUtils.getRequestHeaderValue;
 
-import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
-
-import com.google.light.server.utils.JsonUtils;
-
-import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.light.server.annotations.AnotHttpSession;
@@ -33,9 +28,13 @@ import com.google.light.server.annotations.AnotOwner;
 import com.google.light.server.constants.HttpHeaderEnum;
 import com.google.light.server.constants.QueueEnum;
 import com.google.light.server.constants.http.ContentTypeEnum;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
 import com.google.light.server.servlets.SessionManager;
 import com.google.light.server.utils.GuiceUtils;
+import com.google.light.server.utils.JsonUtils;
+import com.google.light.server.utils.LightPreconditions;
 import com.google.light.server.utils.ServletUtils;
+import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -48,6 +47,8 @@ import javax.servlet.http.HttpSession;
  * @author Arjun Satyapal
  */
 public abstract class AbstractJerseyResource {
+  private static final Logger logger = Logger.getLogger(AbstractJerseyResource.class.getName());
+  
   @Inject Injector injector;
   protected HttpServletRequest request;
   protected HttpServletResponse response;
@@ -64,27 +65,27 @@ public abstract class AbstractJerseyResource {
   }
   
   public QueueEnum getQueue() {
-    checkIsRunningUnderQueue(request);
+    checkIsUnderTaskQueue(request);
     return queue;
   }
 
   public String getTaskName() {
-    checkIsRunningUnderQueue(request);
+    checkIsUnderTaskQueue(request);
     return taskName;
   }
 
   public int getTaskRetryCount() {
-    checkIsRunningUnderQueue(request);
+    checkIsUnderTaskQueue(request);
     return taskRetryCount;
   }
 
   public String getFailFast() {
-    checkIsRunningUnderQueue(request);
+    checkIsUnderTaskQueue(request);
     return failFast;
   }
 
   public String getTaskEta() {
-    checkIsRunningUnderQueue(request);
+    checkIsUnderTaskQueue(request);
     return taskEta;
   }
 
@@ -104,9 +105,6 @@ public abstract class AbstractJerseyResource {
     SessionManager sessionManager = GuiceUtils.getInstance(SessionManager.class);
     sessionManager.seedPersonIds(request);
 
-    PersonId foo = getInstance(PersonId.class, AnotOwner.class);
-    Preconditions.checkNotNull(foo);
-    
     initQueueParamsIfRequired(request);
   }
 
@@ -119,8 +117,13 @@ public abstract class AbstractJerseyResource {
     if (queueName == null) {
       return;
     }
-    
+    logger.info("QueueName = " + queueName);
     queue = QueueEnum.getByName(queueName);
+    
+    if (queue == QueueEnum.GAE_CRON_QUEUE) {
+      return;
+    }
+    
     taskName = getRequestHeaderValue(request, HttpHeaderEnum.GAE_TASK_NAME);
     taskRetryCount = Integer.parseInt(getRequestHeaderValue(request, 
         HttpHeaderEnum.GAE_TASK_RETRY_COUNT));
@@ -128,6 +131,8 @@ public abstract class AbstractJerseyResource {
     taskEta = getRequestHeaderValue(request, HttpHeaderEnum.GAE_TASK_ETA);
     
     initOwner();
+    PersonId ownerId = getInstance(PersonId.class, AnotOwner.class);
+    LightPreconditions.checkPersonId(ownerId);
   }
   
   /**

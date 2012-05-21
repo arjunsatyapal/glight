@@ -17,9 +17,9 @@ package com.google.light.server.persistence.entity.collection;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.light.server.utils.LightPreconditions.checkNonEmptyList;
 import static com.google.light.server.utils.LightPreconditions.checkNonNegativeLong;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
+import static com.google.light.server.utils.LightPreconditions.checkNotEmptyCollection;
 import static com.google.light.server.utils.LightPreconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkVersion;
 import static com.google.light.server.utils.LightUtils.convertListOfValuesToWrapperList;
@@ -27,15 +27,15 @@ import static com.google.light.server.utils.LightUtils.convertWrapperListToListO
 import static com.google.light.server.utils.LightUtils.getWrapper;
 import static com.google.light.server.utils.LightUtils.getWrapperValue;
 
-import com.google.light.server.constants.LightClientType;
-
 import com.google.light.server.annotations.ObjectifyQueryField;
 import com.google.light.server.annotations.ObjectifyQueryFieldName;
+import com.google.light.server.constants.LightClientType;
 import com.google.light.server.dto.collection.CollectionDto;
 import com.google.light.server.dto.collection.CollectionState;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.CollectionId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
+import com.google.light.server.dto.thirdparty.google.youtube.ContentLicense;
 import com.google.light.server.exception.ExceptionType;
 import com.google.light.server.persistence.entity.AbstractPersistenceEntity;
 import com.googlecode.objectify.Key;
@@ -55,6 +55,7 @@ public class CollectionEntity extends AbstractPersistenceEntity<CollectionEntity
   @Id
   private Long collectionId;
   private String title;
+  private List<ContentLicense> contentLicenses;
   private CollectionState state;
   @ObjectifyQueryFieldName("owners")
   public static final String OFY_COLLECTION_OWNER_QUERY_STRING = "owners IN";
@@ -70,12 +71,15 @@ public class CollectionEntity extends AbstractPersistenceEntity<CollectionEntity
   public CollectionEntity validate() {
     super.validate();
     checkNotBlank(title, "title");
+    checkNotEmptyCollection(contentLicenses, "contentLicenses");
     checkNotNull(state, "collectionState");
-    checkNonEmptyList(owners, "owners");
+    checkNotEmptyCollection(owners, "owners");
 
     // TODO(arjuns): Add validation for etag.
     checkNonNegativeLong(latestPublishVersion, "latestVersion");
     checkNonNegativeLong(nextVersion, "nextVersion");
+
+    checkNotNull(creationTimeInMillis, "creationTimeInMillis");
     return this;
   }
 
@@ -99,9 +103,13 @@ public class CollectionEntity extends AbstractPersistenceEntity<CollectionEntity
   public String getTitle() {
     return title;
   }
-  
+
   public void setTitle(String title) {
     this.title = checkNotBlank(title, "title");
+  }
+
+  public List<ContentLicense> getContentLicenses() {
+    return contentLicenses;
   }
 
   public CollectionState getState() {
@@ -127,10 +135,10 @@ public class CollectionEntity extends AbstractPersistenceEntity<CollectionEntity
   public Version getNextVersion() {
     return getWrapper(nextVersion, Version.class);
   }
-  
+
   /**
    * Thisk should be called by callers if they want to reserve a version. And callers are expected
-   * to save the entity. 
+   * to save the entity.
    */
   public Version reserveVersion() {
     /*
@@ -143,34 +151,35 @@ public class CollectionEntity extends AbstractPersistenceEntity<CollectionEntity
   /**
    * If the currently published version is newer then latestPublishVersion, then update it.
    * Caller is expected to persist this entity.
+   * 
    * @param latestVersion
    */
   @SuppressWarnings("unused")
   public void publishVersion(Version latestPublishVersion, Instant lastEditTime, String etag) {
     // Other then builder, all are required to set a positive latestVersion.
     checkVersion(latestPublishVersion);
-    
+
     Long tempVersion = getWrapperValue(latestPublishVersion);
     if (this.latestPublishVersion < tempVersion) {
       this.latestPublishVersion = tempVersion;
       this.etag = etag;
       this.state = CollectionState.PUBLISHED;
     }
-    
-    checkArgument(this.latestPublishVersion < this.nextVersion, 
+
+    checkArgument(this.latestPublishVersion < this.nextVersion,
         "latestPublishVersion should be always less then nextVersion");
   }
-  
-  public Version determineBaseVersionForAppend(Version askedVersion, Version reservedVersion, 
+
+  public Version determineBaseVersionForAppend(Version askedVersion, Version reservedVersion,
       LightClientType clientType) {
     if (askedVersion.isSpecificVersion() || askedVersion.isNoVersion()) {
       return askedVersion;
     }
-    
+
     if (clientType == LightClientType.BROWSER) {
       return reservedVersion.getPreviousVersion();
     }
-    
+
     throw new IllegalArgumentException("Invalid askedVersion : " + askedVersion);
   }
 
@@ -179,19 +188,23 @@ public class CollectionEntity extends AbstractPersistenceEntity<CollectionEntity
    */
   @Override
   public CollectionDto toDto() {
-    return new CollectionDto.Builder()
+    CollectionDto dto = new CollectionDto.Builder()
         .collectionId(getCollectionId())
-        .title(title)
-        .state(state)
-        .owners(getOwners())
+        .contentLicenses(contentLicenses)
         .latestPublishedVersion(getLatestPublishVersion())
         .nextVersion(getNextVersion())
+        .owners(getOwners())
+        .state(state)
+        .title(title)
         .build();
+    
+    return dto.validate();
   }
 
   public static class Builder extends AbstractPersistenceEntity.BaseBuilder<Builder> {
     private Long id;
     private String title;
+    private List<ContentLicense> contentLicenses;
     private CollectionState state;
     private List<PersonId> owners;
     private String etag;
@@ -205,6 +218,11 @@ public class CollectionEntity extends AbstractPersistenceEntity<CollectionEntity
 
     public Builder title(String title) {
       this.title = title;
+      return this;
+    }
+
+    public Builder contentLicenses(List<ContentLicense> contentLicenses) {
+      this.contentLicenses = contentLicenses;
       return this;
     }
 
@@ -239,12 +257,13 @@ public class CollectionEntity extends AbstractPersistenceEntity<CollectionEntity
     super(builder, true);
     this.collectionId = builder.id;
     this.title = builder.title;
+    this.contentLicenses = builder.contentLicenses;
     this.state = builder.state;
     this.owners = convertWrapperListToListOfValues(builder.owners);
     this.etag = builder.etag;
     this.latestPublishVersion = getWrapperValue(builder.latestPublishVersion);
     this.nextVersion = getWrapperValue(builder.nextVersion);
-    
+
   }
 
   // For objectify.

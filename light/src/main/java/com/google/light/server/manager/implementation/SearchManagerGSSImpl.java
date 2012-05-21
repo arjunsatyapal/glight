@@ -39,7 +39,7 @@ public class SearchManagerGSSImpl implements SearchManager {
 
   private static final String GSS_CSE_URL = "http://www.google.com/cse";
   // TODO(waltercacau): Extract this to a property file
-  private static final String GSS_CSE_ID = "001369170667164983739:xqelsiji0y8";
+  private static final String GSS_CSE_ID = "010876134375682122369:tpzezwcekzm";
   private static final String SUGGESTION_QUERY_TAG = "q";
   private static final String SUGGESTION_TAG = "Suggestion";
   private static final String SPELLING_TAG = "Spelling";

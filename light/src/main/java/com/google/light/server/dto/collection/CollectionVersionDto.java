@@ -18,15 +18,18 @@ package com.google.light.server.dto.collection;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
-import com.google.light.server.dto.pojo.tree.collection.CollectionTreeNodeDto;
-
 import com.google.light.server.dto.AbstractDtoToPersistence;
+import com.google.light.server.dto.pojo.tree.collection.CollectionTreeNodeDto;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.CollectionId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
+import com.google.light.server.dto.thirdparty.google.youtube.ContentLicense;
 import com.google.light.server.persistence.entity.collection.CollectionVersionEntity;
+import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAnyElement;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.annotate.JsonTypeName;
@@ -59,6 +62,11 @@ public class CollectionVersionDto extends AbstractDtoToPersistence<CollectionVer
   @JsonProperty(value = "collectionTree")
   private CollectionTreeNodeDto collectionTree;
   
+  @XmlElementWrapper(name = "contentLicenses")
+  @XmlAnyElement
+  @JsonProperty(value = "contentLicenses")
+  private List<ContentLicense> contentLicenses;
+  
   @XmlElement(name = "collectionState")
   @JsonProperty(value = "collectionState")
   private CollectionState collectionState;
@@ -84,6 +92,18 @@ public class CollectionVersionDto extends AbstractDtoToPersistence<CollectionVer
     throw new UnsupportedOperationException();
   }
 
+  public CollectionId getCollectionId() {
+    return collectionId;
+  }
+
+  public List<ContentLicense> getContentLicenses() {
+    return contentLicenses;
+  }
+
+  public CollectionState getCollectionState() {
+    return collectionState;
+  }
+
   public CollectionTreeNodeDto getCollectionTree() {
     return collectionTree;
   }
@@ -101,6 +121,7 @@ public class CollectionVersionDto extends AbstractDtoToPersistence<CollectionVer
     private String title;
     private Version version;
     private CollectionTreeNodeDto collectionTree;
+    private List<ContentLicense> contentLicenses;
     private CollectionState collectionState;
 
     public Builder collectionId(CollectionId collectionId) {
@@ -123,6 +144,11 @@ public class CollectionVersionDto extends AbstractDtoToPersistence<CollectionVer
       return this;
     }
     
+    public Builder contentLicenses(List<ContentLicense> contentLicenses) {
+      this.contentLicenses = contentLicenses;
+      return this;
+    }
+    
     public Builder collectionState(CollectionState collectionState) {
       this.collectionState = collectionState;
       return this;
@@ -141,6 +167,7 @@ public class CollectionVersionDto extends AbstractDtoToPersistence<CollectionVer
     this.title = builder.title;
     this.version = builder.version;
     this.collectionTree = builder.collectionTree;
+    this.contentLicenses = builder.contentLicenses;
     this.collectionState = builder.collectionState;
   }
 

@@ -35,4 +35,6 @@ public class LightStringConstants {
   
   public static final String FTS_MODULE_ID_KEY = "moduleId:";
   
+  public static final String LIGHT_APPLICATION_NAME = "light";
+  
 }

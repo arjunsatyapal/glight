@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.server.dto.thirdparty.google.gdata.gdoc;
+package com.google.light.server.dto.thirdparty.google.gdoc;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.constants.OAuth2ProviderService.GOOGLE_DOC;
@@ -196,7 +196,7 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> implements C
       checkNotBlank(htmlExportUrl, "htmlExportUrl");
       // checkNonEmptyList(parentCollectionUrls);
 
-      checkNotNull(owners);
+//      checkNotNull(owners, "owners");
       // We dont do any validation for writers, commenters and readers.
       // checkNotNull(writers);
       // checkNotNull(commenters);
@@ -591,9 +591,10 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> implements C
         lastCommentTime(new DateTime(docListEntry.getLastCommented().getValue()).toInstant());
       }
 
-      if (config != Configuration.DTO_FOR_IMPORT) {
-        withAclFeed(docListEntry.getAclFeed());
-      }
+      // TODO(arjuns): Fix this.
+//      if (config != Configuration.DTO_FOR_IMPORT) {
+//        withAclFeed(docListEntry.getAclFeed());
+//      }
 
       return this;
     }

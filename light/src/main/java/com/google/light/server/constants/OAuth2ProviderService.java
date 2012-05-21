@@ -13,16 +13,13 @@
 package com.google.light.server.constants;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.light.server.utils.LightPreconditions.checkNonEmptyList;
+import static com.google.light.server.utils.LightPreconditions.checkNotEmptyCollection;
 import static com.google.light.server.utils.LightPreconditions.checkValidUri;
 
-import com.google.light.server.servlets.oauth2.google.pojo.GoogleOAuth2TokenInfo;
-
-import com.google.light.server.servlets.oauth2.google.pojo.GoogleLoginTokenInfo;
-
-import com.google.light.server.servlets.oauth2.google.pojo.AbstractOAuth2TokenInfo;
-
 import com.google.common.collect.Lists;
+import com.google.light.server.servlets.oauth2.google.pojo.AbstractOAuth2TokenInfo;
+import com.google.light.server.servlets.oauth2.google.pojo.GoogleLoginTokenInfo;
+import com.google.light.server.servlets.oauth2.google.pojo.GoogleOAuth2TokenInfo;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 
@@ -85,7 +82,7 @@ public enum OAuth2ProviderService {
       this.tokenServerUrl = checkValidUri(tokenServerUrl);
       this.tokenInfoUrl = checkValidUri(tokenInfoUrl);
       this.tokenInfoClazz = checkNotNull(tokenInfoClazz);
-      this.scopes = (ArrayList<String>) checkNonEmptyList(scopes, "scopes");
+      this.scopes = checkNotEmptyCollection(scopes, "scopes");
     } catch (URISyntaxException e) {
       throw new IllegalArgumentException(e);
     }

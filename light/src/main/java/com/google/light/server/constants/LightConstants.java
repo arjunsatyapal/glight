@@ -32,6 +32,7 @@ public class LightConstants {
   public static int SECOND_FIVE = 5;
   public static int SECOND_TEN = 10;
   public static int SECONDS_IN_MIN = 60;
+  public static int SECONDS_IN_TEN_MIN = 60* 10;
   public static int SECONDS_IN_HR = 60 * 60;
   public static int SECONDS_IN_A_DAY = 24 * 60 * 60;
   

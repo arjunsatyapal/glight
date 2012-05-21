@@ -58,7 +58,7 @@ public class JerseyResourcesEnumTest implements EnumTestInterface {
   @Override
   @Test
   public void test_count() throws Exception {
-    assertEquals(9, JerseyResourcesEnum.values().length);
+    assertEquals(12, JerseyResourcesEnum.values().length);
 
     Set<Class<? extends AbstractJerseyResource>> existingSet =
         JerseyMethodEnum.getSetOfJerseyResources();

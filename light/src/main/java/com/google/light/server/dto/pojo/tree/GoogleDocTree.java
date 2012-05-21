@@ -17,14 +17,15 @@ package com.google.light.server.dto.pojo.tree;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.light.server.dto.thirdparty.google.gdoc.GoogleDocInfoDto;
+import com.google.light.server.dto.thirdparty.google.gdoc.GoogleDocResourceId;
+
 import org.codehaus.jackson.annotate.JsonTypeName;
 
 import javax.xml.bind.annotation.XmlAccessType;
 
 import javax.xml.bind.annotation.XmlAccessorType;
 
-import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocInfoDto;
-import com.google.light.server.dto.thirdparty.google.gdata.gdoc.GoogleDocResourceId;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import org.codehaus.jackson.annotate.JsonProperty;

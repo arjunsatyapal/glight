@@ -14,10 +14,7 @@ package com.google.light.server.servlets.path;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
-
-import java.util.List;
-
-import javax.servlet.http.HttpServlet;
+import static com.google.light.server.utils.LightPreconditions.checkNotEmptyCollection;
 
 import com.google.common.collect.Lists;
 import com.google.light.server.constants.LightEnvEnum;
@@ -40,7 +37,8 @@ import com.google.light.server.servlets.test.TestLogin;
 import com.google.light.server.servlets.test.TestServlet;
 import com.google.light.server.servlets.test.oauth2.TestCredentialBackupServlet;
 import com.google.light.server.servlets.test.oauth2.login.FakeLoginServlet;
-import com.google.light.server.utils.LightPreconditions;
+import java.util.List;
+import javax.servlet.http.HttpServlet;
 
 /**
  * Enum to Map Servlets with their Paths and URL Patterns.
@@ -168,7 +166,7 @@ public enum ServletPathEnum {
 
     this.allowedInProd = allowedInProd;
     this.allowedInNonProd = allowedInNonProd;
-    this.listOfFilters = LightPreconditions.checkNonEmptyList(listOfFilters, "listOfFilters.");
+    this.listOfFilters = checkNotEmptyCollection(listOfFilters, "listOfFilters.");
   }
 
   public Class<? extends HttpServlet> getClazz() {
