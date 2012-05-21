@@ -196,7 +196,7 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> implements C
       checkNotBlank(htmlExportUrl, "htmlExportUrl");
       // checkNonEmptyList(parentCollectionUrls);
 
-      checkNotNull(owners);
+//      checkNotNull(owners, "owners");
       // We dont do any validation for writers, commenters and readers.
       // checkNotNull(writers);
       // checkNotNull(commenters);
@@ -591,9 +591,10 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> implements C
         lastCommentTime(new DateTime(docListEntry.getLastCommented().getValue()).toInstant());
       }
 
-      if (config != Configuration.DTO_FOR_IMPORT) {
-        withAclFeed(docListEntry.getAclFeed());
-      }
+      // TODO(arjuns): Fix this.
+//      if (config != Configuration.DTO_FOR_IMPORT) {
+//        withAclFeed(docListEntry.getAclFeed());
+//      }
 
       return this;
     }

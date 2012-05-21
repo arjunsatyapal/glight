@@ -90,7 +90,7 @@ public class GoogleDocJobs {
     nodeBuilder.nodeType(TreeNodeType.INTERMEDIATE_NODE);
     List<GoogleDocInfoDto> listOfChilds = 
         docsServiceProvider.get().getFolderContentWhichAreSupportedInAlphabeticalOrder(
-            resourceId, GDATA_GDOC_MAX_RESULTS);
+            resourceId, GDATA_GDOC_MAX_RESULTS, GoogleDocInfoDto.Configuration.DTO_FOR_DEBUGGING);
 
     List<GoogleDocInfoDto> listOfSupportedChilds = Lists.newArrayList();
     for (GoogleDocInfoDto currChild : listOfChilds) {

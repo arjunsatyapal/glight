@@ -115,7 +115,8 @@ public class ModuleUtils {
     DocsServiceWrapper docsService = GuiceUtils.getInstance(DocsServiceWrapper.class);
     GoogleDocResourceId resourceId = new GoogleDocResourceId(externalId);
     try {
-      GoogleDocInfoDto info = docsService.getGoogleDocInfo(resourceId);
+      GoogleDocInfoDto info = docsService.getGoogleDocInfo(resourceId, 
+          GoogleDocInfoDto.Configuration.DTO_FOR_IMPORT);
       return info.getTitle();
     } catch (Exception e) {
       throw new InvalidExternalIdException(externalId);

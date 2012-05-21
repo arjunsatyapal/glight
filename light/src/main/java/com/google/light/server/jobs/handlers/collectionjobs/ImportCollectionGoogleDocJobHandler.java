@@ -111,17 +111,18 @@ public class ImportCollectionGoogleDocJobHandler implements JobHandlerInterface 
 
         GoogleDocResourceId gdocResourceId = new GoogleDocResourceId(context.getExternalId());
         DocsServiceWrapper docsService = GuiceUtils.getInstance(DocsServiceWrapper.class);
-        List<GoogleDocInfoDto> listOfChilds =
+        List<GoogleDocInfoDto> listOfChilds = 
             docsService.getFolderContentWhichAreSupportedInAlphabeticalOrder(
-                gdocResourceId, GDATA_GDOC_MAX_RESULTS);
+                gdocResourceId, GDATA_GDOC_MAX_RESULTS,
+                GoogleDocInfoDto.Configuration.DTO_FOR_DEBUGGING);
         System.out.println(JsonUtils.toJson(listOfChilds));
 
         JobId enqueuedJobId = null;
         for (GoogleDocInfoDto currChild : listOfChilds) {
           ImportExternalIdDto existing = context.findImportExternalIdDtoByExternalId(
               currChild.getExternalId());
-          if (existing != null && existing.hasJobId()) {
-            // For current child, job is already created.
+          if (existing != null && !existing.needsNewJobId()) {
+            // For current child, job is already created or not required.
             continue;
           }
 
@@ -146,19 +147,23 @@ public class ImportCollectionGoogleDocJobHandler implements JobHandlerInterface 
               throw new IllegalStateException("We should not get this type : " + moduleType);
           }
 
+          context.addImportModuleDto(importExternalIdDto);
+          jobEntity.setContext(context);
+          
           if (enqueuedJobId != null) {
             // Update ParentJob Context and then exit for loop and retry this function for other
             // pending childs.
             context.validate();
-            context.addImportModuleDto(importExternalIdDto);
-            jobEntity.setContext(context);
             jobEntity.addChildJob(checkNotNull(importExternalIdDto.getJobId(),
                 "jobId cannot be null."));
             System.out.println(context.toJson());
             jobManager.put(ofy, jobEntity, new ChangeLogEntryPojo(
                 "enqueued child : " + importExternalIdDto.getJobId()));
-            return true;
+          } else {
+            jobManager.put(ofy, jobEntity, new ChangeLogEntryPojo(
+                "child upto date : " + importExternalIdDto.getExternalId()));
           }
+          return true;
         }
 
         if (enqueuedJobId == null) {

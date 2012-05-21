@@ -93,7 +93,6 @@ public class ImportModuleGoogleDocJobHandler implements JobHandlerInterface {
   private JobManager jobManager;
   private FTSManager ftsManager;
   private ModuleManager moduleManager;
-  
 
   @Inject
   public ImportModuleGoogleDocJobHandler(JobManager jobManager, FTSManager ftsManager,
@@ -113,7 +112,7 @@ public class ImportModuleGoogleDocJobHandler implements JobHandlerInterface {
 
     switch (gdocImportContext.getState()) {
       case ENQUEUED:
-        startArchivingGoogleDoc(gdocImportContext, jobEntity);
+        startArchivingGoogleDocIfRequired(gdocImportContext, jobEntity);
         break;
 
       case WAITING_FOR_ARCHIVE:
@@ -153,31 +152,36 @@ public class ImportModuleGoogleDocJobHandler implements JobHandlerInterface {
         "Successfully completed Google Doc Job.");
   }
 
-  // TODO(arjuns): Move this inside jobManager.
+  // TODO(arjuns): This creates a duplicate job even when not required.
   public JobId enqueueModuleGoogleDocJob(Objectify ofy, ImportExternalIdDto importModuleDto,
       GoogleDocInfoDto gdocInfo, JobId parentJobId, JobId rootJobId) {
     ModuleId moduleId = importModuleDto.getModuleId();
 
     List<PersonId> owners = Lists.newArrayList(GuiceUtils.getOwnerId());
     Version reservedVersion = null;
+    boolean createdNewModule = false;
     if (moduleId == null) {
       // Either this GDoc is being imported for the first time, or is part of a sub collection.
       ModuleEntity moduleEntity = moduleManager.reserveModule(ofy, importModuleDto.getExternalId(),
           owners, importModuleDto.getTitle(), importModuleDto.getContentLicenses());
       moduleId = moduleEntity.getModuleId();
       importModuleDto.setModuleId(moduleEntity.getModuleId());
-      
+
       if (moduleEntity.getNextVersion().isFirstVersion()) {
         // This document is imported for the first time.
         reservedVersion = moduleManager.reserveModuleVersionFirst(ofy, moduleEntity);
+        createdNewModule = true;
       }
-    } 
-    
-    if (reservedVersion == null) {
-      // Now reserving a module version and creating a GDoc Child job that will publish this version.
-      // Control will reach here only when it is not the first version.
-      reservedVersion = moduleManager.reserveModuleVersion(ofy, moduleId,
-          gdocInfo.getEtag(), gdocInfo.getLastEditTime(), importModuleDto.getContentLicenses());
+    }
+
+    if (!createdNewModule) {
+      if (reservedVersion == null) {
+        // Now reserving a module version and creating a GDoc Child job that will publish this
+        // version.
+        // Control will reach here only when it is not the first version.
+        reservedVersion = moduleManager.reserveModuleVersion(ofy, moduleId,
+            gdocInfo.getEtag(), gdocInfo.getLastEditTime(), importModuleDto.getContentLicenses());
+      }
     }
 
     checkNotNull(importModuleDto.getModuleId());
@@ -264,10 +268,10 @@ public class ImportModuleGoogleDocJobHandler implements JobHandlerInterface {
    * @param gdocImportContext
    * @param jobEntity
    */
-  private void startArchivingGoogleDoc(final ImportModuleGoogleDocJobContext gdocImportContext,
+  private void startArchivingGoogleDocIfRequired(
+      final ImportModuleGoogleDocJobContext gdocImportContext,
       final JobEntity jobEntity) {
     DocsServiceWrapper docsService = GuiceUtils.getInstance(DocsServiceWrapper.class);
-
     GoogleDocInfoDto resourceInfo = gdocImportContext.getResourceInfo();
 
     GoogleDocResourceId gdocResourceId = new GoogleDocResourceId(resourceInfo.getExternalId());
@@ -343,7 +347,7 @@ public class ImportModuleGoogleDocJobHandler implements JobHandlerInterface {
       Map<String, GSBlobInfo> resourceMap = Maps.newConcurrentMap();
 
       AppEngineFile file = new AppEngineFile(gdocImportContext.getGCSArchiveLocation());
-      FileReadChannel readChannel = fileService.openReadChannel(file, false /*lock*/);
+      FileReadChannel readChannel = fileService.openReadChannel(file, false /* lock */);
 
       InputStream inputStream = Channels.newInputStream(readChannel);
       ZipInputStream zipIn = new ZipInputStream(new ByteArrayInputStream(
@@ -363,13 +367,12 @@ public class ImportModuleGoogleDocJobHandler implements JobHandlerInterface {
 
         checkArgument(nameFromGoogleDoc.contains("/"), "Unexpected name from GoogleDoc : "
             + nameFromGoogleDoc);
-        
+
         /*
          * Structure of zip entry name is as follows :
          * <document title>/<50 char long title for html file.>
-         *     In case title is too big, html file may not even contain .html extension.
+         * In case title is too big, html file may not even contain .html extension.
          * <document title/images/images<0-n>.jpg
-         * 
          * In case documentTitle has '/', then it gets converted to '-'
          */
         String parts[] = nameFromGoogleDoc.split("/");
@@ -379,7 +382,7 @@ public class ImportModuleGoogleDocJobHandler implements JobHandlerInterface {
         if (parts.length == 2) {
           // This will be true for HTML file.
           newFileName = parts[1];
-          
+
           newFileName = FileExtensions.appendExtensionToFileName(newFileName, FileExtensions.HTML);
           System.out.println("HTML File = " + newFileName);
         } else {

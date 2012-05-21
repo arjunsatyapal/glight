@@ -161,14 +161,9 @@ public class ImportBatchJobHandler implements JobHandlerInterface {
       });
     } while (hasChildsNeedingJob);
 
-    // if (retryThisMethod) {
-    // createChilds(jobId);
-    // }
-    //
-    // if (enqueuedJobId == null) {
-    // All possible childs are created. So this job is now ready for getting child
-    // notifications.
-
+    /*
+     * All possible childs are created. So this job is now ready for getting child notifications.
+     */
     repeatInTransaction(new Transactable<Void>() {
       @SuppressWarnings("synthetic-access")
       @Override
@@ -202,19 +197,20 @@ public class ImportBatchJobHandler implements JobHandlerInterface {
       ImportExternalIdDto importExternalIdDto) {
     switch (importExternalIdDto.getModuleType()) {
       case LIGHT_SYNTHETIC_MODULE:
-        enqueuedJobId = enqueueImportChildSyntheticModule(ofy, importExternalIdDto, 
+        enqueuedJobId = enqueueImportChildSyntheticModule(ofy, importExternalIdDto,
             jobEntity.getJobId(), jobEntity.getRootJobId());
         break;
 
       case GOOGLE_DOCUMENT:
-        enqueuedJobId = enqueueImportModuleGoogleDocument(ofy, importExternalIdDto, jobEntity.getJobId(),
-                jobEntity.getRootJobId());
+        enqueuedJobId =
+            enqueueImportModuleGoogleDocument(ofy, importExternalIdDto, jobEntity.getJobId(),
+                jobEntity.getRootJobId(), GoogleDocInfoDto.Configuration.DTO_FOR_DEBUGGING);
         System.out.println(importExternalIdDto.toJson());
         break;
 
       case GOOGLE_COLLECTION:
         enqueuedJobId = enqueueImportCollectionGDoc(ofy, importExternalIdDto, jobEntity.getJobId(),
-                jobEntity.getRootJobId());
+            jobEntity.getRootJobId(), GoogleDocInfoDto.Configuration.DTO_FOR_DEBUGGING);
         break;
       default:
         return enqueuedJobId;
@@ -282,15 +278,16 @@ public class ImportBatchJobHandler implements JobHandlerInterface {
   }
 
   private JobId enqueueImportCollectionGDoc(Objectify ofy, ImportExternalIdDto importModuleDto,
-      JobId parentJobId, JobId rootJobId) {
-    GoogleDocInfoDto gdocInfo = getGDocInfo(importModuleDto);
+      JobId parentJobId, JobId rootJobId, GoogleDocInfoDto.Configuration config) {
+    GoogleDocInfoDto gdocInfo = getGDocInfo(importModuleDto, config);
     return importCollectionGDocJobHandler.enqueueCollectionGoogleDocJob(ofy,
         importModuleDto, gdocInfo, parentJobId, rootJobId);
   }
 
   private JobId enqueueImportModuleGoogleDocument(Objectify ofy,
-      ImportExternalIdDto importExternalIdDto, JobId parentJobId, JobId rootJobId) {
-    GoogleDocInfoDto gdocInfo = getGDocInfo(importExternalIdDto);
+      ImportExternalIdDto importExternalIdDto, JobId parentJobId, JobId rootJobId,
+      GoogleDocInfoDto.Configuration config) {
+    GoogleDocInfoDto gdocInfo = getGDocInfo(importExternalIdDto, config);
     return importModuleGDocJobHandler.enqueueModuleGoogleDocJob(ofy,
         importExternalIdDto, gdocInfo, parentJobId, rootJobId);
   }
@@ -299,10 +296,11 @@ public class ImportBatchJobHandler implements JobHandlerInterface {
    * @param importModuleDto
    * @return
    */
-  private GoogleDocInfoDto getGDocInfo(ImportExternalIdDto importModuleDto) {
+  private GoogleDocInfoDto getGDocInfo(ImportExternalIdDto importModuleDto,
+      GoogleDocInfoDto.Configuration config) {
     DocsServiceWrapper docsService = GuiceUtils.getInstance(DocsServiceWrapper.class);
     GoogleDocResourceId resourceId = new GoogleDocResourceId(importModuleDto.getExternalId());
-    GoogleDocInfoDto gdocInfo = docsService.getGoogleDocInfo(resourceId);
+    GoogleDocInfoDto gdocInfo = docsService.getGoogleDocInfo(resourceId, config);
     return gdocInfo;
   }
 
@@ -349,7 +347,7 @@ public class ImportBatchJobHandler implements JobHandlerInterface {
       }
 
       if (currDto.getModuleType().mapsToCollection()) {
-        childNode = createChildNodeFromChildJobs(currDto);
+        childNode = getChildNodeFromJobResult(currDto);
       } else {
         childNode = createChildNodeFromExistingDetails(currDto);
       }
@@ -421,27 +419,25 @@ public class ImportBatchJobHandler implements JobHandlerInterface {
    * @param currDto
    * @return
    */
-  private CollectionTreeNodeDto createChildNodeFromChildJobs(
+  private CollectionTreeNodeDto getChildNodeFromJobResult(
       ImportExternalIdDto importExternalIdDto) {
     checkArgument(
         importExternalIdDto.getModuleType().getNodeType() == TreeNodeType.INTERMEDIATE_NODE,
         "This should be called only for " + TreeNodeType.INTERMEDIATE_NODE);
 
-    CollectionTreeNodeDto collectionRoot = new CollectionTreeNodeDto.Builder()
-        .nodeType(TreeNodeType.INTERMEDIATE_NODE)
-        .title(importExternalIdDto.getTitle())
-        .externalId(importExternalIdDto.getExternalId())
-        .moduleType(ModuleType.LIGHT_SUB_COLLECTION)
-        .build();
+//    CollectionTreeNodeDto collectionRoot = new CollectionTreeNodeDto.Builder()
+//        .nodeType(TreeNodeType.INTERMEDIATE_NODE)
+//        .title(importExternalIdDto.getTitle())
+//        .externalId(importExternalIdDto.getExternalId())
+//        .moduleType(ModuleType.LIGHT_SUB_COLLECTION)
+//        .build();
 
-    JobEntity jobEntity = jobManager.get(null, importExternalIdDto.getJobId());
-    for (JobId childJobId : jobEntity.getChildJobs()) {
-      CollectionTreeNodeDto child = generateCollectionNodeFromChildJob(jobManager, childJobId);
-      collectionRoot.addChildren(child);
-    }
+    CollectionTreeNodeDto child = generateCollectionNodeFromChildJob(jobManager,
+        importExternalIdDto.getJobId());
+//    collectionRoot.addChildren(child);
 
-    System.out.println("\n***Subcollection root : " + collectionRoot.toJson());
-    return collectionRoot;
+    System.out.println("\n***Subcollection root : " + child.toJson());
+    return child;
   }
 
   /**

@@ -21,6 +21,8 @@ import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkTxnIsRunning;
 import static com.google.light.server.utils.LightUtils.createModuleVersionEntity;
 
+import com.google.light.server.manager.interfaces.QueueManager;
+
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.light.server.constants.JerseyConstants;
@@ -70,18 +72,19 @@ public class ModuleManagerImpl implements ModuleManager {
   private final ModuleDao moduleDao;
   private final ModuleVersionDao moduleVersionDao;
   private final ModuleVersionResourceDao moduleVersionResourceDao;
-
   private final ExternalIdMappingDao externalIdMappingDao;
+  private final QueueManager queueManager;
 
   @Inject
   public ModuleManagerImpl(ModuleDao moduleDao, ModuleVersionDao moduleVersionDao,
       ModuleVersionResourceDao moduleVersionResourceDao,
-      ExternalIdMappingDao externalIdMappingDao) {
+      ExternalIdMappingDao externalIdMappingDao, QueueManager queueManager) {
     this.moduleDao = checkNotNull(moduleDao, "moduleDao");
     this.moduleVersionDao = checkNotNull(moduleVersionDao, "moduleVersionDao");
     this.moduleVersionResourceDao = checkNotNull(moduleVersionResourceDao,
         "moduleVersionResourceDao");
     this.externalIdMappingDao = checkNotNull(externalIdMappingDao, "externalIdMappingDao");
+    this.queueManager = checkNotNull(queueManager, "queueManager");
   }
 
   /**
@@ -232,6 +235,9 @@ public class ModuleManagerImpl implements ModuleManager {
 
     moduleEntity.publishVersion(version, title, lastEditTime, now, etag, externalId);
     moduleDao.put(ofy, moduleEntity);
+    
+    // Enqueue a task so that searchIndices can be updated.
+    queueManager.enqueueSearchIndexTask(ofy);
 
     return moduleVersionEntity;
   }

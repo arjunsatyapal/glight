@@ -292,6 +292,11 @@ public class ImportResource extends AbstractJerseyResource {
             // This will be true for Light URLs.
             LightUrl lightUrl = currExternalIdDto.getExternalId().getLightUrl();
             ModuleEntity moduleEntity = moduleManager.get(null, lightUrl.getModuleId());
+
+            if (moduleEntity == null) {
+              throw new InvalidExternalIdException(currExternalIdDto.getExternalId());
+            }
+
             currExternalIdDto.setModuleId(lightUrl.getModuleId());
             currExternalIdDto.setModuleState(ModuleState.PUBLISHED);
             currExternalIdDto.setModuleType(moduleEntity.getModuleType());
@@ -312,10 +317,13 @@ public class ImportResource extends AbstractJerseyResource {
                 return null;
               }
             });
+            currExternalIdDto.setModuleState(ModuleState.IMPORTING);
           }
+        } else {
+          // This is a collection. So changing state to importing.
+          currExternalIdDto.setModuleState(ModuleState.IMPORTING);
         }
-        
-        currExternalIdDto.setModuleState(ModuleState.IMPORTING);
+
         currExternalIdDto.setContentLicenses(contentLicenses);
       } catch (InvalidExternalIdException e) {
         logger.info("Ignoring externalId : " + currExternalIdDto.getExternalId() + " due to : "

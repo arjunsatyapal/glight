@@ -85,8 +85,8 @@ public class JobHandler {
       logger.info(jobEntity.getContext().getValue());
     }
 
+    System.out.println(jobEntity.getTaskType());
     JobState jobState = jobEntity.getJobState();
-    System.out.println("Jobstate : " + jobState + ", TaskType : " + jobEntity.getTaskType());
     switch (jobState) {
       case POLLING_FOR_CHILDS:
         pollForChilds(jobEntity);

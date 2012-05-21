@@ -17,6 +17,17 @@ package com.google.light.server.jersey.resources.test;
 
 import static com.google.light.server.utils.LightPreconditions.checkIsNotEnv;
 
+import com.google.appengine.api.search.Results;
+import com.google.appengine.api.search.ScoredDocument;
+
+import com.google.appengine.api.search.Index;
+
+import com.google.light.server.constants.fts.FTSIndex;
+
+import com.google.light.server.utils.FTSUtils;
+
+import com.google.light.server.utils.LightUtils;
+
 import com.google.light.server.utils.GaeUtils;
 
 import com.google.light.server.utils.GuiceUtils;
@@ -79,6 +90,10 @@ public class TestAdminResources extends AbstractJerseyResource {
     if (appId.equals("light-demo")) {
       throw new IllegalStateException("DeleteAll is not allowed for " + appId);
     }
+    
+    StringBuilder builder = new StringBuilder("\nDeleting Search Indices..");
+    
+    builder.append(clearFTSIndex());
 
     List<String> tableNames = Lists.newArrayList(
         ModuleEntity.class.getName(),
@@ -91,7 +106,8 @@ public class TestAdminResources extends AbstractJerseyResource {
         ExternalIdMappingEntity.class.getName(),
         JobEntity.class.getName());
 
-    StringBuilder builder = new StringBuilder("\nDeleting Tables.");
+    
+    builder.append("\nDeleting tables");
     Objectify ofy = ObjectifyUtils.nonTransaction();
     for (String currClassName : tableNames) {
       Class currClass = this.getClass().getClassLoader().loadClass(currClassName);
@@ -107,7 +123,7 @@ public class TestAdminResources extends AbstractJerseyResource {
 
     builder.append(purgeQueue());
     
-    builder.append(clearFTSIndex());
+    
 
     return builder.toString();
   }
@@ -116,8 +132,32 @@ public class TestAdminResources extends AbstractJerseyResource {
    * @return
    */
   private String clearFTSIndex() {
-    FTSManager ftsManager = GuiceUtils.getInstance(FTSManager.class);
-    return null;
+    StringBuilder builder = new StringBuilder();
+    
+    for (FTSIndex currIndex : FTSIndex.values()) {
+      builder.append("\n\n  Deleting index : " + currIndex);
+      Index index = FTSUtils.getIndex(FTSIndex.module);
+      
+      
+      Results<ScoredDocument> results = index.search("a");
+      Iterator<ScoredDocument> iterator = results.iterator();
+      while(iterator.hasNext()) {
+        ScoredDocument document = iterator.next();
+        index.removeAsync(document.getId());
+        
+      }
+      
+      results = index.search("NOT a");
+      iterator = results.iterator();
+      while(iterator.hasNext()) {
+        ScoredDocument document = iterator.next();
+        index.removeAsync(document.getId());
+      }
+      
+      builder.append("\n  Deleted index : " + currIndex);
+    }
+    
+    return builder.toString();
   }
 
   @GET
