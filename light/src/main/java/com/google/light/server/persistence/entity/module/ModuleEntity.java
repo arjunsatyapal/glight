@@ -66,7 +66,7 @@ public class ModuleEntity extends AbstractPersistenceEntity<ModuleEntity, Module
   public static final String OFY_MODULE_OWNER_QUERY_STRING = "owners IN";
   @ObjectifyQueryField("OFY_MODULE_OWNER_QUERY_STRING")
   private List<Long> owners;
-  
+
   private List<ContentLicense> contentLicenses;
 
   @Deprecated
@@ -146,17 +146,18 @@ public class ModuleEntity extends AbstractPersistenceEntity<ModuleEntity, Module
   @Override
   public ModuleDto toDto() {
     ModuleDto dto = new ModuleDto.Builder()
+        .contentLicenses(contentLicenses)
+        .externalId(getExternalId())
         .id(new ModuleId(moduleId))
-        .title(title)
+        .latestPublishVersion(getLatestPublishVersion())
         .moduleType(moduleType)
         .moduleState(moduleState)
-        .owners(getOwners())
-        .latestPublishVersion(getLatestPublishVersion())
         .nextVersion(getNextVersion())
-        .externalId(getExternalId())
+        .owners(getOwners())
+        .title(title)
         .build();
 
-    return dto;
+    return dto.validate();
   }
 
   public ModuleId getModuleId() {
@@ -213,7 +214,7 @@ public class ModuleEntity extends AbstractPersistenceEntity<ModuleEntity, Module
    * 
    * @param latestVersion
    */
-  public void publishVersion(Version latestPublishVersion, String title, 
+  public void publishVersion(Version latestPublishVersion, String title,
       Instant lastEditTime, Instant latestPublishTime, String etag, ExternalId externalId) {
     // Other then builder, all are required to set a positive latestVersion.
     checkVersion(latestPublishVersion);
@@ -311,7 +312,7 @@ public class ModuleEntity extends AbstractPersistenceEntity<ModuleEntity, Module
     private Instant lastEditTime = new Instant(0L);
     private Instant latestPublishTimeInMillis;
     private List<ContentLicense> contentLicenses;
-    
+
     private ExternalId externalId;
     private SearchIndexStatus searchIndexStatus;
 
@@ -344,7 +345,7 @@ public class ModuleEntity extends AbstractPersistenceEntity<ModuleEntity, Module
       this.contentLicenses = contentLicenses;
       return this;
     }
-    
+
     public Builder etag(String etag) {
       this.etag = etag;
       return this;

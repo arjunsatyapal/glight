@@ -17,7 +17,6 @@ package com.google.light.server.manager.implementation;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.light.server.dto.thirdparty.google.youtube.ContentLicense.DEFAULT_LIGHT_CONTENT_LICENSES;
 import static com.google.light.server.utils.LightPreconditions.checkTxnIsRunning;
 import static com.google.light.server.utils.LightUtils.createCollectionVersionEntity;
 
@@ -310,7 +309,8 @@ public class CollectionManagerImpl implements CollectionManager {
    */
   @Override
   public Version reserveAndPublishAsLatest(Objectify ofy, CollectionId collectionId,
-      CollectionTreeNodeDto collectionTree, CollectionState collectionState) {
+      CollectionTreeNodeDto collectionTree, CollectionState collectionState, 
+      List<ContentLicense> contentLicenses) {
     checkTxnIsRunning(ofy);
 
     Instant now = LightUtils.getNow();
@@ -320,7 +320,7 @@ public class CollectionManagerImpl implements CollectionManager {
     this.update(ofy, collectionEntity);
 
     CollectionVersionEntity cvEntity = LightUtils.createCollectionVersionEntity(
-        collectionEntity.getKey(), collectionState, collectionTree, DEFAULT_LIGHT_CONTENT_LICENSES,
+        collectionEntity.getKey(), collectionState, collectionTree, contentLicenses,
         now, reserveVersion);
     this.doPublishVersion(ofy, reserveVersion, collectionTree, collectionEntity, cvEntity);
     return reserveVersion;

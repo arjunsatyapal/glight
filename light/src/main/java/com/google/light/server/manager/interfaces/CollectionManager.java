@@ -75,7 +75,8 @@ public interface CollectionManager {
    * Add CollectionVersion.
    */
   public Version reserveAndPublishAsLatest(Objectify ofy, CollectionId collectionId,
-      CollectionTreeNodeDto collectionRoot, CollectionState collectionState);
+      CollectionTreeNodeDto collectionRoot, CollectionState collectionState, 
+      List<ContentLicense> contentLicenses);
   
   public CollectionVersionEntity getLatestPublishedVersion(Objectify ofy, CollectionId collectionId);
   

@@ -105,7 +105,7 @@ public class ModuleVersionEntity extends
         .version(getVersion())
         .build();
 
-    return dto;
+    return dto.validate();
   }
 
   public Version getVersion() {

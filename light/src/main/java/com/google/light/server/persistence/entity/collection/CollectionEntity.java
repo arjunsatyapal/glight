@@ -74,12 +74,11 @@ public class CollectionEntity extends AbstractPersistenceEntity<CollectionEntity
     checkNotEmptyCollection(contentLicenses, "contentLicenses");
     checkNotNull(state, "collectionState");
     checkNotEmptyCollection(owners, "owners");
-    
 
     // TODO(arjuns): Add validation for etag.
     checkNonNegativeLong(latestPublishVersion, "latestVersion");
     checkNonNegativeLong(nextVersion, "nextVersion");
-    
+
     checkNotNull(creationTimeInMillis, "creationTimeInMillis");
     return this;
   }
@@ -104,7 +103,7 @@ public class CollectionEntity extends AbstractPersistenceEntity<CollectionEntity
   public String getTitle() {
     return title;
   }
-  
+
   public void setTitle(String title) {
     this.title = checkNotBlank(title, "title");
   }
@@ -136,10 +135,10 @@ public class CollectionEntity extends AbstractPersistenceEntity<CollectionEntity
   public Version getNextVersion() {
     return getWrapper(nextVersion, Version.class);
   }
-  
+
   /**
    * Thisk should be called by callers if they want to reserve a version. And callers are expected
-   * to save the entity. 
+   * to save the entity.
    */
   public Version reserveVersion() {
     /*
@@ -152,34 +151,35 @@ public class CollectionEntity extends AbstractPersistenceEntity<CollectionEntity
   /**
    * If the currently published version is newer then latestPublishVersion, then update it.
    * Caller is expected to persist this entity.
+   * 
    * @param latestVersion
    */
   @SuppressWarnings("unused")
   public void publishVersion(Version latestPublishVersion, Instant lastEditTime, String etag) {
     // Other then builder, all are required to set a positive latestVersion.
     checkVersion(latestPublishVersion);
-    
+
     Long tempVersion = getWrapperValue(latestPublishVersion);
     if (this.latestPublishVersion < tempVersion) {
       this.latestPublishVersion = tempVersion;
       this.etag = etag;
       this.state = CollectionState.PUBLISHED;
     }
-    
-    checkArgument(this.latestPublishVersion < this.nextVersion, 
+
+    checkArgument(this.latestPublishVersion < this.nextVersion,
         "latestPublishVersion should be always less then nextVersion");
   }
-  
-  public Version determineBaseVersionForAppend(Version askedVersion, Version reservedVersion, 
+
+  public Version determineBaseVersionForAppend(Version askedVersion, Version reservedVersion,
       LightClientType clientType) {
     if (askedVersion.isSpecificVersion() || askedVersion.isNoVersion()) {
       return askedVersion;
     }
-    
+
     if (clientType == LightClientType.BROWSER) {
       return reservedVersion.getPreviousVersion();
     }
-    
+
     throw new IllegalArgumentException("Invalid askedVersion : " + askedVersion);
   }
 
@@ -188,14 +188,17 @@ public class CollectionEntity extends AbstractPersistenceEntity<CollectionEntity
    */
   @Override
   public CollectionDto toDto() {
-    return new CollectionDto.Builder()
+    CollectionDto dto = new CollectionDto.Builder()
         .collectionId(getCollectionId())
-        .title(title)
-        .state(state)
-        .owners(getOwners())
+        .contentLicenses(contentLicenses)
         .latestPublishedVersion(getLatestPublishVersion())
         .nextVersion(getNextVersion())
+        .owners(getOwners())
+        .state(state)
+        .title(title)
         .build();
+    
+    return dto.validate();
   }
 
   public static class Builder extends AbstractPersistenceEntity.BaseBuilder<Builder> {
@@ -217,7 +220,7 @@ public class CollectionEntity extends AbstractPersistenceEntity<CollectionEntity
       this.title = title;
       return this;
     }
-    
+
     public Builder contentLicenses(List<ContentLicense> contentLicenses) {
       this.contentLicenses = contentLicenses;
       return this;
@@ -260,7 +263,7 @@ public class CollectionEntity extends AbstractPersistenceEntity<CollectionEntity
     this.etag = builder.etag;
     this.latestPublishVersion = getWrapperValue(builder.latestPublishVersion);
     this.nextVersion = getWrapperValue(builder.nextVersion);
-    
+
   }
 
   // For objectify.

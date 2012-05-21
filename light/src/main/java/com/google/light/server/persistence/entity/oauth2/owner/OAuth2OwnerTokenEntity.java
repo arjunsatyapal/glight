@@ -28,7 +28,6 @@ import com.google.light.server.annotations.ObjectifyQueryField;
 
 import com.google.light.server.annotations.ObjectifyQueryFieldName;
 
-
 import com.google.light.server.constants.OAuth2ProviderService;
 import com.google.light.server.dto.oauth2.owner.OAuth2OwnerTokenDto;
 import com.google.light.server.persistence.entity.AbstractPersistenceEntity;
@@ -68,7 +67,7 @@ public class OAuth2OwnerTokenEntity extends
    */
   @Override
   public OAuth2OwnerTokenDto toDto() {
-    return new OAuth2OwnerTokenDto.Builder()
+    OAuth2OwnerTokenDto dto = new OAuth2OwnerTokenDto.Builder()
         .personId(new PersonId(personKey.getId()))
         .provider(OAuth2ProviderService.valueOf(providerServiceName))
         .providerUserId(providerUserId)
@@ -78,6 +77,7 @@ public class OAuth2OwnerTokenEntity extends
         .tokenType(tokenType)
         .tokenInfo(tokenInfo)
         .build();
+    return dto.validate();
   }
 
   public Key<PersonEntity> getPersonKey() {
@@ -166,7 +166,7 @@ public class OAuth2OwnerTokenEntity extends
     }
   }
 
-  public static class Builder extends AbstractPersistenceEntity.BaseBuilder<Builder>{
+  public static class Builder extends AbstractPersistenceEntity.BaseBuilder<Builder> {
     private Key<PersonEntity> personKey;
     private OAuth2ProviderService providerService;
     private String providerUserId;

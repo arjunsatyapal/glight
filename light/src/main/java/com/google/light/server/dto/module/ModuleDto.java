@@ -69,7 +69,7 @@ public class ModuleDto extends AbstractDtoToPersistence<ModuleDto, ModuleEntity,
   @XmlElement(name = "personId")
   @JsonProperty(value = "owners")
   private List<PersonId> owners;
-  
+
   @XmlElementWrapper(name = "contentLicenses")
   @XmlAnyElement
   @JsonProperty(value = "contentLicenses")
@@ -78,11 +78,11 @@ public class ModuleDto extends AbstractDtoToPersistence<ModuleDto, ModuleEntity,
   @XmlElement(name = "latestPublishVersion")
   @JsonProperty(value = "latestPublishVersion")
   private Version latestPublishVersion;
-  
+
   @XmlElement(name = "nextVersion")
   @JsonProperty(value = "nextVersion")
   private Version nextVersion;
-  
+
   @XmlElement(name = "externalId")
   @JsonProperty(value = "externalId")
   private ExternalId externalId;
@@ -97,7 +97,7 @@ public class ModuleDto extends AbstractDtoToPersistence<ModuleDto, ModuleEntity,
     checkNotNull(moduleType, "moduleType");
     checkNotEmptyCollection(owners, "owner list cannot be empty");
     checkNotEmptyCollection(contentLicenses, "contentLicenses list cannot be empty");
-    
+
     // Version can be zero when module is in process of import.
     checkNotNull(latestPublishVersion, "version");
     checkNotNull(externalId, "externalId");
@@ -111,13 +111,13 @@ public class ModuleDto extends AbstractDtoToPersistence<ModuleDto, ModuleEntity,
   public ModuleType getModuleType() {
     return moduleType;
   }
-  
+
   public ModuleState getModuleState() {
     return moduleState;
   }
 
   public List<PersonId> getOwners() {
-//    return convertListOfValuesToWrapperList(owners, PersonId.class);
+    // return convertListOfValuesToWrapperList(owners, PersonId.class);
     return owners;
   }
 
@@ -128,11 +128,11 @@ public class ModuleDto extends AbstractDtoToPersistence<ModuleDto, ModuleEntity,
   public Version getLatestPublishVersion() {
     return latestPublishVersion;
   }
-  
+
   public Version getNextVersion() {
     return nextVersion;
   }
-  
+
   public ExternalId getExternalId() {
     return externalId;
   }
@@ -176,7 +176,7 @@ public class ModuleDto extends AbstractDtoToPersistence<ModuleDto, ModuleEntity,
       this.moduleType = moduleType;
       return this;
     }
-    
+
     public Builder moduleState(ModuleState moduleState) {
       this.moduleState = moduleState;
       return this;
@@ -186,7 +186,7 @@ public class ModuleDto extends AbstractDtoToPersistence<ModuleDto, ModuleEntity,
       this.owners = owners;
       return this;
     }
-    
+
     public Builder contentLicenses(List<ContentLicense> contentLicenses) {
       this.contentLicenses = contentLicenses;
       return this;
@@ -196,12 +196,12 @@ public class ModuleDto extends AbstractDtoToPersistence<ModuleDto, ModuleEntity,
       this.latestPublishVersion = latestPublishVersion;
       return this;
     }
-    
+
     public Builder nextVersion(Version nextVersion) {
       this.nextVersion = nextVersion;
       return this;
     }
-    
+
     public Builder externalId(ExternalId externalId) {
       this.externalId = externalId;
       return this;
@@ -209,22 +209,23 @@ public class ModuleDto extends AbstractDtoToPersistence<ModuleDto, ModuleEntity,
 
     @SuppressWarnings("synthetic-access")
     public ModuleDto build() {
-      return new ModuleDto(this);
+      return new ModuleDto(this).validate();
     }
   }
 
   @SuppressWarnings("synthetic-access")
   private ModuleDto(Builder builder) {
     super(builder);
+
+    this.contentLicenses = builder.contentLicenses;
+    this.externalId = builder.externalId;
+    this.latestPublishVersion = builder.latestPublishVersion;
     this.moduleId = builder.id;
-    this.title = builder.title;
     this.moduleType = builder.moduleType;
     this.moduleState = builder.moduleState;
-    this.owners = builder.owners;
-    this.contentLicenses = builder.contentLicenses;
-    this.latestPublishVersion = builder.latestPublishVersion;
     this.nextVersion = builder.nextVersion;
-    this.externalId = builder.externalId;
+    this.owners = builder.owners;
+    this.title = builder.title;
   }
 
   @JsonCreator

@@ -204,7 +204,7 @@ public class ImportResource extends AbstractJerseyResource {
 
             Version publishVersion = collectionManager.reserveAndPublishAsLatest(ofy,
                 importBatchWrapper.getCollectionId(), rootToBeUpdated,
-                CollectionState.PARTIALLY_PUBLISHED);
+                CollectionState.PARTIALLY_PUBLISHED, DEFAULT_LIGHT_CONTENT_LICENSES);
             importBatchWrapper.setBaseVersion(publishVersion);
             importBatchWrapper.setVersion(publishVersion);
             break;

@@ -88,5 +88,5 @@ public enum ContentLicense implements NeedsDtoValidation {
     throw new EnumConstantNotPresentException(ContentLicense.class, identifier);
   }
 
-  public static final List<ContentLicense> DEFAULT_LIGHT_CONTENT_LICENSES = newArrayList(CC, YOUTUBE);
+  public static final List<ContentLicense> DEFAULT_LIGHT_CONTENT_LICENSES = newArrayList(CC);
 }
