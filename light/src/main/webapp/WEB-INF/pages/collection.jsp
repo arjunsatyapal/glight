@@ -10,13 +10,8 @@
     <link type="text/css" rel="stylesheet" href="/css/servebase.css">
     <style>
     .collectionContent ol {
-      counter-reset: section;
-      list-style-type: none;
+        list-style-type: none;
     }
-    
-    .collectionContent ol li { counter-increment: section; }
-                
-    .collectionContent ol li:before  { content: counters(section, ".") ". "; }
     </style>
   </head>
   <body>
