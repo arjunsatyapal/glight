@@ -15,11 +15,11 @@
  */
 define(['light/controllers/SearchResultListController', 'light/services/SearchService',
         'light/views/SearchResultListView', 'lightTest/TestUtils',
-        'dojo/_base/connect', 'light/enums/EventsEnum',
+        'light/utils/PubSubUtils', 'light/enums/EventsEnum',
         'light/schemas/SearchStateSchema'],
         function(SearchResultListController, SearchService,
                  SearchResultListView,
-                 TestUtils, connect, EventsEnum, SearchStateSchema) {
+                 TestUtils, PubSubUtils, EventsEnum, SearchStateSchema) {
 
   var ADDITION_QUERY_REQUEST = {
     query: 'addition',
@@ -36,6 +36,9 @@ define(['light/controllers/SearchResultListController', 'light/services/SearchSe
   };
   var ADDITION_QUERY_SAMPLE_RESULT = {
     some: 'Thing'
+  };
+  var ADDITION_QUERY_SAMPLE_RECENT_RESULT = {
+    someOther: 'Thing'
   };
 
   describe('lightTest.SearchResultListControllerTest inputs', function() {
@@ -59,7 +62,7 @@ define(['light/controllers/SearchResultListController', 'light/services/SearchSe
     describe('watch when called', function() {
       it('should wire the object to the dojo event system to watch' +
          'search state changes', function() {
-        var subscribeStub = this.stub(connect, 'subscribe');
+        var subscribeStub = this.stub(PubSubUtils, 'subscribe');
 
         controller.watch();
 
@@ -89,10 +92,15 @@ define(['light/controllers/SearchResultListController', 'light/services/SearchSe
       describe('when receiving a valid query request', function() {
         it('should issue the request to the server and call view.show',
                 function() {
-          var successCallback;
+          var successCallback, recentSuccessCallback;
           searchService.search.withArgs(ADDITION_QUERY_REQUEST).returns({
             then: function(cbk) {
               successCallback = cbk;
+            }
+          });
+          searchService.searchRecent.withArgs(ADDITION_QUERY_REQUEST).returns({
+            then: function(cbk) {
+              recentSuccessCallback = cbk;
             }
           });
 
@@ -101,10 +109,18 @@ define(['light/controllers/SearchResultListController', 'light/services/SearchSe
           expect(searchService.search)
               .toHaveBeenCalledWith(ADDITION_QUERY_REQUEST);
 
+          expect(searchService.searchRecent)
+              .toHaveBeenCalledWith(ADDITION_QUERY_REQUEST);
+
           successCallback(ADDITION_QUERY_SAMPLE_RESULT);
 
           expect(view.show).toHaveBeenCalledWith(ADDITION_QUERY_REQUEST,
                   ADDITION_QUERY_SAMPLE_RESULT);
+
+          recentSuccessCallback(ADDITION_QUERY_SAMPLE_RECENT_RESULT);
+
+          expect(view.showRecent).toHaveBeenCalledWith(
+                  ADDITION_QUERY_SAMPLE_RECENT_RESULT);
         });
       });
     });

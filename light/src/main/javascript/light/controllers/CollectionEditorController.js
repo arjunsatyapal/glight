@@ -13,15 +13,20 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
-        'light/enums/EventsEnum', 'dojo/_base/connect',
+define(['dojo/_base/declare', 'dojo/_base/connect',
+        'light/controllers/AbstractLightController',
+        'light/enums/EventsEnum', 'light/utils/PubSubUtils',
         'light/enums/BrowseContextsEnum',
         'light/utils/SinglePromiseContainer',
         'light/enums/LightConstantsEnum',
         'dojo/DeferredList'],
-        function(declare, AbstractLightController, EventsEnum,
-                connect, BrowseContextsEnum, SinglePromiseContainer,
+        function(declare, connect, AbstractLightController, EventsEnum,
+                PubSubUtils, BrowseContextsEnum, SinglePromiseContainer,
                 LightConstantsEnum, DeferredList) {
+
+  var PUBLISH_VALIDATOR_IDENTIFIER =
+    'light.controller.CollectionEditorController';
+
   return declare('light.controller.CollectionEditorController',
           AbstractLightController, {
 
@@ -40,7 +45,7 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
      * watch for browser context state changes.
      */
     watch: function() {
-      connect.subscribe(EventsEnum.BROWSE_CONTEXT_STATE_CHANGED, this,
+      PubSubUtils.subscribe(EventsEnum.BROWSE_CONTEXT_STATE_CHANGED, this,
               this._onBrowseContextStateChange);
     },
 
@@ -48,9 +53,8 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
      * Handler for browse context state change events.
      */
     _onBrowseContextStateChange: function(browseContextState, source) {
-      // TODO(waltercacau): Prompt the user when he is leaving this view
-      // if he has unsaved changes.
       this._view.hide();
+      this.everythingIsSaved();
       this._collectionId = null;
       if (browseContextState.context == BrowseContextsEnum.COLLECTION) {
         this._collectionId = browseContextState.subcontext;
@@ -82,7 +86,7 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
           if (!results[0][0] || !results[1][0]) {
             // If something failed to load and it wasn't because it was
             // cancelled, then we really failed.
-            if((!results[0][0] && !results[0][1].lightCancelled) ||
+            if ((!results[0][0] && !results[0][1].lightCancelled) ||
                     (!results[1][0] && !results[1][1].lightCancelled)) {
               self._view.showCouldNotLoad();
             }
@@ -109,6 +113,34 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
         if (!error.lightCancelled) {
           self._view.failedToSave();
         }
+      });
+    },
+    _lastBeforeUnloadHandle: null,
+    everythingIsSaved: function() {
+      PubSubUtils.removePublishValidator(
+              EventsEnum.BROWSE_CONTEXT_STATE_CHANGED,
+              PUBLISH_VALIDATOR_IDENTIFIER);
+      if (this._lastBeforeUnloadHandle !== null) {
+        connect.disconnect(this._lastBeforeUnloadHandle);
+        this._lastBeforeUnloadHandle = null;
+      }
+    },
+    thereAreUnsavedChanges: function() {
+      // Cleaning up before doing anything, because there is no guarantee
+      // from the view that this method will be called only once
+      // before the next cleanup
+      this.everythingIsSaved();
+      // TODO(waltercacau): move to somewhere else,
+      // other components might need this too.
+      var self = this;
+      this._lastBeforeUnloadHandle = connect.connect(window, 'beforeunload',
+              this, function() {
+        return self._view.messages.thereAreUnsavedChangesBeforeUnload;
+      });
+      PubSubUtils.addPublishValidator(EventsEnum.BROWSE_CONTEXT_STATE_CHANGED,
+              PUBLISH_VALIDATOR_IDENTIFIER, function() {
+        return confirm(
+                self._view.messages.thereAreUnsavedChangesConfirmLeaving);
       });
     }
   });

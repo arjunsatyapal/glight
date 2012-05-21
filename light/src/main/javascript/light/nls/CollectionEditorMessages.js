@@ -15,6 +15,8 @@
  */
 define({
   root: {
+    thereAreUnsavedChangesConfirmLeaving: 'There are unsaved changes. If you are sure you want to discard theses changes, press OK. Otherwise, press Cancel.',
+    thereAreUnsavedChangesBeforeUnload: 'There are unsaved changes. If you proceed theses changes will be lost.',
     createSubcollectionDialogTitle: 'Create a subcollection',
     createSubcollectionOkButtonLabel: 'Create',
     createSubcollectionTitleTextboxLabel: 'Title',

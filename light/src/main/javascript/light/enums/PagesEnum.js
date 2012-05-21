@@ -105,7 +105,7 @@ define(['exports',
       SEARCH: SEARCH,
       MYDASH: MYDASH,
       REGISTER: REGISTER,
-      COLLECTION_VIEWER: CONTENT_VIEWER,
+      CONTENT_VIEWER: CONTENT_VIEWER,
       values: [REGISTER, SEARCH, MYDASH, CONTENT_VIEWER],
   
       getCurrentPage: function() {

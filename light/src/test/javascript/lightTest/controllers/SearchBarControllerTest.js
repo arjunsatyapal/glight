@@ -15,11 +15,11 @@
  */
 define(['light/controllers/SearchBarController',
         'light/views/SearchBarView', 'lightTest/TestUtils',
-        'dojo/_base/connect', 'light/enums/EventsEnum',
+        'light/utils/PubSubUtils', 'light/enums/EventsEnum',
         'light/schemas/SearchStateSchema'],
         function(SearchBarController,
                  SearchBarView,
-                 TestUtils, connect, EventsEnum, SearchStateSchema) {
+                 TestUtils, PubSubUtils, EventsEnum, SearchStateSchema) {
 
   var ADDITION_QUERY = 'addition';
   var ADDITION_QUERY_REQUEST = {
@@ -46,7 +46,7 @@ define(['light/controllers/SearchBarController',
     describe('watch when called', function() {
       it('should wire the object to the dojo event system to watch' +
          'search state changes', function() {
-        var subscribeStub = this.stub(connect, 'subscribe');
+        var subscribeStub = this.stub(PubSubUtils, 'subscribe');
 
         controller.watch();
 
@@ -80,7 +80,7 @@ define(['light/controllers/SearchBarController',
 
     describe('onSubmit when called', function() {
       it('should publish a search state change event', function() {
-        var publishStub = this.stub(connect, 'publish');
+        var publishStub = this.stub(PubSubUtils, 'publish');
         view.getQuery.withArgs().returns(ADDITION_QUERY);
 
         controller.onSubmit();

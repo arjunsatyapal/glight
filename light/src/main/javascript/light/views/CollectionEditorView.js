@@ -42,7 +42,8 @@ define(['dojo/_base/declare', 'dojo/_base/lang',
   /**
    * Builder for items in the internal nodeStore of this view.
    */
-  var COMMON_ATTRIBUTES = ['externalId', 'moduleId', 'moduleType', 'title', 'nodeType'];
+  var COMMON_ATTRIBUTES = ['externalId', 'moduleId', 'moduleType',
+                           'title', 'nodeType'];
   var NodeBuilder = BuilderUtils.createBuilderClass(
           'light.views.CollectionEditorView._NodeBuilder',
           ['externalId', 'moduleId', 'moduleType', 'title', 'nodeType',
@@ -252,8 +253,9 @@ define(['dojo/_base/declare', 'dojo/_base/lang',
     _onModelChange: function() {
       // A change happened, let's enable the save button.
       this._setSaveButtonState(SAVE_BUTTON_STATE.SAVE_ENABLED);
+      this._controller.thereAreUnsavedChanges();
     },
-    
+
     /**
      * Called when a node in the tree is double clicked
      */
@@ -281,7 +283,10 @@ define(['dojo/_base/declare', 'dojo/_base/lang',
     },
 
     savedSuccessfully: function() {
+      // TODO(waltercacau): Currently we are using the state of the save
+      // button to contain what is our saving state. This seems unclean.
       if (this._saveButtonState == SAVE_BUTTON_STATE.SAVING_ENABLED) {
+        this._controller.everythingIsSaved();
         this._setSaveButtonState(SAVE_BUTTON_STATE.SAVED_DISABLED);
       }
     },

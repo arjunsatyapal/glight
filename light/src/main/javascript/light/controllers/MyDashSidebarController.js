@@ -14,11 +14,11 @@
  * the License.
  */
 define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
-        'light/enums/EventsEnum', 'dojo/_base/connect', 'dojo/_base/array',
+        'light/enums/EventsEnum', 'light/utils/PubSubUtils', 'dojo/_base/array',
         'light/builders/BrowseContextStateBuilder',
         'light/utils/XHRUtils'],
         function(declare, AbstractLightController, EventsEnum,
-                 connect, array, BrowseContextStateBuilder, XHRUtils) {
+                 PubSubUtils, array, BrowseContextStateBuilder, XHRUtils) {
   var MAX_NUMBER_OF_COLLECTIONS_PER_BULK = 50;
 
   /**
@@ -39,7 +39,7 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
      * watch for state changes.
      */
     watch: function() {
-      connect.subscribe(EventsEnum.BROWSE_CONTEXT_STATE_CHANGED, this,
+      PubSubUtils.subscribe(EventsEnum.BROWSE_CONTEXT_STATE_CHANGED, this,
               this._onBrowseContextStateChange);
       // TODO(waltercacau): rename all watch methods to setup
       // so it can contain other kinds of logic like this
@@ -59,7 +59,7 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
      * Fire's the proper event to change the context.
      */
     changeContextTo: function(browseContextState) {
-      connect.publish(EventsEnum.BROWSE_CONTEXT_STATE_CHANGED,
+      PubSubUtils.publish(EventsEnum.BROWSE_CONTEXT_STATE_CHANGED,
           [browseContextState, this]);
     },
 

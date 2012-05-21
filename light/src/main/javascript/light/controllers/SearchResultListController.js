@@ -14,12 +14,12 @@
  * the License.
  */
 define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
-        'light/enums/EventsEnum', 'dojo/_base/connect',
+        'light/enums/EventsEnum', 'light/utils/PubSubUtils',
         'light/RegexCommon',
         'light/utils/SinglePromiseContainer',
         'light/enums/BrowseContextsEnum'],
         function(declare, AbstractLightController, EventsEnum,
-                 connect, RegexCommon, SinglePromiseContainer,
+                 PubSubUtils, RegexCommon, SinglePromiseContainer,
                  BrowseContextsEnum) {
 
   return declare('light.controller.SearchResultListController',
@@ -44,9 +44,9 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
      * watch for search state changes.
      */
     watch: function() {
-      connect.subscribe(EventsEnum.SEARCH_STATE_CHANGED, this,
+      PubSubUtils.subscribe(EventsEnum.SEARCH_STATE_CHANGED, this,
               this._onSearchStateChange);
-      connect.subscribe(EventsEnum.BROWSE_CONTEXT_STATE_CHANGED, this,
+      PubSubUtils.subscribe(EventsEnum.BROWSE_CONTEXT_STATE_CHANGED, this,
               this._onBrowseContextStateChange);
     },
 

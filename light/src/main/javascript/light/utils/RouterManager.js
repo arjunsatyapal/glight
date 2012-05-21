@@ -13,10 +13,10 @@ a * Copyright (C) Google Inc.
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-define(['dojo/_base/connect', 'dojo/_base/declare', 'dojo/_base/lang',
+define(['light/utils/PubSubUtils', 'dojo/_base/declare', 'dojo/_base/lang',
         'light/utils/URLUtils', 'dojo', 'light/RegexCommon',
         'light/enums/LightConstantsEnum'],
-        function(connect, declare, lang, URLUtils, dojo, RegexCommon,
+        function(PubSubUtils, declare, lang, URLUtils, dojo, RegexCommon,
                  LightConstantsEnum) {
 
   /**
@@ -81,11 +81,18 @@ define(['dojo/_base/connect', 'dojo/_base/declare', 'dojo/_base/lang',
       return states;
     },
 
-    _fireIfChanged: function(changeEvent, state) {
+    /**
+     * Tries to publish the event if it has changed.
+     *
+     * Note this will not guarantee the event to be fired, because
+     * it is possible some publish validator will block it.
+     */
+    _tryToFireIfChanged: function(changeEvent, state) {
       if (!this._statesAreEqual(state,
               this._lastRecordedStateForEvent[changeEvent])) {
-        connect.publish(changeEvent, [state, this]);
-        this._lastRecordedStateForEvent[changeEvent] = state;
+        if (PubSubUtils.publish(changeEvent, [state, this])) {
+          this._lastRecordedStateForEvent[changeEvent] = state;
+        }
       }
     },
 
@@ -107,14 +114,14 @@ define(['dojo/_base/connect', 'dojo/_base/declare', 'dojo/_base/lang',
      */
     watch: function(currentPage) {
       this._currentPage = currentPage;
-      connect.subscribe('/dojo/hashchange', this, this._onHashChange);
+      PubSubUtils.subscribe('/dojo/hashchange', this, this._onHashChange);
 
       this._lastWorkingHashData = {};
       for (var i = 0, len = this._currentPage.states.length; i < len; i++) {
         var state = this._currentPage.states[i];
 
         // Observing change state events
-        connect.subscribe(state.changeEvent, this,
+        PubSubUtils.subscribe(state.changeEvent, this,
                 lang.partial(this._onStateChange, state.changeEvent));
       }
 
@@ -186,11 +193,11 @@ define(['dojo/_base/connect', 'dojo/_base/declare', 'dojo/_base/lang',
           // event was fired/recorded earlier, because components on the
           // page might be expecting it to initialize.
           if (!this._lastRecordedStateForEvent[stateDesc.changeEvent]) {
-            this._fireIfChanged(stateDesc.changeEvent,
+            this._tryToFireIfChanged(stateDesc.changeEvent,
                     new stateDesc.Builder().build());
           }
         } else {
-          this._fireIfChanged(stateDesc.changeEvent, stateBuilder.build());
+          this._tryToFireIfChanged(stateDesc.changeEvent, stateBuilder.build());
         }
 
       }
@@ -205,7 +212,8 @@ define(['dojo/_base/connect', 'dojo/_base/declare', 'dojo/_base/lang',
       if (!version) {
         version = LightConstantsEnum.LATEST_VERSION_STR;
       }
-      return URLUtils.getOrigin() + '/rest/content/general/module/' + moduleId + '/' + version + '/';
+      return URLUtils.getOrigin() + '/rest/content/general/module/' +
+          moduleId + '/' + version + '/';
     },
 
 

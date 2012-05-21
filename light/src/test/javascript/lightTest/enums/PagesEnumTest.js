@@ -59,7 +59,7 @@
           function expectToThrowOrNotToBe(page) {
             var foundPage = null;
             try {
-              foundPage = PagesEnum.getCurrentPath();
+              foundPage = PagesEnum.getCurrentPage();
             } catch(err) {
               return;
             }
@@ -107,7 +107,7 @@
         it('should throw', function() {
           this.stub(URLUtils, 'getPath').withArgs().returns(SAMPLE_UNKOWN_PATH);
           expect(function() {
-            PagesEnum.getCurrentPath();
+            PagesEnum.getCurrentPage();
           }).toThrow();
         });
       });

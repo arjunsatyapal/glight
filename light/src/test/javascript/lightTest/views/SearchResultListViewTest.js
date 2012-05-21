@@ -69,14 +69,14 @@ define(['light/views/SearchResultListView',
       });
     });
 
-    describe('clear', function() {
+    describe('clearSearch', function() {
       describe('when called', function() {
         it('should safely empty this.domNode', function() {
           var emptyStub = this.stub(domConstruct, 'empty');
 
-          view.clear();
+          view.clearSearch();
 
-          expect(emptyStub).toHaveBeenCalledWith(view.domNode);
+          expect(emptyStub).toHaveBeenCalledWith(view._searchResultsNode);
         });
       });
     });

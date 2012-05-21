@@ -14,12 +14,12 @@
  * the License.
  */
 define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
-        'light/enums/EventsEnum', 'dojo/_base/connect',
+        'light/enums/EventsEnum', 'light/utils/PubSubUtils',
         'light/enums/BrowseContextsEnum', 'light/utils/URLUtils', 'dojo',
         'light/builders/BrowseContextStateBuilder',
         'light/utils/XHRUtils'],
         function(declare, AbstractLightController, EventsEnum,
-                 connect, BrowseContextsEnum, URLUtils, dojo,
+                 PubSubUtils, BrowseContextsEnum, URLUtils, dojo,
                  BrowseContextStateBuilder, XHRUtils) {
   var NUMBER_OF_ITEMS_PER_PAGE = 10;
 
@@ -45,7 +45,7 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
      * watch for browser context state changes.
      */
     watch: function() {
-      connect.subscribe(EventsEnum.BROWSE_CONTEXT_STATE_CHANGED, this,
+      PubSubUtils.subscribe(EventsEnum.BROWSE_CONTEXT_STATE_CHANGED, this,
               this._onBrowseContextStateChange);
     },
 
@@ -71,7 +71,7 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
      * modules to import.
      */
     gdocAsSource: function() {
-      connect.publish(EventsEnum.BROWSE_CONTEXT_STATE_CHANGED, [
+      PubSubUtils.publish(EventsEnum.BROWSE_CONTEXT_STATE_CHANGED, [
            new BrowseContextStateBuilder()
                .context(BrowseContextsEnum.IMPORT)
                .subcontext('gdoc').build(), this]);
@@ -81,7 +81,7 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
      * Indicates the user wants to see what he have imported on light.
      */
     seeImported: function() {
-      connect.publish(EventsEnum.BROWSE_CONTEXT_STATE_CHANGED, [
+      PubSubUtils.publish(EventsEnum.BROWSE_CONTEXT_STATE_CHANGED, [
            new BrowseContextStateBuilder()
                .context(BrowseContextsEnum.IMPORT)
                .subcontext('me').build(), this]);
@@ -92,7 +92,7 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
      * and should see a list of sources from where he can do it.
      */
     importModules: function() {
-      connect.publish(EventsEnum.BROWSE_CONTEXT_STATE_CHANGED, [
+      PubSubUtils.publish(EventsEnum.BROWSE_CONTEXT_STATE_CHANGED, [
            new BrowseContextStateBuilder()
                .context(BrowseContextsEnum.IMPORT).build(), this]);
     },
