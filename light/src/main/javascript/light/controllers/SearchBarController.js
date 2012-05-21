@@ -52,10 +52,13 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
      * Handler for browse context state change events.
      */
     _onBrowseContextStateChange: function(browseContextState, source) {
-      if (browseContextState.context != BrowseContextsEnum.ALL) {
-        this._view.disable();
-      } else {
+      // TODO(waltercacau): Extract gdoc to some kind of constant
+      if (browseContextState.context == BrowseContextsEnum.ALL ||
+          (browseContextState.context == BrowseContextsEnum.IMPORT &&
+           browseContextState.subcontext == 'gdoc')) {
         this._view.enable();
+      } else {
+        this._view.disable();
       }
     },
 

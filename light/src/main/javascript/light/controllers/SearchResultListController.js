@@ -62,21 +62,23 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
         return;
       }
 
-      if (searchState.query.match(RegexCommon.SPACES_ONLY)) {
-        this._view.clear();
-        this._cancelCurrentSearches();
-      } else {
+      this._view.clear();
+      this._cancelCurrentSearches();
+      if (!searchState.query.match(RegexCommon.SPACES_ONLY)) {
         var self = this;
         this._searchPromiseContainer.handle(function() {
           return self._searchService.search(searchState);
         }).then(function(data) {
           self._view.show(searchState, data);
         });
-        this._searchRecentPromiseContainer.handle(function() {
-          return self._searchService.searchRecent(searchState);
-        }).then(function(data) {
-          self._view.showRecent(data);
-        });
+        // Only in the first page we should use the appengine stuff
+        if(searchState.page == 1) {
+          this._searchRecentPromiseContainer.handle(function() {
+            return self._searchService.searchRecent(searchState);
+          }).then(function(data) {
+            self._view.showRecent(data);
+          });
+        }
       }
 
     },

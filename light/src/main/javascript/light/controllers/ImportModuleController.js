@@ -22,6 +22,8 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
                  PubSubUtils, BrowseContextsEnum, URLUtils, dojo,
                  BrowseContextStateBuilder, XHRUtils) {
   var NUMBER_OF_ITEMS_PER_PAGE = 10;
+  var FIRST_FORM = 'first';
+  var GDOC_FORM = 'gdoc';
 
   return declare('light.controller.ImportModuleController',
           AbstractLightController, {
@@ -42,21 +44,49 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
     watch: function() {
       PubSubUtils.subscribe(EventsEnum.BROWSE_CONTEXT_STATE_CHANGED, this,
               this._onBrowseContextStateChange);
+      PubSubUtils.subscribe(EventsEnum.SEARCH_STATE_CHANGED, this,
+              this._onSearchStateChange);
     },
 
+    _currentForm: null,
     /**
      * Handler for browse context state change events.
      */
     _onBrowseContextStateChange: function(browseContextState, source) {
       if (browseContextState.context == BrowseContextsEnum.IMPORT) {
-        if (browseContextState.subcontext == 'gdoc') {
-          this._view.showGdocListForm('/rest/thirdparty/google/gdoc/list');
+        if (browseContextState.subcontext == GDOC_FORM) {
+          this._showGdocForm();
+          this._currentForm = GDOC_FORM;
         } else {
           this._view.showFirstForm();
+          this._currentForm = FIRST_FORM;
         }
       } else {
         this._view.hide();
+        this._currentForm = null;
       }
+    },
+
+    /**
+     * Handler for search state change events.
+     */
+    _lastQuery: '',
+    _onSearchStateChange: function(searchState, source) {
+      if (source != this) {
+        this._lastQuery = searchState.query;
+        if(this._currentForm == GDOC_FORM) {
+          this._showGdocForm();
+        }
+      }
+    },
+    _showGdocForm: function() {
+      var link = '/rest/thirdparty/google/gdoc/list';
+      if(this._lastQuery !== '') {
+        link += '?'+dojo.objectToQuery({
+          'filter': this._lastQuery
+        });
+      }
+      this._view.showGdocListForm(link);
     },
 
     /**
@@ -67,7 +97,7 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
       PubSubUtils.publish(EventsEnum.BROWSE_CONTEXT_STATE_CHANGED, [
            new BrowseContextStateBuilder()
                .context(BrowseContextsEnum.IMPORT)
-               .subcontext('gdoc').build(), this]);
+               .subcontext(GDOC_FORM).build(), this]);
     },
 
     /**
