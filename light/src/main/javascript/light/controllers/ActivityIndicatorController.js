@@ -16,40 +16,41 @@
 define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
         'light/enums/EventsEnum', 'light/utils/PubSubUtils',
         'light/enums/BrowseContextsEnum',
-        'light/builders/BrowseContextStateBuilder'],
+        'light/builders/BrowseContextStateBuilder', 'dojo'],
         function(declare, AbstractLightController, EventsEnum,
                  PubSubUtils, BrowseContextsEnum,
-                 BrowseContextStateBuilder) {
+                 BrowseContextStateBuilder, dojo) {
 
-  return declare('light.controller.ImportedByMeController',
+  return declare('light.controller.ActivityIndicatorController',
           AbstractLightController, {
-    /** @lends light.controller.ImportedByMeController# */
+    /** @lends light.controller.ActivityIndicatorController# */
 
     /**
      * @extends light.controllers.AbstractLightController
      * @constructs
      */
     constructor: function() {
+      if(!dojo.config.ioPublish) {
+        throw new Error('dojo.config.ioPublish should be truthy');
+      }
     },
 
     /**
-     * Wire's this object to the dojo event system so it can
-     * watch for browser context state changes.
+     * Wire's this object to the dojo event system.
      */
     watch: function() {
-      PubSubUtils.subscribe(EventsEnum.BROWSE_CONTEXT_STATE_CHANGED, this,
-              this._onBrowseContextStateChange);
+      PubSubUtils.subscribe('/dojo/io/send', this,
+              this._onIOSend);
+      PubSubUtils.subscribe('/dojo/io/stop', this,
+              this._onIOStop);
     },
 
-    /**
-     * Handler for browse context state change events.
-     */
-    _onBrowseContextStateChange: function(browseContextState, source) {
-      if (browseContextState.context == BrowseContextsEnum.IMPORTED_BY_ME) {
-        this._view.show('/rest/module/me');
-      } else {
-        this._view.hide();
-      }
+    _onIOSend: function(browseContextState, source) {
+      this._view.show();
+    },
+
+    _onIOStop: function(browseContextState, source) {
+      this._view.hide();
     }
   });
 });

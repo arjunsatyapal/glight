@@ -173,6 +173,16 @@
     body[dir="ltr"] .recentSearchResultsBox {
         right: 0;
     }
+    #activityIndicator {
+        position: absolute;
+        top: 15px;
+    }
+    body[dir="ltr"] #activityIndicator {
+        left: 10px;
+    }
+    body[dir="rtl"] #activityIndicator {
+        right: 10px;
+    }
     
     </style>
     <!--<link rel="stylesheet/less" type="text/css" href="/css/search.less">
@@ -181,6 +191,7 @@
   <body>
     <div id="sidebar"></div>
     <div id="header">
+        <div id="activityIndicator"></div>
         <div id="searchBar"></div>
         <div id="loginToolbar"></div>
     </div>

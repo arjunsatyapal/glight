@@ -21,6 +21,7 @@ var dojoConfig = {
   async: true,
   isDebug: true,
   waitSeconds: 2,
+  ioPublish: true,
   locale: lightPreload.locale,
   has: {
     'light-dev': 1

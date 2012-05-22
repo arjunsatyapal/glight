@@ -85,7 +85,10 @@ var profile = (function() {
         }, {
           name: 'dojox',
           location: '/js/external/djk/dojox'
-        }]
+        }],
+        
+        // Necessary for the activity indicator
+        ioPublish: true
       };
       if (this.lightPreload && this.lightPreload.locale) {
         config.locale = this.lightPreload.locale;

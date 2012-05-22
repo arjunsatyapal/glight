@@ -13,7 +13,9 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-define(['light/views/SearchBarView',
+define(['light/views/ActivityIndicatorView',
+        'light/controllers/ActivityIndicatorController',
+        'light/views/SearchBarView',
         'light/controllers/SearchBarController',
         'light/views/ImportModuleView',
         'light/controllers/ImportModuleController',
@@ -34,9 +36,10 @@ define(['light/views/SearchBarView',
         'light/utils/URLUtils',
         'light/enums/PagesEnum',
         'dojo/domReady!'],
-        function(SearchBarView, SearchBarController,
-                ImportModuleView, ImportModuleController,
-                ImportedByMeView, ImportedByMeController,
+        function(ActivityIndicatorView, ActivityIndicatorController,
+                 SearchBarView, SearchBarController,
+                 ImportModuleView, ImportModuleController,
+                 ImportedByMeView, ImportedByMeController,
                  SearchResultListView, SearchResultListController,
                  SearchService,
                  LoginToolbarView, LoginToolbarController,
@@ -90,4 +93,10 @@ define(['light/views/SearchBarView',
   importedByMeController.setView(importedByMeView);
   importedByMeView.setController(importedByMeController);
   importedByMeController.watch();
+
+  var activityIndicatorView = new ActivityIndicatorView({}, 'activityIndicator');
+  var activityIndicatorController = new ActivityIndicatorController();
+  activityIndicatorController.setView(activityIndicatorView);
+  activityIndicatorView.setController(activityIndicatorController);
+  activityIndicatorController.watch();
 });
