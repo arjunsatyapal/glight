@@ -15,38 +15,58 @@
  */
 define(['dojo/_base/declare',
         'dijit/tree/dndSource',
-        'dojo/_base/array'],
-        function(declare, dndSource, array) {
+        'dojo/_base/array',
+        'dojo/dnd/Manager',
+        'dojo'],
+        function(declare, dndSource, array, dndManager, dojo) {
 
   // TODO(waltercacau): Move this function to a utility class and test it.
   function compareArrayTuples(a, b) {
-    for(var len = Math.min(a.length,b.length), i=0;i<len;i++) {
-      if(a[i] < b[i]) {
+    for (var len = Math.min(a.length, b.length), i = 0; i < len; i++) {
+      if (a[i] < b[i]) {
         return -1;
       }
-      if(a[i] > b[i]) {
+      if (a[i] > b[i]) {
         return 1;
       }
     }
-    if(a.length < b.length) {
+    if (a.length < b.length) {
       return -1;
     }
-    if(a.length > b.length) {
+    if (a.length > b.length) {
       return 1;
     }
     return 0;
   }
-  
+
   return declare('light.widgets.TreeDndSource', dndSource, {
     /** @lends light.widgets.TreeDndSource */
-    
+
+    _isDragEnabled: true,
+    disableDrag: function() {
+      this._isDragEnabled = false;
+      if (this.isDragging) {
+        dojo.publish('/dnd/cancel');
+        dndManager.manager().stopDrag();
+        this.onDndCancel();
+      }
+    },
+    enableDrag: function() {
+      this._isDragEnabled = true;
+    },
+    onMouseMove: function() {
+      if (this._isDragEnabled) {
+        return this.inherited(arguments);
+      }
+    },
+
     /**
      * Overriding getSelectedTreeNodes to guarantee that the order
      * of the nodes returned is the same as the one the user is seeing.
      */
     getSelectedTreeNodes: function() {
       var selectedNodes = this.inherited(arguments);
-      if(selectedNodes.length <= 1){
+      if (selectedNodes.length <= 1) {
         return selectedNodes;
       }
       var indexPaths = {};
@@ -54,7 +74,7 @@ define(['dojo/_base/declare',
         var indexReversePath = [];
         var iterNode = node;
         var rootNode = node.tree.rootNode;
-        while(iterNode != rootNode) {
+        while (iterNode != rootNode) {
           var index = Array.prototype.indexOf.call(iterNode.domNode.parentNode.childNodes, iterNode.domNode);
           indexReversePath.push(index);
           iterNode = iterNode.getParent();
@@ -62,25 +82,25 @@ define(['dojo/_base/declare',
         indexReversePath.reverse();
         indexPaths[node.id] = indexReversePath;
       });
-      
+
       selectedNodes.sort(function(a,b) {
         return compareArrayTuples(indexPaths[a.id], indexPaths[b.id]);
       });
-      
+
       return selectedNodes;
     },
 
     /**
      * Overriding onDndDrop to fix issue of multiple selection
      * drag&drop inversion.
-     * 
+     *
      * The implementation of this function was borrowed from the file
      * dijit/tree/dndSource of dojo 1.7.2 and was slightly modified to
      * correct the mentioned bug.
-     * 
+     *
      * TODO(waltercacau): File a bug for dojo.
      */
-    onDndDrop: function(source, nodes, copy){
+    onDndDrop: function(source, nodes, copy) {
       /*jshint funcscope:true */
       // summary:
       //    Topic event processor for /dnd/drop, called to finish the DnD operation.
@@ -95,7 +115,7 @@ define(['dojo/_base/declare',
       //    Copy items, if true, move items otherwise
       // tags:
       //    protected
-      if(this.containerState == "Over"){
+      if (this.containerState == 'Over') {
         var tree = this.tree,
           model = tree.model,
           target = this.targetAnchor;
@@ -106,16 +126,16 @@ define(['dojo/_base/declare',
         var newParentItem;
         var insertIndex;
         newParentItem = (target && target.item) || tree.item;
-        if(this.dropPosition == "Before" || this.dropPosition == "After"){
+        if (this.dropPosition == 'Before' || this.dropPosition == 'After') {
           // TODO: if there is no parent item then disallow the drop.
           // Actually this should be checked during onMouseMove too, to make the drag icon red.
           newParentItem = (target.getParent() && target.getParent().item) || tree.item;
           // Compute the insert index for reordering
           insertIndex = target.getIndexInParent();
-          if(this.dropPosition == "After"){
+          if (this.dropPosition == 'After') {
             insertIndex = target.getIndexInParent() + 1;
           }
-        }else{
+        }else {
           newParentItem = (target && target.item) || tree.item;
         }
 
@@ -123,7 +143,7 @@ define(['dojo/_base/declare',
         // (one entry in the array for each dragged node).
         var newItemsParams;
 
-        array.forEach(nodes, function(node, idx){
+        array.forEach(nodes, function(node, idx) {
           // dojo.dnd.Item representing the thing being dropped.
           // Don't confuse the use of item here (meaning a DnD item) with the
           // uses below where item means dojo.data item.
@@ -132,37 +152,37 @@ define(['dojo/_base/declare',
           // Information that's available if the source is another Tree
           // (possibly but not necessarily this tree, possibly but not
           // necessarily the same model as this Tree)
-          if(array.indexOf(sourceItem.type, "treeNode") != -1){
+          if (array.indexOf(sourceItem.type, 'treeNode') != -1) {
             var childTreeNode = sourceItem.data,
               childItem = childTreeNode.item,
               oldParentItem = childTreeNode.getParent().item;
           }
 
-          if(source == this){
+          if (source == this) {
             // This is a node from my own tree, and we are moving it, not copying.
             // Remove item from old parent's children attribute.
             // TODO: dijit.tree.dndSelector should implement deleteSelectedNodes()
             // and this code should go there.
 
-            if(typeof insertIndex == "number"){
-              if(newParentItem == oldParentItem && childTreeNode.getIndexInParent() < insertIndex){
+            if (typeof insertIndex == 'number') {
+              if (newParentItem == oldParentItem && childTreeNode.getIndexInParent() < insertIndex) {
                 insertIndex -= 1;
               }
             }
             model.pasteItem(childItem, oldParentItem, newParentItem, copy, insertIndex);
             // LightMod Start: Incrementing insertIndex
-            if(typeof insertIndex == "number"){
+            if (typeof insertIndex == 'number') {
               insertIndex++;
             }
             // LightMod End
-          }else if(model.isItem(childItem)){
+          }else if (model.isItem(childItem)) {
             // Item from same model
             // (maybe we should only do this branch if the source is a tree?)
             model.pasteItem(childItem, oldParentItem, newParentItem, copy, insertIndex);
-          }else{
+          }else {
             // Get the hash to pass to model.newItem().  A single call to
             // itemCreator() returns an array of hashes, one for each drag source node.
-            if(!newItemsParams){
+            if (!newItemsParams) {
               newItemsParams = this.itemCreator(nodes, target.rowNode, source);
             }
 

@@ -17,12 +17,14 @@ define(['dojo/_base/declare', 'dojo/_base/connect',
         'light/controllers/AbstractLightController',
         'light/enums/EventsEnum', 'light/utils/PubSubUtils',
         'light/enums/BrowseContextsEnum',
-        'light/utils/SinglePromiseContainer',
-        'light/enums/LightConstantsEnum',
-        'dojo/DeferredList'],
+        'light/utils/promises/SinglePromiseContainer',
+        'light/utils/promises/CompositePromise',
+        'light/utils/promises/WaitPromise',
+        'light/enums/LightConstantsEnum'],
         function(declare, connect, AbstractLightController, EventsEnum,
                 PubSubUtils, BrowseContextsEnum, SinglePromiseContainer,
-                LightConstantsEnum, DeferredList) {
+                CompositePromise, WaitPromise,
+                LightConstantsEnum) {
 
   var PUBLISH_VALIDATOR_IDENTIFIER =
     'light.controller.CollectionEditorController';
@@ -53,6 +55,7 @@ define(['dojo/_base/declare', 'dojo/_base/connect',
      * Handler for browse context state change events.
      */
     _onBrowseContextStateChange: function(browseContextState, source) {
+      // TODO(waltercacau): Create better utilities for this and rewrite this code
       this._view.hide();
       this.everythingIsSaved();
       this._collectionId = null;
@@ -60,46 +63,59 @@ define(['dojo/_base/declare', 'dojo/_base/connect',
         this._collectionId = browseContextState.subcontext;
         var self = this;
         this._singlePromiseContainer.handle(function() {
-          /* TODO(waltercacau): Maybe create a better utility then
-             DeferredList to deal with parallel promises. Currently
-             DeferredList does not provide an automatic canceler to
-             cancel the given promises.
-             Also it does not propagate the errors to the errback.*/
-            var getCollection = self._collectionService.get(
-                    browseContextState.subcontext
-            );
-            var getCollectionVersion = self._collectionService.getVersion(
-                    browseContextState.subcontext,
-                    LightConstantsEnum.LATEST_VERSION_STR
-            );
-            var dfd = new DeferredList([getCollection, getCollectionVersion]);
-            dfd.cancel = function() {
-              // This is quite a hack. If you simple pass a canceler to
-              // the deferred and then cancel the individual promises
-              // you will get nasty messages in the console about
-              // the deferred being already resolved.
-              getCollection.cancel();
-              getCollectionVersion.cancel();
-            };
-            return dfd;
+          return CompositePromise.of(
+                  self._collectionService.get(
+                          browseContextState.subcontext
+                  ),
+                  self._collectionService.getVersion(
+                          browseContextState.subcontext,
+                          LightConstantsEnum.LATEST_VERSION_STR
+                  )
+          );
         }).then(function(results) {
-          if (!results[0][0] || !results[1][0]) {
-            // If something failed to load and it wasn't because it was
-            // cancelled, then we really failed.
-            if ((!results[0][0] && !results[0][1].lightCancelled) ||
-                    (!results[1][0] && !results[1][1].lightCancelled)) {
-              self._view.showCouldNotLoad();
-            }
+          if (results[0] instanceof Error || results[1] instanceof Error) {
+            self._view.showCouldNotLoad();
           } else {
-            self._collection = results[0][1];
-            self._collectionVersion = results[1][1];
+            self._collection = results[0];
+            self._collectionVersion = results[1];
+            var isPartiallyPublished =
+                self._collectionVersion.collectionState == 'PARTIALLY_PUBLISHED';
             self._view.showEditor(self._collectionId,
-                    self._collectionVersion.collectionTree);
+                    self._collectionVersion.collectionTree, isPartiallyPublished);
+            if(isPartiallyPublished) {
+              self._poolForPublishedVersion();
+            }
           }
         });
       } else {
         this._singlePromiseContainer.cancel();
       }
+    },
+    _poolForPublishedVersion: function() {
+      var self = this;
+      self._singlePromiseContainer.handle(function() {
+        return WaitPromise.of(3000);
+      }).then(function() {
+        self._singlePromiseContainer.handle(function() {
+          return self._collectionService.getVersion(
+                  self._collectionId,
+                  LightConstantsEnum.LATEST_VERSION_STR,
+                  false /* ioPublish = false, so we don't trigger the ActivityIndicator */
+          );
+        }).then(function(result) {
+          if(result.collectionState == 'PUBLISHED') {
+            self._collectionVersion = result;
+            self._view.showEditor(self._collectionId,
+                    self._collectionVersion.collectionTree, false);
+          } else {
+            self._poolForPublishedVersion();
+          }
+        }, function(err) {
+          if(!err.lightCancelled) {
+            self._poolForPublishedVersion();
+          }
+        });
+      });
     },
     saveCollection: function(collectionTree) {
       var self = this;

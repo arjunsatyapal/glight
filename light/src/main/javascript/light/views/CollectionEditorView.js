@@ -157,9 +157,11 @@ define(['dojo/_base/declare', 'dojo/_base/lang',
 
     /**
      * Shows the editor for the given collectionTree
-     * @param {Object} root A CollectionTreeNode.
+     * @param {string|number} collectionId The collection id.
+     * @param {Object} collectionTree A CollectionTreeNode.
+     * @param {boolean} isPartiallyPublished True if it is partially published.
      */
-    showEditor: function(collectionId, collectionTree) {
+    showEditor: function(collectionId, collectionTree, isPartiallyPublished) {
       var _collectionLink =
           RouterManager.buildLinkForCollectionContent(collectionId);
       this._collectionLinkA.href = _collectionLink;
@@ -218,10 +220,17 @@ define(['dojo/_base/declare', 'dojo/_base/lang',
           var treeNode = dijit.byNode(target.parentNode);
           return !self._isLeafNode(treeNode.item, 'nodeType');
         },
-        onDblClick: lang.hitch(this, '_onDblClickNode'),
         dndController: TreeDndSource
       });
       this._editorFormDiv.appendChild(this._collectionTree.domNode);
+      
+      if(isPartiallyPublished) {
+        DOMUtils.show(this._partiallyPublishedWarningDiv);
+        this._collectionTree.dndController.disableDrag();
+      } else {
+        this._collectionTree.onDblClick = lang.hitch(this, '_onDblClickNode');
+        DOMUtils.hide(this._partiallyPublishedWarningDiv);
+      }
     },
 
     _setSaveButtonState: function(state) {
@@ -373,10 +382,6 @@ define(['dojo/_base/declare', 'dojo/_base/lang',
         this._traversePostorder(children[i], func);
       }
       func(root);
-    },
-
-    _viewLastSaved: function() {
-
     },
 
     /**

@@ -21,9 +21,13 @@ define(['dojo/_base/declare', 'light/utils/XHRUtils', 'dojo'],
         url: '/rest/collection/' + collectionId
       });
     },
-    getVersion: function(collectionId, version) {
+    getVersion: function(collectionId, version, ioPublish) {
+      if(typeof ioPublish === "undefined") {
+        ioPublish = true;
+      }
       return XHRUtils.get({
-        url: '/rest/collection/' + collectionId + '/' + version
+        url: '/rest/collection/' + collectionId + '/' + version,
+        ioPublish: ioPublish
       });
     },
     create: function(collection) {

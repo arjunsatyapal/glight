@@ -31,6 +31,7 @@ import com.google.light.server.dto.pojo.tree.AbstractTreeNode.TreeNodeType;
 
 import com.google.light.server.dto.collection.CollectionState;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -154,6 +155,11 @@ public class CollectionResource extends AbstractJerseyResource {
         @SuppressWarnings("synthetic-access")
         @Override
         public Version run(Objectify ofy) {
+          CollectionEntity collectionEntity = collectionManager.get(ofy, collectionId);
+          Version previousVersion = collectionEntity.getNextVersion().getPreviousVersion();
+          CollectionVersionEntity collectionVersion = collectionManager.getCollectionVersion(ofy, collectionId, previousVersion);
+          Preconditions.checkState(collectionVersion.getCollectionState() != CollectionState.PARTIALLY_PUBLISHED,
+              "Partially published collections are not allowed to be edited!");
           return collectionManager.reserveCollectionVersion(ofy, collectionId, 
               DEFAULT_LIGHT_CONTENT_LICENSES);
         }

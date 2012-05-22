@@ -16,7 +16,7 @@
 define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
         'light/enums/EventsEnum', 'light/utils/PubSubUtils',
         'light/RegexCommon',
-        'light/utils/SinglePromiseContainer',
+        'light/utils/promises/SinglePromiseContainer',
         'light/enums/BrowseContextsEnum'],
         function(declare, AbstractLightController, EventsEnum,
                  PubSubUtils, RegexCommon, SinglePromiseContainer,

@@ -20,7 +20,6 @@ define(['dojo/_base/declare',
         'dojo/on',
         'dojo'],
         function(declare, dndSource, focusUtil, event, on, dojo) {
-
   return declare('light.widgets.ListWidget', dndSource, {
     /** @lends light.widgets.ListWidget */
 
@@ -72,7 +71,6 @@ define(['dojo/_base/declare',
      * @extends dojo/dnd/Source
      */
     constructor: function(node, params) {
-
       // Initial checks
       if (params.creator) {
         throw new Error('You should define rawCreator instead of creator');
@@ -87,10 +85,8 @@ define(['dojo/_base/declare',
        */
       this._focusNodeMap = {};
 
-      this.events.push(
-        dojo.connect(this.node, 'onkeypress', this, '_onKeyPress'),
-        dojo.connect(this.node, 'focusin', this, this._onFocus)
-      );
+      this.events.push(dojo.connect(this.node, 'onkeypress', this, '_onKeyPress'));
+      this.events.push(dojo.connect(this.node, 'focus', this, '_onFocus'));
 
       // Making the list widget focusable initially
       this.node.setAttribute('tabindex', '0');
@@ -189,10 +185,11 @@ define(['dojo/_base/declare',
      * Focus handler
      */
     _onFocus: function(evt) {
+      console.log('_onFocus',this.counter);
       // For some reason we need to delay this, otherwise we get random
       // DOM Exceptions from a query selector call inside Dojo Dnd Selector.
       var self = this;
-      setTimeout(function() {
+      //setTimeout(function() {
         if (!self.anchor) {
           var newAnchor = self.getAllNodes()[0];
           if (newAnchor) {
@@ -200,7 +197,7 @@ define(['dojo/_base/declare',
             self._setNewAnchor(newAnchor);
           }
         }
-      }, 0);
+      //}, 0);
     },
     
     /**
@@ -235,9 +232,7 @@ define(['dojo/_base/declare',
         this.node.setAttribute('tabindex', '-1');
         var focusNode = this._lastAnchorFocusNode = this._focusNodeMap[node.id];
         focusNode.setAttribute('tabindex', '0');
-        setTimeout(function() {
-          focusUtil.focus(focusNode);
-        }, 0);
+        focusUtil.focus(focusNode);
       }
       this.inherited(arguments);
     },

@@ -33,6 +33,7 @@ define({
     collectionLinkTextBoxLabel: 'Link',
     viewLastSaved: 'View last saved',
     errorSavingDialogTitle: 'Error Saving',
-    errorSavingDialogContent: 'Could not save the collection. Please try again.'
+    errorSavingDialogContent: 'Could not save the collection. Please try again.',
+    partiallyPublishedWarning: 'Import in progress. You can\'t edit while it is happening.'
   }
 });

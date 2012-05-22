@@ -19,9 +19,9 @@ define(['dojo/_base/declare'], function(declare) {
    * Guarantees that only a single promise will be pending.
    *
    * @class
-   * @name light.utils.SinglePromiseContainer
+   * @name light.utils.promises.SinglePromiseContainer
    */
-  return declare('light.utils.SinglePromiseContainer', null, {
+  return declare('light.utils.promises.SinglePromiseContainer', null, {
     _lastPromise: null,
 
     /**
