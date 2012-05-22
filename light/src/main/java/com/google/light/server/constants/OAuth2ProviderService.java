@@ -82,7 +82,7 @@ public enum OAuth2ProviderService {
       this.tokenServerUrl = checkValidUri(tokenServerUrl);
       this.tokenInfoUrl = checkValidUri(tokenInfoUrl);
       this.tokenInfoClazz = checkNotNull(tokenInfoClazz);
-      this.scopes = checkNotEmptyCollection(scopes, "scopes");
+      this.scopes = (ArrayList<String>) checkNotEmptyCollection(scopes, "scopes");
     } catch (URISyntaxException e) {
       throw new IllegalArgumentException(e);
     }

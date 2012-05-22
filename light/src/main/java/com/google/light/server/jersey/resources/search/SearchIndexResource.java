@@ -67,31 +67,36 @@ public class SearchIndexResource extends AbstractJerseyResource {
   @Produces(ContentTypeConstants.TEXT_PLAIN)
   @Path(JerseyConstants.PATH_SEARCH_INDEX_UPDATE_INDICES)
   public Response updateIndices() {
-    GAEQueryWrapper<ModuleVersionEntity> queryWrapper = 
-        moduleManager.findModuleVersionsForFTSIndexUpdate(LightConstants.MAX_RESULTS_MAX, null);
-    
-    List<ModuleVersionEntity> listOfModuleVersions = queryWrapper.getList();
     StringBuilder builder = new StringBuilder();
-    for (ModuleVersionEntity curr : listOfModuleVersions) {
-      builder.append(curr.getModuleId() + ",");
-    }
-    logger.info("Found (" + listOfModuleVersions.size() + ") modules for FTSIndexUpdate : "
-        + builder.toString());
 
-    ftsManager.indexModules(listOfModuleVersions);
-    logger.info("Finished indexing for FTS");
+    try {
+      GAEQueryWrapper<ModuleVersionEntity> queryWrapper =
+          moduleManager.findModuleVersionsForFTSIndexUpdate(LightConstants.MAX_RESULTS_MAX, null);
 
-    for (ModuleVersionEntity currModule : listOfModuleVersions) {
-      String logMsg = null;
-      try {
-        updateFTSIndexFlag(currModule);
-        logMsg = "Successfully updated IndexFTSFlag for " + currModule.getModuleId();
-      } catch (Throwable throwable) {
-        logMsg = "Failed to update IndexFTSFlag for " + currModule.getModuleId() + " due to : " +
-            Throwables.getStackTraceAsString(throwable);
+      List<ModuleVersionEntity> listOfModuleVersions = queryWrapper.getList();
+      for (ModuleVersionEntity curr : listOfModuleVersions) {
+        builder.append(curr.getModuleId() + ",");
       }
+      logger.info("Found (" + listOfModuleVersions.size() + ") modules for FTSIndexUpdate : "
+          + builder.toString());
 
-      logger.info(logMsg);
+      ftsManager.indexModules(listOfModuleVersions);
+      logger.info("Finished indexing for FTS");
+
+      for (ModuleVersionEntity currModule : listOfModuleVersions) {
+        String logMsg = null;
+        try {
+          updateFTSIndexFlag(currModule);
+          logMsg = "Successfully updated IndexFTSFlag for " + currModule.getModuleId();
+        } catch (Throwable throwable) {
+          logMsg = "Failed to update IndexFTSFlag for " + currModule.getModuleId() + " due to : " +
+              Throwables.getStackTraceAsString(throwable);
+        }
+
+        logger.info(logMsg);
+      }
+    } catch (Exception e) {
+      // Eating exception.
     }
 
     return Response.ok("Finished for : " + builder.toString()).build();

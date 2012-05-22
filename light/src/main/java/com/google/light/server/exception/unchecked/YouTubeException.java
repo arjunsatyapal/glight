@@ -13,34 +13,41 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.server.exception.unchecked.taskqueue;
-
-import com.google.common.collect.Iterables;
-import com.google.light.server.dto.pojo.typewrapper.longwrapper.JobId;
-import java.util.List;
-
-
-
-
+package com.google.light.server.exception.unchecked;
 
 /**
- * This happens when incorrect KeyType is passed. e.g. Instead of String Id, a Long Id was passed.
- * Most probably this is going to be a server side issue.
- *  
+ * This indicates that there was some JSON exception while serializing/de-serializing.
+ * 
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
-public class WaitForChildsToComplete extends TaskQueueRetriableException {
-  private JobId jobId;
-  
+public class YouTubeException extends RuntimeException {
   /**
    * {@inheritDoc}
    */
-  public WaitForChildsToComplete(List<JobId> jobIds) {
-      super("Waiting for : " + Iterables.toString(jobIds));
+  public YouTubeException() {
+      super();
   }
-  
-  public JobId getJobId() {
-    return jobId;
+
+  /**
+   * {@inheritDoc}
+   * @param message
+   */
+  public YouTubeException(String message) {
+      super(message);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public YouTubeException(String message, Throwable cause) {
+      super(message, cause);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public YouTubeException(Throwable cause) {
+      super(cause);
   }
 }

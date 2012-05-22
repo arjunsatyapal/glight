@@ -15,6 +15,16 @@
  */
 package com.google.light.server.manager.interfaces;
 
+import com.google.light.server.jobs.handlers.collectionjobs.youtubeplaylist.ImportCollectionYouTubePlaylistContext;
+
+import com.google.light.server.jobs.handlers.collectionjobs.gdoccollection.ImportCollectionGoogleDocContext;
+
+import com.google.light.server.persistence.entity.jobs.JobEntity.TaskType;
+
+import com.google.light.server.jobs.handlers.modulejobs.gdocument.ImportModuleGoogleDocJobContext;
+
+import com.google.light.server.jobs.handlers.modulejobs.synthetic.ImportModuleSyntheticModuleJobContext;
+
 import com.google.light.server.persistence.entity.jobs.JobState;
 
 import com.google.light.server.serveronlypojos.GAEQueryWrapper;
@@ -29,9 +39,6 @@ import com.google.light.server.dto.importresource.ImportBatchWrapper;
 import com.google.light.server.dto.importresource.ImportExternalIdDto;
 import com.google.light.server.dto.pojo.ChangeLogEntryPojo;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.JobId;
-import com.google.light.server.jobs.handlers.collectionjobs.ImportCollectionGoogleDocContext;
-import com.google.light.server.jobs.handlers.modulejobs.ImportModuleGoogleDocJobContext;
-import com.google.light.server.jobs.handlers.modulejobs.ImportModuleSyntheticModuleJobContext;
 import com.google.light.server.persistence.entity.jobs.JobEntity;
 import com.googlecode.objectify.Objectify;
 import java.util.Map;
@@ -89,10 +96,14 @@ public interface JobManager {
   public JobEntity createImportCollectionGoogleCollectionJob(Objectify ofy, ImportCollectionGoogleDocContext jobRequest,
       JobId parentJobId, JobId rootJobId);
   
+  public JobEntity createImportCollectionYouTubePlaylistJob(Objectify ofy, 
+      ImportCollectionYouTubePlaylistContext jobRequest, JobId parentJobId, JobId rootJobId);
+  
   public void enqueueImportChildJob(Objectify ofy, JobId parentJobId, JobId childJobId,
       ImportExternalIdDto childJob, QueueEnum queue);
   
-  public JobEntity createSyntheticModuleJob(Objectify ofy, ImportModuleSyntheticModuleJobContext context, 
+  public JobEntity createSyntheticModuleJob(Objectify ofy, 
+      ImportModuleSyntheticModuleJobContext context, TaskType taskType, 
       JobId parentJobId, JobId rootJobId);
   
   public GAEQueryWrapper<JobEntity> findRootJobsCreatedByMe(PersonId ownerId, String startIndex, int maxResults); 

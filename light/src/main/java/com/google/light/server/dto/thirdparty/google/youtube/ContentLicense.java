@@ -16,15 +16,13 @@
 package com.google.light.server.dto.thirdparty.google.youtube;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.collect.Lists.newArrayList;
-import static com.google.light.server.utils.LightUtils.isCollectionEmpty;
 
-import javax.xml.bind.annotation.XmlRootElement;
-
-import com.google.common.collect.Lists;
+import com.google.common.collect.ImmutableList;
 import com.google.light.server.dto.NeedsDtoValidation;
+import com.google.light.server.utils.LightUtils;
 import java.util.List;
 import javax.xml.bind.annotation.XmlEnumValue;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * 
@@ -38,34 +36,34 @@ public enum ContentLicense implements NeedsDtoValidation {
   
   // Standard YouTube License.
   @XmlEnumValue(value = "YOUTUBE")
-  YOUTUBE(Lists.newArrayList("youtbue")),
+  YOUTUBE(ImmutableList.of("youtube")),
 
   // CC Attribution.
   @XmlEnumValue(value = "CC")
-  CC(Lists.newArrayList("CC")),
+  CC(ImmutableList.of("cc")),
 
   // CC Attribution-ShareAlike
   @XmlEnumValue(value = "CC_SA")
-  CC_SA(Lists.newArrayList("CC-SA")),
+  CC_SA(ImmutableList.of("CC-SA")),
 
   // CC Attribution-NoDrivs
   @XmlEnumValue(value = "CC_ND")
-  CC_ND(Lists.newArrayList("CC-ND")),
+  CC_ND(ImmutableList.of("CC-ND")),
 
   // CC Attribution NonCommercial
   @XmlEnumValue(value = "CC_NC")
-  CC_NC(Lists.newArrayList("CC-SA")),
+  CC_NC(ImmutableList.of("CC-SA")),
 
   // CC Attribution-NonCommercial-ShareAlike
   @XmlEnumValue(value = "CC_NC_SA")
-  CC_NC_SA(Lists.newArrayList("CC-NC-SA")),
+  CC_NC_SA(ImmutableList.of("CC-NC-SA")),
 
   // CC Attribution-NonCommercial-NoDrivs
   @XmlEnumValue(value = "CC_NC_ND")
-  CC_NC_ND(Lists.newArrayList("CC-NC-ND")),
+  CC_NC_ND(ImmutableList.of("CC-NC-ND")),
 
   @XmlEnumValue(value = "UNKNOWN")
-  UNKNOWN(Lists.newArrayList("unknown"));
+  UNKNOWN(ImmutableList.of("unknown"));
 
   private List<String> listOfIdentifiers;
 
@@ -74,7 +72,7 @@ public enum ContentLicense implements NeedsDtoValidation {
   }
 
   private ContentLicense(List<String> listIdentifiers) {
-    checkArgument(!isCollectionEmpty(listIdentifiers), "listOfIdentifiers.");
+    checkArgument(!LightUtils.isCollectionEmpty(listIdentifiers), "listOfIdentifiers.");
     this.listOfIdentifiers = listIdentifiers;
   }
 
@@ -88,5 +86,5 @@ public enum ContentLicense implements NeedsDtoValidation {
     throw new EnumConstantNotPresentException(ContentLicense.class, identifier);
   }
 
-  public static final List<ContentLicense> DEFAULT_LIGHT_CONTENT_LICENSES = newArrayList(CC);
+  public static final List<ContentLicense> DEFAULT_LIGHT_CONTENT_LICENSES = ImmutableList.of(CC);
 }

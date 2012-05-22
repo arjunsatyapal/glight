@@ -27,7 +27,6 @@ import static com.google.light.server.utils.LightUtils.isCollectionEmpty;
 
 import com.google.appengine.api.datastore.Text;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.google.light.server.annotations.ObjectifyQueryField;
 import com.google.light.server.annotations.ObjectifyQueryFieldName;
 import com.google.light.server.dto.AbstractDto;
@@ -39,7 +38,6 @@ import com.google.light.server.utils.JsonUtils;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.Unindexed;
 import java.util.List;
-import java.util.Set;
 import javax.persistence.Embedded;
 import javax.persistence.Id;
 
@@ -217,12 +215,12 @@ public class JobEntity extends AbstractPersistenceEntity<JobEntity, Object> {
     return JsonUtils.getDto(response.getValue(), clazz);
   }
 
-  public Set<JobId> getPendingChildJobs() {
+  public List<JobId> getPendingChildJobs() {
     if (isCollectionEmpty(childJobs)) {
-      return Sets.newHashSet();
+      return Lists.newArrayList();
     }
 
-    Set<JobId> pendingChildJobs = Sets.newHashSet(getChildJobs());
+    List<JobId> pendingChildJobs = convertListOfValuesToWrapperList(childJobs, JobId.class);
     pendingChildJobs.removeAll(getFinishedChildJobs());
     return pendingChildJobs;
   }
@@ -301,6 +299,8 @@ public class JobEntity extends AbstractPersistenceEntity<JobEntity, Object> {
       case IMPORT_BATCH:
       case IMPORT_GOOGLE_DOCUMENT:
       case IMPORT_SYNTHETIC_MODULE:
+      case IMPORT_YOUTUBE_VIDEO:
+      case IMPORT_YOUTUBE_PLAYLIST:
       case IMPORT_COLLECTION_GOOGLE_COLLECTION:
         checkNotNull(request, "jobRequest cannot be empty for " + taskType);
         checkArgument(jobHandlerType == JobHandlerType.TASK_QUEUE, taskType
@@ -465,19 +465,34 @@ public class JobEntity extends AbstractPersistenceEntity<JobEntity, Object> {
 
   public static enum TaskType {
     // Task for importing a batch of ExternalIds.
-    IMPORT_BATCH,
+    IMPORT_BATCH(false),
 
     // Task for Importing a Collection.
-    IMPORT_COLLECTION,
+    IMPORT_COLLECTION(true),
 
     // Task for Importing a Google Collection.
-    IMPORT_COLLECTION_GOOGLE_COLLECTION,
+    IMPORT_COLLECTION_GOOGLE_COLLECTION(true),
 
     // Task for Importing Google Document.
-    IMPORT_GOOGLE_DOCUMENT,
+    IMPORT_GOOGLE_DOCUMENT(true),
 
     // Task for Importing a Synthetic Module.
-    IMPORT_SYNTHETIC_MODULE;
+    IMPORT_SYNTHETIC_MODULE(true),
+    
+ // Task for Importing a YouTube Module.
+    IMPORT_YOUTUBE_VIDEO(true),
+    
+    IMPORT_YOUTUBE_PLAYLIST(true);
+    
+    private boolean needsResponse;
+    
+    private TaskType(boolean needsResponse) {
+      this.needsResponse = needsResponse;
+    }
+    
+    public boolean needsResponse() {
+      return needsResponse;
+    }
   }
 
   // For objectify.

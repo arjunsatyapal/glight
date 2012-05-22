@@ -13,11 +13,8 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.server.jobs.handlers.collectionjobs;
+package com.google.light.server.jobs.handlers.collectionjobs.youtubeplaylist;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
-import static com.google.light.server.utils.LightPreconditions.checkNotEmptyCollection;
 import static com.google.light.server.utils.LightUtils.isCollectionEmpty;
 import static com.google.light.server.utils.LightUtils.replaceInstanceInList;
 
@@ -25,8 +22,8 @@ import com.google.common.collect.Lists;
 import com.google.light.server.dto.AbstractDto;
 import com.google.light.server.dto.importresource.ImportExternalIdDto;
 import com.google.light.server.dto.pojo.typewrapper.stringwrapper.ExternalId;
-import com.google.light.server.dto.thirdparty.google.gdoc.GoogleDocInfoDto;
 import com.google.light.server.dto.thirdparty.google.youtube.ContentLicense;
+import com.google.light.server.dto.thirdparty.google.youtube.YouTubePlaylistInfo;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -45,29 +42,13 @@ import org.codehaus.jackson.annotate.JsonTypeName;
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
-@JsonTypeName(value = "importCollectionGoogleDocContext")
-@XmlRootElement(name = "importCollectionGoogleDocContext")
+@JsonTypeName(value = "importCollectionYouTubePlaylistContext")
+@XmlRootElement(name = "importCollectionYouTubePlaylistContext")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class ImportCollectionGoogleDocContext extends AbstractDto<ImportCollectionGoogleDocContext> {
-  @XmlElement(name = "title")
-  @JsonProperty(value = "title")
-  private String title;
-
-  @XmlElement(name = "externalId")
-  @JsonProperty(value = "externalId")
-  private ExternalId externalId;
-
-  @XmlElement(name = "gdocInfo")
-  @JsonProperty(value = "gdocInfo")
-  private GoogleDocInfoDto gdocInfo;
-
-  public GoogleDocInfoDto getGdocInfo() {
-    return gdocInfo;
-  }
-
-  public List<ContentLicense> getContentLicenses() {
-    return contentLicenses;
-  }
+public class ImportCollectionYouTubePlaylistContext extends AbstractDto<ImportCollectionYouTubePlaylistContext> {
+  @XmlElement(name = "youTubePlaylistInfo")
+  @JsonProperty(value = "youTubePlaylistInfo")
+  private YouTubePlaylistInfo youTubePlaylistInfo;
 
   @XmlElementWrapper(name = "list")
   @XmlElement(name = "item")
@@ -83,29 +64,22 @@ public class ImportCollectionGoogleDocContext extends AbstractDto<ImportCollecti
    * {@inheritDoc}
    */
   @Override
-  public ImportCollectionGoogleDocContext validate() {
-    if (!isCollectionEmpty(getList())) {
-      ImportExternalIdDto.doValidationForList(getList(), false /* isRequest */);
-    }
-    checkNotNull(externalId, "externalId");
-    checkNotBlank(title, "title");
-    checkNotEmptyCollection(contentLicenses, "contentLicenses");
-    checkNotNull(gdocInfo, "gdocInfo");
+  public ImportCollectionYouTubePlaylistContext validate() {
     return this;
   }
 
-  public String getTitle() {
-    return title;
+  public YouTubePlaylistInfo getYouTubePlaylistInfo() {
+    return youTubePlaylistInfo;
   }
-
+  
+  public void setYouTubePlaylistInfo(YouTubePlaylistInfo youTubePlaylistInfo) {
+    this.youTubePlaylistInfo = youTubePlaylistInfo;
+  }
+  
   public ExternalId getExternalId() {
-    return externalId;
+    return youTubePlaylistInfo.getExternalId();
   }
-
-  public GoogleDocInfoDto getGDocInfo() {
-    return gdocInfo;
-  }
-
+  
   public List<ImportExternalIdDto> getList() {
     if (isCollectionEmpty(list)) {
       list = Lists.newArrayList();
@@ -136,47 +110,33 @@ public class ImportCollectionGoogleDocContext extends AbstractDto<ImportCollecti
   }
 
   public static class Builder extends AbstractDto.BaseBuilder<Builder> {
-    private ExternalId externalId;
-    private String title;
+    private YouTubePlaylistInfo youTubePlaylistInfo;
     private List<ContentLicense> contentLicenses;
-    private GoogleDocInfoDto gdocInfo;
 
-    public Builder externalId(ExternalId externalId) {
-      this.externalId = externalId;
+    public Builder youTubePlaylistInfo(YouTubePlaylistInfo youTubePlaylistInfo) {
+      this.youTubePlaylistInfo = youTubePlaylistInfo;
       return this;
     }
 
-    public Builder title(String title) {
-      this.title = title;
-      return this;
-    }
-    
     public Builder contentLicenses(List<ContentLicense> contentLicenses) {
       this.contentLicenses = contentLicenses;
       return this;
     }
 
-    public Builder gdocInfo(GoogleDocInfoDto gdocInfo) {
-      this.gdocInfo = gdocInfo;
-      return this;
-    }
-
     @SuppressWarnings("synthetic-access")
-    public ImportCollectionGoogleDocContext build() {
-      return new ImportCollectionGoogleDocContext(this).validate();
+    public ImportCollectionYouTubePlaylistContext build() {
+      return new ImportCollectionYouTubePlaylistContext(this).validate();
     }
   }
 
   @SuppressWarnings("synthetic-access")
-  private ImportCollectionGoogleDocContext(Builder builder) {
+  private ImportCollectionYouTubePlaylistContext(Builder builder) {
     super(builder);
-    this.externalId = builder.externalId;
-    this.title = builder.title;
+    this.youTubePlaylistInfo = builder.youTubePlaylistInfo;
     this.contentLicenses = builder.contentLicenses;
-    this.gdocInfo = builder.gdocInfo;
   }
 
-  private ImportCollectionGoogleDocContext() {
+  private ImportCollectionYouTubePlaylistContext() {
     super(null);
   }
 }

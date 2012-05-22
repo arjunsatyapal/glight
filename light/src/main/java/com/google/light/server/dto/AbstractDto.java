@@ -37,17 +37,17 @@ import org.joda.time.Instant;
  *         Satyapal
  */
 @SuppressWarnings("serial")
-public abstract class AbstractDto<D> extends AbstractPojo<D>  implements NeedsDtoValidation {
+public abstract class AbstractDto<D> extends AbstractPojo<D> implements NeedsDtoValidation {
   @XmlElement(name = "creationTimeInMillis")
   @JsonProperty(value = "creationTimeInMillis")
   protected final Long creationTimeInMillis = null;
-  
+
   @XmlElement(name = "lastUpdateTimeInMillis")
   @JsonProperty(value = "lastUpdateTimeInMillis")
   protected Long lastUpdateTimeInMillis;
 
   /**
-   *  Convert DTO to JSON String.
+   * Convert DTO to JSON String.
    */
   public String toJson() {
     return JsonUtils.toJson(this);
@@ -60,8 +60,12 @@ public abstract class AbstractDto<D> extends AbstractPojo<D>  implements NeedsDt
     return XmlUtils.toXml(this);
   }
 
-  public Long getLastUpdateTimeInMillis() {
-    return lastUpdateTimeInMillis;
+  public Instant getLastUpdateTime() {
+    if (lastUpdateTimeInMillis != null) {
+      return new Instant(lastUpdateTimeInMillis);
+    }
+
+    return null;
   }
 
   public Long getCreationTimeInMillis() {
@@ -70,20 +74,27 @@ public abstract class AbstractDto<D> extends AbstractPojo<D>  implements NeedsDt
 
   @SuppressWarnings("rawtypes")
   public static class BaseBuilder<T extends BaseBuilder> {
-    @SuppressWarnings("unused")
-    private Long creationTimeMillis;
-    private Long lastUpdateTimeMillis;
+    private Instant creationTime;
+    private Instant lastUpdateTime;
 
     @SuppressWarnings("unchecked")
     protected T creationTime(Instant creationTime) {
-      this.creationTimeMillis = creationTime.getMillis();
+      this.creationTime = creationTime;
       return ((T) this);
     }
 
     @SuppressWarnings("unchecked")
     protected T lastUpdateTime(Instant lastUpdateTime) {
-      this.lastUpdateTimeMillis = lastUpdateTime.getMillis();
+      this.lastUpdateTime = lastUpdateTime;
       return ((T) this);
+    }
+
+    public Instant getCreationTime() {
+      return creationTime;
+    }
+
+    public Instant getLastUpdateTime() {
+      return lastUpdateTime;
     }
   }
 
@@ -92,8 +103,11 @@ public abstract class AbstractDto<D> extends AbstractPojo<D>  implements NeedsDt
     if (builder == null) {
       return;
     }
-//    this.creationTime = builder.creationTime;
-    this.lastUpdateTimeInMillis = builder.lastUpdateTimeMillis;
+    // this.creationTime = builder.creationTime;
+    if (builder.lastUpdateTime != null) {
+      this.lastUpdateTimeInMillis = builder.lastUpdateTime.getMillis();
+    }
+
   }
 
   // For JAXB

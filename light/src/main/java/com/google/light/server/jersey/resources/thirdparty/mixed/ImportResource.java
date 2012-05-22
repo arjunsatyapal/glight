@@ -43,7 +43,6 @@ import com.google.light.server.dto.pojo.typewrapper.longwrapper.JobId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
-import com.google.light.server.dto.pojo.typewrapper.stringwrapper.ExternalId;
 import com.google.light.server.dto.thirdparty.google.youtube.ContentLicense;
 import com.google.light.server.exception.ExceptionType;
 import com.google.light.server.exception.unchecked.InvalidExternalIdException;
@@ -280,6 +279,8 @@ public class ImportResource extends AbstractJerseyResource {
 
         String predictedTitle = ModuleUtils.getTitleForExternalId(
             currExternalIdDto.getExternalId());
+        logger.info("For " + currExternalIdDto.getExternalId()
+            + ", Predicted Title : " + predictedTitle);
         if (StringUtils.isBlank(currExternalIdDto.getTitle())) {
           currExternalIdDto.setTitle(predictedTitle);
         }
@@ -307,20 +308,18 @@ public class ImportResource extends AbstractJerseyResource {
               @SuppressWarnings("synthetic-access")
               @Override
               public Void run(Objectify ofy) {
-                ExternalId externalId = currExternalIdDto.getExternalId();
                 ModuleId moduleId = moduleManager.reserveModuleId(ofy,
                     currExternalIdDto.getExternalId(), owners, currExternalIdDto.getTitle(),
                     contentLicenses);
                 currExternalIdDto.setModuleId(moduleId);
                 currExternalIdDto.setContentLicenses(contentLicenses);
-                System.out.println(currExternalIdDto.toJson());
                 return null;
               }
             });
             currExternalIdDto.setModuleState(ModuleState.IMPORTING);
           }
         } else {
-          // This is a collection. So changing state to importing.
+          // This is a type of External Collection. So changing state to importing.
           currExternalIdDto.setModuleState(ModuleState.IMPORTING);
         }
 

@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.server.constants;
+package com.google.light.server.dto.thirdparty.google.youtube;
 
 /**
  *
@@ -22,21 +22,6 @@ package com.google.light.server.constants;
  *
  * @author Arjun Satyapal
  */
-public class LightStringConstants {
-  public static final String CONTENT = "content";
-  
-  public static final String VERSION_LATEST_STR = "latest";
-  public static final String START_INDEX_STR = "startIndex";
-  public static final String MAX_RESULTS_STR = "maxResults";
-  public static final String FILTER = "filter";
-  
-  // TODO(arjuns): Find a better way for URLs. See also LocationHeader.
-  // Some URLs.
-  
-  public static final String FTS_MODULE_ID_KEY = "moduleId:";
-  
-  public static final String LIGHT_APPLICATION_NAME = "light";
-  
-  public static final String TEST = "test";
-  
+public enum AspectRatio {
+  widescreen;
 }

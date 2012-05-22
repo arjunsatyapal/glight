@@ -31,7 +31,7 @@ import org.junit.Test;
  * @author Arjun Satyapal
  */
 public class ContentTypeEnumTest implements EnumTestInterface {
-  private int expectedCount = 31;
+  private int expectedCount = 32;
   /**
    * {@inheritDoc} When you change {@link ContentTypeEnum} update
    * {@link #test_getContentTypeByString}.
@@ -51,6 +51,7 @@ public class ContentTypeEnumTest implements EnumTestInterface {
     Map<String, ContentTypeEnum> map =
         ImmutableMap
             .<String, ContentTypeEnum> builder()
+            .put("application/x-shockwave-flash", ContentTypeEnum.APPLICATION_FLASH)
             .put("application/json", ContentTypeEnum.APPLICATION_JSON)
             .put("application/pdf", ContentTypeEnum.APPLICATION_PDF)
             .put("application/x-www-form-urlencoded", ContentTypeEnum.APPLICATION_URL_ENCODED)

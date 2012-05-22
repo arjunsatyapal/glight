@@ -115,7 +115,7 @@ public class GoogleDocUtils {
     Preconditions.checkArgument(resourceId.getModuleType().mapsToCollection(),
         "Invalid GoogleResource[" + resourceId + "].");
     URL url = getResourceEntryUrl(resourceId);
-    return getURL(url.toString() + "/contents" + "?" + getMaxResults(maxResult) + "&" + EXPAND_ACL);
+    return getURL(url.toString() + "/contents" + "?" + getMaxResults(maxResult));
   }
 
   public static String getMaxResults(int maxResults) {

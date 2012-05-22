@@ -37,7 +37,7 @@ public enum LightEnvEnum {
   // DevServer picks the value from appengine-web.xml. So it will be always same as QA. But
   // the difference is that SystemProperty.environment.value() differs for QA and DEV_SERVER.
   DEV_SERVER(newArrayList("light-qa")),
-  UNIT_TEST(newArrayList("test"));
+  UNIT_TEST(newArrayList(LightStringConstants.TEST));
   
   private List<String> appIds;
   

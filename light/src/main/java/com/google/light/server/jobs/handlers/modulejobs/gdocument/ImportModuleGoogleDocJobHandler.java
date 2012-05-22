@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.server.jobs.handlers.modulejobs;
+package com.google.light.server.jobs.handlers.modulejobs.gdocument;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -55,12 +55,11 @@ import com.google.light.server.dto.thirdparty.google.gdoc.GoogleDocResourceId;
 import com.google.light.server.exception.unchecked.GoogleDocException;
 import com.google.light.server.exception.unchecked.taskqueue.GoogleDocArchivalWaitingException;
 import com.google.light.server.jobs.handlers.JobHandlerInterface;
-import com.google.light.server.manager.interfaces.FTSManager;
 import com.google.light.server.manager.interfaces.JobManager;
 import com.google.light.server.manager.interfaces.ModuleManager;
 import com.google.light.server.persistence.entity.jobs.JobEntity;
 import com.google.light.server.persistence.entity.module.ModuleEntity;
-import com.google.light.server.thirdparty.clients.google.gdoc.DocsServiceWrapper;
+import com.google.light.server.servlets.thirdparty.google.gdoc.DocsServiceWrapper;
 import com.google.light.server.utils.GoogleCloudStorageUtils;
 import com.google.light.server.utils.GuiceUtils;
 import com.google.light.server.utils.JsonUtils;
@@ -91,13 +90,10 @@ public class ImportModuleGoogleDocJobHandler implements JobHandlerInterface {
       .getName());
 
   private JobManager jobManager;
-  private FTSManager ftsManager;
   private ModuleManager moduleManager;
 
   @Inject
-  public ImportModuleGoogleDocJobHandler(JobManager jobManager, FTSManager ftsManager,
-      ModuleManager moduleManager) {
-    this.ftsManager = checkNotNull(ftsManager, "ftsManager");
+  public ImportModuleGoogleDocJobHandler(JobManager jobManager, ModuleManager moduleManager) {
     this.jobManager = checkNotNull(jobManager, "jobManager");
     this.moduleManager = checkNotNull(moduleManager, "moduleManager");
   }
@@ -363,7 +359,6 @@ public class ImportModuleGoogleDocJobHandler implements JobHandlerInterface {
         // Storing file on Cloud Storage.
         String nameFromGoogleDoc = zipEntry.getName();
         logger.info(nameFromGoogleDoc);
-        System.out.println(nameFromGoogleDoc);
 
         checkArgument(nameFromGoogleDoc.contains("/"), "Unexpected name from GoogleDoc : "
             + nameFromGoogleDoc);
@@ -384,7 +379,6 @@ public class ImportModuleGoogleDocJobHandler implements JobHandlerInterface {
           newFileName = parts[1];
 
           newFileName = FileExtensions.appendExtensionToFileName(newFileName, FileExtensions.HTML);
-          System.out.println("HTML File = " + newFileName);
         } else {
           checkArgument(parts.length == 3, "Google Docs will return files " +
               "name of format <pretty title/images/image names>");

@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.server.jobs.handlers.collectionjobs;
+package com.google.light.server.jobs.handlers.collectionjobs.gdoccollection;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -36,12 +36,11 @@ import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
 import com.google.light.server.dto.thirdparty.google.gdoc.GoogleDocInfoDto;
 import com.google.light.server.dto.thirdparty.google.gdoc.GoogleDocResourceId;
 import com.google.light.server.jobs.handlers.JobHandlerInterface;
-import com.google.light.server.jobs.handlers.modulejobs.ImportModuleGoogleDocJobHandler;
+import com.google.light.server.jobs.handlers.modulejobs.gdocument.ImportModuleGoogleDocJobHandler;
 import com.google.light.server.manager.interfaces.JobManager;
-import com.google.light.server.manager.interfaces.ModuleManager;
 import com.google.light.server.persistence.entity.jobs.JobEntity;
 import com.google.light.server.persistence.entity.jobs.JobState;
-import com.google.light.server.thirdparty.clients.google.gdoc.DocsServiceWrapper;
+import com.google.light.server.servlets.thirdparty.google.gdoc.DocsServiceWrapper;
 import com.google.light.server.utils.GuiceUtils;
 import com.google.light.server.utils.JsonUtils;
 import com.google.light.server.utils.LightUtils;
@@ -60,16 +59,14 @@ import org.apache.commons.lang.StringUtils;
  */
 public class ImportCollectionGoogleDocJobHandler implements JobHandlerInterface {
   private JobManager jobManager;
-  private ModuleManager moduleManager;
   private ImportModuleGoogleDocJobHandler importGDocModuleJobHandler;
 
   @Inject
   public ImportCollectionGoogleDocJobHandler(JobManager jobManager,
-      ImportModuleGoogleDocJobHandler importGoogleDocModuleJobHandler, ModuleManager moduleManager) {
+      ImportModuleGoogleDocJobHandler importGoogleDocModuleJobHandler) {
     this.jobManager = checkNotNull(jobManager, "jobManager");
     this.importGDocModuleJobHandler = checkNotNull(importGoogleDocModuleJobHandler,
         "importGoogleDocModuleJobHandler");
-    this.moduleManager = checkNotNull(moduleManager, "moduleManager");
   }
 
   @Override
@@ -77,7 +74,7 @@ public class ImportCollectionGoogleDocJobHandler implements JobHandlerInterface 
     ImportCollectionGoogleDocContext context =
         jobEntity.getContext(ImportCollectionGoogleDocContext.class);
     checkArgument(context.getExternalId().getModuleType() == ModuleType.GOOGLE_COLLECTION,
-        "This handler can handle only Google Collections");
+        "This handler can handle only " + ModuleType.GOOGLE_COLLECTION);
 
     JobState jobState = jobEntity.getJobState();
     switch (jobState) {

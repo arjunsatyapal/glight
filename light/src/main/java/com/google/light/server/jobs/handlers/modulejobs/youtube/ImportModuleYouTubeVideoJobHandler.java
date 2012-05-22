@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.server.jobs.handlers.modulejobs;
+package com.google.light.server.jobs.handlers.modulejobs.youtube;
 
 import static com.google.light.server.jobs.JobUtils.updateJobContext;
 import static com.google.light.server.utils.LightPreconditions.checkNotNull;
@@ -27,14 +27,17 @@ import com.google.light.server.dto.pojo.tree.collection.CollectionTreeNodeDto;
 import com.google.light.server.exception.ExceptionType;
 import com.google.light.server.httpclient.LightHttpClient;
 import com.google.light.server.jobs.handlers.JobHandlerInterface;
+import com.google.light.server.jobs.handlers.modulejobs.synthetic.ImportModuleSyntheticModuleJobContext;
 import com.google.light.server.manager.interfaces.JobManager;
 import com.google.light.server.manager.interfaces.ModuleManager;
 import com.google.light.server.persistence.entity.jobs.JobEntity;
 import com.google.light.server.persistence.entity.jobs.JobState;
+import com.google.light.server.urls.YouTubeUrl;
 import com.google.light.server.utils.HtmlBuilder;
 import com.google.light.server.utils.Transactable;
 import com.googlecode.objectify.Objectify;
 import java.net.URI;
+import java.util.logging.Logger;
 
 /**
  * 
@@ -43,12 +46,15 @@ import java.net.URI;
  * 
  * @author Arjun Satyapal
  */
-public class ImportModuleSyntheticModuleJobHandler implements JobHandlerInterface {
+public class ImportModuleYouTubeVideoJobHandler implements JobHandlerInterface {
+  private static final Logger logger = Logger.getLogger(
+      ImportModuleYouTubeVideoJobHandler.class.getName());
+  
   private JobManager jobManager;
   private ModuleManager moduleManager;
 
   @Inject
-  public ImportModuleSyntheticModuleJobHandler(LightHttpClient httpClient, JobManager jobManager,
+  public ImportModuleYouTubeVideoJobHandler(LightHttpClient httpClient, JobManager jobManager,
       ModuleManager moduleManager) {
     checkNotNull(httpClient, ExceptionType.SERVER_GUICE_INJECTION, "httpClient");
     this.jobManager = checkNotNull(jobManager, ExceptionType.SERVER_GUICE_INJECTION, "jobManager");
@@ -95,6 +101,8 @@ public class ImportModuleSyntheticModuleJobHandler implements JobHandlerInterfac
    */
   private String generateHtmlContent(ImportModuleSyntheticModuleJobContext context) {
     URI canonicalUri = getURI(context.getExternalId().getValue());
+    YouTubeUrl ytUrl = new YouTubeUrl(context.getExternalId());
+    
     HtmlBuilder htmlBuilder = new HtmlBuilder();
 
     htmlBuilder.appendDoctype();
@@ -104,7 +112,7 @@ public class ImportModuleSyntheticModuleJobHandler implements JobHandlerInterfac
 
     htmlBuilder.appendHeadEnd();
     htmlBuilder.appendBodyStart();
-    htmlBuilder.appendIFrame(canonicalUri);
+    htmlBuilder.appendIFrame(ytUrl.getEmbedUri(), "505px", "853px");
     htmlBuilder.appendBodyEnd();
 
     String htmlContent = htmlBuilder.toString();

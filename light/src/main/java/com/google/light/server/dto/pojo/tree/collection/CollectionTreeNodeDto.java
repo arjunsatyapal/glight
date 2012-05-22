@@ -142,7 +142,6 @@ public class CollectionTreeNodeDto extends AbstractTreeNode<CollectionTreeNodeDt
       return;
     }
     
-    System.out.println(this.toJson());
     for (CollectionTreeNodeDto currChild : source.getChildren()) {
       if (currChild.isLeafNode()) {
         checkNotNull(currChild.getExternalId(), "leaf nodes must have externalId");

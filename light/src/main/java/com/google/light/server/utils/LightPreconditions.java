@@ -18,8 +18,9 @@ package com.google.light.server.utils;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.Lists.newArrayList;
-import static com.google.light.server.utils.LightUtils.isCollectionEmpty;
 import static com.google.light.server.utils.ServletUtils.getRequestHeaderValue;
+
+import java.util.List;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
@@ -52,7 +53,6 @@ import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Objectify;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Collection;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.validator.routines.EmailValidator;
@@ -125,10 +125,10 @@ public class LightPreconditions {
     return collectionId;
   }
 
-//  TODO(arjuns): Add test for this.
-  public static <T, C extends Collection<T>> C
-      checkNotEmptyCollection(C collection, String message) {
-    checkArgument(!isCollectionEmpty(collection), message);
+  // TODO(arjuns): Add test for this.
+  public static <T> List<T> checkNotEmptyCollection(List<T> collection, String message) {
+    Preconditions.checkNotNull(collection, "collection");
+    checkArgument(collection.size() != 0, message);
     return collection;
   }
 

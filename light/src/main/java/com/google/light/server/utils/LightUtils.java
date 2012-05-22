@@ -37,7 +37,6 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.google.common.io.CharStreams;
 import com.google.light.server.constants.FileExtensions;
 import com.google.light.server.constants.LightConstants;
@@ -77,7 +76,6 @@ import java.util.Collection;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpSession;
@@ -311,7 +309,7 @@ public class LightUtils {
     return Iterables.toString(list);
   }
 
-  public static boolean isCollectionEmpty(Collection<?> collection) {
+  public static boolean isCollectionEmpty(List collection) {
     if (collection == null || collection.size() == 0) {
       return true;
     }
@@ -349,22 +347,6 @@ public class LightUtils {
     }
 
     return requiredList;
-  }
-
-  public static <E, W extends AbstractTypeWrapper<E, W>>
-      Set<E> convertWrapperSetToSetOfValues(Set<W> setOfWrappers) {
-    if (isCollectionEmpty(setOfWrappers)) {
-      return Sets.newHashSet();
-    }
-
-    Set<E> requiredSet = Sets.newHashSet();
-
-    for (W curr : setOfWrappers) {
-      E wrappedValue = getWrapperValue(curr);
-      requiredSet.add(wrappedValue);
-    }
-
-    return requiredSet;
   }
 
   @VisibleForTesting
@@ -426,24 +408,6 @@ public class LightUtils {
     }
 
     return requiredList;
-  }
-
-  @SuppressWarnings({ "rawtypes", "unchecked", "deprecation" })
-  public static <I, W extends AbstractTypeWrapper<I, W>>
-      Set<W> convertSetOfValuesToWrapperSet(Set<I> setOfValues, Class<W> clazz) {
-    if (isCollectionEmpty(setOfValues)) {
-      return Sets.newHashSet();
-    }
-
-    Set<W> requiredSet = Sets.newHashSet();
-
-    for (I curr : setOfValues) {
-      AbstractTypeWrapper instanceCreator = map.get(clazz.getName());
-      W instance = ((W) instanceCreator.createInstance(curr));
-      requiredSet.add(instance);
-    }
-
-    return requiredSet;
   }
 
   public static String generateNameForExternalId(ExternalId externalId) {
@@ -608,7 +572,7 @@ public class LightUtils {
   }
 
   public static ImportExternalIdDto createImportExternalIdDto(List<ContentLicense> contentLicenses,
-      ExternalId externalId, JobId jobId, JobState jobState, ModuleId moduleId, 
+      ExternalId externalId, JobId jobId, JobState jobState, ModuleId moduleId,
       ModuleType moduleType, ModuleState moduleState, String title, Version version) {
     ImportExternalIdDto dto = new ImportExternalIdDto.Builder()
         .contentLicenses(contentLicenses)
@@ -622,5 +586,52 @@ public class LightUtils {
         .version(version)
         .build1();
     return dto;
+  }
+
+  public static <D, T extends Collection<D>> boolean addToCollectionIfNotPresent(T collection,
+      D newMember) {
+    boolean wasAdded = false;
+    checkNotNull(collection, "collection cannot be null.");
+    if (!collection.contains(newMember)) {
+      collection.add(newMember);
+      wasAdded = true;
+    }
+
+    return wasAdded;
+  }
+
+  public static String getParamValueFromQueryString(URL url, String paramKey) {
+    String query = url.getQuery();
+    
+    if (!query.contains(paramKey)) {
+      return null;
+    }
+    
+    if (!query.contains("&")) {
+      // There is only one keyValue.
+      return getParamValue(query, paramKey, url);
+    }
+    for(String currKeyValue : query.split("&")) {
+      if (currKeyValue.startsWith(paramKey)) {
+        return getParamValue(currKeyValue, paramKey, url);
+      }
+    }
+    
+    return null;
+  }
+
+  /**
+   * @param query
+   */
+  private static String getParamValue(String keyValue, String key, URL url) {
+    checkArgument(keyValue.contains("="), "key and value should be separated by =. Failed for "
+        + url);
+    String[] parts = keyValue.split("=");
+    checkArgument(parts.length == 2, "AFter split found " + parts.length + "(>2) for " + url);
+    if (parts[0].equals(key)) {
+      return parts[1];
+    } 
+    
+    return null;
   }
 }

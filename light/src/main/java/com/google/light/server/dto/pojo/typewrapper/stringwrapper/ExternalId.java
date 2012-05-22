@@ -17,38 +17,31 @@ package com.google.light.server.dto.pojo.typewrapper.stringwrapper;
 
 import static com.google.light.server.utils.LightUtils.getStringWrapper;
 
-import org.codehaus.jackson.annotate.JsonTypeName;
-
-import javax.xml.bind.annotation.XmlAccessType;
-
-import javax.xml.bind.annotation.XmlAccessorType;
-
-import com.google.light.server.urls.YouTubeUrl;
-
-import org.codehaus.jackson.annotate.JsonIgnore;
-
-import com.google.light.server.urls.LightUrl;
-
-import com.google.light.server.urls.GoogleDocUrl;
-
-import com.google.light.server.utils.GaeUtils;
-
-import com.google.light.server.dto.module.ModuleTypeProvider;
-
+import com.google.common.collect.Lists;
 import com.google.light.server.dto.module.ModuleType;
+import com.google.light.server.dto.module.ModuleTypeProvider;
 import com.google.light.server.dto.pojo.typewrapper.AbstractTypeWrapper;
 import com.google.light.server.dto.pojo.typewrapper.stringwrapper.ExternalId.ExternalIdDeserializer;
 import com.google.light.server.dto.pojo.typewrapper.stringwrapper.ExternalId.ExternalIdSerializer;
 import com.google.light.server.dto.pojo.typewrapper.stringwrapper.ExternalId.ExternalIdXmlAdapter;
+import com.google.light.server.urls.GoogleDocUrl;
+import com.google.light.server.urls.LightUrl;
+import com.google.light.server.urls.YouTubeUrl;
+import com.google.light.server.utils.GaeUtils;
 import com.google.light.server.utils.LightUtils;
 import java.io.IOException;
 import java.net.URL;
+import java.util.List;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.JsonProcessingException;
+import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.annotate.JsonTypeName;
 import org.codehaus.jackson.map.DeserializationContext;
 import org.codehaus.jackson.map.JsonDeserializer;
 import org.codehaus.jackson.map.JsonSerializer;
@@ -57,10 +50,10 @@ import org.codehaus.jackson.map.annotate.JsonDeserialize;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 
 /**
- *
+ * 
  * 
  * TODO(arjuns): Add test for this class.
- *
+ * 
  * @author Arjun Satyapal
  */
 @SuppressWarnings("serial")
@@ -73,7 +66,7 @@ import org.codehaus.jackson.map.annotate.JsonSerialize;
 public class ExternalId extends AbstractTypeWrapper<String, ExternalId> {
   @JsonIgnore
   private transient URL url;
-  
+
   /**
    * @param value
    */
@@ -81,7 +74,27 @@ public class ExternalId extends AbstractTypeWrapper<String, ExternalId> {
     super(value);
   }
 
-  /** 
+  /**
+   * This might be required for resources where multiple URLs can represent same thing. So this
+   * will help in deduping those.
+   */
+  private void updateValueIfRequired() {
+    ModuleType moduleType = getModuleType();
+    // TODO(arjuns): This gets called inside LightUtils and needs to be fixed. As at that time moduleType is null.
+    if (moduleType != null) {
+
+      switch (moduleType) {
+        case YOU_TUBE_VIDEO:
+          YouTubeUrl youTubeUrl = new YouTubeUrl(this);
+          setValue(youTubeUrl.getNormalizedHref());
+          break;
+        default:
+          // do nothing.
+      }
+    }
+  }
+
+  /**
    * {@inheritDoc}
    */
   @Override
@@ -89,67 +102,66 @@ public class ExternalId extends AbstractTypeWrapper<String, ExternalId> {
     return new ExternalId(value);
   }
 
-  public URL getExternalId() {
-    return getURL();
-  }
-  
-  /** 
+  /**
    * {@inheritDoc}
    */
   @Override
   public ExternalId validate() {
     // This will attempt to create a url and thus will automatically get validated.
-    getExternalId();
+    getURL();
+    updateValueIfRequired();
     return this;
   }
-  
+
   // For JAXB
   @SuppressWarnings("unused")
   private ExternalId() {
     super();
   }
-  
-  private URL getURL() {
+
+  public URL getURL() {
     if (url == null) {
-      url = LightUtils.getURL(getValue()); 
+      url = LightUtils.getURL(getValue());
     }
     return url;
   }
-  
-  
+
   public GoogleDocUrl getGoogleDocURL() {
     return new GoogleDocUrl(getURL());
   }
-  
+
   public LightUrl getLightUrl() {
     return new LightUrl(getURL());
   }
-  
+
   public YouTubeUrl getYouTubeUrl() {
     return new YouTubeUrl(getURL());
   }
-  
-  public  ModuleType getModuleType() {
+
+  public ModuleType getModuleType() {
+    ModuleType returnType = ModuleType.LIGHT_SYNTHETIC_MODULE;
+
     if (isLightUrl()) {
-      return getLightUrl().getModuleType();
+      returnType = getLightUrl().getModuleType();
     } else if (isGDocUrl()) {
       GoogleDocUrl docUrl = getGoogleDocURL();
-      return docUrl.getModuleType();
+      returnType = docUrl.getModuleType();
     } else if (isYouTubeUrl()) {
-      
+      YouTubeUrl ytUrl = new YouTubeUrl(getURL());
+      returnType = ytUrl.getModuleType();
     }
-    
-    return ModuleType.LIGHT_SYNTHETIC_MODULE;
+
+    return returnType;
   }
 
   /**
    * @return
    */
   private boolean isYouTubeUrl() {
-    if (getURL().getHost().equals("youtube.com")) {
+    if (matchesHost("youtube.com")) {
       return true;
     }
-    
+
     return false;
   }
 
@@ -157,8 +169,20 @@ public class ExternalId extends AbstractTypeWrapper<String, ExternalId> {
    * @return
    */
   private boolean isGDocUrl() {
-    return getURL().getHost().equals("docs.google.com")
-        || getURL().getHost().equals("drive.google.com");
+    return matchesHost("docs.google.com")
+        || matchesHost("drive.google.com");
+  }
+
+  private boolean matchesHost(String hostName) {
+    List<String> validHostNames = Lists.newArrayList();
+    validHostNames.add(hostName);
+    validHostNames.add("www." + hostName);
+
+    if (validHostNames.contains(getURL().getHost())) {
+      return true;
+    }
+
+    return false;
   }
 
   /**
@@ -167,10 +191,9 @@ public class ExternalId extends AbstractTypeWrapper<String, ExternalId> {
   private boolean isLightUrl() {
     String host = getURL().getHost();
     String appId = GaeUtils.getAppId();
-    
-    
+
     if (host.equals("localhost")) {
-      if (GaeUtils.isDevServer()) { 
+      if (GaeUtils.isDevServer()) {
         // Allowing localhost URLs on DevServer only.
         return true;
       } else {
@@ -182,25 +205,25 @@ public class ExternalId extends AbstractTypeWrapper<String, ExternalId> {
         return true;
       }
     }
-    
+
     return false;
   }
 
   public boolean isGoogleDocResource() {
     return getModuleType().getModuleTypeProvider() == ModuleTypeProvider.GOOGLE_DOC;
   }
-  
+
   public boolean isYouTubeResource() {
     return getModuleType() == ModuleType.YOU_TUBE_VIDEO;
   }
 
   // Adding Custom Serializer/Deserializer and XmlAdapter.
-  
+
   /**
    * Xml Adapter for {@link ExternalId}.
    */
   public static class ExternalIdXmlAdapter extends XmlAdapter<String, ExternalId> {
-    /** 
+    /**
      * {@inheritDoc}
      */
     @Override
@@ -208,7 +231,7 @@ public class ExternalId extends AbstractTypeWrapper<String, ExternalId> {
       return new ExternalId(value);
     }
 
-    /** 
+    /**
      * {@inheritDoc}
      */
     @Override
@@ -216,34 +239,36 @@ public class ExternalId extends AbstractTypeWrapper<String, ExternalId> {
       return value.getValue();
     }
   }
-  
+
   /**
    * {@link JsonDeserializer} for {@link ExternalId}.
    */
-  public static class ExternalIdDeserializer extends JsonDeserializer<ExternalId>{
-    /** 
+  public static class ExternalIdDeserializer extends JsonDeserializer<ExternalId> {
+    /**
      * {@inheritDoc}
      */
     @Override
-    public ExternalId deserialize(JsonParser jsonParser, DeserializationContext ctxt) throws IOException,
+    public ExternalId deserialize(JsonParser jsonParser, DeserializationContext ctxt)
+        throws IOException,
         JsonProcessingException {
       String value = jsonParser.getText();
-      
+
       return getStringWrapper(value, ExternalId.class);
     }
   }
-  
+
   /**
    * {@link JsonSerializer} for {@link ExternalId}.
    */
-  public static class ExternalIdSerializer extends JsonSerializer<ExternalId>{
+  public static class ExternalIdSerializer extends JsonSerializer<ExternalId> {
 
-    /** 
+    /**
      * {@inheritDoc}
      */
     @Override
-    public void serialize(ExternalId value, JsonGenerator jsonGenerator, SerializerProvider provider)
-        throws IOException, JsonProcessingException {
+    public void
+        serialize(ExternalId value, JsonGenerator jsonGenerator, SerializerProvider provider)
+            throws IOException, JsonProcessingException {
       if (value == null) {
         return;
       }

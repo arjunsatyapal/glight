@@ -19,6 +19,18 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotNull;
 import static com.google.light.server.utils.ObjectifyUtils.repeatInTransaction;
 
+import java.util.List;
+
+import com.google.light.server.jobs.handlers.collectionjobs.youtubeplaylist.ImportCollectionYouTubePlaylistHandler;
+
+import com.google.light.server.jobs.handlers.collectionjobs.gdoccollection.ImportCollectionGoogleDocJobHandler;
+
+import com.google.light.server.jobs.handlers.modulejobs.youtube.ImportModuleYouTubeVideoJobHandler;
+
+import com.google.light.server.jobs.handlers.modulejobs.gdocument.ImportModuleGoogleDocJobHandler;
+
+import com.google.light.server.jobs.handlers.modulejobs.synthetic.ImportModuleSyntheticModuleJobHandler;
+
 import com.google.common.collect.Iterables;
 import com.google.inject.Inject;
 import com.google.light.server.dto.pojo.ChangeLogEntryPojo;
@@ -26,9 +38,6 @@ import com.google.light.server.dto.pojo.typewrapper.longwrapper.JobId;
 import com.google.light.server.exception.ExceptionType;
 import com.google.light.server.exception.unchecked.taskqueue.WaitForChildsToComplete;
 import com.google.light.server.jobs.handlers.batchjobs.ImportBatchJobHandler;
-import com.google.light.server.jobs.handlers.collectionjobs.ImportCollectionGoogleDocJobHandler;
-import com.google.light.server.jobs.handlers.modulejobs.ImportModuleGoogleDocJobHandler;
-import com.google.light.server.jobs.handlers.modulejobs.ImportModuleSyntheticModuleJobHandler;
 import com.google.light.server.manager.interfaces.JobManager;
 import com.google.light.server.persistence.entity.jobs.JobEntity;
 import com.google.light.server.persistence.entity.jobs.JobEntity.TaskType;
@@ -36,7 +45,6 @@ import com.google.light.server.persistence.entity.jobs.JobState;
 import com.google.light.server.utils.Transactable;
 import com.googlecode.objectify.Objectify;
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Logger;
 
 /**
@@ -52,22 +60,30 @@ public class JobHandler {
   private JobManager jobManager;
   private ImportModuleGoogleDocJobHandler importModuleGDocHandler;
   private ImportModuleSyntheticModuleJobHandler importModuleSyntheticJobHandler;
+  private ImportModuleYouTubeVideoJobHandler importModuleYouTubeVideoJobHandler;
   private ImportBatchJobHandler importBatchJobHandler;
   private ImportCollectionGoogleDocJobHandler importCollectionGDocHandler;
+  private ImportCollectionYouTubePlaylistHandler importYouTubePlaylistHandler;
 
   @Inject
   public JobHandler(JobManager jobManager, ImportModuleGoogleDocJobHandler importModuleGDocHandler,
       ImportModuleSyntheticModuleJobHandler importModuleSyntheticJobHandler,
+      ImportModuleYouTubeVideoJobHandler importModuleYouTubeVideoJobHandler,
       ImportBatchJobHandler importBatchJobHandler,
-      ImportCollectionGoogleDocJobHandler importCollectionGDocHandler) {
+      ImportCollectionGoogleDocJobHandler importCollectionGDocHandler,
+      ImportCollectionYouTubePlaylistHandler importYouTubePlaylistHandler) {
     this.jobManager = checkNotNull(jobManager, "jobManager");
     this.importModuleGDocHandler = checkNotNull(importModuleGDocHandler,
         "importModuleGDocHandler");
     this.importModuleSyntheticJobHandler = checkNotNull(importModuleSyntheticJobHandler,
         "importModuleSyntheticJobHandler");
+    this.importModuleYouTubeVideoJobHandler = checkNotNull(importModuleYouTubeVideoJobHandler,
+        "importModuleYouTubeVideoJobHandler");
     this.importCollectionGDocHandler = checkNotNull(importCollectionGDocHandler,
         "importCollectionGDocHandler");
     this.importBatchJobHandler = checkNotNull(importBatchJobHandler, "importBatchJobHandler");
+    this.importYouTubePlaylistHandler = checkNotNull(importYouTubePlaylistHandler,
+        "importYouTubePlaylistHandler");
 
   }
 
@@ -85,7 +101,6 @@ public class JobHandler {
       logger.info(jobEntity.getContext().getValue());
     }
 
-    System.out.println(jobEntity.getTaskType());
     JobState jobState = jobEntity.getJobState();
     switch (jobState) {
       case POLLING_FOR_CHILDS:
@@ -124,6 +139,14 @@ public class JobHandler {
         importModuleSyntheticJobHandler.handle(jobEntity);
         break;
 
+      case IMPORT_YOUTUBE_VIDEO:
+        importModuleYouTubeVideoJobHandler.handle(jobEntity);
+        break;
+
+      case IMPORT_YOUTUBE_PLAYLIST:
+        importYouTubePlaylistHandler.handle(jobEntity);
+        break;
+
       case IMPORT_COLLECTION_GOOGLE_COLLECTION:
         importCollectionGDocHandler.handle(jobEntity);
         break;
@@ -134,7 +157,7 @@ public class JobHandler {
   }
 
   private void pollForChilds(final JobEntity jobEntity) {
-    Set<JobId> listOfChildJobIds = jobEntity.getPendingChildJobs();
+    List<JobId> listOfChildJobIds = jobEntity.getPendingChildJobs();
     Map<JobId, JobEntity> map = jobManager.findListOfJobs(listOfChildJobIds);
 
     boolean allChildsComplete = true;
