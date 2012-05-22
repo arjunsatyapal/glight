@@ -17,7 +17,13 @@ package com.google.light.server.constants;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
+import com.google.light.server.jobs.handlers.collectionjobs.youtubeplaylist.ImportCollectionYouTubePlaylistContext;
+
+import com.google.light.server.dto.thirdparty.google.youtube.YouTubeVideoInfo;
+
+import com.google.light.server.dto.thirdparty.google.youtube.YouTubePlaylistInfo;
+
+import com.google.light.server.jobs.handlers.collectionjobs.gdoccollection.ImportCollectionGoogleDocContext;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
@@ -47,6 +53,7 @@ import com.google.light.server.dto.pojo.typewrapper.longwrapper.CollectionId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.JobId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
 import com.google.light.server.dto.pojo.typewrapper.stringwrapper.ExternalId;
 import com.google.light.server.dto.pojo.typewrapper.stringwrapper.FTSDocumentId;
 import com.google.light.server.dto.search.GSSClientLoginTokenInfoDto;
@@ -58,9 +65,8 @@ import com.google.light.server.dto.thirdparty.google.gdoc.GoogleDocInfoDto;
 import com.google.light.server.dto.thirdparty.google.gdoc.GoogleDocResourceId;
 import com.google.light.server.dto.thirdparty.google.youtube.ContentLicense;
 import com.google.light.server.dto.thirdparty.google.youtube.YouTubeResourceId;
-import com.google.light.server.jobs.handlers.collectionjobs.ImportCollectionGoogleDocContext;
-import com.google.light.server.jobs.handlers.modulejobs.ImportModuleGoogleDocJobContext;
-import com.google.light.server.jobs.handlers.modulejobs.ImportModuleSyntheticModuleJobContext;
+import com.google.light.server.jobs.handlers.modulejobs.gdocument.ImportModuleGoogleDocJobContext;
+import com.google.light.server.jobs.handlers.modulejobs.synthetic.ImportModuleSyntheticModuleJobContext;
 import com.google.light.server.servlets.oauth2.google.pojo.GoogleUserInfo;
 import java.util.List;
 
@@ -100,6 +106,7 @@ public enum LightDtos {
 
   IMPORT_BATCH_WRAPPER(ImportBatchWrapper.class, "importBatch"),
   IMPORT_COLLECTION_GOOGLE_DOC_CONTEXT(ImportCollectionGoogleDocContext.class, "importCollectionGoogleDocContext"),
+  IMPORT_COLLECTION_YOU_TUBE_PLAYLIST_CONTEXT(ImportCollectionYouTubePlaylistContext.class, "importCollectionYouTubePlaylistContext"),
   IMPORT_EXTERNAL_ID_DTO(ImportExternalIdDto.class, "importExternalId"),
   IMPORT_MODULE_SYNTHETIC_JOB_CONTEXT(ImportModuleSyntheticModuleJobContext.class, "importModuleSyntheticModuleJobContext"),
   
@@ -126,19 +133,18 @@ public enum LightDtos {
   SEARCH_RESULT_DTO(SearchResultDto.class, "searchResult"),
   SEARCH_RESULT_ITEM_DTO(SearchResultItemDto.class, "searchResultItem"),
   VERSION(Version.class, "version"),
-  YOU_TUBE_RESOURCE_ID(YouTubeResourceId.class, "youTubeResourceId");
+  YOU_TUBE_RESOURCE_ID(YouTubeResourceId.class, "youTubeResourceId"),
+  YOU_TUBE_PLAYLIST_INFO(YouTubePlaylistInfo.class, "youTubePlaylistInfo"),
+  YOU_TUBE_VIDEO_INFO(YouTubeVideoInfo.class, "youTubeVideoInfo");
 
-  @SuppressWarnings("rawtypes")
   private Class<? extends NeedsDtoValidation> clazz;
   private String xmlRootElementName;
 
-  @SuppressWarnings("rawtypes")
   private LightDtos(Class<? extends NeedsDtoValidation> clazz, String xmlRootElementName) {
     this.clazz = checkNotNull(clazz, "class");
     this.xmlRootElementName = Preconditions.checkNotNull(xmlRootElementName);
   }
 
-  @SuppressWarnings("rawtypes")
   public Class<? extends NeedsDtoValidation> getClazz() {
     return clazz;
   }

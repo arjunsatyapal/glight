@@ -18,18 +18,15 @@ package com.google.light.server.jobs.handlers.batchjobs;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.dto.pojo.tree.collection.CollectionTreeUtils.generateCollectionNodeFromChildJob;
-import static com.google.light.server.jersey.resources.thirdparty.mixed.ImportResource.updateImportExternalIdDtoForModules;
 import static com.google.light.server.jobs.JobUtils.updateJobContext;
 import static com.google.light.server.utils.ObjectifyUtils.repeatInTransaction;
 
 import com.google.common.collect.Iterables;
 import com.google.inject.Inject;
-import com.google.light.server.constants.QueueEnum;
 import com.google.light.server.dto.collection.CollectionState;
 import com.google.light.server.dto.importresource.ImportBatchType;
 import com.google.light.server.dto.importresource.ImportBatchWrapper;
 import com.google.light.server.dto.importresource.ImportExternalIdDto;
-import com.google.light.server.dto.module.ModuleState;
 import com.google.light.server.dto.module.ModuleStateCategory;
 import com.google.light.server.dto.module.ModuleType;
 import com.google.light.server.dto.pojo.ChangeLogEntryPojo;
@@ -37,22 +34,25 @@ import com.google.light.server.dto.pojo.tree.AbstractTreeNode.TreeNodeType;
 import com.google.light.server.dto.pojo.tree.collection.CollectionTreeNodeDto;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.CollectionId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.JobId;
-import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
 import com.google.light.server.dto.thirdparty.google.gdoc.GoogleDocInfoDto;
 import com.google.light.server.dto.thirdparty.google.gdoc.GoogleDocResourceId;
+import com.google.light.server.dto.thirdparty.google.youtube.YouTubePlaylistInfo;
 import com.google.light.server.jobs.handlers.JobHandlerInterface;
-import com.google.light.server.jobs.handlers.collectionjobs.ImportCollectionGoogleDocJobHandler;
-import com.google.light.server.jobs.handlers.modulejobs.ImportModuleGoogleDocJobHandler;
-import com.google.light.server.jobs.handlers.modulejobs.ImportModuleSyntheticModuleJobContext;
+import com.google.light.server.jobs.handlers.collectionjobs.gdoccollection.ImportCollectionGoogleDocJobHandler;
+import com.google.light.server.jobs.handlers.collectionjobs.youtubeplaylist.ImportCollectionYouTubePlaylistHandler;
+import com.google.light.server.jobs.handlers.modulejobs.gdocument.ImportModuleGoogleDocJobHandler;
+import com.google.light.server.jobs.handlers.modulejobs.synthetic.ImportModuleSyntheticModuleJobHandler;
 import com.google.light.server.manager.interfaces.CollectionManager;
 import com.google.light.server.manager.interfaces.JobManager;
 import com.google.light.server.manager.interfaces.ModuleManager;
 import com.google.light.server.persistence.entity.collection.CollectionVersionEntity;
 import com.google.light.server.persistence.entity.jobs.JobEntity;
+import com.google.light.server.persistence.entity.jobs.JobEntity.TaskType;
 import com.google.light.server.persistence.entity.jobs.JobState;
-import com.google.light.server.persistence.entity.module.ModuleEntity;
-import com.google.light.server.thirdparty.clients.google.gdoc.DocsServiceWrapper;
+import com.google.light.server.servlets.thirdparty.google.gdoc.DocsServiceWrapper;
+import com.google.light.server.servlets.thirdparty.google.youtube.YouTubeServiceWrapper;
+import com.google.light.server.urls.YouTubeUrl;
 import com.google.light.server.utils.GuiceUtils;
 import com.google.light.server.utils.LightUtils;
 import com.google.light.server.utils.Transactable;
@@ -74,11 +74,15 @@ public class ImportBatchJobHandler implements JobHandlerInterface {
   private CollectionManager collectionManager;
   private ImportModuleGoogleDocJobHandler importModuleGDocJobHandler;
   private ImportCollectionGoogleDocJobHandler importCollectionGDocJobHandler;
+  private ImportCollectionYouTubePlaylistHandler importYouTubePlaylistHandler;
+  private ImportModuleSyntheticModuleJobHandler importSyntheticModuleJobHandler;
 
   @Inject
   public ImportBatchJobHandler(JobManager jobManager, CollectionManager collectionManager,
       ModuleManager moduleManager, ImportModuleGoogleDocJobHandler importModuleGDocJobHandler,
-      ImportCollectionGoogleDocJobHandler importCollectionGDocJobHandler) {
+      ImportCollectionGoogleDocJobHandler importCollectionGDocJobHandler,
+      ImportModuleSyntheticModuleJobHandler importSyntheticModuleJobHandler,
+      ImportCollectionYouTubePlaylistHandler importYouTubePlaylistHandler) {
     this.jobManager = checkNotNull(jobManager, "jobManager");
     this.collectionManager = checkNotNull(collectionManager, "collectionManager");
     this.moduleManager = checkNotNull(moduleManager, "moduleManager");
@@ -86,6 +90,11 @@ public class ImportBatchJobHandler implements JobHandlerInterface {
         "importModuleGDocJobHandler");
     this.importCollectionGDocJobHandler = checkNotNull(importCollectionGDocJobHandler,
         "importCollectionGDocJobHandler");
+    this.importYouTubePlaylistHandler = checkNotNull(importYouTubePlaylistHandler,
+        "importYouTubePlaylistHandler");
+    this.importSyntheticModuleJobHandler = checkNotNull(importSyntheticModuleJobHandler,
+        "importSyntheticModuleJobHandler");
+
   }
 
   /**
@@ -197,7 +206,19 @@ public class ImportBatchJobHandler implements JobHandlerInterface {
       ImportExternalIdDto importExternalIdDto) {
     switch (importExternalIdDto.getModuleType()) {
       case LIGHT_SYNTHETIC_MODULE:
-        enqueuedJobId = enqueueImportChildSyntheticModule(ofy, importExternalIdDto,
+        enqueuedJobId = importSyntheticModuleJobHandler.enqueueImportChildSyntheticModule(
+            ofy, importExternalIdDto, 
+            TaskType.IMPORT_SYNTHETIC_MODULE, jobEntity.getJobId(), jobEntity.getRootJobId());
+        break;
+        
+      case YOU_TUBE_VIDEO :
+        enqueuedJobId = importSyntheticModuleJobHandler.enqueueImportChildSyntheticModule(
+            ofy, importExternalIdDto, 
+            TaskType.IMPORT_YOUTUBE_VIDEO, jobEntity.getJobId(), jobEntity.getRootJobId());
+        break;
+        
+      case YOU_TUBE_PLAYLIST:
+        enqueuedJobId = enqueueImportCollectionYouTubePlaylist(ofy, importExternalIdDto, 
             jobEntity.getJobId(), jobEntity.getRootJobId());
         break;
 
@@ -233,55 +254,22 @@ public class ImportBatchJobHandler implements JobHandlerInterface {
     return enqueuedJobId;
   }
 
-  public JobId enqueueImportChildSyntheticModule(Objectify ofy,
-      ImportExternalIdDto importExternalIdDto,
+  private JobId enqueueImportCollectionYouTubePlaylist(
+      Objectify ofy, ImportExternalIdDto importExternalIdDto,
       JobId parentJobId, JobId rootJobId) {
-    ModuleId moduleId = checkNotNull(importExternalIdDto.getModuleId(), "moduleId");
-    ModuleEntity existingModule = moduleManager.get(ofy, moduleId);
+    YouTubeServiceWrapper ytService = GuiceUtils.getInstance(YouTubeServiceWrapper.class);
+    YouTubeUrl ytUrl = new YouTubeUrl(importExternalIdDto.getExternalId());
+    YouTubePlaylistInfo ytPlaylistInfo = ytService.getYouTubePlayListDetailedInfo(ytUrl);
 
-    if (existingModule != null && existingModule.getModuleState() == ModuleState.PUBLISHED) {
-      updateImportExternalIdDtoForModules(importExternalIdDto, moduleId,
-          existingModule.getLatestPublishVersion(),
-          ModuleState.PUBLISHED, existingModule.getModuleType(), existingModule.getTitle(), null);
-      return null;
-    }
-
-    /*
-     * Now reserving a module version and creating a Synthetic Module Child job that will
-     * publish this version.
-     */
-    Version reservedVersion = moduleManager.reserveModuleVersion(ofy, moduleId, null /* etag */,
-        null /* last edit time */, importExternalIdDto.getContentLicenses());
-
-    String title = importExternalIdDto.getTitle();
-    ImportModuleSyntheticModuleJobContext jobContext =
-        new ImportModuleSyntheticModuleJobContext.Builder()
-            .title(title)
-            .externalId(importExternalIdDto.getExternalId())
-            .moduleId(moduleId)
-            .version(reservedVersion)
-            .build();
-
-    JobEntity childJob = jobManager.createSyntheticModuleJob(
-        ofy, jobContext, parentJobId, rootJobId);
-
-    /*
-     * Now saving details about ModuleId and version as part of ExternalIdDto that will be
-     * eventually sent to the client. Also this will be stored as part of the parent Batch Job
-     * which can be useful for Debugging later.
-     */
-    updateImportExternalIdDtoForModules(importExternalIdDto, moduleId, reservedVersion,
-        ModuleState.IMPORTING, ModuleType.LIGHT_SYNTHETIC_MODULE, title, childJob);
-    jobManager.enqueueImportChildJob(ofy, parentJobId, childJob.getJobId(), importExternalIdDto,
-        QueueEnum.LIGHT);
-    return childJob.getJobId();
+    return importYouTubePlaylistHandler.enqueueCollectionYouTubePlaylistJob(
+        ofy, importExternalIdDto, ytPlaylistInfo, parentJobId, rootJobId);
   }
 
-  private JobId enqueueImportCollectionGDoc(Objectify ofy, ImportExternalIdDto importModuleDto,
+  private JobId enqueueImportCollectionGDoc(Objectify ofy, ImportExternalIdDto importExternalIdDto,
       JobId parentJobId, JobId rootJobId, GoogleDocInfoDto.Configuration config) {
-    GoogleDocInfoDto gdocInfo = getGDocInfo(importModuleDto, config);
+    GoogleDocInfoDto gdocInfo = getGDocInfo(importExternalIdDto, config);
     return importCollectionGDocJobHandler.enqueueCollectionGoogleDocJob(ofy,
-        importModuleDto, gdocInfo, parentJobId, rootJobId);
+        importExternalIdDto, gdocInfo, parentJobId, rootJobId);
   }
 
   private JobId enqueueImportModuleGoogleDocument(Objectify ofy,
@@ -425,18 +413,17 @@ public class ImportBatchJobHandler implements JobHandlerInterface {
         importExternalIdDto.getModuleType().getNodeType() == TreeNodeType.INTERMEDIATE_NODE,
         "This should be called only for " + TreeNodeType.INTERMEDIATE_NODE);
 
-//    CollectionTreeNodeDto collectionRoot = new CollectionTreeNodeDto.Builder()
-//        .nodeType(TreeNodeType.INTERMEDIATE_NODE)
-//        .title(importExternalIdDto.getTitle())
-//        .externalId(importExternalIdDto.getExternalId())
-//        .moduleType(ModuleType.LIGHT_SUB_COLLECTION)
-//        .build();
+    // CollectionTreeNodeDto collectionRoot = new CollectionTreeNodeDto.Builder()
+    // .nodeType(TreeNodeType.INTERMEDIATE_NODE)
+    // .title(importExternalIdDto.getTitle())
+    // .externalId(importExternalIdDto.getExternalId())
+    // .moduleType(ModuleType.LIGHT_SUB_COLLECTION)
+    // .build();
 
     CollectionTreeNodeDto child = generateCollectionNodeFromChildJob(jobManager,
         importExternalIdDto.getJobId());
-//    collectionRoot.addChildren(child);
+    // collectionRoot.addChildren(child);
 
-    System.out.println("\n***Subcollection root : " + child.toJson());
     return child;
   }
 

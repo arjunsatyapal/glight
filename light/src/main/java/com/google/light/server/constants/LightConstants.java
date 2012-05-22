@@ -75,6 +75,12 @@ public class LightConstants {
   public static final int GDATA_GDOC_MAX_RESULTS = 1000;
   
   
+  /** Number of records to be fetched in YouTube Playlist GDATA Feed. 
+   * {@link https://developers.google.com/youtube/2.0/developers_guide_protocol#Searching_for_Videos}
+   */
+  public static final int GDATA_YOU_TUBE_PLAYLIST_MAX_RESULTS = 50;
+
+  
   /**
    * Number of documents that can be requested by client to import in single batch.
    * This includes only first level documents. It is allowed to have folders with multiple-level

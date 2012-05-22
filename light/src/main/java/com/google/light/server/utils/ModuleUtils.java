@@ -19,19 +19,22 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.httpclient.LightHttpClient.getHeaderValueFromResponse;
 import static com.google.light.server.utils.LightUtils.getURI;
 
-import com.google.light.server.dto.thirdparty.google.gdoc.GoogleDocInfoDto;
-import com.google.light.server.dto.thirdparty.google.gdoc.GoogleDocResourceId;
-
-import com.google.light.server.thirdparty.clients.google.gdoc.DocsServiceWrapper;
-
 import com.google.api.client.http.HttpResponse;
 import com.google.light.server.constants.HttpHeaderEnum;
+import com.google.light.server.dto.module.ModuleType;
 import com.google.light.server.dto.pojo.typewrapper.stringwrapper.ExternalId;
+import com.google.light.server.dto.thirdparty.google.gdoc.GoogleDocInfoDto;
+import com.google.light.server.dto.thirdparty.google.gdoc.GoogleDocResourceId;
+import com.google.light.server.dto.thirdparty.google.youtube.YouTubePlaylistInfo;
+import com.google.light.server.dto.thirdparty.google.youtube.YouTubeVideoInfo;
 import com.google.light.server.exception.unchecked.InvalidExternalIdException;
 import com.google.light.server.httpclient.LightHttpClient;
 import com.google.light.server.manager.interfaces.ModuleManager;
 import com.google.light.server.persistence.entity.module.ModuleEntity;
+import com.google.light.server.servlets.thirdparty.google.gdoc.DocsServiceWrapper;
+import com.google.light.server.servlets.thirdparty.google.youtube.YouTubeServiceWrapper;
 import com.google.light.server.urls.LightUrl;
+import com.google.light.server.urls.YouTubeUrl;
 import java.net.URI;
 
 /**
@@ -44,7 +47,11 @@ import java.net.URI;
 public class ModuleUtils {
   public static String getTitleForExternalId(ExternalId externalId) {
     checkNotNull(externalId, "externalId");
-    switch (externalId.getModuleType()) {
+    System.out.println(externalId);
+    ModuleType moduleType = externalId.getModuleType();
+    System.out.println(moduleType);
+    
+    switch (moduleType) {
       case GOOGLE_COLLECTION:
       case GOOGLE_DOCUMENT:
         return getTitleForGDocResource(externalId);
@@ -54,10 +61,38 @@ public class ModuleUtils {
 
       case LIGHT_SYNTHETIC_MODULE:
         return getTitleForSyntheticModule(externalId);
+        
+      case YOU_TUBE_VIDEO:
+      case YOU_TUBE_PLAYLIST:
+        return getTitleForYouTubeResource(externalId);
 
       default:
         throw new InvalidExternalIdException(externalId);
 
+    }
+  }
+
+  /**
+   * @param externalId
+   * @return
+   */
+  private static String getTitleForYouTubeResource(ExternalId externalId) {
+    YouTubeUrl ytUrl = new YouTubeUrl(externalId);
+    YouTubeServiceWrapper ytService = GuiceUtils.getInstance(YouTubeServiceWrapper.class);
+
+    ModuleType moduleType = ytUrl.getModuleType();
+    switch(moduleType) {
+      case YOU_TUBE_VIDEO :
+        YouTubeVideoInfo videoInfo = ytService.getYouTubeVideoInfo(ytUrl);
+        return videoInfo.getTitle();
+        
+      case YOU_TUBE_PLAYLIST :
+        YouTubePlaylistInfo playlistInfo = ytService.getYouTubePlayListInfo(ytUrl);
+        return playlistInfo.getTitle();
+        
+      default : 
+        throw new IllegalStateException("Unsupported moduleType : " + moduleType 
+            + "for " + externalId); 
     }
   }
 

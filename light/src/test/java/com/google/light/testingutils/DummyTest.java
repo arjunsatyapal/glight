@@ -17,38 +17,27 @@ package com.google.light.testingutils;
 
 import static org.junit.Assert.assertEquals;
 
-import com.google.light.server.dto.thirdparty.google.youtube.ContentLicense;
-
-import com.google.light.server.dto.module.ModuleState;
-
-import com.google.light.server.persistence.entity.jobs.JobState;
-
-import com.google.light.server.dto.pojo.typewrapper.longwrapper.JobId;
-
-import com.google.light.server.utils.XmlUtils;
-
-import com.google.gdata.data.youtube.VideoEntry;
-
-import com.google.light.server.thirdparty.clients.google.youtube.YouTubeServiceWrapper;
-
-import java.util.regex.Matcher;
-
-import java.util.regex.Pattern;
-
 import com.google.common.base.Charsets;
 import com.google.light.server.dto.importresource.ImportBatchWrapper;
 import com.google.light.server.dto.importresource.ImportExternalIdDto;
+import com.google.light.server.dto.module.ModuleState;
 import com.google.light.server.dto.module.ModuleType;
 import com.google.light.server.dto.pojo.tree.AbstractTreeNode.TreeNodeType;
 import com.google.light.server.dto.pojo.tree.collection.CollectionTreeNodeDto;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.JobId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
 import com.google.light.server.dto.pojo.typewrapper.stringwrapper.ExternalId;
+import com.google.light.server.dto.thirdparty.google.youtube.ContentLicense;
+import com.google.light.server.persistence.entity.jobs.JobState;
 import com.google.light.server.utils.JsonUtils;
 import com.google.light.server.utils.LightUtils;
+import com.google.light.server.utils.XmlUtils;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.junit.Test;
 
 /**
@@ -193,6 +182,17 @@ public class DummyTest {
         new ImportExternalIdDto.Builder()
             .externalId(new ExternalId("http://en.wikipedia.org/wiki/Gmail"))
             .build1();
+    
+    ImportExternalIdDto youTubeVideoWithCustomTitle =
+        new ImportExternalIdDto.Builder()
+            .externalId(new ExternalId("http://www.youtube.com/watch?v=iytllF9MHko&list=PL1FB965FD592C00C1&index=6&feature=plpp_video"))
+            .title("You tube video with custom title")
+            .build1();
+    
+    ImportExternalIdDto youtubePlaylist =
+        new ImportExternalIdDto.Builder()
+            .externalId(new ExternalId("http://www.youtube.com/playlist?list=PL1FB965FD592C00C1"))
+            .build1();
 
     ImportBatchWrapper listWrapper = new ImportBatchWrapper();
     listWrapper.addImportModuleDto(dtoFolderWithCustomTitle);
@@ -205,6 +205,10 @@ public class DummyTest {
     listWrapper.addImportModuleDto(dtoDocumentWithoutTitle);
     listWrapper.addImportModuleDto(dtoSyntheticWithCustomTitle);
     listWrapper.addImportModuleDto(dtoSyntheticWithoutTitle);
+
+    listWrapper.addImportModuleDto(youTubeVideoWithCustomTitle);
+    listWrapper.addImportModuleDto(youtubePlaylist);
+
     listWrapper.setCollectionTitle("New expected collection.");
     listWrapper.setBaseVersion(new Version(Version.LATEST_VERSION));
 
@@ -257,14 +261,6 @@ public class DummyTest {
     
     Matcher matcher = pt.matcher("foo/11/12/13");
     System.out.println(matcher.matches());
-  }
-  
-  @Test
-  public void test_youtube() throws Exception {
-    YouTubeServiceWrapper ytService = new YouTubeServiceWrapper();
-    VideoEntry entry = ytService.getEntry(new URL("http://gdata.youtube.com/feeds/api/videos/4FSdMqhQvBI"), VideoEntry.class);
-    System.out.println(XmlUtils.getXmlEntry(entry));
-    ytService.printVideoEntry(entry, true);
   }
   
   @Test

@@ -19,10 +19,11 @@ import static com.google.light.server.constants.LightConstants.GDATA_GDOC_MAX_RE
 import static com.google.light.server.utils.LightPreconditions.checkNotNull;
 import static com.google.light.server.utils.LightUtils.isCollectionEmpty;
 
+import com.google.light.server.servlets.thirdparty.google.gdoc.DocsServiceWrapper;
+
 import com.google.light.server.dto.thirdparty.google.gdoc.GoogleDocInfoDto;
 import com.google.light.server.dto.thirdparty.google.gdoc.GoogleDocResourceId;
 
-import com.google.light.server.thirdparty.clients.google.gdoc.DocsServiceWrapper;
 
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;

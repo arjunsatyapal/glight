@@ -21,6 +21,8 @@ import static com.google.light.server.utils.LightPreconditions.checkNotNull;
 import static com.google.light.server.utils.ObjectifyUtils.repeatInTransaction;
 import static com.google.light.server.utils.ServletUtils.getRequestHeaderValue;
 
+import java.util.logging.Logger;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.light.server.constants.HttpHeaderEnum;
@@ -55,6 +57,8 @@ import javax.ws.rs.core.Response;
  */
 @Path(JerseyConstants.RESOURCE_PATH_NOTIFICATION)
 public class NotificationResource extends AbstractJerseyResource {
+  private static final Logger logger = Logger.getLogger(NotificationResource.class.getName());
+  
   private JobManager jobManager;
 
   @Inject
@@ -93,6 +97,7 @@ public class NotificationResource extends AbstractJerseyResource {
   private void handlChildJobCompletion(String body) {
     final ChildJobCompletionNotification jobNotification =
         JsonUtils.getDto(body, ChildJobCompletionNotification.class);
+    logger.info("Notification : " + jobNotification.toJson());
 
     repeatInTransaction(new Transactable<Void>() {
 

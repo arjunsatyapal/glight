@@ -15,8 +15,7 @@
  */
 package com.google.light.server.urls;
 
-import static org.junit.Assert.assertEquals;
-
+import static org.junit.Assert.*;
 import com.google.common.collect.Lists;
 import com.google.light.server.dto.module.ModuleType;
 import com.google.light.server.utils.LightUtils;
@@ -29,11 +28,15 @@ import org.junit.Test;
  * @author Arjun Satyapal
  */
 public class YouTubeUrlTest {
+  private String YOUTUBE_VIDEO_IN_PLAYLIST = "http://www.youtube.com/watch?v=AlPhA&list=dummyList1234&index=1&feature=plpp_video";
   @Test
   public void test_youtubeUrl() {
     List<String> urls = Lists.newArrayList(
         "http://www.youtube.com/watch?v=AlPhA",
-        "http://www.youtube.com/watch?v=AlPhA&feature=gamma");
+        "http://www.youtube.com/watch?v=AlPhA&feature=gamma",
+        YOUTUBE_VIDEO_IN_PLAYLIST);
+    
+//    http://www.youtube.com/v/CCzXXy4L-DQ?version=3&amp;f=playlists&amp;c=light&amp;app=youtube_gdata
 
     for (String curr : urls) {
       doTest(curr, "AlPhA");
@@ -45,8 +48,31 @@ public class YouTubeUrlTest {
    * @param string
    */
   private void doTest(String url, String expectedKey) {
+    String failureMsg = "Failed for : " + url;
     YouTubeUrl ytUrl = new YouTubeUrl(LightUtils.getURL(url));
-    assertEquals(expectedKey, ytUrl.getVideoKey());
-    assertEquals(ModuleType.YOU_TUBE_VIDEO, ytUrl.getModuleType());
+    assertFalse(failureMsg, ytUrl.isPlaylist());
+    assertEquals(failureMsg, expectedKey, ytUrl.getVideoId());
+    assertEquals(failureMsg, ModuleType.YOU_TUBE_VIDEO, ytUrl.getModuleType());
+  }
+  
+  @Test
+  public void test_videoInplaylist() {
+    YouTubeUrl ytUrl = new YouTubeUrl(LightUtils.getURL(YOUTUBE_VIDEO_IN_PLAYLIST));
+    assertNotNull(ytUrl.getPlaylistId());
+    assertEquals("dummyList1234", ytUrl.getPlaylistId());
+  }
+  
+  @Test
+  public void test_playlist() {
+    List<String> urls = Lists.newArrayList(
+        "http://www.youtube.com/course?list=PLdummyList1234&category_name=University&feature=edu",
+        "http://www.youtube.com/playlist?list=PLdummyList1234&category_name=University&feature=edu",
+        "http://www.youtube.com/view_play_list?p=dummyList1234"
+        );
+    for (String curr : urls) {
+      YouTubeUrl ytUrl = new YouTubeUrl(LightUtils.getURL(curr));
+      assertTrue(ytUrl.isPlaylist());
+      assertEquals("Failed for " + curr, "dummyList1234", ytUrl.getPlaylistId());
+    }
   }
 }

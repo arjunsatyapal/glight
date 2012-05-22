@@ -27,10 +27,12 @@ import com.google.light.server.exception.unchecked.httpexception.UnsupportedMedi
  * @author Arjun Satyapal
  */
 public enum ContentTypeEnum {
+  APPLICATION_FLASH("application/x-shockwave-flash"),
   APPLICATION_JSON("application/json"),
   APPLICATION_PDF("application/pdf"),
   APPLICATION_URL_ENCODED("application/x-www-form-urlencoded"),
   APPLICATION_XML("application/xml"),
+  
   APPLICATION_ZIP("application/zip"),
 
   /*

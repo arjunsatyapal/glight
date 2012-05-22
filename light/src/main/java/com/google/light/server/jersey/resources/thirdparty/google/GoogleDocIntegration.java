@@ -22,6 +22,8 @@ import static com.google.light.server.utils.LightPreconditions.checkNotNull;
 import static com.google.light.server.utils.LightUtils.initializeFilterStr;
 import static com.google.light.server.utils.LightUtils.initializeMaxResults;
 
+import com.google.light.server.servlets.thirdparty.google.gdoc.DocsServiceWrapper;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Provider;
@@ -33,7 +35,6 @@ import com.google.light.server.dto.pojo.typewrapper.stringwrapper.ExternalId;
 import com.google.light.server.dto.thirdparty.google.gdoc.GoogleDocInfoDto;
 import com.google.light.server.dto.thirdparty.google.gdoc.GoogleDocResourceId;
 import com.google.light.server.jersey.resources.AbstractJerseyResource;
-import com.google.light.server.thirdparty.clients.google.gdoc.DocsServiceWrapper;
 import com.google.light.server.utils.LightUtils;
 import java.net.URL;
 import javax.servlet.http.HttpServletRequest;

@@ -144,10 +144,10 @@ public class HtmlBuilder {
     appendNodeEnd(HtmlNode.BODY);
   }
   
-  public void appendIFrame(URI uri) {
+  public void appendIFrame(URI uri, String height, String width) {
     builder.append("<iframe src=")
            .append(uri.toString())
-           .append(" height=100% width=100%>")
+           .append(" height=\"").append(height).append("\" width=\"").append(width).append("\">")
            .append("</iframe>");
   }
   

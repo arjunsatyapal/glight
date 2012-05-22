@@ -65,7 +65,7 @@ public class TestResources extends AbstractJerseyResource {
 
     StringBuilder builder = new StringBuilder();
     appendSessionData(builder, sessionManager.getSession());
-
+    
     return Response.ok(builder.toString()).build();
   }
 

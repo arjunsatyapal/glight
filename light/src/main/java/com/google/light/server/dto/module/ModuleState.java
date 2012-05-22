@@ -28,7 +28,10 @@ import javax.xml.bind.annotation.XmlEnumValue;
  */
 public enum ModuleState {
   @XmlEnumValue(value = "FAILED")
-  FAILED(ModuleStateCategory.RETRY),
+  FAILED(ModuleStateCategory.NOT_HOSTED),
+  
+  @XmlEnumValue(value = "REJECTED")
+  REJECTED(ModuleStateCategory.NOT_HOSTED),
   
   @XmlEnumValue(value = "RESERVED")
   RESERVED(ModuleStateCategory.HOSTED),
@@ -42,8 +45,18 @@ public enum ModuleState {
   @XmlEnumValue(value = "PUBLISHED")
   PUBLISHED(ModuleStateCategory.HOSTED),
   
-//  @XmlEnumValue(value = "UNKNOWN")
-//  UNKNOWN(ModuleStateCategory.RETRY),
+  // Following are borrowed from YTPublicationState.
+  @XmlEnumValue(value = "INCOMPLETE")
+  INCOMPLETE(ModuleStateCategory.RETRY),
+  
+  @XmlEnumValue(value = "PROCESSING")
+  PROCESSING (ModuleStateCategory.RETRY),
+  
+  @XmlEnumValue(value = "DELETED")
+  DELETED(ModuleStateCategory.NOT_HOSTED),
+  
+  @XmlEnumValue(value = "RESTRICTED")
+  RESTRICTED(ModuleStateCategory.HOSTED),
   
   @XmlEnumValue(value = "NOT_SUPPORTED")
   NOT_SUPPORTED(ModuleStateCategory.NOT_HOSTED);

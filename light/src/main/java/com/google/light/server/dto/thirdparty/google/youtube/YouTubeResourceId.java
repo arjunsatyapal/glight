@@ -41,6 +41,7 @@ import org.codehaus.jackson.annotate.JsonTypeName;
 @JsonTypeName(value = "youTubeResourceId")
 @XmlRootElement(name = "youTubeResourceId")
 @XmlAccessorType(XmlAccessType.FIELD)
+@Deprecated
 public class YouTubeResourceId extends AbstractDto<YouTubeResourceId> {
   @XmlElement(name = "moduleType")
   @JsonProperty(value = "moduleType")

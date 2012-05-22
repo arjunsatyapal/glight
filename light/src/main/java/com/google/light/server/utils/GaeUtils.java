@@ -18,6 +18,8 @@ package com.google.light.server.utils;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 
+import com.google.light.server.constants.LightStringConstants;
+
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.appengine.api.utils.SystemProperty;
@@ -67,6 +69,9 @@ public class GaeUtils {
    */
   public static String getAppId() {
     Environment env = ApiProxy.getCurrentEnvironment();
+    if (env == null) {
+      return LightStringConstants.TEST;
+    }
     return checkNotBlank(env.getAppId(), "appId");
   }
 

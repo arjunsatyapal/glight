@@ -34,9 +34,10 @@ import com.google.light.server.dto.importresource.ImportExternalIdDto;
 import com.google.light.server.dto.pojo.ChangeLogEntryPojo;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.JobId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
-import com.google.light.server.jobs.handlers.collectionjobs.ImportCollectionGoogleDocContext;
-import com.google.light.server.jobs.handlers.modulejobs.ImportModuleGoogleDocJobContext;
-import com.google.light.server.jobs.handlers.modulejobs.ImportModuleSyntheticModuleJobContext;
+import com.google.light.server.jobs.handlers.collectionjobs.gdoccollection.ImportCollectionGoogleDocContext;
+import com.google.light.server.jobs.handlers.collectionjobs.youtubeplaylist.ImportCollectionYouTubePlaylistContext;
+import com.google.light.server.jobs.handlers.modulejobs.gdocument.ImportModuleGoogleDocJobContext;
+import com.google.light.server.jobs.handlers.modulejobs.synthetic.ImportModuleSyntheticModuleJobContext;
 import com.google.light.server.manager.interfaces.JobManager;
 import com.google.light.server.manager.interfaces.NotificationManager;
 import com.google.light.server.manager.interfaces.QueueManager;
@@ -150,7 +151,10 @@ public class JobManagerImpl implements JobManager {
       public JobEntity run(Objectify ofy) {
         JobEntity jobEntity = get(ofy, jobId);
         jobEntity.setJobState(JobState.COMPLETE);
+        
+        checkNotNull(responseDto, "found null for " + jobEntity);
         jobEntity.setResponse(responseDto);
+        
         put(ofy, jobEntity, new ChangeLogEntryPojo(message));
 
         if (!jobEntity.isRootJob()) {
@@ -206,7 +210,7 @@ public class JobManagerImpl implements JobManager {
    * {@inheritDoc}
    */
   @Override
-  public JobId createImportBatchJob(Objectify ofy, final ImportBatchWrapper jobRequest, 
+  public JobId createImportBatchJob(Objectify ofy, final ImportBatchWrapper jobRequest,
       JobState jobState) {
     checkTxnIsRunning(ofy);
     Text jobRequestText = new Text(jobRequest.toJson());
@@ -241,10 +245,12 @@ public class JobManagerImpl implements JobManager {
 
     JobEntity parentJob = this.get(ofy, parentJobId);
     checkNotNull(parentJob, "Parent[" + parentJobId + "] was not found.");
-    checkArgument(parentJob.getTaskType() == TaskType.IMPORT_BATCH ||
-        parentJob.getTaskType() == TaskType.IMPORT_COLLECTION_GOOGLE_COLLECTION,
+    checkArgument(parentJob.getTaskType() == TaskType.IMPORT_BATCH
+        || parentJob.getTaskType() == TaskType.IMPORT_COLLECTION_GOOGLE_COLLECTION
+        || parentJob.getTaskType() == TaskType.IMPORT_YOUTUBE_PLAYLIST,
         "Parent job was expected to be of type : " + TaskType.IMPORT_BATCH + "/"
-            + TaskType.IMPORT_COLLECTION_GOOGLE_COLLECTION);
+            + TaskType.IMPORT_COLLECTION_GOOGLE_COLLECTION + "/"
+            + TaskType.IMPORT_YOUTUBE_PLAYLIST);
 
     parentJob.addChildJob(childJobId);
 
@@ -304,6 +310,16 @@ public class JobManagerImpl implements JobManager {
         parentJob.setContext(importCollectionGDocContext);
         break;
 
+      case IMPORT_YOUTUBE_PLAYLIST:
+        // Get existing context from Parent Job Entity.
+        ImportCollectionYouTubePlaylistContext ytPlaylistJobContext = parentJob.getContext(
+            ImportCollectionYouTubePlaylistContext.class);
+
+        checkNotNull(ytPlaylistJobContext, "ytPlaylistJobContext should not be null.");
+        // Now update context with new information and then persist it back.
+        ytPlaylistJobContext.addImportModuleDto(externalIdDto);
+        parentJob.setContext(ytPlaylistJobContext);
+        break;
       default:
         throw new IllegalStateException("Unsupported parentJob for : " + taskType);
     }
@@ -314,7 +330,7 @@ public class JobManagerImpl implements JobManager {
    */
   @Override
   public JobEntity createSyntheticModuleJob(Objectify ofy,
-      ImportModuleSyntheticModuleJobContext context,
+      ImportModuleSyntheticModuleJobContext context, TaskType taskType,
       JobId parentJobId, JobId rootJobId) {
     checkTxnIsRunning(ofy);
     checkJobId(parentJobId);
@@ -327,7 +343,7 @@ public class JobManagerImpl implements JobManager {
         .parentJobId(parentJobId)
         .rootJobId(rootJobId)
         .jobHandlerType(JobHandlerType.TASK_QUEUE)
-        .taskType(TaskType.IMPORT_SYNTHETIC_MODULE)
+        .taskType(taskType)
         .jobState(JobState.ENQUEUED)
         .request(text)
         .context(text)
@@ -367,11 +383,45 @@ public class JobManagerImpl implements JobManager {
         .creationTime(getNow())
         .ownerId(GuiceUtils.getOwnerId())
         .build();
-    JobEntity savedJobEntity = this.put(ofy, jobEntity,
-        new ChangeLogEntryPojo("Enqueuing " + TaskType.IMPORT_COLLECTION_GOOGLE_COLLECTION + " job"));
+    JobEntity savedJobEntity =
+        this.put(ofy, jobEntity,
+            new ChangeLogEntryPojo("Enqueuing " + TaskType.IMPORT_COLLECTION_GOOGLE_COLLECTION
+                + " job"));
 
     logger.info("Successfully created Job[" + savedJobEntity.getJobId() + "] for ["
         + TaskType.IMPORT_COLLECTION_GOOGLE_COLLECTION + "].");
+    return savedJobEntity;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public JobEntity createImportCollectionYouTubePlaylistJob(Objectify ofy,
+      ImportCollectionYouTubePlaylistContext jobRequest, JobId parentJobId, JobId rootJobId) {
+    checkTxnIsRunning(ofy);
+    checkJobId(parentJobId);
+    checkJobId(rootJobId);
+
+    Text text = new Text(jobRequest.toJson());
+
+    JobEntity jobEntity = new JobEntity.Builder()
+        .jobType(JobType.CHILD_JOB)
+        .parentJobId(parentJobId)
+        .rootJobId(rootJobId)
+        .jobHandlerType(JobHandlerType.TASK_QUEUE)
+        .taskType(TaskType.IMPORT_YOUTUBE_PLAYLIST)
+        .jobState(JobState.ENQUEUED)
+        .request(text)
+        .context(text)
+        .creationTime(getNow())
+        .ownerId(GuiceUtils.getOwnerId())
+        .build();
+    JobEntity savedJobEntity = this.put(ofy, jobEntity,
+        new ChangeLogEntryPojo("Enqueuing " + TaskType.IMPORT_YOUTUBE_PLAYLIST + " job"));
+
+    logger.info("Successfully created Job[" + savedJobEntity.getJobId() + "] for ["
+        + TaskType.IMPORT_YOUTUBE_PLAYLIST + "].");
     return savedJobEntity;
   }
 

@@ -26,13 +26,7 @@ import com.google.light.server.constants.fts.FTSIndex;
 
 import com.google.light.server.utils.FTSUtils;
 
-import com.google.light.server.utils.LightUtils;
-
 import com.google.light.server.utils.GaeUtils;
-
-import com.google.light.server.utils.GuiceUtils;
-
-import com.google.light.server.manager.interfaces.FTSManager;
 
 import com.google.appengine.api.taskqueue.Queue;
 import com.google.appengine.api.taskqueue.QueueFactory;

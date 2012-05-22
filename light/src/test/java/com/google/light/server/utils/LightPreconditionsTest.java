@@ -240,7 +240,7 @@ public class LightPreconditionsTest {
       List<Object> tempList = null;
       checkNotEmptyCollection(tempList, "null expected");
       fail("should have failed.");
-    } catch (IllegalArgumentException e) {
+    } catch (NullPointerException e) {
       // expected.
     }
 

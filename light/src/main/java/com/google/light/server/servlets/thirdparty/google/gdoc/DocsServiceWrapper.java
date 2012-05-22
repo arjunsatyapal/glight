@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.google.light.server.thirdparty.clients.google.gdoc;
+package com.google.light.server.servlets.thirdparty.google.gdoc;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -62,7 +62,6 @@ import com.google.light.server.exception.unchecked.httpexception.NotFoundExcepti
 import com.google.light.server.manager.implementation.oauth2.owner.OAuth2OwnerTokenManagerFactory;
 import com.google.light.server.manager.interfaces.OAuth2OwnerTokenManager;
 import com.google.light.server.persistence.entity.oauth2.owner.OAuth2OwnerTokenEntity;
-import com.google.light.server.servlets.thirdparty.google.gdoc.GoogleDocUtils;
 import com.google.light.server.utils.GoogleCloudStorageUtils;
 import com.google.light.server.utils.LightUtils;
 import com.google.light.server.utils.XmlUtils;
