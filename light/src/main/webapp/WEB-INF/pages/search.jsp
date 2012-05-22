@@ -22,6 +22,9 @@
         padding-bottom: 10px;
         text-align: center;
     }
+    #searchResults .dojoDndItem {
+        word-wrap: break-word;
+    }
     #searchHeader .dijitTextBox {
         font-size: 20px;
     }

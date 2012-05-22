@@ -104,6 +104,9 @@
     .gdocListItemNotSupported {
         text-decoration: line-through;
     }
+    #content .dojoDndItem {
+        word-wrap: break-word;
+    }
     #content .dojoDndItemSelected, #content .dojoDndItemAnchor {
       background-repeat: repeat-x;
       background-color: #cfe5fa;

@@ -18,6 +18,7 @@ body {
 
 .innerContainer {
     padding: 0 1em 1em 1em;
+        word-wrap: break-word;
 }
 
 .outerContainer,.innerContainer {

@@ -50,6 +50,11 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
       } else {
         this._view.hide();
       }
+    },
+    importOtherModules: function() {
+      PubSubUtils.publish(EventsEnum.BROWSE_CONTEXT_STATE_CHANGED, [
+          new BrowseContextStateBuilder()
+              .context(BrowseContextsEnum.IMPORT).build(), this]);
     }
   });
 });

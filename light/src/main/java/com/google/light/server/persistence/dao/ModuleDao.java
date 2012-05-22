@@ -15,6 +15,7 @@
  */
 package com.google.light.server.persistence.dao;
 
+import static com.google.light.server.persistence.entity.module.ModuleEntity.OFY_MODULE_LATEST_PUBLISH_TIME_DESCENDING_ORDER_STRING;
 import static com.google.light.server.utils.LightPreconditions.checkNotNull;
 
 import com.google.light.server.persistence.entity.module.SearchIndexStatus;
@@ -83,24 +84,27 @@ public class ModuleDao extends AbstractBasicDao<ModuleDto, ModuleEntity> {
     ArrayList<Long> listOfValues = Lists.newArrayList(ownerId.getValue());
 
     Map<String, Object> map = new ImmutableMap.Builder<String, Object>()
-        .put(ModuleEntity.OFY_MODULE_OWNER_QUERY_STRING,listOfValues)
+        .put(ModuleEntity.OFY_MODULE_OWNER_QUERY_STRING, listOfValues)
         .build();
-    
+
     GAEQueryWrapper<ModuleEntity> queryWrapper = ObjectifyUtils.findQueryResults(
-        ofy, ModuleEntity.class, map, startIndex, maxResults);
+        ofy, ModuleEntity.class, map,
+        Lists.newArrayList(OFY_MODULE_LATEST_PUBLISH_TIME_DESCENDING_ORDER_STRING),
+        startIndex, maxResults);
     return queryWrapper;
   }
-  
-  public GAEQueryWrapper<ModuleEntity> findModulesForFTSIndexUpdate(int maxResults, String startIndex) {
+
+  public GAEQueryWrapper<ModuleEntity> findModulesForFTSIndexUpdate(int maxResults,
+      String startIndex) {
     Objectify ofy = ObjectifyUtils.nonTransaction();
-    
+
     Map<String, Object> map = new ImmutableMap.Builder<String, Object>()
         .put(SearchIndexStatus.OFY_MODULE_INDEX_FOR_FTS_QUERY_STRING, new Boolean(true))
         .build();
-          
+
     GAEQueryWrapper<ModuleEntity> queryWrapper = ObjectifyUtils.findQueryResults(
-        ofy, ModuleEntity.class, map, startIndex, maxResults);
-    
+        ofy, ModuleEntity.class, map, null, startIndex, maxResults);
+
     return queryWrapper;
   }
 }

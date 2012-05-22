@@ -15,6 +15,7 @@
  */
 define({
   root: {
-    listLabel: 'The following modules where imported by you into Light.'
+    listLabel: 'The following modules where imported by you into Light.',
+    importOtherModulesButton: 'Import Other Modules'
   }
 });

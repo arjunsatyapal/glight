@@ -239,12 +239,18 @@ public class ObjectifyUtils {
   }
 
   public static <T> GAEQueryWrapper<T> findQueryResults(Objectify ofy,
-      Class<T> clazz, Map<String, Object> mapOfFilterKeyValue, String startIndex, int maxResults) {
+      Class<T> clazz, Map<String, Object> mapOfFilterKeyValue, List<String> orderList, String startIndex, int maxResults) {
     checkNotNull(mapOfFilterKeyValue, "map of filters.");
     Query<T> query = ofy.query(clazz);
 
-    for(String currKey : mapOfFilterKeyValue.keySet()) {
+    for (String currKey : mapOfFilterKeyValue.keySet()) {
       query = query.filter(currKey, mapOfFilterKeyValue.get(currKey));
+    }
+    
+    if(orderList != null) {
+      for (String orderArg : orderList) {
+        query = query.order(orderArg);
+      }
     }
 
     if (StringUtils.isNotBlank(startIndex)) {
@@ -268,13 +274,13 @@ public class ObjectifyUtils {
 
     return wrapper;
   }
-  
+
   public static <T> QueryResultIterator<Key<T>> findQueryIterablesForKeys(Objectify ofy,
       Class<T> clazz, Map<String, Object> mapOfFilterKeyValue) {
     checkNotNull(mapOfFilterKeyValue, "map of filters.");
     Query<T> query = ofy.query(clazz);
 
-    for(String currKey : mapOfFilterKeyValue.keySet()) {
+    for (String currKey : mapOfFilterKeyValue.keySet()) {
       query = query.filter(currKey, mapOfFilterKeyValue.get(currKey));
     }
 

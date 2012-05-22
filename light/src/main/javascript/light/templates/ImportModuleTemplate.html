@@ -1,8 +1,17 @@
 <div>
   <div class="firstForm" data-dojo-attach-point="_firstFormDiv">
     <button data-dojo-type="dijit.form.Button" data-dojo-attach-event="onClick:_seeImported">${messages.seeImportedButton}</button>
+    <br />
+    <br />
     <div>${messages.selectOneSource}</div>
     <button data-dojo-type="dijit.form.Button" data-dojo-attach-event="onClick:_gdocAsSource">${messages.gdocSource}</button>
+    <br />
+    <br />
+    <div>${messages.orImportFromURL}</div>
+    <div data-dojo-type="dijit.form.Form" data-dojo-attach-event="onSubmit:_importURL"> 
+        <input data-dojo-type="dijit.form.TextBox" data-dojo-attach-point="_importURLTextBox" />
+        <button data-dojo-type="dijit.form.Button" type="submit">${messages.importFromURLButton}</button>
+     </div>
   </div>
   <div class="gdocAuthRequiredForm" data-dojo-attach-point="_gdocAuthRequiredFormDiv">
     <div>${messages.authRequired}</div>

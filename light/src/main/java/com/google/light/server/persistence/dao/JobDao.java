@@ -108,7 +108,7 @@ public class JobDao extends AbstractBasicDao<Object, JobEntity> {
     
     Objectify ofy = ObjectifyUtils.nonTransaction();
     GAEQueryWrapper<JobEntity> listOfModules = ObjectifyUtils.findQueryResults(
-        ofy, JobEntity.class, mapOfFilterKeyValues, startIndex, maxResults);
+        ofy, JobEntity.class, mapOfFilterKeyValues, null, startIndex, maxResults);
     return listOfModules;
   }
 }

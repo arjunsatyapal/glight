@@ -62,6 +62,9 @@ public class ModuleEntity extends AbstractPersistenceEntity<ModuleEntity, Module
   private ModuleType moduleType;
   private String externalId;
 
+  public static final String OFY_MODULE_LATEST_PUBLISH_TIME_DESCENDING_ORDER_STRING =
+      "-latestPublishTimeInMillis";
+
   @ObjectifyQueryFieldName("owners")
   public static final String OFY_MODULE_OWNER_QUERY_STRING = "owners IN";
   @ObjectifyQueryField("OFY_MODULE_OWNER_QUERY_STRING")

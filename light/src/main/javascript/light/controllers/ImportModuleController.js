@@ -139,6 +139,12 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
       this._importService.import_(list).then(function() {
         self._view.alertSuccessfullyStartedGdocsImport();
       });
+    },
+    importURL: function(url) {
+      var self = this;
+      this._importService.import_([{ 'externalId' : url }]).then(function() {
+        self.seeImported();
+      });
     }
   });
 });

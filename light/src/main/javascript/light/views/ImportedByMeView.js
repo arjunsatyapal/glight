@@ -91,6 +91,10 @@ define(['dojo/_base/declare', 'light/views/TemplatedLightView',
     show: function(link) {
       DOMUtils.show(this.domNode);
       this._listWidget.getFirstPage(link);
+    },
+    
+    _importOtherModules: function() {
+      this._controller.importOtherModules();
     }
 
   });

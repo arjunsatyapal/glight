@@ -30,13 +30,16 @@ define(['dojo/_base/declare', 'light/views/TemplatedLightView',
         'light/utils/DialogUtils',
         'light/enums/DndConstantsEnum',
         'light/builders/ModuleDndTypeBuilder',
-        'dijit/form/Button'],
+        'dojo/_base/event',
+        'dijit/form/Button',
+        'dijit/form/TextBox',
+        'dijit/form/Form'],
         function(declare, TemplatedLightView, template, GDocListItemTemplate,
                 messages, DOMUtils, URLUtils, LanguageUtils,
                 RouterManager, $, string,
                 domConstruct, _WidgetsInTemplateMixin, PaginatedListWidget, 
                 TemplateUtils, DialogUtils, DndConstantsEnum,
-                ModuleDndTypeBuilder, Button) {
+                ModuleDndTypeBuilder, eventUtil, Button) {
   var SUPPORTED_GDOC_MODULE_TYPES_TO_IMPORT = {
           'GOOGLE_DOCUMENT': true,
           'GOOGLE_COLLECTION': true
@@ -184,6 +187,10 @@ define(['dojo/_base/declare', 'light/views/TemplatedLightView',
     },
     _seeImported: function() {
       this._controller.seeImported();
+    },
+    _importURL: function(evt) {
+      eventUtil.stop(evt);
+      return this._controller.importURL(this._importURLTextBox.get('value'));
     }
   });
 
