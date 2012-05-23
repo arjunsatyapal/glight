@@ -75,9 +75,14 @@ define(['dojo/_base/declare',
         var iterNode = node;
         var rootNode = node.tree.rootNode;
         while (iterNode != rootNode) {
-          var index = Array.prototype.indexOf.call(iterNode.domNode.parentNode.childNodes, iterNode.domNode);
+          var parent = iterNode.getParent();
+          if(parent === null) {
+            indexPaths[node.id] = [];
+            return;
+          }
+          var index = parent.getChildren().indexOf(iterNode);
           indexReversePath.push(index);
-          iterNode = iterNode.getParent();
+          iterNode = parent;
         }
         indexReversePath.reverse();
         indexPaths[node.id] = indexReversePath;
@@ -86,7 +91,6 @@ define(['dojo/_base/declare',
       selectedNodes.sort(function(a,b) {
         return compareArrayTuples(indexPaths[a.id], indexPaths[b.id]);
       });
-
       return selectedNodes;
     },
 
