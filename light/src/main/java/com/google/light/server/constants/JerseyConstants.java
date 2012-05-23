@@ -221,8 +221,11 @@ public class JerseyConstants {
       + RESOURCE_PATH_SEARCH_INDEX;
 
   public static final String PATH_SEARCH_INDEX_UPDATE_INDICES = "/updateIndices";
+  public static final String PATH_SEARCH_INDEX_UPDATE_INDICES_GSS = "/updateIndicesGSS";
   public static final String URI_SEARCH_INDEX_UPDATE_INDICES =
       URI_RESOURCE_PATH_SEARCH_INDEX + PATH_SEARCH_INDEX_UPDATE_INDICES;
+  public static final String URI_SEARCH_INDEX_UPDATE_INDICES_GSS =
+      URI_RESOURCE_PATH_SEARCH_INDEX + PATH_SEARCH_INDEX_UPDATE_INDICES_GSS;
 
   // Some getter methods.
   public static String getJerseyContext() {

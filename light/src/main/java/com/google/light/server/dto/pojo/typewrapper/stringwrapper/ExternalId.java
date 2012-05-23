@@ -200,8 +200,8 @@ public class ExternalId extends AbstractTypeWrapper<String, ExternalId> {
         throw new IllegalStateException("URLs pointing to local host are not allowed.");
       }
     } else {
-      String appSpotAddress = appId + ".appspot.com";
-      if (host.endsWith(appSpotAddress)) {
+      String appSpotAddress = GaeUtils.getHostForDefaultVersion();
+      if (host.equals(appSpotAddress) || host.endsWith("."+appSpotAddress)) {
         return true;
       }
     }

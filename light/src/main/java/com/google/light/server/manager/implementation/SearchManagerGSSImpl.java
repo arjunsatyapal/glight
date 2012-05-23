@@ -1,19 +1,30 @@
 package com.google.light.server.manager.implementation;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.jdom.Attribute;
 import org.jdom.Document;
 import org.jdom.Element;
+import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
+import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
 
 import com.google.api.client.http.GenericUrl;
+import com.google.api.client.http.HttpContent;
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.HttpTransport;
+import com.google.api.client.http.InputStreamContent;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Throwables;
 import com.google.inject.Inject;
@@ -27,7 +38,6 @@ import com.google.light.server.dto.search.SearchResultItemDto;
 import com.google.light.server.exception.checked.FailedToIndexException;
 import com.google.light.server.manager.interfaces.GSSClientLoginTokenManager;
 import com.google.light.server.manager.interfaces.SearchManager;
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * An implementation of {@link SearchManager} using Google Site Search.
@@ -39,7 +49,15 @@ public class SearchManagerGSSImpl implements SearchManager {
 
   private static final String GSS_CSE_URL = "http://www.google.com/cse";
   // TODO(waltercacau): Extract this to a property file
-  private static final String GSS_CSE_ID = "010876134375682122369:tpzezwcekzm";
+  
+
+  // CSE Owned by waltercacau@google.com
+  private static final String GSS_CSE_ID = "xqelsiji0y8";
+  private static final String GSS_CSE_OWNER_ID = "001369170667164983739";
+  /*
+  // CSE Owned by search-admin@myopenedu.com
+  private static final String GSS_CSE_ID = "tpzezwcekzm";
+  private static final String GSS_CSE_OWNER_ID = "010876134375682122369";*/
   private static final String SUGGESTION_QUERY_TAG = "q";
   private static final String SUGGESTION_TAG = "Suggestion";
   private static final String SPELLING_TAG = "Spelling";
@@ -78,7 +96,7 @@ public class SearchManagerGSSImpl implements SearchManager {
 
     HttpTransport httpTransport = this.httpTransportProvider.get();
     GenericUrl url = new GenericUrl(GSS_CSE_URL);
-    url.put("cx", GSS_CSE_ID);
+    url.put("cx", GSS_CSE_OWNER_ID + ":" + GSS_CSE_ID);
     url.put("output", "xml_no_dtd");
     url.put("num", LightConstants.SEARCH_RESULTS_PER_PAGE);
     url.put("start", start);
@@ -166,16 +184,71 @@ public class SearchManagerGSSImpl implements SearchManager {
 
   @Override
   public void index(OnDemandIndexingRequest request) throws FailedToIndexException {
-    // TODO(waltercacau): Finish implementing this method.
-    String currentToken = null;
+    // Getting the token and trying to authenticate if necessary
+    String authorizationToken = null;
     try {
-      currentToken = tokenManager.getCurrentToken();
-      if (currentToken == null) {
-        currentToken = tokenManager.authenticate();
+      authorizationToken = tokenManager.getCurrentToken();
+      if (authorizationToken == null) {
+        authorizationToken = tokenManager.authenticate();
       }
     } catch (Exception e) {
       throw new FailedToIndexException("Failed to authenticate", e);
     }
+
+    // Transforming the request into HttpContent
+    byte[] contentBytes = null;
+    try {
+      contentBytes = request.toXmlString().getBytes("UTF-8");
+    } catch (UnsupportedEncodingException e) {
+      throw new FailedToIndexException("Failed to encode request in UTF-8", e);
+    }
+    InputStream stream = new ByteArrayInputStream(contentBytes);
+    HttpContent content = new InputStreamContent("application/xml; charset=utf-8", stream);
+
+    // Preparing the request
+    try {
+      HttpRequest httpRequest =
+          httpTransportProvider
+              .get()
+              .createRequestFactory()
+              .buildPostRequest(
+                  new GenericUrl("https://www.google.com/cse/api/" + GSS_CSE_OWNER_ID + "/index/"
+                      + GSS_CSE_ID),
+                  content);
+
+      httpRequest.setEnableGZipContent(false);
+      httpRequest.getHeaders().setAuthorization(authorizationToken);
+      httpRequest.getHeaders().setAcceptEncoding("utf-8");
+
+      httpRequest.setThrowExceptionOnExecuteError(false);
+      HttpResponse response = httpRequest.execute();
+
+      if (!response.isSuccessStatusCode()) {
+        throw new FailedToIndexException("Failed to index. Received from GSS/CSE: "
+            + response.getStatusCode() + " " + response.getStatusMessage());
+      }
+
+      // Reading the response
+      InputStream contentStream = response.getContent();
+      Document doc = new SAXBuilder().build(contentStream);
+      logger.info(new XMLOutputter().outputString(doc));
+      Element root = doc.getRootElement();
+      Attribute refreshStatusAttribute = root.getAttribute("refresh_status");
+      if (refreshStatusAttribute == null) {
+        throw new FailedToIndexException("GSS/CSE response format has changed.");
+      }
+
+      if (!"SUCCESS".equals(refreshStatusAttribute.getValue())) {
+        throw new FailedToIndexException("Failed to index. Received from GSS/CSE refresh_status = "
+            + refreshStatusAttribute.getValue());
+      }
+
+    } catch (IOException e) {
+      throw new FailedToIndexException("Failed to index", e);
+    } catch (JDOMException e) {
+      throw new FailedToIndexException("Failed to parse XML response", e);
+    }
+
   }
 
 }

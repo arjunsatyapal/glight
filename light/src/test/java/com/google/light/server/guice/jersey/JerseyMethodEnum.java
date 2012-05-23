@@ -338,6 +338,14 @@ public enum JerseyMethodEnum {
                                        "/rest/gaeadmin/search/updateIndices",
                                        new String[] { "text/plain; charset=UTF-8" }),
 
+  // Search Index Resource
+ SEARCH_INDEX_RESOURCE_UPDATE_INDICES_GSS(
+                                      SearchIndexResource.class,
+                                      "updateIndicesGSS",
+                                      new Class[] {},
+                                      GET.class,
+                                      "/rest/gaeadmin/search/updateIndicesGSS",
+                                      new String[] { "text/plain; charset=UTF-8" }),
   // Test Resource Jersey Methods.
   TEST_ADMIN_RESOURCE_DELETE_ALL(
                                  TestAdminResources.class,

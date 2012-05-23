@@ -236,8 +236,9 @@ public class ModuleManagerImpl implements ModuleManager {
     moduleEntity.publishVersion(version, title, lastEditTime, now, etag, externalId);
     moduleDao.put(ofy, moduleEntity);
     
-    // Enqueue a task so that searchIndices can be updated.
+    // Enqueue tasks so that searchIndices can be updated.
     queueManager.enqueueSearchIndexTask(ofy);
+    queueManager.enqueueSearchIndexGSSTask(ofy);
 
     return moduleVersionEntity;
   }
@@ -412,6 +413,31 @@ public class ModuleManagerImpl implements ModuleManager {
       String startIndex) {
     GAEQueryWrapper<ModuleEntity> moduleListWrapper =
         moduleDao.findModulesForFTSIndexUpdate(maxResults, startIndex);
+
+    List<Key<ModuleVersionEntity>> listOfKeys = Lists.newArrayList();
+    for (ModuleEntity curr : moduleListWrapper.getList()) {
+      Key<ModuleVersionEntity> key = ModuleVersionEntity.generateKey(
+          curr.getKey(), curr.getLatestPublishVersion());
+      listOfKeys.add(key);
+    }
+
+    List<ModuleVersionEntity> listOfModuleVersions = moduleVersionDao.findModuleVersionsByKeys(
+        listOfKeys);
+
+    GAEQueryWrapper<ModuleVersionEntity> mvWrapper = new GAEQueryWrapper<ModuleVersionEntity>();
+    mvWrapper.setStartIndex(moduleListWrapper.getStartIndex());
+    mvWrapper.setList(listOfModuleVersions);
+    return mvWrapper;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public GAEQueryWrapper<ModuleVersionEntity> findModuleVersionsForGSSIndexUpdate(int maxResults,
+      String startIndex) {
+    GAEQueryWrapper<ModuleEntity> moduleListWrapper =
+        moduleDao.findModulesForGSSIndexUpdate(maxResults, startIndex);
 
     List<Key<ModuleVersionEntity>> listOfKeys = Lists.newArrayList();
     for (ModuleEntity curr : moduleListWrapper.getList()) {

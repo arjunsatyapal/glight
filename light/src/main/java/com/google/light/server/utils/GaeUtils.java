@@ -74,6 +74,23 @@ public class GaeUtils {
     }
     return checkNotBlank(env.getAppId(), "appId");
   }
+  
+  public static String getBaseUrlForDefaultVersion() {
+    if(isDevServer()) {
+      return "http://localhost:8080";
+    } else {
+      return "http://"+SystemProperty.applicationId.get()+".appspot.com";
+    }
+  }
+  public static String getHostForDefaultVersion() {
+    if(isDevServer()) {
+      return "localhost";
+    } else {
+      return SystemProperty.applicationId.get()+".appspot.com";
+    }
+  }
+  
+  
 
   /**
    * Ensures that Application is running on AppEngine.

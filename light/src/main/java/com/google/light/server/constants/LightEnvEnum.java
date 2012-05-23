@@ -18,11 +18,12 @@ package com.google.light.server.constants;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.light.server.utils.LightPreconditions.checkNotEmptyCollection;
 
+import java.util.List;
+
 import com.google.appengine.api.utils.SystemProperty;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.light.server.exception.unchecked.ServerConfigurationException;
 import com.google.light.server.utils.GaeUtils;
-import java.util.List;
 
 /**
  * Enum to identify the Environment.

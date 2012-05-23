@@ -126,26 +126,27 @@ public class FTSUtils {
     index.add(ftsDocumentWrapper.getDocument());
     logger.info("Added " + ftsDocumentWrapper.getFtsDocumentId() + " for FTS indexing.");
   }
-  
+
   /**
    * @param ftsDocument
    * @param module
    */
-  public static void indexDocuments(List<FTSDocumentWrapper> listOfftsDocumentWrapper, FTSIndex ftsIndex) {
+  public static void indexDocuments(List<FTSDocumentWrapper> listOfftsDocumentWrapper,
+      FTSIndex ftsIndex) {
     StringBuilder strBuilder = new StringBuilder(
         "Successfully added following moduleIds on FTS Index : ");
-    
+
     List<Document> listOfDocuments = Lists.newArrayListWithExpectedSize(
         listOfftsDocumentWrapper.size());
-    
+
     for (FTSDocumentWrapper curr : listOfftsDocumentWrapper) {
       strBuilder.append(" " + curr.getFtsDocumentId());
       listOfDocuments.add(curr.getDocument());
     }
-    
+
     Index index = getIndex(ftsIndex);
     index.add(listOfDocuments);
-    
+
     logger.info(strBuilder.toString());
   }
 
@@ -183,16 +184,16 @@ public class FTSUtils {
     QueryOptions options = getQueryOptions(maxResults, cursor, sortOptions);
 
     Query.Builder queryBuilder = Query.newBuilder().setOptions(options);
-    
+
     Query query = null;
-    
+
     if (StringUtils.isBlank(queryString)) {
       checkNotBlank(startIndex, "startIndex and query both cannot be blank");
       query = queryBuilder.build();
     } else {
       query = queryBuilder.build(queryString);
     }
-    
+
     Results<ScoredDocument> results = getIndex(ftsIndex).search(query);
 
     List<SearchResultItemDto> listOfResults = Lists.newArrayList();
@@ -218,13 +219,13 @@ public class FTSUtils {
           .build();
       listOfResults.add(item);
     }
-    
+
     String newStartIndex = null;
-    if(results.getNumberFound() > maxResults) {
+    if (results.getNumberFound() > maxResults) {
       Cursor newCursor = results.getCursor();
       newStartIndex = getNewStartIndex(queryString, newCursor);
     }
-  
+
     PageDto pageDto = new PageDto.Builder()
         .startIndex(newStartIndex)
         .handlerUri(JerseyConstants.URI_MODULE_SEARCH)
@@ -247,8 +248,8 @@ public class FTSUtils {
   private static String getNewStartIndex(String queryString, Cursor cursor) {
     String queryPart = LightStringConstants.FILTER + "=" + queryString;
     String startIndexPart = cursor.toWebSafeString();
-    String unEncodedStartIndex = startIndexPart + "&" + queryPart; 
-    
+    String unEncodedStartIndex = startIndexPart + "&" + queryPart;
+
     return unEncodedStartIndex;
   }
 

@@ -103,5 +103,7 @@ public class LightConstants {
   public static final int TASK_RETRY_LIMIT = 3;
   
   public static final int OBJECTIFY_REPEAT_COUNT = 5;
+  public static final int MAX_GSS_CSE_INDEX_UPDATE_BULK = 50;
+  public static final int GSS_CSE_INDEX_UPDATE_WAIT_INTERVAL_IN_MILLIS = 5000;
 
 }

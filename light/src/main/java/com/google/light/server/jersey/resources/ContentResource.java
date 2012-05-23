@@ -60,8 +60,10 @@ import com.google.light.server.manager.interfaces.ModuleManager;
 import com.google.light.server.persistence.entity.collection.CollectionVersionEntity;
 import com.google.light.server.persistence.entity.module.ModuleVersionEntity;
 import com.google.light.server.persistence.entity.module.ModuleVersionResourceEntity;
+import com.google.light.server.utils.GaeUtils;
 import com.google.light.server.utils.LightUtils;
 import com.google.light.server.utils.ServletUtils;
+import com.google.light.server.utils.URIBuilder;
 
 /**
  * Jersey resource to serve content from collections and
@@ -523,5 +525,9 @@ public class ContentResource extends AbstractJerseyResource {
             Collections.list(request.getLocales())).getClientLanguageCode());
 
     request.setAttribute("preload", dtoBuilder.build().toHtml());
+  }
+  
+  public static String buildAbsoluteLinkForModule(ModuleId moduleId) {
+    return GaeUtils.getBaseUrlForDefaultVersion() + "/rest/content/general/module/"+moduleId.getValue()+"/latest/";
   }
 }

@@ -5,4 +5,9 @@
     <description>Check modules to be Indexed for search every day.</description>
     <schedule>every 6 hours</schedule>
   </cron> -->
+<cron>
+    <url>/rest/gaeadmin/cron/searchIndexRefresh</url>
+    <description>Check modules to be Indexed for search every day.</description>
+    <schedule>every 6 hours</schedule>
+  </cron>
 </cronentries>

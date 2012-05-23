@@ -187,4 +187,23 @@ public class QueueManagerImpl implements QueueManager {
 //    logger.info("Enqueued searchIndexTask " + " with TaskHandle : " + taskHandle);
     logger.info("Ignoring adding to queue");
   }
+
+  @Override
+  public void enqueueSearchIndexGSSTask(Objectify ofy) {
+    checkTxnIsRunning(ofy);
+
+    PersonManager personManager = GuiceUtils.getInstance(PersonManager.class);
+    PersonEntity lightBot = personManager.findByEmail(LightConstants.LIGHT_BOT_EMAIL);
+    checkNotNull(lightBot, "lightBot is missing");
+    
+    RetryOptions retryOptions = QueueEnum.SEARCH_INDEX_GSS.getRetryOptions();
+    TaskOptions taskOptions = getTaskOptions(lightBot.getPersonId(),
+        retryOptions, TaskOptions.Method.GET, ContentTypeConstants.TEXT_PLAIN, null,
+        getURI(JerseyConstants.URI_SEARCH_INDEX_UPDATE_INDICES_GSS));
+
+    Queue queue = QueueFactory.getQueue(QueueEnum.SEARCH_INDEX.getName());
+    TaskHandle taskHandle = queue.add(taskOptions);
+    logger.info("Enqueued searchIndexGSSTask " + " with TaskHandle : " + taskHandle);
+    
+  }
 }

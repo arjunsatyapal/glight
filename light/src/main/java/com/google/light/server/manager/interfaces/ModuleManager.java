@@ -120,4 +120,7 @@ public interface ModuleManager {
   public GAEQueryWrapper<ModuleVersionEntity> findModuleVersionsForFTSIndexUpdate(int maxResults,
       String startIndex);
 
+  public GAEQueryWrapper<ModuleVersionEntity> findModuleVersionsForGSSIndexUpdate(int maxResults,
+      String startIndex);
+
 }

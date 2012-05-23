@@ -67,6 +67,7 @@ public class CronResource extends AbstractJerseyResource {
       @Override
       public Void run(Objectify ofy) {
         queueManager.enqueueSearchIndexTask(ofy);
+        queueManager.enqueueSearchIndexGSSTask(ofy);
         return null;
       }
     });

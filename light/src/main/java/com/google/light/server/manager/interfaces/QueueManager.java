@@ -48,6 +48,8 @@ public interface QueueManager {
   
   public void enqueueSearchIndexTask(Objectify ofy);
   
+  public void enqueueSearchIndexGSSTask(Objectify ofy);
+  
   public <T extends AbstractNotification<T>> void enqueueNotification(
       Objectify ofy, T notification);
 }

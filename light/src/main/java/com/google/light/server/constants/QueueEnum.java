@@ -40,6 +40,7 @@ public enum QueueEnum {
   LIGHT_NOTIFICATIONS("light-notification", SECOND_TEN, 2, SECOND, TASK_AGE_LIMIT_MAX, 100),
   LIGHT_POLLING("light-polling", SECOND_FIVE, 2, SECOND, TASK_AGE_LIMIT_MAX, 100),
   SEARCH_INDEX("search-index", SECOND, 1, SECOND, SECONDS_IN_TEN_MIN, 1),
+  SEARCH_INDEX_GSS("search-index-gss", SECOND, 1, SECOND, SECONDS_IN_TEN_MIN, 1),
   
   // Queues from AppEngine
   /*

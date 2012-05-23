@@ -44,8 +44,13 @@ import com.google.api.client.http.InputStreamContent;
 import com.google.common.collect.Lists;
 import com.google.inject.Injector;
 import com.google.light.server.constants.LightEnvEnum;
+import com.google.light.server.constants.OAuth2ProviderEnum;
 import com.google.light.server.dto.search.OnDemandIndexingRequest;
+import com.google.light.server.exception.checked.FailedToIndexException;
 import com.google.light.server.manager.implementation.GSSClientLoginTokenManagerImpl;
+import com.google.light.server.manager.implementation.SearchManagerGSSImpl;
+import com.google.light.server.persistence.dao.OAuth2ConsumerCredentialDao;
+import com.google.light.server.persistence.entity.admin.OAuth2ConsumerCredentialEntity;
 import com.google.light.server.servlets.test.CredentialUtils;
 import com.google.light.server.utils.GuiceUtils;
 import com.google.light.testingutils.TestingUtils;
@@ -57,35 +62,40 @@ import com.google.light.testingutils.TestingUtils;
  * 
  */
 public class ControlGSSTestScript {
-  // CSE Owned by search-admin@myopenedu.com
-  private static final String CSE_ID = "tpzezwcekzm";
-  private static final String CSE_OWNER_ID = "010876134375682122369";
 
-  /*
-   * // CSE Owned by search-admin@myopenedu.org
-   * private static final String CSE_ID = "tpzezwcekzm";
-   * private static final String CSE_OWNER_ID = "010876134375682122369";
-   */
-
-  public static void main(String[] args) throws IOException, JDOMException {
+  public static void main(String[] args) throws IOException, JDOMException, FailedToIndexException {
+    
     // Initializing
     TestingUtils.gaeSetup(LightEnvEnum.DEV_SERVER);
     Injector injector = getInjectorByEnv(LightEnvEnum.DEV_SERVER);
     GuiceUtils.setInjector(injector);
+    SearchManagerGSSImpl searchManager = injector.getInstance(SearchManagerGSSImpl.class);
+    OAuth2ConsumerCredentialDao consumerCredentialDao = injector.getInstance(OAuth2ConsumerCredentialDao.class);
+    
     Properties consumerCredentials =
         TestingUtils.loadProperties(CredentialUtils.getConsumerCredentialFileAbsPath(CLIENT_LOGIN,
             GSS));
     TestingUtils.validatePropertiesFile(consumerCredentials, Lists.newArrayList(
         CLIENT_ID.get(), CLIENT_SECRET.get()));
-    GSSClientLoginTokenManagerImpl tokenManager =
+    
+    consumerCredentialDao.put(null,
+        new OAuth2ConsumerCredentialEntity.Builder()
+          .providerName(GSS.name())
+          .clientId(consumerCredentials.getProperty(CLIENT_ID.get()))
+          .clientSecret(consumerCredentials.getProperty(CLIENT_SECRET.get()))
+          .build());
+    
+    searchManager.index(new OnDemandIndexingRequest()
+        .add("http://light-qa.appspot.com/"));
+    
+    /*GSSClientLoginTokenManagerImpl tokenManager =
         injector.getInstance(GSSClientLoginTokenManagerImpl.class);
     HttpTransport transport = injector.getInstance(HttpTransport.class);
 
     // Authorizing
-    String authorizationToken =
-        tokenManager.authenticate(consumerCredentials.getProperty(CLIENT_ID.get()),
+    tokenManager.authenticate(consumerCredentials.getProperty(CLIENT_ID.get()),
             consumerCredentials.getProperty(CLIENT_SECRET.get()), null, null);
-
+    
     String contentString = new OnDemandIndexingRequest()
         .add("http://light-demo.appspot.com/rest/content/general/module/25005/latest/")
         .toXmlString();
@@ -122,6 +132,8 @@ public class ControlGSSTestScript {
     Document doc = new SAXBuilder().build(contentStream);
     System.out.println(new XMLOutputter(Format.getPrettyFormat()).outputString(doc));
     Element root = doc.getRootElement();
-    Assert.assertEquals("SUCCESS", root.getAttribute("refresh_status").getValue());
+    Assert.assertEquals("SUCCESS", root.getAttribute("refresh_status").getValue());*/
+    
+    
   }
 }

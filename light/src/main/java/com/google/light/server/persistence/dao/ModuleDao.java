@@ -107,4 +107,18 @@ public class ModuleDao extends AbstractBasicDao<ModuleDto, ModuleEntity> {
 
     return queryWrapper;
   }
+
+  public GAEQueryWrapper<ModuleEntity> findModulesForGSSIndexUpdate(int maxResults,
+      String startIndex) {
+    Objectify ofy = ObjectifyUtils.nonTransaction();
+
+    Map<String, Object> map = new ImmutableMap.Builder<String, Object>()
+        .put(SearchIndexStatus.OFY_MODULE_INDEX_FOR_GSS_QUERY_STRING, new Boolean(true))
+        .build();
+
+    GAEQueryWrapper<ModuleEntity> queryWrapper = ObjectifyUtils.findQueryResults(
+        ofy, ModuleEntity.class, map, null, startIndex, maxResults);
+
+    return queryWrapper;
+  }
 }

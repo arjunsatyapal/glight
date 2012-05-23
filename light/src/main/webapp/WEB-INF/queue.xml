@@ -17,14 +17,6 @@
     <mode>push</mode>
   </queue>
 
-  <!-- <queue>
-    <name>gss-pagemap-update</name>
-    <rate>20/s</rate>
-    <bucket-size>100</bucket-size>
-    <max-concurrent-requests>100</max-concurrent-requests>
-    <mode>push</mode>
-    </queue> -->
-
   <queue>
     <name>light</name>
     <rate>20/s</rate>
@@ -57,5 +49,12 @@
     <mode>push</mode>
   </queue>
 
+  <queue>
+    <name>search-index-gss</name>
+    <rate>1/s</rate>
+    <bucket-size>1</bucket-size>
+    <max-concurrent-requests>1</max-concurrent-requests>
+    <mode>push</mode>
+  </queue>
 
 </queue-entries>
