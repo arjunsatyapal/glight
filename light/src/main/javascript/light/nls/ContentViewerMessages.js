@@ -16,7 +16,9 @@
 define({
   root: {
     next: 'Next',
-    previous: 'Previous'
+    previous: 'Previous',
+    start: 'Start',
+    inCollection: 'in ${collection} collection'
   },
   'pt-br': true,
   'fa': true

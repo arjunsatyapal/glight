@@ -12,12 +12,18 @@
     .collectionContent ol {
         list-style-type: none;
     }
+    .collectionStartLinkContainer {
+        padding-top: 3px;
+        padding-left: 5px;
+        padding-bottom: 3px;
+    }
     </style>
   </head>
   <body>
     <div class="outerContainer">
         <div class="innerContainer hiddenNode">
             <h1 class="collectionTitle">${collectionTitle}</h1>
+            <div class="collectionStartLinkContainer">${collectionStartLink}</div>
             <div class="collectionContent">${collectionContent}</div>
         </div>
     </div>

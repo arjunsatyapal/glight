@@ -15,13 +15,20 @@
  */
 define(['dojo/i18n!light/nls/ContentViewerMessages', 'dojo/query',
         'light/utils/DOMUtils',
+        'dojox/html/entities',
         'dojo/domReady!'],
-        function(messages, $, DOMUtils) {
+        function(messages, $, DOMUtils, htmlEntities) {
   $("a.previousLink").forEach(function(node) {
     DOMUtils.setText(node, messages.previous);
   });
   $("a.nextLink").forEach(function(node) {
     DOMUtils.setText(node, messages.next);
+  });
+  $(".collectionToolbar").forEach(function(node) {
+    node.innerHTML = htmlEntities.encode(messages.inCollection).replace("${collection}", node.innerHTML);
+  });
+  $("a.collectionStartLink").forEach(function(node) {
+    DOMUtils.setText(node, messages.start);
   });
   $(".hiddenNode").forEach(function(node) {
     DOMUtils.show(node);

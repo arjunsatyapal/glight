@@ -84,7 +84,7 @@ public class Version extends AbstractTypeWrapper<Long, Version> {
     super();
     checkNotNull(version, "version");
     if (version.equals(LightStringConstants.VERSION_LATEST_STR)) {
-      setValue(-1L);
+      setValue(LATEST_VERSION);
     } else {
       setValue(Long.parseLong(version));
     }
@@ -132,6 +132,14 @@ public class Version extends AbstractTypeWrapper<Long, Version> {
 
   public boolean isSpecificVersion() {
     return getState() == State.SPECIFIC;
+  }
+  
+  public String toURLComponentString() {
+    if(isLatestVersion()) {
+      return LightStringConstants.VERSION_LATEST_STR;
+    } else {
+      return Long.toString(getValue());
+    }
   }
 
   @Override

@@ -13,21 +13,27 @@
     .navigationBar {
         text-align: center;
         padding: 10px;
+    }
+    .collectionToolbar {
+        padding: 5px;
     }<c:if test="${usesIframe == 'true'}">
     .moduleTitle {
       white-space: nowrap;
       text-overflow: ellipsis;
       overflow: hidden;
-      height: 1.5em;
+      height: 1.2em;
     }
     .moduleContent div {
         height: 100%;
         width: 100%;
     }
+    .collectionToolbar {
+        padding-top: 0px;
+    }
     .moduleContent {
         margin: -4px auto;
         position: absolute;
-        top: 4em;
+        top: 5.5em;
         left: 0;
         right: 0;
         bottom: 40px;
@@ -41,6 +47,7 @@
         left: 0;
         right: 0;
         bottom: 5px;
+        padding-top: 0px;
     }</c:if>
     </style>
   </head>
@@ -48,6 +55,7 @@
     <div class="outerContainer">
         <div class="innerContainer">
             <h1 class="moduleTitle hiddenNode">${moduleTitle}</h1>
+            <div class="collectionToolbar hiddenNode"><a href="${collectionPath}">${collectionTitle}</a></div>
             <div class="moduleContent">${moduleContent}</div>
             <div class="navigationBar hiddenNode">${navigationBar}</div>
         </div>

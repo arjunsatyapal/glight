@@ -180,6 +180,8 @@ public class ContentResource extends AbstractJerseyResource {
   public Response getCollectionVersionContent(
       @PathParam(JerseyConstants.PATH_PARAM_COLLECTION_ID) String collectionIdStr,
       @PathParam(JerseyConstants.PATH_PARAM_VERSION) String versionStr) {
+    CollectionId collectionId = new CollectionId(collectionIdStr);
+    Version collectionVersion = new Version(versionStr);
 
     CollectionVersionEntity collectionVersionEntity = getCollectionVersionEntity(
         collectionIdStr, versionStr);
@@ -188,10 +190,26 @@ public class ContentResource extends AbstractJerseyResource {
     StringBuilder contentBuilder = new StringBuilder();
 
     contentBuilder.append("<ol>\n");
-    appendCurrNode(tree, contentBuilder, 2, true, request.getRequestURI());
+    appendCurrNode(tree, contentBuilder, 2, true, collectionId,
+        collectionVersion);
     contentBuilder.append("\n</ol>");
 
     request.setAttribute("collectionTitle", StringEscapeUtils.escapeHtml(tree.getTitle()));
+    List<CollectionTreeNodeDto> leafNodeList = getLeafNodeList(tree);
+    StringBuilder startLinkBuilder = new StringBuilder();
+    if (leafNodeList.size() > 0) {
+      CollectionTreeNodeDto firstLeafNode = leafNodeList.get(0);
+      startLinkBuilder
+          .append("<a class=\"collectionStartLink\" href=\"")
+          .append(
+              StringEscapeUtils.escapeHtml(buildPathForModuleInCollection(
+                  collectionId,
+                  collectionVersion,
+                  firstLeafNode.getModuleId())))
+          .append("\">Start</a>");
+
+    }
+    request.setAttribute("collectionStartLink", startLinkBuilder.toString());
     request.setAttribute("collectionContent", contentBuilder.toString());
     setJSVariablesPreload(request);
 
@@ -249,6 +267,8 @@ public class ContentResource extends AbstractJerseyResource {
       @PathParam(JerseyConstants.PATH_PARAM_COLLECTION_ID) String collectionIdStr,
       @PathParam(JerseyConstants.PATH_PARAM_VERSION) String versionStr,
       @PathParam(JerseyConstants.PATH_PARAM_MODULE_ID) String moduleIdStr) {
+    CollectionId collectionId = new CollectionId(collectionIdStr);
+    Version collectionVersion = new Version(versionStr);
 
     // TODO(waltercacau): Figure out how to deal with duplicate modules
 
@@ -273,25 +293,33 @@ public class ContentResource extends AbstractJerseyResource {
     StringBuilder contentBuilder = new StringBuilder();
     contentBuilder.append("<ol>\n");
     String collectionUri = "/rest/content/general/collection/" + collectionIdStr + "/" + versionStr;
-    appendCurrNode(tree, contentBuilder, 2, true, collectionUri);
+    appendCurrNode(tree, contentBuilder, 2, true,
+        collectionId,
+        collectionVersion);
     contentBuilder.append("\n</ol>");
 
     request.setAttribute("collectionTitle", StringEscapeUtils.escapeHtml(tree.getTitle()));
+    request.setAttribute("collectionPath",
+        StringEscapeUtils.escapeHtml(buildPathForCollection(collectionId, collectionVersion)));
     request.setAttribute("collectionContent", contentBuilder.toString());
 
     StringBuilder navigationBarBuilder = new StringBuilder();
     if (data.treeNodePrevious != null) {
       navigationBarBuilder.append("<a href=\"");
-      navigationBarBuilder.append(StringEscapeUtils.escapeHtml(buildModuleInCollectionLink(
-          data.treeNodePrevious, collectionUri)));
+      navigationBarBuilder.append(StringEscapeUtils.escapeHtml(buildPathForModuleInCollection(
+          collectionId,
+          collectionVersion,
+          data.treeNodePrevious.getModuleId())));
       navigationBarBuilder.append("\" class=\"previousLink\" >Previous</a> | ");
     }
     navigationBarBuilder.append(StringEscapeUtils.escapeHtml((data.navIndex + 1) + "/"
         + data.numberOfLeafs));
     if (data.treeNodeNext != null) {
       navigationBarBuilder.append(" | <a href=\"");
-      navigationBarBuilder.append(StringEscapeUtils.escapeHtml(buildModuleInCollectionLink(
-          data.treeNodeNext, collectionUri)));
+      navigationBarBuilder.append(StringEscapeUtils.escapeHtml(buildPathForModuleInCollection(
+          collectionId,
+          collectionVersion,
+          data.treeNodeNext.getModuleId())));
       navigationBarBuilder.append("\" class=\"nextLink\" >Next</a>");
     }
 
@@ -395,13 +423,14 @@ public class ContentResource extends AbstractJerseyResource {
    * Constructs a HTML representation of a tree using li, ol and a tags.
    */
   private void appendCurrNode(CollectionTreeNodeDto node, StringBuilder builder, int space,
-      boolean isRoot, String collectionUri) {
+      boolean isRoot, CollectionId collectionId, Version collectionVersion) {
     String sp = "";
     for (int i = 0; i < space; i++) {
       sp += " ";
     }
     if (node.isLeafNode()) {
-      String uri = buildModuleInCollectionLink(node, collectionUri);
+      String uri =
+          buildPathForModuleInCollection(collectionId, collectionVersion, node.getModuleId());
       builder.append(sp).append("<li><a href=").append(StringEscapeUtils.escapeHtml(uri))
           .append(">")
           .append(StringEscapeUtils.escapeHtml(node.getTitle())).append("</a></li>\n");
@@ -412,7 +441,7 @@ public class ContentResource extends AbstractJerseyResource {
       }
       if (node.hasChildren()) {
         for (CollectionTreeNodeDto currChild : node.getChildren()) {
-          appendCurrNode(currChild, builder, space + 4, false, collectionUri);
+          appendCurrNode(currChild, builder, space + 4, false, collectionId, collectionVersion);
         }
       }
       if (!isRoot) {
@@ -421,23 +450,19 @@ public class ContentResource extends AbstractJerseyResource {
     }
   }
 
-  private String buildModuleInCollectionLink(CollectionTreeNodeDto node, String collectionUri) {
-    return collectionUri + "/" + node.getModuleId().getValue() + "/";
-  }
-
   protected CollectionVersionEntity getCollectionVersionEntity(String collectionIdStr,
       String versionStr) {
 
     checkNotBlank(collectionIdStr, "Invalid CollectionId.");
     checkNotBlank(versionStr, "Invalid version.");
     CollectionId collectionId = new CollectionId(collectionIdStr);
-    Version version = new Version(versionStr);
+    Version collectionVersion = new Version(versionStr);
 
     CollectionVersionEntity cvEntity = collectionManager.getCollectionVersion(
-        null, collectionId, version);
+        null, collectionId, collectionVersion);
 
     if (cvEntity == null) {
-      throw new NotFoundException("Could not find " + collectionId + ":" + version);
+      throw new NotFoundException("Could not find " + collectionId + ":" + collectionVersion);
     }
 
     return cvEntity;
@@ -526,8 +551,27 @@ public class ContentResource extends AbstractJerseyResource {
 
     request.setAttribute("preload", dtoBuilder.build().toHtml());
   }
-  
+
   public static String buildAbsoluteLinkForModule(ModuleId moduleId) {
-    return GaeUtils.getBaseUrlForDefaultVersion() + "/rest/content/general/module/"+moduleId.getValue()+"/latest/";
+    return GaeUtils.getBaseUrlForDefaultVersion()
+        + buildPathForModule(moduleId, new Version(VERSION_LATEST_STR));
   }
+
+  private static String buildPathForModule(ModuleId moduleId, Version version) {
+    return "/rest/content/general/module/" + moduleId.getValue() + "/"
+        + version.toURLComponentString() + "/";
+  }
+
+  private static String buildPathForModuleInCollection(CollectionId collectionId,
+      Version collectionVersion, ModuleId moduleId) {
+    return "/rest/content/general/collection/" + collectionId.getValue() + "/"
+        + collectionVersion.toURLComponentString() + "/" + moduleId.getValue();
+  }
+
+  private static String buildPathForCollection(CollectionId collectionId,
+      Version collectionVersion) {
+    return "/rest/content/general/collection/" + collectionId.getValue() + "/"
+        + collectionVersion.toURLComponentString();
+  }
+
 }
