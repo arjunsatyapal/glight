@@ -20,6 +20,8 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.light.server.utils.ServletUtils.getRequestHeaderValue;
 
+import com.google.light.server.dto.module.ModuleType;
+
 import java.util.List;
 
 import com.google.common.base.Preconditions;
@@ -396,7 +398,10 @@ public class LightPreconditions {
   }
 
   public static ExternalId checkExternalIdIsGDocResource(ExternalId externalId) {
-    checkArgument(externalId.getModuleType().getModuleTypeProvider() == ModuleTypeProvider.GOOGLE_DOC);
+    ModuleType moduleType = externalId.getModuleType();
+    
+    checkArgument(moduleType.getModuleTypeProvider() == ModuleTypeProvider.GOOGLE_DOC || 
+        moduleType == ModuleType.UNKNOWN);
     return externalId;
   }
 
