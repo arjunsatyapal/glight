@@ -116,6 +116,10 @@ public class GoogleDocUrl implements ExternalIdUrlInterface {
       case GOOGLE_PRESENTATION:
         this.typedResourceId = moduleType.getCategory() + ":" + parts[startIndex + 2];
         break;
+        
+      case UNKNOWN:
+        this.typedResourceId = url.toString();
+        break;
       default:
         throw new IllegalArgumentException("Unsupported " + moduleType + " for URL : " + url);
     }

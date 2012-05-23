@@ -266,7 +266,7 @@ public enum ModuleType {
       }
     }
 
-    throw new EnumConstantNotPresentException(ModuleType.class, providerService + ":" + category);
+    return UNKNOWN;
   }
 
   public boolean mapsToCollection() {
