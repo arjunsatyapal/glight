@@ -117,7 +117,7 @@ public class GoogleDocUrl implements ExternalIdUrlInterface {
         this.typedResourceId = moduleType.getCategory() + ":" + parts[startIndex + 2];
         break;
         
-      case UNKNOWN:
+      case LIGHT_SYNTHETIC_MODULE:
         this.typedResourceId = url.toString();
         break;
       default:

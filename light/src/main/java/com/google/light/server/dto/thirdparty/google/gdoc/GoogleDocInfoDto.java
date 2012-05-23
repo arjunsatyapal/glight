@@ -22,6 +22,8 @@ import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
 import static com.google.light.server.utils.LightUtils.getWrapper;
 
+import com.google.light.server.utils.XmlUtils;
+
 import com.google.common.collect.Lists;
 import com.google.gdata.data.Link;
 import com.google.gdata.data.MediaContent;
@@ -559,19 +561,21 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> implements C
       aclFeedLink(docListEntry.getAclFeedLink().getHref());
       // TODO(arjuns) : Verify this.
       int contentTypeInt = docListEntry.getContent().getType();
-      switch (contentTypeInt) {
-      /**
-       * See {@link IContent.Type}
-       */
-        case 7:
-          MediaContent mediaContent = (MediaContent) docListEntry.getContent();
-          htmlExportUrl(mediaContent.getUri());
-          break;
-
-        default:
-          throw new IllegalArgumentException("ContentType : " + contentTypeInt
-              + " is currently not supported.");
-      }
+      htmlExportUrl(docListEntry.getHtmlLink().getHref());
+//      switch (contentTypeInt) {
+//      /**
+//       * See {@link IContent.Type}
+//       */
+//        case 7:
+//          MediaContent mediaContent = (MediaContent) docListEntry.getContent();
+//          
+//          break;
+//
+//        default:
+//          System.out.println("Here i am : " + XmlUtils.getXmlEntry(docListEntry));
+//          throw new IllegalArgumentException("ContentType : " + contentTypeInt
+//              + " is currently not supported. Failed for " + XmlUtils.getXmlEntry(docListEntry));
+//      }
 
       List<Link> parentFolderUrls = docListEntry.getParentLinks();
 

@@ -20,6 +20,8 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkNotEmptyCollection;
 
+import com.google.appengine.api.socket.SocketServicePb.RemoteSocketServiceError.SystemError;
+
 import com.google.light.server.constants.OAuth2ProviderService;
 import com.google.light.server.constants.http.ContentTypeEnum;
 import com.google.light.server.dto.pojo.tree.AbstractTreeNode.TreeNodeType;
@@ -169,17 +171,17 @@ public enum ModuleType {
                          ModuleTypeProvider.LIGHT,
                          TreeNodeType.LEAF_NODE,
                          newArrayList(ContentLicense.UNKNOWN),
-                         true, false, false, false),
+                         true, false, false, false);
 
-  // To be used at places where ModuleType is not known.
-  @XmlEnumValue(value = "UNKNOWN")
-  UNKNOWN(OAuth2ProviderService.GOOGLE_DOC,
-          "root",
-          ContentTypeEnum.OASIS_DOCUMENT,
-          ModuleTypeProvider.LIGHT,
-          TreeNodeType.LEAF_NODE,
-          newArrayList(ContentLicense.UNKNOWN),
-          false, false, false, false),
+//  // To be used at places where ModuleType is not known.
+//  @XmlEnumValue(value = "UNKNOWN")
+//  UNKNOWN(OAuth2ProviderService.GOOGLE_DOC,
+//          "root",
+//          ContentTypeEnum.OASIS_DOCUMENT,
+//          ModuleTypeProvider.LIGHT,
+//          TreeNodeType.LEAF_NODE,
+//          newArrayList(ContentLicense.UNKNOWN),
+//          false, false, false, false),
 
   ;
 
@@ -266,7 +268,7 @@ public enum ModuleType {
       }
     }
 
-    return UNKNOWN;
+    return LIGHT_SYNTHETIC_MODULE;
   }
 
   public boolean mapsToCollection() {

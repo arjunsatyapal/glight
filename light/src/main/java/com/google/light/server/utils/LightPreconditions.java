@@ -401,7 +401,7 @@ public class LightPreconditions {
     ModuleType moduleType = externalId.getModuleType();
     
     checkArgument(moduleType.getModuleTypeProvider() == ModuleTypeProvider.GOOGLE_DOC || 
-        moduleType == ModuleType.UNKNOWN);
+        moduleType == ModuleType.LIGHT_SYNTHETIC_MODULE);
     return externalId;
   }
 
