@@ -29,6 +29,9 @@
         bottom: 4px;
         max-width: 55em;
     }
+    .moduleContent {
+        text-align: center;
+    }
     .moduleContent iframe {
         border: 0px;
     }</style></c:if>

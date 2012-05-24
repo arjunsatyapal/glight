@@ -39,6 +39,9 @@
         bottom: 40px;
         max-width: 55em;
     }
+    .moduleContent {
+        text-align: center;
+    }
     .moduleContent iframe {
         border: 0px;
     }
