@@ -17,10 +17,11 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
         'light/enums/EventsEnum', 'light/utils/PubSubUtils',
         'light/RegexCommon',
         'light/utils/promises/SinglePromiseContainer',
-        'light/enums/BrowseContextsEnum'],
+        'light/enums/BrowseContextsEnum',
+        'light/builders/SearchStateBuilder'],
         function(declare, AbstractLightController, EventsEnum,
                  PubSubUtils, RegexCommon, SinglePromiseContainer,
-                 BrowseContextsEnum) {
+                 BrowseContextsEnum, SearchStateBuilder) {
 
   return declare('light.controller.SearchResultListController',
           AbstractLightController, {
@@ -88,6 +89,7 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
       this._searchRecentPromiseContainer.cancel();
     },
 
+    _lastBrowseContext: null,
     /**
      * Handler for browse context state change events.
      */
@@ -98,10 +100,17 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
           this._onSearchStateChange(this._lastSearchState);
         }
       } else {
+        // Cleaning search query
+        if(this._lastBrowseContext == BrowseContextsEnum.ALL) {
+          console.log('Hey light.controller.SearchResultListController');
+          PubSubUtils.publish(EventsEnum.SEARCH_STATE_CHANGED, [
+              new SearchStateBuilder().build(), this]);
+        }
         this._enabled = false;
         this._cancelCurrentSearches();
         this._view.clear();
       }
+      this._lastBrowseContext = browseContextState.context;
     }
   });
 });

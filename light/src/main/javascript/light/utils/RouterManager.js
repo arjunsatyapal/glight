@@ -154,7 +154,7 @@ define(['light/utils/PubSubUtils', 'dojo/_base/declare', 'dojo/_base/lang',
         return;
       }
       this._lastRecordedStateForEvent[changeEvent] = state;
-      this._setHash(this._hashForStates(this._getCurrentStates()), false);
+      this._triggerHashNormalization(false  /* does not replace the current one in browser history */);
     },
 
     /**
@@ -202,9 +202,41 @@ define(['light/utils/PubSubUtils', 'dojo/_base/declare', 'dojo/_base/lang',
 
       }
 
-      // Redefining the hash to the normalized and validated format
-      this._setHash(this._hashForStates(this._getCurrentStates()),
-              true /* replaces the current one in browser history */);
+      this._triggerHashNormalization(true  /* replaces the current one in browser history */); 
+    },
+    
+    _hashNormalizationTimeout: null,
+    _shouldHashNormalizationReplaceHistory: false,
+    /**
+     * Triggers a deferred hash normalization/change, so the states may change
+     * several times, but we will only informe the browser and update the hash when
+     * they stabilize. 
+     * 
+     * Doing this in a deferred way gives time for the components
+     * to talk and change the page states until they agree on a particular
+     * set of states.
+     * 
+     * During this process, if this function is called with replaceHistory
+     * set to true at least once, it will update the history.
+     * 
+     * TODO(waltercacau): Analyze this better. It may cause some
+     * really odd behaviors.
+     * 
+     * @param replaceHistory
+     */
+    _triggerHashNormalization: function(replaceHistory) {
+      if(this._hashNormalizationTimeout !== null) {
+        clearTimeout(this._hashNormalizationTimeout);
+      }
+      var self = this;
+      self._shouldHashNormalizationReplaceHistory = self._shouldHashNormalizationReplaceHistory || replaceHistory;
+      setTimeout(function() {
+        self._hashNormalizationTimeout = null;
+        var shouldReplaceHistory = self._shouldHashNormalizationReplaceHistory;
+        self._shouldHashNormalizationReplaceHistory = false;
+        self._setHash(self._hashForStates(self._getCurrentStates()),
+                shouldReplaceHistory);
+      }, 0);
     },
 
     // Utility linking build

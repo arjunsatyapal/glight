@@ -17,10 +17,11 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
         'light/enums/EventsEnum', 'light/utils/PubSubUtils',
         'light/enums/BrowseContextsEnum', 'light/utils/URLUtils', 'dojo',
         'light/builders/BrowseContextStateBuilder',
-        'light/utils/XHRUtils'],
+        'light/utils/XHRUtils',
+        'light/builders/SearchStateBuilder'],
         function(declare, AbstractLightController, EventsEnum,
                  PubSubUtils, BrowseContextsEnum, URLUtils, dojo,
-                 BrowseContextStateBuilder, XHRUtils) {
+                 BrowseContextStateBuilder, XHRUtils, SearchStateBuilder) {
   var NUMBER_OF_ITEMS_PER_PAGE = 10;
   var FIRST_FORM = 'first';
   var GDOC_FORM = 'gdoc';
@@ -53,6 +54,7 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
      * Handler for browse context state change events.
      */
     _onBrowseContextStateChange: function(browseContextState, source) {
+      var lastForm = this._currentForm;
       if (browseContextState.context == BrowseContextsEnum.IMPORT) {
         if (browseContextState.subcontext == GDOC_FORM) {
           this._showGdocForm();
@@ -64,6 +66,12 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
       } else {
         this._view.hide();
         this._currentForm = null;
+      }
+      // Cleaning search query
+      if(lastForm == GDOC_FORM && this._currentForm != GDOC_FORM) {
+        console.log('Hey light.controller.ImportModuleController');
+        PubSubUtils.publish(EventsEnum.SEARCH_STATE_CHANGED, [
+            new SearchStateBuilder().build(), this]);
       }
     },
 

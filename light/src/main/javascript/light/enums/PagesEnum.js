@@ -78,6 +78,10 @@ define(['exports',
       pathRegex: /^\/(\/|$)/,
       onlyForLoggedUsers: true,
       states: [
+        // It is necessary to put this guy first so the BACK button has the right
+        // heaviour when we are clearing the SearchState by leaving
+        // GDoc search / ModuleSearch
+        // TODO(waltercacau): Avoid depending on this order.
         {
           changeEvent: EventsEnum.BROWSE_CONTEXT_STATE_CHANGED,
           Builder: BrowseContextStateBuilder
