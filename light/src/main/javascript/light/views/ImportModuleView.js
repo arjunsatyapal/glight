@@ -23,6 +23,7 @@ define(['dojo/_base/declare', 'light/views/TemplatedLightView',
         'light/utils/RouterManager',
         'dojo/query',
         'dojo/string',
+        'dojo/_base/array',
         'dojo/dom-construct',
         'dijit/_WidgetsInTemplateMixin',
         'light/widgets/PaginatedListWidget',
@@ -33,10 +34,11 @@ define(['dojo/_base/declare', 'light/views/TemplatedLightView',
         'dojo/_base/event',
         'dijit/form/Button',
         'dijit/form/TextBox',
+        'dijit/form/Select',
         'dijit/form/Form'],
         function(declare, TemplatedLightView, template, GDocListItemTemplate,
                 messages, DOMUtils, URLUtils, LanguageUtils,
-                RouterManager, $, string,
+                RouterManager, $, string, array,
                 domConstruct, _WidgetsInTemplateMixin, PaginatedListWidget, 
                 TemplateUtils, DialogUtils, DndConstantsEnum,
                 ModuleDndTypeBuilder, eventUtil, Button) {
@@ -135,8 +137,19 @@ define(['dojo/_base/declare', 'light/views/TemplatedLightView',
      * Show first form where the user should select from which source
      * he wants to import modules into Light.
      */
-    showFirstForm: function() {
+    showFirstForm: function(collections) {
       this._showForm('first');
+      var self = this;
+      array.forEach(self._importIntoCollectionSelect.getOptions(), function(option) {
+        self._importIntoCollectionSelect.removeOption(option.value);
+      });
+      array.forEach(collections, function(collection) {
+        self._importIntoCollectionSelect.addOption({
+          label: collection.title,
+          value: collection.collectionId
+        });
+      });
+      //console.log(collections);
     },
 
     /**
@@ -190,7 +203,11 @@ define(['dojo/_base/declare', 'light/views/TemplatedLightView',
     },
     _importURL: function(evt) {
       eventUtil.stop(evt);
-      return this._controller.importURL(this._importURLTextBox.get('value'));
+      if(this._importIntoCollectionSelect.getOptions().length > 0) {
+        this._controller.importURL(this._importURLTextBox.get('value'),
+                this._importIntoCollectionSelect.get('value'),
+                this._importIntoCollectionSelect.get('displayedValue'));
+      }
     }
   });
 

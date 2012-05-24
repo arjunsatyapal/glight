@@ -13,20 +13,21 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-define(['dojo/_base/declare', 'light/utils/XHRUtils', 'dojo'],
-        function(declare, XHRUtils, dojo) {
+define(['dojo/_base/declare', 'dojo/_base/array', 'light/utils/XHRUtils',
+        'dojo', 'light/utils/DialogUtils'],
+        function(declare, array, XHRUtils, dojo, DialogUtils) {
   return declare('light.services.ImportService', null, {
     import_: function(list) {
-      return XHRUtils.post({
+      return this._takeCareOfErrors(XHRUtils.post({
         url: '/rest/import/batch',
         jsonData: {
           list: list
         }
-      });
+      }));
     },
     addToCollection: function(list, collectionId, collectionTitle) {
       // TODO(waltercacau): Remove the collectionTitle requirement
-      return XHRUtils.post({
+      return this._takeCareOfErrors(XHRUtils.post({
         url: '/rest/import/batch',
         jsonData: {
           list: list,
@@ -34,7 +35,35 @@ define(['dojo/_base/declare', 'light/utils/XHRUtils', 'dojo'],
           collectionTitle: collectionTitle,
           baseVersion: -1
         }
-      });
+      }));
+    },
+    _takeCareOfErrors: function(promise) {
+      return promise.then(function(result) {
+            /*DialogUtils.alert({
+            title: "Error importing",
+            content: "An error ocurred when trying to import. Please try again later."
+          });*/
+          var failedList = [];
+          array.forEach(result.list, function(item) {
+            if (item.moduleState == 'FAILED') {
+              failedList.push(item.title || item.externalId);
+            }
+          });
+          if (failedList.length > 0) {
+            DialogUtils.alert({
+              title: 'Error importing',
+              content: 'The following could not be imported:\n'+ failedList.join('\n')
+            });
+            throw new Error('Failed to import some');
+          }
+          return result;
+        }, function(err) {
+          DialogUtils.alert({
+            title: 'Error importing',
+            content: 'An error ocurred when trying to import. Please try again later.'
+          });
+          throw err;
+        });
     }
   });
 });

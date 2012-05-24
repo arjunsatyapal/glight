@@ -102,7 +102,6 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
       } else {
         // Cleaning search query
         if(this._lastBrowseContext == BrowseContextsEnum.ALL) {
-          console.log('Hey light.controller.SearchResultListController');
           PubSubUtils.publish(EventsEnum.SEARCH_STATE_CHANGED, [
               new SearchStateBuilder().build(), this]);
         }

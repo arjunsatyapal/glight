@@ -18,10 +18,12 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
         'light/enums/BrowseContextsEnum', 'light/utils/URLUtils', 'dojo',
         'light/builders/BrowseContextStateBuilder',
         'light/utils/XHRUtils',
+        'light/utils/promises/SinglePromiseContainer',
         'light/builders/SearchStateBuilder'],
         function(declare, AbstractLightController, EventsEnum,
                  PubSubUtils, BrowseContextsEnum, URLUtils, dojo,
-                 BrowseContextStateBuilder, XHRUtils, SearchStateBuilder) {
+                 BrowseContextStateBuilder, XHRUtils, SinglePromiseContainer,
+                 SearchStateBuilder) {
   var NUMBER_OF_ITEMS_PER_PAGE = 10;
   var FIRST_FORM = 'first';
   var GDOC_FORM = 'gdoc';
@@ -34,8 +36,10 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
      * @extends light.controllers.AbstractLightController
      * @constructs
      */
-    constructor: function(importService) {
+    constructor: function(collectionService, importService) {
       this._importService = importService;
+      this._collectionService = collectionService;
+      this._singlePromiseContainer = new SinglePromiseContainer();
     },
 
     /**
@@ -55,21 +59,27 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
      */
     _onBrowseContextStateChange: function(browseContextState, source) {
       var lastForm = this._currentForm;
+      this._singlePromiseContainer.cancel();
       if (browseContextState.context == BrowseContextsEnum.IMPORT) {
         if (browseContextState.subcontext == GDOC_FORM) {
           this._showGdocForm();
           this._currentForm = GDOC_FORM;
         } else {
-          this._view.showFirstForm();
+          this._view.hide();
           this._currentForm = FIRST_FORM;
+          var self = this;
+          this._singlePromiseContainer.handle(function() {
+            return self._collectionService.getMyCollections();
+          }).then(function(collections) {
+            self._view.showFirstForm(collections);
+          });
         }
       } else {
         this._view.hide();
         this._currentForm = null;
       }
       // Cleaning search query
-      if(lastForm == GDOC_FORM && this._currentForm != GDOC_FORM) {
-        console.log('Hey light.controller.ImportModuleController');
+      if (lastForm == GDOC_FORM && this._currentForm != GDOC_FORM) {
         PubSubUtils.publish(EventsEnum.SEARCH_STATE_CHANGED, [
             new SearchStateBuilder().build(), this]);
       }
@@ -82,15 +92,15 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
     _onSearchStateChange: function(searchState, source) {
       if (source != this) {
         this._lastQuery = searchState.query;
-        if(this._currentForm == GDOC_FORM) {
+        if (this._currentForm == GDOC_FORM) {
           this._showGdocForm();
         }
       }
     },
     _showGdocForm: function() {
       var link = '/rest/thirdparty/google/gdoc/list';
-      if(this._lastQuery !== '') {
-        link += '?'+dojo.objectToQuery({
+      if (this._lastQuery !== '') {
+        link += '?' + dojo.objectToQuery({
           'filter': this._lastQuery
         });
       }
@@ -148,10 +158,10 @@ define(['dojo/_base/declare', 'light/controllers/AbstractLightController',
         self._view.alertSuccessfullyStartedGdocsImport();
       });
     },
-    importURL: function(url) {
+    importURL: function(url, collectionId, collectionTitle) {
       var self = this;
-      this._importService.import_([{ 'externalId' : url }]).then(function() {
-        self.seeImported();
+      this._importService.addToCollection([{ 'externalId' : url }], collectionId, collectionTitle).then(function() {
+        self._view.alertSuccessfullyStartedGdocsImport();
       });
     }
   });

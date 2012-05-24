@@ -38,6 +38,7 @@ import com.google.light.server.dto.search.SearchResultItemDto;
 import com.google.light.server.exception.checked.FailedToIndexException;
 import com.google.light.server.manager.interfaces.GSSClientLoginTokenManager;
 import com.google.light.server.manager.interfaces.SearchManager;
+import com.google.light.server.utils.GaeUtils;
 
 /**
  * An implementation of {@link SearchManager} using Google Site Search.
@@ -48,16 +49,22 @@ public class SearchManagerGSSImpl implements SearchManager {
   private static final Logger logger = Logger.getLogger(SearchManagerGSSImpl.class.getName());
 
   private static final String GSS_CSE_URL = "http://www.google.com/cse";
-  // TODO(waltercacau): Extract this to a property file
   
-
-  // CSE Owned by waltercacau@google.com
-  private static final String GSS_CSE_ID = "xqelsiji0y8";
-  private static final String GSS_CSE_OWNER_ID = "001369170667164983739";
-  /*
-  // CSE Owned by search-admin@myopenedu.com
-  private static final String GSS_CSE_ID = "tpzezwcekzm";
-  private static final String GSS_CSE_OWNER_ID = "010876134375682122369";*/
+  private static final String GSS_CSE_ID;
+  private static final String GSS_CSE_OWNER_ID;
+  static {
+    // TODO(waltercacau): Extract this to a property file
+    if(!GaeUtils.isDevServer() && "light-demo".equals(GaeUtils.getAppIdFromSystemProperty())) {
+      // CSE Owned by search-admin@myopenedu.com
+      GSS_CSE_ID = "tpzezwcekzm";
+      GSS_CSE_OWNER_ID = "010876134375682122369";
+    } else {
+      // CSE Owned by waltercacau@google.com
+      GSS_CSE_ID = "xqelsiji0y8";
+      GSS_CSE_OWNER_ID = "001369170667164983739";
+      
+    }
+  }
   private static final String SUGGESTION_QUERY_TAG = "q";
   private static final String SUGGESTION_TAG = "Suggestion";
   private static final String SPELLING_TAG = "Spelling";

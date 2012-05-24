@@ -42,6 +42,14 @@ define(['dojo/_base/declare', 'light/utils/XHRUtils', 'dojo'],
         url: '/rest/collection/' + collectionId + '/latest',
         jsonData: collectionVersion
       });
+    },
+    getMyCollections: function() {
+      // TODO(waltercacau): Fix this
+      return XHRUtils.get({
+        url: '/rest/collection/me?maxResults=50'
+      }).then(function(result) {
+        return result.list;
+      });
     }
   });
 });

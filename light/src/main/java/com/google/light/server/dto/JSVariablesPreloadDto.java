@@ -25,6 +25,8 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 
 import com.google.light.server.dto.person.PersonDto;
+import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -42,6 +44,10 @@ public class JSVariablesPreloadDto extends AbstractDto<JSVariablesPreloadDto> {
   @XmlElement(name = "locale")
   @JsonProperty(value = "locale")
   private String locale;
+  
+  @XmlElement(name = "moduleId")
+  @JsonProperty(value = "moduleId")
+  private ModuleId moduleId;
   
   @XmlElement(name = "person")
   @JsonProperty(value = "person")
@@ -87,9 +93,15 @@ public class JSVariablesPreloadDto extends AbstractDto<JSVariablesPreloadDto> {
   public static class Builder extends AbstractDto.BaseBuilder<Builder> {
     private String locale;
     private PersonDto person;
+    private ModuleId moduleId;
 
     public Builder locale(String locale) {
       this.locale = locale;
+      return this;
+    }
+
+    public Builder moduleId(ModuleId moduleId) {
+      this.moduleId = moduleId;
       return this;
     }
 
@@ -109,5 +121,11 @@ public class JSVariablesPreloadDto extends AbstractDto<JSVariablesPreloadDto> {
     super(builder);
     this.locale = builder.locale;
     this.person = builder.person;
+    this.moduleId = builder.moduleId;
   }
+
+  public ModuleId getModuleId() {
+    return moduleId;
+  }
+
 }

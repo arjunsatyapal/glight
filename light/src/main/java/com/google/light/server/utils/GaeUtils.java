@@ -79,14 +79,18 @@ public class GaeUtils {
     if(isDevServer()) {
       return "http://localhost:8080";
     } else {
-      return "http://"+SystemProperty.applicationId.get()+".appspot.com";
+      return "http://"+getAppIdFromSystemProperty()+".appspot.com";
     }
+  }
+
+  public static String getAppIdFromSystemProperty() {
+    return SystemProperty.applicationId.get();
   }
   public static String getHostForDefaultVersion() {
     if(isDevServer()) {
       return "localhost";
     } else {
-      return SystemProperty.applicationId.get()+".appspot.com";
+      return getAppIdFromSystemProperty()+".appspot.com";
     }
   }
   

@@ -25,7 +25,7 @@ define({
     next: 'Next',
     previous: 'Previous',
     gdocEmptyList: 'No google documents found.',
-    successfullyStartedGdocsImport: 'Your import request has started and your imported docs should be avaiable in a few minutes.',
+    successfullyStartedGdocsImport: 'Your import request has started and your imported modules should be avaiable in a few minutes.',
     importInProgress: 'Import in progress',
     seeImportedButton: 'Imported Modules',
     importOtherModulesButton: 'Import Other Modules',

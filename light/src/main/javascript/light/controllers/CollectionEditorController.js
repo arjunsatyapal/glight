@@ -82,7 +82,7 @@ define(['dojo/_base/declare', 'dojo/_base/connect',
                 self._collectionVersion.collectionState == 'PARTIALLY_PUBLISHED';
             self._view.showEditor(self._collectionId,
                     self._collectionVersion.collectionTree, isPartiallyPublished);
-            if(isPartiallyPublished) {
+            if (isPartiallyPublished) {
               self._poolForPublishedVersion();
             }
           }
@@ -103,7 +103,7 @@ define(['dojo/_base/declare', 'dojo/_base/connect',
                   false /* ioPublish = false, so we don't trigger the ActivityIndicator */
           );
         }).then(function(result) {
-          if(result.collectionState == 'PUBLISHED') {
+          if (result.collectionState == 'PUBLISHED') {
             self._collectionVersion = result;
             self._view.showEditor(self._collectionId,
                     self._collectionVersion.collectionTree, false);
@@ -111,7 +111,7 @@ define(['dojo/_base/declare', 'dojo/_base/connect',
             self._poolForPublishedVersion();
           }
         }, function(err) {
-          if(!err.lightCancelled) {
+          if (!err.lightCancelled) {
             self._poolForPublishedVersion();
           }
         });

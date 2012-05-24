@@ -269,7 +269,6 @@ define(['dojo/_base/declare', 'dojo/_base/lang',
      * Called when a node in the tree is double clicked
      */
     _onDblClickNode: function(item, node, evt) {
-      console.log(item, node, evt);
       var self = this;
       DialogUtils.prompt({
         title: this.messages.renameNodeDialogTitle,

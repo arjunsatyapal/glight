@@ -24,3 +24,8 @@ body {
 .outerContainer,.innerContainer {
     background-color: white;
 }
+.importInProgressWarning {
+    margin: 0 auto;
+    padding: 50px;
+    text-align: center;
+}

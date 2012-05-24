@@ -18,7 +18,7 @@ define({
     next: 'Next',
     previous: 'Previous',
     start: 'Start',
-    inCollection: 'in ${collection} collection'
+    inCollection: 'inside ${collection} collection'
   },
   'pt-br': true,
   'fa': true

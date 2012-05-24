@@ -13,11 +13,14 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+/*global lightPreload: false*/
 define(['dojo/i18n!light/nls/ContentViewerMessages', 'dojo/query',
         'light/utils/DOMUtils',
         'dojox/html/entities',
+        'light/utils/XHRUtils',
+        'light/utils/URLUtils',
         'dojo/domReady!'],
-        function(messages, $, DOMUtils, htmlEntities) {
+        function(messages, $, DOMUtils, htmlEntities, XHRUtils, URLUtils) {
   $("a.previousLink").forEach(function(node) {
     DOMUtils.setText(node, messages.previous);
   });
@@ -33,4 +36,22 @@ define(['dojo/i18n!light/nls/ContentViewerMessages', 'dojo/query',
   $(".hiddenNode").forEach(function(node) {
     DOMUtils.show(node);
   });
+  
+  function poll() {
+    setTimeout(function() {
+      XHRUtils.get({url: '/rest/module/'+lightPreload.moduleId}).then(function(module) {
+        if(module.latestPublishVersion == "0") {
+          poll();
+        } else {
+          window.location.reload();
+        }
+      }, function() {
+        poll();
+      });
+    }, 3000);
+  }
+  var importInProgressWarning = $(".importInProgressWarning")[0];
+  if(importInProgressWarning && typeof lightPreload.moduleId != "undefined") {
+    poll();
+  }
 });

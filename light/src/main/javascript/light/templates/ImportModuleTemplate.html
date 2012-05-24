@@ -10,6 +10,8 @@
     <div>${messages.orImportFromURL}</div>
     <div data-dojo-type="dijit.form.Form" data-dojo-attach-event="onSubmit:_importURL"> 
         <input data-dojo-type="dijit.form.TextBox" data-dojo-attach-point="_importURLTextBox" />
+        into
+        <select data-dojo-type="dijit.form.Select" data-dojo-attach-point="_importIntoCollectionSelect" data-dojo-props="sortByLabel: true"></select>
         <button data-dojo-type="dijit.form.Button" type="submit">${messages.importFromURLButton}</button>
      </div>
   </div>

@@ -37,6 +37,7 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.joda.time.Instant;
 
 import com.google.appengine.api.blobstore.BlobKey;
 import com.google.appengine.api.blobstore.BlobstoreService;
@@ -49,6 +50,7 @@ import com.google.light.server.constants.ResourceTypes;
 import com.google.light.server.constants.SupportedLanguagesEnum;
 import com.google.light.server.constants.http.ContentTypeConstants;
 import com.google.light.server.dto.JSVariablesPreloadDto;
+import com.google.light.server.dto.module.ModuleState;
 import com.google.light.server.dto.pojo.tree.collection.CollectionTreeNodeDto;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.CollectionId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
@@ -58,6 +60,7 @@ import com.google.light.server.exception.unchecked.httpexception.NotFoundExcepti
 import com.google.light.server.manager.interfaces.CollectionManager;
 import com.google.light.server.manager.interfaces.ModuleManager;
 import com.google.light.server.persistence.entity.collection.CollectionVersionEntity;
+import com.google.light.server.persistence.entity.module.ModuleEntity;
 import com.google.light.server.persistence.entity.module.ModuleVersionEntity;
 import com.google.light.server.persistence.entity.module.ModuleVersionResourceEntity;
 import com.google.light.server.utils.GaeUtils;
@@ -211,7 +214,7 @@ public class ContentResource extends AbstractJerseyResource {
     }
     request.setAttribute("collectionStartLink", startLinkBuilder.toString());
     request.setAttribute("collectionContent", contentBuilder.toString());
-    setJSVariablesPreload(request);
+    setJSVariablesPreload(request, null);
 
     ServletUtils.forward(request, response, "/WEB-INF/pages/collection.jsp");
 
@@ -325,7 +328,7 @@ public class ContentResource extends AbstractJerseyResource {
 
     request.setAttribute("navigationBar", navigationBarBuilder.toString());
     request.setAttribute("usesIframe", bodyContent.indexOf("<iframe") != -1 ? "true" : "false");
-    setJSVariablesPreload(request);
+    setJSVariablesPreload(request, new ModuleId(moduleIdStr));
 
     ServletUtils.forward(request, response, "/WEB-INF/pages/moduleInCollection.jsp");
 
@@ -351,7 +354,7 @@ public class ContentResource extends AbstractJerseyResource {
 
     request.setAttribute("moduleContent", bodyContent);
     request.setAttribute("usesIframe", bodyContent.indexOf("<iframe") != -1 ? "true" : "false");
-    setJSVariablesPreload(request);
+    setJSVariablesPreload(request, new ModuleId(moduleIdStr));
 
     ServletUtils.forward(request, response, "/WEB-INF/pages/module.jsp");
 
@@ -474,14 +477,28 @@ public class ContentResource extends AbstractJerseyResource {
     ModuleId moduleId = new ModuleId(moduleIdStr);
     Version version = new Version(versionStr);
 
-    ModuleVersionEntity moduleEntity = moduleManager.getModuleVersion(
+    ModuleEntity moduleEntity = moduleManager.get(null, moduleId);
+    if(moduleEntity.getLatestPublishVersion().isNoVersion()) {
+      // TODO(waltercacau): Remove this hack
+      return new ModuleVersionEntity.Builder()
+          .version(new Version(Version.DEFAULT_FIRST_VERSION))
+          .content("<body><div class=\"importInProgressWarning\"><img src=\"/images/ajax-loader-white.gif\">Import in progress</body></div>")
+          .title(moduleEntity.getTitle())
+          .moduleKey(moduleEntity.getKey())
+          .moduleState(ModuleState.IMPORTING)
+          .contentLicenses(moduleEntity.getContentLicenses())
+          .lastEditTime(new Instant(1))
+          .build();
+    }
+    
+    ModuleVersionEntity moduleVersionEntity = moduleManager.getModuleVersion(
         null /* ofy */, moduleId, version);
 
-    if (moduleEntity == null) {
+    if (moduleVersionEntity == null) {
       throw new NotFoundException("Could not find " + moduleId + ":" + version);
     }
 
-    return moduleEntity;
+    return moduleVersionEntity;
   }
 
   /**
@@ -542,10 +559,11 @@ public class ContentResource extends AbstractJerseyResource {
    * Sets the JSVariablesPreload in the request with information
    * about the user/browser locale, but without any other user data.
    */
-  private static void setJSVariablesPreload(HttpServletRequest request) {
+  private static void setJSVariablesPreload(HttpServletRequest request, ModuleId moduleId) {
     // TODO(waltercacau): Move this to a utility class.
     @SuppressWarnings("unchecked")
     JSVariablesPreloadDto.Builder dtoBuilder = new JSVariablesPreloadDto.Builder()
+        .moduleId(moduleId)
         .locale(SupportedLanguagesEnum.getClosestPrefferedLanguage(
             Collections.list(request.getLocales())).getClientLanguageCode());
 

@@ -83,7 +83,7 @@ define(['light/views/ActivityIndicatorView',
   collectionEditorController.watch();
 
   var importModuleView = new ImportModuleView({}, 'importModule');
-  var importModuleController = new ImportModuleController(importService);
+  var importModuleController = new ImportModuleController(collectionService, importService);
   importModuleController.setView(importModuleView);
   importModuleView.setController(importModuleController);
   importModuleController.watch();

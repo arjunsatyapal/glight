@@ -70,7 +70,8 @@ define(['dojo/_base/declare', 'dojox/html/entities', 'dojo/string',
           // http://www.w3.org/TR/REC-html40/appendix/notes.html#h-B.3.2
 
           // LightMod: Adding escaping to html.
-          htmlEntities.encode(value.toString());
+          // TODO(waltercacau): Consider the side effects of doing this here.
+          htmlEntities.encode(value.toString()).replace(/\n/g, '\n<br />');
       }, context);
     },
 
