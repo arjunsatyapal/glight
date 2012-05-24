@@ -16,8 +16,6 @@
 package com.google.light.server.dto.pojo.tree.collection;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import com.google.light.server.dto.pojo.tree.AbstractTreeNode.TreeNodeType;
 
 import com.google.light.server.dto.module.ModuleType;

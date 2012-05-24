@@ -21,7 +21,7 @@ import static com.google.light.server.utils.LightPreconditions.checkNotNull;
 import static com.google.light.server.utils.ObjectifyUtils.repeatInTransaction;
 import static com.google.light.server.utils.ServletUtils.getRequestHeaderValue;
 
-import com.google.appengine.repackaged.com.google.common.base.Throwables;
+import com.google.common.base.Throwables;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.light.server.constants.HttpHeaderEnum;

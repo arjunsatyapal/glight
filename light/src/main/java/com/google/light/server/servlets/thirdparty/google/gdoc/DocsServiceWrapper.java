@@ -30,8 +30,6 @@ import static com.google.light.server.utils.LightUtils.getURL;
 import com.google.light.server.dto.thirdparty.google.gdoc.GoogleDocInfoDto;
 import com.google.light.server.dto.thirdparty.google.gdoc.GoogleDocResourceId;
 
-import com.google.light.server.utils.JsonUtils;
-
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpHeaders;
 import com.google.api.client.http.HttpRequest;

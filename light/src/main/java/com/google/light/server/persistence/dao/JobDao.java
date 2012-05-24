@@ -30,7 +30,6 @@ import com.google.light.server.exception.ExceptionType;
 import com.google.light.server.persistence.entity.jobs.JobEntity;
 import com.google.light.server.persistence.entity.jobs.JobEntity.JobType;
 import com.google.light.server.serveronlypojos.GAEQueryWrapper;
-import com.google.light.server.utils.JsonUtils;
 import com.google.light.server.utils.ObjectifyUtils;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Objectify;

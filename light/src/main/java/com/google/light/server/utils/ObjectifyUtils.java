@@ -19,9 +19,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightUtils.getStackAsString;
 import static com.google.light.server.utils.LightUtils.isCollectionEmpty;
 import static com.google.light.server.utils.LightUtils.wrapIntoRuntimeExceptionAndThrow;
-import static com.google.light.server.utils.ObjectifyUtils.commitTransaction;
-import static com.google.light.server.utils.ObjectifyUtils.rollbackTransactionIfStillActive;
-
 import java.util.concurrent.Future;
 
 import java.util.logging.Level;

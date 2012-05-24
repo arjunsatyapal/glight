@@ -26,14 +26,11 @@ import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightUtils.createCollectionNode;
 import static com.google.light.server.utils.ObjectifyUtils.repeatInTransaction;
 
-import com.google.light.server.utils.LightPreconditions;
-
 import com.google.appengine.api.files.AppEngineFile;
 import com.google.appengine.api.files.FileReadChannel;
 import com.google.appengine.api.files.FileService;
 import com.google.appengine.api.files.FileServiceFactory;
 import com.google.appengine.api.files.GSFileOptions;
-import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
@@ -55,7 +52,6 @@ import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
 import com.google.light.server.dto.thirdparty.google.gdoc.GoogleDocInfoDto;
 import com.google.light.server.dto.thirdparty.google.gdoc.GoogleDocResourceId;
-import com.google.light.server.exception.unchecked.GoogleDocException;
 import com.google.light.server.exception.unchecked.taskqueue.GoogleDocArchivalWaitingException;
 import com.google.light.server.jobs.handlers.JobHandlerInterface;
 import com.google.light.server.manager.interfaces.JobManager;
