@@ -145,14 +145,15 @@ public class JobManagerImpl implements JobManager {
     checkNotBlank(message, "message cannot be null");
     checkNotNull(responseDto, "responseDto cannot be null");
 
-    JobEntity jobEntity = repeatInTransaction(new Transactable<JobEntity>() {
+    JobEntity jobEntity = repeatInTransaction("Marking " + jobId + " as complete.",
+        new Transactable<JobEntity>() {
       @SuppressWarnings("synthetic-access")
       @Override
       public JobEntity run(Objectify ofy) {
         JobEntity jobEntity = get(ofy, jobId);
         jobEntity.setJobState(JobState.COMPLETE);
         
-        checkNotNull(responseDto, "found null for " + jobEntity);
+        logger.info("For " + jobId + ", setting response = " + responseDto.toJson());
         jobEntity.setResponse(responseDto);
         
         put(ofy, jobEntity, new ChangeLogEntryPojo(message));

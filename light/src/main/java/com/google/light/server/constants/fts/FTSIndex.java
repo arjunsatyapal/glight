@@ -23,5 +23,5 @@ package com.google.light.server.constants.fts;
  * @author Arjun Satyapal
  */
 public enum FTSIndex {
-  module;
+  module1;
 }

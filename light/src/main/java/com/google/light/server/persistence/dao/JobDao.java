@@ -89,7 +89,6 @@ public class JobDao extends AbstractBasicDao<Object, JobEntity> {
   
   @Override
   public JobEntity put(Objectify ofy, JobEntity entity) {
-    logger.info("I got modified : " + entity.getJobId() + " : " + JsonUtils.toJson(entity));
     checkNotNull(entity.getCreationTime(), "creationTime cannot be null. Happened for " + entity.getJobId());
     JobEntity temp = super.put(ofy, entity);
     logger.info("Successfully created/updated : " + temp.getJobId());

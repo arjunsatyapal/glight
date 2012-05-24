@@ -49,7 +49,7 @@ public class YouTubeServiceWrapper extends YouTubeService {
    */
   @Inject
   public YouTubeServiceWrapper() {
-    super(LIGHT_APPLICATION_NAME);
+    super("light-demo");
     getRequestFactory().setHeader("GData-Version", "2");
   }
 

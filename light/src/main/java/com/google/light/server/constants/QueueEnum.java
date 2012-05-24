@@ -32,12 +32,9 @@ import com.google.appengine.api.taskqueue.RetryOptions;
  * @author Arjun Satyapal
  */
 public enum QueueEnum {
-  GDOC_INTERACTION("gdoc-interaction", 
-      SECOND_FIVE, 2, SECOND, TASK_AGE_LIMIT_MAX, 10),
-  // TODO(waltercacau) : Fix the name.
-//  GSS_PAGEMAP_UPDATE("gss_pagemap_update"),
+  GDOC_INTERACTION("gdoc-interaction", SECOND_FIVE, 2, SECOND, TASK_AGE_LIMIT_MAX, 10),
   LIGHT("light", SECOND_FIVE, 2, SECOND, TASK_AGE_LIMIT_MAX, 10),
-  LIGHT_NOTIFICATIONS("light-notification", SECOND_TEN, 2, SECOND, TASK_AGE_LIMIT_MAX, 100),
+  LIGHT_NOTIFICATIONS("light-notification", SECOND_TEN, 3, SECOND, TASK_AGE_LIMIT_MAX, 100),
   LIGHT_POLLING("light-polling", SECOND_FIVE, 2, SECOND, TASK_AGE_LIMIT_MAX, 100),
   SEARCH_INDEX("search-index", SECOND, 1, SECOND, SECONDS_IN_TEN_MIN, 1),
   SEARCH_INDEX_GSS("search-index-gss", SECOND, 1, SECOND, SECONDS_IN_TEN_MIN, 1),

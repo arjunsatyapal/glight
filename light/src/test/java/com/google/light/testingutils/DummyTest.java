@@ -55,7 +55,7 @@ public class DummyTest {
         .nodeType(TreeNodeType.ROOT_NODE)
         .moduleType(ModuleType.LIGHT_COLLECTION)
         .externalId(null)
-        .build();
+        .build1();
 
     CollectionTreeNodeDto child0 = new CollectionTreeNodeDto.Builder()
         .title("child0")
@@ -64,7 +64,7 @@ public class DummyTest {
         .version(new Version(5678L))
         .moduleType(ModuleType.GOOGLE_DOCUMENT)
         .externalId(TestingConstants.TEST_EXTERNAL_ID)
-        .build();
+        .build1();
     root.addChildren(child0);
 
     CollectionTreeNodeDto child1 = new CollectionTreeNodeDto.Builder()
@@ -72,7 +72,7 @@ public class DummyTest {
         .nodeType(TreeNodeType.INTERMEDIATE_NODE)
         .moduleType(ModuleType.GOOGLE_COLLECTION)
         .externalId(TestingConstants.TEST_EXTERNAL_ID)
-        .build();
+        .build1();
 
     root.addChildren(child1);
 

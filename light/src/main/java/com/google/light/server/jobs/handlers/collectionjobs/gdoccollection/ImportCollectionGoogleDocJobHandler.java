@@ -20,9 +20,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.constants.LightConstants.GDATA_GDOC_MAX_RESULTS;
 import static com.google.light.server.dto.pojo.tree.collection.CollectionTreeUtils.generateCollectionNodeFromChildJob;
 import static com.google.light.server.jersey.resources.thirdparty.mixed.ImportResource.updateImportExternalIdDtoForCollections;
+import static com.google.light.server.utils.LightUtils.LATEST_VERSION;
+import static com.google.light.server.utils.LightUtils.createCollectionNode;
 import static com.google.light.server.utils.LightUtils.isCollectionEmpty;
 
-import com.google.common.collect.Iterables;
 import com.google.inject.Inject;
 import com.google.light.server.constants.QueueEnum;
 import com.google.light.server.dto.importresource.ImportExternalIdDto;
@@ -32,7 +33,6 @@ import com.google.light.server.dto.pojo.ChangeLogEntryPojo;
 import com.google.light.server.dto.pojo.tree.AbstractTreeNode.TreeNodeType;
 import com.google.light.server.dto.pojo.tree.collection.CollectionTreeNodeDto;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.JobId;
-import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
 import com.google.light.server.dto.thirdparty.google.gdoc.GoogleDocInfoDto;
 import com.google.light.server.dto.thirdparty.google.gdoc.GoogleDocResourceId;
 import com.google.light.server.jobs.handlers.JobHandlerInterface;
@@ -104,15 +104,13 @@ public class ImportCollectionGoogleDocJobHandler implements JobHandlerInterface 
         JobEntity jobEntity = jobManager.get(ofy, jobId);
         ImportCollectionGoogleDocContext context = jobEntity.getContext(
             ImportCollectionGoogleDocContext.class);
-        System.out.println(context.toJson());
 
         GoogleDocResourceId gdocResourceId = new GoogleDocResourceId(context.getExternalId());
         DocsServiceWrapper docsService = GuiceUtils.getInstance(DocsServiceWrapper.class);
-        List<GoogleDocInfoDto> listOfChilds = 
+        List<GoogleDocInfoDto> listOfChilds =
             docsService.getFolderContentWhichAreSupportedInAlphabeticalOrder(
                 gdocResourceId, GDATA_GDOC_MAX_RESULTS,
                 GoogleDocInfoDto.Configuration.DTO_FOR_DEBUGGING);
-        System.out.println(JsonUtils.toJson(listOfChilds));
 
         JobId enqueuedJobId = null;
         for (GoogleDocInfoDto currChild : listOfChilds) {
@@ -124,9 +122,11 @@ public class ImportCollectionGoogleDocJobHandler implements JobHandlerInterface 
           }
 
           ModuleType moduleType = currChild.getModuleType();
-          ImportExternalIdDto importExternalIdDto = LightUtils.createImportExternalIdDto(
-              context.getContentLicenses(), currChild.getExternalId(), null /*jobId*/, null /*jobState*/,
-                  null /*moduleId*/, moduleType, ModuleState.IMPORTING, currChild.getTitle(), 
+          ImportExternalIdDto importExternalIdDto =
+              LightUtils.createImportExternalIdDto(
+                  context.getContentLicenses(), currChild.getExternalId(), null /* jobId */,
+                  null /* jobState */,
+                  null /* moduleId */, moduleType, ModuleState.IMPORTING, currChild.getTitle(),
                   LightUtils.LATEST_VERSION);
 
           switch (moduleType) {
@@ -146,14 +146,13 @@ public class ImportCollectionGoogleDocJobHandler implements JobHandlerInterface 
 
           context.addImportModuleDto(importExternalIdDto);
           jobEntity.setContext(context);
-          
+
           if (enqueuedJobId != null) {
             // Update ParentJob Context and then exit for loop and retry this function for other
             // pending childs.
             context.validate();
             jobEntity.addChildJob(checkNotNull(importExternalIdDto.getJobId(),
                 "jobId cannot be null."));
-            System.out.println(context.toJson());
             jobManager.put(ofy, jobEntity, new ChangeLogEntryPojo(
                 "enqueued child : " + importExternalIdDto.getJobId()));
           } else {
@@ -167,8 +166,6 @@ public class ImportCollectionGoogleDocJobHandler implements JobHandlerInterface 
 
           // All possible childs are created. So this job is now ready for getting child
           // notifications.
-          System.out.println(context.toJson());
-          System.out.println("\n****" + Iterables.toString(jobEntity.getChildJobs()));
           context.validate();
           JobState jobState = null;
           if (isCollectionEmpty(jobEntity.getChildJobs())) {
@@ -201,12 +198,10 @@ public class ImportCollectionGoogleDocJobHandler implements JobHandlerInterface 
    */
   private void handleChildCompletions(ImportCollectionGoogleDocContext context,
       JobEntity jobEntity) {
-    CollectionTreeNodeDto subCollection = new CollectionTreeNodeDto.Builder()
-        .title(context.getTitle())
-        .externalId(context.getExternalId())
-        .nodeType(TreeNodeType.INTERMEDIATE_NODE)
-        .moduleType(ModuleType.LIGHT_SUB_COLLECTION)
-        .build();
+    CollectionTreeNodeDto subCollection = createCollectionNode(
+        null /* description */, context.getExternalId(),
+        null/* moduleId */, ModuleType.LIGHT_SUB_COLLECTION, null /* nodeId */,
+        TreeNodeType.INTERMEDIATE_NODE, context.getTitle(), LATEST_VERSION);
 
     for (ImportExternalIdDto curr : context.getList()) {
       CollectionTreeNodeDto child = null;
@@ -216,14 +211,9 @@ public class ImportCollectionGoogleDocJobHandler implements JobHandlerInterface 
         checkArgument(curr.getModuleType().getNodeType() == TreeNodeType.LEAF_NODE,
             "Intermediate nodes are expected to have created a job. Failed for : " +
                 curr.getExternalId());
-        child = new CollectionTreeNodeDto.Builder()
-            .title(curr.getTitle())
-            .externalId(curr.getExternalId())
-            .nodeType(TreeNodeType.LEAF_NODE)
-            .moduleType(curr.getModuleType())
-            .moduleId(curr.getModuleId())
-            .version(new Version(Version.LATEST_VERSION))
-            .build();
+        child = createCollectionNode(null /* description */, 
+            curr.getExternalId(), curr.getModuleId(), curr.getModuleType(),null /* nodeId */,
+            TreeNodeType.LEAF_NODE, curr.getTitle(), LATEST_VERSION);
       }
 
       checkNotNull(child, "child should not be null.");

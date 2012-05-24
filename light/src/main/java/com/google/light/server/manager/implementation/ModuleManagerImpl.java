@@ -237,8 +237,10 @@ public class ModuleManagerImpl implements ModuleManager {
     moduleDao.put(ofy, moduleEntity);
     
     // Enqueue tasks so that searchIndices can be updated.
-    queueManager.enqueueSearchIndexTask(ofy);
-    queueManager.enqueueSearchIndexGSSTask(ofy);
+    if (moduleEntity.getModuleType().isSearchable()) {
+      queueManager.enqueueSearchIndexTask(ofy);
+      queueManager.enqueueSearchIndexGSSTask(ofy);
+    }
 
     return moduleVersionEntity;
   }

@@ -127,7 +127,6 @@ public class DocsServiceWrapper extends DocsService {
         listOfDocuments.add(dto);
       }
 
-      System.out.println(JsonUtils.toJson(listOfDocuments));
       String startIndex = getUriFromLink(docListFeed.getNextLink());
       PageDto pageDto = new PageDto.Builder()
           .handlerUri(handlerUri)
@@ -218,7 +217,6 @@ public class DocsServiceWrapper extends DocsService {
     } while (pageDto.getStartIndex() != null);
 
     Collections.sort(list);
-    System.out.println(JsonUtils.toJson(list));
     
     return list;
   }

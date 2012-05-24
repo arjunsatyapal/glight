@@ -129,7 +129,7 @@ public class LightPreconditions {
 
   // TODO(arjuns): Add test for this.
   public static <T> List<T> checkNotEmptyCollection(List<T> collection, String message) {
-    Preconditions.checkNotNull(collection, "collection");
+    Preconditions.checkNotNull(collection, "java collection is null.");
     checkArgument(collection.size() != 0, message);
     return collection;
   }

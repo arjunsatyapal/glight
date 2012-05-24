@@ -44,7 +44,6 @@ import com.google.light.server.persistence.entity.module.ModuleEntity;
 import com.google.light.server.persistence.entity.module.ModuleVersionEntity;
 import com.google.light.server.serveronlypojos.GAEQueryWrapper;
 import com.google.light.server.utils.GaeUtils;
-import com.google.light.server.utils.LightUtils;
 import com.google.light.server.utils.ObjectifyUtils;
 import com.google.light.server.utils.Transactable;
 import com.googlecode.objectify.Objectify;

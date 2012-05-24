@@ -21,39 +21,19 @@ import static com.google.light.server.constants.RequestParamKeyEnum.CLIENT_SECRE
 import static com.google.light.server.servlets.test.CredentialStandardEnum.CLIENT_LOGIN;
 import static com.google.light.testingutils.TestingUtils.getInjectorByEnv;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Map.Entry;
-import java.util.Properties;
-
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.JDOMException;
-import org.jdom.input.SAXBuilder;
-import org.jdom.output.Format;
-import org.jdom.output.XMLOutputter;
-import org.junit.Assert;
-
-import com.google.api.client.http.GenericUrl;
-import com.google.api.client.http.HttpContent;
-import com.google.api.client.http.HttpRequest;
-import com.google.api.client.http.HttpResponse;
-import com.google.api.client.http.HttpTransport;
-import com.google.api.client.http.InputStreamContent;
 import com.google.common.collect.Lists;
 import com.google.inject.Injector;
 import com.google.light.server.constants.LightEnvEnum;
-import com.google.light.server.constants.OAuth2ProviderEnum;
 import com.google.light.server.dto.search.OnDemandIndexingRequest;
 import com.google.light.server.exception.checked.FailedToIndexException;
-import com.google.light.server.manager.implementation.GSSClientLoginTokenManagerImpl;
 import com.google.light.server.manager.implementation.SearchManagerGSSImpl;
 import com.google.light.server.persistence.dao.OAuth2ConsumerCredentialDao;
 import com.google.light.server.persistence.entity.admin.OAuth2ConsumerCredentialEntity;
 import com.google.light.server.servlets.test.CredentialUtils;
 import com.google.light.server.utils.GuiceUtils;
 import com.google.light.testingutils.TestingUtils;
+import java.io.IOException;
+import java.util.Properties;
 
 /**
  * Small test script to send On Demand Indexing Request to GSS/CSE
@@ -63,7 +43,7 @@ import com.google.light.testingutils.TestingUtils;
  */
 public class ControlGSSTestScript {
 
-  public static void main(String[] args) throws IOException, JDOMException, FailedToIndexException {
+  public static void main(String[] args) throws IOException, FailedToIndexException {
     
     // Initializing
     TestingUtils.gaeSetup(LightEnvEnum.DEV_SERVER);

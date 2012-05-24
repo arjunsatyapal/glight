@@ -130,7 +130,7 @@ public class TestAdminResources extends AbstractJerseyResource {
     
     for (FTSIndex currIndex : FTSIndex.values()) {
       builder.append("\n\n  Deleting index : " + currIndex);
-      Index index = FTSUtils.getIndex(FTSIndex.module);
+      Index index = FTSUtils.getIndex(FTSIndex.module1);
       
       
       Results<ScoredDocument> results = index.search("a");

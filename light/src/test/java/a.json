@@ -1,0 +1,286 @@
+{
+  "list": [
+    {
+      "externalId": "https://docs.google.com/a/myopenedu.com/#folders/folder.0.0B15KDir5QLAcWlhUb2ZfdkttWjQ",
+      "list": [
+        {
+          "contentLicenses": ["CC"],
+          "externalId": "https://docs.google.com/a/myopenedu.com/document/d/1g9TMlEOG483Kf02a7b-8Pj7vEAPEvzkSNiwWh0D1HQw/edit",
+          "nodeType": "LEAF_NODE",
+          "title": "Big Collection"
+        }, {
+          "externalId": "https://docs.google.com/a/myopenedu.com/#folders/folder.0.0B15KDir5QLAcZmVjZDhINXJTRkU",
+          "list": [
+            {
+              "externalId": "https://docs.google.com/a/myopenedu.com/#folders/folder.0.0B15KDir5QLAcRmF6Zk8zSk1aemc",
+              "list": [
+                {
+                  "externalId": "https://docs.google.com/a/myopenedu.com/#folders/folder.0.0B15KDir5QLAcWDM1c3BBbk5lWWM",
+                  "list": [
+                    {
+                      "externalId": "https://docs.google.com/a/myopenedu.com/#folders/folder.0.0B15KDir5QLAcT0dPSFpfbDJZOXM",
+                      "list": [
+                        {
+                          "contentLicenses": ["CC"],
+                          "externalId": "https://docs.google.com/a/myopenedu.com/document/d/1InNKKoPWcfvHnrLnjWMakbkG8iM4uhaiTCFUUWMo9pg/edit",
+                          "nodeType": "LEAF_NODE",
+                          "title": "3"
+                        }, {
+                          "externalId": "https://docs.google.com/a/myopenedu.com/#folders/folder.0.0B15KDir5QLAcM1ZJbmQ1VXBnOVk",
+                          "list": [
+                            {
+                              "contentLicenses": ["CC"],
+                              "externalId": "https://docs.google.com/a/myopenedu.com/document/d/1FKJJB9Py9BxtuWbuiAakXBfz9cwSr0rqlx7P7wNPwOw/edit",
+                              "nodeType": "LEAF_NODE",
+                              "title": "4"
+                            }
+                          ],
+                          "nodeType": "INTERMEDIATE_NODE",
+                          "title": "4"
+                        }
+                      ],
+                      "nodeType": "INTERMEDIATE_NODE",
+                      "title": "3"
+                    }, {
+                      "externalId": "https://docs.google.com/a/myopenedu.com/#folders/folder.0.0B15KDir5QLAcZVp5b0YzV1JCcFU",
+                      "list": [
+                        {
+                          "externalId": "https://docs.google.com/a/myopenedu.com/#folders/folder.0.0B15KDir5QLAcQmtHNmVrSjVjMFk",
+                          "list": [
+                            {
+                              "contentLicenses": ["CC"],
+                              "externalId": "https://docs.google.com/a/myopenedu.com/document/d/13iTAtOfpmGLumlywiqCctcSZ9I1GU4j0szGgDLFRgUU/edit",
+                              "nodeType": "LEAF_NODE",
+                              "title": "3.1.1"
+                            }
+                          ],
+                          "nodeType": "INTERMEDIATE_NODE",
+                          "title": "3.1.1"
+                        }, {
+                          "contentLicenses": ["CC"],
+                          "externalId": "https://docs.google.com/a/myopenedu.com/document/d/1722OdxhPDfEMV8xCuAsFMLe6Wgc50bWq2yj9AYx0AhA/edit",
+                          "nodeType": "LEAF_NODE",
+                          "title": "3.1"
+                        }
+                      ],
+                      "nodeType": "INTERMEDIATE_NODE",
+                      "title": "3.1"
+                    }
+                  ],
+                  "nodeType": "INTERMEDIATE_NODE",
+                  "title": "2"
+                }
+              ],
+              "nodeType": "INTERMEDIATE_NODE",
+              "title": "1"
+            }
+          ],
+          "nodeType": "INTERMEDIATE_NODE",
+          "title": "For showing modification"
+        }, {
+          "externalId": "https://docs.google.com/a/myopenedu.com/#folders/folder.0.0B15KDir5QLAcUFpGZ1BoQ2ZRUC1VX1ZBZ1hIcERVdw",
+          "list": [
+            {
+              "contentLicenses": ["CC"],
+              "externalId": "https://docs.google.com/a/myopenedu.com/document/d/13Eo4eH8vDPLZ7rxN2QMNGm1o21e5ajgAfISij6mrRF0/edit",
+              "nodeType": "LEAF_NODE",
+              "title": "TYPE_COLLECTION"
+            }
+          ],
+          "nodeType": "INTERMEDIATE_NODE",
+          "title": "TYPE_COLLECTION"
+        }, {
+          "contentLicenses": ["CC"],
+          "externalId": "https://docs.google.com/a/myopenedu.com/document/d/13Eo4eH8vDPLZ7rxN2QMNGm1o21e5ajgAfISij6mrRF0/edit",
+          "nodeType": "LEAF_NODE",
+          "title": "Big Collection"
+        }, {
+          "externalId": "https://docs.google.com/a/myopenedu.com/#folders/folder.0.0B38aUjitwp_PRml5X1N2Y05nd28",
+          "list": [
+            {
+              "externalId": "https://docs.google.com/a/myopenedu.com/#folders/folder.0.0B15KDir5QLAcdEhUS0ZjV1drWXc",
+              "list": [
+                {
+                  "contentLicenses": ["CC"],
+                  "externalId": "https://docs.google.com/a/myopenedu.com/document/d/1LTppVCa5-ARQgepYfLSKAGGRB8C8TosVoxdjZbi2tiA/edit",
+                  "nodeType": "LEAF_NODE",
+                  "title": "a2"
+                }, {
+                  "contentLicenses": ["CC"],
+                  "externalId": "https://docs.google.com/a/myopenedu.com/document/d/14BI0h1PrDQ-jT-8HyvPzsHveqhbtuewGHBeG4mt6OcA/edit",
+                  "nodeType": "LEAF_NODE",
+                  "title": "a2"
+                }
+              ],
+              "nodeType": "INTERMEDIATE_NODE",
+              "title": "a2"
+            }
+          ],
+          "nodeType": "INTERMEDIATE_NODE",
+          "title": "a1"
+        }, {
+          "externalId": "https://docs.google.com/a/myopenedu.com/#folders/folder.0.0B15KDir5QLAcdEhUS0ZjV1drWXc",
+          "list": [
+            {
+              "contentLicenses": ["CC"],
+              "externalId": "https://docs.google.com/a/myopenedu.com/document/d/1LTppVCa5-ARQgepYfLSKAGGRB8C8TosVoxdjZbi2tiA/edit",
+              "nodeType": "LEAF_NODE",
+              "title": "a2"
+            }, {
+              "contentLicenses": ["CC"],
+              "externalId": "https://docs.google.com/a/myopenedu.com/document/d/14BI0h1PrDQ-jT-8HyvPzsHveqhbtuewGHBeG4mt6OcA/edit",
+              "nodeType": "LEAF_NODE",
+              "title": "a2"
+            }
+          ],
+          "nodeType": "INTERMEDIATE_NODE",
+          "title": "a2"
+        }, {
+          "externalId": "https://docs.google.com/a/myopenedu.com/#folders/folder.0.0B15KDir5QLAcYzdlUi1BcHlNR0k",
+          "nodeType": "INTERMEDIATE_NODE",
+          "title": "a2"
+        }, {
+          "contentLicenses": ["CC"],
+          "externalId": "https://docs.google.com/a/myopenedu.com/document/d/16vRL9pkHCIjPXs9Npf7KkSBj1TpPxQzjPSLygbvQcIs/edit",
+          "nodeType": "LEAF_NODE",
+          "title": "Big Collection"
+        }, {
+          "externalId": "https://docs.google.com/a/myopenedu.com/#folders/folder.0.0B15KDir5QLAcQlpiM1hVS25RUUdxcVAwQlNYcXZDQQ",
+          "list": [
+            {
+              "contentLicenses": ["CC"],
+              "externalId": "https://docs.google.com/a/myopenedu.com/document/d/1Mb3wdMIeDRADh8mauRSpVLZmBFfV25nqQ0rBNc970c0/edit",
+              "nodeType": "LEAF_NODE",
+              "title": "f1"
+            }, {
+              "externalId": "https://docs.google.com/a/myopenedu.com/#folders/folder.0.0B15KDir5QLAccjhLalN3bUFSemE3dDdxNXRMWHl5UQ",
+              "list": [
+                {
+                  "contentLicenses": ["CC"],
+                  "externalId": "https://docs.google.com/a/myopenedu.com/document/d/1zPgd4WQ_WGf3Kox8HcF-XWkF2o0kvV1FGIFq_urqs34/edit",
+                  "nodeType": "LEAF_NODE",
+                  "title": "f2"
+                }
+              ],
+              "nodeType": "INTERMEDIATE_NODE",
+              "title": "f2"
+            }, {
+              "externalId": "https://docs.google.com/a/myopenedu.com/#folders/folder.0.0B15KDir5QLAcNUJIbWZ2cnpHU0E",
+              "list": [
+                {
+                  "externalId": "https://docs.google.com/a/myopenedu.com/#folders/folder.0.0B15KDir5QLAcSXBXWjJpUGV0c2c",
+                  "nodeType": "INTERMEDIATE_NODE",
+                  "title": "f4"
+                }
+              ],
+              "nodeType": "INTERMEDIATE_NODE",
+              "title": "f3"
+            }
+          ],
+          "nodeType": "INTERMEDIATE_NODE",
+          "title": "f1"
+        }, {
+          "contentLicenses": ["CC"],
+          "externalId": "https://docs.google.com/a/myopenedu.com/document/d/1Mb3wdMIeDRADh8mauRSpVLZmBFfV25nqQ0rBNc970c0/edit",
+          "nodeType": "LEAF_NODE",
+          "title": "Big Collection"
+        }, {
+          "externalId": "https://docs.google.com/a/myopenedu.com/#folders/folder.0.0B15KDir5QLAccjhLalN3bUFSemE3dDdxNXRMWHl5UQ",
+          "list": [
+            {
+              "contentLicenses": ["CC"],
+              "externalId": "https://docs.google.com/a/myopenedu.com/document/d/1zPgd4WQ_WGf3Kox8HcF-XWkF2o0kvV1FGIFq_urqs34/edit",
+              "nodeType": "LEAF_NODE",
+              "title": "f2"
+            }
+          ],
+          "nodeType": "INTERMEDIATE_NODE",
+          "title": "f2"
+        }, {
+          "contentLicenses": ["CC"],
+          "externalId": "https://docs.google.com/a/myopenedu.com/document/d/1zPgd4WQ_WGf3Kox8HcF-XWkF2o0kvV1FGIFq_urqs34/edit",
+          "nodeType": "LEAF_NODE",
+          "title": "Big Collection"
+        }, {
+          "externalId": "https://docs.google.com/a/myopenedu.com/#folders/folder.0.0B15KDir5QLAcNUJIbWZ2cnpHU0E",
+          "list": [
+            {
+              "externalId": "https://docs.google.com/a/myopenedu.com/#folders/folder.0.0B15KDir5QLAcSXBXWjJpUGV0c2c",
+              "nodeType": "INTERMEDIATE_NODE",
+              "title": "f4"
+            }
+          ],
+          "nodeType": "INTERMEDIATE_NODE",
+          "title": "f3"
+        }, {
+          "externalId": "https://docs.google.com/a/myopenedu.com/#folders/folder.0.0B15KDir5QLAcSXBXWjJpUGV0c2c",
+          "nodeType": "INTERMEDIATE_NODE",
+          "title": "f4"
+        }, {
+          "externalId": "https://docs.google.com/a/myopenedu.com/#folders/folder.0.0B15KDir5QLAcc0NFVHJPRmZSQWU5X3ZFdzBnQWowQQ",
+          "list": [
+            {
+              "contentLicenses": ["CC"],
+              "externalId": "https://docs.google.com/a/myopenedu.com/document/d/1ooBuZodU0xi7VM7MCYYMBh-157KuqCdszdokG2WUW0I/edit",
+              "nodeType": "LEAF_NODE",
+              "title": "from-arjuns"
+            }, {
+              "contentLicenses": ["CC"],
+              "externalId": "https://docs.google.com/a/myopenedu.com/document/d/1UJmH5D4tBU3hh7v_qSmJTQu8P7bBG7AOIOB01Ex-C8A/edit",
+              "nodeType": "LEAF_NODE",
+              "title": "from-arjuns"
+            }, {
+              "contentLicenses": ["CC"],
+              "externalId": "https://docs.google.com/a/myopenedu.com/document/d/1pdPb5oakgT7iq2bZLD_-B2jnhYuZyrLH1kXw-Ws9l98/edit",
+              "nodeType": "LEAF_NODE",
+              "title": "from-arjuns"
+            }
+          ],
+          "nodeType": "INTERMEDIATE_NODE",
+          "title": "from-arjuns"
+        }, {
+          "externalId": "https://docs.google.com/a/myopenedu.com/#folders/folder.0.0B15KDir5QLAcSUZiMHhjRjVJM1k",
+          "list": [
+            {
+              "contentLicenses": ["CC"],
+              "externalId": "https://docs.google.com/a/myopenedu.com/document/d/1tJZGzv_2sjMpvs4jtwxg18PGuSG-6nlfmx8Hlqa-_58/edit",
+              "nodeType": "LEAF_NODE",
+              "title": "one doc collection"
+            }
+          ],
+          "nodeType": "INTERMEDIATE_NODE",
+          "title": "one doc collection"
+        }, {
+          "contentLicenses": ["CC"],
+          "externalId": "https://docs.google.com/a/myopenedu.com/document/d/1XOrXgvFmjg8poJhCtIaKnHXVcBTPgNS6MCL2pjOp_6k/edit",
+          "nodeType": "LEAF_NODE",
+          "title": "Big Collection"
+        }, {
+          "contentLicenses": ["CC"],
+          "externalId": "https://docs.google.com/a/myopenedu.com/document/d/1ooBuZodU0xi7VM7MCYYMBh-157KuqCdszdokG2WUW0I/edit",
+          "nodeType": "LEAF_NODE",
+          "title": "Big Collection"
+        }, {
+          "contentLicenses": ["CC"],
+          "externalId": "https://docs.google.com/a/myopenedu.com/document/d/1UJmH5D4tBU3hh7v_qSmJTQu8P7bBG7AOIOB01Ex-C8A/edit",
+          "nodeType": "LEAF_NODE",
+          "title": "Big Collection"
+        }, {
+          "contentLicenses": ["CC"],
+          "externalId": "https://docs.google.com/a/myopenedu.com/document/d/19M8_Wxg8iI62FNCfv6V2ybywZW6vm4Mxc_nyiDguVP8/edit",
+          "nodeType": "LEAF_NODE",
+          "title": "Big Collection"
+        }, {
+          "contentLicenses": ["CC"],
+          "externalId": "https://docs.google.com/a/myopenedu.com/document/d/1pdPb5oakgT7iq2bZLD_-B2jnhYuZyrLH1kXw-Ws9l98/edit",
+          "nodeType": "LEAF_NODE",
+          "title": "Big Collection"
+        }
+      ],
+      "nodeType": "INTERMEDIATE_NODE",
+      "title": "Big Collection"
+    }
+  ],
+  "nodeType": "ROOT_NODE",
+  "title": "d5ba0f11-c3db-4851-bb6a-43c992bc22d4"
+}

@@ -22,11 +22,8 @@ import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPositiveLong;
 import static com.google.light.server.utils.LightUtils.getWrapper;
 
-import com.google.light.server.utils.XmlUtils;
-
 import com.google.common.collect.Lists;
 import com.google.gdata.data.Link;
-import com.google.gdata.data.MediaContent;
 import com.google.gdata.data.acl.AclEntry;
 import com.google.gdata.data.acl.AclFeed;
 import com.google.gdata.data.acl.AclRole;
@@ -208,7 +205,7 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> implements C
         // Current Entry is for a file which is not converted to Google Docs.
         checkNotBlank(fileName, "fileName");
         checkNotBlank(suggestedFileName, "suggestedFileName");
-        checkNotBlank(md5sum, "md5sum");
+//        checkNotBlank(md5sum, "md5sum");
         checkPositiveLong(sizeInBytes, "sizeInBytes : " + sizeInBytes);
       }
     }
@@ -560,7 +557,7 @@ public class GoogleDocInfoDto extends AbstractDto<GoogleDocInfoDto> implements C
       externalId(getWrapper(docListEntry.getDocumentLink().getHref(), ExternalId.class));
       aclFeedLink(docListEntry.getAclFeedLink().getHref());
       // TODO(arjuns) : Verify this.
-      int contentTypeInt = docListEntry.getContent().getType();
+//      int contentTypeInt = docListEntry.getContent().getType();
       htmlExportUrl(docListEntry.getHtmlLink().getHref());
 //      switch (contentTypeInt) {
 //      /**

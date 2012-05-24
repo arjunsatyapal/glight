@@ -183,8 +183,8 @@ public class QueueManagerImpl implements QueueManager {
         getURI(JerseyConstants.URI_SEARCH_INDEX_UPDATE_INDICES));
 
     Queue queue = QueueFactory.getQueue(QueueEnum.SEARCH_INDEX.getName());
-//    TaskHandle taskHandle = queue.add(taskOptions);
-//    logger.info("Enqueued searchIndexTask " + " with TaskHandle : " + taskHandle);
+    TaskHandle taskHandle = queue.add(taskOptions);
+    logger.info("Enqueued searchIndexTask " + " with TaskHandle : " + taskHandle);
     logger.info("Ignoring adding to queue");
   }
 

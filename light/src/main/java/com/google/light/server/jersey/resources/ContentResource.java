@@ -66,7 +66,6 @@ import com.google.light.server.persistence.entity.module.ModuleVersionResourceEn
 import com.google.light.server.utils.GaeUtils;
 import com.google.light.server.utils.LightUtils;
 import com.google.light.server.utils.ServletUtils;
-import com.google.light.server.utils.URIBuilder;
 
 /**
  * Jersey resource to serve content from collections and

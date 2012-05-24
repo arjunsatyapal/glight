@@ -61,7 +61,7 @@ public class CronResource extends AbstractJerseyResource {
   @GET
   @Path(JerseyConstants.PATH_CRON_SEARCH_INDEX_REFRESH)
   public Response refreshSearchIndex() {
-    ObjectifyUtils.repeatInTransaction(new Transactable<Void>() {
+    ObjectifyUtils.repeatInTransaction("enqueue search tasks", new Transactable<Void>() {
 
       @SuppressWarnings("synthetic-access")
       @Override

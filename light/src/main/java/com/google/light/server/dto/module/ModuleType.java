@@ -20,8 +20,6 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkNotEmptyCollection;
 
-import com.google.appengine.api.socket.SocketServicePb.RemoteSocketServiceError.SystemError;
-
 import com.google.light.server.constants.OAuth2ProviderService;
 import com.google.light.server.constants.http.ContentTypeEnum;
 import com.google.light.server.dto.pojo.tree.AbstractTreeNode.TreeNodeType;
@@ -183,7 +181,7 @@ public enum ModuleType {
 //          newArrayList(ContentLicense.UNKNOWN),
 //          false, false, false, false),
 
-  ;
+  
 
   private OAuth2ProviderService providerService;
   /*

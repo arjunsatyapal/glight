@@ -88,6 +88,10 @@ public class ImportCollectionYouTubePlaylistContext extends AbstractDto<ImportCo
     return list;
   }
 
+  public List<ContentLicense> getContentLicenses() {
+    return contentLicenses;
+  }
+
   public ImportExternalIdDto findImportExternalIdDtoByExternalId(ExternalId externalId) {
     for (ImportExternalIdDto curr : getList()) {
       if (curr.getExternalId().equals(externalId)) {

@@ -51,7 +51,6 @@ public class LocationUtils {
     }
     
     uriBuilder.append("/rest/content/general/module").append("" + getWrapperValue(moduleId)).append("/latest");
-    System.out.println(uriBuilder.build());
     
     return LightUtils.getURI(uriBuilder.toString());
   }

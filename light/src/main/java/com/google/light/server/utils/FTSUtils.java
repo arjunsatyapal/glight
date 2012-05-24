@@ -26,12 +26,9 @@ import com.google.appengine.api.search.Field;
 import com.google.appengine.api.search.Field.FieldType;
 import com.google.appengine.api.search.Index;
 import com.google.appengine.api.search.IndexSpec;
-import com.google.appengine.api.search.ListIndexesRequest;
-import com.google.appengine.api.search.ListIndexesResponse;
 import com.google.appengine.api.search.Query;
 import com.google.appengine.api.search.QueryOptions;
 import com.google.appengine.api.search.Results;
-import com.google.appengine.api.search.Schema;
 import com.google.appengine.api.search.ScoredDocument;
 import com.google.appengine.api.search.SearchServiceFactory;
 import com.google.appengine.api.search.SortExpression;
@@ -50,7 +47,6 @@ import java.net.URI;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
-
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
@@ -156,19 +152,19 @@ public class FTSUtils {
     getIndex(ftsIndex).remove(docIds);
   }
 
-  // TODO(arjuns) : Refine this method.
-  public static void getIndexSchema() {
-    ListIndexesResponse response = SearchServiceFactory.getSearchService().listIndexes(
-        ListIndexesRequest.newBuilder().setSchemaFetched(true).build());
-
-    // List out elements of each Schema
-    for (Index index : response) {
-      Schema schema = index.getSchema();
-      for (String fieldName : schema.getFieldNames()) {
-        List<FieldType> typesForField = schema.getFieldTypes(fieldName);
-      }
-    }
-  }
+//  // TODO(arjuns) : Refine this method.
+//  public static void getIndexSchema() {
+//    ListIndexesResponse response = SearchServiceFactory.getSearchService().listIndexes(
+//        ListIndexesRequest.newBuilder().setSchemaFetched(true).build());
+//
+//    // List out elements of each Schema
+//    for (Index index : response) {
+//      Schema schema = index.getSchema();
+//      for (String fieldName : schema.getFieldNames()) {
+//        List<FieldType> typesForField = schema.getFieldTypes(fieldName);
+//      }
+//    }
+//  }
 
   public static PageDto findDocuments(String queryString, int maxResults,
       String startIndex, FTSIndex ftsIndex) {
@@ -194,11 +190,13 @@ public class FTSUtils {
       query = queryBuilder.build(queryString);
     }
 
+    logger.info(JsonUtils.toJson(query));
     Results<ScoredDocument> results = getIndex(ftsIndex).search(query);
+    System.out.println("Json results = " + JsonUtils.toJson(results));
 
     List<SearchResultItemDto> listOfResults = Lists.newArrayList();
+    
     for (ScoredDocument curr : results.getResults()) {
-      System.out.println(curr.getId());
       FTSDocumentId ftsDocumentId = new FTSDocumentId(curr.getId());
       ModuleId moduleId = LightUtils.convertFTSDocumentIdToModuleId(ftsDocumentId);
       URI uri = LocationUtils.getModuleLocation(moduleId);
@@ -211,7 +209,6 @@ public class FTSUtils {
       Iterable<Field> fieldIterable = curr.getField(FTSFieldCategory.TITLE.getName());
       Field textField = fieldIterable.iterator().next();
 
-      System.out.println(uri.toString());
       SearchResultItemDto item = new SearchResultItemDto.Builder()
           .link(uri.toString())
           .description(expression.getHTML())
@@ -231,12 +228,6 @@ public class FTSUtils {
         .handlerUri(JerseyConstants.URI_MODULE_SEARCH)
         .list(listOfResults)
         .build();
-    System.out.println(pageDto.toJson());
-
-    System.out.println("Found : " + results.getNumberFound());
-    System.out.println("Returned : " + results.getNumberReturned());
-    System.out.println("OperationResult : " + results.getOperationResult());
-
     return pageDto;
   }
 

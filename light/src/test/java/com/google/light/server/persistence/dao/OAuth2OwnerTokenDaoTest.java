@@ -127,7 +127,7 @@ public class OAuth2OwnerTokenDaoTest extends
     assertTrue(txn.getTxn().isActive());
 
     dao.put(txn, testEntity);
-    commitTransaction(txn);
+    commitTransaction("test", txn);
     OAuth2OwnerTokenEntity getEntity =
         dao.getByProviderService(GOOGLE_LOGIN);
     assertEquals(testEntity, getEntity);

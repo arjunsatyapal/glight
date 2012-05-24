@@ -18,6 +18,13 @@ package com.google.light.server.utils;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightUtils.getStackAsString;
 import static com.google.light.server.utils.LightUtils.isCollectionEmpty;
+import static com.google.light.server.utils.LightUtils.wrapIntoRuntimeExceptionAndThrow;
+import static com.google.light.server.utils.ObjectifyUtils.commitTransaction;
+import static com.google.light.server.utils.ObjectifyUtils.rollbackTransactionIfStillActive;
+
+import java.util.concurrent.Future;
+
+import java.util.logging.Level;
 
 import com.google.appengine.api.datastore.Cursor;
 import com.google.appengine.api.datastore.QueryResultIterable;
@@ -83,17 +90,24 @@ public class ObjectifyUtils {
   /**
    * Commit an Objectify transaction which is in progress.
    */
-  public static void commitTransaction(Objectify ofy) {
+  public static void commitTransaction(String commitMsg, Objectify ofy) {
     try {
       // If its a non-transaction, then txn.getTxn will return null.
       if (ofy.getTxn() != null) {
-        ofy.getTxn().commit();
+        Future<Void> future = ofy.getTxn().commitAsync();
+        try {
+          future.get();
+        } catch (Exception e) {
+          logger.severe("Exception while committing(" + commitMsg + ") : "
+              + Throwables.getStackTraceAsString(e));
+          wrapIntoRuntimeExceptionAndThrow(e);
+        }
       }
       logger.info("Successfully committed");
-      // Thread.sleep(2000);
     } catch (Exception e) {
-      logger.severe("Exception while committing : " + Throwables.getStackTraceAsString(e));
-      LightUtils.wrapIntoRuntimeExceptionAndThrow(e);
+      logger.severe("Exception while committing(" + commitMsg + ") : "
+          + Throwables.getStackTraceAsString(e));
+      wrapIntoRuntimeExceptionAndThrow(e);
     } finally {
       if (ofy.getTxn() != null && ofy.getTxn().isActive()) {
         // TODO(arjuns): Add requestId once available.
@@ -239,15 +253,16 @@ public class ObjectifyUtils {
   }
 
   public static <T> GAEQueryWrapper<T> findQueryResults(Objectify ofy,
-      Class<T> clazz, Map<String, Object> mapOfFilterKeyValue, List<String> orderList, String startIndex, int maxResults) {
+      Class<T> clazz, Map<String, Object> mapOfFilterKeyValue, List<String> orderList,
+      String startIndex, int maxResults) {
     checkNotNull(mapOfFilterKeyValue, "map of filters.");
     Query<T> query = ofy.query(clazz);
 
     for (String currKey : mapOfFilterKeyValue.keySet()) {
       query = query.filter(currKey, mapOfFilterKeyValue.get(currKey));
     }
-    
-    if(orderList != null) {
+
+    if (orderList != null) {
       for (String orderArg : orderList) {
         query = query.order(orderArg);
       }
@@ -290,14 +305,18 @@ public class ObjectifyUtils {
 
   /** Create a default DAOT and run the transaction through it */
   // TODO(waltercacau): Add test for this
-  public static <T> T runInTransaction(Transactable<T> t) {
+  public static <T> T runInTransaction(String txnMsg, Transactable<T> t) {
     Objectify ofy = ObjectifyUtils.initiateTransaction();
     T toReturn = null;
     try {
       toReturn = t.run(ofy);
-      ObjectifyUtils.commitTransaction(ofy);
+      commitTransaction(txnMsg, ofy);
+    } catch (Exception e) {
+      logger.severe("Failed to perform " + txnMsg + " due to : "
+          + Throwables.getStackTraceAsString(e));
+      wrapIntoRuntimeExceptionAndThrow(e);
     } finally {
-      ObjectifyUtils.rollbackTransactionIfStillActive(ofy);
+      rollbackTransactionIfStillActive(ofy);
     }
     return toReturn;
   }
@@ -308,24 +327,37 @@ public class ObjectifyUtils {
    * 
    * TODO(waltercacau): Add test for this
    */
+  @Deprecated
   public static <T> T repeatInTransaction(Transactable<T> t) {
+    return repeatInTransaction("No title set", t);
+  }
+
+  public static <T> T repeatInTransaction(String txnMsg, Transactable<T> t) {
     T toReturn = null;
-    for (int count = LightConstants.OBJECTIFY_REPEAT_COUNT; count >= 0; count--) {
-      try {
-        toReturn = runInTransaction(t);
-        break;
-      } catch (ConcurrentModificationException ex) {
-        if (count == 0) {
-          throw ex;
-        } else {
-          logger.warning("Optimistic concurrency failure for " + t + ": " + ex);
-          try {
-            Thread.sleep(count * 500);
-          } catch (InterruptedException e) {
-            // ignoring ...
+    try {
+      for (int count = LightConstants.OBJECTIFY_REPEAT_COUNT; count >= 0; count--) {
+        try {
+          toReturn = runInTransaction(txnMsg, t);
+          break;
+        } catch (ConcurrentModificationException ex) {
+          if (count == 0) {
+            throw ex;
+          } else {
+            logger.warning("Optimistic concurrency failure for (" + txnMsg + ") for "
+                + t + "due to : " + ex);
+            try {
+              Thread.sleep(count * 500);
+            } catch (InterruptedException e) {
+              // ignoring ...
+              wrapIntoRuntimeExceptionAndThrow(e);
+            }
           }
         }
       }
+    } catch (Exception e) {
+      logger.log(Level.SEVERE, "Failed to complete transaction[" + txnMsg + "] due to : "
+          + Throwables.getStackTraceAsString(e));
+      wrapIntoRuntimeExceptionAndThrow(e);
     }
 
     return toReturn;

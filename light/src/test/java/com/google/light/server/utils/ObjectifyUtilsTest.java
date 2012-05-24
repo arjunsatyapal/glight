@@ -92,7 +92,7 @@ public class ObjectifyUtilsTest extends AbstractLightServerTest {
     try {
       assertTrue(txn.getTxn().isActive());
     } finally {
-      commitTransaction(txn);
+      commitTransaction("test", txn);
     }
   }
 
@@ -112,7 +112,7 @@ public class ObjectifyUtilsTest extends AbstractLightServerTest {
   @Test
   public void test_commitTransaction() {
     Objectify txn = initiateTransaction();
-    commitTransaction(txn);
+    commitTransaction("test", txn);
     assertNotNull(txn.getTxn());
     assertFalse(txn.getTxn().isActive());
   }

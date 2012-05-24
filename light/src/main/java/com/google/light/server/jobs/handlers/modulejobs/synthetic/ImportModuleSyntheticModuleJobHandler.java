@@ -45,6 +45,7 @@ import com.google.light.server.persistence.entity.jobs.JobState;
 import com.google.light.server.persistence.entity.module.ModuleEntity;
 import com.google.light.server.utils.GuiceUtils;
 import com.google.light.server.utils.HtmlBuilder;
+import com.google.light.server.utils.LightUtils;
 import com.google.light.server.utils.Transactable;
 import com.googlecode.objectify.Objectify;
 import java.net.URI;
@@ -77,7 +78,8 @@ public class ImportModuleSyntheticModuleJobHandler implements JobHandlerInterfac
 
     final String htmlContent = generateHtmlContent(context);
 
-    repeatInTransaction(new Transactable<Void>() {
+    repeatInTransaction("marking " + jobEntity.getJobId() + "] as complete.",
+        new Transactable<Void>() {
       @SuppressWarnings("synthetic-access")
       @Override
       public Void run(Objectify ofy) {
@@ -92,14 +94,9 @@ public class ImportModuleSyntheticModuleJobHandler implements JobHandlerInterfac
       }
     });
 
-    CollectionTreeNodeDto collectionNode = new CollectionTreeNodeDto.Builder()
-        .title(context.getTitle())
-        .nodeType(TreeNodeType.LEAF_NODE)
-        .moduleId(context.getModuleId())
-        .version(context.getVersion())
-        .moduleType(context.getModuleType())
-        .externalId(context.getExternalId())
-        .build();
+    CollectionTreeNodeDto collectionNode = LightUtils.createCollectionNode(null/*description*/,
+        context.getExternalId(), context.getModuleId(), context.getModuleType(), null/*nodeId*/, 
+        TreeNodeType.LEAF_NODE, context.getTitle(), context.getVersion());
     jobManager.enqueueCompleteJob(jobEntity.getJobId(), collectionNode, "Marking as complete");
   }
 
