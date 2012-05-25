@@ -24,13 +24,18 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import java.util.ConcurrentModificationException;
+
+import org.junit.Test;
 
 import com.google.light.server.AbstractLightServerTest;
+import com.google.light.server.constants.LightConstants;
 import com.google.light.server.persistence.entity.person.PersonEntity;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Objectify;
 import com.googlecode.objectify.ObjectifyOpts;
-import org.junit.Test;
 
 /**
  * Test for {@link ObjectifyUtils}
@@ -126,5 +131,71 @@ public class ObjectifyUtilsTest extends AbstractLightServerTest {
     rollbackTransactionIfStillActive(txn);
     assertNotNull(txn.getTxn());
     assertFalse(txn.getTxn().isActive());
+  }
+
+  private static final String TOO_MUCH_FAKE_CONTENTION_MESSAGE = "Too much fake contention";
+  private static class FakeFailureTransactable implements Transactable<String> {
+    int runCount = 0;
+    final int succeedOnCount;
+    final String returnString;
+    
+    public FakeFailureTransactable(int succeedOnCount, String returnString) {
+      this.succeedOnCount = succeedOnCount;
+      this.returnString = returnString;
+    }
+    
+    @Override
+    public String run(Objectify ofy) {
+      runCount++;
+      if(succeedOnCount > runCount) {
+        throw new ConcurrentModificationException(TOO_MUCH_FAKE_CONTENTION_MESSAGE);
+      }
+      return returnString;
+    }
+  }
+  
+  @Test
+  public void test_repeatInTransaction() {
+
+    // Fails for any crazy reason
+    final String CRAZY_EXCEPTION_MESSAGE = "Crazy exception";
+    try {
+      ObjectifyUtils.repeatInTransaction(new Transactable<Void>() {@Override
+        public Void run(Objectify ofy) {
+          throw new RuntimeException(CRAZY_EXCEPTION_MESSAGE);
+        }
+      });
+      fail("should have failed");
+    } catch (RuntimeException e) {
+      assertEquals(RuntimeException.class, e.getClass());
+      assertEquals(CRAZY_EXCEPTION_MESSAGE, e.getMessage());
+    }
+    
+    final String SAMPLE_RETURN_VALUE = "SAMPLE_RETURN_VALUE";
+    // Success in the first attempt
+    FakeFailureTransactable transactable = new FakeFailureTransactable(1, SAMPLE_RETURN_VALUE);
+    assertEquals(SAMPLE_RETURN_VALUE, ObjectifyUtils.repeatInTransaction(transactable));
+    assertEquals(transactable.runCount, 1);
+    
+    // Success in the second one
+    transactable = new FakeFailureTransactable(2, SAMPLE_RETURN_VALUE);
+    assertEquals(SAMPLE_RETURN_VALUE, ObjectifyUtils.repeatInTransaction(transactable));
+    assertEquals(transactable.runCount, 2);
+    
+    // Success in the third one
+    transactable = new FakeFailureTransactable(3, SAMPLE_RETURN_VALUE);
+    assertEquals(SAMPLE_RETURN_VALUE, ObjectifyUtils.repeatInTransaction(transactable));
+    assertEquals(transactable.runCount, 3);
+    
+    // Keep failing ...
+    transactable = new FakeFailureTransactable(Integer.MAX_VALUE, SAMPLE_RETURN_VALUE);
+    try {
+      ObjectifyUtils.repeatInTransaction(transactable);
+      fail("should have failed");
+    } catch(ConcurrentModificationException e) {
+      // expected
+      assertEquals(TOO_MUCH_FAKE_CONTENTION_MESSAGE, e.getMessage());
+    }
+    assertEquals(transactable.runCount, LightConstants.OBJECTIFY_REPEAT_COUNT);
   }
 }

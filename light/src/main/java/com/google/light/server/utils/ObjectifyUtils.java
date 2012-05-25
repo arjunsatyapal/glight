@@ -91,9 +91,9 @@ public class ObjectifyUtils {
       }
       logger.info("Successfully committed");
       // Thread.sleep(2000);
-    } catch (Exception e) {
+    } catch (RuntimeException e) {
       logger.severe("Exception while committing : " + Throwables.getStackTraceAsString(e));
-      LightUtils.wrapIntoRuntimeExceptionAndThrow(e);
+      throw e;
     } finally {
       if (ofy.getTxn() != null && ofy.getTxn().isActive()) {
         // TODO(arjuns): Add requestId once available.
@@ -310,12 +310,12 @@ public class ObjectifyUtils {
    */
   public static <T> T repeatInTransaction(Transactable<T> t) {
     T toReturn = null;
-    for (int count = LightConstants.OBJECTIFY_REPEAT_COUNT; count >= 0; count--) {
+    for (int count = 1; count <= LightConstants.OBJECTIFY_REPEAT_COUNT; count++) {
       try {
         toReturn = runInTransaction(t);
         break;
       } catch (ConcurrentModificationException ex) {
-        if (count == 0) {
+        if (count == LightConstants.OBJECTIFY_REPEAT_COUNT) {
           throw ex;
         } else {
           logger.warning("Optimistic concurrency failure for " + t + ": " + ex);
