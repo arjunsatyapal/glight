@@ -17,6 +17,8 @@ package com.google.light.server.constants;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.light.server.dto.pojo.tree.externaltree.ExternalIdTreeNodeDto;
+
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -87,6 +89,7 @@ public enum LightDtos {
   COLLECTION_TREE_NODE_DTO(CollectionTreeNodeDto.class, "collectionTree"),
   CONTENT_LICENSE_ENUM(ContentLicense.class, "contentLicense"),
   EXTERNAL_ID(ExternalId.class, "externalId"),
+  EXTERNAL_ID_TREE_NODE(ExternalIdTreeNodeDto.class, "externalIdTree"),
   
   FTS_DOCUMENT_ID(FTSDocumentId.class, "ftsDocumentId"),
   GOOGLE_DOC_RESOURCE_ID(GoogleDocResourceId.class, "googleDocResourceId"),
