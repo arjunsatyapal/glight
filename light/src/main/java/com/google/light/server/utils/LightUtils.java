@@ -197,8 +197,8 @@ public class LightUtils {
 
   public static void wrapIntoRuntimeExceptionAndThrow(Exception e) {
     // Allowing LightHttpException to pass through so the filters can handle it properly.
-    if (LightHttpException.class.isAssignableFrom(e.getClass())) {
-      throw (LightHttpException) e;
+    if (RuntimeException.class.isAssignableFrom(e.getClass())) {
+      throw (RuntimeException) e;
     } else {
       throw new RuntimeException(e);
     }

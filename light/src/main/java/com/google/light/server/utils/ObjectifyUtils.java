@@ -331,32 +331,23 @@ public class ObjectifyUtils {
 
   public static <T> T repeatInTransaction(String txnMsg, Transactable<T> t) {
     T toReturn = null;
-    try {
-      for (int count = LightConstants.OBJECTIFY_REPEAT_COUNT; count >= 0; count--) {
-        try {
-          toReturn = runInTransaction(txnMsg, t);
-          break;
-        } catch (ConcurrentModificationException ex) {
-          if (count == 0) {
-            throw ex;
-          } else {
-            logger.warning("Optimistic concurrency failure for (" + txnMsg + ") for "
-                + t + "due to : " + ex);
-            try {
-              Thread.sleep(count * 500);
-            } catch (InterruptedException e) {
-              // ignoring ...
-              wrapIntoRuntimeExceptionAndThrow(e);
-            }
+    for (int count = 1; count <= LightConstants.OBJECTIFY_REPEAT_COUNT; count++) {
+      try {
+        toReturn = runInTransaction(txnMsg, t);
+        break;
+      } catch (ConcurrentModificationException ex) {
+        if (count == LightConstants.OBJECTIFY_REPEAT_COUNT) {
+          throw ex;
+        } else {
+          logger.warning("Optimistic concurrency failure for " + t + ": " + ex);
+          try {
+            Thread.sleep(count * 500);
+          } catch (InterruptedException e) {
+            // ignoring ...
           }
         }
       }
-    } catch (Exception e) {
-      logger.log(Level.SEVERE, "Failed to complete transaction[" + txnMsg + "] due to : "
-          + Throwables.getStackTraceAsString(e));
-      wrapIntoRuntimeExceptionAndThrow(e);
     }
-
     return toReturn;
   }
 
