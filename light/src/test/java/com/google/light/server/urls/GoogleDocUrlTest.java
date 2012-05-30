@@ -38,6 +38,7 @@ public class GoogleDocUrlTest {
   @Test
   public void test_googleCollectionUrl() {
     List<URL> urls = Lists.newArrayList(
+        getURL("https://docs.google.com/#folders/folder.0.f1234"),
         getURL("https://drive.google.com/?authuser=0#folders/f1234"),
         getURL("https://drive.google.com/a/myopenedu.com/?pli=1#folders/f1234"),
         getURL("https://drive.google.com/a/foo.com/#folders/f1234"),

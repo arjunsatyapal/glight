@@ -60,8 +60,29 @@ public class GoogleDocUrl implements ExternalIdUrlInterface {
    */
   private void initUsingPublic(String file, URL url) {
     String parts[] = file.split("/");
+    if (parts.length == 0) {
+      // Seems like whole thing is inside a ref.
+      initUsingRef(url);
+    } else {
+      checkArgument(parts.length >= 1, "Invalid URL " + url);
+      domain = null;
+      initRest(parts, 1, url);
+    }
+  }
+
+  /**
+   * @param parts
+   * @param url
+   */
+  private void initUsingRef(URL url) {
+    /*
+     * At present we know of only one URL which will use this.
+     * https://docs.google.com/#folders/folder.0.f1234
+     */
+    String ref = url.getRef();
+    checkArgument(ref.startsWith("folder"), "Invalid URL : " + url);
+    String[] parts = ref.split("/");
     checkArgument(parts.length >= 1, "Invalid URL " + url);
-    domain = null;
     initRest(parts, 1, url);
   }
 
@@ -110,13 +131,13 @@ public class GoogleDocUrl implements ExternalIdUrlInterface {
         //$FALL-THROUGH$
       case GOOGLE_DRAWING:
         //$FALL-THROUGH$
-        
+
       case GOOGLE_FILE:
         //$FALL-THROUGH$
       case GOOGLE_PRESENTATION:
         this.typedResourceId = moduleType.getCategory() + ":" + parts[startIndex + 2];
         break;
-        
+
       case LIGHT_SYNTHETIC_MODULE:
         this.typedResourceId = url.toString();
         break;
