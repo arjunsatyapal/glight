@@ -15,6 +15,8 @@
  */
 package com.google.light.server.guice.modules;
 
+import com.google.light.server.utils.GaeUtils;
+
 import com.google.light.server.manager.implementation.FTSManagerImpl;
 
 import com.google.light.server.manager.interfaces.FTSManager;
@@ -91,6 +93,8 @@ public abstract class BaseGuiceModule extends AbstractModule {
 
   @Override
   protected void configure() {
+    logger.info("Initializing : " + GaeUtils.getAppId());
+
     requireBinding(HttpTransport.class);
 
     // binding to Providers.

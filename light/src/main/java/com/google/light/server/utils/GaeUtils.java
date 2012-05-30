@@ -86,6 +86,7 @@ public class GaeUtils {
   public static String getAppIdFromSystemProperty() {
     return SystemProperty.applicationId.get();
   }
+  
   public static String getHostForDefaultVersion() {
     if(isDevServer()) {
       return "localhost";

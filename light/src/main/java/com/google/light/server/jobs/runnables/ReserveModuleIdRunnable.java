@@ -19,6 +19,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkNotEmptyCollection;
 import static com.google.light.server.utils.ObjectifyUtils.repeatInTransaction;
 
+import java.util.logging.Logger;
+
 import com.google.light.server.dto.importresource.ImportExternalIdDto;
 import com.google.light.server.dto.pojo.tree.externaltree.ExternalIdTreeNodeDto;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
@@ -39,6 +41,8 @@ import java.util.List;
  * @author Arjun Satyapal
  */
 public class ReserveModuleIdRunnable implements Runnable {
+  private static final Logger logger = Logger.getLogger(ReserveModuleIdRunnable.class.getName());
+  
   private final ExternalIdTreeNodeDto externalIdTreeNode;
   private ImportExternalIdDto importExternalIdDto;
   private final List<PersonId> owners;
@@ -60,7 +64,7 @@ public class ReserveModuleIdRunnable implements Runnable {
       @Override
       public Void run(Objectify ofy) {
         ExternalId externalId = externalIdTreeNode.getExternalId();
-        System.out.println(externalId);
+        logger.info("Reserving module for " + externalId);
         ModuleManager moduleManager = GuiceUtils.getInstance(ModuleManager.class);
         ModuleId moduleId = moduleManager.reserveModuleId(ofy, externalId, owners, 
             externalIdTreeNode.getTitle(),

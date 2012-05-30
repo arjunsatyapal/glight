@@ -60,7 +60,7 @@ public enum LightEnvEnum {
    * @return
    */
   public static LightEnvEnum getLightEnv() {
-    String appId = SystemProperty.applicationId.get();
+    String appId = GaeUtils.getAppIdFromSystemProperty();
     LightEnvEnum returnEnum = getLightEnvByAppId(appId);
     
     if (returnEnum == QA) {

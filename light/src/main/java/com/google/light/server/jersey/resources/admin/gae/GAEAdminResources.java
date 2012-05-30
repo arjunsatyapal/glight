@@ -82,7 +82,8 @@ public class GAEAdminResources extends AbstractJerseyResource {
       StringBuilder builder = new StringBuilder();
       Environment env = ApiProxy.getCurrentEnvironment();
       appendSectionHeader(builder, "Appengine SystemProperty");
-      appendKeyValue(builder, "applicationid", GaeUtils.getAppId());
+      appendKeyValue(builder, "ApiProxy.getCurrentEnvironment().getAppId()", GaeUtils.getAppId());
+      appendKeyValue(builder, "SystemProperty.applicationId.get()", GaeUtils.getAppIdFromSystemProperty());
 
       String applicationVersion = SystemProperty.applicationVersion.get();
       appendKeyValue(builder, "applicationVersion", applicationVersion);

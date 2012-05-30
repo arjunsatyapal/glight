@@ -21,6 +21,8 @@ import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkTxnIsRunning;
 import static com.google.light.server.utils.LightUtils.createModuleVersionEntity;
 
+import com.google.common.base.Preconditions;
+
 import com.google.light.server.manager.interfaces.QueueManager;
 
 import com.google.common.collect.Lists;
@@ -144,7 +146,9 @@ public class ModuleManagerImpl implements ModuleManager {
   @Override
   public ModuleId reserveModuleId(Objectify ofy, ExternalId externalId,
       List<PersonId> owners, String title, List<ContentLicense> contentLicenses) {
-    return reserveModule(ofy, externalId, owners, title, contentLicenses).getModuleId();
+    ModuleEntity moduleEntity = reserveModule(ofy, externalId, owners, title, contentLicenses);
+    checkNotNull(moduleEntity, "Failed to reserve Module for [" + externalId + "].");
+    return moduleEntity.getModuleId();
   }
 
   /**
@@ -160,8 +164,11 @@ public class ModuleManagerImpl implements ModuleManager {
 
     ModuleId existingModuleId = findModuleIdByExternalId(ofy, externalId);
     if (existingModuleId != null) {
+      logger.info("For externalId [" + externalId + "], found " + existingModuleId);
       return get(ofy, existingModuleId);
     }
+    
+    logger.info("For externalId [" + externalId + "], reserving new ModuleId.");
 
     if (StringUtils.isBlank(title)) {
       title = "Untitled : " + new DateTime(now) + ":" + externalId.getValue();
@@ -178,6 +185,8 @@ public class ModuleManagerImpl implements ModuleManager {
         externalId, ModuleState.RESERVED, moduleType, owners, SearchIndexStatus.forReserveVersion,
         title);
     ModuleEntity persistedEntity = this.create(ofy, moduleEntity);
+    
+    logger.info("For externalId [" + externalId + "], created " + persistedEntity.getModuleId());
 
     // Version reservedVersion = moduleEntity.reserveVersion();
     // this.put(ofy, moduleEntity);
@@ -193,7 +202,7 @@ public class ModuleManagerImpl implements ModuleManager {
         .build();
     externalIdMappingDao.put(ofy, mappingEntity);
 
-    return persistedEntity;
+    return checkNotNull(persistedEntity, "Unexpected null for [" + externalId + "].");
   }
 
   /**

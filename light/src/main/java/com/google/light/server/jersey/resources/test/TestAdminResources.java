@@ -17,33 +17,21 @@ package com.google.light.server.jersey.resources.test;
 
 import static com.google.light.server.utils.LightPreconditions.checkIsNotEnv;
 
+import com.google.appengine.api.datastore.QueryResultIterable;
+import com.google.appengine.api.search.Index;
 import com.google.appengine.api.search.Results;
 import com.google.appengine.api.search.ScoredDocument;
-
-import com.google.appengine.api.search.Index;
-
-import com.google.light.server.constants.fts.FTSIndex;
-
-import com.google.light.server.utils.FTSUtils;
-
-import com.google.light.server.utils.GaeUtils;
-
 import com.google.appengine.api.taskqueue.Queue;
 import com.google.appengine.api.taskqueue.QueueFactory;
-import com.google.light.server.constants.QueueEnum;
-
-import com.google.light.server.jersey.resources.AbstractJerseyResource;
-
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-import com.google.light.server.constants.LightEnvEnum;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import com.google.appengine.api.datastore.QueryResultIterable;
-import com.google.common.collect.Lists;
 import com.google.light.server.constants.JerseyConstants;
+import com.google.light.server.constants.LightEnvEnum;
+import com.google.light.server.constants.QueueEnum;
+import com.google.light.server.constants.fts.FTSIndex;
 import com.google.light.server.constants.http.ContentTypeConstants;
+import com.google.light.server.jersey.resources.AbstractJerseyResource;
 import com.google.light.server.persistence.entity.collection.CollectionEntity;
 import com.google.light.server.persistence.entity.collection.CollectionVersionEntity;
 import com.google.light.server.persistence.entity.jobs.JobEntity;
@@ -51,10 +39,14 @@ import com.google.light.server.persistence.entity.module.ExternalIdMappingEntity
 import com.google.light.server.persistence.entity.module.ModuleEntity;
 import com.google.light.server.persistence.entity.module.ModuleVersionEntity;
 import com.google.light.server.persistence.entity.module.ModuleVersionResourceEntity;
+import com.google.light.server.utils.FTSUtils;
+import com.google.light.server.utils.GaeUtils;
 import com.google.light.server.utils.ObjectifyUtils;
 import com.googlecode.objectify.Objectify;
 import java.util.Iterator;
 import java.util.List;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -80,7 +72,7 @@ public class TestAdminResources extends AbstractJerseyResource {
   @Produces(ContentTypeConstants.TEXT_PLAIN)
   @Path(JerseyConstants.PATH_TEST_DELETE_ALL)
   public String deleteAll() throws ClassNotFoundException {
-    String appId = GaeUtils.getAppId();
+    String appId = GaeUtils.getAppIdFromSystemProperty();
     if (appId.equals("light-demo")) {
       throw new IllegalStateException("DeleteAll is not allowed for " + appId);
     }
@@ -116,8 +108,6 @@ public class TestAdminResources extends AbstractJerseyResource {
     }
 
     builder.append(purgeQueue());
-    
-    
 
     return builder.toString();
   }
