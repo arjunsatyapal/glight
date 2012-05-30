@@ -23,18 +23,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import com.google.light.server.jobs.handlers.collectionjobs.youtubeplaylist.ImportCollectionYouTubePlaylistContext;
-
-import com.google.light.server.dto.thirdparty.google.youtube.YouTubePlaylistInfo;
-
-import com.google.light.server.dto.thirdparty.google.youtube.YouTubeVideoInfo;
-
-import com.google.light.server.jobs.handlers.collectionjobs.gdoccollection.ImportCollectionGoogleDocContext;
-
-import com.google.light.server.jobs.handlers.modulejobs.gdocument.ImportModuleGoogleDocJobContext;
-
-import com.google.light.server.jobs.handlers.modulejobs.synthetic.ImportModuleSyntheticModuleJobContext;
-
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
@@ -60,7 +48,12 @@ import com.google.light.server.dto.pojo.typewrapper.stringwrapper.FTSDocumentId;
 import com.google.light.server.dto.thirdparty.google.gdoc.GoogleDocImportBatchJobContext;
 import com.google.light.server.dto.thirdparty.google.gdoc.GoogleDocResourceId;
 import com.google.light.server.dto.thirdparty.google.youtube.ContentLicense;
-import com.google.light.server.dto.thirdparty.google.youtube.YouTubeResourceId;
+import com.google.light.server.dto.thirdparty.google.youtube.YouTubePlaylistInfo;
+import com.google.light.server.dto.thirdparty.google.youtube.YouTubeVideoInfo;
+import com.google.light.server.jobs.handlers.collectionjobs.gdoccollection.ImportCollectionGoogleDocContext;
+import com.google.light.server.jobs.handlers.collectionjobs.youtubeplaylist.ImportCollectionYouTubePlaylistContext;
+import com.google.light.server.jobs.handlers.modulejobs.gdocument.ImportModuleGoogleDocJobContext;
+import com.google.light.server.jobs.handlers.modulejobs.synthetic.ImportModuleSyntheticModuleJobContext;
 import com.google.light.server.servlets.oauth2.google.pojo.AbstractOAuth2TokenInfo;
 import com.google.light.server.servlets.oauth2.google.pojo.GoogleLoginTokenInfo;
 import com.google.light.server.servlets.oauth2.google.pojo.GoogleOAuth2TokenInfo;
@@ -138,7 +131,6 @@ public class LightDtosTest implements EnumTestInterface {
       ModuleId.class.getName(),
       PersonId.class.getName(),
       Version.class.getName(),
-      YouTubeResourceId.class.getName(),
       YouTubeVideoInfo.class.getName(),
       YouTubePlaylistInfo.class.getName());
 

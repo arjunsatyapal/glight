@@ -21,8 +21,7 @@ import static com.google.light.server.utils.LightPreconditions.checkNotNull;
 import static com.google.light.server.utils.ObjectifyUtils.repeatInTransaction;
 import static com.google.light.server.utils.ServletUtils.getRequestHeaderValue;
 
-import java.util.logging.Logger;
-
+import com.google.common.base.Throwables;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.light.server.constants.HttpHeaderEnum;
@@ -30,10 +29,12 @@ import com.google.light.server.constants.JerseyConstants;
 import com.google.light.server.constants.NotificationType;
 import com.google.light.server.constants.PlacementOrder;
 import com.google.light.server.constants.http.ContentTypeConstants;
+import com.google.light.server.constants.http.HttpStatusCodesEnum;
 import com.google.light.server.dto.notifications.ChildJobCompletionNotification;
 import com.google.light.server.dto.pojo.ChangeLogEntryPojo;
 import com.google.light.server.exception.ExceptionType;
 import com.google.light.server.exception.unchecked.taskqueue.ParentNotReadyForChildCompleteNotification;
+import com.google.light.server.exception.unchecked.taskqueue.TaskQueueRetriableException;
 import com.google.light.server.jersey.resources.AbstractJerseyResource;
 import com.google.light.server.manager.interfaces.JobManager;
 import com.google.light.server.persistence.entity.jobs.JobEntity;
@@ -41,6 +42,7 @@ import com.google.light.server.persistence.entity.jobs.JobState;
 import com.google.light.server.utils.JsonUtils;
 import com.google.light.server.utils.Transactable;
 import com.googlecode.objectify.Objectify;
+import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Consumes;
@@ -81,7 +83,13 @@ public class NotificationResource extends AbstractJerseyResource {
 
     switch (type) {
       case CHILD_JOB_COMPLETION:
-        handlChildJobCompletion(body);
+        try {
+          handlChildJobCompletion(body);  
+        } catch (TaskQueueRetriableException e) {
+          logger.warning("Retry task after some time : " + Throwables.getStackTraceAsString(e));
+          return Response.status(HttpStatusCodesEnum.PRECONDITIONS_FAILED.getStatusCode()).build();
+        }
+        
         break;
 
       default:
@@ -99,7 +107,8 @@ public class NotificationResource extends AbstractJerseyResource {
         JsonUtils.getDto(body, ChildJobCompletionNotification.class);
     logger.info("Notification : " + jobNotification.toJson());
 
-    repeatInTransaction(new Transactable<Void>() {
+    repeatInTransaction("Handling childJobNotification completion : " + body,
+        new Transactable<Void>() {
 
       @SuppressWarnings("synthetic-access")
       @Override

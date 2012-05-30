@@ -118,6 +118,15 @@ public class ExternalId extends AbstractTypeWrapper<String, ExternalId> {
   private ExternalId() {
     super();
   }
+  
+  public String getNormalizedId() {
+    if (isYouTubeUrl()) {
+      YouTubeUrl ytUrl = getYouTubeUrl();
+      return ytUrl.getNormalizedHref();
+    }
+    
+    return getValue();
+  }
 
   public URL getURL() {
     if (url == null) {
@@ -190,8 +199,6 @@ public class ExternalId extends AbstractTypeWrapper<String, ExternalId> {
    */
   private boolean isLightUrl() {
     String host = getURL().getHost();
-    String appId = GaeUtils.getAppId();
-
     if (host.equals("localhost")) {
       if (GaeUtils.isDevServer()) {
         // Allowing localhost URLs on DevServer only.

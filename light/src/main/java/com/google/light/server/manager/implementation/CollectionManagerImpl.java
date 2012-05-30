@@ -143,7 +143,7 @@ public class CollectionManagerImpl implements CollectionManager {
 
     Version reservedVersion = collectionEntity.reserveVersion();
     
-    CollectionTreeNodeDto dummyRoot = LightUtils.getDummyCollectionRoot(
+    CollectionTreeNodeDto dummyRoot = LightUtils.createCollectionRootDummy(
         collectionEntity.getTitle(), "No Description");
     
     Instant now = LightUtils.getNow();

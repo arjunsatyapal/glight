@@ -17,14 +17,6 @@ package com.google.light.server.constants;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.light.server.jobs.handlers.collectionjobs.youtubeplaylist.ImportCollectionYouTubePlaylistContext;
-
-import com.google.light.server.dto.thirdparty.google.youtube.YouTubeVideoInfo;
-
-import com.google.light.server.dto.thirdparty.google.youtube.YouTubePlaylistInfo;
-
-import com.google.light.server.jobs.handlers.collectionjobs.gdoccollection.ImportCollectionGoogleDocContext;
-
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -64,7 +56,10 @@ import com.google.light.server.dto.thirdparty.google.gdoc.GoogleDocImportBatchJo
 import com.google.light.server.dto.thirdparty.google.gdoc.GoogleDocInfoDto;
 import com.google.light.server.dto.thirdparty.google.gdoc.GoogleDocResourceId;
 import com.google.light.server.dto.thirdparty.google.youtube.ContentLicense;
-import com.google.light.server.dto.thirdparty.google.youtube.YouTubeResourceId;
+import com.google.light.server.dto.thirdparty.google.youtube.YouTubePlaylistInfo;
+import com.google.light.server.dto.thirdparty.google.youtube.YouTubeVideoInfo;
+import com.google.light.server.jobs.handlers.collectionjobs.gdoccollection.ImportCollectionGoogleDocContext;
+import com.google.light.server.jobs.handlers.collectionjobs.youtubeplaylist.ImportCollectionYouTubePlaylistContext;
 import com.google.light.server.jobs.handlers.modulejobs.gdocument.ImportModuleGoogleDocJobContext;
 import com.google.light.server.jobs.handlers.modulejobs.synthetic.ImportModuleSyntheticModuleJobContext;
 import com.google.light.server.servlets.oauth2.google.pojo.GoogleUserInfo;
@@ -133,7 +128,6 @@ public enum LightDtos {
   SEARCH_RESULT_DTO(SearchResultDto.class, "searchResult"),
   SEARCH_RESULT_ITEM_DTO(SearchResultItemDto.class, "searchResultItem"),
   VERSION(Version.class, "version"),
-  YOU_TUBE_RESOURCE_ID(YouTubeResourceId.class, "youTubeResourceId"),
   YOU_TUBE_PLAYLIST_INFO(YouTubePlaylistInfo.class, "youTubePlaylistInfo"),
   YOU_TUBE_VIDEO_INFO(YouTubeVideoInfo.class, "youTubeVideoInfo");
 

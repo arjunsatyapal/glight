@@ -23,6 +23,7 @@ import static com.google.light.server.jobs.JobUtils.updateJobContext;
 import static com.google.light.server.utils.GoogleCloudStorageUtils.writeFileOnGCS;
 import static com.google.light.server.utils.GuiceUtils.getInstance;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
+import static com.google.light.server.utils.LightUtils.createCollectionNode;
 import static com.google.light.server.utils.ObjectifyUtils.repeatInTransaction;
 
 import com.google.appengine.api.files.AppEngineFile;
@@ -30,7 +31,6 @@ import com.google.appengine.api.files.FileReadChannel;
 import com.google.appengine.api.files.FileService;
 import com.google.appengine.api.files.FileServiceFactory;
 import com.google.appengine.api.files.GSFileOptions;
-import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
@@ -52,7 +52,6 @@ import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
 import com.google.light.server.dto.thirdparty.google.gdoc.GoogleDocInfoDto;
 import com.google.light.server.dto.thirdparty.google.gdoc.GoogleDocResourceId;
-import com.google.light.server.exception.unchecked.GoogleDocException;
 import com.google.light.server.exception.unchecked.taskqueue.GoogleDocArchivalWaitingException;
 import com.google.light.server.jobs.handlers.JobHandlerInterface;
 import com.google.light.server.manager.interfaces.JobManager;
@@ -136,14 +135,10 @@ public class ImportModuleGoogleDocJobHandler implements JobHandlerInterface {
       JobEntity jobEntity) {
     ModuleEntity moduleEntity = moduleManager.get(null, gdocImportContext.getModuleId());
 
-    CollectionTreeNodeDto collectionNode = new CollectionTreeNodeDto.Builder()
-        .title(moduleEntity.getTitle())
-        .nodeType(TreeNodeType.LEAF_NODE)
-        .moduleId(gdocImportContext.getModuleId())
-        .version(gdocImportContext.getVersion())
-        .moduleType(moduleEntity.getModuleType())
-        .externalId(moduleEntity.getExternalId())
-        .build();
+    CollectionTreeNodeDto collectionNode = createCollectionNode(null /* description */,
+        moduleEntity.getExternalId(), moduleEntity.getModuleId(), moduleEntity.getModuleType(),
+        null /* nodeId */, TreeNodeType.LEAF_NODE, moduleEntity.getTitle(),
+        gdocImportContext.getVersion());
     jobManager.enqueueCompleteJob(jobEntity.getJobId(), collectionNode,
         "Successfully completed Google Doc Job.");
   }
@@ -281,17 +276,19 @@ public class ImportModuleGoogleDocJobHandler implements JobHandlerInterface {
     gdocImportContext
         .setState(ImportModuleGoogleDocJobContext.GoogleDocImportJobState.WAITING_FOR_ARCHIVE);
 
-    repeatInTransaction(new Transactable<Void>() {
+    repeatInTransaction("job[" + jobEntity.getJobId() + "] is waiting for archive",
+        new Transactable<Void>() {
 
-      @SuppressWarnings("synthetic-access")
-      @Override
-      public Void run(Objectify ofy) {
-        updateJobContext(null, jobManager, jobEntity.getJobState(), gdocImportContext, jobEntity,
-            "Waiting for Archive");
-        jobManager.enqueueGoogleDocInteractionJob(ofy, jobEntity.getJobId());
-        return null;
-      }
-    });
+          @SuppressWarnings("synthetic-access")
+          @Override
+          public Void run(Objectify ofy) {
+            updateJobContext(null, jobManager, jobEntity.getJobState(), gdocImportContext,
+                jobEntity,
+                "Waiting for Archive");
+            jobManager.enqueueGoogleDocInteractionJob(ofy, jobEntity.getJobId());
+            return null;
+          }
+        });
   }
 
   /**
@@ -317,16 +314,18 @@ public class ImportModuleGoogleDocJobHandler implements JobHandlerInterface {
         .setState(ImportModuleGoogleDocJobContext.GoogleDocImportJobState.ARCHIVE_DOWNLOADED);
     gdocImportContext.setGCSArchiveLocation(gcsArchiveLocation);
 
-    repeatInTransaction(new Transactable<Void>() {
-      @SuppressWarnings("synthetic-access")
-      @Override
-      public Void run(Objectify ofy) {
-        updateJobContext(ofy, jobManager, jobEntity.getJobState(), gdocImportContext, jobEntity,
-            "archive downloaded.");
-        jobManager.enqueueLightJob(ofy, jobEntity.getJobId());
-        return null;
-      }
-    });
+    repeatInTransaction("enqueuing light job[" + jobEntity.getJobId() + "].",
+        new Transactable<Void>() {
+          @SuppressWarnings("synthetic-access")
+          @Override
+          public Void run(Objectify ofy) {
+            updateJobContext(ofy, jobManager, jobEntity.getJobState(), gdocImportContext,
+                jobEntity,
+                "archive downloaded.");
+            jobManager.enqueueLightJob(ofy, jobEntity.getJobId());
+            return null;
+          }
+        });
 
   }
 
@@ -334,13 +333,15 @@ public class ImportModuleGoogleDocJobHandler implements JobHandlerInterface {
    * @param gdocImportContext
    * @param jobEntity
    */
-  private void publishModule(ImportModuleGoogleDocJobContext gdocImportContext,
-      JobEntity jobEntity) {
-    ModuleId moduleId = gdocImportContext.getModuleId();
-    Version version = gdocImportContext.getVersion();
+  private void publishModule(final ImportModuleGoogleDocJobContext gdocImportContext,
+      final JobEntity jobEntity) {
+    final ModuleId moduleId = gdocImportContext.getModuleId();
+    final Version version = gdocImportContext.getVersion();
+
+    FileService fileService = FileServiceFactory.getFileService();
+    final Map<String, GSBlobInfo> resourceMap = Maps.newConcurrentMap();
+    String htmlContent = null;
     try {
-      FileService fileService = FileServiceFactory.getFileService();
-      Map<String, GSBlobInfo> resourceMap = Maps.newConcurrentMap();
 
       AppEngineFile file = new AppEngineFile(gdocImportContext.getGCSArchiveLocation());
       FileReadChannel readChannel = fileService.openReadChannel(file, false /* lock */);
@@ -425,56 +426,65 @@ public class ImportModuleGoogleDocJobHandler implements JobHandlerInterface {
       file = new AppEngineFile(filePath);
       readChannel = fileService.openReadChannel(file, true /* lock */);
       inputStream = Channels.newInputStream(readChannel);
-      String htmlContent = LightUtils.getInputStreamAsString(inputStream);
+      htmlContent = LightUtils.getInputStreamAsString(inputStream);
 
-      Objectify ofy = ObjectifyUtils.initiateTransaction();
-      try {
-        ModuleManager moduleManager = getInstance(ModuleManager.class);
-
-        GoogleDocInfoDto resourceInfo = gdocImportContext.getResourceInfo();
-        // First publish HTML on Light.
-        moduleManager.publishModuleVersion(ofy, moduleId, version,
-            resourceInfo.getExternalId(), gdocImportContext.getTitle(), htmlContent,
-            resourceInfo.getModuleType().getDefaultLicenses(),
-            resourceInfo.getEtag(), resourceInfo.getLastEditTime());
-
-        // Now publishing associated resources.
-        for (String currKey : resourceMap.keySet()) {
-          // We dont want to store HTML files as resources. They are handled separately.
-          if (currKey.endsWith(FileExtensions.HTML.get())) {
-            continue;
-          }
-
-          GSBlobInfo gsBlobInfo = resourceMap.get(currKey);
-          logger.info(JsonUtils.toJson(gsBlobInfo));
-          moduleManager.publishModuleResource(ofy, moduleId, version, currKey,
-              gsBlobInfo);
-        }
-
-        gdocImportContext.setState(
-            ImportModuleGoogleDocJobContext.GoogleDocImportJobState.COMPLETE);
-
-        // Now generating result for this job.
-        CollectionTreeNodeDto node = new CollectionTreeNodeDto.Builder()
-            .title(gdocImportContext.getResourceInfo().getTitle())
-            .nodeType(TreeNodeType.LEAF_NODE)
-            .moduleId(gdocImportContext.getModuleId())
-            .externalId(gdocImportContext.getResourceInfo().getExternalId())
-            .moduleType(gdocImportContext.getResourceInfo().getModuleType())
-            .version(LightUtils.LATEST_VERSION)
-            .build();
-        jobEntity.setResponse(node);
-
-        updateJobContext(ofy, jobManager, jobEntity.getJobState(), gdocImportContext, jobEntity,
-            "Published module[" + moduleId + ":" + version);
-        jobManager.enqueueLightJob(ofy, jobEntity.getJobId());
-        ObjectifyUtils.commitTransaction(ofy);
-      } finally {
-        ObjectifyUtils.rollbackTransactionIfStillActive(ofy);
-      }
     } catch (Exception e) {
-      logger.warning(Throwables.getStackTraceAsString(e));
-      throw new GoogleDocException(e);
+      LightUtils.wrapIntoRuntimeExceptionAndThrow(e);
     }
+    
+    final String requiredContent = checkNotBlank(htmlContent, "htmlcontent cannot be blank here.");
+    ObjectifyUtils.repeatInTransaction("publishing module " + moduleId,
+        new Transactable<Void>() {
+          @SuppressWarnings("synthetic-access")
+          @Override
+          public Void run(Objectify ofy) {
+            ModuleManager moduleManager = getInstance(ModuleManager.class);
+
+            GoogleDocInfoDto resourceInfo = gdocImportContext.getResourceInfo();
+            // First publish HTML on Light.
+            moduleManager.publishModuleVersion(ofy, moduleId, version,
+                resourceInfo.getExternalId(), gdocImportContext.getTitle(), requiredContent,
+                resourceInfo.getModuleType().getDefaultLicenses(),
+                resourceInfo.getEtag(), resourceInfo.getLastEditTime());
+
+            // Now publishing associated resources.
+            for (String currKey : resourceMap.keySet()) {
+              // We dont want to store HTML files as resources. They are handled separately.
+              if (currKey.endsWith(FileExtensions.HTML.get())) {
+                continue;
+              }
+
+              GSBlobInfo gsBlobInfo = resourceMap.get(currKey);
+              logger.info(JsonUtils.toJson(gsBlobInfo));
+              moduleManager.publishModuleResource(ofy, moduleId, version, currKey,
+                  gsBlobInfo);
+            }
+
+            gdocImportContext.setState(
+                ImportModuleGoogleDocJobContext.GoogleDocImportJobState.COMPLETE);
+
+            // Now generating result for this job.
+            CollectionTreeNodeDto node =
+                createCollectionNode(null /* description */,
+                    gdocImportContext.getResourceInfo().getExternalId(),
+                    gdocImportContext.getModuleId(), gdocImportContext.getResourceInfo()
+                        .getModuleType(),
+                    null/* nodeId */, TreeNodeType.LEAF_NODE, gdocImportContext.getResourceInfo()
+                        .getTitle(),
+                    LightUtils.LATEST_VERSION);
+            jobEntity.setResponse(node);
+
+            updateJobContext(ofy, jobManager, jobEntity.getJobState(), gdocImportContext,
+                jobEntity,
+                "Published module[" + moduleId + ":" + version);
+            jobManager.enqueueLightJob(ofy, jobEntity.getJobId());
+            return null;
+          }
+        });
+
+    // } catch (Exception e) {
+    // logger.warning(Throwables.getStackTraceAsString(e));
+    // throw new GoogleDocException(e);
+    // }
   }
 }

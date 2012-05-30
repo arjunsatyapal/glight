@@ -19,19 +19,10 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.dto.pojo.tree.collection.CollectionTreeUtils.generateCollectionNodeFromChildJob;
 import static com.google.light.server.jersey.resources.thirdparty.mixed.ImportResource.updateImportExternalIdDtoForCollections;
+import static com.google.light.server.utils.LightUtils.createCollectionNode;
 import static com.google.light.server.utils.LightUtils.isCollectionEmpty;
+import static com.google.light.server.utils.ObjectifyUtils.repeatInTransaction;
 
-import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
-
-import java.util.List;
-
-import com.google.common.collect.Lists;
-
-import com.google.light.server.utils.GuiceUtils;
-
-import com.google.light.server.manager.interfaces.ModuleManager;
-
-import com.google.common.collect.Iterables;
 import com.google.inject.Inject;
 import com.google.light.server.constants.QueueEnum;
 import com.google.light.server.dto.importresource.ImportExternalIdDto;
@@ -41,7 +32,6 @@ import com.google.light.server.dto.pojo.ChangeLogEntryPojo;
 import com.google.light.server.dto.pojo.tree.AbstractTreeNode.TreeNodeType;
 import com.google.light.server.dto.pojo.tree.collection.CollectionTreeNodeDto;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.JobId;
-import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
 import com.google.light.server.dto.thirdparty.google.youtube.YouTubePlaylistInfo;
 import com.google.light.server.dto.thirdparty.google.youtube.YouTubeVideoInfo;
 import com.google.light.server.jobs.handlers.JobHandlerInterface;
@@ -50,9 +40,7 @@ import com.google.light.server.manager.interfaces.JobManager;
 import com.google.light.server.persistence.entity.jobs.JobEntity;
 import com.google.light.server.persistence.entity.jobs.JobEntity.TaskType;
 import com.google.light.server.persistence.entity.jobs.JobState;
-import com.google.light.server.utils.JsonUtils;
 import com.google.light.server.utils.LightUtils;
-import com.google.light.server.utils.ObjectifyUtils;
 import com.google.light.server.utils.Transactable;
 import com.googlecode.objectify.Objectify;
 
@@ -65,14 +53,12 @@ import com.googlecode.objectify.Objectify;
  */
 public class ImportCollectionYouTubePlaylistHandler implements JobHandlerInterface {
   private JobManager jobManager;
-  private ModuleManager moduleManager;
   private ImportModuleSyntheticModuleJobHandler importSyntheticModuleJobHandler;
 
   @Inject
-  public ImportCollectionYouTubePlaylistHandler(JobManager jobManager, ModuleManager moduleManager,
+  public ImportCollectionYouTubePlaylistHandler(JobManager jobManager, 
       ImportModuleSyntheticModuleJobHandler importSyntheticModuleJobHandler) {
     this.jobManager = checkNotNull(jobManager, "jobManager");
-    this.moduleManager = checkNotNull(moduleManager, "moduleManager");
     this.importSyntheticModuleJobHandler = checkNotNull(importSyntheticModuleJobHandler,
         "importSyntheticModuleJobHandler");
   }
@@ -104,7 +90,8 @@ public class ImportCollectionYouTubePlaylistHandler implements JobHandlerInterfa
    * @param jobId
    */
   private void createChilds(final JobId jobId) {
-    boolean retryThisMethod = ObjectifyUtils.repeatInTransaction(new Transactable<Boolean>() {
+    boolean retryThisMethod = repeatInTransaction("creating childs for " + jobId, 
+        new Transactable<Boolean>() {
 
       @SuppressWarnings("synthetic-access")
       @Override
@@ -112,9 +99,7 @@ public class ImportCollectionYouTubePlaylistHandler implements JobHandlerInterfa
         JobEntity jobEntity = jobManager.get(ofy, jobId);
         ImportCollectionYouTubePlaylistContext context = jobEntity.getContext(
             ImportCollectionYouTubePlaylistContext.class);
-        System.out.println(context.toJson());
         YouTubePlaylistInfo playlistInfo = context.getYouTubePlaylistInfo();
-        System.out.println("Childs = " + playlistInfo.getListOfVideos().size());
 
         JobId enqueuedJobId = null;
         int skipCounter = 0;
@@ -127,10 +112,9 @@ public class ImportCollectionYouTubePlaylistHandler implements JobHandlerInterfa
             // For current child, job is already created or not required.
             continue;
           }
-          System.out.println("Skipped : " + skipCounter);
+          System.out.println("SkipCounter = " + skipCounter);
           skipCounter = 0;
 
-          List<PersonId> owners = Lists.newArrayList(GuiceUtils.getOwnerId());
           ModuleType moduleType = currChild.getModuleType();
           ImportExternalIdDto importExternalIdDto = LightUtils.createImportExternalIdDto(
               playlistInfo.getContentLicenses(), currChild.getExternalId(),
@@ -157,7 +141,6 @@ public class ImportCollectionYouTubePlaylistHandler implements JobHandlerInterfa
             context.validate();
             jobEntity.addChildJob(checkNotNull(importExternalIdDto.getJobId(),
                 "jobId cannot be null."));
-            System.out.println(context.toJson());
             jobManager.put(ofy, jobEntity, new ChangeLogEntryPojo(
                 "enqueued child : " + importExternalIdDto.getJobId()));
           } else {
@@ -171,8 +154,6 @@ public class ImportCollectionYouTubePlaylistHandler implements JobHandlerInterfa
 
           // All possible childs are created. So this job is now ready for getting child
           // notifications.
-          System.out.println(context.toJson());
-          System.out.println("\n****" + Iterables.toString(jobEntity.getChildJobs()));
           context.validate();
           JobState jobState = null;
           if (isCollectionEmpty(jobEntity.getChildJobs())) {
@@ -184,11 +165,9 @@ public class ImportCollectionYouTubePlaylistHandler implements JobHandlerInterfa
             jobState = JobState.WAITING_FOR_CHILD_COMPLETE_NOTIFICATION;
           }
 
-          System.out.println(jobEntity.getContext().getValue());
           jobEntity.setJobState(jobState);
           jobManager.put(ofy, jobEntity, new ChangeLogEntryPojo(
               "getting ready for " + jobState));
-
         }
         return false;
       }
@@ -206,12 +185,9 @@ public class ImportCollectionYouTubePlaylistHandler implements JobHandlerInterfa
   private void handleChildCompletions(ImportCollectionYouTubePlaylistContext context,
       JobEntity jobEntity) {
     YouTubePlaylistInfo playlistInfo = context.getYouTubePlaylistInfo();
-    CollectionTreeNodeDto subCollection = new CollectionTreeNodeDto.Builder()
-        .title(playlistInfo.getTitle())
-        .externalId(context.getExternalId())
-        .nodeType(TreeNodeType.INTERMEDIATE_NODE)
-        .moduleType(ModuleType.LIGHT_SUB_COLLECTION)
-        .build();
+    CollectionTreeNodeDto subCollection = createCollectionNode(null /* description */, 
+        context.getExternalId(), null/*moduleId*/, ModuleType.LIGHT_SUB_COLLECTION,
+        null /* nodeId */, TreeNodeType.INTERMEDIATE_NODE, playlistInfo.getTitle(), null /*version*/);
 
     for (ImportExternalIdDto curr : context.getList()) {
       CollectionTreeNodeDto child = null;
@@ -221,19 +197,13 @@ public class ImportCollectionYouTubePlaylistHandler implements JobHandlerInterfa
         checkArgument(curr.getModuleType().getNodeType() == TreeNodeType.LEAF_NODE,
             "Intermediate nodes are expected to have created a job. Failed for : " +
                 curr.getExternalId());
-        child = new CollectionTreeNodeDto.Builder()
-            .title(curr.getTitle())
-            .externalId(curr.getExternalId())
-            .nodeType(TreeNodeType.LEAF_NODE)
-            .moduleType(curr.getModuleType())
-            .moduleId(curr.getModuleId())
-            .version(new Version(Version.LATEST_VERSION))
-            .build();
+        child = createCollectionNode(null /*description*/, curr.getExternalId(), 
+            curr.getModuleId(), curr.getModuleType(), null /*nodeId*/, TreeNodeType.LEAF_NODE, 
+            curr.getTitle(), LightUtils.LATEST_VERSION);
       }
 
       checkNotNull(child, "child should not be null.");
       subCollection.addChildren(child);
-      System.out.println("\n***SubCollection = " + JsonUtils.toJson(subCollection));
     }
 
     jobManager.enqueueCompleteJob(jobEntity.getJobId(), subCollection, "Marking job as complete");

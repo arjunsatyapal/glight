@@ -17,6 +17,7 @@ package com.google.light.server.jobs.handlers.modulejobs.youtube;
 
 import static com.google.light.server.jobs.JobUtils.updateJobContext;
 import static com.google.light.server.utils.LightPreconditions.checkNotNull;
+import static com.google.light.server.utils.LightUtils.createCollectionNode;
 import static com.google.light.server.utils.LightUtils.getNow;
 import static com.google.light.server.utils.LightUtils.getURI;
 import static com.google.light.server.utils.ObjectifyUtils.repeatInTransaction;
@@ -37,7 +38,6 @@ import com.google.light.server.utils.HtmlBuilder;
 import com.google.light.server.utils.Transactable;
 import com.googlecode.objectify.Objectify;
 import java.net.URI;
-import java.util.logging.Logger;
 
 /**
  * 
@@ -47,9 +47,6 @@ import java.util.logging.Logger;
  * @author Arjun Satyapal
  */
 public class ImportModuleYouTubeVideoJobHandler implements JobHandlerInterface {
-  private static final Logger logger = Logger.getLogger(
-      ImportModuleYouTubeVideoJobHandler.class.getName());
-  
   private JobManager jobManager;
   private ModuleManager moduleManager;
 
@@ -69,7 +66,8 @@ public class ImportModuleYouTubeVideoJobHandler implements JobHandlerInterface {
 
     final String htmlContent = generateHtmlContent(context);
 
-    repeatInTransaction(new Transactable<Void>() {
+    repeatInTransaction("publishing module " + context.getModuleId() + "]", 
+        new Transactable<Void>() {
       @SuppressWarnings("synthetic-access")
       @Override
       public Void run(Objectify ofy) {
@@ -84,14 +82,9 @@ public class ImportModuleYouTubeVideoJobHandler implements JobHandlerInterface {
       }
     });
 
-    CollectionTreeNodeDto collectionNode = new CollectionTreeNodeDto.Builder()
-        .title(context.getTitle())
-        .nodeType(TreeNodeType.LEAF_NODE)
-        .moduleId(context.getModuleId())
-        .version(context.getVersion())
-        .moduleType(context.getModuleType())
-        .externalId(context.getExternalId())
-        .build();
+    CollectionTreeNodeDto collectionNode = createCollectionNode(null/*description*/,
+        context.getExternalId(), context.getModuleId(), context.getModuleType(), null/*nodeId*/, 
+        TreeNodeType.LEAF_NODE, context.getTitle(), context.getVersion());
     jobManager.enqueueCompleteJob(jobEntity.getJobId(), collectionNode, "Marking as complete");
   }
 

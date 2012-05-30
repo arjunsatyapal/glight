@@ -64,12 +64,24 @@ public class CollectionTreeNodeDto extends AbstractTreeNode<CollectionTreeNodeDt
   public CollectionTreeNodeDto validate() {
     super.validate();
 
+    if (externalId != null) {
+      String normalizedId = externalId.getNormalizedId(); 
+      externalId =  new ExternalId(normalizedId);
+    }
+    
     switch (getNodeType()) {
       case LEAF_NODE:
         checkModuleId(getModuleId());
         checkNotNull(moduleType, "moduleType");
         checkNotNull(externalId, "externalId");
         checkNotNull(version, "version");
+        break;
+      
+      case INTERMEDIATE_NODE :
+      case ROOT_NODE :
+      
+        // Set version to null for non-leaf nodes.
+        version = null;
         break;
         
       default:
@@ -195,7 +207,7 @@ public class CollectionTreeNodeDto extends AbstractTreeNode<CollectionTreeNodeDt
     }
 
     @SuppressWarnings("synthetic-access")
-    public CollectionTreeNodeDto build() {
+    public CollectionTreeNodeDto build1() {
       return new CollectionTreeNodeDto(this).validate();
     }
   }

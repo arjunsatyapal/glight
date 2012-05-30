@@ -173,7 +173,7 @@ public class PersonDaoTest extends AbstractBasicDaoTest<PersonDto, PersonEntity>
     assertTrue(txn.getTxn().isActive());
 
     dao.put(txn, testEntity);
-    commitTransaction(txn);
+    commitTransaction("test", txn);
     PersonEntity getEntity = dao.get(personId);
     assertEquals(testEntity, getEntity);
 

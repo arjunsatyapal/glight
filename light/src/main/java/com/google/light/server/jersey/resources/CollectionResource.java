@@ -21,13 +21,11 @@ import static com.google.light.server.constants.LightConstants.MAX_RESULTS_MAX;
 import static com.google.light.server.dto.thirdparty.google.youtube.ContentLicense.DEFAULT_LIGHT_CONTENT_LICENSES;
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkPersonLoggedIn;
+import static com.google.light.server.utils.LightUtils.createCollectionRootDummy;
 import static com.google.light.server.utils.LightUtils.isCollectionEmpty;
 import static com.google.light.server.utils.ObjectifyUtils.repeatInTransaction;
 
 import com.google.light.server.dto.thirdparty.google.youtube.ContentLicense;
-
-import com.google.light.server.dto.module.ModuleType;
-import com.google.light.server.dto.pojo.tree.AbstractTreeNode.TreeNodeType;
 
 import com.google.light.server.dto.collection.CollectionState;
 
@@ -194,20 +192,14 @@ public class CollectionResource extends AbstractJerseyResource {
     final String title = checkNotBlank(body, "Body is used as title and title cannot be blank.");
 
     CollectionEntity collectionEntity = repeatInTransaction(new Transactable<CollectionEntity>() {
-
       @SuppressWarnings("synthetic-access")
       @Override
       public CollectionEntity run(Objectify ofy) {
-        CollectionTreeNodeDto collectionTree = new CollectionTreeNodeDto.Builder()
-            .nodeType(TreeNodeType.ROOT_NODE)
-            .title(title)
-            .moduleType(ModuleType.LIGHT_COLLECTION)
-            .build();
+        CollectionTreeNodeDto collectionTree = createCollectionRootDummy(title, null /*description*/);
 
         return collectionManager.createEmptyCollection(ofy, Lists.newArrayList(ownerId),
             collectionTree, ContentLicense.DEFAULT_LIGHT_CONTENT_LICENSES);
       }
-
     });
     return collectionEntity;
   }

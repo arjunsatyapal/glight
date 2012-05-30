@@ -47,7 +47,7 @@ public class FTSManagerImpl implements FTSManager {
    */
   @Override
   public PageDto searchForModule(String query, int maxResults, String startIndex) {
-    return FTSUtils.findDocuments(query, maxResults, startIndex, FTSIndex.module);
+    return FTSUtils.findDocuments(query, maxResults, startIndex, FTSIndex.module1);
   }
 
   /**
@@ -70,6 +70,6 @@ public class FTSManagerImpl implements FTSManager {
       listOfFTSDocuments.add(ftsDocumentWrapper);
     }
     
-    FTSUtils.indexDocuments(listOfFTSDocuments, FTSIndex.module);
+    FTSUtils.indexDocuments(listOfFTSDocuments, FTSIndex.module1);
   }
 }

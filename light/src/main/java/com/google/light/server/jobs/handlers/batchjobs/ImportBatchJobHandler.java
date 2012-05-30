@@ -19,16 +19,17 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.light.server.dto.pojo.tree.collection.CollectionTreeUtils.generateCollectionNodeFromChildJob;
 import static com.google.light.server.jobs.JobUtils.updateJobContext;
+import static com.google.light.server.utils.LightUtils.LATEST_VERSION;
+import static com.google.light.server.utils.LightUtils.createCollectionNode;
+import static com.google.light.server.utils.LightUtils.createCollectionRootDummy;
 import static com.google.light.server.utils.ObjectifyUtils.repeatInTransaction;
 
-import com.google.common.collect.Iterables;
 import com.google.inject.Inject;
 import com.google.light.server.dto.collection.CollectionState;
 import com.google.light.server.dto.importresource.ImportBatchType;
 import com.google.light.server.dto.importresource.ImportBatchWrapper;
 import com.google.light.server.dto.importresource.ImportExternalIdDto;
 import com.google.light.server.dto.module.ModuleStateCategory;
-import com.google.light.server.dto.module.ModuleType;
 import com.google.light.server.dto.pojo.ChangeLogEntryPojo;
 import com.google.light.server.dto.pojo.tree.AbstractTreeNode.TreeNodeType;
 import com.google.light.server.dto.pojo.tree.collection.CollectionTreeNodeDto;
@@ -45,7 +46,6 @@ import com.google.light.server.jobs.handlers.modulejobs.gdocument.ImportModuleGo
 import com.google.light.server.jobs.handlers.modulejobs.synthetic.ImportModuleSyntheticModuleJobHandler;
 import com.google.light.server.manager.interfaces.CollectionManager;
 import com.google.light.server.manager.interfaces.JobManager;
-import com.google.light.server.manager.interfaces.ModuleManager;
 import com.google.light.server.persistence.entity.collection.CollectionVersionEntity;
 import com.google.light.server.persistence.entity.jobs.JobEntity;
 import com.google.light.server.persistence.entity.jobs.JobEntity.TaskType;
@@ -70,7 +70,6 @@ public class ImportBatchJobHandler implements JobHandlerInterface {
   private static final Logger logger = Logger.getLogger(ImportBatchJobHandler.class.getName());
 
   private JobManager jobManager;
-  private ModuleManager moduleManager;
   private CollectionManager collectionManager;
   private ImportModuleGoogleDocJobHandler importModuleGDocJobHandler;
   private ImportCollectionGoogleDocJobHandler importCollectionGDocJobHandler;
@@ -79,13 +78,12 @@ public class ImportBatchJobHandler implements JobHandlerInterface {
 
   @Inject
   public ImportBatchJobHandler(JobManager jobManager, CollectionManager collectionManager,
-      ModuleManager moduleManager, ImportModuleGoogleDocJobHandler importModuleGDocJobHandler,
+      ImportModuleGoogleDocJobHandler importModuleGDocJobHandler,
       ImportCollectionGoogleDocJobHandler importCollectionGDocJobHandler,
       ImportModuleSyntheticModuleJobHandler importSyntheticModuleJobHandler,
       ImportCollectionYouTubePlaylistHandler importYouTubePlaylistHandler) {
     this.jobManager = checkNotNull(jobManager, "jobManager");
     this.collectionManager = checkNotNull(collectionManager, "collectionManager");
-    this.moduleManager = checkNotNull(moduleManager, "moduleManager");
     this.importModuleGDocJobHandler = checkNotNull(importModuleGDocJobHandler,
         "importModuleGDocJobHandler");
     this.importCollectionGDocJobHandler = checkNotNull(importCollectionGDocJobHandler,
@@ -140,7 +138,8 @@ public class ImportBatchJobHandler implements JobHandlerInterface {
     boolean hasChildsNeedingJob = false;
 
     do {
-      hasChildsNeedingJob = repeatInTransaction(new Transactable<Boolean>() {
+      hasChildsNeedingJob = repeatInTransaction("creating child jobs for " + jobId,
+          new Transactable<Boolean>() {
         @SuppressWarnings("synthetic-access")
         @Override
         public Boolean run(Objectify ofy) {
@@ -173,7 +172,7 @@ public class ImportBatchJobHandler implements JobHandlerInterface {
     /*
      * All possible childs are created. So this job is now ready for getting child notifications.
      */
-    repeatInTransaction(new Transactable<Void>() {
+    repeatInTransaction("Updating context for Job[" + jobId + "]", new Transactable<Void>() {
       @SuppressWarnings("synthetic-access")
       @Override
       public Void run(Objectify ofy) {
@@ -181,7 +180,6 @@ public class ImportBatchJobHandler implements JobHandlerInterface {
         ImportBatchWrapper importBatchJobContext = jobEntity.getContext(ImportBatchWrapper.class);
 
         System.out.println(importBatchJobContext.toJson());
-        System.out.println("\n****" + Iterables.toString(jobEntity.getChildJobs()));
         JobState jobState = null;
         if (LightUtils.isCollectionEmpty(jobEntity.getChildJobs())) {
           // This means all the childs were ignored.
@@ -207,18 +205,18 @@ public class ImportBatchJobHandler implements JobHandlerInterface {
     switch (importExternalIdDto.getModuleType()) {
       case LIGHT_SYNTHETIC_MODULE:
         enqueuedJobId = importSyntheticModuleJobHandler.enqueueImportChildSyntheticModule(
-            ofy, importExternalIdDto, 
+            ofy, importExternalIdDto,
             TaskType.IMPORT_SYNTHETIC_MODULE, jobEntity.getJobId(), jobEntity.getRootJobId());
         break;
-        
-      case YOU_TUBE_VIDEO :
+
+      case YOU_TUBE_VIDEO:
         enqueuedJobId = importSyntheticModuleJobHandler.enqueueImportChildSyntheticModule(
-            ofy, importExternalIdDto, 
+            ofy, importExternalIdDto,
             TaskType.IMPORT_YOUTUBE_VIDEO, jobEntity.getJobId(), jobEntity.getRootJobId());
         break;
-        
+
       case YOU_TUBE_PLAYLIST:
-        enqueuedJobId = enqueueImportCollectionYouTubePlaylist(ofy, importExternalIdDto, 
+        enqueuedJobId = enqueueImportCollectionYouTubePlaylist(ofy, importExternalIdDto,
             jobEntity.getJobId(), jobEntity.getRootJobId());
         break;
 
@@ -226,7 +224,6 @@ public class ImportBatchJobHandler implements JobHandlerInterface {
         enqueuedJobId =
             enqueueImportModuleGoogleDocument(ofy, importExternalIdDto, jobEntity.getJobId(),
                 jobEntity.getRootJobId(), GoogleDocInfoDto.Configuration.DTO_FOR_DEBUGGING);
-        System.out.println(importExternalIdDto.toJson());
         break;
 
       case GOOGLE_COLLECTION:
@@ -240,7 +237,6 @@ public class ImportBatchJobHandler implements JobHandlerInterface {
     // Update ParentJob Context and then exit for loop and retry this function for other
     // pending childs.
     System.out.println(importBatchJobContext.toJson());
-    System.out.println("\n*** ExternalIdDto = " + importExternalIdDto.toJson());
     jobEntity.setContext(importBatchJobContext);
 
     if (enqueuedJobId != null) {
@@ -313,17 +309,13 @@ public class ImportBatchJobHandler implements JobHandlerInterface {
     CollectionTreeNodeDto collectionRoot = null;
 
     if (importBatchJobContext.getBaseVersion().isNoVersion()) {
-      collectionRoot = new CollectionTreeNodeDto.Builder()
-          .nodeType(TreeNodeType.ROOT_NODE)
-          .title(importBatchJobContext.getCollectionTitle())
-          .moduleType(ModuleType.LIGHT_COLLECTION)
-          .build();
+      collectionRoot = createCollectionRootDummy(
+          importBatchJobContext.getCollectionTitle(), null/* description */);
     } else {
       CollectionVersionEntity collectionEntity = collectionManager.getCollectionVersion(
           null, collectionId, importBatchJobContext.getBaseVersion());
       collectionRoot = collectionEntity.getCollectionTree();
     }
-    System.out.println("\n***CollectionRoot = " + collectionRoot.toJson());
 
     for (ImportExternalIdDto currDto : importBatchJobContext.getList()) {
       CollectionTreeNodeDto childNode = null;
@@ -345,7 +337,8 @@ public class ImportBatchJobHandler implements JobHandlerInterface {
     }
 
     final CollectionTreeNodeDto finalCollectionRoot = collectionRoot;
-    repeatInTransaction(new Transactable<Void>() {
+    repeatInTransaction("publishing collection[" + collectionId + ":" + version + "]", 
+        new Transactable<Void>() {
       @SuppressWarnings("synthetic-access")
       @Override
       public Void run(Objectify ofy) {
@@ -413,16 +406,8 @@ public class ImportBatchJobHandler implements JobHandlerInterface {
         importExternalIdDto.getModuleType().getNodeType() == TreeNodeType.INTERMEDIATE_NODE,
         "This should be called only for " + TreeNodeType.INTERMEDIATE_NODE);
 
-    // CollectionTreeNodeDto collectionRoot = new CollectionTreeNodeDto.Builder()
-    // .nodeType(TreeNodeType.INTERMEDIATE_NODE)
-    // .title(importExternalIdDto.getTitle())
-    // .externalId(importExternalIdDto.getExternalId())
-    // .moduleType(ModuleType.LIGHT_SUB_COLLECTION)
-    // .build();
-
     CollectionTreeNodeDto child = generateCollectionNodeFromChildJob(jobManager,
         importExternalIdDto.getJobId());
-    // collectionRoot.addChildren(child);
 
     return child;
   }
@@ -435,13 +420,12 @@ public class ImportBatchJobHandler implements JobHandlerInterface {
       ImportExternalIdDto importExternalIdDto) {
     checkArgument(importExternalIdDto.getModuleType().getNodeType() == TreeNodeType.LEAF_NODE,
         "This should be called only for " + TreeNodeType.LEAF_NODE);
-    return new CollectionTreeNodeDto.Builder()
-        .nodeType(TreeNodeType.LEAF_NODE)
-        .title(importExternalIdDto.getTitle())
-        .externalId(importExternalIdDto.getExternalId())
-        .moduleId(importExternalIdDto.getModuleId())
-        .moduleType(importExternalIdDto.getModuleType())
-        .version(new Version(Version.LATEST_VERSION))
-        .build();
+
+    CollectionTreeNodeDto node = createCollectionNode(
+        null /* description */, importExternalIdDto.getExternalId(),
+        importExternalIdDto.getModuleId(), importExternalIdDto.getModuleType(), null /* nodeId */,
+        TreeNodeType.LEAF_NODE, importExternalIdDto.getTitle(), LATEST_VERSION);
+
+    return node;
   }
 }

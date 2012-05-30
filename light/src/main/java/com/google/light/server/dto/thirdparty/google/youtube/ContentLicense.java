@@ -87,4 +87,6 @@ public enum ContentLicense implements NeedsDtoValidation {
   }
 
   public static final List<ContentLicense> DEFAULT_LIGHT_CONTENT_LICENSES = ImmutableList.of(CC);
+  
+  public static final List<ContentLicense> DEFAULT_UNKNOWN_LICENSES = ImmutableList.of(UNKNOWN);
 }

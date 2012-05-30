@@ -30,7 +30,6 @@ import com.google.light.server.exception.ExceptionType;
 import com.google.light.server.persistence.entity.jobs.JobEntity;
 import com.google.light.server.persistence.entity.jobs.JobEntity.JobType;
 import com.google.light.server.serveronlypojos.GAEQueryWrapper;
-import com.google.light.server.utils.JsonUtils;
 import com.google.light.server.utils.ObjectifyUtils;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Objectify;
@@ -89,7 +88,6 @@ public class JobDao extends AbstractBasicDao<Object, JobEntity> {
   
   @Override
   public JobEntity put(Objectify ofy, JobEntity entity) {
-    logger.info("I got modified : " + entity.getJobId() + " : " + JsonUtils.toJson(entity));
     checkNotNull(entity.getCreationTime(), "creationTime cannot be null. Happened for " + entity.getJobId());
     JobEntity temp = super.put(ofy, entity);
     logger.info("Successfully created/updated : " + temp.getJobId());

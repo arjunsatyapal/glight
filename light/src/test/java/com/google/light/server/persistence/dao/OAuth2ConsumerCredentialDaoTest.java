@@ -114,7 +114,7 @@ public class OAuth2ConsumerCredentialDaoTest extends
     assertTrue(txn.getTxn().isActive());
 
     dao.put(txn, testEntity);
-    commitTransaction(txn);
+    commitTransaction("test", txn);
     OAuth2ConsumerCredentialEntity getEntity = dao.get(testEntity.getOAuth2Provider());
     assertEquals(testEntity, getEntity);
 

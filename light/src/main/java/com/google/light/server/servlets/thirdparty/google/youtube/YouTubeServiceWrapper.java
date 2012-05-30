@@ -17,7 +17,6 @@ package com.google.light.server.servlets.thirdparty.google.youtube;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.light.server.constants.LightConstants.GDATA_YOU_TUBE_PLAYLIST_MAX_RESULTS;
-import static com.google.light.server.constants.LightStringConstants.LIGHT_APPLICATION_NAME;
 import static com.google.light.server.servlets.thirdparty.google.youtube.YouTubeUtils.getPlaylistFeedUrl;
 import static com.google.light.server.servlets.thirdparty.google.youtube.YouTubeUtils.getPlaylistSnippetUrl;
 
@@ -49,7 +48,7 @@ public class YouTubeServiceWrapper extends YouTubeService {
    */
   @Inject
   public YouTubeServiceWrapper() {
-    super(LIGHT_APPLICATION_NAME);
+    super("light-demo");
     getRequestFactory().setHeader("GData-Version", "2");
   }
 

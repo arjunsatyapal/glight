@@ -30,8 +30,6 @@ import static com.google.light.server.utils.LightUtils.getURL;
 import com.google.light.server.dto.thirdparty.google.gdoc.GoogleDocInfoDto;
 import com.google.light.server.dto.thirdparty.google.gdoc.GoogleDocResourceId;
 
-import com.google.light.server.utils.JsonUtils;
-
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpHeaders;
 import com.google.api.client.http.HttpRequest;
@@ -127,7 +125,6 @@ public class DocsServiceWrapper extends DocsService {
         listOfDocuments.add(dto);
       }
 
-      System.out.println(JsonUtils.toJson(listOfDocuments));
       String startIndex = getUriFromLink(docListFeed.getNextLink());
       PageDto pageDto = new PageDto.Builder()
           .handlerUri(handlerUri)
@@ -218,7 +215,6 @@ public class DocsServiceWrapper extends DocsService {
     } while (pageDto.getStartIndex() != null);
 
     Collections.sort(list);
-    System.out.println(JsonUtils.toJson(list));
     
     return list;
   }

@@ -97,7 +97,7 @@ public class ObjectifyUtilsTest extends AbstractLightServerTest {
     try {
       assertTrue(txn.getTxn().isActive());
     } finally {
-      commitTransaction(txn);
+      commitTransaction("test", txn);
     }
   }
 
@@ -117,7 +117,7 @@ public class ObjectifyUtilsTest extends AbstractLightServerTest {
   @Test
   public void test_commitTransaction() {
     Objectify txn = initiateTransaction();
-    commitTransaction(txn);
+    commitTransaction("test", txn);
     assertNotNull(txn.getTxn());
     assertFalse(txn.getTxn().isActive());
   }
@@ -160,7 +160,7 @@ public class ObjectifyUtilsTest extends AbstractLightServerTest {
     // Fails for any crazy reason
     final String CRAZY_EXCEPTION_MESSAGE = "Crazy exception";
     try {
-      ObjectifyUtils.repeatInTransaction(new Transactable<Void>() {@Override
+      ObjectifyUtils.repeatInTransaction("", new Transactable<Void>() {@Override
         public Void run(Objectify ofy) {
           throw new RuntimeException(CRAZY_EXCEPTION_MESSAGE);
         }
@@ -174,23 +174,23 @@ public class ObjectifyUtilsTest extends AbstractLightServerTest {
     final String SAMPLE_RETURN_VALUE = "SAMPLE_RETURN_VALUE";
     // Success in the first attempt
     FakeFailureTransactable transactable = new FakeFailureTransactable(1, SAMPLE_RETURN_VALUE);
-    assertEquals(SAMPLE_RETURN_VALUE, ObjectifyUtils.repeatInTransaction(transactable));
+    assertEquals(SAMPLE_RETURN_VALUE, ObjectifyUtils.repeatInTransaction("", transactable));
     assertEquals(transactable.runCount, 1);
     
     // Success in the second one
     transactable = new FakeFailureTransactable(2, SAMPLE_RETURN_VALUE);
-    assertEquals(SAMPLE_RETURN_VALUE, ObjectifyUtils.repeatInTransaction(transactable));
+    assertEquals(SAMPLE_RETURN_VALUE, ObjectifyUtils.repeatInTransaction("", transactable));
     assertEquals(transactable.runCount, 2);
     
     // Success in the third one
     transactable = new FakeFailureTransactable(3, SAMPLE_RETURN_VALUE);
-    assertEquals(SAMPLE_RETURN_VALUE, ObjectifyUtils.repeatInTransaction(transactable));
+    assertEquals(SAMPLE_RETURN_VALUE, ObjectifyUtils.repeatInTransaction("", transactable));
     assertEquals(transactable.runCount, 3);
     
     // Keep failing ...
     transactable = new FakeFailureTransactable(Integer.MAX_VALUE, SAMPLE_RETURN_VALUE);
     try {
-      ObjectifyUtils.repeatInTransaction(transactable);
+      ObjectifyUtils.repeatInTransaction("", transactable);
       fail("should have failed");
     } catch(ConcurrentModificationException e) {
       // expected

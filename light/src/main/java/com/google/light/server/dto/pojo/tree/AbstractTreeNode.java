@@ -124,6 +124,21 @@ public abstract class AbstractTreeNode<T extends AbstractTreeNode<T>> extends Ab
 
     return list;
   }
+  
+  @SuppressWarnings("unchecked")
+  public List<T> getLeafNodes() {
+    List<T> list = Lists.newArrayList();
+    
+    if (getNodeType() == TreeNodeType.LEAF_NODE) {
+      list.add(((T) this));
+    } else if (hasChildren()) {
+      for (T currChild : getChildren()) {
+        list.addAll(currChild.getLeafNodes());
+      }
+    } 
+    
+    return list;
+  }
 
   public boolean hasChildren() {
     if (list == null || list.size() == 0) {

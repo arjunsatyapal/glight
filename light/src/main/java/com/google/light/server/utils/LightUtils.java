@@ -25,6 +25,8 @@ import static com.google.light.server.constants.RequestParamKeyEnum.LOGIN_PROVID
 import static com.google.light.server.constants.RequestParamKeyEnum.PERSON_ID;
 import static com.google.light.server.utils.LightPreconditions.checkIntegerIsInRage;
 
+import com.google.light.server.dto.pojo.tree.externaltree.ExternalIdTreeNodeDto;
+
 import com.google.light.server.dto.importresource.ImportExternalIdDto;
 import com.google.light.server.persistence.entity.jobs.JobState;
 
@@ -195,8 +197,8 @@ public class LightUtils {
 
   public static void wrapIntoRuntimeExceptionAndThrow(Exception e) {
     // Allowing LightHttpException to pass through so the filters can handle it properly.
-    if (LightHttpException.class.isAssignableFrom(e.getClass())) {
-      throw (LightHttpException) e;
+    if (RuntimeException.class.isAssignableFrom(e.getClass())) {
+      throw (RuntimeException) e;
     } else {
       throw new RuntimeException(e);
     }
@@ -482,7 +484,7 @@ public class LightUtils {
     return new ModuleId(ftsDocumentId.getValue().substring(FTS_MODULE_ID_KEY.length()));
   }
 
-  public static CollectionTreeNodeDto getDummyCollectionRoot(String title, String description) {
+  public static CollectionTreeNodeDto createCollectionRootDummy(String title, String description) {
     CollectionTreeNodeDto dummyRoot =
         new CollectionTreeNodeDto.Builder()
             .children(null)
@@ -492,9 +494,28 @@ public class LightUtils {
             .nodeId(getUUIDString())
             .nodeType(TreeNodeType.ROOT_NODE)
             .title(title)
-            .build();
+            .build1();
 
     return dummyRoot;
+  }
+  
+  public static CollectionTreeNodeDto createCollectionNode(String description, 
+      ExternalId externalId, ModuleId moduleId, ModuleType moduleType, String nodeId, 
+      TreeNodeType nodeType, String title, Version version) {
+    CollectionTreeNodeDto collectionTreeNode =
+        new CollectionTreeNodeDto.Builder()
+            .children(null)
+            .description(description)
+            .externalId(externalId)
+            .moduleId(moduleId)
+            .moduleType(moduleType)
+            .nodeId(nodeId)
+            .nodeType(nodeType)
+            .title(title)
+            .version(version)
+            .build1();
+
+    return collectionTreeNode;
   }
 
   public static ModuleEntity createModuleEntity(List<ContentLicense> contentLicenses,
@@ -602,21 +623,21 @@ public class LightUtils {
 
   public static String getParamValueFromQueryString(URL url, String paramKey) {
     String query = url.getQuery();
-    
+
     if (!query.contains(paramKey)) {
       return null;
     }
-    
+
     if (!query.contains("&")) {
       // There is only one keyValue.
       return getParamValue(query, paramKey, url);
     }
-    for(String currKeyValue : query.split("&")) {
+    for (String currKeyValue : query.split("&")) {
       if (currKeyValue.startsWith(paramKey)) {
         return getParamValue(currKeyValue, paramKey, url);
       }
     }
-    
+
     return null;
   }
 
@@ -630,8 +651,30 @@ public class LightUtils {
     checkArgument(parts.length == 2, "AFter split found " + parts.length + "(>2) for " + url);
     if (parts[0].equals(key)) {
       return parts[1];
-    } 
-    
+    }
+
     return null;
+  }
+
+  public static ExternalIdTreeNodeDto createExternalIdTreeNode(ExternalId externalId, String title,
+      TreeNodeType nodeType, List<ContentLicense> contentLicenses) {
+    String requiredTitle = title;
+    
+    if (StringUtils.isEmpty(requiredTitle)) {
+      requiredTitle = createRandomTitle();
+    }
+    
+    ExternalIdTreeNodeDto externalIdTreeNode = new ExternalIdTreeNodeDto.Builder()
+        .contentLicenses(contentLicenses)
+        .externalId(externalId)
+        .nodeType(nodeType)
+        .title(requiredTitle)
+        .build();
+
+    return externalIdTreeNode;
+  }
+  
+  public static String createRandomTitle() {
+    return getUUIDString();
   }
 }

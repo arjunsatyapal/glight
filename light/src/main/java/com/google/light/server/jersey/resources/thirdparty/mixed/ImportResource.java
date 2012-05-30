@@ -21,8 +21,15 @@ import static com.google.light.server.dto.thirdparty.google.youtube.ContentLicen
 import static com.google.light.server.utils.LightPreconditions.checkNotBlank;
 import static com.google.light.server.utils.LightPreconditions.checkNotNull;
 import static com.google.light.server.utils.LightPreconditions.checkPersonLoggedIn;
+import static com.google.light.server.utils.LightUtils.createCollectionNode;
+import static com.google.light.server.utils.LightUtils.createExternalIdTreeNode;
+import static com.google.light.server.utils.LightUtils.wrapIntoRuntimeExceptionAndThrow;
+import static com.google.light.server.utils.ModuleUtils.createExternalIdTree;
 import static com.google.light.server.utils.ObjectifyUtils.repeatInTransaction;
 
+import java.util.concurrent.Future;
+
+import com.google.appengine.api.ThreadManager;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
@@ -38,16 +45,19 @@ import com.google.light.server.dto.module.ModuleState;
 import com.google.light.server.dto.module.ModuleType;
 import com.google.light.server.dto.pojo.tree.AbstractTreeNode.TreeNodeType;
 import com.google.light.server.dto.pojo.tree.collection.CollectionTreeNodeDto;
+import com.google.light.server.dto.pojo.tree.externaltree.ExternalIdTreeNodeDto;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.CollectionId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.JobId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.ModuleId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.PersonId;
 import com.google.light.server.dto.pojo.typewrapper.longwrapper.Version;
+import com.google.light.server.dto.pojo.typewrapper.stringwrapper.ExternalId;
 import com.google.light.server.dto.thirdparty.google.youtube.ContentLicense;
 import com.google.light.server.exception.ExceptionType;
 import com.google.light.server.exception.unchecked.InvalidExternalIdException;
 import com.google.light.server.exception.unchecked.httpexception.NotFoundException;
 import com.google.light.server.jersey.resources.AbstractJerseyResource;
+import com.google.light.server.jobs.runnables.ReserveModuleIdRunnable;
 import com.google.light.server.manager.interfaces.CollectionManager;
 import com.google.light.server.manager.interfaces.JobManager;
 import com.google.light.server.manager.interfaces.ModuleManager;
@@ -61,11 +71,14 @@ import com.google.light.server.urls.LightUrl;
 import com.google.light.server.utils.GuiceUtils;
 import com.google.light.server.utils.JsonUtils;
 import com.google.light.server.utils.LightUtils;
-import com.google.light.server.utils.ModuleUtils;
 import com.google.light.server.utils.Transactable;
 import com.google.light.server.utils.XmlUtils;
 import com.googlecode.objectify.Objectify;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -75,6 +88,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.Instant;
 
 /**
  * 
@@ -160,9 +174,38 @@ public class ImportResource extends AbstractJerseyResource {
 
     // Now reserve ModuleIds for each of the externalIds.
     List<PersonId> owners = Lists.newArrayList(GuiceUtils.getOwnerId());
-    reserveModuleIdAndUpdateWrapper(importBatchWrapper, owners);
+    // reserveModuleIdAndUpdateWrapper(importBatchWrapper, owners);
 
-    return handleCollectionAndRelatedJob(importBatchWrapper);
+    Instant now = LightUtils.getNow();
+    ExternalIdTreeNodeDto externalIdTreeRoot = prepareExternalIdTree(importBatchWrapper);
+    logger.info("ExternalId Tree : " + externalIdTreeRoot.toJson());
+    reserveWholeTreeAndUpdateWrapper(externalIdTreeRoot, importBatchWrapper, owners);
+    Instant now2 = LightUtils.getNow();
+    System.out.println(now2.minus(now.getMillis()).getMillis());
+
+    return handleCollectionAndRelatedJob(externalIdTreeRoot, importBatchWrapper);
+  }
+
+  /**
+   * @param importBatchWrapper
+   * @param owners
+   */
+  private ExternalIdTreeNodeDto prepareExternalIdTree(ImportBatchWrapper importBatchWrapper) {
+    ExternalIdTreeNodeDto rootNode = createExternalIdTreeNode(null, null, TreeNodeType.ROOT_NODE,
+        null /* license */);
+
+    for (ImportExternalIdDto currExternalIdDto : importBatchWrapper.getList()) {
+      try {
+        ExternalIdTreeNodeDto node = createExternalIdTree(currExternalIdDto.getExternalId());
+        rootNode.addChildren(node);
+      } catch (InvalidExternalIdException e) {
+        logger.info("Ignoring externalId : " + currExternalIdDto.getExternalId() + " due to : "
+            + Throwables.getStackTraceAsString(e));
+        currExternalIdDto.setModuleState(ModuleState.FAILED);
+      }
+    }
+
+    return rootNode;
   }
 
   /**
@@ -170,65 +213,114 @@ public class ImportResource extends AbstractJerseyResource {
    * @return
    */
   private ImportBatchWrapper handleCollectionAndRelatedJob(
-      final ImportBatchWrapper importBatchWrapper) {
-    repeatInTransaction(new Transactable<Void>() {
-      @SuppressWarnings("synthetic-access")
-      @Override
-      public Void run(Objectify ofy) {
-        List<PersonId> owners = Lists.newArrayList(GuiceUtils.getOwnerId());
+      ExternalIdTreeNodeDto externalIdTreeRoot, final ImportBatchWrapper importBatchWrapper) {
+    // Convering externalIdTree to Collection Tree.
 
-        CollectionTreeNodeDto dummyRoot = null;
-        CollectionEntity collectionEntity = null;
-        switch (importBatchWrapper.getImportBatchType()) {
-          case CREATE_COLLECTION_JOB:
-            dummyRoot = getDummyRootFromImportBatchWrapper(importBatchWrapper);
-            collectionEntity = collectionManager.reserveCollectionId(ofy, owners, dummyRoot,
-                DEFAULT_LIGHT_CONTENT_LICENSES);
+    final CollectionTreeNodeDto dummyRoot =
+        convertExternalIdTreeToCollectionTree(externalIdTreeRoot);
 
-            Version reservedVersion = collectionManager.reserveCollectionVersionFirst(
-                ofy, collectionEntity);
+    repeatInTransaction("enqueueing a job for " + importBatchWrapper.getCollectionTitle(),
+        new Transactable<Void>() {
+          @SuppressWarnings("synthetic-access")
+          @Override
+          public Void run(Objectify ofy) {
+            List<PersonId> owners = Lists.newArrayList(GuiceUtils.getOwnerId());
 
-            importBatchWrapper.setCollectionId(collectionEntity.getCollectionId());
-            importBatchWrapper.setBaseVersion(collectionEntity.getLatestPublishVersion());
-            importBatchWrapper.setVersion(reservedVersion);
-            break;
+            // CollectionTreeNodeDto dummyRoot = null;
+            CollectionEntity collectionEntity = null;
+            switch (importBatchWrapper.getImportBatchType()) {
+              case CREATE_COLLECTION_JOB:
+                // dummyRoot = getDummyRootFromImportBatchWrapper(importBatchWrapper);
+                collectionEntity = collectionManager.reserveCollectionId(ofy, owners, dummyRoot,
+                    DEFAULT_LIGHT_CONTENT_LICENSES);
 
-          case APPEND_COLLECTION_JOB:
-            dummyRoot = getDummyRootFromImportBatchWrapper(importBatchWrapper);
-            CollectionVersionEntity cvEntity = collectionManager.getLatestPublishedVersion(
-                ofy, importBatchWrapper.getCollectionId());
-            checkNotNull(cvEntity, "cvEntity should not be null here.");
-            CollectionTreeNodeDto rootToBeUpdated = cvEntity.getCollectionTree();
-            rootToBeUpdated.importChildsFrom(dummyRoot);
+                Version reservedVersion = collectionManager.reserveCollectionVersionFirst(
+                    ofy, collectionEntity);
 
-            Version publishVersion = collectionManager.reserveAndPublishAsLatest(ofy,
-                importBatchWrapper.getCollectionId(), rootToBeUpdated,
-                CollectionState.PARTIALLY_PUBLISHED, DEFAULT_LIGHT_CONTENT_LICENSES);
-            importBatchWrapper.setBaseVersion(publishVersion);
-            importBatchWrapper.setVersion(publishVersion);
-            break;
+                importBatchWrapper.setCollectionId(collectionEntity.getCollectionId());
+                importBatchWrapper.setBaseVersion(collectionEntity.getLatestPublishVersion());
+                importBatchWrapper.setVersion(reservedVersion);
+                break;
 
-          case MODULE_JOB:
-            break;
+              case APPEND_COLLECTION_JOB:
+                // dummyRoot = getDummyRootFromImportBatchWrapper(importBatchWrapper);
+                CollectionVersionEntity cvEntity = collectionManager.getLatestPublishedVersion(
+                    ofy, importBatchWrapper.getCollectionId());
+                checkNotNull(cvEntity, "cvEntity should not be null here.");
+                CollectionTreeNodeDto rootToBeUpdated = cvEntity.getCollectionTree();
+                rootToBeUpdated.importChildsFrom(dummyRoot);
 
-          default:
-            throw new IllegalStateException("Add support for : "
-                + importBatchWrapper.getImportBatchType());
-        }
+                Version publishVersion = collectionManager.reserveAndPublishAsLatest(ofy,
+                    importBatchWrapper.getCollectionId(), rootToBeUpdated,
+                    CollectionState.PARTIALLY_PUBLISHED, DEFAULT_LIGHT_CONTENT_LICENSES);
+                importBatchWrapper.setBaseVersion(publishVersion);
+                importBatchWrapper.setVersion(publishVersion);
+                break;
 
-        JobState jobState = JobState.ENQUEUED;
-        JobId rootJobId = jobManager.createImportBatchJob(
-            ofy, importBatchWrapper, JobState.ENQUEUED);
-        importBatchWrapper.setJobState(jobState);
-        importBatchWrapper.setJobId(rootJobId);
-        jobManager.enqueueLightJob(ofy, rootJobId);
+              case MODULE_JOB:
+                break;
 
-        return null;
-      }
-    });
+              default:
+                throw new IllegalStateException("Add support for : "
+                    + importBatchWrapper.getImportBatchType());
+            }
+
+            JobState jobState = JobState.ENQUEUED;
+            JobId rootJobId = jobManager.createImportBatchJob(
+                ofy, importBatchWrapper, JobState.ENQUEUED);
+            importBatchWrapper.setJobState(jobState);
+            importBatchWrapper.setJobId(rootJobId);
+            jobManager.enqueueLightJob(ofy, rootJobId);
+
+            return null;
+          }
+        });
 
     importBatchWrapper.responseValidation();
     return importBatchWrapper;
+  }
+
+  /**
+   * @param externalIdTreeRoot
+   * @return
+   */
+  private CollectionTreeNodeDto convertExternalIdTreeToCollectionTree(
+      ExternalIdTreeNodeDto externalIdNode) {
+    TreeNodeType nodeType = externalIdNode.getNodeType();
+    ExternalId externalId = externalIdNode.getExternalId();
+
+    ModuleType moduleType = null;
+
+    if (nodeType == TreeNodeType.ROOT_NODE) {
+      moduleType = ModuleType.LIGHT_COLLECTION;
+    } else {
+      moduleType = externalId.getModuleType();
+    }
+
+    CollectionTreeNodeDto collectionTreeNode = createCollectionNode(null/* description */,
+        externalId, externalIdNode.getModuleId(), moduleType,
+        null/* nodeId */, nodeType, externalIdNode.getTitle(), LightUtils.LATEST_VERSION);
+
+    switch (nodeType) {
+      case LEAF_NODE:
+        break;
+
+      case INTERMEDIATE_NODE:
+      case ROOT_NODE:
+        if (externalIdNode.hasChildren()) {
+          for (ExternalIdTreeNodeDto currExternalIdNodeChild : externalIdNode.getChildren()) {
+            CollectionTreeNodeDto childCollectionTreeNode = convertExternalIdTreeToCollectionTree(
+                currExternalIdNodeChild);
+
+            collectionTreeNode.addChildren(childCollectionTreeNode);
+          }
+        }
+        break;
+
+      default:
+        throw new IllegalStateException("Unknown nodeType : " + nodeType);
+    }
+    return collectionTreeNode;
   }
 
   /**
@@ -237,11 +329,8 @@ public class ImportResource extends AbstractJerseyResource {
    */
   private static CollectionTreeNodeDto getDummyRootFromImportBatchWrapper(
       final ImportBatchWrapper importBatchWrapper) {
-    CollectionTreeNodeDto dummyRoot = new CollectionTreeNodeDto.Builder()
-        .title(importBatchWrapper.getCollectionTitle())
-        .nodeType(TreeNodeType.ROOT_NODE)
-        .moduleType(ModuleType.LIGHT_COLLECTION)
-        .build();
+    CollectionTreeNodeDto dummyRoot = LightUtils.createCollectionRootDummy(
+        importBatchWrapper.getCollectionTitle(), null /* description */);
 
     for (ImportExternalIdDto currExternalIdDto : importBatchWrapper.getList()) {
 
@@ -250,14 +339,11 @@ public class ImportResource extends AbstractJerseyResource {
         continue;
       }
 
-      CollectionTreeNodeDto newChild = new CollectionTreeNodeDto.Builder()
-          .title(currExternalIdDto.getTitle())
-          .moduleType(currExternalIdDto.getModuleType())
-          .externalId(currExternalIdDto.getExternalId())
-          .nodeType(currExternalIdDto.getModuleType().getNodeType())
-          .moduleId(currExternalIdDto.getModuleId())
-          .version(LightUtils.LATEST_VERSION)
-          .build();
+      CollectionTreeNodeDto newChild = createCollectionNode(null/* description */,
+          currExternalIdDto.getExternalId(), currExternalIdDto.getModuleId(),
+          currExternalIdDto.getModuleType(), null/* nodeId */,
+          currExternalIdDto.getModuleType().getNodeType(), currExternalIdDto.getTitle(),
+          LightUtils.LATEST_VERSION);
 
       dummyRoot.addChildren(newChild);
     }
@@ -267,68 +353,99 @@ public class ImportResource extends AbstractJerseyResource {
   /**
    * @param importBatchWrapper
    */
-  private void reserveModuleIdAndUpdateWrapper(ImportBatchWrapper importBatchWrapper,
-      final List<PersonId> owners) {
-    // TODO(arjuns) : Replace this with multithreaded once available.
-    for (final ImportExternalIdDto currExternalIdDto : importBatchWrapper.getList()) {
-      currExternalIdDto.setModuleType(currExternalIdDto.getExternalId().getModuleType());
+  private void reserveWholeTreeAndUpdateWrapper(ExternalIdTreeNodeDto externalIdTree,
+      ImportBatchWrapper importBatchWrapper, final List<PersonId> owners) {
+
+    ThreadFactory factory = ThreadManager.currentRequestThreadFactory();
+    ExecutorService threadExecutor = Executors.newFixedThreadPool(9, factory);
+
+    List<ReserveModuleIdRunnable> listOfRunnables = Lists.newArrayList();
+    for (ExternalIdTreeNodeDto currExternalIdNode : externalIdTree.getLeafNodes()) {
+      ReserveModuleIdRunnable runnable = new ReserveModuleIdRunnable(currExternalIdNode, owners);
+      Future<?> future = threadExecutor.submit(runnable);
       try {
-        // Predicting title does two things :
-        // 1. Fetches the title.
-        // 2. Ensures that its a valid module.
+        future.get();
+      } catch (Exception e) {
+        logger.severe("Failed for " + currExternalIdNode.getExternalId() + " due to : "
+            + Throwables.getStackTraceAsString(e));
+        wrapIntoRuntimeExceptionAndThrow(e);
+      }
+      listOfRunnables.add(runnable);
+    }
 
-        String predictedTitle = ModuleUtils.getTitleForExternalId(
-            currExternalIdDto.getExternalId());
-        logger.info("For " + currExternalIdDto.getExternalId()
-            + ", Predicted Title : " + predictedTitle);
-        if (StringUtils.isBlank(currExternalIdDto.getTitle())) {
-          currExternalIdDto.setTitle(predictedTitle);
-        }
+    threadExecutor.shutdown();
+    try {
+      threadExecutor.awaitTermination(25, TimeUnit.SECONDS);
+    } catch (Exception e) {
+      LightUtils.wrapIntoRuntimeExceptionAndThrow(e);
+    }
 
-        ModuleType moduleType = currExternalIdDto.getModuleType();
-        final List<ContentLicense> contentLicenses = moduleType.getDefaultLicenses();
+    // All ExternalIds are now reserved. So updating the moduleIds.
 
-        if (moduleType.mapsToModule()) {
-          if (currExternalIdDto.getModuleType() == ModuleType.LIGHT_HOSTED_MODULE) {
-            // This will be true for Light URLs.
-            LightUrl lightUrl = currExternalIdDto.getExternalId().getLightUrl();
-            ModuleEntity moduleEntity = moduleManager.get(null, lightUrl.getModuleId());
+    for (final ImportExternalIdDto currExternalIdDto : importBatchWrapper.getList()) {
+      if (currExternalIdDto.getModuleState() == ModuleState.FAILED) {
+        continue;
+      }
 
-            if (moduleEntity == null) {
-              throw new InvalidExternalIdException(currExternalIdDto.getExternalId());
-            }
+      ExternalId externalId = currExternalIdDto.getExternalId();
+      final ExternalIdTreeNodeDto externalIdTreeNode =
+          externalIdTree.findFirstLevelChildByExternalId(
+              externalId);
+      checkNotNull(externalIdTreeNode, "externalIdTreeNode");
 
-            currExternalIdDto.setModuleId(lightUrl.getModuleId());
-            currExternalIdDto.setModuleState(ModuleState.PUBLISHED);
-            currExternalIdDto.setModuleType(moduleEntity.getModuleType());
-            currExternalIdDto.setVersion(LightUtils.LATEST_VERSION);
-          } else {
-            // Now reserve ModuleIds.
-            repeatInTransaction(new Transactable<Void>() {
-              @SuppressWarnings("synthetic-access")
-              @Override
-              public Void run(Objectify ofy) {
-                ModuleId moduleId = moduleManager.reserveModuleId(ofy,
-                    currExternalIdDto.getExternalId(), owners, currExternalIdDto.getTitle(),
-                    contentLicenses);
-                currExternalIdDto.setModuleId(moduleId);
-                currExternalIdDto.setContentLicenses(contentLicenses);
-                return null;
-              }
-            });
-            currExternalIdDto.setModuleState(ModuleState.IMPORTING);
+      currExternalIdDto.setModuleType(currExternalIdDto.getExternalId().getModuleType());
+      // try {
+      // Predicting title does two things :
+      // 1. Fetches the title.
+      // 2. Ensures that its a valid module.
+
+      String predictedTitle = externalIdTreeNode.getTitle();
+      // ModuleUtils.getTitleForExternalId(
+      // currExternalIdDto.getExternalId());
+      // logger.info("For " + currExternalIdDto.getExternalId()
+      // + ", Predicted Title : " + predictedTitle);
+      if (StringUtils.isBlank(currExternalIdDto.getTitle())) {
+        currExternalIdDto.setTitle(predictedTitle);
+      }
+
+      ModuleType moduleType = currExternalIdDto.getModuleType();
+      final List<ContentLicense> contentLicenses = moduleType.getDefaultLicenses();
+
+      if (moduleType.mapsToModule()) {
+        if (currExternalIdDto.getModuleType() == ModuleType.LIGHT_HOSTED_MODULE) {
+          // This will be true for Light URLs.
+          LightUrl lightUrl = currExternalIdDto.getExternalId().getLightUrl();
+          ModuleEntity moduleEntity = moduleManager.get(null, lightUrl.getModuleId());
+
+          if (moduleEntity == null) {
+            throw new InvalidExternalIdException(currExternalIdDto.getExternalId());
           }
+
+          currExternalIdDto.setModuleId(lightUrl.getModuleId());
+          currExternalIdDto.setModuleState(ModuleState.PUBLISHED);
+          currExternalIdDto.setModuleType(moduleEntity.getModuleType());
+          currExternalIdDto.setVersion(LightUtils.LATEST_VERSION);
         } else {
-          // This is a type of External Collection. So changing state to importing.
+          ModuleId moduleId = externalIdTreeNode.getModuleId();
+          if (moduleId == null) {
+            System.out.println(externalIdTreeNode.toJson());
+          }
+          checkNotNull(moduleId, "ModuleId found null for : " + externalIdTreeNode.getExternalId());
+          currExternalIdDto.setModuleId(externalIdTreeNode.getModuleId());
+          currExternalIdDto.setContentLicenses(contentLicenses);
           currExternalIdDto.setModuleState(ModuleState.IMPORTING);
         }
-
-        currExternalIdDto.setContentLicenses(contentLicenses);
-      } catch (InvalidExternalIdException e) {
-        logger.info("Ignoring externalId : " + currExternalIdDto.getExternalId() + " due to : "
-            + Throwables.getStackTraceAsString(e));
-        currExternalIdDto.setModuleState(ModuleState.FAILED);
+      } else {
+        // This is a type of External Collection. So changing state to importing.
+        currExternalIdDto.setModuleState(ModuleState.IMPORTING);
       }
+
+      currExternalIdDto.setContentLicenses(contentLicenses);
+      // } catch (InvalidExternalIdException e) {
+      // logger.info("Ignoring externalId : " + currExternalIdDto.getExternalId() + " due to : "
+      // + Throwables.getStackTraceAsString(e));
+      // currExternalIdDto.setModuleState(ModuleState.FAILED);
+      // }
     }
   }
 
