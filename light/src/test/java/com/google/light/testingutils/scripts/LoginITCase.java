@@ -140,6 +140,7 @@ public class LoginITCase {
 
       Thread thread = new Thread(new ParallelTests(serverUrl, email));
       thread.start();
+      thread.join();
       listOfThread.add(thread);
     }
 
@@ -216,7 +217,7 @@ public class LoginITCase {
       // Now revoking access
       driver.get("https://accounts.google.com/b/0/IssuedAuthSubTokens?hl=en");
       while(driver.getPageSource().contains("Revoke Access")) {
-        if (!SeleniumUtils.clickIfExists(driver, By.linkText("Revoke Access")))
+        if (!SeleniumUtils.clickIfExists(driver, By.cssSelector("input[value=\"Revoke Access\"]")))
           break;
       }
     }
@@ -253,6 +254,7 @@ public class LoginITCase {
       approveAccess();
 
       // Asserting the User is logged in
+      Thread.sleep(2000);
       assertTrue(driver.getCurrentUrl().startsWith(serverUrl + ServletPathEnum.REGISTER_PAGE.get()));
       clickAtCenter(driver, By.id("registerForm_tosCheckbox"));
       clickAtCenter(driver, By.id("registerForm_submitButton"));

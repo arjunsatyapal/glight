@@ -19,6 +19,8 @@ import static com.google.light.server.utils.LightPreconditions.checkNotEmptyColl
 import com.google.common.collect.Lists;
 import com.google.light.server.constants.LightEnvEnum;
 import com.google.light.server.exception.unchecked.httpexception.NotFoundException;
+import com.google.light.server.servlets.GFormTestServlet;
+import com.google.light.server.servlets.GSitesTestServlet;
 import com.google.light.server.servlets.LightGenericJSPServlet;
 import com.google.light.server.servlets.admin.GSSConsumerCredentialServlet;
 import com.google.light.server.servlets.admin.OAuth2ConsumerCredentialServlet;
@@ -79,6 +81,12 @@ public enum ServletPathEnum {
          Lists.newArrayList(FilterPathEnum.API, FilterPathEnum.TEST)),
 
   // Client Side pages
+  GFORM_TEST(GFormTestServlet.class, "/gform",
+             false, false, true, true,
+             Lists.newArrayList(FilterPathEnum.API, FilterPathEnum.TEST)),
+  GSITES_TEST(GSitesTestServlet.class, "/gsites",
+              false, false, true, true,
+              Lists.newArrayList(FilterPathEnum.API, FilterPathEnum.TEST)),
   HOME_PAGE(LightGenericJSPServlet.class, "/",
             false, false, true, true,
             Lists.newArrayList(FilterPathEnum.API, FilterPathEnum.TEST)),

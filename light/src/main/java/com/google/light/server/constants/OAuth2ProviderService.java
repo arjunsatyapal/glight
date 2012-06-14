@@ -48,6 +48,7 @@ public enum OAuth2ProviderService {
              "https://www.googleapis.com/oauth2/v1/tokeninfo",
              GoogleOAuth2TokenInfo.class,
              Lists.newArrayList(
+                 "https://sites.google.com/feeds/", // Adding GSites for GSitesTestServlet
                  "https://docs.google.com/feeds/",
                  "https://docs.googleusercontent.com/",
                  "https://spreadsheets.google.com/feeds/"

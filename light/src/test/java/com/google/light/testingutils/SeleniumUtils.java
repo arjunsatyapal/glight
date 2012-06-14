@@ -19,13 +19,15 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.interactions.Actions;
 
 public class SeleniumUtils {
   // TODO(waltercacau): Add a command line flag to change which browser to use.
   public static WebDriver getWebDriver() {
-    return new FirefoxDriver();
+    return new ChromeDriver();
+    //return new FirefoxDriver();
   }
   
   /**
